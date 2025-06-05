@@ -360,12 +360,14 @@ namespace RaywattApp.ViewModels
                     bugTestFunc();
                     ray3DStatus.IsFirstRendering = false;
                 }
-                //CommonUtil.GuideWireToMemory(PatientCase.LumenGuidewires,
-                //new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize),
-                //buffer,
-                //new OpenCvSharp.Size(diameter, diameter));
-                //ODSOCT_InputSurfaceParameter(Ray3DObject.GuideWire, 10, 15, ".\\data\\guidewire_tex.jpg");
-                //ODSOCT_InputData(Ray3DObject.GuideWire, buffer, diameter, diameter, depth, 1, 1, zVal);
+
+
+                CommonUtil.GuideWireToMemory(PatientCase.LumenGuidewires,
+                new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize),
+                buffer,
+                new OpenCvSharp.Size(diameter, diameter));
+                ODSOCT_InputSurfaceParameter(Ray3DObject.GuideWire, 10, 15, ".\\data\\guidewire_tex.jpg");
+                ODSOCT_InputData(Ray3DObject.GuideWire, buffer, diameter, diameter, depth, 1, 1, zVal);
 
                 Marshal.FreeHGlobal(buffer);
                 ReviewStatus.IsLumenEdited = false;
