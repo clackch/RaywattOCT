@@ -13,6 +13,7 @@
 #include "IRayLearning.h"
 #include "LookUpTable.h"
 #include <string>
+#include <chrono>
 
 CImagingSession::CImagingSession(CMessageService* pMsg, int nSession, bool deleteData) :
 	m_pMsg(pMsg),
@@ -639,12 +640,13 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		//stent
 		std::vector<cv::Rect2f> vStents = learning->FindStent(circleImage);
 		cv::Mat mStent(vStents.size(), 1, CV_32SC2);
+
 		for (size_t row = 0; row < vStents.size(); row++) {
 			mStent.at<cv::Point>(row, 0) = cv::Point(vStents[row].x + vStents[row].width / 2, vStents[row].y + vStents[row].height / 2);
 		}
-		
+
 		pImaging->EraseStentOutLier(mStent);
-		
+
 		vStent.push_back(mStent);
 
 		//guidewire
@@ -676,8 +678,6 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 				cv::circle(circleImage, centerPoints[row], static_cast<int>(Radius[row]), cv::Scalar(0, 255, 0), 2);
 			}
 			vGuidewire.push_back(mGuidewire);
-
-			PLOGI.printf("vGuidewire.count = %d, %d, %d %d", vGuidewire.size(), mGuidewire.at<cv::Point>(0, 0).x, mGuidewire.at<cv::Point>(0, 0).y, nFrame);
 			vGuidewireRadius.push_back(Radius);
 		}
 		else {
