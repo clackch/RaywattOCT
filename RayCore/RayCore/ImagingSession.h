@@ -49,7 +49,7 @@ private:
 	std::vector<std::vector<cv::Mat>> m_vSidebranch;
 	std::vector<cv::Mat> m_vStent;
 	std::vector<cv::Mat> m_vGuidewire;
-	std::vector<std::vector<double>> m_vGuidewireRadius;
+	std::vector<std::vector<float>> m_vGuidewireRadius;
 	char* m_pVolumeData;
 
 	int m_zOffset;

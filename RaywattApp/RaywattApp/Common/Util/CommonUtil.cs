@@ -1594,7 +1594,7 @@ namespace RaywattApp.Common.Util
 
                 if (guidewireList[i].Points == null)
                     continue;
-
+                 
                 foreach (System.Windows.Point point in guidewireList[i].Points)
                 {
                     OpenCvSharp.Point currentPoint = new OpenCvSharp.Point();

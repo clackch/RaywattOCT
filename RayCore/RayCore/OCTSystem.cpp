@@ -1186,26 +1186,6 @@ RayError COCTSystem::SetImageCompensationControlWindow(bool value)
 }
 
 /*
-* GetImageLumenVignetting
-*/
-bool COCTSystem::GetImageLumenVignetting()
-{
-	return m_bImageLumenVignetting;
-}
-
-/*
-* SetImageLumenVignetting
-*/
-RayError COCTSystem::SetImageLumenVignetting(bool value)
-{
-	m_bImageLumenVignetting = value;
-
-	COCTImaging::SetImageLumenVignetting(m_bImageLumenVignetting);
-
-	return RayError::OK;
-}
-
-/*
 * GetFieldOfView
 */
 double COCTSystem::GetFieldOfView()

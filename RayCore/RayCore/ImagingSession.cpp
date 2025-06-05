@@ -475,7 +475,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	std::vector<std::vector<cv::Mat>>& vSidebranch = pSession->m_vSidebranch;
 	std::vector<cv::Mat>& vStent = pSession->m_vStent;
 	std::vector<cv::Mat>& vGuidewire = pSession->m_vGuidewire;
-	std::vector<std::vector<double>>& vGuidewireRadius = pSession->m_vGuidewireRadius;
+	std::vector<std::vector<float>>& vGuidewireRadius = pSession->m_vGuidewireRadius;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 	cv::Mat circleImage, imgZOffset;
 
@@ -496,9 +496,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	vSidebranch.clear();
 	vStent.clear();
 	vGuidewire.clear();
-	int a = 0;
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadObjectDetection->isRun; nFrame++) {
-		a++;
 		std::map<int, cv::Mat>::iterator it = pSession->m_mapImageWithoutCompensation.find(nFrame);
 		if (it == pSession->m_mapImageWithoutCompensation.end()) {
 			nFrame--;
@@ -647,6 +645,10 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		//guidewire
 		std::vector<cv::Rect2f> vGuidewires = learning->FindGuidewire();
 
+		std::vector<cv::Point> centerPoints;
+		std::vector<float> Radius;
+		cv::Mat mGuidewire(vGuidewires.size(), 1, CV_32SC2);
+
 		/*cv::Mat mask3 = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
 		for (int i = 0; i < vGuidewires.size(); i++) {
 			cv::rectangle(mask3, vGuidewires[i], cv::Scalar(255), -1);
@@ -655,28 +657,28 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		cv::Mat imgCheck = circleImage.clone();
 		cv::findContours(mask3, realContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 		cv::drawContours(imgCheck, realContours, -1, cv::Scalar(0, 255, 0), 2);
-		string check = "contour Image" + std::to_string(a) + ".png";
+
+		string check = "GW Center Image" + std::to_string(nFrame) + ".png";
 		cv::imwrite(check, imgCheck);*/
 
-		std::vector<cv::Point> centerPoints;
-		std::vector<double> Radius;
-		cv::Mat mGuidewire(vGuidewires.size(), 1, CV_32SC2);
-		
 		pImaging->GetGuideWireCenterPoint(circleImage, vGuidewires, centerPoints, Radius);
-		//PLOGI.printf("frame : %d", nFrame);
-		cv::Mat imgCheck = circleImage.clone();
-		if(centerPoints.size() > 0)
+
+		if (centerPoints.size() > 0)
 		{
 			for (size_t row = 0; row < vGuidewires.size(); row++) {
 				mGuidewire.at<cv::Point>(row, 0) = cv::Point(centerPoints[row].x, centerPoints[row].y);
 				if (Radius[row] < 0) continue;
-				cv::circle(imgCheck, centerPoints[row], static_cast<int>(Radius[row]), cv::Scalar(0, 255, 0), 2);
+				cv::circle(circleImage, centerPoints[row], static_cast<int>(Radius[row]), cv::Scalar(0, 255, 0), 2);
 			}
 			vGuidewire.push_back(mGuidewire);
+
+			PLOGI.printf("vGuidewire.count = %d, %d, %d %d", vGuidewire.size(), mGuidewire.at<cv::Point>(0, 0).x, mGuidewire.at<cv::Point>(0, 0).y, nFrame);
 			vGuidewireRadius.push_back(Radius);
 		}
-		string check = "circle Image" + std::to_string(a) + ".png";
-		cv::imwrite(check, imgCheck);
+		else {
+			vGuidewire.push_back(mGuidewire);
+			vGuidewireRadius.push_back(std::vector<float>(1));
+		}
 
 		pSession->m_pMsg->postMessage(WM_PROCESS_DETECTION, nSession, nFrame);
 	}
