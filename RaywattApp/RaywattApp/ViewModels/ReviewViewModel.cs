@@ -836,7 +836,6 @@ namespace RaywattApp.ViewModels
 
             //guide wire
             int guidewireHeight = RayGetNumOfGuidewirePoints(frameInfo);
-            _log.Debug(frameInfo.ToString() + " guidewireHeight = " + guidewireHeight.ToString());
             if (guidewireHeight > 0)
             {
                 IntPtr contour = RayGetGuidewirePoints(frameInfo);
