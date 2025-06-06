@@ -1108,12 +1108,12 @@ RayError COCTSystem::SetSheathDiameter(double value)
 	if (!m_bFirstLoad) return RayError::OK;
 	m_bFirstLoad = false;
 
-	if (value == 1.7) {
+	/*if (value == 1.7) {
 		m_pLaserModule->Move(eStepMotorIndex::DelayLine, config.catheter.length);
 	}
 	else {
 		m_pLaserModule->Move(eStepMotorIndex::DelayLine, 0);
-	}
+	}*/
 
 	return RayError::OK;
 }
@@ -1511,6 +1511,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 	{
 		// 0. Speed Up
 		pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_AUTO);
+		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO / 8);
 
 		// 1. Start Finding Sheath
 		pSystem->m_vCalibrationInfo.clear();
@@ -1534,6 +1535,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 				nZOffset = pSystem->m_vCalibrationInfo.at(i).second;
 			}
 		}
+
 		PLOGI.printf("Calibrated zOffset: %d", nZOffset);
 
 		// 1-3. Move to calibrated position
