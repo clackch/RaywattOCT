@@ -1609,6 +1609,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 
 	// 2. Pullback Linear Stage
 	if (pRJController->IsConnected() && config.stepMotor.pullbackDistance > 0) {
+		pRJController->changeSMProfileToPullback();
 		pRJController->Move(eStepMotorIndex::Both, pRJController->ConvertMMtoStep(config.stepMotor.pullbackDistance), false);
 
 		auto now = std::chrono::system_clock::now();
@@ -1637,6 +1638,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pRJController->StopMotor();
 
 	// 5. Homing
+	pRJController->changeSMProfileToLoadUnload();
 	Sleep(2000);
 	pRJController->Set(eStepMotorIndex::Both, STEP_MOTOR_SPEED_DEFAULT / 2);
 	pRJController->Move(eStepMotorIndex::Both, 0);
@@ -1677,6 +1679,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterLoading);
 
 	if (pRJController->IsConnected()) {
+		pRJController->changeSMProfileToLoadUnload();
 		pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 
 		for (const auto& commands : loadCommands) {
@@ -1752,6 +1755,8 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 			pRJController->StopMotor();
 			Sleep(2000);
 		}
+		pRJController->changeSMProfileToLoadUnload();
+
 		// in case of homing failed
 		if (!pRJController->GetPhotoSensorOnOff(0))
 		{
