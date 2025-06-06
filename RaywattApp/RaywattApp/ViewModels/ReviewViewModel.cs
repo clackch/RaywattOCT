@@ -931,11 +931,16 @@ namespace RaywattApp.ViewModels
 
         private double GetGuidewireAverageRadius()
         {
+            if(GuideWireRadiusList == null || !(GuideWireRadiusList.Any()))
+            {
+                return 0.0;
+            }
+
             // 0보다 작은 값들을 제거
             List<double> validRadiusList = GuideWireRadiusList.Where(v => v >= 0 && double.IsFinite(v) && v <= 90).ToList();
 
             if (validRadiusList.Count == 0)
-            { 
+            {
                 _log.Debug("No valid radius values.");
                 return 0.0;
             }
@@ -953,6 +958,11 @@ namespace RaywattApp.ViewModels
                 return normalizedValue >= -2 && normalizedValue <= 2;
             }).ToList();
 
+            if(!filteredValues.Any())
+            {
+                return 0.0;
+            }
+            
             double filteredAverage = filteredValues.Average();
 
             _log.Debug("Average Radius Value" + filteredAverage.ToString());
