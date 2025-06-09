@@ -509,7 +509,6 @@ namespace RaywattApp.Common.Angio
 
             angioBitsPerPixel = (char)tmpBuffer[offset++];
             double live_time = BitConverter.ToInt64(tmpBuffer, offset); // Time Stamp
-            _log.Debug($"Height = {angioFrameHeight}, Width = {angioFrameWidth}");
             offset += sizeof(long);
 
             angioImageSize = angioFrameHeight * angioFrameWidth * angioBitsPerPixel / 8;
@@ -783,6 +782,7 @@ namespace RaywattApp.Common.Angio
             if (imageList != null)
             {
                 imageList.Clear();
+                _log.Debug("Image_List Clear");
             }
 
             if (get_image != null)
