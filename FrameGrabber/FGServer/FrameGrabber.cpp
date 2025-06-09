@@ -227,7 +227,7 @@ void FrameGrabber::DecodeError(char* szErrMsg, ERRTYPE e)
 {
 	char		szErrText[1024];
 	int			nErrSize;
-
+	szErrMsg[0] = '\0';
 	if (e == 0) return;
 
 	//
