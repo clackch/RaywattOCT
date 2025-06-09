@@ -1533,10 +1533,9 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			if (nMinDiff > nDiff) {
 				nMinDiff = nDiff;
 				nZOffset = pSystem->m_vCalibrationInfo.at(i).second;
+				PLOGI.printf("nDiff: %d, Calibrated zOffset: %d", nDiff, nZOffset);
 			}
 		}
-
-		PLOGI.printf("Calibrated zOffset: %d", nZOffset);
 
 		// 1-3. Move to calibrated position
 		nTargetPos = nZOffset;
