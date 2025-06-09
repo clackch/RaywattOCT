@@ -211,7 +211,14 @@ void TCPSocket::ReceivePacket(FrameGrabber& fg) {
 				PLOGI.printf("FGAskDeviceInfo");
 				tmpRecvBufferLen -= 5;
 				memmove(tmpRecvBuffer, tmpRecvBuffer + 5, tmpRecvBufferLen);
-				tmpRecvBuffer[tmpRecvBufferLen] = '\0';
+
+				if (tmpRecvBufferLen >= 0 && tmpRecvBufferLen < sizeof(tmpRecvBuffer)) { 
+					tmpRecvBuffer[tmpRecvBufferLen] = '\0'; 
+				}
+				else {
+					PLOGE.printf("Invalid buffer index for null termination: %d", tmpRecvBufferLen); 
+					break;
+				}
 
 				SetDeviceInfoPacket(fg, deviceInfoBuffer);
 
