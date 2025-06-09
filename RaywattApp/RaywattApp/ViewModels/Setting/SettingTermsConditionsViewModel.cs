@@ -33,6 +33,12 @@ namespace RaywattApp.ViewModels.Setting
             get { return this._modifyInstituteCommand ?? (this._modifyInstituteCommand = new RelayCommand(ModifyInstitute)); }
         }
 
+        private ICommand _confirmInstituteCommand;
+        public ICommand ConfirmInstituteCommand
+        {
+            get { return this._confirmInstituteCommand ?? (this._confirmInstituteCommand = new RelayCommand(ConfirmInstitute)); }
+        }
+
         public SettingTermsConditionsViewModel(SqlManager sqlManager)
         {
             _log.Debug("SettingTermsConditionsViewModel");
@@ -61,9 +67,6 @@ namespace RaywattApp.ViewModels.Setting
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
             _log.Debug("OnNavigating");
-
-            if (Validate())
-                Save();
         }
 
         private void Init()
@@ -81,6 +84,16 @@ namespace RaywattApp.ViewModels.Setting
         private void ModifyInstitute()
         {
             IsModify = true;
+        }
+
+        private void ConfirmInstitute()
+        {
+            
+            if (Validate())
+            {
+                Save();
+                IsModify = false;
+            }                
         }
 
         private bool Validate()

@@ -40,6 +40,7 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Visibility="{Binding IsModify, Converter={StaticResource BoolToVisibilityConverter}}">
                     <TextBox Style="{DynamicResource TextBoxValidator}" Width="400" MaxLength="50" Text="{Binding TermsConditions.Buffer, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter Institute Name], Source={StaticResource L10N}}" ToolTip="{Binding ValidateInstituteName}"/>
+                    <component:IconButton Style="{DynamicResource IconButton}" Icon="confirmSimple" HorizontalAlignment="Left" Margin="-40,0,0,20" Command="{Binding ConfirmInstituteCommand}"/>
                 </StackPanel>
             </StackPanel>
         </Grid>
