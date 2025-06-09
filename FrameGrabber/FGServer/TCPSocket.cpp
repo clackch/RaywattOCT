@@ -252,7 +252,8 @@ CommandType TCPSocket::CheckCommandType(const char* tmpRecvBuffer) {
 			else {
 				if (tmpRecvBuffer[3] == (char)CalcCheckSum((char*)tmpRecvBuffer, 3)) {
 					if (tmpRecvBuffer[4] == (char)0xA3) {
-						switch (tmpRecvBuffer[2]) {
+						CommandType cmd = static_cast<CommandType>(static_cast<unsigned char>(tmpRecvBuffer[2]));
+						switch (cmd) {
 						case CommandType::FGStarted:
 							return CommandType::FGStarted;
 							break;
