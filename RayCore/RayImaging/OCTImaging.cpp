@@ -85,6 +85,7 @@ void COCTImaging::Initialize(CCalibration* calibration) {
 
 	releaseCircularizeMap();
 	initCircularizeMap(m_setting.nOutputLength, m_setting.nBScan, m_setting.nOutputLength, m_setting.nCircleSize, m_setting.nCircleSize, 2.0f);
+	releaseInversedCircularizeMap();
 	initInverseCircularizeMap(m_setting.nOutputLength, m_setting.nBScan, m_setting.nOutputLength, m_setting.nCircleSize, m_setting.nCircleSize, 2.0f);
 
 	m_nWidth = m_setting.nCircleSize;
@@ -125,7 +126,7 @@ void COCTImaging::PostProcess(cv::Mat image) {
 
 	if (m_bShowCalibGuide) {
 		drawGuideLine(imageResultColor, m_measureSetting.nSheathPosition, cv::Scalar(0xff, 0xcc, 0x33));
-		drawGuideLine(imageResultColor, m_nSheathPosition, cv::Scalar(0xff, 0xff, 0xff));
+		//drawGuideLine(imageResultColor, m_nSheathPosition, cv::Scalar(0xff, 0xff, 0xff));
 	}
 
 	CircularizeImage(imageResultColor, imageCircle);
@@ -320,6 +321,11 @@ void COCTImaging::initInverseCircularizeMap(int diameter, int srcHeight, int src
 void COCTImaging::releaseCircularizeMap() {
 	matXMap.release();
 	matYMap.release();
+}
+
+void COCTImaging::releaseInversedCircularizeMap() {
+	inverseMatYMap.release();
+	inverseMatYMap.release();
 }
 
 void COCTImaging::generateBackground(Ipp16u* fringes) {

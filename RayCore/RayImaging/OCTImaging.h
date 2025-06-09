@@ -117,6 +117,7 @@ protected:
 	void initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
 	void initInverseCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
 	void releaseCircularizeMap();
+	void releaseInversedCircularizeMap();
 
 	void generateBackground(Ipp16u* fringes);
 	void fftProcessing(const Ipp32f* fringes32f);
