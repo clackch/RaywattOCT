@@ -235,7 +235,7 @@ namespace plog
 #elif defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR)
         int retval = _vsnwprintf(str, bufferCharCount, format, ap);
 #else
-        int retval = _vsnwprintf_s(str, bufferCharCount, charCount, format, ap);
+        int retval = _vsnwprintf_s(str, bufferCharCount, static_cast<size_t>(charCount), format, ap);
 #endif
         if (retval < 0)
         {
