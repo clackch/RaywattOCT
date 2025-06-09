@@ -6,6 +6,7 @@
 #include <sstream>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <limits>
 
 #ifndef PLOG_ENABLE_WCHAR_INPUT
 #   ifdef _WIN32
@@ -403,7 +404,7 @@ namespace plog
 #else
                     ::write(m_file, buf, count)
 #endif
-                    ) : static_cast<size_t>(-1);
+                    ) : std::numeric_limits<size_t>::max();
             }
 
             template<class CharType>
@@ -422,7 +423,7 @@ namespace plog
 #else
                     ::lseek(m_file, static_cast<off_t>(offset), whence)
 #endif
-                    ) : static_cast<size_t>(-1);
+                    ) : std::numeric_limits<size_t>::max();
             }
 
             void close()
