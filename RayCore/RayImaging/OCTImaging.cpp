@@ -460,7 +460,9 @@ void COCTImaging::findSheath(cv::Mat img) {
 	double pointStandard = 0.1;
 	int closeness = 10;
 	int maxDiffIndex = 44, minDiffIndex = 33;
-	cv::Mat image;
+	cv::Mat image, checkError;
+	checkError = img.clone();
+	checkError = checkError(cv::Range(0, m_nSheathSearchRange), cv::Range::all());
 
 	img.convertTo(img, CV_32F, 1 / 255.f);
 	cv::rotate(img, image, cv::ROTATE_90_COUNTERCLOCKWISE);
@@ -506,7 +508,26 @@ void COCTImaging::findSheath(cv::Mat img) {
 		m_nSheathPosition = 0;
 	}
 	else {
-		m_nSheathPosition = std::max(maxIndex[0], maxIndex[1]);
+		int checkRange = 5;
+		int errorThreshold = 100 * checkError.cols;
+		int startIndex = maxIndex[0] - checkRange >= 0 ? maxIndex[0] - checkRange : 0;
+		int roiHeight = std::min(checkRange * 2, checkError.rows - startIndex);
+		int errorSum = 0;
+
+		cv::Mat roi = checkError(cv::Rect(0, startIndex, checkError.cols, roiHeight));
+
+		for (int i = 0; i < roi.rows; i++) {
+			for (int j = 0; j < roi.cols; j++) {
+				errorSum += roi.at<char>(i, j);
+			}
+		}
+
+		if (errorSum < errorThreshold) {
+			m_nSheathPosition = 0;
+		}
+		else {
+			m_nSheathPosition = std::max(maxIndex[0], maxIndex[1]);
+		}
 	}
 }
 
