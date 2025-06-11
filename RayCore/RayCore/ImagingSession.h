@@ -49,6 +49,7 @@ private:
 	std::vector<std::vector<cv::Mat>> m_vSidebranch;
 	std::vector<cv::Mat> m_vStent;
 	std::vector<cv::Mat> m_vGuidewire;
+	std::vector<std::vector<float>> m_vGuidewireRadius;
 	char* m_pVolumeData;
 
 	int m_zOffset;
@@ -99,6 +100,7 @@ public:
 	int GetNumOfStentPoints(int nFrame);
 	void* GetGuidewirePoints(int nFrame);
 	int GetNumOfGuidewirePoints(int nFrame);
+	void* GetGuidewireRadius(int nFrame);
 
 	bool LoadZOffset(const char* strDataFilePath);
 	void SetZOffset(int zOffset) { m_zOffset = zOffset; }

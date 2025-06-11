@@ -881,7 +881,7 @@ namespace RaywattApp.Common.Util
                     _log.Debug($"sys.path: {sys.path}");
 
                     // Python 모듈 가져오기
-                    dynamic script = Py.Import("SaveTIFFAsGray");
+                    dynamic script = Py.Import("ImageProcess");
 
                     // Mat 리스트를 Python으로 전달
                     int width, height;
@@ -1732,11 +1732,13 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        unsafe public static void GuideWireToMemory(List<LumenGuidewire>? guidewireList, Size sizeContour, IntPtr buffer, Size sizeBuffer)
+        unsafe public static void GuideWireToMemory(List<LumenGuidewire>? guidewireList, Size sizeContour, IntPtr buffer, Size sizeBuffer, double radius)
         {
             if (guidewireList == null) return;
 
             int frameSize = sizeBuffer.Width * sizeBuffer.Height;
+
+            OpenCvSharp.Point prevPoint = new OpenCvSharp.Point(0, 0);
             for (int i = 0; i < guidewireList.Count; i++)
             {
                 Mat imgLumen = new Mat(sizeContour, MatType.CV_8UC1);
@@ -1748,23 +1750,26 @@ namespace RaywattApp.Common.Util
 
                 if (guidewireList[i].Points == null)
                     continue;
-
+                 
                 foreach (System.Windows.Point point in guidewireList[i].Points)
                 {
+                    OpenCvSharp.Point currentPoint = new OpenCvSharp.Point();
+                    if (point.X < 0 || point.Y < 0)
+                    {
+                        currentPoint.X = prevPoint.X;
+                        currentPoint.Y = prevPoint.Y;
+                    }
+                    else
+                    {
+                        currentPoint.X = (int)point.X;
+                        currentPoint.Y = (int)point.Y;
+                    }
                     //TODO - 실제 Guidewire 반지름에 맞춰서 Size( , )를 설정해 주어야 함.
-                    imgLumen.Ellipse(new OpenCvSharp.Point(point.X, point.Y), new Size(50, 50), 0, 0, 360, Scalar.White, 1);
+                    imgLumen.Ellipse(currentPoint, new Size(radius, radius), 0, 0, 360, Scalar.White, -1);
+
+                    prevPoint = currentPoint;
                 }
-
-                Mat binary = new Mat();
-                Cv2.Threshold(imgLumen, binary, 128, 255, ThresholdTypes.Binary);
-
-                Cv2.FindContours(binary, out contours, out HierarchyIndex[] hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
-
-                Cv2.DrawContours(imgLumen, contours, -1, Scalar.White, 1);
-
                 Cv2.Resize(imgLumen, imgResize, imgResize.Size());
-
-                Cv2.Blur(imgResize, imgResize, new Size(7, 7) /* 필터 크기 */, new Point(-1, -1) /* 필터 중심*/);
                 Buffer.MemoryCopy((void*)imgResize.Data, (void*)(IntPtr.Add(buffer, i * frameSize)), frameSize, frameSize);
             }
         }

@@ -172,7 +172,6 @@ namespace RaywattApp.Common.Angio
             _tcpClient = new TcpClient(Constants.ServerIP, Constants.ServerPort);
 
             ActivateClientThreads();
-            LiveViewThreads();
             SoketCheckThreads();
             bool init = InitAngioBoard();
             if (init)
@@ -428,10 +427,12 @@ namespace RaywattApp.Common.Angio
         }
         private void LiveViewThreads()
         {
-            _log.Debug("LiveViewThreads");
-
-            get_image = new Thread(() => LiveViewThread());
-            StartLiveView();
+            if (liveView == false)
+            {
+                _log.Debug("LiveViewThreads");
+                get_image = new Thread(() => LiveViewThread());
+                StartLiveView();
+            }
         }
 
         public void CloseAngioManager()
@@ -618,6 +619,7 @@ namespace RaywattApp.Common.Angio
                     }
                     isChpFileChangeSuccess = 1;
                     ViewModelBase._deviceStatus.IsAngioInitialized = true;
+                    ToggleLive(true);
                 }
                 else if (command == (byte)CommandType.FGFailChangeChp)
                 {

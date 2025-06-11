@@ -176,6 +176,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["section_proximal"] = PatientCase.SectionProximal;
             PatientCase.SectionDistal = PatientCase.NumOfFrames - 1;
             sqlParameters["section_distal"] = PatientCase.SectionDistal;
+            sqlParameters["guidewire_radius"] = PatientCase.GuidewireRadius;
 
             int nRows = _sqlManager.InsertPatientCase(sqlParameters);
 
