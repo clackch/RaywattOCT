@@ -59,6 +59,7 @@ bool CRJController::Connect(void *param) {
 	}
 	displayLCD(eLCDImage::LCD_IMAGE_BOOTING);
 
+	RFIDProtocol::initState();
 	m_state = eRJState::Initializing;
 	m_nextState = eRJState::Initializing;
 
@@ -696,106 +697,38 @@ void CRJController::RxPacketRFIDGetState(BYTE* buff, RFID_ReadType type)
 
 	int uidLength = buff[idx++];
 	if (uidLength >= buff[RFID_REPLY_LENGTH_IDX]) uidLength = HARDWARE_UID_LENGTH;
-	std::string sCardNo = "";
 	std::stringstream ss;
-	std::stringstream customCardNo;
-	std::stringstream hardWareCardNo;
-	for (int i = 0; i < uidLength + CUSTOM_UID_LENGTH; i++)
-	{
-		if (i != 0)
-		{
-			if (i < uidLength)
-			{
-				hardWareCardNo << " ";
-			}
-			else
-			{
-				customCardNo << " ";
-			}
-		}
-		if (i < uidLength)
-		{
-			hardWareCardNo << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(buff[idx++]);
-		}
-		else
-		{
-			customCardNo << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(buff[idx++]);
-		}
-	}
 
-	sCardNo = hardWareCardNo.str() + " " + customCardNo.str();
-	std::cout << "Hardware UID :" << hardWareCardNo.str() << std::endl;
-	std::cout << "Custom UID : "  << customCardNo.str() << std::endl;
-	std::cout << "TOTAL UID : "<< sCardNo << std::endl;
+	RFIDProtocol::setHardwareUID(&buff[idx], uidLength);
+	idx += uidLength;
+	RFIDProtocol::setCustomUID(&buff[idx], CUSTOM_UID_LENGTH);
+	idx += CUSTOM_UID_LENGTH;
 
 	if (type == MANUF || type == MANUF_CNT)
 	{
-		ss.clear();
-		int ManuLength = 7;
-		std::string sManuNo2 = "";
-
-		for (int i = 0; i < ManuLength; i++)
-		{
-			if (i != 0) ss << " ";
-			ss << std::uppercase << std::setw(2) << std::setfill('0') << std::hex << (int)buff[idx++];
-		}
-		sManuNo2 = ss.str();
-		std::cout << "Manufacturer : " << sManuNo2 << std::endl;
+		RFIDProtocol::setManuf(&buff[idx], MANUF_LEN);
+		idx += MANUF_LEN;
 	}
 	if (type == CNT || type == MANUF_CNT)
 	{
-		int cntLength = 1;
-		int sCountNo3 = 0;
-
-		for (int i = 0; i < cntLength; i++)
-		{
-			sCountNo3 *= 256;
-			sCountNo3 += (int)buff[idx++];//cnt만 10진수로
-		}
-		std::cout << "count : " << sCountNo3 << std::endl;
+		RFIDProtocol::setCount(&buff[idx], COUNT_LEN);
+		idx += COUNT_LEN;
 	}
 	if (type == KEYS)
 	{
-		ss.clear();
-		//KeyThread.authSuccess = true;
-		int keyLength_A = KEY_LEN;
-		std::string keyA = "";
-		BYTE* key = new BYTE[KEY_LEN];
-		for (int i = 0; i < keyLength_A; i++)
-		{
-			if (i != 0) ss << " ";
-			key[i] = buff[idx]; 
-			ss << std::uppercase << std::setw(2) << std::setfill('0') << std::hex << (int)buff[idx++];
-		}
-		keyA = ss.str();
-		//KeyCache.Put(hardWareCardNo, key);
-		//LRUCache.defaultKey = key;
-		std::cout << "keyA : " << keyA << std::endl;
-		ss.clear();
-		ss.str("");
+		RFIDProtocol::setKeyA(&buff[idx], KEY_LEN);
+		idx += KEY_LEN;
 
-		int keyLength_B = 6;
-		std::string keyB = "";
-		for (int i = 0; i < keyLength_B; i++)
-		{
-			if (i != 0) ss << " ";
-			ss << std::uppercase << std::setw(2) << std::setfill('0') << std::hex << (int)buff[idx++];
-		}
-		keyB = ss.str();
-		std::cout << "keyB : " << keyB << std::endl;
-
+		RFIDProtocol::setKeyB(&buff[idx], KEY_LEN);
+		idx += KEY_LEN;
 	}
 	if (type == STEP)
 	{
-		int stepLength = 3;
-		int step = 0;
-		for (int i = 0; i < stepLength; i++)
-		{
-			step *= 256;
-			step += (int)buff[idx++];
-		}
-		std::cout << "step : " << step << std::endl;
+		RFIDProtocol::setStep(&buff[idx], STEP_LEN);
+		idx += STEP_LEN;
 	}
+
+	RFIDProtocol::printState();
 }
 
 void CRJController::handlePacket() {
