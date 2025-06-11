@@ -264,6 +264,13 @@ namespace RaywattApp.Services
                 WHERE server_type = @server_type
                 ORDER BY ae_title
                 ";
+
+            //SelectUserList
+            _query["SelectUserList"] = @$"
+                SELECT id, password, comment, password_changed_at, password_reset, terms_agreed_at, create_date, update_date
+                FROM rv_schema.users
+                ORDER BY id
+                ";
         }
 
         private static void SetInsertQuery()

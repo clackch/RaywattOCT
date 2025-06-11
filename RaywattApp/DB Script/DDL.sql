@@ -262,6 +262,30 @@ ALTER TABLE IF EXISTS rv_schema.dicom_server
     OWNER to rv_user;
 
 
+-- Table: rv_schema.users
+
+-- DROP TABLE IF EXISTS rv_schema.users;
+
+CREATE TABLE IF NOT EXISTS rv_schema.users
+(
+    id character varying(64) COLLATE pg_catalog."default" NOT NULL,
+    password text COLLATE pg_catalog."default" NOT NULL,
+    comment text COLLATE pg_catalog."default",
+    password_changed_at timestamp without time zone,
+    password_reset boolean DEFAULT false,
+    terms_agreed_at timestamp without time zone,
+    create_date timestamp without time zone,
+    update_date timestamp without time zone,
+    CONSTRAINT users_pkey PRIMARY KEY (id)
+        USING INDEX TABLESPACE rv_tablespace
+)
+
+TABLESPACE rv_tablespace;
+
+ALTER TABLE IF EXISTS rv_schema.users
+    OWNER to rv_user;
+
+
 -- FUNCTION: rv_schema.fn_code(character varying, character varying)
 
 -- DROP FUNCTION IF EXISTS rv_schema.fn_code(character varying, character varying);

@@ -537,6 +537,19 @@ namespace RaywattApp.Services
 
             return _databaseService.DeleteData(commandText, sqlParameters);
         }
+
+        /**
+         * User
+         */
+        public IList<User> SelectUserList()
+        {
+            _log.Debug("SelectUserList");
+
+            string commandText = SqlQuery.GetQuery("SelectUserList");
+
+            return _databaseService.GetDatas<User>(commandText);
+        }
+
         /**
          * Extra
          */

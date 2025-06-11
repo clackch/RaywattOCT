@@ -39,7 +39,12 @@ namespace RaywattApp.ViewModels
         private bool _isHome;
 
         [ObservableProperty]
-        private bool _isLoading;
+        private bool _isSetting;
+
+        [ObservableProperty]
+        private bool _isExit;
+
+        private bool isAdmin;
 
         [ObservableProperty]
         private string _navigationSource;
@@ -48,6 +53,8 @@ namespace RaywattApp.ViewModels
         private object _navigationParameter;
 
         private List<string> reviewPages;
+
+        private List<string> adminPages;
 
         [ObservableProperty]
         private PrevStatus? _prevStatus;
@@ -223,7 +230,7 @@ namespace RaywattApp.ViewModels
             codeDefinition.GetCode();
 
             //시작 페이지 설정
-            NavigationSource = Constants.OutsetLoadingPage;
+            NavigationSource = Constants.OutsetLoginPage;
 
             //네비게이션 메시지 수신 등록
             WeakReferenceMessenger.Default.Register<NavigationMessage>(this, OnNavigationMessage);
@@ -231,6 +238,11 @@ namespace RaywattApp.ViewModels
             RayRegisterCallback(Marshal.GetFunctionPointerForDelegate(CBFunction));
 
             Directory.CreateDirectory(Constants.DataRootPath);
+
+            adminPages = new List<string>();
+            adminPages.Add(Constants.UserListPage);
+            adminPages.Add(Constants.UserNewPage);
+            adminPages.Add(Constants.UserEditPage);
 
             reviewPages = new List<string>();
             reviewPages.Add(Constants.ReviewPage);
@@ -244,7 +256,8 @@ namespace RaywattApp.ViewModels
             reviewPages.Add(Constants.ReviewCalibrationPage);
 
             IsHome = true;
-            IsLoading = true;
+            IsSetting = true;
+            IsExit = true;
 
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "TestMode";
@@ -299,24 +312,37 @@ namespace RaywattApp.ViewModels
             }
 
             //Review 화면에서 나가는 경우, RayEndReview 호출
-            if (reviewPages.Contains(Constants.CurrentPage))
-            {
-                if (!reviewPages.Contains(pageUri))
-                    RayEndReview();
-            }
+            if (reviewPages.Contains(Constants.CurrentPage) && !reviewPages.Contains(pageUri))
+                RayEndReview();
             //Recording(Confirm) 화면에서 나가는 경우, RayEndReview 호출
-            if (Constants.CurrentPage == Constants.RecordingConfirmPage)
-            {
-                if (!pageUri.Equals(Constants.ReviewPage))
-                    RayEndReview();
-            }
+            if (Constants.CurrentPage == Constants.RecordingConfirmPage && !pageUri.Equals(Constants.ReviewPage))
+                RayEndReview();
+
+            IsHome = false;
+            IsSetting = false;
+            IsExit = false;
+            this.isAdmin = false;
 
             if (NavigationSource == Constants.PatientListPage || (NavigationSource == "Refresh" && Constants.CurrentPage == Constants.PatientListPage))
                 IsHome = true;
-            else
-                IsHome = false;
 
-            IsLoading = false;
+            if (adminPages.Contains(NavigationSource))
+            {
+                IsHome = true;
+                IsSetting = true;
+                this.isAdmin = true;
+            }
+
+            if (Constants.OutsetLoadingPage.Equals(NavigationSource))
+            {
+                IsHome = true;
+                IsSetting = true;
+                IsExit = true;
+                this.isAdmin = true;
+            }
+
+            if (Constants.OutsetLoginPage.Equals(NavigationSource))
+                this.isAdmin = true;
         }
 
         private void Home()
@@ -354,10 +380,9 @@ namespace RaywattApp.ViewModels
 
                 if (result.DialogAnswer == DialogResults.Answer.Extra)
                 {
-                    DeviceStatus.PowerOffMsg = _l10n["Switching user"];
+                    DeviceStatus.PowerOffMsg = _l10n["Logging out"];
                 }
-                CommonUtil.Exit(DeviceStatus, _angioManager, result.DialogAnswer == DialogResults.Answer.Yes ? true : false); // 여기다
-                _angioManager.StopSoketCheck();
+                CommonUtil.Exit(DeviceStatus, _angioManager, result.DialogAnswer == DialogResults.Answer.Yes ? true : false, this.isAdmin);
             }
         }
 

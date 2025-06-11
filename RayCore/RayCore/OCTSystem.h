@@ -104,6 +104,7 @@ public:
 	// Call from dll only
 	RayError Start();
 	RayError Stop();
+	RayError Init();
 	RayError RegisterCallback(FunctionPtr cb);
 	RayError UnregisterCallback();
 	RayError ConnectDevices();

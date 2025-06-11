@@ -19,45 +19,22 @@
 * COCTSystem
 */
 COCTSystem::COCTSystem() {
+
 	m_callback = nullptr;
 	m_cbCrossSection = nullptr;
 	m_cbLongitude = nullptr;
-	m_cbObjectDetection = nullptr;
+	m_cbObjectDetection = nullptr;	
 
-	m_pThreadService = nullptr;
-	m_pThreadSaveRaw = nullptr;
-	m_pThreadRotaryJunction = nullptr;
+	m_isTestMode = false;
 
-	m_pImagingRealtime = nullptr;
-	m_pImagingPullback = nullptr;
-	m_pImagingLiveView = nullptr;
-
-	m_pDataWriter = nullptr;
-
-	m_pVolume = nullptr;
-
-	m_pAcqDevice = nullptr;	
-
-	m_curSession = SESSION_UNKNOWN;
-	for (int i = 0; i < MAX_SESSION_NUM; i++) {
-		m_reviewSession[i] = nullptr;
-	}
-	m_openedSession = nullptr;
 	InitializeCriticalSection(&m_csSession);
 
-	m_pRJController = new CRJController();
-	m_pRJController->SetMessage(this);
-	m_pLaserModule = new CLaserModule();
+	CConfiguration& config = CConfiguration::GetInstance();
+	if (!config.IsInit()) {
+		config.Initialize(_T(".\\raycore.ini"));
+	}
 
-	m_prevState = RayScannerState::Initial;
-	m_curState = RayScannerState::Initial;
-	m_cathState = CatheterState::Unloaded;
-
-	//Property
-	m_fBrightness = 0.0f;
-	m_fContrast = 0.5f;
-	m_fDegree = 90;
-	m_isTestMode = false;
+	SetLogger(config.logRootPath);
 }
 
 /*
@@ -89,6 +66,47 @@ void COCTSystem::SetLogger(TCHAR* logRootPath) {
 }
 
 /*
+* Init
+*/
+RayError COCTSystem::Init() {
+
+	m_pThreadService = nullptr;
+	m_pThreadSaveRaw = nullptr;
+	m_pThreadRotaryJunction = nullptr;
+
+	m_pImagingRealtime = nullptr;
+	m_pImagingPullback = nullptr;
+	m_pImagingLiveView = nullptr;
+
+	m_pDataWriter = nullptr;
+
+	m_pVolume = nullptr;
+
+	m_pAcqDevice = nullptr;
+
+	m_curSession = SESSION_UNKNOWN;
+	for (int i = 0; i < MAX_SESSION_NUM; i++) {
+		m_reviewSession[i] = nullptr;
+	}
+	m_openedSession = nullptr;
+
+	m_pRJController = new CRJController();
+	m_pRJController->SetMessage(this);
+	m_pLaserModule = new CLaserModule();
+
+	m_prevState = RayScannerState::Initial;
+	m_curState = RayScannerState::Initial;
+	m_cathState = CatheterState::Unloaded;
+
+	//Property
+	m_fBrightness = 0.0f;
+	m_fContrast = 0.5f;
+	m_fDegree = 90;
+
+	return RayError::OK;
+}
+
+/*
 * Start
 */
 RayError COCTSystem::Start() {
@@ -101,8 +119,6 @@ RayError COCTSystem::Start() {
 
 	m_fBrightness = config.imaging.brightness;
 	m_fContrast = config.imaging.contrast;
-
-	SetLogger(config.logRootPath);
 
 	CUtility::StartThread(threadService, m_pThreadService, this);
 

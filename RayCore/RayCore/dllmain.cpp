@@ -13,6 +13,9 @@ _declspec(dllexport) RayError RayStartSystem() {
 _declspec(dllexport) RayError RayStopSystem() {
     return octSystem.Stop();
 }
+_declspec(dllexport) RayError RayInitSystem() {
+    return octSystem.Init();
+}
 _declspec(dllexport) RayError RayRegisterCallback(FunctionPtr cb) {
     return octSystem.RegisterCallback(cb);
 }

@@ -1,0 +1,26 @@
+﻿<Page x:Class="RaywattApp.Views.OutsetLoginPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:RaywattApp.Views"
+      xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+      mc:Ignorable="d"
+      d:DesignHeight="1024" d:DesignWidth="1280"
+      Background="{DynamicResource GrayscaleGray8Brush}"
+      Title="OutsetLoginPage">
+
+    <StackPanel Margin="415,280,415,314">
+        <Image Source="{svgc:SvgImage Source=/res/icon/fasterWhite.svg}"/>
+        <StackPanel Height="40"/>
+        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [ID], Source={StaticResource L10N}}"/>
+        <StackPanel Height="6"/>
+        <TextBox Style="{DynamicResource TextBoxValidator}" MaxLength="50" Text="{Binding Id.Text, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter ID], Source={StaticResource L10N}}" ToolTip="{Binding Id.Msg}" Width="450"/>
+        <StackPanel Height="6"/>
+        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Password], Source={StaticResource L10N}}"/>
+        <StackPanel Height="6"/>
+        <TextBox Style="{DynamicResource TextBoxValidator}" MaxLength="50" Text="{Binding Password.Text, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter Password], Source={StaticResource L10N}}" ToolTip="{Binding Password.Msg}" Width="450"/>
+        <StackPanel Height="10"/>
+        <Button Style="{StaticResource ContainedBtnType1-XLarge-Wide}" Command="{Binding LoginCommand}" Content="{Binding [Login], Source={StaticResource L10N}}"/>
+    </StackPanel>
+</Page>
