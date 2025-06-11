@@ -46,7 +46,7 @@
             <StackPanel Height="20"/>
             <DataGrid ItemsSource="{Binding Users}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding ID}" Header="{Binding [Procedure], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding Id}" Header="{Binding [ID], Source={StaticResource L10N}}" />
                     <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding Password}" Header="{Binding [Password], Source={StaticResource L10N}}" />
                     <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}" />
                     <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding PasswordChangedAt, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Password Changed At], Source={StaticResource L10N}}" />
