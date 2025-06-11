@@ -644,7 +644,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 			mStent.at<cv::Point>(row, 0) = cv::Point(vStents[row].x + vStents[row].width / 2, vStents[row].y + vStents[row].height / 2);
 		}
 
-		pImaging->EraseStentOutLier(mStent);
+		//pImaging->EraseStentOutLier(mStent);
 
 		vStent.push_back(mStent);
 
