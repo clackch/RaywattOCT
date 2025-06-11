@@ -12,6 +12,7 @@ namespace RaywattApp.Common.Bases
 
         //[Page List]
         //Outset
+        public const string OutsetLoginPage = "Views/OutsetLoginPage.xaml";
         public const string OutsetLoadingPage = "Views/OutsetLoadingPage.xaml";
         //Patient
         public const string PatientListPage = "Views/PatientListPage.xaml";
@@ -56,6 +57,10 @@ namespace RaywattApp.Common.Bases
         public const string SettingTermsConditionsPage = "Views/Setting/SettingTermsConditionsPage.xaml";
         public const string SettingMaintenancePage = "Views/Setting/SettingMaintenancePage.xaml";
         public const string SettingDicomPage = "Views/Setting/SettingDicomPage.xaml";
+        //Admin
+        public const string UserListPage = "Views/Admin/UserListPage.xaml";
+        public const string UserNewPage = "Views/Admin/UserNewPage.xaml";
+        public const string UserEditPage = "Views/Admin/UserEditPage.xaml";
 
         //Resolution
         public const double ApplicationWidth = 1280;

@@ -69,15 +69,14 @@ namespace RaywattApp.ViewModels
 
                     if (result != null && result.DialogAnswer == DialogResults.Answer.No)
                     {
-                        DeviceStatus.PowerOffMsg = _l10n["Switching user"];
-                        CommonUtil.Exit(DeviceStatus);
-                        _angioManager.StopSoketCheck();
+                        DeviceStatus.PowerOffMsg = _l10n["Logging out"];
+                        CommonUtil.Exit(DeviceStatus, null, false);
                     }
                 }
             }
 
             Thread threadCoreAndDeviceInit = new Thread(() => ThreadCoreAndDeviceInit());
-                threadCoreAndDeviceInit.Start();
+            threadCoreAndDeviceInit.Start();
 
             timer.Interval = TimeSpan.FromMilliseconds(25);
             timer.Tick += new EventHandler(ProgressTest);
@@ -124,7 +123,6 @@ namespace RaywattApp.ViewModels
                 if (resultDialog != null && resultDialog.DialogAnswer == DialogResults.Answer.Undefined)
                 {
                     CommonUtil.Exit(DeviceStatus, _angioManager, true);
-                    _angioManager.StopSoketCheck();
                 }
             }
 
@@ -135,9 +133,10 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ThreadCoreAndDeviceInit");
 
-            RayError result = RayError.OK;
+            RayError result = (RayError)RayInitSystem();
 
             result |= (RayError)RayStartSystem();
+            
             if (result == RayError.OK)
             {
                 result |= (RayError)RayConnectDevices();

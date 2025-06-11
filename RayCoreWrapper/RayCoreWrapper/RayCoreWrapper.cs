@@ -137,6 +137,8 @@ namespace RaywattOCT
         [DllImport("RayCore.dll")]
         public static extern int RayStopSystem();
         [DllImport("RayCore.dll")]
+        public static extern int RayInitSystem();
+        [DllImport("RayCore.dll")]
         public static extern int RayRegisterCallback(IntPtr cb);
         [DllImport("RayCore.dll")]
         public static extern int RayUnregisterCallback();

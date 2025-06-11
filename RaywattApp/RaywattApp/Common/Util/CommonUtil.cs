@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Runtime.InteropServices;
 using static RaywattOCT.RayCoreWrapper;
+using static RaywattOCT.Ray3DWrapper;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Size = OpenCvSharp.Size;
@@ -881,7 +882,7 @@ namespace RaywattApp.Common.Util
                     _log.Debug($"sys.path: {sys.path}");
 
                     // Python 모듈 가져오기
-                    dynamic script = Py.Import("SaveTIFFAsGray");
+                    dynamic script = Py.Import("ImageProcess");
 
                     // Mat 리스트를 Python으로 전달
                     int width, height;
@@ -1209,13 +1210,13 @@ namespace RaywattApp.Common.Util
             return textBlock.DesiredSize;
         }
 
-        public static void Exit(DeviceStatus? deviceStatus = null, AngioManager? angioManager = null, bool isShutdown = false)
+        public static void Exit(DeviceStatus? deviceStatus = null, AngioManager? angioManager = null, bool isShutdown = false, bool isAdmin = false)
         {
             if (deviceStatus != null)
             {
                 deviceStatus.IsPowerOff = true;
-
                 deviceStatus.IsPaused = true;
+
                 while (!deviceStatus.CanExit)
                 {
                     Thread.Sleep(50);
@@ -1227,29 +1228,40 @@ namespace RaywattApp.Common.Util
 
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
 
-            Thread threadReadyPullback = new Thread(() => ThreadExit(deviceStatus, isShutdown));
+            Thread threadReadyPullback = new Thread(() => ThreadExit(deviceStatus, isShutdown, isAdmin));
             threadReadyPullback.Start();
         }
 
-        private static void ThreadExit(DeviceStatus? deviceStatus, bool isShutdown)
+        private static void ThreadExit(DeviceStatus? deviceStatus, bool isShutdown, bool isAdmin)
         {
-            RayDisconnectDevices();
-            RayStopSystem();            
+            if (!isAdmin)
+            {
+                RayDisconnectDevices();
+                RayStopSystem();
+                ODSOCT_DeleteDll();
 
+                deviceStatus.IsServiceStarted = false;
+                deviceStatus.IsDeviceConnected = false;
+            }
+            
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
-                System.Windows.Application.Current.MainWindow.Close();
-
                 if (deviceStatus == null)
                 {
+                    System.Windows.Application.Current.MainWindow.Close();
                     Win32Helper.Shutdown();
                 }
-                else if (!CommonUtil.IsTestMode(deviceStatus.TestMode, "Power"))
+                else if (isShutdown)
                 {
-                    if (isShutdown)
+                    System.Windows.Application.Current.MainWindow.Close();
+
+                    if (!CommonUtil.IsTestMode(deviceStatus.TestMode, "Power"))
                         Win32Helper.Shutdown();
-                    else
-                        Win32Helper.LogOff();
+                }
+                else
+                {
+                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
+                    deviceStatus.IsPowerOff = false;
                 }
             });
         }

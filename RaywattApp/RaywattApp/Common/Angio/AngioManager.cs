@@ -242,8 +242,17 @@ namespace RaywattApp.Common.Angio
                 Thread.Sleep(1000);
                 if(GetServerConnection() == false && !ViewModelBase._deviceStatus.IsPowerOff)
                 {
-                    _log.Debug("server down");
-                    CommonUtil.Exit(ViewModelBase._deviceStatus, this, true);
+                    _log.Debug("Disconnected from the Angio server.");
+
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        ViewModelBase._deviceStatus.IsAngioConnected = false;
+                        Dictionary<string, object> popupParameter = new Dictionary<string, object>();
+                        popupParameter["title"] = _l10n["Information"];
+                        popupParameter["message"] = _l10n["Disconnected from the Angio server."];
+                        var popupResult = _dialogService.OpenDialog(new AlertDialogControl(), popupParameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                    });
+
                     isSocketAlive = false;
                 }
             }
@@ -438,22 +447,28 @@ namespace RaywattApp.Common.Angio
         {
             _log.Debug("CloseAngioManager");
 
-            if (GetServerConnection())
-            {
-                _tcpClient.GetStream().Close();
-            }
-            if (threadFuncLiveAngioImage != null && threadFuncLiveAngioImage.IsAlive)
-                StopLiveAngioThread();
-                StopLiveView();
             if (threadFuncSaveAngioFrames != null && threadFuncSaveAngioFrames.IsAlive)
                 StopGettingAngioImageThread();
+
+            if (isSocketConnected != null && isSocketConnected.IsAlive)
+                StopSoketCheck();
+
+            StopLiveView();
+
+            if (GetServerConnection())
+                _tcpClient.GetStream().Close();
+
+            if (threadFuncLiveAngioImage != null && threadFuncLiveAngioImage.IsAlive)
+                StopLiveAngioThread();
+
+            if (_tcpClient != null)
+                _tcpClient.Close();
 
             string processName = CommonUtil.IsTestMode(ViewModelBase._deviceStatus.TestMode, "FG") ? "FGServerTestStub" : "FGServer";
             foreach (Process process in Process.GetProcessesByName(processName))
             {
                 process.Kill();
             }
-
         }
 
         private bool ReadPacket()
@@ -783,7 +798,7 @@ namespace RaywattApp.Common.Angio
                 imageList.Clear();
             }
 
-            if (get_image != null)
+            if (get_image != null && get_image.IsAlive)
             {
                 get_image.Join();
             }
