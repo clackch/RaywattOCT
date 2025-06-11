@@ -40,7 +40,7 @@ void RFIDProtocol::setPacketByFID(eFID fid, BYTE* packet, int& packetLength, int
 		idx += AddDataToPacket(packet + idx, uidLen, uidLenLen);
 		idx += AddDataToPacket(packet + idx, UID, uidSize);
 		idx += AddDataToPacket(packet + idx, keyType, keyTypeLen);
-		idx += AddDataToPacket(packet+idx, key, keyLen);
+		idx += AddDataToPacket(packet+idx, key, KEY_LEN);
 		if (data != NULL && dataSize > 0) {
 			AddDataToPacket(packet + idx, data, dataSize);
 		}
