@@ -330,6 +330,15 @@ namespace RaywattApp.Services
             return _databaseService.UpdateData(commandText, sqlParameters);
         }
 
+        public int UpdatePatientCaseId(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpdatePatientCaseId");
+
+            string commandText = SqlQuery.GetQuery("UpdatePatientCaseId");
+
+            return _databaseService.UpdateData(commandText, sqlParameters);
+        }
+        
         public int UpsertPatientCase(Dictionary<string, Object> sqlParameters)
         {
             _log.Debug("UpsertPatientCase");

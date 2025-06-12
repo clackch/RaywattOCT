@@ -375,6 +375,13 @@ namespace RaywattApp.Services
                 WHERE id = @id
                 ";
 
+            //UpdatePatientCaseId
+            _query["UpdatePatientCaseId"] = @$"
+                UPDATE rv_schema.patient_case
+                SET id = REGEXP_REPLACE(id, @originId, @id)
+                WHERE patient_id = @id;
+                ";
+
             //UpdatePatientCaseAnnotationWithoutLumenContour
             _query["UpdatePatientCaseAnnotationWithoutLumenContour"] = @$"
                 UPDATE rv_schema.patient_case_annotation
