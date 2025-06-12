@@ -384,6 +384,10 @@ void CRJController::updateState() {
 		if (!m_bLimitSwitch) {
 			m_nextState = eRJState::Disconnected;
 		}
+		
+		if (m_bPhotoSensor[3] == 0) {
+			m_nextState = eRJState::Error;
+		}
 		break;
 	case eRJState::Error:
 		if (!m_isInit) {

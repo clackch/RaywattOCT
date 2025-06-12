@@ -114,7 +114,7 @@ bool CLaserModule::Move(eStepMotorIndex idxMotor, int posStep, bool delay, char 
 	else {
 		m_nStepPosition[(int)idxMotor - 1] = posStep;
 		m_isSMMoving[(int)idxMotor - 1] = true;
-		sensorStop[(int)idxMotor - 1] = sensor;
+		sensorStop[(int)idxMotor - 1] = sensor; // sensor == 2 : DelayLine upperside, sensor == 3 : DelayLine downside
 	}
 
 	BYTE serialPacket[MAX_PATH];
