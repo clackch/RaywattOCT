@@ -203,7 +203,7 @@ namespace RaywattApp.ViewModels.Dialog
             DicomServer.ServerType = serverType.ToString();
             DicomServer.CaFilePath = IntPtr.Zero != caFilePathPtr ? Marshal.PtrToStringAnsi(caFilePathPtr) : string.Empty;
             if (caFilePathPtr != IntPtr.Zero)
-                Marshal.FreeCoTaskMem(caFilePathPtr);
+                RayExportWrapper.FreeMemory(caFilePathPtr);
 
             return true;
         }
@@ -243,16 +243,16 @@ namespace RaywattApp.ViewModels.Dialog
         {           
             try
             {
-                Hostname = Hostname.Trim();
-
-                if (Hostname.Equals(OrgHostname))
-                {
-                    return;
-                }
-
                 if (string.IsNullOrEmpty(Hostname))
                 {
                     IpAddress.SetIpAddress("...");
+                    return;
+                }
+
+                Hostname = Hostname.Trim();
+                
+                if (Hostname.Equals(OrgHostname))
+                {
                     return;
                 }
 

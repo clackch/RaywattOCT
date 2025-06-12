@@ -307,7 +307,7 @@ namespace RaywattApp.ViewModels
                     current += Marshal.SizeOf<DicomPatient>();
                 }
             }
-            RayExportWrapper.FreePatients(dicomPatients);
+            RayExportWrapper.FreeMemory(dicomPatients);
         }
 
         private bool CanNext()

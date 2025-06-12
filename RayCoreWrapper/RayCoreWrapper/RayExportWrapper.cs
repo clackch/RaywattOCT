@@ -62,6 +62,7 @@ namespace RayCoreWrapper
         {
             PACS,
             MWL,
+            BOTH,
             UNKNOWN
         }
 
@@ -108,8 +109,10 @@ namespace RayCoreWrapper
         [DllImport("DcmUtility.dll")]
         public static extern IntPtr FindPatients(IntPtr client, string patientId, string patientName, out int count);
         [DllImport("DcmUtility.dll")]
+        private static extern IntPtr FindWorklist(IntPtr client, string patientId, string patientName, string accessionNumber, string modality, string scheduledStationAET, string startDate, string endDate, string requestedProcedureId, out int count);
+        [DllImport("DcmUtility.dll")]
         public static extern int StoreFile(IntPtr client, string filename);
         [DllImport("DcmUtility.dll")]
-        public static extern void FreePatients(IntPtr patients);
+        public static extern void FreeMemory(IntPtr ptr);
     }
 }
