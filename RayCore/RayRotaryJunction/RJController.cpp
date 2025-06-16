@@ -223,6 +223,20 @@ bool CRJController::StopStepMotors() {
 
 	return (written == packetLength);
 }
+
+void CRJController::DisableStepMotors() {
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+
+	getSerialPacket(eFID::FID_SM_DISABLE, 0, serialPacket, packetLength);
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+	PLOGI.printf("Disable Done");
+}
+
 bool CRJController::DisplayLCD(eLCDImage image) {
 	if (!m_initMotor) return false;
 	if (m_state == eRJState::Error) return false;

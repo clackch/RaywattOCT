@@ -91,6 +91,8 @@ public:
 
 	void changeSMProfileToPullback();
 	void changeSMProfileToLoadUnload();
+
+	void DisableStepMotors();
 protected:
 	void initSetting();
 	static UINT threadRJState(LPVOID param);
