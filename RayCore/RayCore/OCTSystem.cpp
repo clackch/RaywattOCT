@@ -1490,6 +1490,9 @@ UINT COCTSystem::threadInitializeRotaryJunction(LPVOID param) {
 	if (pRJController->GetState() == eRJState::Initializing) {
 		pRJController->UpdateState(eRJState::Disconnected);
 	}
+
+	pRJController->DisableStepMotors();
+
 	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::InitializeRotaryJunction);
 
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
