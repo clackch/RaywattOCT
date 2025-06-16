@@ -423,7 +423,7 @@ namespace RaywattApp.ViewModels
 
         private void change3DIndicatorVisibility(bool show)
         {
-            ray3DStatus.ShowIndicator(show);
+            Ray3DStatus.ShowIndicator(show);
             ODSOCT_Render();
         }
 

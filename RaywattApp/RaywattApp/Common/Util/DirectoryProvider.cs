@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using RaywattApp.Common.Bases;
-using System.Collections.Generic;
+using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -126,13 +126,12 @@ namespace RaywattApp.Common.Util
 
         public bool DuplicateCheckRename(string originPath, string orginName, string name)
         {
-            string newPath = originPath.Substring(0, originPath.LastIndexOf(orginName) - 1) + "\\" + name;
+            int index = originPath.LastIndexOf(orginName, StringComparison.OrdinalIgnoreCase);
+            string basePath = new string(originPath.AsSpan(0, index - 1));
+            string newPath = Path.Combine(basePath, name);
 
-            if (Directory.Exists(newPath))
-            {
-                if (!name.ToLower().Equals(orginName.ToLower()))
-                    return false;
-            }
+            if (Directory.Exists(newPath) && !string.Equals(name, orginName, StringComparison.OrdinalIgnoreCase))
+                return false;
 
             return true;
         }
@@ -155,7 +154,7 @@ namespace RaywattApp.Common.Util
             return true;
         }
 
-        private void ChangeSubPath(DirectoryItem it, string originPath, string newPath)
+        private static void ChangeSubPath(DirectoryItem it, string originPath, string newPath)
         {
             foreach(var itm in it.Items)
             {
@@ -164,7 +163,7 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        private DirectoryItem FindDirectory(DirectoryItem it, string path)
+        private static DirectoryItem FindDirectory(DirectoryItem it, string path)
         {
             if (it.Path.Equals(path))
             {
@@ -183,7 +182,7 @@ namespace RaywattApp.Common.Util
             return findDir;
         }
 
-        private DirectoryItem CreateDirectoryNode(DirectoryInfo directoryInfo)
+        private static DirectoryItem CreateDirectoryNode(DirectoryInfo directoryInfo)
         {
             string dirName = directoryInfo.Name;
             string dirFullName = directoryInfo.FullName;
@@ -205,7 +204,7 @@ namespace RaywattApp.Common.Util
             return directoryItme;
         }
 
-        private DirectoryItem CreateDirectoryNodeWithExtension(DirectoryInfo directoryInfo)
+        private static DirectoryItem CreateDirectoryNodeWithExtension(DirectoryInfo directoryInfo)
         {
             string dirName = directoryInfo.Name;
             string dirFullName = directoryInfo.FullName;

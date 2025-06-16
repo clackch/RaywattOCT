@@ -8,11 +8,11 @@ namespace RaywattApp.Models
     {
         public class ReviewImageInfo
         {
-            public int Width = 0;
-            public int Height = 0;
-            public int Channels = 0;
-            public int Total = 0;
-            public int Current = 0;
+            public int Width;
+            public int Height;
+            public int Channels;
+            public int Total;
+            public int Current;
         };
 
         [ObservableProperty]

@@ -105,7 +105,11 @@ namespace RaywattApp.Common.Bases
             {
                 Playback();
             }
-            RayUnregisterImageCallback();
+            RayError result = (RayError)RayUnregisterImageCallback();
+            if (result != RayError.OK) 
+            {
+                _log.Error("RayUnregisterImageCallback Error");
+            }
         }
 
         /// <summary>
@@ -113,9 +117,13 @@ namespace RaywattApp.Common.Bases
         /// </summary>
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
-            RayRegisterImageCallback(
+            RayError result = (RayError)RayRegisterImageCallback(
                 Marshal.GetFunctionPointerForDelegate(CBCrossSection),
                 Marshal.GetFunctionPointerForDelegate(CBLongitude));
+            if (result != RayError.OK)
+            {
+                _log.Error("RayRegisterImageCallback Error");
+            }
         }
 
         private void OnRecvCrossSection(int session, IntPtr data, int width, int height, int ch, int frameInfo, double intensity)
@@ -200,7 +208,7 @@ namespace RaywattApp.Common.Bases
             SheathIndicatorAngio = CommonUtil.DrawSheathIndicator((int)Constants.CrossSectionAngio, sheathDiameter);
         }
 
-        private Mat GenerateMask(Mat image)
+        private static Mat GenerateMask(Mat image)
         {
             Mat mask = image.EmptyClone();
             Point center = new Point(mask.Width / 2, mask.Height / 2);

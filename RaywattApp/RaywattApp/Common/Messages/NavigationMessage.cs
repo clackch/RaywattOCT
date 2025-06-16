@@ -7,7 +7,7 @@ namespace RaywattApp.Common.Messages
     /// </summary>
     public class NavigationMessage : ValueChangedMessage<string>
     {
-        public object? Parameter { get; set; } = null;
+        public object? Parameter { get; set; }
 
         public NavigationMessage(string value) : base(value)
         {

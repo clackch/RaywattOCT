@@ -5,10 +5,15 @@ namespace RaywattApp.Common.Bases
     public class Constants
     {
         //MainWindow for Cursor
-        public static System.Windows.Window mainWindow = System.Windows.Application.Current.MainWindow;
+        public static readonly System.Windows.Window mainWindow = System.Windows.Application.Current.MainWindow;
 
         //Current Page
-        public static string CurrentPage = "";
+        private static string _currentPage = "";
+        public static string CurrentPage
+        {
+            get => _currentPage;
+            set => _currentPage = value;
+        }
 
         //[Page List]
         //Outset
@@ -207,8 +212,8 @@ namespace RaywattApp.Common.Bases
         public const double CalciumThicknessIndicatorExportSize = 644;
         public const double CalciumThicknessIndicatorCenterExportBig = CalciumThicknessIndicatorExportSizeBig / 2;
         public const double CalciumThicknessIndicatorCenterExport = CalciumThicknessIndicatorExportSize / 2;
-        public static System.Windows.Point CalciumThicknessIndicatorPointCenterExportBig = new System.Windows.Point(CalciumThicknessIndicatorCenterExportBig, CalciumThicknessIndicatorCenterExportBig);
-        public static System.Windows.Point CalciumThicknessIndicatorPointCenterExport = new System.Windows.Point(CalciumThicknessIndicatorCenterExport, CalciumThicknessIndicatorCenterExport);
+        public static readonly System.Windows.Point CalciumThicknessIndicatorPointCenterExportBig = new System.Windows.Point(CalciumThicknessIndicatorCenterExportBig, CalciumThicknessIndicatorCenterExportBig);
+        public static readonly System.Windows.Point CalciumThicknessIndicatorPointCenterExport = new System.Windows.Point(CalciumThicknessIndicatorCenterExport, CalciumThicknessIndicatorCenterExport);
 
         //File Icon
         public const string FileIconDrive = "drive";
@@ -283,16 +288,16 @@ namespace RaywattApp.Common.Bases
         public const double CrossSectionSize = 620;
         public const double CrossSectionCenter = CrossSectionSize / 2;
         public const double CrossSectionRadius = CrossSectionCenter;
-        public static System.Windows.Point CrossSectionPointCenter = new System.Windows.Point(CrossSectionRadius, CrossSectionRadius);
-        public static System.Windows.Rect CrossSectionRect = new System.Windows.Rect(0, 0, CrossSectionSize, CrossSectionSize);
+        public static readonly System.Windows.Point CrossSectionPointCenter = new System.Windows.Point(CrossSectionRadius, CrossSectionRadius);
+        public static readonly System.Windows.Rect CrossSectionRect = new System.Windows.Rect(0, 0, CrossSectionSize, CrossSectionSize);
         public const double CalciumIndicatorSize = 645;
         public const double CalciumIndicatorAngioSize = 490;
         public const double CalciumThicknessIndicatorSize = 681;
         public const double CalciumThicknessIndicatorAngioSize = 510;
         public const double CalciumThicknessIndicatorCenter = CalciumThicknessIndicatorSize / 2;
         public const double CalciumThicknessIndicatorCenterAngio = CalciumThicknessIndicatorAngioSize / 2;
-        public static System.Windows.Point CalciumThicknessIndicatorPointCenter = new System.Windows.Point(CalciumThicknessIndicatorCenter, CalciumThicknessIndicatorCenter);
-        public static System.Windows.Point CalciumThicknessIndicatorPointCenterAngio = new System.Windows.Point(CalciumThicknessIndicatorCenterAngio, CalciumThicknessIndicatorCenterAngio);
+        public static readonly System.Windows.Point CalciumThicknessIndicatorPointCenter = new System.Windows.Point(CalciumThicknessIndicatorCenter, CalciumThicknessIndicatorCenter);
+        public static readonly System.Windows.Point CalciumThicknessIndicatorPointCenterAngio = new System.Windows.Point(CalciumThicknessIndicatorCenterAngio, CalciumThicknessIndicatorCenterAngio);
         public const int CalciumIndicatorColor = 0x57FEEB;
 
         //Review - 2D - Angio
@@ -300,8 +305,8 @@ namespace RaywattApp.Common.Bases
         public const double CrossSectionAngio = 470;
         public const double CrossSectionAngioCenter = CrossSectionAngio / 2;
         public const double CrossSectionAngioRadius = CrossSectionAngioCenter;
-        public static System.Windows.Point CrossSectionAngioPointCenter = new System.Windows.Point(CrossSectionAngioRadius, CrossSectionAngioRadius);
-        public static System.Windows.Rect CrossSectionAngioRect = new System.Windows.Rect(0, 0, CrossSectionAngio, CrossSectionAngio);
+        public static readonly System.Windows.Point CrossSectionAngioPointCenter = new System.Windows.Point(CrossSectionAngioRadius, CrossSectionAngioRadius);
+        public static readonly System.Windows.Rect CrossSectionAngioRect = new System.Windows.Rect(0, 0, CrossSectionAngio, CrossSectionAngio);
         public const double CrossSectionAngioScale = CrossSectionAngio / CrossSectionSize;
         public const double CoRegZoomAngioSize = 382;
         public const double CoRegZoomScale = 5;
@@ -412,13 +417,13 @@ namespace RaywattApp.Common.Bases
         public const string MeasureReDraw = "MeasureReDraw";    //MeasureReDraw
 
         //Draw Annotation
-        public static Brush[] AnnotationBrushes = {
+        public static readonly Brush[] AnnotationBrushes = {
             new SolidColorBrush(Color.FromRgb(0x57, 0xFE, 0xEB)),
             new SolidColorBrush(Color.FromRgb(0xFF, 0xD8, 0x00)),
             new SolidColorBrush(Color.FromRgb(0xFF, 0x7D, 0x77))
         };
-        public static DashStyle AnnotationDashLarge = new DashStyle(new double[] { 7, 7 }, 0);
-        public static DashStyle AnnotationDashSmall = new DashStyle(new double[] { 2, 5 }, 0);
+        public static readonly DashStyle AnnotationDashLarge = new DashStyle(new double[] { 7, 7 }, 0);
+        public static readonly DashStyle AnnotationDashSmall = new DashStyle(new double[] { 2, 5 }, 0);
         public const double AnnotationTextPointSize = 6;
         public const double AnnotationRectWidth = 6;
         public const double AnnotationRectHeight = 6;
@@ -470,7 +475,7 @@ namespace RaywattApp.Common.Bases
         public const double MiniMapBorderSize = 140;
         public const double MiniMapCanvasSize = 138;
         public const double MiniMapRadius = MiniMapCanvasSize / 2;
-        public static System.Windows.Point MiniMapPointCenter = new System.Windows.Point(MiniMapRadius, MiniMapRadius);
+        public static readonly System.Windows.Point MiniMapPointCenter = new System.Windows.Point(MiniMapRadius, MiniMapRadius);
 
         //Zoom
         public const double ZoomScaleDefault = CrossSectionSize / OCTImageSize;

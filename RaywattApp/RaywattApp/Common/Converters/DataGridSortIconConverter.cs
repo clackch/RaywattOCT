@@ -12,11 +12,11 @@ namespace RaywattApp.Common.Converters
             if (value == null || String.IsNullOrEmpty(value.ToString()))
                 return null;
 
-            if (value.ToString().Contains("▾"))
+            if (value.ToString().Contains('▾'))
             {
                 return (Style)App.Current.Resources["DataGridColumnHeaderDesc"];
             }
-            else if(value.ToString().Contains("▴"))
+            else if(value.ToString().Contains('▴'))
             {
                 return (Style)App.Current.Resources["DataGridColumnHeaderAsc"];
             }
