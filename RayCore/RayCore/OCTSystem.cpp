@@ -283,8 +283,8 @@ RayError COCTSystem::ManualCalibration(bool forward) {
 		if (m_pLaserModule->IsConnected() == false) return RayError::DeviceNotConnected;
 		if (m_pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) return RayError::DeviceBusy;
 
-		m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_DEFAULT * DELAY_LINE_MICROSTEP);
-		m_pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, (forward ? DELAYLINE_FORWARD_POSITION * DELAY_LINE_MICROSTEP : DELAYLINE_BACKWARD_POSITION * DELAY_LINE_MICROSTEP));
+		m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_DEFAULT * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+		m_pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, (forward ? DELAYLINE_FORWARD_POSITION * CConfiguration::GetInstance().laserModule.delayLineSMSteps : DELAYLINE_BACKWARD_POSITION * CConfiguration::GetInstance().laserModule.delayLineSMSteps));
 
 		return RayError::OK;
 	}
@@ -1490,6 +1490,9 @@ UINT COCTSystem::threadInitializeRotaryJunction(LPVOID param) {
 	if (pRJController->GetState() == eRJState::Initializing) {
 		pRJController->UpdateState(eRJState::Disconnected);
 	}
+
+	pRJController->DisableStepMotors();
+
 	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::InitializeRotaryJunction);
 
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
@@ -1511,17 +1514,19 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 	{
 		// 0. Speed Up
 		pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_AUTO);
-		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO / 8 * DELAY_LINE_MICROSTEP);
+		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
 
 		// 1. Start Finding Sheath
 		pSystem->m_vCalibrationInfo.clear();
 		pSystem->m_cathState = CatheterState::FindingSheath;
 		
 		// 1-1. Move Delay-line & Find Sheath
-		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, -1000 * DELAY_LINE_MICROSTEP);
+		pSystem->m_pImagingLiveView->SetDelayLineMovingDirection(-1);
+		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, -1000 * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
 		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
-		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, 2000 * DELAY_LINE_MICROSTEP);
+		pSystem->m_pImagingLiveView->SetDelayLineMovingDirection(1);
+		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, 2000 * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
 		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
 		// 1-2. Find Z-Offset Position
@@ -1784,6 +1789,8 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	pSystem->postPriorMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
 	pSystem->m_pRJController->UpdateState(eRJState::Unloaded);
 
+	pRJController->DisableStepMotors();
+
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
@@ -2025,8 +2032,8 @@ int COCTSystem::connectRotaryJunction() {
 			m_pLaserModule->SetVLD(0);
 			m_pLaserModule->SetVOA(config.laserModule.voaValue);
 #ifdef DELAY_LINE_HOMING_WORKS
-			m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX * 2);
-			m_pLaserModule->Current(eStepMotorIndex::DelayLine, DELAY_LINE_UPEER_END_POSITION *	DELAY_LINE_MICROSTEP);
+			m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX * (CConfiguration::GetInstance().laserModule.delayLineSMSteps == 1 ? 1 : 2));
+			m_pLaserModule->Current(eStepMotorIndex::DelayLine, DELAY_LINE_UPEER_END_POSITION *	CConfiguration::GetInstance().laserModule.delayLineSMSteps);
 
 			Sleep(500);
 

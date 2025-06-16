@@ -15,6 +15,8 @@ public:
 		int vldValue;
 		int delayPosition;
 		int polarPosition;
+		int delayLineSMSteps;
+		int delayLineSMSpeed;
 	};
 
 	class StepMotorSetting {

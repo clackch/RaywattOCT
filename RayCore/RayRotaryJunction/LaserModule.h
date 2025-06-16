@@ -11,7 +11,6 @@
 #define DELAYLINE_FORWARD_POSITION		(50)
 #define DELAY_LINE_HOMING_WORKS			1 
 #define DELAY_LINE_UPEER_END_POSITION	9000
-#define DELAY_LINE_MICROSTEP			4
 
 class CLaserModule
 	: public CMotorController,
