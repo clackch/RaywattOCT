@@ -457,145 +457,79 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 }
 
 void COCTImaging::findSheath(cv::Mat img) {
-	cv::Mat image;
-	cv::Mat imgRe = ReCircularize(img);
-	imgRe.convertTo(image, CV_32F, 1.0 / 255.0);
-	cv::rotate(image, image, cv::ROTATE_90_COUNTERCLOCKWISE);
+	m_nSheathSearchRange = 300; /*1mm 오차 범위 설정*/
+	double maxMinusEdge = 0.3;
+	double pointStandard = 0.1;
+	int closeness = 10;
+	int maxDiffIndex = 44, minDiffIndex = 33;
+	cv::Mat image, checkError;
+	if (img.type() == CV_32FC1)
+		img.convertTo(checkError, CV_8UC1, 255);
+	else
+		checkError = img.clone();
+	checkError = checkError(cv::Range(0, m_nSheathSearchRange), cv::Range::all());
+	
+	img.convertTo(img, CV_32F, 1 / 255.f);
+	cv::rotate(img, image, cv::ROTATE_90_COUNTERCLOCKWISE);
+	cv::resize(image, image, cv::Size(image.cols, image.rows));
 
-	m_nSheathSearchRange = image.rows / 2;
-	int sectionSize = 20, totalPixelCount = 0, totalEdgeY = 0;
-	int upperSheathRow = 0, lowerSheathRow = 150, betweenRow = 0, sheathDist = 30;
-	std::vector<int> pixelCount(m_nSheathSearchRange), chosenRows, sectionCheck(m_nSheathSearchRange, 0);
-	std::vector<float> rowSumEdgeY(m_nSheathSearchRange, 0);
-
-	image = image(cv::Range(0, m_nSheathSearchRange), cv::Range::all());
-
-	//horizontal line formed 노이즈 배제
-	cv::Mat edge_imageX, edge_imageY, temp(image.size(), image.type());
-	cv::Sobel(image, edge_imageX, CV_32F, 1 /*dx*/, 0 /*dy*/, 3 /*kernel size*/, 1, 0, cv::BORDER_CONSTANT);
-	cv::Sobel(image, edge_imageY, CV_32F, 0 /*dx*/, 1 /*dy*/, 3 /*kernel size*/, 1, 0, cv::BORDER_CONSTANT);
-
-	float addEdgeX = 0.05f;
-	for (int i = 0; i < m_nSheathSearchRange; i++) {
-		float* temp_row = temp.ptr<float>(i);
-		const float* edgeX_row = edge_imageX.ptr<float>(i);
-		const float* input_row = image.ptr<float>(i);
-		for (int j = 0; j < temp.cols; j++) {
-			float edgeX = edgeX_row[j];
-			temp_row[j] = (addEdgeX + edgeX * edgeX) * input_row[j];
-		}
+	//horizontal line formed 노이즈 제거
+	cv::Mat edge_image;
+	cv::Sobel(image, edge_image, CV_64F, 1 /*dx*/, 0 /*dy*/, 3 /*kernel size*/, 1, 0, cv::BORDER_CONSTANT);
+	cv::Mat temp = image.clone();
+	for (int i = 0; i < m_nSheathSearchRange; i++) for (int j = 0; j < temp.cols; j++) {
+		temp.at<float>(i, j) -= (maxMinusEdge - edge_image.at<float>(i, j));
 	}
 
-	// Sheath 사이 row 후보군 찾기
-	float thresholdPixel = 0.1f;
+	// 행마다의 일정 밝기 이상의 픽셀 계수, 가장 많은 행 2개 저장
+	std::vector<int> pixelNum(m_nSheathSearchRange);
+	int maxIndex[2] = { 0, 0 };
+
 	for (int i = 0; i < m_nSheathSearchRange; i++) {
-		bool isTherePixel = false;
 		int tmp = 0;
-		const float* edgeY_row = edge_imageY.ptr<float>(i);
-		const float* temp_row = temp.ptr<float>(i);
 		for (int j = 0; j < image.cols; j++) {
-			if (j % sectionSize == 0) {
-				isTherePixel = false;
-			}
-			else if (j % sectionSize == sectionSize - 1) {
-				if (isTherePixel) sectionCheck[i]++;
-			}
-			rowSumEdgeY[i] += edgeY_row[j];
-			if (temp_row[j] >= thresholdPixel) {
-				isTherePixel = true;
+			if (temp.at<float>(i, j) >= pointStandard)
 				tmp++;
+			pixelNum[i] = tmp;
+			if (i == 0) continue;
+			else if (pixelNum[maxIndex[0]] < pixelNum[i]) {
+				maxIndex[0] = i;
 			}
 		}
-		pixelCount[i] = tmp;
-		totalPixelCount += tmp;
-
-		if (rowSumEdgeY[i] < 0)
-			rowSumEdgeY[i] = -1 * rowSumEdgeY[i];
-		totalEdgeY += rowSumEdgeY[i];
 	}
-	std::vector<int> pixCopy = pixelCount;
-	std::sort(pixCopy.begin(), pixCopy.end());
-	int threshold = std::abs(totalPixelCount / m_nSheathSearchRange - pixCopy[m_nSheathSearchRange * 0.5]);
-	bool isUpperDark = false;
-	int sizeOfDark = 0;
-	int tooThin = 0, tooThick = 50;
+
 	for (int i = 0; i < m_nSheathSearchRange; i++) {
-		if (pixelCount[i] <= threshold) {
-			sizeOfDark++;
-			isUpperDark = true;
-		}
-		else {
-			if (isUpperDark) {
-				isUpperDark = false;
-				if (sizeOfDark == tooThin || sizeOfDark > tooThick) {
-					sizeOfDark = 0;
-					continue;
-				}
-
-				chosenRows.push_back(i - (sizeOfDark / 2.0 + 0.5));
-				sizeOfDark = 0;
-			}
+		if (i == 0 || std::abs(maxIndex[0] - i) <= closeness) continue;
+		else if (pixelNum[maxIndex[1]] < pixelNum[i]) {
+			maxIndex[1] = i;
 		}
 	}
 
-	// 각 row당 upper sheath와 lower sheath 탐색, best case 선택
-	double thresholdY = (totalEdgeY / (double)m_nSheathSearchRange) * 0.8;
-	int rangeFromRow = 75;
-	for (int row : chosenRows) {
-		bool startUpperSheath = false, startLowerSheath = false, endUpper = false, endLower = false;
-		int upperSheathThickness = 0, lowerSheathThickness = 0;
-		int tmpUp = 0, tmpLow;
-		for (int i = 0; i < rangeFromRow; i++) {
-			if (row - i >= 0) {
-				if (sectionCheck[row - i] >= sectionCheck[tmpUp]) {
-					tmpUp = row - i;
-					endUpper = true;
-				}
-			}
-
-			if (!endLower && row + i < m_nSheathSearchRange) {
-				if (rowSumEdgeY[row + i] > thresholdY) {
-					if (!startLowerSheath)
-						startLowerSheath = true;
-					else
-						lowerSheathThickness++;
-				}
-				else if (startLowerSheath) {
-					endLower = true;
-					tmpLow = row + i - lowerSheathThickness / 2;
-				}
-			}
-		}
-
-		if (!endUpper || !endLower) {
-			continue;
-		}
-
-		int diffWithIdeal = 15;
-		bool isThisBetter = (
-			sectionCheck[tmpUp] > sectionCheck[upperSheathRow]
-			|| pixelCount[tmpUp] >= pixelCount[upperSheathRow]
-			&& abs(sheathDist - (lowerSheathRow - upperSheathRow)) >= abs(sheathDist - (tmpLow - tmpUp))
-			)
-			&& abs(sheathDist - (tmpLow - tmpUp)) <= diffWithIdeal;
-
-		if (isThisBetter) {
-			upperSheathRow = tmpUp;
-			lowerSheathRow = tmpLow;
-			betweenRow = row;
-		}
-	}
-
-	// outer line 행 위치를 return
-	tooThin = 20, tooThick = 40;
-	int tooLittle = 10;
-	if (lowerSheathRow - upperSheathRow > tooThick || lowerSheathRow - upperSheathRow < tooThin
-		|| pixelCount[upperSheathRow] < tooLittle
-		|| sectionCheck[upperSheathRow] < tooLittle) {
+	int diff = abs(maxIndex[0] - maxIndex[1]);
+	if (diff < minDiffIndex || diff > maxDiffIndex) {
 		m_nSheathPosition = 0;
 	}
 	else {
-		m_nSheathPosition = lowerSheathRow;
+		int checkRange = 5;
+		int errorThreshold = 200 * checkError.cols;
+		int startIndex = maxIndex[0] - checkRange >= 0 ? maxIndex[0] - checkRange : 0;
+		int roiHeight = std::min(checkRange * 2, checkError.rows - startIndex);
+		int errorSum = 0;
+		cv::Mat roi = checkError(cv::Rect(0, startIndex, checkError.cols, roiHeight));
+
+		for (int i = 0; i < roi.rows; i++) {
+			for (int j = 0; j < roi.cols; j++) {
+				errorSum += roi.at<char>(i, j);
+			}
+		}
+
+		if (errorSum < errorThreshold) {
+			m_nSheathPosition = 0;
+		}
+		else {
+			m_nSheathPosition = std::max(maxIndex[0], maxIndex[1]) + m_delayLineMovingDirection * 2;
+		}
+		PLOGI.printf("errorThreshold = %d, errorSum = %d", errorThreshold, errorSum);
 	}
 }
 
