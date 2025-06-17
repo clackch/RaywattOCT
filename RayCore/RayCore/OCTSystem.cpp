@@ -1809,16 +1809,26 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 
 	Sleep(1000);
 
-	//determine image verification
 	bool verified = false;
+
+	//determine image verification
 	for (int i = 0; i < 3; i++) {
-		int position = pSystem->m_pImagingLiveView->GetSheathPosition();
-		PLOGI.printf("sheath position : %d", position);
-		if (position != 0) {
-			verified = true;
-			break;
-		}
-		Sleep(500);
+		cv::Mat image = pSystem->m_pImagingLiveView->GetWithoutCompensationImage();
+		cv::Mat blurImage;
+		cv::GaussianBlur(image, blurImage, cv::Size(3, 3), 0);
+
+		cv::Mat sobel_x, sobel_y;
+		cv::Sobel(image, sobel_x, CV_64F, 1, 0, 3, 1, 0, cv::BORDER_CONSTANT);
+		cv::Sobel(blurImage, sobel_y, CV_64F, 0, 1, 3);
+
+		// magnitude 계산 (벡터 크기)
+		cv::Mat sobel_mag, sobel_vis;
+		magnitude(sobel_x, sobel_y, sobel_mag);
+		cv::convertScaleAbs(sobel_x, sobel_vis);
+		
+		cv::Scalar mean, stddev;
+		cv::meanStdDev(sobel_vis, mean, stddev);
+		verified = stddev[0] >= 30.0;
 	}
 	
 	pRJController->StopMotor();
@@ -2018,18 +2028,6 @@ int COCTSystem::connectRotaryJunction() {
 
 	bool result = true;
 
-	if (!m_pRJController->IsConnected()) {
-		result &= m_pRJController->Connect(config.bldcMotor.port);
-
-		if (result) {
-			m_pRJController->StartControl();
-			m_pRJController->UpdateState(eRJState::Initializing);
-		}
-		else {
-			PLOGI.printf("Failed to connect to Rotary Junction");
-		}
-	}
-
 	if (!m_pLaserModule->IsConnected()) {
 		result = m_pLaserModule->Connect(config.laserModule.port);
 		if (result) {
@@ -2038,7 +2036,7 @@ int COCTSystem::connectRotaryJunction() {
 			m_pLaserModule->SetVOA(config.laserModule.voaValue);
 #ifdef DELAY_LINE_HOMING_WORKS
 			m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX * 2);
-			m_pLaserModule->Current(eStepMotorIndex::DelayLine, DELAY_LINE_UPEER_END_POSITION *	DELAY_LINE_MICROSTEP);
+			m_pLaserModule->Current(eStepMotorIndex::DelayLine, DELAY_LINE_UPEER_END_POSITION * DELAY_LINE_MICROSTEP);
 
 			Sleep(500);
 
@@ -2069,6 +2067,18 @@ int COCTSystem::connectRotaryJunction() {
 		else
 		{
 			PLOGE.printf("Failed to connect to laser module");
+		}
+	}
+
+	if (!m_pRJController->IsConnected()) {
+		result &= m_pRJController->Connect(config.bldcMotor.port);
+
+		if (result) {
+			m_pRJController->StartControl();
+			m_pRJController->UpdateState(eRJState::Initializing);
+		}
+		else {
+			PLOGI.printf("Failed to connect to Rotary Junction");
 		}
 	}
 

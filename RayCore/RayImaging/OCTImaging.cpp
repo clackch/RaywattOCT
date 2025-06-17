@@ -98,7 +98,7 @@ void COCTImaging::Process(char* fringes) {
 	generateBackground((Ipp16u*)fringes);
 	fftProcessing(fringes32f);
 	computeLogarithm(fFFTResult, fFFTResult);
-	findSheath(fFFTResult);
+	//findSheath(fFFTResult);
 	generateImage(fFFTResult, false);
 	adaptive_compensation();
 }
