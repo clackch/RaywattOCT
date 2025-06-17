@@ -2118,7 +2118,7 @@ int COCTSystem::disconnectRotaryJunction() {
 
 	if (m_pLaserModule->IsConnected()) {
 		//m_pLaserModule->Home(-100000, 10000);
-		m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX*2);
+		m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX * (CConfiguration::GetInstance().laserModule.delayLineSMSteps == 1 ? 1 : 2));
 		m_pLaserModule->Move(eStepMotorIndex::DelayLine, 0, false, static_cast<char>(3));
 		m_pLaserModule->Move(eStepMotorIndex::Polarization, 0);
 		m_pLaserModule->SetVLD(0);

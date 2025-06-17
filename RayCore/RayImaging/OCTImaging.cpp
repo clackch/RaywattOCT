@@ -1139,7 +1139,7 @@ void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f>
 
 	if (theta.empty()) {
 		PLOGI.printf("GuideWire Detection Fail");
-		centerPoints.push_back(centerPoints.back());
+		centerPoints.push_back(cv::Point(-1, -1));
 		radius.push_back(-1);
 		return;
 	}
