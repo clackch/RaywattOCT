@@ -1679,6 +1679,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
 	CRJController* pRJController = pSystem->m_pRJController;
+	CLaserModule* pLaserModule = pSystem->m_pLaserModule;
 
 	std::vector<std::vector<std::string>> loadCommands = pSystem->readLoadSequence();
 
@@ -1720,16 +1721,12 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 		Sleep(config.GetLoadCatheterTime());
 	}
 
-	// To-Do: Check Catheter Connection
-	bool loaded = true;
-	if (loaded) {
-		pSystem->m_bFirstLoad = true;
-		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loaded);
+	if (pLaserModule != nullptr && pLaserModule->IsConnected()) {
+		pLaserModule->SetVLD(config.laserModule.vldValue);
 	}
-	else {
-		pRJController->StopMotor();
-		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
-	}
+	
+	pSystem->m_bFirstLoad = true;
+	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loaded);
 	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::LoadCatheter);
 
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
@@ -1807,36 +1804,61 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CConfiguration& config = CConfiguration::GetInstance();
 	CRJController* pRJController = pSystem->m_pRJController;
+	CLaserModule* pLaserModule = pSystem->m_pLaserModule;
 
 	PLOGI.printf("Catheter Validation");
-	Sleep(1500);
-#if 0
-	pSystem->m_pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_STANDBY_ON);
+
+	pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_STANDBY_ON);
+	pSystem->m_pImagingLiveView->Start();
 	pSystem->laserOnOff(true);
 	pSystem->restartAcqDevice(pSystem->m_pImagingLiveView);
 	pRJController->PerformRun(config.bldcMotor.velocityLiveView);
 
-	// To-Do: determine image verification
-	Sleep(2000);
-	bool verified = true;
+	Sleep(1000);
 
+	bool verified = false;
+
+	//determine image verification
+	for (int i = 0; i < 3; i++) {
+		cv::Mat image = pSystem->m_pImagingLiveView->GetWithoutCompensationImage();
+		cv::Mat blurImage;
+		cv::GaussianBlur(image, blurImage, cv::Size(3, 3), 0);
+
+		cv::Mat sobel_x, sobel_y;
+		cv::Sobel(image, sobel_x, CV_64F, 1, 0, 3, 1, 0, cv::BORDER_CONSTANT);
+		cv::Sobel(blurImage, sobel_y, CV_64F, 0, 1, 3);
+
+		// magnitude 계산 (벡터 크기)
+		cv::Mat sobel_mag, sobel_vis;
+		magnitude(sobel_x, sobel_y, sobel_mag);
+		cv::convertScaleAbs(sobel_x, sobel_vis);
+		
+		cv::Scalar mean, stddev;
+		cv::meanStdDev(sobel_vis, mean, stddev);
+		verified = stddev[0] >= 30.0;
+	}
+	
 	pRJController->StopMotor();
 	pSystem->laserOnOff(false);
-#endif
-	if (true) {
+
+	if (verified) {
 		if (config.catheter.manualLoad) {
 			PLOGI.printf("m_pRJController->UpdateState - WaitManualLoad");
-			pSystem->m_pRJController->UpdateState(eRJState::WaitManualLoad);
+			pRJController->UpdateState(eRJState::WaitManualLoad);
 		}
 		else {
 			PLOGI.printf("m_pRJController->UpdateState - Loaded");
-			pSystem->m_pRJController->UpdateState(eRJState::Loaded);
+			pRJController->UpdateState(eRJState::Loaded);
 		}
 		PLOGI.printf("postMessage - CatheterState::Enable");
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Enable);
 	}
 	else {
-		pSystem->m_pRJController->UpdateState(eRJState::Error);
+		if (pLaserModule != nullptr && pLaserModule->IsConnected()) {
+			pLaserModule->SetVLD(0);
+		}
+		pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_ERROR);
+		pRJController->UpdateState(eRJState::Error);
 		pSystem->postMessage(WM_NOTIFY_ERROR_OCCURED, (WPARAM)RayError::CatheterNotValid);
 	}
 
@@ -2013,18 +2035,6 @@ int COCTSystem::connectRotaryJunction() {
 
 	bool result = true;
 
-	if (!m_pRJController->IsConnected()) {
-		result &= m_pRJController->Connect(config.bldcMotor.port);
-
-		if (result) {
-			m_pRJController->StartControl();
-			m_pRJController->UpdateState(eRJState::Initializing);
-		}
-		else {
-			PLOGI.printf("Failed to connect to Rotary Junction");
-		}
-	}
-
 	if (!m_pLaserModule->IsConnected()) {
 		result = m_pLaserModule->Connect(config.laserModule.port);
 		if (result) {
@@ -2064,6 +2074,18 @@ int COCTSystem::connectRotaryJunction() {
 		else
 		{
 			PLOGE.printf("Failed to connect to laser module");
+		}
+	}
+
+	if (!m_pRJController->IsConnected()) {
+		result &= m_pRJController->Connect(config.bldcMotor.port);
+
+		if (result) {
+			m_pRJController->StartControl();
+			m_pRJController->UpdateState(eRJState::Initializing);
+		}
+		else {
+			PLOGI.printf("Failed to connect to Rotary Junction");
 		}
 	}
 
@@ -2511,10 +2533,6 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 	case eRJState::WaitManualLoad:
 		break;
 	case eRJState::Loaded:
-		if (m_pLaserModule != nullptr && m_pLaserModule->IsConnected()) {
-			CConfiguration& config = CConfiguration::GetInstance();
-			m_pLaserModule->SetVLD(config.laserModule.vldValue);
-		}
 		break;
 	case eRJState::Unloading:
 	{
