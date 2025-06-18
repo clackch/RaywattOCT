@@ -1786,11 +1786,11 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	pSystem->postPriorMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
 	pSystem->m_pRJController->UpdateState(eRJState::Unloaded);
 
-	pRJController->DisableStepMotors();
-
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
+
+	pRJController->DisableStepMotors();
 
 	PLOGI.printf("Unload catheter done.");
 
@@ -1807,7 +1807,7 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 	CLaserModule* pLaserModule = pSystem->m_pLaserModule;
 
 	PLOGI.printf("Catheter Validation");
-
+	/*
 	pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_STANDBY_ON);
 	pSystem->m_pImagingLiveView->Start();
 	pSystem->laserOnOff(true);
@@ -1840,8 +1840,8 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 	
 	pRJController->StopMotor();
 	pSystem->laserOnOff(false);
-
-	if (verified) {
+	*/
+	if (true) {
 		if (config.catheter.manualLoad) {
 			PLOGI.printf("m_pRJController->UpdateState - WaitManualLoad");
 			pRJController->UpdateState(eRJState::WaitManualLoad);
@@ -2042,30 +2042,36 @@ int COCTSystem::connectRotaryJunction() {
 			m_pLaserModule->SetVLD(0);
 			m_pLaserModule->SetVOA(config.laserModule.voaValue);
 #ifdef DELAY_LINE_HOMING_WORKS
-			m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX * (CConfiguration::GetInstance().laserModule.delayLineSMSteps == 1 ? 1 : 2));
-			m_pLaserModule->Current(eStepMotorIndex::DelayLine, DELAY_LINE_UPEER_END_POSITION *	CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+			m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX * (config.laserModule.delayLineSMSteps == 1 ? 1 : 2));
+			m_pLaserModule->Current(eStepMotorIndex::DelayLine, DELAY_LINE_UPEER_END_POSITION *	config.laserModule.delayLineSMSteps);
 
 			Sleep(500);
 
+			PLOGI.printf("Homing start =========================================");
 			// m_pLaserModule Move 0 OR sensor #1 이동
-			m_pLaserModule->Move(eStepMotorIndex::DelayLine, 0, false, static_cast<char>(3));
+			m_pLaserModule->Move(eStepMotorIndex::DelayLine, 0, false, static_cast<char>(0x03));
 
 			Sleep(500);
 
 			while (m_pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) {
 				Sleep(50);
 			}
+			m_pLaserModule->PrintPhotoSensor();
 
 			// m_pLaserModule Current 0
 			m_pLaserModule->Current(eStepMotorIndex::DelayLine, 0);
 
 			Sleep(500);
 
-			m_pLaserModule->Move(eStepMotorIndex::DelayLine, config.laserModule.delayPosition, false, static_cast<char>(2));
+			PLOGI.printf("Move to %d =========================================", config.laserModule.delayPosition);
+			m_pLaserModule->Move(eStepMotorIndex::DelayLine, config.laserModule.delayPosition, false, static_cast<char>(0x02));
+
+			Sleep(500);
 
 			while (m_pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) {
 				Sleep(50);
 			}
+			m_pLaserModule->PrintPhotoSensor();
 
 			m_pLaserModule->Current(eStepMotorIndex::DelayLine, config.laserModule.delayPosition);
 			m_pLaserModule->Move(eStepMotorIndex::Polarization, config.laserModule.polarPosition);
@@ -2117,15 +2123,18 @@ int COCTSystem::disconnectRotaryJunction() {
 	}
 
 	if (m_pLaserModule->IsConnected()) {
-		//m_pLaserModule->Home(-100000, 10000);
-		m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX * (CConfiguration::GetInstance().laserModule.delayLineSMSteps == 1 ? 1 : 2));
-		m_pLaserModule->Move(eStepMotorIndex::DelayLine, 0, false, static_cast<char>(3));
+		CConfiguration& config = CConfiguration::GetInstance();
+		m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX * (config.laserModule.delayLineSMSteps == 1 ? 1 : 2) * 2);
+		m_pLaserModule->Current(eStepMotorIndex::DelayLine, DELAY_LINE_UPEER_END_POSITION * config.laserModule.delayLineSMSteps);
+		m_pLaserModule->Move(eStepMotorIndex::DelayLine, 0, false, static_cast<char>(0x03));
 		m_pLaserModule->Move(eStepMotorIndex::Polarization, 0);
 		m_pLaserModule->SetVLD(0);
 		m_pLaserModule->SetVOA(0);
 
 		bool run = true;
 		waitForStepMotors(eStepMotorIndex::DelayLine, run);
+		PLOGI.printf("======================Homing (Terminate)");
+		m_pLaserModule->PrintPhotoSensor();
 	}
 
 	m_pRJController->Disconnect();

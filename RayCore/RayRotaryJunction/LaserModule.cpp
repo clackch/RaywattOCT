@@ -176,6 +176,9 @@ void CLaserModule::SetVLD(unsigned short vld) {
 	m_nVLD = vld;
 	setVOAVLD();
 }
+void CLaserModule::PrintPhotoSensor() {
+	PLOGI.printf("PhotoSensor: %d %d %d", m_bPhotoSensor[0], m_bPhotoSensor[1], m_bPhotoSensor[2]);
+}
 bool CLaserModule::AutoStatePeriod(USHORT interval) {
 	if (!m_initMotor) return false;
 
