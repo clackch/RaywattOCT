@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -11,7 +11,9 @@ namespace RaywattApp.Views.Component
     /// </summary>
     public partial class IpAddressInputControl : UserControl
     {
-        public static readonly DependencyProperty IpAddressProperty = DependencyProperty.Register("IpAddress", typeof(IpAddress), typeof(IpAddressInputControl));
+        public static readonly DependencyProperty IpAddressProperty = DependencyProperty.Register("IpAddress", typeof(IpAddress), typeof(IpAddressInputControl), new PropertyMetadata(null, OnIpAddressChanged));
+
+        public static readonly DependencyProperty SubnetMaskProperty = DependencyProperty.Register("SubnetMask", typeof(SubnetMask), typeof(IpAddressInputControl), new PropertyMetadata(null, OnSubnetMaskChanged));
 
         public static readonly DependencyProperty ToolTipProperty = DependencyProperty.Register("ToolTip", typeof(string), typeof(IpAddressInputControl), new PropertyMetadata(string.Empty, OnTooltipChanged));
 
@@ -21,15 +23,63 @@ namespace RaywattApp.Views.Component
             set { SetValue(IpAddressProperty, value); }
         }
 
+        public SubnetMask SubnetMask
+        {
+            get { return (SubnetMask)GetValue(SubnetMaskProperty); }
+            set { SetValue(SubnetMaskProperty, value); }
+        }
+
         public string ToolTip
         {
             get { return (string)GetValue(ToolTipProperty); }
             set { SetValue(ToolTipProperty, value); }
         }
 
+        private bool _isInitialized;
+
         public IpAddressInputControl()
         {
             InitializeComponent();
+        }
+
+        private static void OnIpAddressChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var control = (IpAddressInputControl)d;
+
+            if (e.NewValue != null && e.OldValue == null)
+            {
+                control.SetTextBoxValues();
+                control._isInitialized = true;
+            }
+        }
+
+        private static void OnSubnetMaskChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var control = (IpAddressInputControl)d;
+
+            if (e.NewValue != null && e.OldValue == null)
+            {
+                control.SetTextBoxValues();
+                control._isInitialized = true;
+            }
+        }
+
+        private void SetTextBoxValues()
+        {
+            if (IpAddress != null)
+            {
+                Octet1TextBox.Text = IpAddress.Octet1 ?? string.Empty;
+                Octet2TextBox.Text = IpAddress.Octet2 ?? string.Empty;
+                Octet3TextBox.Text = IpAddress.Octet3 ?? string.Empty;
+                Octet4TextBox.Text = IpAddress.Octet4 ?? string.Empty;
+            }
+            else if (SubnetMask != null)
+            {
+                Octet1TextBox.Text = SubnetMask.Octet1 ?? string.Empty;
+                Octet2TextBox.Text = SubnetMask.Octet2 ?? string.Empty;
+                Octet3TextBox.Text = SubnetMask.Octet3 ?? string.Empty;
+                Octet4TextBox.Text = SubnetMask.Octet4 ?? string.Empty;
+            }
         }
 
         private static void OnTooltipChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -64,10 +114,23 @@ namespace RaywattApp.Views.Component
 
         private void OnTextChanged(object sender, TextChangedEventArgs e)
         {
-            IpAddress.Octet1 = Octet1TextBox.Text;
-            IpAddress.Octet2 = Octet2TextBox.Text;
-            IpAddress.Octet3 = Octet3TextBox.Text;
-            IpAddress.Octet4 = Octet4TextBox.Text;
+            if (!_isInitialized)
+                return;
+
+            if (IpAddress != null)
+            {
+                IpAddress.Octet1 = Octet1TextBox.Text;
+                IpAddress.Octet2 = Octet2TextBox.Text;
+                IpAddress.Octet3 = Octet3TextBox.Text;
+                IpAddress.Octet4 = Octet4TextBox.Text;
+            }
+            else if (SubnetMask != null)
+            {
+                SubnetMask.Octet1 = Octet1TextBox.Text;
+                SubnetMask.Octet2 = Octet2TextBox.Text;
+                SubnetMask.Octet3 = Octet3TextBox.Text;
+                SubnetMask.Octet4 = Octet4TextBox.Text;
+            }
         }
 
         private void TextBox_GotFocus(object sender, RoutedEventArgs e)
