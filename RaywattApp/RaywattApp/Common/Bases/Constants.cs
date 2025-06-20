@@ -500,5 +500,7 @@ namespace RaywattApp.Common.Bases
         public const int pathIntervalPowerSTSH = 3;
         public const int pathIntervalPowerSTLO = 5;
         public const int pathIntervalPowerFAST = 12;
+
+        public static bool initAutocalibration = false;
     }
 }

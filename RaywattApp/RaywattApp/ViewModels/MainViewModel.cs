@@ -649,6 +649,7 @@ namespace RaywattApp.ViewModels
                     break;
                 case RayWorkItem.UnloadCatheter:
                     DeviceStatus.CatheterStatus = Constants.CatheterStatusConnected;
+                    Constants.initAutocalibration = false;
                     break;
                 case RayWorkItem.Recording:
                     if (DeviceStatus.IsAngioConnected)

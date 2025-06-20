@@ -238,6 +238,11 @@ namespace RaywattApp.ViewModels
             if (DeviceStatus.IsLiveView)
             {
                 RayStartLiveView();
+                if(!Constants.initAutocalibration)
+                {
+                    Constants.initAutocalibration = true;
+                    RayAutoCalibration();
+                }
             }
             else
             {
