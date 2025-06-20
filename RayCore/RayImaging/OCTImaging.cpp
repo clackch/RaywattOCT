@@ -616,6 +616,7 @@ cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {
 	}
 	cv::Mat result;
 	remap(circularized, result, imatXMap, imatYMap, cv::INTER_NEAREST);
+	cv::rotate(result, result, cv::ROTATE_90_COUNTERCLOCKWISE);
 
 	return result;
 }
