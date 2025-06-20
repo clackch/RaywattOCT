@@ -126,7 +126,7 @@ void COCTImaging::PostProcess(cv::Mat image) {
 
 	if (m_bShowCalibGuide) {
 		drawGuideLine(imageResultColor, m_measureSetting.nSheathPosition, cv::Scalar(0xff, 0xcc, 0x33));
-		//drawGuideLine(imageResultColor, m_nSheathPosition, cv::Scalar(0xff, 0xff, 0xff));
+		drawGuideLine(imageResultColor, m_nSheathPosition, cv::Scalar(0xff, 0xff, 0xff));
 	}
 
 	CircularizeImage(imageResultColor, imageCircle);
@@ -529,7 +529,6 @@ void COCTImaging::findSheath(cv::Mat img) {
 		else {
 			m_nSheathPosition = std::max(maxIndex[0], maxIndex[1]) + m_delayLineMovingDirection * 2;
 		}
-		PLOGI.printf("errorThreshold = %d, errorSum = %d", errorThreshold, errorSum);
 	}
 }
 

@@ -503,6 +503,7 @@ void CRJController::updateState(eRJState state) {
 		m_nRFIDLength = 0;	// clear RFID info.
 		break;
 	case eRJState::Validating:
+		displayLCD(eLCDImage::LCD_IMAGE_BOOTING);
 		break;
 	case eRJState::Loading:
 		displayLCD(eLCDImage::LCD_IMAGE_LOADING);

@@ -853,7 +853,14 @@ namespace RaywattApp.ViewModels
                     for (int row = 0; row < mat.Rows; row++)
                     {
                         Vec2i point = mat.At<Vec2i>(0, row);
-                        LumenGuidewires[frameInfo].Points.Add(new Point(point.Item0, point.Item1));
+                        if(point.Item0 < 0 || point.Item0 < 0)
+                        {
+                            LumenGuidewires[frameInfo].Points.Add(new Point(0, 0));
+                        }
+                        else
+                        {
+                            LumenGuidewires[frameInfo].Points.Add(new Point(point.Item0, point.Item1));
+                        }
                         GuideWireRadiusList.Add(*(doublePtr + row));
                     }
                 }
