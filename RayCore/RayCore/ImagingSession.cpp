@@ -655,7 +655,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		std::vector<float> Radius;
 		cv::Mat mGuidewire(vGuidewires.size(), 1, CV_32SC2);
 
-		/*cv::Mat mask3 = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+		cv::Mat mask3 = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
 		for (int i = 0; i < vGuidewires.size(); i++) {
 			cv::rectangle(mask3, vGuidewires[i], cv::Scalar(255), -1);
 		}
@@ -664,8 +664,8 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		cv::findContours(mask3, realContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 		cv::drawContours(imgCheck, realContours, -1, cv::Scalar(0, 255, 0), 2);
 
-		string check = "GW Center Image" + std::to_string(nFrame) + ".png";
-		cv::imwrite(check, imgCheck);*/
+		string name1 = "GW Center Image" + std::to_string(nFrame) + ".png";
+		cv::imwrite(name1, imgCheck);
 
 		pImaging->GetGuideWireCenterPoint(circleImage, vGuidewires, centerPoints, Radius);
 
