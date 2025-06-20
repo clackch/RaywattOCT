@@ -1,4 +1,4 @@
-癤#include "Config.h"
+#include "Config.h"
 #include "OCTSystem.h"
 #include "Utility.h"
 #include "Configuration.h"
@@ -1693,7 +1693,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 			std::transform(command.begin(), command.end(), command.begin(), ::toupper);
 
 			if (command == "SM") {
-				int position = std::stoi(commands[1]); // 臾몄댁 �濡 蹂
+				int position = std::stoi(commands[1]); 
 				int speed = std::stoi(commands[2]);
 
 				pRJController->Set(eStepMotorIndex::Pullback, speed);
