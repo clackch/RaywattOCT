@@ -1726,8 +1726,8 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	}
 	
 	pSystem->m_bFirstLoad = true;
-	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loaded);
 	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::LoadCatheter);
+	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loaded);
 
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -1798,15 +1798,12 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 }
 
 void COCTSystem::autoCalibrationInit(LPVOID param) {
-	PLOGI.printf("autoCalibration start");
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CLaserModule* pLaserModule = pSystem->m_pLaserModule;
 	int nTargetPos = 0;
 
-	bool flag = true;
 	if (pLaserModule != nullptr && pLaserModule->IsConnected())
 	{
-		PLOGI.printf("Doing autoCalibration");
 		int microSteps = CConfiguration::GetInstance().laserModule.delayLineSMSteps;
 
 		// 0. Speed Up
@@ -1820,11 +1817,11 @@ void COCTSystem::autoCalibrationInit(LPVOID param) {
 		// 1-1. Move Delay-line & Find Sheath
 		pSystem->m_pImagingLiveView->SetDelayLineMovingDirection(-1);
 		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, -1000 * microSteps);
-		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, flag);
+		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
 		pSystem->m_pImagingLiveView->SetDelayLineMovingDirection(1);
 		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, 2000 * microSteps);
-		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, flag);
+		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
 		// 1-2. Find Z-Offset Position
 		const int nSheathPosition = CConfiguration::GetInstance().measurement.nSheathPosition;
@@ -1844,7 +1841,7 @@ void COCTSystem::autoCalibrationInit(LPVOID param) {
 		// 1-3. Move to calibrated position
 		nTargetPos = nZOffset;
 		pLaserModule->Move(eStepMotorIndex::DelayLine, nZOffset);
-		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, flag);
+		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
 		// 2. Start Finding Peak
 		pSystem->m_vCalibrationInfo.clear();
@@ -1852,10 +1849,10 @@ void COCTSystem::autoCalibrationInit(LPVOID param) {
 
 		// 2-1. Move Polarization-control & Find Peak
 		nTargetPos = pLaserModule->Move(eStepMotorIndex::Polarization, 0);
-		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, flag);
+		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
 
 		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::Polarization, 3240);
-		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, flag);
+		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
 
 		// 2-2. Find Max Peak
 		int nMaxPeak = INT_MIN;
@@ -1870,9 +1867,7 @@ void COCTSystem::autoCalibrationInit(LPVOID param) {
 		// 2-3. Move to calibrated position
 		nTargetPos = nMaxPeakPos;
 		pLaserModule->Move(eStepMotorIndex::Polarization, nTargetPos);
-		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, flag);
-
-		PLOGI.printf("autoCalibration Done");
+		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
 	}
 }
 
@@ -1982,8 +1977,8 @@ UINT COCTSystem::threadManualLoadCatheter(LPVOID param)
 		Sleep(config.GetLoadCatheterTime());
 	}
 
-	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loaded);
 	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::LoadCatheter);
+	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loaded);
 
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -2253,7 +2248,6 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 	double intensity = 0.0;
 
 	if (m_curState == RayScannerState::Review) {
-		PLOGI.printf("m_curState == RayScannerState::Review");
 		if (isRealTime) return NOERROR;
 		int nCurFrame = (nFrameInfo >> 16) & 0xFFFF;
 		int nTotalFrame = (nFrameInfo & 0xFFFF);
@@ -2262,7 +2256,6 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 	}
 	else {
 		if (isRealTime == false) return NOERROR;
-		PLOGI.printf("m_curState : %d", m_curState);
 		image = m_pImagingRealtime->GetCircleImage();
 
 		//calculate intensity - m_fImageThreshold/m_fImageRoi
