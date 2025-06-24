@@ -515,7 +515,7 @@ void COCTImaging::findSheath(cv::Mat img) {
 	}
 	std::vector<int> pixCopy = pixelCount;
 	std::sort(pixCopy.begin(), pixCopy.end());
-	int threshold = std::abs(totalPixelCount / m_nSheathSearchRange /*- pixCopy[m_nSheathSearchRange * 0.5]*/);
+	int threshold = std::abs(totalPixelCount / m_nSheathSearchRange - pixCopy[m_nSheathSearchRange * 0.5]);
 	bool isUpperDark = false;
 	int sizeOfDark = 0;
 	int tooThin = 0, tooThick = 50;
