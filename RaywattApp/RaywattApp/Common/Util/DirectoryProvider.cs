@@ -43,7 +43,7 @@ namespace RaywattApp.Common.Util
             Items.Add(directoryItem);
         }
 
-        public ObservableCollection<Item> Traverse(DirectoryItem it)
+        public static ObservableCollection<Item> Traverse(DirectoryItem it)
         {
             var items = new ObservableCollection<Item>();
 
@@ -86,7 +86,7 @@ namespace RaywattApp.Common.Util
             _rootDirectoryItem.Items = directoryItems;
         }
 
-        public bool DuplicateCheck(string path, string name)
+        public static bool DuplicateCheck(string path, string name)
         {
             string fullPath = path + "\\" + name;
 
@@ -111,7 +111,7 @@ namespace RaywattApp.Common.Util
             return true;
         }
 
-        private ObservableCollection<DirectoryItem> SortDirectoryItem(ObservableCollection<DirectoryItem> items)
+        private static ObservableCollection<DirectoryItem> SortDirectoryItem(ObservableCollection<DirectoryItem> items)
         {
             var tempObservableCollection = items.OrderBy(x => x.Name).ToList();
             foreach (var temp in tempObservableCollection)
@@ -124,7 +124,7 @@ namespace RaywattApp.Common.Util
             return items;
         }
 
-        public bool DuplicateCheckRename(string originPath, string orginName, string name)
+        public static bool DuplicateCheckRename(string originPath, string orginName, string name)
         {
             int index = originPath.LastIndexOf(orginName, StringComparison.OrdinalIgnoreCase);
             string basePath = new string(originPath.AsSpan(0, index - 1));
@@ -138,7 +138,8 @@ namespace RaywattApp.Common.Util
 
         public bool RenameDirectory(string originPath, string orginName, string name)
         {
-            string newPath = originPath.Substring(0, originPath.LastIndexOf(orginName) - 1) + "\\" + name;
+            int index = originPath.LastIndexOf(orginName) - 1;
+            string newPath = string.Concat(originPath.AsSpan(0, index), "\\", name);
 
             Directory.Move(originPath, newPath);
 
@@ -239,6 +240,6 @@ namespace RaywattApp.Common.Util
             return directoryItme;
         }
 
-        public ObservableCollection<Item> DirItems => _rootDirectoryItem.Traverse(_rootDirectoryItem);
+        public ObservableCollection<Item> DirItems => DirectoryItem.Traverse(_rootDirectoryItem);
     }
 }

@@ -562,7 +562,7 @@ namespace RaywattApp.Services
         /**
          * Extra
          */
-        private string getAdditionalCondition(Dictionary<string, Object> sqlAdditionalCondition)
+        private static string getAdditionalCondition(Dictionary<string, Object> sqlAdditionalCondition)
         {
             _log.Debug("getAddtionalCondition");
 

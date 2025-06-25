@@ -61,7 +61,7 @@ namespace RaywattApp.ViewModels
 
         private bool isReadyOn = true;
 
-        private bool isMoveConfirm = false;
+        private bool isMoveConfirm;
 
         private ICommand _cancelCommand;
         public ICommand CancelCommand
@@ -149,8 +149,14 @@ namespace RaywattApp.ViewModels
 
             _angioManager.ReadyToRecv = true;
 
-            if(!this.isMoveConfirm)
-                RayStopLiveView();
+            if (!this.isMoveConfirm)
+            {
+                RayError result = (RayError)RayStopLiveView();
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayStopLiveView Error");
+                }
+            }
         }
 
         private void Cancel()
@@ -173,7 +179,11 @@ namespace RaywattApp.ViewModels
 
         private void ThreadReadyPullback()
         {
-            RayReadyPullback();
+            RayError result = (RayError)RayReadyPullback();
+            if (result != RayError.OK)
+            {
+                _log.Error("RayReadyPullback Error");
+            }
 
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
@@ -206,7 +216,11 @@ namespace RaywattApp.ViewModels
             StartTime--;
             if(StartTime == 0)
             {
-                RayStartLiveView();
+                RayError result = (RayError)RayStartLiveView();
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayStartLiveView Error");
+                }
 
                 IsStep1 = true;
                 isReadyOn = true;
@@ -235,7 +249,11 @@ namespace RaywattApp.ViewModels
             DeviceStatus.IsLumenDetected = false;
             DeviceStatus.IsPullbackDone = false;
 
-            RayPullbackScan(PatientCase.ImageFullPath);
+            RayError result = (RayError)RayPullbackScan(PatientCase.ImageFullPath);
+            if (result != RayError.OK)
+            {
+                _log.Error("RayPullbackScan Error");
+            }
 
             if (DeviceStatus.IsAngioConnected && _angioManager.isChpFileConnected == 1)
             {
@@ -278,7 +296,7 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
         }
 
-        private string generateFileName(string ext)
+        private static string generateFileName(string ext)
         {
             string filename = "{" +
                 CommonUtil.GetRandomText(8) + "-" +

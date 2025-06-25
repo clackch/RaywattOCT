@@ -40,7 +40,13 @@ namespace RaywattApp.Common.Util
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(CommonUtil));
 
-        public static bool isVTIFileSave = false;
+        private static bool _isVTIFileSave;
+
+        public static bool IsVTIFileSave
+        {
+            get => _isVTIFileSave;
+            set => _isVTIFileSave = value;
+        }
 
         public static bool ValidateText(string input)
         {
@@ -1590,7 +1596,7 @@ namespace RaywattApp.Common.Util
             StringBuilder sb = new StringBuilder();
             StringWriter sw = new StringWriter(sb);
 
-            using (JsonWriter writer = new JsonTextWriter(sw))
+            using (JsonTextWriter writer = new JsonTextWriter(sw))
             {
                 writer.WriteStartArray();
 

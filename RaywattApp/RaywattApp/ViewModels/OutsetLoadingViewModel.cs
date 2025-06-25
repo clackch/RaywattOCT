@@ -31,7 +31,7 @@ namespace RaywattApp.ViewModels
 
         private DispatcherTimer timer = new DispatcherTimer();
 
-        private bool isError = false;
+        private bool isError;
 
         private ConnectionStatus connState = ConnectionStatus.Default;
 
@@ -93,15 +93,43 @@ namespace RaywattApp.ViewModels
             if (Progress >= 100 && DeviceStatus.IsServiceStarted && DeviceStatus.IsDeviceConnected)
             {
                 IntPtr hWnd = new WindowInteropHelper(Constants.mainWindow).Handle;
-                ODSOCT_CreateDll(hWnd);
-                ODSOCT_CreateOCTWindowByPos(Ray3DViewID.CutView, (int)Constants.CutView3dX, (int)Constants.CutView3dY,
+                int ray3DResult = ODSOCT_CreateDll(hWnd);
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_CreateDll Error");
+                }
+                ray3DResult = ODSOCT_CreateOCTWindowByPos(Ray3DViewID.CutView, (int)Constants.CutView3dX, (int)Constants.CutView3dY,
                     (int)Constants.CutView3dWidth, (int)Constants.CutView3dHeight);
-                ODSOCT_CreateOCTWindowByPos(Ray3DViewID.FlyThrough, (int)Constants.FlyThroughView3dX, (int)Constants.FlyThroughView3dY,
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_CreateOCTWindowByPos Error");
+                }
+                ray3DResult = ODSOCT_CreateOCTWindowByPos(Ray3DViewID.FlyThrough, (int)Constants.FlyThroughView3dX, (int)Constants.FlyThroughView3dY,
                     (int)Constants.FlyThroughView3dWidth, (int)Constants.FlyThroughView3dHeight);
-                ODSOCT_StartRendering();
-                ODSOCT_EnableInteractor(Ray3DViewID.CutView, false);
-                ODSOCT_EnableInteractor(Ray3DViewID.FlyThrough, false);
-                ODSOCT_EnableWheelEvent(false);
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_CreateOCTWindowByPos Error");
+                }
+                ray3DResult = ODSOCT_StartRendering();
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_StartRendering Error");
+                }
+                ray3DResult = ODSOCT_EnableInteractor(Ray3DViewID.CutView, false);
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_EnableInteractor Error");
+                }
+                ray3DResult = ODSOCT_EnableInteractor(Ray3DViewID.FlyThrough, false);
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_EnableInteractor Error");
+                }
+                ray3DResult = ODSOCT_EnableWheelEvent(false);
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_EnableWheelEvent Error");
+                }
 
                 timer.Stop();
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));

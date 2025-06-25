@@ -326,7 +326,7 @@ namespace RaywattApp.ViewModels.Dialog
             var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.SettingDialogWidth, Constants.SettingDialogHeight);
         }
 
-        private string GetReturnValueDescription(long returnCode)
+        private static string GetReturnValueDescription(long returnCode)
         {
             switch (returnCode)
             {
@@ -351,7 +351,7 @@ namespace RaywattApp.ViewModels.Dialog
             }
         }
 
-        private bool IsValidIPAddress(string ipAddress)
+        private static bool IsValidIPAddress(string ipAddress)
         {
             if (!IPAddress.TryParse(ipAddress, out IPAddress ip))
                 return false;
@@ -369,7 +369,7 @@ namespace RaywattApp.ViewModels.Dialog
             return true;
         }
 
-        private bool IsValidSubnetMask(string subnetMask)
+        private static bool IsValidSubnetMask(string subnetMask)
         {
             if (string.IsNullOrWhiteSpace(subnetMask)) return false;
 

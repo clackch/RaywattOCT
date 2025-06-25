@@ -68,8 +68,8 @@ namespace RaywattApp.Common.Angio
         private Mat imgAngio;
         public Mat ImgAngio { get { return imgAngio; } set { imgAngio = value; } }
 
-        private bool isBoardInited = false;
-        private bool boardConnection = false;
+        private bool isBoardInited;
+        private bool boardConnection;
 
         private byte[] buffer;
         private byte[] tmpBuffer;
@@ -95,7 +95,7 @@ namespace RaywattApp.Common.Angio
         private bool threadOnSaveAsFile;
         public bool threadOnRedoPullback;
         public bool threadOnSaveFinished;
-        public bool fromRecording = false;
+        public bool fromRecording;
 
         private Thread get_image;
         private bool liveView;
@@ -109,15 +109,15 @@ namespace RaywattApp.Common.Angio
         public char AngioBitsPerPixel { get { return angioBitsPerPixel; } set { angioBitsPerPixel = value; } }
         private int angioImageSize;
 
-        private bool readyToRecv = false;
+        private bool readyToRecv;
         public bool ReadyToRecv { get { return readyToRecv; } set { readyToRecv = value; } }
 
-        private short isChpFileChangeSuccess = 0;
+        private short isChpFileChangeSuccess;
         public short IsChpFileChangeSuccess { get { return isChpFileChangeSuccess; } set { isChpFileChangeSuccess = value; } }
 
-        public short isChpFileConnected = 0;
+        public short isChpFileConnected;
 
-        private bool isCathRoomDialogOpen = false;
+        private bool isCathRoomDialogOpen;
 
         public AngioManager(IDialogService dialogService)
         {
@@ -142,7 +142,7 @@ namespace RaywattApp.Common.Angio
             threadOnSaveAngioFrames = false;
         }
 
-        private void StartFGServerProc(ProcessStartInfo startInfo)
+        private static void StartFGServerProc(ProcessStartInfo startInfo)
         {
             _log.Debug("StartFGServerProc");
 
@@ -716,7 +716,7 @@ namespace RaywattApp.Common.Angio
             return PacketType.Nothing;
         }
 
-        public Mat ShowNoSignal()
+        public static Mat ShowNoSignal()
         {
             _log.Debug("No signal");
             Mat image = new Mat(1080, 1920, MatType.CV_8UC3);
@@ -724,7 +724,7 @@ namespace RaywattApp.Common.Angio
             return image;
         }
 
-        private byte CalcCheckSum(byte[] buffer, int size)
+        private static byte CalcCheckSum(byte[] buffer, int size)
         {
             size--;
             byte csum = 0;

@@ -55,7 +55,7 @@ namespace RaywattApp.Common.Annotation.Models
             set { valid = value; }
         }
 
-        private bool IsOriginData = false;
+        private bool IsOriginData;
 
         public void SetOriginData(bool flag)
         {
