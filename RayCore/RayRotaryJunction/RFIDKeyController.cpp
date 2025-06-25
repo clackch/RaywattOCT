@@ -38,6 +38,12 @@ void RFIDKeyController::addKey(BYTE* key) {
 		keyStr << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(key[i]);
 	}
 	logFile << keyStr.str() << "\n";
+
+	std::vector<BYTE> tnsKey;
+	for (int i = 0; i < KEY_LEN; ++i) {
+		tnsKey.push_back(key[i]);
+	}
+	keys.push_back(tnsKey);
 }
 void RFIDKeyController::loadFirstKey(BYTE* key) {
 	if (keys.empty()) {

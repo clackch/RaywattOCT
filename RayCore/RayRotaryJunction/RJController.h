@@ -105,12 +105,13 @@ public:
 	bool IncreaseRFIDUsage(int uidSize, BYTE* UID);
 	bool ResetRFIDUsage(int uidSize, BYTE* UID);
 	bool ResetRFIDUID(int uidSize, BYTE* UID, int dataSize, BYTE* newUID);
-	bool SetRFIDUsage(int uidSize, BYTE* UID, int dataSize, BYTE* count);
+	bool SetRFIDUsage(int uidSize, BYTE* UID, BYTE count);
 	bool SetRFIDManuf(int uidSize, BYTE* UID, int dataSize, BYTE* manuf);
 	bool SetRFIDKey(int uidSize, BYTE* UID, int dataSize, BYTE* key);
 	bool GetRFIDKey();
 	bool SetRFIDStep(int uidSize, BYTE* UID, int step);
 	bool GetRFIDStep();
+	void findCorrectKey();
 	UINT GetRFIDInfo(BYTE* pRFIDInfo);
 	bool GetPhotoSensorOnOff(int index) { return m_bPhotoSensor[index]; }
 
@@ -126,8 +127,8 @@ protected:
 	bool displayLCD(eLCDImage image);
 	void RxPacketRFIDGetState(BYTE* buff, RFID_ReadType type = DEFAULT);
 	void parseSMPacket(BYTE*packet, int size);
-	void parseRFIDPacket(BYTE*packet, int size);
 	virtual void handlePacket();
 	virtual bool writeMotor(BYTE* packet, int size);
+	void resendPacket(eFID fid, RFIDMessageData::Data rePacketData);
 };
 

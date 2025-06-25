@@ -29,7 +29,8 @@ enum class eCOMM_RJ : BYTE {
 };
 
 enum class eFID : BYTE {
-	FID_AUTO_REPORT = 0x01
+	NO_FID = 0x00
+	, FID_AUTO_REPORT = 0x01
 	, FID_GET_MAIN_STATE
 	, FID_SET_VOAVLD
 	, FID_GET_AUTO_PERIOD = 0x10

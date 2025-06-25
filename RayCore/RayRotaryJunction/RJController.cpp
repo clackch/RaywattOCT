@@ -2,6 +2,7 @@
 #include "COMConnection.h"
 #include "Utility.h"
 #include "MessageService.h"
+#include "RFIDKeyController.h"
 
 CRJController::CRJController()
 	:ICommonProtocol(RJ_STX, RJ_ETX)
@@ -59,7 +60,7 @@ bool CRJController::Connect(void *param) {
 	}
 	displayLCD(eLCDImage::LCD_IMAGE_BOOTING);
 
-	RFIDProtocol::initState();
+	RFIDProtocol::initState(true);
 	m_state = eRJState::Initializing;
 	m_nextState = eRJState::Initializing;
 
@@ -286,13 +287,14 @@ bool CRJController::ResetRFIDUID(int uidSize, BYTE* UID, int dataSize, BYTE* new
 	return (written == packetLength);
 }
 
-bool CRJController::SetRFIDUsage(int uidSize, BYTE* UID, int dataSize, BYTE* count) {
+bool CRJController::SetRFIDUsage(int uidSize, BYTE* UID, BYTE count) {
 	if (!m_initMotor) return false;
-	if (dataSize < COUNT_LEN) return false;
 
 	BYTE serialPacket[MAX_PATH];
 	int packetLength;
-	RFIDProtocol::setPacketByFID(eFID::FID_RFID_SET_USAGE, serialPacket, packetLength, uidSize, UID, COUNT_LEN, count);
+	BYTE countBytes[COUNT_LEN];
+	countBytes[0] = count;
+	RFIDProtocol::setPacketByFID(eFID::FID_RFID_SET_USAGE, serialPacket, packetLength, uidSize, UID, COUNT_LEN, countBytes);
 
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
@@ -358,13 +360,17 @@ bool CRJController::SetRFIDStep(int uidSize, BYTE* UID, int step) {
 	int packetLength;
 	BYTE stepByte[STEP_LEN];
 	for (int st = STEP_LEN-1; st >= 0; st--) {
-		stepByte[st] = step % 0xFF;
-		step /= 0xFF;
+		stepByte[st] = step % 256;
+		step /= 256;
 	}
 
 	RFIDProtocol::setPacketByFID(eFID::FID_RFID_SET_STEP, serialPacket, packetLength, uidSize, UID, STEP_LEN, stepByte);
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
+
+	for (int i = 0; i < packetLength; i++) {
+		printf("%02x ", serialPacket[i]);
+	}
 
 	int written = m_pConnection->Write(serialPacket, packetLength);
 
@@ -429,6 +435,26 @@ void CRJController::initSetting() {
 		PLOGI.printf("Written size is not matched. (%d / %d bytes)", written, packetLength);
 	}
 }
+
+void CRJController::resendPacket(eFID fid, RFIDMessageData::Data rePacketData) {
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	RFIDProtocol::resetPacketByFID(fid, serialPacket, packetLength, rePacketData);
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+
+	RFIDProtocol::deleteMessageData(fid);
+	printf("write Len : %d\n", packetLength);
+	printf("buffer\n");
+	for (int p = 0; p < packetLength; p++) {
+		printf("%02x ", serialPacket[p]);
+	}
+	//Sleep(40);
+	int written = m_pConnection->Write(serialPacket, packetLength);
+	printf("written: %d\n", written);
+}
+
 UINT CRJController::threadRJState(LPVOID param) {
 	CRJController* pRJController = (CRJController*)param;
 
@@ -461,7 +487,6 @@ UINT CRJController::threadReadPacket(LPVOID param) {
 			pRJController->addPacket(recvBuf, readSize);
 			pRJController->parseSerialPacket();
 		}
-
 		Sleep(1);
 	}
 
@@ -678,17 +703,6 @@ void CRJController::parseSMPacket(BYTE* packet, int size) {
 		offset += 12;	// current pos (4byte), target pos (4byte), current speed (4byte)
 	}
 }
-void CRJController::parseRFIDPacket(BYTE* packet, int size) {
-	m_nRFIDLength = packet[1];
-	memcpy(m_RFID, packet + 2, m_nRFIDLength);
-	memcpy(m_byManufacturerId, packet + 6, 7);
-	m_nRFIDUsageCount = packet[13];
-	printf("inputRFID:\n");
-	for (int p = 0; p < m_nRFIDLength; p++) {
-		printf("%02x ", m_RFID[p]);
-	}
-	printf("\n");
-}
 
 void CRJController::RxPacketRFIDGetState(BYTE* buff, RFID_ReadType type)
 {
@@ -698,6 +712,10 @@ void CRJController::RxPacketRFIDGetState(BYTE* buff, RFID_ReadType type)
 	int uidLength = buff[idx++];
 	if (uidLength >= buff[RFID_REPLY_LENGTH_IDX]) uidLength = HARDWARE_UID_LENGTH;
 	std::stringstream ss;
+
+	if (!RFIDProtocol::cmpUID(&buff[idx], uidLength)) {
+		RFIDProtocol::initState(false);
+	}
 
 	RFIDProtocol::setHardwareUID(&buff[idx], uidLength);
 	idx += uidLength;
@@ -735,21 +753,41 @@ void CRJController::handlePacket() {
 	BYTE length = m_vPacket[LENGTH_IDX];
 	int dataLength = length - HEADER_LEN;
 	eFID fid = (eFID) m_vPacket[FID_IDX];
+	PLOGI.printf("handled : %d\n", fid);
+	if (fid == eFID::FID_RFID_GET_STATE || fid == eFID::FID_RFID_GET_KEY) {
+		PLOGI.printf("-------------------------------------------------------------");
+	}
 	char strTime[MAX_PATH];
 	CUtility::GetCurTime(strTime);
-
-	// photo sensor state
-	for (int i = 0; i < 6; i++) {
-		m_bPhotoSensor[i] = m_vPacket[PHOTO_IDX] & (0x1 << i);
+	for (int c = 0; c < length; c++) {
+		PLOGI.printf("%02x ", m_vPacket[c]);
 	}
-	
-	// button, switch state
-	m_bButton[0] = m_vPacket[KEY_IDX] & 0x1;
-	m_bButton[1] = m_vPacket[KEY_IDX] & 0x2;
-	m_bLimitSwitch = m_vPacket[KEY_IDX] & 0x4;
 
-	//PLOGI.printf("\tButton: %02d %02d %02d\n", m_bButton[0], m_bButton[1], m_bLimitSwitch);
+	if (fid < eFID::FID_RFID_GET_STATE) {
+		// photo sensor state
+		for (int i = 0; i < 6; i++) {
+			m_bPhotoSensor[i] = m_vPacket[PHOTO_IDX] & (0x1 << i);
+		}
 
+		// button, switch state
+		m_bButton[0] = m_vPacket[KEY_IDX] & 0x1;
+		m_bButton[1] = m_vPacket[KEY_IDX] & 0x2;
+		m_bLimitSwitch = m_vPacket[KEY_IDX] & 0x4;
+
+		//PLOGI.printf("\tButton: %02d %02d %02d\n", m_bButton[0], m_bButton[1], m_bLimitSwitch);
+	}
+	else {
+		PLOGI.printf("return %s\n", ((m_vPacket[REPLY_RESULT_IDX] == 0) ? "ok" : "error"));
+		if (m_vPacket[REPLY_RESULT_IDX] != 0) {
+			if (fid != eFID::FID_RFID_GET_KEY) {
+				RFIDProtocol::setLastFID(fid);
+				findCorrectKey();
+			}
+			return;
+		}
+	}
+	RFIDProtocol::deleteMessageData(fid);
+	RFIDMessageData::Data* data = nullptr;
 	switch(fid) {
 	case eFID::FID_SM_GET_STATE:
 		parseSMPacket(&m_vPacket[DATA_IDX], dataLength);
@@ -757,11 +795,6 @@ void CRJController::handlePacket() {
 	case eFID::FID_BLDC_PASS:
 		parsePacket(&m_vPacket[DATA_IDX], dataLength);
 		break;
-	/*case eFID::FID_RFID_GET_STATE:
-	case eFID::FID_RFID_USAGE_INCREMENT:
-	case eFID::FID_RFID_USAGE_RESET:
-		parseRFIDPacket(&m_vPacket[DATA_IDX], dataLength);
-		break;*/
 	case eFID::FID_RFID_GET_STATE:
 		RxPacketRFIDGetState(&m_vPacket[0], MANUF_CNT);
 		break;
@@ -777,8 +810,15 @@ void CRJController::handlePacket() {
 		RxPacketRFIDGetState(&m_vPacket[0], MANUF);
 		break;
 	case eFID::FID_RFID_SET_KEY:
+		RFIDKeyController::addKey(&m_vPacket[RFID_REPLY_DATA_IDX + 1 + HARDWARE_UID_LENGTH + CUSTOM_UID_LENGTH]);
+		RxPacketRFIDGetState(&m_vPacket[0], KEYS);
+		break;
 	case eFID::FID_RFID_GET_KEY:
 		RxPacketRFIDGetState(&m_vPacket[0], KEYS);
+		data = RFIDProtocol::getRecentMessageData();
+		if(data != nullptr)
+			resendPacket(RFIDProtocol::getLastFID(), *data);
+		RFIDProtocol::setLastFID(eFID::NO_FID);
 		break;
 	case eFID::FID_RFID_SET_STEP:
 	case eFID::FID_RFID_GET_STEP:
@@ -790,6 +830,26 @@ void CRJController::handlePacket() {
 
 	m_bReadInitStatus = true;
 }
+
+void CRJController::findCorrectKey() {
+	std::vector<std::vector<BYTE>> keys = RFIDKeyController::getKeys();
+	for (std::vector<BYTE> key : keys) {
+		printf("hi\n");
+		BYTE* keyVal = new BYTE[KEY_LEN];
+		for (int idx = 0; idx < KEY_LEN; idx++) {
+			keyVal[idx] = key[idx];
+		}
+		BYTE serialPacket[MAX_PATH];
+		int packetLength;
+		RFIDProtocol::setPacketByFID(eFID::FID_RFID_GET_KEY, serialPacket, packetLength, 0, NULL, 0, 0, keyVal);
+		BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+		serialPacket[packetLength - 2] = checksum;
+
+		int written = m_pConnection->Write(serialPacket, packetLength);
+		Sleep(10);
+	}
+}
+
 bool CRJController::writeMotor(BYTE* packet, int size) {
 	if (!m_initMotor) return false;
 	

@@ -2,8 +2,54 @@
 #include "RFIDKeyController.h"
 
 RFIDProtocol::SRFIDState RFIDProtocol::aRFIDState;
+RFIDMessageData RFIDProtocol::aRFIDMessageData;
 
-void RFIDProtocol::setPacketByFID(eFID fid, BYTE* packet, int& packetLength, int uidSize, BYTE* UID, int dataSize, BYTE* data) {
+
+void RFIDProtocol::resetPacketByFID(eFID fid, BYTE* packet, int& packetLength, RFIDMessageData::Data data) {
+	if (packet == nullptr) return;
+	int keyTypeLen = 1;
+	int uidLenLen = 1;
+	packetLength = data.etcLen + FIXED_HEADER_FRONT_LEN + FIXED_HEADER_BACK_LEN + KEY_LEN + keyTypeLen + ((data.aHardwareUIDLen == 0) ? 0 : (CUSTOM_UID_LENGTH + HARDWARE_UID_LENGTH + uidLenLen));
+	packet[0] = RJ_STX;
+	packet[LENGTH_IDX] = (BYTE)packetLength;
+	packet[FID_IDX] = (BYTE)fid;
+	packet[packetLength - 1] = RJ_ETX;
+	int idx = FIXED_HEADER_FRONT_LEN;
+
+	switch (fid)
+	{
+	case eFID::FID_RFID_GET_STATE:
+	case eFID::FID_RFID_GET_KEY:
+	case eFID::FID_RFID_GET_STEP:
+		idx += AddDataToPacket(packet + idx, &(data.aKeyType), keyTypeLen);
+		idx += AddDataToPacket(packet + idx, aRFIDState.aKeyA, KEY_LEN);
+
+		if (data.etcData != NULL && data.etcLen > 0) {
+			AddDataToPacket(packet + idx, data.etcData, data.etcLen);
+		}
+		break;
+	case eFID::FID_RFID_USAGE_INCREMENT:
+	case eFID::FID_RFID_USAGE_CLEAR:
+	case eFID::FID_RFID_SET_KEY:
+	case eFID::FID_RFID_SET_MANUF:
+	case eFID::FID_RFID_SET_USAGE:
+	case eFID::FID_RFID_SET_UID:
+	case eFID::FID_RFID_SET_STEP:
+		idx += AddDataToPacket(packet + idx, &(data.aHardwareUIDLen), uidLenLen);
+		idx += AddDataToPacket(packet + idx, data.aUID, data.aHardwareUIDLen+CUSTOM_UID_LENGTH);
+		idx += AddDataToPacket(packet + idx, &(data.aKeyType), keyTypeLen);
+		idx += AddDataToPacket(packet + idx, data.aKey, KEY_LEN);
+		if (data.etcData != NULL && data.etcLen > 0) {
+			AddDataToPacket(packet + idx, data.etcData, data.etcLen);
+		}
+		break;
+	default:
+		break;
+	}
+
+}
+
+void RFIDProtocol::setPacketByFID(eFID fid, BYTE* packet, int& packetLength, int uidSize, BYTE* UID, int dataSize, BYTE* data, BYTE* inputKey) {
 	if (packet == nullptr || dataSize < 0) return;
 
 	int keyTypeLen = 1;
@@ -15,10 +61,12 @@ void RFIDProtocol::setPacketByFID(eFID fid, BYTE* packet, int& packetLength, int
 	packet[LENGTH_IDX] = (BYTE)packetLength;
 	packet[FID_IDX] = (BYTE)fid;
 	packet[packetLength - 1] = RJ_ETX;
-	BYTE* key = aRFIDState.aKeyA;
+	BYTE* key = ((inputKey!=NULL)?inputKey:aRFIDState.aKeyA);
 	BYTE* keyType = new BYTE[keyTypeLen]{ 0 };
 	BYTE* uidLen = new BYTE[uidLenLen]{ HARDWARE_UID_LENGTH };
 	int idx = FIXED_HEADER_FRONT_LEN;
+
+	RFIDMessageData::Data messageData = { 0 };
 	switch (fid)
 	{
 	case eFID::FID_RFID_GET_STATE:
@@ -26,8 +74,12 @@ void RFIDProtocol::setPacketByFID(eFID fid, BYTE* packet, int& packetLength, int
 	case eFID::FID_RFID_GET_STEP:
 		idx += AddDataToPacket(packet + idx, keyType, keyTypeLen);
 		idx += AddDataToPacket(packet+ idx, key, KEY_LEN);
+		memcpy(&(messageData.aKeyType), keyType, keyTypeLen);
+		memcpy(&(messageData.aKey), key, KEY_LEN);
+
 		if (data != NULL&&dataSize>0) {
 			AddDataToPacket(packet + idx, data, dataSize);
+			memcpy(&(messageData.etcData), data, dataSize);
 		}
 		break;
 	case eFID::FID_RFID_USAGE_INCREMENT:
@@ -41,13 +93,20 @@ void RFIDProtocol::setPacketByFID(eFID fid, BYTE* packet, int& packetLength, int
 		idx += AddDataToPacket(packet + idx, UID, uidSize);
 		idx += AddDataToPacket(packet + idx, keyType, keyTypeLen);
 		idx += AddDataToPacket(packet+idx, key, KEY_LEN);
+		memcpy(&(messageData.aHardwareUIDLen), uidLen, uidLenLen);
+		memcpy(&(messageData.aUID), UID, uidSize);
+		memcpy(&(messageData.aKeyType), keyType, keyTypeLen);
+		memcpy(&(messageData.aKey), key, KEY_LEN);
 		if (data != NULL && dataSize > 0) {
 			AddDataToPacket(packet + idx, data, dataSize);
+			memcpy(&(messageData.etcData), data, dataSize);
+			messageData.etcLen = dataSize;
 		}
 		break;
 	default:
 		break;
 	}
+	(aRFIDMessageData.messageMap)[fid] = messageData;
 }
 
 
@@ -92,6 +151,15 @@ int RFIDProtocol::AddDataToPacket(BYTE* packet, BYTE* data, int len) {
 	return len;
 }
 
+bool RFIDProtocol::cmpUID(BYTE* UID, int uidLength) {
+	if (uidLength != HARDWARE_UID_LENGTH) return false;
+
+	for (int i = 0; i < uidLength+CUSTOM_UID_LENGTH; i++) {
+		if (i < HARDWARE_UID_LENGTH && UID[i] != aRFIDState.aHardwareUID[i]
+			|| UID[i] != aRFIDState.aCustomUID[i - HARDWARE_UID_LENGTH]) return false;
+	}
+	return true;
+}
 
 void RFIDProtocol::setHardwareUID(BYTE* packet, int packetLength) {
 	if (packetLength != HARDWARE_UID_LENGTH) return;
@@ -180,13 +248,46 @@ void RFIDProtocol::printState() {
 	std::cout << "step : " << aRFIDState.aStep << std::endl;
 }
 
-void RFIDProtocol::initState() {
+void RFIDProtocol::initState(bool needLoadKey) {
 	memset(aRFIDState.aHardwareUID, 0x00, HARDWARE_UID_LENGTH);
 	memset(aRFIDState.aCustomUID, 0x00, CUSTOM_UID_LENGTH);
 	memset(aRFIDState.aMANU, 0x00, MANUF_LEN);
-	memset(aRFIDState.aKeyA, 0x00, KEY_LEN);
 	memset(aRFIDState.aKeyB, 0x00, KEY_LEN);
 	aRFIDState.aCNT = 0;
 	aRFIDState.aStep = 0;
-	RFIDKeyController::loadFirstKey(aRFIDState.aKeyA);
+	if(needLoadKey)
+		RFIDKeyController::loadFirstKey(aRFIDState.aKeyA);
+}
+
+void RFIDProtocol::deleteMessageData(eFID fid) {
+	RFIDMessageData::Data* tnsData = getMessageData(fid);
+
+	if (tnsData == nullptr) return;
+
+	aRFIDMessageData.messageMap.erase(fid);
+}
+
+RFIDMessageData::Data* RFIDProtocol::getMessageData(eFID fid) {
+	auto it = aRFIDMessageData.messageMap.find(fid);
+	if (it != aRFIDMessageData.messageMap.end()) {
+		return &(it->second);
+	}
+	return nullptr;
+}
+
+RFIDMessageData::Data* RFIDProtocol::getRecentMessageData(){
+	eFID fid = aRFIDMessageData.lastFID;
+	if (fid == eFID::NO_FID) return nullptr;
+	auto it = aRFIDMessageData.messageMap.find(fid);
+	if (it != aRFIDMessageData.messageMap.end()) {
+		return &(it->second);
+	}
+	return nullptr;
+}
+
+void RFIDProtocol::setLastFID(eFID fid) {
+	aRFIDMessageData.lastFID = fid;
+}
+eFID RFIDProtocol::getLastFID() {
+	return aRFIDMessageData.lastFID;
 }
