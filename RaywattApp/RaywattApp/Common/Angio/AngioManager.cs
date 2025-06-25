@@ -618,7 +618,12 @@ namespace RaywattApp.Common.Angio
                         isChpFileConnected = 1;
                     }
                     isChpFileChangeSuccess = 1;
-                    ViewModelBase._deviceStatus.IsAngioInitialized = true;
+
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        ViewModelBase._deviceStatus.IsAngioInitialized = true;
+                    });
+                    
                     ToggleLive(true);
                 }
                 else if (command == (byte)CommandType.FGFailChangeChp)
