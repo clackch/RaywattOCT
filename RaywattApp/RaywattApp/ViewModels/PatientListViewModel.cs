@@ -263,25 +263,9 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("MovePatientNew");
 
-            var result = _dialogService.OpenDialog(new NewPatientDialogControl(), null, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["prevStatus"] = GetListStatus();
-
-            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
-            {
-                Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
-                bool isManual = (bool)data["isManual"];
-
-                if (isManual)
-                {
-                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientNewPage) { Parameter = parameter });
-                }
-                else
-                {
-                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientNewDicomPage) { Parameter = parameter });
-                }                
-            }           
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientNewPage) { Parameter = parameter });         
         }
 
         private PrevStatus GetListStatus()

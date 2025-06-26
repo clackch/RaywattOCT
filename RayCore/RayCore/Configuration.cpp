@@ -63,6 +63,8 @@ void CConfiguration::Initialize(tstring configFile)
 	this->laserModule.vldValue = ::GetPrivateProfileInt(_T("LaserModule"), _T("VLD"), 2000, configFilePath.c_str());
 	this->laserModule.delayPosition = ::GetPrivateProfileInt(_T("LaserModule"), _T("DelayLine"), 0, configFilePath.c_str());
 	this->laserModule.polarPosition = ::GetPrivateProfileInt(_T("LaserModule"), _T("Polarization"), 0, configFilePath.c_str());
+	this->laserModule.delayLineSMSteps = ::GetPrivateProfileInt(_T("LaserModule"), _T("DelayLineSMSteps"), 1, configFilePath.c_str());
+	this->laserModule.delayLineSMSpeed = ::GetPrivateProfileInt(_T("LaserModule"), _T("DelayLineSMSpeed"), 1, configFilePath.c_str());
 
 	// [StepMotor]
 	::GetPrivateProfileString(_T("StepMotor"), _T("Port"), _T(""), this->stepMotor.port, sizeof(this->stepMotor.port), configFilePath.c_str());
@@ -84,6 +86,7 @@ void CConfiguration::Initialize(tstring configFile)
 	this->catheter.rotationTime = ::GetPrivateProfileInt(_T("Catheter"), _T("RotationTime"), 10000, configFilePath.c_str());
 	this->catheter.manualLoad = ::GetPrivateProfileInt(_T("Catheter"), _T("ManualLoad"), 0, configFilePath.c_str());
 	this->catheter.length = ::GetPrivateProfileInt(_T("Catheter"), _T("Length1.7"), -45000, configFilePath.c_str());
+	this->catheter.catheterValidationOnOff = ::GetPrivateProfileInt(_T("Catheter"), _T("CatheterValidationOnOff"), 0, configFilePath.c_str());
 
 	// [Volume]
 	this->volume.size = ::GetPrivateProfileInt(_T("Volume"), _T("Size"), 500, configFilePath.c_str());

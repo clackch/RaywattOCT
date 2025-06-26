@@ -52,6 +52,8 @@ enum class eFID : BYTE {
 	, FID_LCD_DOWN_IMAGE
 	, FID_LCD_DISP_IMAGE
 	, FID_RFID_GET_STATE = 0x50
+	, FID_SM_ENABLE = 0x51
+	, FID_SM_DISABLE = 0x52
 };
 
 enum class eSFID : BYTE {

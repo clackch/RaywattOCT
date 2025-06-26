@@ -68,7 +68,7 @@
                                 <Label Grid.Row="1" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Type], Source={StaticResource L10N}}"/>
                                 <ComboBox Grid.Row="2" Grid.Column="0" Width="500" ItemsSource="{Binding FlushMediaList}" SelectedValue="{Binding SelectedFlushMedia, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" Tag="{Binding [Select Flush Media], Source={StaticResource L10N}}" HorizontalAlignment="Left"/>
                                 <ComboBox Grid.Row="2" Grid.Column="1" Width="500" ItemsSource="{Binding PullbackTypeList}" SelectedValue="{Binding SelectedPullbackType, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" Tag="{Binding [Select Pullback Type], Source={StaticResource L10N}}" HorizontalAlignment="Left"/>
-                                <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <!--<StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                                     <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Trigger], Source={StaticResource L10N}}" VerticalAlignment="Center"/>
                                     <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="37,0,0,0">
                                         <StackPanel>
@@ -78,7 +78,7 @@
                                             <RadioButton IsChecked="{Binding PatientCase.PullbackTrigger, Converter={StaticResource RadioButtonConverter}, ConverterParameter=AUTO}" Content="{Binding [Auto], Source={StaticResource L10N}}" />
                                         </StackPanel>
                                     </StackPanel>
-                                </StackPanel>
+                                </StackPanel>-->
                                 <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,8,0,0">
                                     <StackPanel Orientation="Horizontal">
                                         <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Length], Source={StaticResource L10N}}"/>

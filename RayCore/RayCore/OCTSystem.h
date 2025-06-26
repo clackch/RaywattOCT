@@ -144,6 +144,7 @@ public:
 	int GetNumOfStentPoints(int nFrame);
 	void* GetGuidewirePoints(int nFrame);
 	int GetNumOfGuidewirePoints(int nFrame);
+	void* GetGuidewireRadius(int nFrame);
 	
 	//Property
 	RayScannerState GetCurrentState() { return m_curState; }
@@ -219,6 +220,7 @@ private:
 	bool waitForStepMotors(eStepMotorIndex idxMotor, bool& runFlag);
 	void calculateIntensity(cv::Mat image);
 	std::vector<std::vector<std::string>> readLoadSequence();
+	void autoCalibrationInit(LPVOID param);
 
 protected:
 	LRESULT OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam);
