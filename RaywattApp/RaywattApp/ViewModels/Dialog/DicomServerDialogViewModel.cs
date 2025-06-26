@@ -125,8 +125,11 @@ namespace RaywattApp.ViewModels.Dialog
             if (!res)
                 return;
 
-            //DB Save
-            Save();
+            if ((IsNew && ValidateDicomServer()) || !IsNew)
+            {
+                //DB Save
+                Save();
+            }
 
             RayExportWrapper.DestroyDcmClient(dicomClient);
 
@@ -208,34 +211,73 @@ namespace RaywattApp.ViewModels.Dialog
             return true;
         }
 
+        private bool ValidateDicomServer()
+        {
+            bool canSave = false;
+
+            IList<DicomServer> DicomServers = _sqlManager.SelectDicomServer();
+
+            var existingServers = DicomServers.Where(x => x.AeTitle == DicomServer.AeTitle && x.IpAddress == DicomServer.IpAddress && x.Port == DicomServer.Port);
+
+            if (existingServers == null)
+            {
+                canSave = true;
+            }
+
+            if (existingServers != null && DicomServer.ServerType == "BOTH")
+            {
+                var existringTypes = existingServers.Select(x => x.ServerType).ToList();
+                var allTypes = new List<string> { "PACS", "MWL" };
+                var missingType = allTypes.Except(existringTypes).ToList();
+
+                if (missingType.Count == 1)
+                {
+                    canSave = true;
+                    DicomServer.ServerType = missingType[0];
+                }
+                else // Count == 0
+                {
+                    canSave = false; // 이미 전부 저장 됨
+                }
+            }
+
+            return canSave;
+        }
+
         private void Save()
         {
-            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
-            sqlParameters["ae_title"] = AeTitle.Text.Trim();
-            sqlParameters["hostname"] = DicomServer.SpecifyIpAddress ? "" : string.IsNullOrEmpty(Hostname) ? "" : Hostname.Trim();
-            sqlParameters["specify_ip_address"] = DicomServer.SpecifyIpAddress;
-            sqlParameters["ip_address"] = IpAddress.GetIpAddress();
-            sqlParameters["port"] = Port.Text;
-            sqlParameters["tls_yn"] = DicomServer.TlsYn;
-            sqlParameters["server_type"] = DicomServer.ServerType;
-            sqlParameters["comment"] = DicomServer.Comment;
-            sqlParameters["ca_file_path"] = DicomServer.CaFilePath;
+            bool isBoth = DicomServer.ServerType == "BOTH";
+            string[] serverTypes = isBoth ? new[] { "PACS", "MWL" } : new[] { DicomServer.ServerType };
 
-            int res = 0;
+            foreach (var serverType in serverTypes)
+            {
+                Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+                sqlParameters["ae_title"] = AeTitle.Text.Trim();
+                sqlParameters["hostname"] = DicomServer.SpecifyIpAddress ? "" : string.IsNullOrEmpty(Hostname) ? "" : Hostname.Trim();
+                sqlParameters["specify_ip_address"] = DicomServer.SpecifyIpAddress;
+                sqlParameters["ip_address"] = IpAddress.GetIpAddress();
+                sqlParameters["port"] = Port.Text;
+                sqlParameters["tls_yn"] = DicomServer.TlsYn;
+                sqlParameters["server_type"] = serverType;
+                sqlParameters["comment"] = DicomServer.Comment;
+                sqlParameters["ca_file_path"] = DicomServer.CaFilePath;
 
-            if (IsNew)
-            {
-                res = _sqlManager.InsertDicomServer(sqlParameters);
-            }
-            else
-            {
-                sqlParameters["id"] = DicomServer.Id;
-                res = _sqlManager.UpdateDicomServer(sqlParameters);
-            }
+                int res = 0;
 
-            if (res != 1)
-            {
-                _log.Error(IsNew ? "Insert Error" : "Update Error");
+                if (IsNew)
+                {
+                    res = _sqlManager.InsertDicomServer(sqlParameters);
+                }
+                else
+                {
+                    sqlParameters["id"] = DicomServer.Id;
+                    res = _sqlManager.UpdateDicomServer(sqlParameters);
+                }
+
+                if (res != 1)
+                {
+                    _log.Error(IsNew ? "Insert Error" : "Update Error");
+                }
             }
         }
 
