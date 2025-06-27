@@ -1920,9 +1920,11 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 	else {
 		verified = true;
 	}
-	
-	if (verified) {
 
+	PLOGI.printf("postMessage - RayWorkItem::ValidateCatheter");
+	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::ValidateCatheter);
+
+	if (verified) {
 		if (config.catheter.manualLoad) {
 			PLOGI.printf("m_pRJController->UpdateState - WaitManualLoad");
 			pRJController->UpdateState(eRJState::WaitManualLoad);
@@ -1942,9 +1944,6 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 		pRJController->UpdateState(eRJState::Error);
 		pSystem->postMessage(WM_NOTIFY_ERROR_OCCURED, (WPARAM)RayError::CatheterNotValid);
 	}
-
-	PLOGI.printf("postMessage - RayWorkItem::ValidateCatheter");
-	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::ValidateCatheter);
 
 	PLOGI.printf("wait for StopThread");
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
