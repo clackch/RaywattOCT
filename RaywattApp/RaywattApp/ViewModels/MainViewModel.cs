@@ -19,6 +19,7 @@ using static RaywattOCT.RayCoreWrapper;
 using RaywattApp.Common.Angio;
 using System.Threading;
 using OpenCvSharp;
+using System.Threading.Tasks;
 
 namespace RaywattApp.ViewModels
 {
@@ -594,14 +595,17 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("error: " + error.ToString());
 
-            switch(error)
+            Task.Run(() =>
             {
-                case RayError.CatheterNotValid:
-                    CatheterFailReceiver();
-                    break;
-                default:
-                    break;
-            }
+                switch (error)
+                {
+                    case RayError.CatheterNotValid:
+                        CatheterFailReceiver();
+                        break;
+                    default:
+                        break;
+                }
+            });
         }
 
         protected void handleEvent(RayCallbackRequest request, RayEvent e, int param)
