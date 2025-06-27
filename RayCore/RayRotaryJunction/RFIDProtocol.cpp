@@ -38,7 +38,7 @@ void RFIDProtocol::resetPacketByFID(eFID fid, BYTE* packet, int& packetLength, R
 		idx += AddDataToPacket(packet + idx, &(data.aHardwareUIDLen), uidLenLen);
 		idx += AddDataToPacket(packet + idx, data.aUID, data.aHardwareUIDLen+CUSTOM_UID_LENGTH);
 		idx += AddDataToPacket(packet + idx, &(data.aKeyType), keyTypeLen);
-		idx += AddDataToPacket(packet + idx, data.aKey, KEY_LEN);
+		idx += AddDataToPacket(packet + idx, aRFIDState.aKeyA, KEY_LEN);
 		if (data.etcData != NULL && data.etcLen > 0) {
 			AddDataToPacket(packet + idx, data.etcData, data.etcLen);
 		}
