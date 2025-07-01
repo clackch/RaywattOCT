@@ -70,6 +70,8 @@ namespace RaywattApp.ViewModels.Dialog
 
         private bool usePeerVerification = true;
 
+        private string previousServerType = "";
+
         private ICommand _updateHostnameCommand;
         public ICommand UpdateHostnameCommand
         {
@@ -108,6 +110,7 @@ namespace RaywattApp.ViewModels.Dialog
                 AeTitle.Text = DicomServer.AeTitle;
                 Port.Text = DicomServer.Port;
                 Hostname = DicomServer.Hostname;
+                previousServerType = DicomServer.ServerType;
 
                 IsNew = false;
             }
@@ -125,11 +128,11 @@ namespace RaywattApp.ViewModels.Dialog
             if (!res)
                 return;
 
-            if ((IsNew && ValidateDicomServer()) || !IsNew)
-            {
-                //DB Save
-                Save();
-            }
+            if ((IsNew && ValidateDicomServer()))
+                SaveNew();
+
+            if (!IsNew)
+                SaveEdit();
 
             RayExportWrapper.DestroyDcmClient(dicomClient);
 
@@ -244,7 +247,7 @@ namespace RaywattApp.ViewModels.Dialog
             return canSave;
         }
 
-        private void Save()
+        private void SaveNew()
         {
             bool isBoth = DicomServer.ServerType == "BOTH";
             string[] serverTypes = isBoth ? new[] { "PACS", "MWL" } : new[] { DicomServer.ServerType };
@@ -262,22 +265,43 @@ namespace RaywattApp.ViewModels.Dialog
                 sqlParameters["comment"] = DicomServer.Comment;
                 sqlParameters["ca_file_path"] = DicomServer.CaFilePath;
 
-                int res = 0;
-
-                if (IsNew)
-                {
-                    res = _sqlManager.InsertDicomServer(sqlParameters);
-                }
-                else
-                {
-                    sqlParameters["id"] = DicomServer.Id;
-                    res = _sqlManager.UpdateDicomServer(sqlParameters);
-                }
+                int res = _sqlManager.InsertDicomServer(sqlParameters);
 
                 if (res != 1)
                 {
                     _log.Error(IsNew ? "Insert Error" : "Update Error");
                 }
+            }
+        }
+
+        private void SaveEdit()
+        {
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["server_type"] = DicomServer.ServerType;
+
+            if (DicomServer.ServerType != previousServerType)
+            {
+                if (DicomServer.ServerType == "BOTH")
+                    sqlParameters["server_type"] = previousServerType;
+                else
+                    return;
+            }
+
+            sqlParameters["ae_title"] = AeTitle.Text.Trim();
+            sqlParameters["hostname"] = DicomServer.SpecifyIpAddress ? "" : string.IsNullOrEmpty(Hostname) ? "" : Hostname.Trim();
+            sqlParameters["specify_ip_address"] = DicomServer.SpecifyIpAddress;
+            sqlParameters["ip_address"] = IpAddress.GetIpAddress();
+            sqlParameters["port"] = Port.Text;
+            sqlParameters["tls_yn"] = DicomServer.TlsYn;
+            sqlParameters["comment"] = DicomServer.Comment;
+            sqlParameters["ca_file_path"] = DicomServer.CaFilePath;
+            sqlParameters["id"] = DicomServer.Id;
+
+            int res = _sqlManager.UpdateDicomServer(sqlParameters);
+
+            if (res != 1)
+            {
+                _log.Error(IsNew ? "Insert Error" : "Update Error");
             }
         }
 
