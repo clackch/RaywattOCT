@@ -1915,9 +1915,9 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 			if (verified) break;
 		}
 
-		if (verified) {
+		/*if (verified) {
 			pSystem->autoCalibrationInit(param);
-		}
+		}*/
 
 		pRJController->StopMotor();
 		pSystem->laserOnOff(false);
