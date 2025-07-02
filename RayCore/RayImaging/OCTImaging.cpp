@@ -1089,7 +1089,9 @@ void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f>
 		grayImage = image.clone();
 	}
 
-	GetGuideWireCircleEdgePoints(grayImage, GuideWires, edgePoints);
+	std::vector<cv::Point> edgePoints1, edgePoints2, edgePoints3;
+	GetGuideWireCircleEdgePoints(grayImage, GuideWires, edgePoints, edgePoints2, edgePoints3);
+	edgePoints1 = edgePoints;
 
 	InterpolateEdgePoints(edgePoints);
 
@@ -1130,7 +1132,10 @@ void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f>
 		centerPoints.push_back(cv::Point((int)(edgePoints[i].x + XDirection * guideWireRadius * std::cos(angle)),
 			(int)(edgePoints[i].y + YDirection * guideWireRadius * std::sin(angle))));
 		radius.push_back(guideWireRadius);
-		cv::circle(imgCheck2, edgePoints[i], 2, cv::Scalar(255, 0, 255), -1);
+		cv::circle(imgCheck2, edgePoints1[i], 2, cv::Scalar(0, 0, 255), -1);
+		cv::circle(imgCheck2, edgePoints3[i], 2, cv::Scalar(0, 255, 0), -1);
+		cv::circle(imgCheck2, edgePoints2[i], 2, cv::Scalar(255, 100, 0), -1);
+		
 	}
 	cv::Mat mask3 = cv::Mat::zeros(imgCheck2.cols, imgCheck2.cols, CV_8UC1);
 	for (int i = 0; i < GuideWires.size(); i++) {
@@ -1138,12 +1143,13 @@ void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f>
 	}
 	std::vector<std::vector<cv::Point>> realContours;
 	cv::findContours(mask3, realContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-	cv::drawContours(imgCheck2, realContours, -1, cv::Scalar(0, 255, 0), 2);
+	//cv::drawContours(imgCheck2, realContours, -1, cv::Scalar(0, 255, 0), 2);
 
 	cv::imwrite("edgePoints" + std::to_string(whatNumberYouAre) + ".png", imgCheck2);
 }
 
-void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& edgePoints) {
+void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& edgePoints, 
+	std::vector<cv::Point>& edgePointsG, std::vector<cv::Point>& edgePointsL) {
 	int paddingSize = 1;
 	for (const auto& rect : GuideWires) {
 		if (rect.width == 0 && rect.height == 0) {
@@ -1181,7 +1187,16 @@ void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv
 
 		cv::multiply(floatImage, floatMask, filtered);
 
+		cv::Mat gaussian;
+		cv::GaussianBlur(filtered, gaussian, cv::Size(3, 3), 0);
+		for (int i = 0; i < 5; i++) {
+			cv::GaussianBlur(gaussian, gaussian, cv::Size(3, 3), 0);
+		}
+
 		filtered.convertTo(filtered, CV_8U, 255.0);
+		gaussian.convertTo(gaussian, CV_8U, 255.0);
+
+		cv::imwrite("gaussian" + std::to_string(whatNumberYouAre) + ".png", gaussian);
 
 		// top 3 pixels에 대한 Mask 작업을 위한 Roi Padding 설정
 		if (rect.x - paddingSize < 0 || rect.y - paddingSize < 0 || rect.x + rect.width + paddingSize > filtered.cols || rect.y + rect.height + paddingSize > filtered.rows) {
@@ -1190,36 +1205,68 @@ void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv
 
 		cv::Rect roiRect(rect.x - paddingSize, rect.y - paddingSize, rect.width + paddingSize * 2, rect.height + paddingSize * 2);
 		cv::Mat roi = filtered(roiRect);
+		cv::Mat roiG = gaussian(roiRect);
+		cv::Mat roiL = filtered(roiRect);
 
-		cv::Mat roiInt;
+		cv::Mat roiInt, roiGInt, roiLInt;
 		if (roi.type() != CV_8U) {
 			roi.convertTo(roiInt, CV_8U);
 		}
 		else {
 			roiInt = roi;
 		}
+		if (roiG.type() != CV_8U) {
+			roiG.convertTo(roiGInt, CV_8U);
+		}
+		else {
+			roiGInt = roiG;
+		}
+		if (roiL.type() != CV_8U) {
+			roiL.convertTo(roiLInt, CV_8U);
+		}
+		else {
+			roiLInt = roiL;
+		}
 
+		int threshold = 100;
 		// Roi Padding 없는 기존 GuideWire Rectangle Roi
 		cv::Rect originalRoiRect(paddingSize, paddingSize, rect.width, rect.height);
 		cv::Mat originalRoi = roiInt(originalRoiRect);
+		cv::Mat originalGRoi = roiGInt(originalRoiRect);
+		cv::Mat originalLRoi = roiLInt(originalRoiRect);
 
-		std::vector<std::pair<int, cv::Point>> pixelValues;
+		std::vector<std::pair<int, cv::Point>> pixelValues, pixelValuesG;
+		std::vector<std::pair<double, cv::Point>> pixelDist;
 		for (int y = 0; y < originalRoi.rows; y++) {
 			for (int x = 0; x < originalRoi.cols; x++) {
 				pixelValues.emplace_back(originalRoi.at<unsigned char>(y, x), cv::Point(x, y));
+				pixelValuesG.emplace_back(originalGRoi.at<unsigned char>(y, x), cv::Point(x, y));
+				if (originalLRoi.at<unsigned char>(y, x) >= threshold)
+					pixelDist.emplace_back(std::sqrt(std::pow(roiRect.x + x - centerX, 2) + std::pow(roiRect.y + y - centerY, 2)), cv::Point(x, y));
 			}
 		}
 		std::sort(pixelValues.begin(), pixelValues.end(), [](const std::pair<int, cv::Point>& a, const std::pair<int, cv::Point>& b) {
 			return a.first > b.first;
 			});
+		std::sort(pixelValuesG.begin(), pixelValuesG.end(), [](const std::pair<int, cv::Point>& a, const std::pair<int, cv::Point>& b) {
+			return a.first > b.first;
+			});
+		std::sort(pixelDist.begin(), pixelDist.end(), [](const std::pair<double, cv::Point>& a, const std::pair<double, cv::Point>& b) {
+			return a.first < b.first;
+			});
+		//edgePointsG.push_back(cv::Point(pixelValuesG[0].second.x + roiRect.x, pixelValuesG[0].second.y + roiRect.y));
+		edgePointsL.push_back(cv::Point(pixelDist[0].second.x + roiRect.x, pixelDist[0].second.y + roiRect.y));
 
-		std::vector<cv::Point> top3Points;
+		std::vector<cv::Point> top3Points, top3PointsG;
 		for (int i = 0; i < 30 && i < pixelValues.size(); i++) {
 			top3Points.push_back(pixelValues[i].second);
 		}
+		for (int i = 0; i < 30 && i < pixelValuesG.size(); i++) {
+			top3PointsG.push_back(pixelValuesG[i].second);
+		}
 
 		// top 3 pixels에 대한 3x3 분류 작업
-		std::vector<std::pair<int, cv::Point>> avgValues;
+		std::vector<std::pair<int, cv::Point>> avgValues, avgValuesG;
 		for (const auto& pt : top3Points) {
 			int startX = pt.x;
 			int startY = pt.y;
@@ -1234,8 +1281,26 @@ void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv
 
 			avgValues.emplace_back(regionAvg, pt);
 		}
+		for (const auto& pt : top3PointsG) {
+			int startX = pt.x;
+			int startY = pt.y;
+			int width = paddingSize * 2 + 1;
+			int height = paddingSize * 2 + 1;
+
+			cv::Rect region(startX, startY, width, height);
+			cv::Mat regionMat = roiGInt(region);
+
+			int sum = cv::sum(regionMat)[0];
+			int regionAvg = (int)((double)sum / (region.width * region.height));
+
+			avgValuesG.emplace_back(regionAvg, pt);
+		}
 
 		auto maxAvgIt = std::max_element(avgValues.begin(), avgValues.end(),
+			[](const std::pair<int, cv::Point>& a, const std::pair<int, cv::Point>& b) {
+				return a.first < b.first;
+			});
+		auto maxAvgItG = std::max_element(avgValuesG.begin(), avgValuesG.end(),
 			[](const std::pair<int, cv::Point>& a, const std::pair<int, cv::Point>& b) {
 				return a.first < b.first;
 			});
@@ -1243,6 +1308,10 @@ void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv
 		if (maxAvgIt != avgValues.end()) {
 			cv::Point maxAvgPoint = maxAvgIt->second + cv::Point(rect.x, rect.y);
 			edgePoints.push_back(maxAvgPoint);
+		}
+		if (maxAvgItG != avgValuesG.end()) {
+			cv::Point maxAvgPoint = maxAvgItG->second + cv::Point(rect.x, rect.y);
+			edgePointsG.push_back(maxAvgPoint);
 		}
 	}
 }
