@@ -94,6 +94,7 @@ namespace RaywattApp
             services.AddTransient(typeof(ReviewCalibrationViewModel));
             services.AddTransient(typeof(PatientNewDicomViewModel));
             services.AddTransient(typeof(PatientNewDicomPacsViewModel));
+            services.AddTransient(typeof(PatientNewDicomMwlViewModel));
 
             //Setting
             services.AddTransient(typeof(SettingAcquisitionViewModel));
@@ -135,6 +136,7 @@ namespace RaywattApp
             services.AddTransient(typeof(DicomServerDialogViewModel));
             services.AddTransient(typeof(NewPatientDialogViewModel));
             services.AddTransient(typeof(DicomPacsDialogViewModel));
+            services.AddTransient(typeof(MwlSearchDialogViewModel));
 
             //IDatabaseService 등록 (Singleton 사용 안함 => Connection Pooling을 Default로 사용)
             services.AddTransient<IDatabaseService, SqlService>(obj => new SqlService(connectionString));
