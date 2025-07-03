@@ -352,16 +352,13 @@ namespace RaywattApp.ViewModels
                 ODSOCT_InputSurfaceParameter(Ray3DObject.GuideWire, 10, 15, ".\\data\\guidewire_tex.jpg");
                 ODSOCT_InputData(Ray3DObject.GuideWire, buffer, diameter, diameter, depth, 1, 1, zVal);
 
-                if (CommonUtil.IsPostCase(PatientCase.Procedure))
-                {
-                    buffer = Marshal.AllocHGlobal(diameter * diameter * depth);
-                    CommonUtil.StentsToMemory(PatientCase.LumenStents,
-                        new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize),
-                        buffer,
-                        new OpenCvSharp.Size(diameter, diameter));
-                    ODSOCT_InputSurfaceParameter(Ray3DObject.Stent, 10, 15, ".\\data\\stent_tex.jpg");
-                    ODSOCT_InputData(Ray3DObject.Stent, buffer, diameter, diameter, depth, 1, 1, zVal);
-                }
+                buffer = Marshal.AllocHGlobal(diameter * diameter * depth);
+                CommonUtil.StentsToMemory(PatientCase.LumenStents,
+                    new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize),
+                    buffer,
+                    new OpenCvSharp.Size(diameter, diameter));
+                ODSOCT_InputSurfaceParameter(Ray3DObject.Stent, 10, 15, ".\\data\\stent_tex.jpg");
+                ODSOCT_InputData(Ray3DObject.Stent, buffer, diameter, diameter, depth, 1, 1, zVal);
 
                 ODSOCT_ProcessingDatas();
                 if (isFirstRendering)
