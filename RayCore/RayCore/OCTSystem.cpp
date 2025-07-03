@@ -2204,9 +2204,9 @@ int COCTSystem::disconnectRotaryJunction() {
 
 	if (m_pLaserModule->IsConnected()) {
 		CConfiguration& config = CConfiguration::GetInstance();
-		m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX * (config.laserModule.delayLineSMSteps == 1 ? 1 : 2) * 2);
+		/*m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX * (config.laserModule.delayLineSMSteps == 1 ? 1 : 2) * 2);
 		m_pLaserModule->Current(eStepMotorIndex::DelayLine, DELAY_LINE_UPPER_END_POSITION * config.laserModule.delayLineSMSteps);
-		m_pLaserModule->Move(eStepMotorIndex::DelayLine, 0, false, static_cast<char>(0x03));
+		m_pLaserModule->Move(eStepMotorIndex::DelayLine, 0, false, static_cast<char>(0x03));*/
 		m_pLaserModule->Move(eStepMotorIndex::Polarization, 0);
 		m_pLaserModule->SetVLD(0);
 		m_pLaserModule->SetVOA(0);
