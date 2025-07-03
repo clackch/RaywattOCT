@@ -146,34 +146,19 @@ namespace RaywattApp.ViewModels
 
         private void UpdateAngioAvailabilityUI()
         {
-            bool isSelectedCathRoom = DeviceStatus.SelectedCathRoom != null && DeviceStatus.SelectedCathRoom.Name != "Not Selected";
-            IsVisibleExpand = DeviceStatus.IsAngioConnected && isSelectedCathRoom;
+            bool isAngioConnected = DeviceStatus.IsAngioConnected;
+            var cathRoom = DeviceStatus.SelectedCathRoom;
+            bool isCathRoomSelected = cathRoom != null && cathRoom.Name != "Not Selected";
 
-            if (DeviceStatus.IsAngioConnected)
+            if (isAngioConnected && isCathRoomSelected)
             {
-                if (DeviceStatus.SelectedCathRoom?.Name != "Not Selected")
-                {
-                    if (DeviceStatus.SelectedCathRoom == null)
-                    {
-                        _angioManager.ImgAngio = _angioManager.ShowNoSignal();
-                        IsVisibleExpand = false;
-                    }
-                    else
-                    {
-                        IsVisibleExpand = true;
-                    }
-                }
-                else
-                {
-                    _angioManager.ImgAngio = _angioManager.ShowNoSignal();
-                    IsVisibleExpand = false;
-                }
+                IsVisibleExpand = true;
             }
             else
             {
+                _angioManager.ImgAngio = _angioManager.ShowNoSignal();
                 IsVisibleExpand = false;
             }
-
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
