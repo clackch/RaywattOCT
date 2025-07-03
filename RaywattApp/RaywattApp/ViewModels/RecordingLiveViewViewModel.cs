@@ -27,7 +27,7 @@ namespace RaywattApp.ViewModels
         private readonly SqlManager? _sqlManager;
 
         private IDialogService? _dialogService;
-               
+
         private readonly AngioManager _angioManager;
 
         private IList<Code> pullbackTypes;
@@ -86,11 +86,11 @@ namespace RaywattApp.ViewModels
         public double FieldOfView
         {
             get { return _fieldOfView; }
-            set 
-            { 
+            set
+            {
                 _fieldOfView = value;
                 OnPropertyChanged(nameof(FieldOfView));
-                
+
                 PatientCase.FieldOfView = value;
                 Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
                 ZoomSmall.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
@@ -148,6 +148,32 @@ namespace RaywattApp.ViewModels
         {
             bool isSelectedCathRoom = DeviceStatus.SelectedCathRoom != null && DeviceStatus.SelectedCathRoom.Name != "Not Selected";
             IsVisibleExpand = DeviceStatus.IsAngioConnected && isSelectedCathRoom;
+
+            if (DeviceStatus.IsAngioConnected)
+            {
+                if (DeviceStatus.SelectedCathRoom?.Name != "Not Selected")
+                {
+                    if (DeviceStatus.SelectedCathRoom == null)
+                    {
+                        _angioManager.ImgAngio = _angioManager.ShowNoSignal();
+                        IsVisibleExpand = false;
+                    }
+                    else
+                    {
+                        IsVisibleExpand = true;
+                    }
+                }
+                else
+                {
+                    _angioManager.ImgAngio = _angioManager.ShowNoSignal();
+                    IsVisibleExpand = false;
+                }
+            }
+            else
+            {
+                IsVisibleExpand = false;
+            }
+
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
