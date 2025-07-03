@@ -853,6 +853,7 @@ namespace RaywattApp.Common.Angio
             {
                 Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
                 ViewModelBase._deviceStatus.SelectedCathRoom = (CathRoom)data["selectedCathRoom"];
+                OnAngioAvailabilityChanged?.Invoke();
             }
 
             isCathRoomDialogOpen = false;
