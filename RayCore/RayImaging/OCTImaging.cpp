@@ -1327,7 +1327,7 @@ void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv
 			return a.first < b.first;
 			});
 		//edgePointsG.push_back(cv::Point(pixelValuesG[0].second.x + roiRect.x, pixelValuesG[0].second.y + roiRect.y));
-		edgePointsL.push_back(cv::Point(pixelDist[0].second.x + roiRect.x, pixelDist[0].second.y + roiRect.y));
+		//edgePointsL.push_back(cv::Point(pixelDist[0].second.x + roiRect.x, pixelDist[0].second.y + roiRect.y));
 
 		std::vector<cv::Point> top3Points, top3PointsG;
 		for (int i = 0; i < 30 && i < pixelValues.size(); i++) {
@@ -1383,7 +1383,41 @@ void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv
 		}
 		if (maxAvgItG != avgValuesG.end()) {
 			cv::Point maxAvgPoint = maxAvgItG->second + cv::Point(rect.x, rect.y);
-			edgePointsG.push_back(maxAvgPoint);
+			int nowX = maxAvgPoint.x, nowY = maxAvgPoint.y;
+			int dx = abs(centerX - nowX), dy = abs(centerY - nowY);
+			int dirX = (maxAvgPoint.x < centerX) ? 1 : -1, dirY = (maxAvgPoint.y < centerY) ? 1 : -1;
+
+			bool steep = dy > dx;
+			if (steep) {
+				std::swap(dx, dy);
+				//std::swap(dirX, dirY);
+			}
+			int err = 2 * dy - dx;
+
+			while (true) {
+				if (nowX < rect.x || nowY < rect.y || nowX >= rect.x + rect.width || nowY >= rect.y + rect.height)
+					break;
+
+				int e2 = 2 * err;
+				if (e2 > -dy) {
+					err -= dy;
+					if (steep)
+						nowY += dirY;
+					else
+						nowX += dirX;
+				}
+				if (e2 < dx) {
+					err += dx;
+					if (steep)
+						nowX += dirX;
+					else
+						nowY += dirY;
+				}
+				if (grayImage.at<unsigned char>(nowY, nowX) <= grayImage.at<unsigned char>(maxAvgPoint) * 0.8)
+					break;
+			}
+			edgePointsG.push_back(cv::Point(nowX, nowY));
+			edgePointsL.push_back(maxAvgPoint);
 		}
 	}
 }
@@ -1399,96 +1433,99 @@ void COCTImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<c
 			theta.push_back(0);
 			continue;
 		}
-		//cv::Mat cloneImage = grayImage.clone();
+		/*
+		cv::Mat cloneImage = grayImage.clone();
 
-		//cv::Mat mask = (cloneImage == 255);
-		//cloneImage.setTo(0, mask);
-		//cloneImage.at<uchar>(edgePoint.y, edgePoint.x) = 255;
+		cv::Mat mask = (cloneImage == 255);
+		cloneImage.setTo(0, mask);
+		cloneImage.at<uchar>(edgePoint.y, edgePoint.x) = 255;
 
-		//cv::Mat inversedImage;
-		//cv::remap(cloneImage, inversedImage, inverseMatXMap, inverseMatYMap, cv::INTER_NEAREST);
-		//cv::rotate(inversedImage, inversedImage, cv::ROTATE_90_COUNTERCLOCKWISE);
+		cv::Mat inversedImage;
+		cv::remap(cloneImage, inversedImage, imatXMap, imatYMap, cv::INTER_NEAREST);
+		cv::rotate(inversedImage, inversedImage, cv::ROTATE_90_COUNTERCLOCKWISE);
 
-		//cv::Point inversedEdgePoint;
-		//for (int y = 0; y < height; y++) {
-		//	for (int x = 0; x < width; x++) {
-		//		if (inversedImage.at<uchar>(y, x) == 255) {
-		//			inversedEdgePoint = cv::Point(x, y);
-		//			break;
-		//		}
-		//	}
-		//}
-		//int startY, startX, endX;
+		cv::Point inversedEdgePoint;
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				if (inversedImage.at<uchar>(y, x) == 255) {
+					inversedEdgePoint = cv::Point(x, y);
+					break;
+				}
+			}
+		}
+		int startY, startX, endX;
 
-		//startY = inversedEdgePoint.y;
-		//startX = 0;
-		//endX = inversedEdgePoint.x - 100 < 0 ? inversedEdgePoint.x / 2 : inversedEdgePoint.x - 100;
+		startY = inversedEdgePoint.y;
+		startX = 0;
+		endX = inversedEdgePoint.x - 100 < 0 ? inversedEdgePoint.x / 2 : inversedEdgePoint.x - 100;
 
-		////GuideWire 중심점 row에 대한 pixel Value 합
-		//double sumOfStandardValue = 0;
-		//for (int x = startX; x <= endX; x++) {
-		//	sumOfStandardValue += inversedImage.at<uchar>(startY, x);
-		//}
+		//GuideWire 중심점 row에 대한 pixel Value 합
+		double sumOfStandardValue = 0;
+		for (int x = startX; x <= endX; x++) {
+			sumOfStandardValue += inversedImage.at<uchar>(startY, x);
+		}
 
-		//double gap = 0;
-		//int series = 0;
-		//int rotationTimes = 0;
+		double gap = 0;
+		int series = 0;
+		int rotationTimes = 0;
 
-		//// + y 방향 탐색
-		//for (int y = startY; y < height; y += 1, gap += 1.0) {
-		//	int sumOfPixelValues = 0;
-		//	for (int x = startX; x <= endX; x++) {
-		//		sumOfPixelValues += inversedImage.at<uchar>(y, x);
-		//	}
+		// + y 방향 탐색
+		for (int y = startY; y < height; y += 1, gap += 1.0) {
+			int sumOfPixelValues = 0;
+			for (int x = startX; x <= endX; x++) {
+				sumOfPixelValues += inversedImage.at<uchar>(y, x);
+			}
 
-		//	PLOGI.printf("row %d : sumOfPixelValues = %d", y, sumOfPixelValues);
+			PLOGI.printf("row %d : sumOfPixelValues = %d", y, sumOfPixelValues);
 
-		//	if (sumOfPixelValues >= sumOfStandardValue * 1.5) {
-		//		series++;
-		//		if (series == 3) {
-		//			PLOGI.printf("end_row1 %d : sumOfPixelValues = %d", y, sumOfPixelValues);
-		//			series = 0;
-		//			break;
-		//		}
-		//	}
+			if (sumOfPixelValues >= sumOfStandardValue * 1.5) {
+				series++;
+				if (series == 3) {
+					PLOGI.printf("end_row1 %d : sumOfPixelValues = %d", y, sumOfPixelValues);
+					series = 0;
+					break;
+				}
+			}
 
-		//	if (y == height - 1) {
-		//		rotationTimes++;
-		//		if (rotationTimes >= 2) {
-		//			rotationTimes = 0;
-		//			break;
-		//		}
-		//		y = 0;
-		//	}
-		//}
+			if (y == height - 1) {
+				rotationTimes++;
+				if (rotationTimes >= 2) {
+					rotationTimes = 0;
+					break;
+				}
+				y = 0;
+			}
+		}
 
-		//// - y 방향 탐색
-		//for (int y = startY; y >= 0; y -= 1, gap += 1.0) {
-		//	int sumOfPixelValues = 0;
-		//	for (int x = startX; x <= endX; x++) {
-		//		sumOfPixelValues += inversedImage.at<uchar>(y, x);
-		//	}
+		// - y 방향 탐색
+		for (int y = startY; y >= 0; y -= 1, gap += 1.0) {
+			int sumOfPixelValues = 0;
+			for (int x = startX; x <= endX; x++) {
+				sumOfPixelValues += inversedImage.at<uchar>(y, x);
+			}
 
-		//	PLOGI.printf("row %d : sumOfPixelValues = %d", y, sumOfPixelValues);
+			PLOGI.printf("row %d : sumOfPixelValues = %d", y, sumOfPixelValues);
 
-		//	if (sumOfPixelValues >= sumOfStandardValue * 1.5) {
-		//		series++;
-		//		if (series == 3) {
-		//			PLOGI.printf("end_row2 %d : sumOfPixelValues = %d", y, sumOfPixelValues);
-		//			break;
-		//		}
-		//	}
+			if (sumOfPixelValues >= sumOfStandardValue * 1.5) {
+				series++;
+				if (series == 3) {
+					PLOGI.printf("end_row2 %d : sumOfPixelValues = %d", y, sumOfPixelValues);
+					break;
+				}
+			}
 
-		//	if (y == 0) {
-		//		rotationTimes++;
-		//		if (rotationTimes >= 2) {
-		//			rotationTimes = 0;
-		//			break;
-		//		}
-		//		y = height - 1;
-		//	}
-		//}
+			if (y == 0) {
+				rotationTimes++;
+				if (rotationTimes >= 2) {
+					rotationTimes = 0;
+					break;
+				}
+				y = height - 1;
+			}
+		}
 		PLOGI.printf("start_Guidewire_Shadow_calc, frameNum = %d", whatNumberYouAre);
+		*/
+
 
 		double angle = 360.0 / m_nHeight * 45;
 
