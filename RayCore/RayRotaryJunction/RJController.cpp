@@ -187,7 +187,7 @@ bool CRJController::StartControl() {
 	if (!m_initMotor) return false;
 	if (m_pThreadState != nullptr) return true;
 
-	AutoStatePeriod(50);
+	AutoStatePeriod(100);
 	initSetting();
 	bool result = CUtility::StartThread(threadRJState, m_pThreadState, (LPVOID)this);
 
@@ -450,9 +450,10 @@ void CRJController::resendPacket(eFID fid, RFIDMessageData::Data rePacketData) {
 	for (int p = 0; p < packetLength; p++) {
 		printf("%02x ", serialPacket[p]);
 	}
+	printf("\n");
 	//Sleep(40);
-	int written = m_pConnection->Write(serialPacket, packetLength);
-	printf("written: %d\n", written);
+	m_pConnection->Write(serialPacket, packetLength);
+
 }
 
 UINT CRJController::threadRJState(LPVOID param) {
@@ -778,7 +779,7 @@ void CRJController::handlePacket() {
 	}
 	else {
 		PLOGI.printf("return %s\n", ((m_vPacket[REPLY_RESULT_IDX] == 0) ? "ok" : "error"));
-		if (m_vPacket[REPLY_RESULT_IDX] != 0) {
+		if (m_vPacket[REPLY_RESULT_IDX] == 12) {
 			if (fid != eFID::FID_RFID_GET_KEY) {
 				RFIDProtocol::setLastFID(fid);
 				findCorrectKey();
@@ -816,7 +817,7 @@ void CRJController::handlePacket() {
 	case eFID::FID_RFID_GET_KEY:
 		RxPacketRFIDGetState(&m_vPacket[0], KEYS);
 		data = RFIDProtocol::getRecentMessageData();
-		if(data != nullptr)
+		if (data != nullptr) 
 			resendPacket(RFIDProtocol::getLastFID(), *data);
 		RFIDProtocol::setLastFID(eFID::NO_FID);
 		break;
@@ -834,7 +835,6 @@ void CRJController::handlePacket() {
 void CRJController::findCorrectKey() {
 	std::vector<std::vector<BYTE>> keys = RFIDKeyController::getKeys();
 	for (std::vector<BYTE> key : keys) {
-		printf("hi\n");
 		BYTE* keyVal = new BYTE[KEY_LEN];
 		for (int idx = 0; idx < KEY_LEN; idx++) {
 			keyVal[idx] = key[idx];

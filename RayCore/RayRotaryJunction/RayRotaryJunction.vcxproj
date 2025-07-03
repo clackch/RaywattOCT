@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -174,6 +174,7 @@ xcopy "$(ProjectDir)*Protocol.h" "$(TargetDir)include\" /y /d</Command>
     <ClInclude Include="LaserModule.h" />
     <ClInclude Include="LaserController.h" />
     <ClInclude Include="MotorController.h" />
+    <ClInclude Include="WriteTaskManager.h" />
     <ClInclude Include="RFIDKeyController.h" />
     <ClInclude Include="RFIDProtocol.h" />
     <ClInclude Include="RJController.h" />
@@ -187,6 +188,7 @@ xcopy "$(ProjectDir)*Protocol.h" "$(TargetDir)include\" /y /d</Command>
     <ClCompile Include="CommonProtocol.cpp" />
     <ClCompile Include="LaserController.cpp" />
     <ClCompile Include="MotorController.cpp" />
+    <ClCompile Include="WriteTaskManager.cpp" />
     <ClCompile Include="RFIDKeyController.cpp" />
     <ClCompile Include="RFIDProtocol.cpp" />
     <ClCompile Include="RJController.cpp" />
