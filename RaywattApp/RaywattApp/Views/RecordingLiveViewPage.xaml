@@ -254,7 +254,15 @@
                                             </Grid.Visibility>
                                             <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG023], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                         </Grid>
-                                        <component:IconButton Style="{StaticResource IconButton}" Icon="screenExpand" Width="42" Height="42" Command="{Binding ScreenExpandCommand}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="12"/>
+                                        <component:IconButton Style="{StaticResource IconButton}" 
+                                                              Icon="screenExpand" 
+                                                              Width="42" 
+                                                              Height="42" 
+                                                              Visibility="{Binding IsVisibleExpand, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                              Command="{Binding ScreenExpandCommand}" 
+                                                              VerticalAlignment="Bottom" 
+                                                              HorizontalAlignment="Left" 
+                                                              Margin="12"/>
                                     </Grid>
                                 </Grid>
                             </Border>
