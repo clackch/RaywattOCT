@@ -1093,9 +1093,9 @@ void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f>
 	GetGuideWireCircleEdgePoints(grayImage, GuideWires, edgePoints, edgePoints2, edgePoints3);
 	edgePoints1 = edgePoints;
 
-	InterpolateEdgePoints(edgePoints);
+	InterpolateEdgePoints(edgePoints2);
 
-	GetGuideWireShadowPointAngles(grayImage, edgePoints, theta);
+	GetGuideWireShadowPointAngles(grayImage, edgePoints2, theta);
 
 	if (theta.empty()) {
 		PLOGI.printf("GuideWire Detection Fail");
@@ -1110,15 +1110,15 @@ void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f>
 
 	cv::Mat imgCheck2 = image.clone();
 
-	for (int i = 0; i < edgePoints.size(); i++) {
+	for (int i = 0; i < edgePoints2.size(); i++) {
 		int XDirection, YDirection;
 		double centerToEdgePointDistance, guideWireRadius, angle;
-		if (edgePoints[i].x == -1) {
+		if (edgePoints2[i].x == -1) {
 
 		}
 		else {
-			cv::Vec2d edgeVector = cv::Vec2d(edgePoints[i].x - centerX, edgePoints[i].y - centerY);
-			centerToEdgePointDistance = std::sqrt((centerX - edgePoints[i].x) * (centerX - edgePoints[i].x) + (centerY - edgePoints[i].y) * (centerY - edgePoints[i].y));
+			cv::Vec2d edgeVector = cv::Vec2d(edgePoints2[i].x - centerX, edgePoints2[i].y - centerY);
+			centerToEdgePointDistance = std::sqrt((centerX - edgePoints2[i].x) * (centerX - edgePoints2[i].x) + (centerY - edgePoints2[i].y) * (centerY - edgePoints2[i].y));
 			guideWireRadius = std::abs(centerToEdgePointDistance * std::sin(theta[i]) / (1 - std::sin(theta[i]))); // radius = magnitude
 
 			cv::Vec2d unitVector = edgeVector[0] > 0 ? cv::Vec2d(1, 0) : cv::Vec2d(-1, 0);
@@ -1189,14 +1189,43 @@ void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv
 
 		cv::Mat gaussian;
 		cv::GaussianBlur(filtered, gaussian, cv::Size(3, 3), 0);
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 50; i++) {
 			cv::GaussianBlur(gaussian, gaussian, cv::Size(3, 3), 0);
 		}
 
+		cv::Mat kernelOdd = (cv::Mat_<float>(3, 3) <<
+			1, 2, 4,
+			2, 4, 2,
+			4, 2, 1) / 22.0;
+		cv::Mat kernelEven = (cv::Mat_<float>(3, 3) <<
+			4, 2, 1,
+			2, 4, 2,
+			1, 2, 4) / 22.0;
+		cv::Rect topLeft(0, 0, width / 2, height / 2);
+		cv::Rect topRight(width / 2, 0, width - width / 2, height / 2);
+		cv::Rect bottomLeft(0, height / 2, width / 2, height - height / 2);
+		cv::Rect bottomRight(width / 2, height / 2, width - width / 2, height - height / 2);
+		cv::Mat roiTL = filtered(topLeft).clone();
+		cv::Mat roiTR = filtered(topRight).clone();
+		cv::Mat roiBL = filtered(bottomLeft).clone();
+		cv::Mat roiBR = filtered(bottomRight).clone();
+		for (int i = 0; i < 5; i++) {
+			cv::filter2D(roiTL, roiTL, -1, kernelEven);
+			cv::filter2D(roiTR, roiTR, -1, kernelOdd);
+			cv::filter2D(roiBL, roiBL, -1, kernelOdd);
+			cv::filter2D(roiBR, roiBR, -1, kernelEven);
+		}
+		cv::Mat top, bottom, dirFiltered;
+		cv::hconcat(roiTL, roiTR, top);
+		cv::hconcat(roiBL, roiBR, bottom);
+		cv::vconcat(top, bottom, dirFiltered);
+
 		filtered.convertTo(filtered, CV_8U, 255.0);
 		gaussian.convertTo(gaussian, CV_8U, 255.0);
+		dirFiltered.convertTo(dirFiltered, CV_8U, 255.0);
 
 		cv::imwrite("gaussian" + std::to_string(whatNumberYouAre) + ".png", gaussian);
+		//cv::imwrite("gaussian" + std::to_string(whatNumberYouAre) + ".png", dirFiltered);
 
 		// top 3 pixels에 대한 Mask 작업을 위한 Roi Padding 설정
 		if (rect.x - paddingSize < 0 || rect.y - paddingSize < 0 || rect.x + rect.width + paddingSize > filtered.cols || rect.y + rect.height + paddingSize > filtered.rows) {
