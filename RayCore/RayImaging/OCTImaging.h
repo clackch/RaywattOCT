@@ -137,7 +137,7 @@ protected:
 	std::vector<int> find_outliers(const std::vector<int>& y_values);
 	static void on_trackbar(int, void*);
 	void GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBoundary);
-	void GetGuideWireCircleEdgePoints(cv::Mat image, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& edgePoints, std::vector<cv::Point>& edgePoints2, std::vector<cv::Point>& edgePoints3);
+	void GetGuideWireCircleEdgePoints(cv::Mat image, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& edgePoints);
 	void GetGuideWireShadowPointAngles(cv::Mat image, std::vector<cv::Point> edgePoints, std::vector<double>& theta);
 	void InterpolateEdgePoints(std::vector<cv::Point>& edgePoints);
 	void GetCircularizeTransformPoint(cv::Point src, cv::Point& dst);
