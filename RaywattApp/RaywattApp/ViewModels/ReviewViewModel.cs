@@ -596,6 +596,17 @@ namespace RaywattApp.ViewModels
                             LumenGuidewires.Add(lumenGuidewire);
                         }
                     }
+
+                    
+                    if (CommonUtil.IsTestMode(DeviceStatus.TestMode, "ML"))
+                    {
+                        threadMakeLumenProfile.Join();
+                        InitializeLumenData();
+                        DeviceStatus.IsLumenSaved = false;
+                        RayStartLumenDetection();
+                        this.isLumenContourSave = true;
+                    }
+                    
                 }
                 else//From Recording
                 {
