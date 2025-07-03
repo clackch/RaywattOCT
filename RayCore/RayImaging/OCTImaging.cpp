@@ -1065,9 +1065,7 @@ void COCTImaging::GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBounda
 	}
 }
 
-static int whatNumberYouAre = 0;
 void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& centerPoints, std::vector<float>& radius) {
-	whatNumberYouAre++;
 	if (GuideWires.empty()) {
 		return;
 	}
@@ -1106,8 +1104,6 @@ void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f>
 	int centerX = image.cols / 2;
 	int centerY = image.rows / 2;
 
-	cv::Mat imgCheck2 = image.clone();
-
 	for (int i = 0; i < edgePoints.size(); i++) {
 		int XDirection, YDirection;
 		double centerToEdgePointDistance, guideWireRadius, angle;
@@ -1130,17 +1126,7 @@ void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f>
 		centerPoints.push_back(cv::Point((int)(edgePoints[i].x + XDirection * guideWireRadius * std::cos(angle)),
 			(int)(edgePoints[i].y + YDirection * guideWireRadius * std::sin(angle))));
 		radius.push_back(guideWireRadius);
-		cv::circle(imgCheck2, edgePoints[i], 2, cv::Scalar(255, 0, 255), -1);
 	}
-	cv::Mat mask3 = cv::Mat::zeros(imgCheck2.cols, imgCheck2.cols, CV_8UC1);
-	for (int i = 0; i < GuideWires.size(); i++) {
-		cv::rectangle(mask3, GuideWires[i], cv::Scalar(255), -1);
-	}
-	std::vector<std::vector<cv::Point>> realContours;
-	cv::findContours(mask3, realContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-	cv::drawContours(imgCheck2, realContours, -1, cv::Scalar(0, 255, 0), 2);
-
-	cv::imwrite("edgePoints" + std::to_string(whatNumberYouAre) + ".png", imgCheck2);
 }
 
 void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& edgePoints) {
@@ -1347,7 +1333,6 @@ void COCTImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<c
 		//		y = height - 1;
 		//	}
 		//}
-		PLOGI.printf("start_Guidewire_Shadow_calc, frameNum = %d", whatNumberYouAre);
 
 		double angle = 360.0 / m_nHeight * 45;
 
