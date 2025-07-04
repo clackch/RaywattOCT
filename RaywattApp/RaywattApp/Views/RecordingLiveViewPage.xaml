@@ -258,7 +258,7 @@
                                                               Icon="screenExpand" 
                                                               Width="42" 
                                                               Height="42" 
-                                                              Visibility="{Binding IsVisibleExpand, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                              Visibility="{Binding IsExpandButtonVisible, Converter={StaticResource BoolToVisibilityConverter}}"
                                                               Command="{Binding ScreenExpandCommand}" 
                                                               VerticalAlignment="Bottom" 
                                                               HorizontalAlignment="Left" 

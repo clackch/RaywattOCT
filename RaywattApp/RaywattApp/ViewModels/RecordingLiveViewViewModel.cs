@@ -66,7 +66,7 @@ namespace RaywattApp.ViewModels
         private Zoom _zoomSmall = new Zoom(Constants.SmallCrossSectionSize);
 
         [ObservableProperty]
-        private bool _isVisibleExpand = false;
+        private bool _isExpandButtonVisible = false;
 
         private int _brightness;
         public int Brightness
@@ -152,12 +152,12 @@ namespace RaywattApp.ViewModels
 
             if (isAngioConnected && isCathRoomSelected)
             {
-                IsVisibleExpand = true;
+                IsExpandButtonVisible = true;
             }
             else
             {
                 _angioManager.ImgAngio = _angioManager.ShowNoSignal();
-                IsVisibleExpand = false;
+                IsExpandButtonVisible = false;
             }
         }
 
