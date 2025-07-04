@@ -128,15 +128,8 @@ namespace RaywattApp.ViewModels
                 return;
             }
 
-            if (!isCathRoomSelected)
+            if (!isCathRoomSelected | !isAngioConnected)
             {
-                IsDeviceConnectedMessage = true;
-                return;
-            }
-
-            if (!isAngioConnected)
-            {
-                _angioManager.ImgAngio = _angioManager.ShowNoSignal();
                 IsDeviceConnectedMessage = true;
                 return;
             }
@@ -300,7 +293,14 @@ namespace RaywattApp.ViewModels
             UpdateAngioAvailabilityUI();
 
             if (DeviceStatus.IsAngioConnected)
+            {
                 DrawAngioImage();
+            }
+            else
+            {
+                _angioManager.ImgAngio = _angioManager.ShowNoSignal();
+                AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(_angioManager.ImgAngio);
+            }
         }
 
         private void leaveToPage(string viewPage)
