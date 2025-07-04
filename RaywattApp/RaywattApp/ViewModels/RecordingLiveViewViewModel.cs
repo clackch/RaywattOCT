@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
+using RaywattApp.Common.Angio;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
@@ -26,7 +27,7 @@ namespace RaywattApp.ViewModels
         private readonly SqlManager? _sqlManager;
 
         private IDialogService? _dialogService;
-               
+
         private readonly AngioManager _angioManager;
 
         private IList<Code> pullbackTypes;
@@ -64,6 +65,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private Zoom _zoomSmall = new Zoom(Constants.SmallCrossSectionSize);
 
+        [ObservableProperty]
+        private bool _isExpandButtonVisible = false;
+
         private int _brightness;
         public int Brightness
         {
@@ -82,11 +86,11 @@ namespace RaywattApp.ViewModels
         public double FieldOfView
         {
             get { return _fieldOfView; }
-            set 
-            { 
+            set
+            {
                 _fieldOfView = value;
                 OnPropertyChanged(nameof(FieldOfView));
-                
+
                 PatientCase.FieldOfView = value;
                 Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
                 ZoomSmall.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
@@ -137,12 +141,31 @@ namespace RaywattApp.ViewModels
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "PBTY";
             pullbackTypes = _sqlManager.SelectCode(sqlParameters);
+            _angioManager.OnAngioAvailabilityChanged = UpdateAngioAvailabilityUI;
+        }
+
+        private void UpdateAngioAvailabilityUI()
+        {
+            bool isAngioConnected = DeviceStatus.IsAngioConnected;
+            var cathRoom = DeviceStatus.SelectedCathRoom;
+            bool isCathRoomSelected = cathRoom != null && cathRoom.Name != "Not Selected";
+
+            if (isAngioConnected && isCathRoomSelected)
+            {
+                IsExpandButtonVisible = true;
+            }
+            else
+            {
+                _angioManager.ImgAngio = _angioManager.ShowNoSignal();
+                IsExpandButtonVisible = false;
+            }
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             base.OnNavigated(sender, navigatedEventArgs);
             _log.Debug("OnNavigated");
+            UpdateAngioAvailabilityUI();
 
             var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
 
@@ -209,6 +232,7 @@ namespace RaywattApp.ViewModels
         {
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
+            UpdateAngioAvailabilityUI();
 
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
@@ -220,14 +244,14 @@ namespace RaywattApp.ViewModels
                 _angioManager.ToggleLive(false);
             }
 
-            if(!this.isStartRecording && !this.isMoveCalibration)
+            if (!this.isStartRecording && !this.isMoveCalibration)
                 RayStopLiveView();
         }
 
         private void Back()
         {
             _log.Debug("Back");
-            
+
             leaveToPage(Constants.RecordingPresetPage);
         }
 
@@ -262,7 +286,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("StartRecording");
 
             this.isStartRecording = true;
-            
+
             if (!DeviceStatus.IsLiveView)
             {
                 RayStartLiveView();
@@ -282,7 +306,7 @@ namespace RaywattApp.ViewModels
         {
             if (!DeviceStatus.IsAngioConnected)
             {
-                IsOctExpanded =  true;
+                IsOctExpanded = true;
             }
             DrawCrossSectionImage();
             DrawAngioImage();

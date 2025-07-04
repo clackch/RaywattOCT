@@ -101,6 +101,8 @@ namespace RaywattApp.Common.Angio
         private bool liveView;
         private static ConcurrentQueue<Mat> imageList;
 
+        public Action OnAngioAvailabilityChanged;
+
         private short angioFrameWidth;
         public short AngioFrameWidth { get { return angioFrameWidth; } set { angioFrameWidth = value; } }
         private short angioFrameHeight;
@@ -569,6 +571,7 @@ namespace RaywattApp.Common.Angio
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
                         ViewModelBase._deviceStatus.IsAngioConnected = false;
+                        OnAngioAvailabilityChanged?.Invoke();
                     });
                 }
                 else if (command == (byte)CommandType.FGAngioConnected)
@@ -594,6 +597,7 @@ namespace RaywattApp.Common.Angio
                     {
                         ViewModelBase._deviceStatus.IsAngioConnected = true;
                         _log.Debug("Now angio is connected");
+                        OnAngioAvailabilityChanged?.Invoke();
                     });
                 }
                 else if (command == (byte)CommandType.FGBoardExist)
@@ -849,6 +853,7 @@ namespace RaywattApp.Common.Angio
             {
                 Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
                 ViewModelBase._deviceStatus.SelectedCathRoom = (CathRoom)data["selectedCathRoom"];
+                OnAngioAvailabilityChanged?.Invoke();
             }
 
             isCathRoomDialogOpen = false;

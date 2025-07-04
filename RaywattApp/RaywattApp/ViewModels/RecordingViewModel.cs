@@ -52,6 +52,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private Zoom _zoom = new Zoom();
 
+        [ObservableProperty]
+        private bool _isDeviceConnectedMessage = false;
+
         private Thread threadWaitPullbackDone;
         private bool runWaitPullbackDone;
 
@@ -108,7 +111,30 @@ namespace RaywattApp.ViewModels
 
             // Instant start 방지
             //Thread.Sleep(1000);
-            
+
+            _angioManager.OnAngioAvailabilityChanged = UpdateAngioAvailabilityUI;
+        }
+
+        private void UpdateAngioAvailabilityUI()
+        {
+            bool isAngioConnected = DeviceStatus.IsAngioConnected;
+            bool isAngioInitialized = DeviceStatus.IsAngioInitialized;
+            var cathRoom = DeviceStatus.SelectedCathRoom;
+            bool isCathRoomSelected = cathRoom != null && cathRoom.Name != "Not Selected";
+
+            if (isAngioConnected && !isAngioInitialized)
+            {
+                IsDeviceConnectedMessage = false;
+                return;
+            }
+
+            if (!isCathRoomSelected | !isAngioConnected)
+            {
+                IsDeviceConnectedMessage = true;
+                return;
+            }
+
+            IsDeviceConnectedMessage = false;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -144,19 +170,19 @@ namespace RaywattApp.ViewModels
             if (timer.IsEnabled)
                 timer.Stop();
 
-            if(readyTimer.IsEnabled)
+            if (readyTimer.IsEnabled)
                 readyTimer.Stop();
 
             _angioManager.ReadyToRecv = true;
 
-            if(!this.isMoveConfirm)
+            if (!this.isMoveConfirm)
                 RayStopLiveView();
         }
 
         private void Cancel()
         {
             _log.Debug("Cancel");
-            
+
             leaveToPage(Constants.RecordingLiveViewPage);
         }
 
@@ -204,7 +230,7 @@ namespace RaywattApp.ViewModels
         private void StartTimer(object sender, EventArgs e)
         {
             StartTime--;
-            if(StartTime == 0)
+            if (StartTime == 0)
             {
                 RayStartLiveView();
 
@@ -228,7 +254,7 @@ namespace RaywattApp.ViewModels
             IsStart = false;
             IsCancel = false;
 
-            PatientCase.Image = generateFileName("oct");            
+            PatientCase.Image = generateFileName("oct");
             DeviceStatus.IsSaveRawDataDone = false;
             DeviceStatus.IsLumenSaved = false;
             DeviceStatus.IsOCTImagingDone = false;
@@ -243,7 +269,7 @@ namespace RaywattApp.ViewModels
                 _angioManager.ReadyToSaveAngioThread(PatientCase);
             }
 
-            threadWaitPullbackDone.Start();            
+            threadWaitPullbackDone.Start();
         }
 
         private void threadFuncWaitPullbackDone()
@@ -264,9 +290,17 @@ namespace RaywattApp.ViewModels
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
             DrawCrossSectionImage();
+            UpdateAngioAvailabilityUI();
 
             if (DeviceStatus.IsAngioConnected)
+            {
                 DrawAngioImage();
+            }
+            else
+            {
+                _angioManager.ImgAngio = _angioManager.ShowNoSignal();
+                AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(_angioManager.ImgAngio);
+            }
         }
 
         private void leaveToPage(string viewPage)
