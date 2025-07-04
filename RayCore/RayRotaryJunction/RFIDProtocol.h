@@ -10,6 +10,7 @@
 #include <ctime>
 #include <iomanip>
 #include <map>
+#include <deque>
 
 #define FIXED_HEADER_FRONT_LEN			3
 #define FIXED_HEADER_BACK_LEN			2	
@@ -34,7 +35,7 @@ public:
 		uint8_t etcLen;
 	};
 	std::map <eFID, Data> messageMap;
-	eFID lastFID;
+	std::deque<eFID> failedFID;
 };
 
 class RFIDProtocol
@@ -47,6 +48,7 @@ class RFIDProtocol
 		uint8_t aKeyB[KEY_LEN];
 		int aCNT;
 		int aStep;
+		bool findingKey = false;
 	};
 private:
 	static int AddDataToPacket(BYTE* packet, BYTE* data, int len);
@@ -70,9 +72,12 @@ public:
 
 	static void initState(bool needLoadKey);
 	static void printState();
+	static bool getFindingKeyStatus();
+	static void setFindingKeyStatus(bool status);
 	static RFIDMessageData::Data* getMessageData(eFID fid);
 	static void deleteMessageData(eFID fid);
-	static void setLastFID(eFID fid);
-	static eFID getLastFID();
-	static RFIDMessageData::Data* getRecentMessageData();
+	static void addFailedFID(eFID fid);
+	static eFID popFailedFID();
+	static void clearFailedFID();
+	static RFIDMessageData::Data* getRecentMessageData(eFID fid);
 };

@@ -1,11 +1,12 @@
 #pragma once
 #include "Config.h"
-#include "CommonProtocol.h"
 
 #include "RFIDProtocol.h"
 #include "MotorController.h"
+#include "WriteTaskController.h"
 #include <vector>
 #include <iomanip>
+
 
 #define ENABLE_RFID		false
 
@@ -78,6 +79,8 @@ private:
 
 	bool m_bManualMode;	// Manual Load Catheter
 
+	WriteTaskController* m_resendManager;
+
 public:
 	CRJController();
 	virtual ~CRJController();
@@ -129,6 +132,7 @@ protected:
 	void parseSMPacket(BYTE*packet, int size);
 	virtual void handlePacket();
 	virtual bool writeMotor(BYTE* packet, int size);
-	void resendPacket(eFID fid, RFIDMessageData::Data rePacketData);
+	void resendPacket(eFID fid);
+	void resendAllSaved();
 };
 

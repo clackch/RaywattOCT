@@ -4,7 +4,7 @@
 
 CCOMConnection::CCOMConnection() {
 	m_pPort = new CSerialPort();
-	m_pWriteManager = new WriteTaskManager(1);
+	m_pWriteManager = new WriteTaskController(1);
 }
 CCOMConnection::~CCOMConnection() {
 	if (m_pPort != nullptr) {

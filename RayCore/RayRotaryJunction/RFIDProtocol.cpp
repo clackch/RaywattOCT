@@ -255,6 +255,8 @@ void RFIDProtocol::initState(bool needLoadKey) {
 	memset(aRFIDState.aKeyB, 0x00, KEY_LEN);
 	aRFIDState.aCNT = 0;
 	aRFIDState.aStep = 0;
+	aRFIDState.findingKey = false;
+
 	if(needLoadKey)
 		RFIDKeyController::loadFirstKey(aRFIDState.aKeyA);
 }
@@ -275,8 +277,15 @@ RFIDMessageData::Data* RFIDProtocol::getMessageData(eFID fid) {
 	return nullptr;
 }
 
-RFIDMessageData::Data* RFIDProtocol::getRecentMessageData(){
-	eFID fid = aRFIDMessageData.lastFID;
+bool RFIDProtocol::getFindingKeyStatus() {
+	return aRFIDState.findingKey;
+}
+
+void RFIDProtocol::setFindingKeyStatus(bool status) {
+	aRFIDState.findingKey = status;
+}
+
+RFIDMessageData::Data* RFIDProtocol::getRecentMessageData(eFID fid){
 	if (fid == eFID::NO_FID) return nullptr;
 	auto it = aRFIDMessageData.messageMap.find(fid);
 	if (it != aRFIDMessageData.messageMap.end()) {
@@ -284,10 +293,15 @@ RFIDMessageData::Data* RFIDProtocol::getRecentMessageData(){
 	}
 	return nullptr;
 }
-
-void RFIDProtocol::setLastFID(eFID fid) {
-	aRFIDMessageData.lastFID = fid;
+void RFIDProtocol::addFailedFID(eFID fid) {
+	aRFIDMessageData.failedFID.push_back(fid);
 }
-eFID RFIDProtocol::getLastFID() {
-	return aRFIDMessageData.lastFID;
+eFID RFIDProtocol::popFailedFID() {
+	if (aRFIDMessageData.failedFID.empty()) return eFID::NO_FID;
+	eFID result = aRFIDMessageData.failedFID.front();
+	aRFIDMessageData.failedFID.pop_front();
+	return result;
+}
+void RFIDProtocol::clearFailedFID() {
+	aRFIDMessageData.failedFID.clear();
 }

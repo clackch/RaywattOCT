@@ -1,16 +1,16 @@
-#include "WriteTaskManager.h"
+#include "WriteTaskController.h"
 
-WriteTaskManager::WriteTaskManager(int interval) {
+WriteTaskController::WriteTaskController(int interval) {
     intervalTime = interval;
     running = true;
-    workerThread = std::thread(&WriteTaskManager::worker, this);
+    workerThread = std::thread(&WriteTaskController::worker, this);
 }
 
-WriteTaskManager::~WriteTaskManager() {
+WriteTaskController::~WriteTaskController() {
     stop();
 }
 
-void WriteTaskManager::addTask(std::function<void()> task) {
+void WriteTaskController::addTask(std::function<void()> task) {
     {
         std::lock_guard<std::mutex> lock(queueMutex);
         taskQueue.push(std::move(task));
@@ -18,7 +18,7 @@ void WriteTaskManager::addTask(std::function<void()> task) {
     cv.notify_one();
 }
 
-void WriteTaskManager::stop() {
+void WriteTaskController::stop() {
     {
         std::lock_guard<std::mutex> lock(queueMutex);
         running = false;
@@ -29,7 +29,7 @@ void WriteTaskManager::stop() {
 }
 
 
-void WriteTaskManager::worker() {
+void WriteTaskController::worker() {
     while (true) {
         std::function<void()> task;
 

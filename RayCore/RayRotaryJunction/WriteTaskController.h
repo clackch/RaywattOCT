@@ -7,11 +7,11 @@
 #include <thread>
 #include <condition_variable>
 
-class WriteTaskManager
+class WriteTaskController
 {
 public:
-    WriteTaskManager(int interval);
-    ~WriteTaskManager();
+    WriteTaskController(int interval);
+    ~WriteTaskController();
 
     void addTask(std::function<void()> task);
     void stop();

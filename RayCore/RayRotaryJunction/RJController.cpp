@@ -8,6 +8,7 @@ CRJController::CRJController()
 	:ICommonProtocol(RJ_STX, RJ_ETX)
 	
 {
+	m_resendManager = new WriteTaskController(40);
 	m_pMsg = nullptr;
 	m_pThreadState = nullptr;
 	m_state = eRJState::None;
@@ -436,10 +437,11 @@ void CRJController::initSetting() {
 	}
 }
 
-void CRJController::resendPacket(eFID fid, RFIDMessageData::Data rePacketData) {
+void CRJController::resendPacket(eFID fid) {
 	BYTE serialPacket[MAX_PATH];
 	int packetLength;
-	RFIDProtocol::resetPacketByFID(fid, serialPacket, packetLength, rePacketData);
+	RFIDMessageData::Data* dataValue = RFIDProtocol::getRecentMessageData(fid);
+	RFIDProtocol::resetPacketByFID(fid, serialPacket, packetLength, *dataValue);
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
 
@@ -454,6 +456,16 @@ void CRJController::resendPacket(eFID fid, RFIDMessageData::Data rePacketData) {
 	//Sleep(40);
 	m_pConnection->Write(serialPacket, packetLength);
 
+}
+
+void CRJController::resendAllSaved() {
+	eFID fid = RFIDProtocol::popFailedFID();
+	while (fid != eFID::NO_FID) {
+		m_resendManager->addTask([=]() {
+			resendPacket(fid);
+			});
+		fid = RFIDProtocol::popFailedFID();
+	}
 }
 
 UINT CRJController::threadRJState(LPVOID param) {
@@ -781,8 +793,12 @@ void CRJController::handlePacket() {
 		PLOGI.printf("return %s\n", ((m_vPacket[REPLY_RESULT_IDX] == 0) ? "ok" : "error"));
 		if (m_vPacket[REPLY_RESULT_IDX] == 12) {
 			if (fid != eFID::FID_RFID_GET_KEY) {
-				RFIDProtocol::setLastFID(fid);
-				findCorrectKey();
+				if (!RFIDProtocol::getFindingKeyStatus()) {
+					RFIDProtocol::setFindingKeyStatus(true);
+					RFIDProtocol::clearFailedFID();
+					findCorrectKey();
+				}
+				RFIDProtocol::addFailedFID(fid);
 			}
 			return;
 		}
@@ -816,10 +832,7 @@ void CRJController::handlePacket() {
 		break;
 	case eFID::FID_RFID_GET_KEY:
 		RxPacketRFIDGetState(&m_vPacket[0], KEYS);
-		data = RFIDProtocol::getRecentMessageData();
-		if (data != nullptr) 
-			resendPacket(RFIDProtocol::getLastFID(), *data);
-		RFIDProtocol::setLastFID(eFID::NO_FID);
+		resendAllSaved();
 		break;
 	case eFID::FID_RFID_SET_STEP:
 	case eFID::FID_RFID_GET_STEP:
