@@ -550,7 +550,7 @@ namespace RaywattApp.ViewModels
         private DispatcherTimer timer = new DispatcherTimer();
         private void ProgressLoadTest(object sender, EventArgs e)
         {
-            if (DeviceStatus.CatheterStatus == Constants.CatheterStatusLoaded)
+            if (DeviceStatus.CatheterStatus == Constants.CatheterStatusEnable)
             {
                 timer.Stop();
             }
@@ -653,6 +653,9 @@ namespace RaywattApp.ViewModels
                     break;
                 case RayWorkItem.UnloadCatheter:
                     DeviceStatus.CatheterStatus = Constants.CatheterStatusConnected;
+                    break;
+                case RayWorkItem.EnableCatheter:
+                    DeviceStatus.CatheterStatus = Constants.CatheterStatusEnable;
                     break;
                 case RayWorkItem.Recording:
                     if (DeviceStatus.IsAngioConnected)

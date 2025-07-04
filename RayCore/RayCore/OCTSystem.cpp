@@ -2558,6 +2558,7 @@ LRESULT COCTSystem::OnMsgUpdateCatheterState(WPARAM wParam, LPARAM lParam) {
 		break;
 	case CatheterState::Enable:
 		PLOGI.printf("Catheter - Enable.");
+		postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::EnableCatheter);
 		break;
 	case CatheterState::Calibrated:
 		PLOGI.printf("Catheter - Calibrated.");

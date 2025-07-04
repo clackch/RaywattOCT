@@ -425,6 +425,7 @@ namespace RaywattApp.Common.Bases
         public const string CatheterStatusConnected = "Connected";
         public const string CatheterStatusLoading = "Loading";
         public const string CatheterStatusLoaded = "Loaded";
+        public const string CatheterStatusEnable = "Enable";
         public const string CatheterStatusFailed = "Failed";
         public const string CatheterStatusUnloading = "Unloading";
         public const string CatheterStatusDisconnected = "Disconnected";

@@ -96,7 +96,8 @@ enum class RayWorkItem {
 	UnloadCatheter,
 	ValidateCatheter,
 	InitializeRotaryJunction,
-	CleanRotaryJunction
+	CleanRotaryJunction,
+	EnableCatheter
 };
 
 enum class RaySession {
