@@ -87,7 +87,8 @@ namespace RaywattApp.ViewModels.Dialog
         {
             _log.Debug("AnswerYes");
 
-            Validate();
+            if (!Validate())
+                return;
 
             await Search();
 
@@ -146,13 +147,20 @@ namespace RaywattApp.ViewModels.Dialog
 
         private bool Validate()
         {
+            if (SpsStartDateFrom > SpsStartDateTo)
+            {
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["title"] = _l10n["Error"];
+                parameter["message"] = _l10n["The start date cannot be later than the end date."];
+                _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                return false;
+            }
+
             PatientName = string.IsNullOrWhiteSpace(PatientName) ? "*" : PatientName.Trim();
             PatientId = string.IsNullOrWhiteSpace(PatientId) ? "*" : PatientId.Trim();
             ProcedureId = string.IsNullOrWhiteSpace(ProcedureId) ? "*" : ProcedureId.Trim();
             AccessionNumber = string.IsNullOrWhiteSpace(AccessionNumber) ? "*" : AccessionNumber.Trim();
             ScheduledStationAe = string.IsNullOrWhiteSpace(ScheduledStationAe) ? "*" : ScheduledStationAe.Trim();
-
-            // TODO[haeun]: SpsStartDate 시작, 끝 날짜의 대소 확인이 필요한지 결정
 
             return true;
         }
