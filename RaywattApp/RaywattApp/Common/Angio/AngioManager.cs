@@ -560,14 +560,14 @@ namespace RaywattApp.Common.Angio
                     _log.Debug("FGAngio Disconnected command");
                     if (isCathRoomDialogOpen)
                     {
-                        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                        System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                         {
                             ViewModelBase._deviceStatus.IsAngioConnected = false;
                             Dictionary<string, object> parameter = new Dictionary<string, object>();
                             parameter["title"] = _l10n["Error"];
                             parameter["message"] = _l10n["$MSG023"];
                             _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-                        });
+                        }));
                         isCathRoomDialogOpen = false;
                     }
 
