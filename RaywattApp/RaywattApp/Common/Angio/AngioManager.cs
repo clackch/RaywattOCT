@@ -241,10 +241,19 @@ namespace RaywattApp.Common.Angio
             while (isSocketAlive)
             {
                 Thread.Sleep(1000);
-                if(GetServerConnection() == false && !ViewModelBase._deviceStatus.IsPowerOff)
+                if (GetServerConnection() == false && !ViewModelBase._deviceStatus.IsPowerOff)
                 {
-                    _log.Debug("server down");
-                    CommonUtil.Exit(ViewModelBase._deviceStatus, this, true);
+                    _log.Debug("Disconnected from the Angio server.");
+
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        ViewModelBase._deviceStatus.IsAngioConnected = false;
+                        Dictionary<string, object> popupParameter = new Dictionary<string, object>();
+                        popupParameter["title"] = _l10n["Information"];
+                        popupParameter["message"] = _l10n["Disconnected from the Angio server."];
+                        var popupResult = _dialogService.OpenDialog(new AlertDialogControl(), popupParameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                    });
+
                     isSocketAlive = false;
                 }
             }
