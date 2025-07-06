@@ -134,7 +134,7 @@ void TCPSocket::ConnectClient(FrameGrabber& fg, int arg) {
 			receiveCmdThreadRunning = true;
 			checkClientThreadRunning = true;
 		}
-		this_thread::sleep_for(chrono::milliseconds(1000));
+		this_thread::sleep_for(chrono::milliseconds(100));
 	}
 }
 
@@ -316,7 +316,7 @@ void TCPSocket::ChpFilePacketProcess(FrameGrabber& fg) {
 void TCPSocket::PortEventThread(FrameGrabber& fg) {
 	while (portEventThreadRunning)
 	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		DWORD status = WaitForSingleObject(fg.pIdeaInfo->hInfoEvent, 100);
 		
 		switch (status)
@@ -439,7 +439,7 @@ void TCPSocket::LiveFrame(FrameGrabber& fg) {
 	if (bufferResult != 0 || pVidHeader == nullptr) {
 		retryCount++; 
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		if (retryCount > 100) { // 이미지를 0.1초 이상 받아오지 못하는 경우 새로고침
+		if (retryCount > 100) { // 이미지를 1초 이상 받아오지 못하는 경우 새로고침
 			RefreshLiveStream(fg);
 			retryCount = 0;
 		}
