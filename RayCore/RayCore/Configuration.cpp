@@ -62,6 +62,7 @@ void CConfiguration::Initialize(tstring configFile)
 	this->laserModule.voaValue = ::GetPrivateProfileInt(_T("LaserModule"), _T("VOA"), 2960, configFilePath.c_str());
 	this->laserModule.vldValue = ::GetPrivateProfileInt(_T("LaserModule"), _T("VLD"), 2000, configFilePath.c_str());
 	this->laserModule.delayPosition = ::GetPrivateProfileInt(_T("LaserModule"), _T("DelayLine"), 0, configFilePath.c_str());
+	this->laserModule.delayPositionOnePointSeven = ::GetPrivateProfileInt(_T("LaserModule"), _T("delayPositionOnePointSeven"), 0, configFilePath.c_str());
 	this->laserModule.polarPosition = ::GetPrivateProfileInt(_T("LaserModule"), _T("Polarization"), 0, configFilePath.c_str());
 	this->laserModule.delayLineSMSteps = ::GetPrivateProfileInt(_T("LaserModule"), _T("DelayLineSMSteps"), 1, configFilePath.c_str());
 	this->laserModule.delayLineSMSpeed = ::GetPrivateProfileInt(_T("LaserModule"), _T("DelayLineSMSpeed"), 1, configFilePath.c_str());

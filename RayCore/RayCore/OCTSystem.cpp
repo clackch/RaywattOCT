@@ -1109,12 +1109,40 @@ RayError COCTSystem::SetSheathDiameter(double value)
 	if (!m_bFirstLoad) return RayError::OK;
 	m_bFirstLoad = false;
 
-	/*if (value == 1.7) {
-		m_pLaserModule->Move(eStepMotorIndex::DelayLine, config.catheter.length);
+	if (value == 1.7) {
+		m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX * (config.laserModule.delayLineSMSteps == 1 ? 1 : 2));
+		m_pLaserModule->Current(eStepMotorIndex::DelayLine, DELAY_LINE_UPPER_END_POSITION * config.laserModule.delayLineSMSteps);
+
+		Sleep(500);
+
+		PLOGI.printf("Homing start =========================================");
+		// m_pLaserModule Move 0 OR sensor #1 이동
+		m_pLaserModule->Move(eStepMotorIndex::DelayLine, 0, false, static_cast<char>(0x03));
+
+		Sleep(500);
+
+		while (m_pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) {
+			Sleep(50);
+		}
+		m_pLaserModule->PrintPhotoSensor();
+
+		// m_pLaserModule Current 0
+		m_pLaserModule->Current(eStepMotorIndex::DelayLine, 0);
+
+		Sleep(500);
+
+		PLOGI.printf("Move to %d =========================================", config.laserModule.delayPositionOnePointSeven);
+		m_pLaserModule->Move(eStepMotorIndex::DelayLine, config.laserModule.delayPosition, false, static_cast<char>(0x02));
+
+		Sleep(500);
+
+		while (m_pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) {
+			Sleep(50);
+		}
+		m_pLaserModule->PrintPhotoSensor();
+
+		m_pLaserModule->Current(eStepMotorIndex::DelayLine, config.laserModule.delayPositionOnePointSeven);
 	}
-	else {
-		m_pLaserModule->Move(eStepMotorIndex::DelayLine, 0);
-	}*/
 
 	return RayError::OK;
 }

@@ -14,6 +14,7 @@ public:
 		int voaValue;
 		int vldValue;
 		int delayPosition;
+		int delayPosition2;
 		int polarPosition;
 		int delayLineSMSteps;
 		int delayLineSMSpeed;
