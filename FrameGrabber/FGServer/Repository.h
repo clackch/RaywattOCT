@@ -20,7 +20,7 @@ public:
     void Disconnect();
 
     bool GetCropRect(int roomId, int& left, int& top, int& right, int& bottom);
-    bool Repository::ApplyCrop(const HDVID_HEADER* pVidHeader, const FrameGrabber& fg, std::vector<unsigned char>& outBuffer);
+    bool ApplyCrop(const HDVID_HEADER* pVidHeader, const FrameGrabber& fg, std::vector<unsigned char>& outBuffer);
     bool InitCropRegion(FrameGrabber& fg);
     const CropRegion& GetCropRegion() const { return cropRegion; }
     bool PrintAllCropRooms();

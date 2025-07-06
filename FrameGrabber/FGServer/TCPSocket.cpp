@@ -157,7 +157,6 @@ void TCPSocket::ReceivePacket(FrameGrabber& fg) {
 			int sendResult;
 			switch (commandType) {
 			case CommandType::FGStarted:
-				
 				PLOGI.printf("FGStarted");
 				tmpRecvBufferLen -= 5;
 				memmove(tmpRecvBuffer, tmpRecvBuffer + 5, tmpRecvBufferLen);

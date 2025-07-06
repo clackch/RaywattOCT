@@ -617,9 +617,9 @@ void CRJController::changeSMProfileToPullback() {
 
 	const int minSpeed = 630;
 	const int maxSpeed = 314960;
-	const int accTime = 30;
+	const int accTime = 10;
 	const int accStep = 100;
-	const int decTime = 30;
+	const int decTime = 10;
 	const int decStep = 0;
 	const int minStep = 100;
 

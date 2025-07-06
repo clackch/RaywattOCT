@@ -1647,9 +1647,12 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	// 5. Homing
 	pRJController->changeSMProfileToLoadUnload();
 	Sleep(2000);
+	int bldcHomingSpeed = config.bldcMotor.velocityLiveView / 2;
+	pRJController->PerformRun(bldcHomingSpeed);
 	pRJController->Set(eStepMotorIndex::Both, STEP_MOTOR_SPEED_DEFAULT / 2);
 	pRJController->Move(eStepMotorIndex::Both, 0);
 	pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+	pRJController->StopMotor();
 	pRJController->Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 	pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_STANDBY_OFF);
 
@@ -1883,6 +1886,8 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 
 	PLOGI.printf("Catheter Validation");
 	bool verified = false;
+
+	Sleep(2000);
 
 	if (config.catheter.catheterValidationOnOff && pSystem->m_curState == RayScannerState::Default) {
 		pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_STANDBY_ON);
