@@ -134,7 +134,7 @@ void TCPSocket::ConnectClient(FrameGrabber& fg, int arg) {
 			receiveCmdThreadRunning = true;
 			checkClientThreadRunning = true;
 		}
-		this_thread::sleep_for(chrono::milliseconds(1000));
+		this_thread::sleep_for(chrono::milliseconds(10));
 	}
 }
 
@@ -317,8 +317,8 @@ void TCPSocket::ChpFilePacketProcess(FrameGrabber& fg) {
 void TCPSocket::PortEventThread(FrameGrabber& fg) {
 	while (portEventThreadRunning)
 	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-		DWORD status = WaitForSingleObject(fg.pIdeaInfo->hInfoEvent, 100);
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		DWORD status = WaitForSingleObject(fg.pIdeaInfo->hInfoEvent, 10);
 		
 		switch (status)
 		{
@@ -339,6 +339,7 @@ void TCPSocket::PortEventThread(FrameGrabber& fg) {
 				//PLOGI.printf("Port Event...");
 				if (fg.m_bSyncValid && fg.portConnection != 1)
 				{
+					retryConnectCount = 0;
 					fg.portConnection = 1;
 					SetCommandPacket(CommandType::FGAngioConnected);
 					int sendResult = send(clientSocket, commandBuffer, 5, 0);
@@ -346,6 +347,12 @@ void TCPSocket::PortEventThread(FrameGrabber& fg) {
 				}
 				else if (!fg.m_bSyncValid && fg.portConnection != 0)
 				{
+					if(retryConnectCount < 100) 
+					{
+						retryConnectCount++;
+						PLOGI.printf("Port connection lost. Retrying... (%d)", retryConnectCount);
+						continue;
+					}
 					fg.portConnection = 0;
 					SetCommandPacket(CommandType::FGAngioDisconnected);
 					int sendResult = send(clientSocket, commandBuffer, 5, 0);
