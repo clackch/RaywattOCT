@@ -85,7 +85,6 @@ private:
 	int imagePacketSize;
 	bool Chp_selected;
 	int retryCount;
-	int retryConnectCount = 0;
 	Repository repo;
 
 	// thread
