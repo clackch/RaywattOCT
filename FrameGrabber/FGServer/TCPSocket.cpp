@@ -427,38 +427,49 @@ long long TCPSocket::timeSelect() {
 
 void TCPSocket::LiveFrame(FrameGrabber& fg) {
 	HDVID_HEADER* pVidHeader = nullptr;
-	ERRTYPE bufferResult = eHD_GetStreamBuffer(fg.m_ImageHandle, &pVidHeader); // 이미지 버퍼헤더 가져오는 함수
+	ERRTYPE bufferResult = eHD_GetStreamBuffer(fg.m_ImageHandle, &pVidHeader);
 	long long livetime = timeSelect();
+
 	if (bufferResult != 0 || pVidHeader == nullptr) {
 		retryCount++;
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		if (retryCount > 100) { // 이미지를 0.1초 이상 받아오지 못하는 경우 새로고침
+		if (retryCount > 100) {
 			RefreshLiveStream(fg);
 			retryCount = 0;
 		}
 		return;
 	}
-	std::this_thread::sleep_for(std::chrono::milliseconds(10));
-	//여기에서 Crop 기능을 추가해야하는데
+
 	int cropsize = repo.GetCropRegion().height * repo.GetCropRegion().width;
-	std::vector<unsigned char> croppedBuffer(cropsize * fg.wBitsPerPixel / 8);
+	int bytesPerPixel = fg.wBitsPerPixel / 8;
+
+	if (croppedBuffer.size() != cropsize * bytesPerPixel) {
+		croppedBuffer.resize(cropsize * bytesPerPixel);
+	}
+
 	if (repo.ApplyCrop(pVidHeader, fg, croppedBuffer));
 	else PLOGI.printf("[Crop] Failed to apply crop. Using full image.");
+
 	int offset = 7;
 	memcpy(sendBuffer + offset, &livetime, sizeof(livetime));
 	offset += sizeof(livetime);
-	memcpy(sendBuffer + offset, croppedBuffer.data(), cropsize * fg.wBitsPerPixel / 8);
-	offset += cropsize * fg.wBitsPerPixel / 8;
+
+	memcpy(sendBuffer + offset, croppedBuffer.data(), cropsize * bytesPerPixel);
+	offset += cropsize * bytesPerPixel;
+
 	checkSum = CalcCheckSum(sendBuffer, offset);
 	memcpy(sendBuffer + offset, &checkSum, sizeof(checkSum));
 	offset += sizeof(checkSum);
+
 	memcpy(sendBuffer + offset, &eof, sizeof(eof));
 	offset += sizeof(eof);
+
 	int sendResult = send(clientSocket, sendBuffer, imagePacketSize, 0);
 	if (sendResult == SOCKET_ERROR) {
 		PLOGI.printf("Failed to send data to client. Error code: %d", WSAGetLastError());
 	}
-	eHD_ReleaseStreamBuffer(fg.m_ImageHandle, pVidHeader); //버퍼 할당 해제
+
+	eHD_ReleaseStreamBuffer(fg.m_ImageHandle, pVidHeader);
 	retryCount = 0;
 }
 
