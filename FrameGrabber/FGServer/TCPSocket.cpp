@@ -323,7 +323,7 @@ void TCPSocket::PortEventThread(FrameGrabber& fg)
 
 	while (portEventThreadRunning)
 	{
-		switch (WaitForMultipleObjectsEx(1, hEvents, FALSE, 100, FALSE))
+		switch (WaitForMultipleObjectsEx(1, hEvents, FALSE, 10, FALSE))
 		{
 			case WAIT_TIMEOUT:
 			{
@@ -356,7 +356,6 @@ void TCPSocket::PortEventThread(FrameGrabber& fg)
 							PLOGI.printf("Send Port Disconnected");
 						}
 					}
-
 				}
 			}
 		}
