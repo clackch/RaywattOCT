@@ -1089,10 +1089,9 @@ RayError COCTSystem::SetSheathDiameter(double value)
 {
 	CConfiguration& config = CConfiguration::GetInstance();
 
-	PLOGI.printf("Set catheter size as %.1f (%d)", (value == 1.7f ? 1.7f : 2.6f), m_bFirstLoad);
+	PLOGI.printf("Set catheter size as %.1f (%d)", (value <= 2.0 ? 1.7f : 2.6f), m_bFirstLoad);
 		
-	m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX);	
-	if (value == 1.7) {
+	if (value <= 2.0) {
 		config.measurement.fSheathRadius = config.measurement.fSheathRadiusOnePointSeven;
 		config.measurement.fSheathThickness = config.measurement.fSheathThicknessOnePointSeven;
 	}
@@ -1106,10 +1105,7 @@ RayError COCTSystem::SetSheathDiameter(double value)
 	m_pImagingPullback->SetMeasurementSetting(config.measurement);
 	m_pImagingLiveView->SetMeasurementSetting(config.measurement);
 
-	if (!m_bFirstLoad) return RayError::OK;
-	m_bFirstLoad = false;
-
-	if (value == 1.7) {
+	if (value <= 2.0) {
 		m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX * (config.laserModule.delayLineSMSteps == 1 ? 1 : 2));
 		m_pLaserModule->Current(eStepMotorIndex::DelayLine, DELAY_LINE_UPPER_END_POSITION * config.laserModule.delayLineSMSteps);
 
@@ -1132,7 +1128,7 @@ RayError COCTSystem::SetSheathDiameter(double value)
 		Sleep(500);
 
 		PLOGI.printf("Move to %d =========================================", config.laserModule.delayPositionOnePointSeven);
-		m_pLaserModule->Move(eStepMotorIndex::DelayLine, config.laserModule.delayPosition, false, static_cast<char>(0x02));
+		m_pLaserModule->Move(eStepMotorIndex::DelayLine, config.laserModule.delayPositionOnePointSeven, false, static_cast<char>(0x02));
 
 		Sleep(500);
 
@@ -1143,6 +1139,9 @@ RayError COCTSystem::SetSheathDiameter(double value)
 
 		m_pLaserModule->Current(eStepMotorIndex::DelayLine, config.laserModule.delayPositionOnePointSeven);
 	}
+
+	if (!m_bFirstLoad) return RayError::OK;
+	m_bFirstLoad = false;
 
 	return RayError::OK;
 }
@@ -1726,6 +1725,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 				PLOGI.printf("Invalid command format.");
 				continue;
 			}
+			if (pSystem->m_pThreadRotaryJunction->isRun == false) break;
 
 			std::string command = commands[0];
 			std::transform(command.begin(), command.end(), command.begin(), ::toupper);
@@ -1756,10 +1756,15 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	if (pLaserModule != nullptr && pLaserModule->IsConnected()) {
 		pLaserModule->SetVLD(config.laserModule.vldValue);
 	}
-	
-	pSystem->m_bFirstLoad = true;
-	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::LoadCatheter);
-	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loaded);
+
+	if (pSystem->m_pThreadRotaryJunction->isRun) {
+		pSystem->m_bFirstLoad = true;
+		pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::LoadCatheter);
+		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loaded);
+	}
+	else {
+		pSystem->postMessage(WM_NOTIFY_ERROR_OCCURED, (WPARAM)RayError::CatheterNotValid);
+	}
 
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -2608,8 +2613,11 @@ LRESULT COCTSystem::OnMsgUpdateCatheterState(WPARAM wParam, LPARAM lParam) {
 */
 LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 	eRJState state = (eRJState)wParam;
+	bool bStopThread = (bool)lParam;
 
 	PLOGI.printf("RJState: %s", m_pRJController->GetStateString(state));
+	if (bStopThread) CUtility::StopThread(m_pThreadRotaryJunction);
+
 	switch (state) {
 	case eRJState::None:
 		break;

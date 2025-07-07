@@ -134,7 +134,7 @@ void TCPSocket::ConnectClient(FrameGrabber& fg, int arg) {
 			receiveCmdThreadRunning = true;
 			checkClientThreadRunning = true;
 		}
-		this_thread::sleep_for(chrono::milliseconds(100));
+		this_thread::sleep_for(chrono::milliseconds(1000));
 	}
 }
 
@@ -316,7 +316,7 @@ void TCPSocket::ChpFilePacketProcess(FrameGrabber& fg) {
 void TCPSocket::PortEventThread(FrameGrabber& fg) {
 	while (portEventThreadRunning)
 	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 		DWORD status = WaitForSingleObject(fg.pIdeaInfo->hInfoEvent, 100);
 		
 		switch (status)

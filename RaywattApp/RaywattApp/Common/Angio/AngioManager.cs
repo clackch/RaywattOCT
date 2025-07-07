@@ -557,16 +557,18 @@ namespace RaywattApp.Common.Angio
                 if (command == (byte)CommandType.FGAngioDisconnected)
                 {
                     imgAngio = ShowNoSignal();
-                    _log.Debug("FGAngio Disconnected command");
+                    _log.Debug("FGAngio Disconnected command " + isCathRoomDialogOpen + " readyToRecv: " + readyToRecv);
                     if (isCathRoomDialogOpen)
                     {
                         System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                         {
+                            _log.Debug("Angio disconnected 1");
                             ViewModelBase._deviceStatus.IsAngioConnected = false;
                             Dictionary<string, object> parameter = new Dictionary<string, object>();
                             parameter["title"] = _l10n["Error"];
                             parameter["message"] = _l10n["$MSG023"];
                             _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                            _log.Debug("Angio disconnected 2");
                         }));
                         isCathRoomDialogOpen = false;
                     }
@@ -625,16 +627,14 @@ namespace RaywattApp.Common.Angio
                 {
                     AskDeviceInfo();
                     _log.Debug("IsChpFileChangeSuccess = 1");
-                    if(isChpFileConnected == 0)
-                    {
-                        isChpFileConnected = 1;
-                    }
+                    isChpFileConnected = 1;
                     isChpFileChangeSuccess = 1;
                     ViewModelBase._deviceStatus.IsAngioInitialized = true;
                     ToggleLive(true);
                 }
                 else if (command == (byte)CommandType.FGFailChangeChp)
                 {
+                    isChpFileConnected = 0;
                     isChpFileChangeSuccess = -1;
                 }
                 Array.Copy(tmpBuffer, Constants.CommandPacketSize, tmpBuffer, 0, tmpBuffer.Length - Constants.CommandPacketSize);
@@ -739,6 +739,7 @@ namespace RaywattApp.Common.Angio
             commandBuffer[3] = checksum;
             if (_tcpClient.Connected)
             {
+                _log.Debug("Before Send Command: " + (CommandType)commandType);
                 _tcpClient.GetStream().Write(commandBuffer, 0, commandBuffer.Length);
             }
             _log.Debug("Send Command: " + (CommandType)commandType);

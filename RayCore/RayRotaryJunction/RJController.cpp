@@ -524,8 +524,10 @@ void CRJController::updateState(eRJState state) {
 	default:
 		break;
 	}
+
+	bool bStopThread = (m_state == eRJState::Error) ? true : false;
 	m_state = m_nextState = state;
-	if (m_pMsg != nullptr) m_pMsg->postPriorMessage(WM_UPDATE_RJ_STATE, (WPARAM)m_state);
+	if (m_pMsg != nullptr) m_pMsg->postPriorMessage(WM_UPDATE_RJ_STATE, (WPARAM)m_state, (LPARAM)bStopThread);
 }
 bool CRJController::displayLCD(eLCDImage image) {
 	BYTE serialPacket[MAX_PATH];

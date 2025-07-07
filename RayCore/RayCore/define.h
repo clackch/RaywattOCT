@@ -20,7 +20,8 @@ enum class RayError {
 	InvalidArgument,
 	WrongState,
 	WrongSession,
-	InvalidFunctionCall
+	InvalidFunctionCall,
+	RotaryJunctionError,
 };
 
 enum class RayProperty {
