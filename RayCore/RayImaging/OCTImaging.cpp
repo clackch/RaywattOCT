@@ -600,20 +600,29 @@ void COCTImaging::drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color)
 
 cv::Mat COCTImaging::getFoVImage(cv::Mat image, double fov) {
 	cv::Rect roi;
-	roi.width = (int)(floor(round(fov * 1000.f / m_setting.distPerPixel))) * 2;
+	roi.width = (int)(floor(round(fov * 1000.f / m_setting.distPerPixel))) / 2;
 	roi.height = roi.width;
 	roi.x = (image.cols - roi.width) / 2;
 	roi.y = (image.rows - roi.height) / 2;
 
-	if (roi.x < 0 || roi.y < 0 ||
-		roi.width <= 0 || roi.height <= 0 ||
-		roi.x + roi.width > image.cols ||
-		roi.y + roi.height > image.rows) {
-		return image.clone();
-	}
-
 	cv::Mat imgROI;
-	cv::resize(image(roi), imgROI, cv::Size(image.cols, image.rows));
+	if (roi.width > image.cols ||
+		roi.height > image.rows) {
+		cv::Mat imgFov;
+		cv::Rect fovRoi;
+
+		fovRoi.x = abs(roi.x);
+		fovRoi.y = abs(roi.y);
+		fovRoi.width = image.cols;
+		fovRoi.height = image.rows;
+
+		cv::resize(image, imgFov, cv::Size(roi.width, roi.height));
+		image.copyTo(imgFov(fovRoi));
+		cv::resize(imgFov, imgROI, cv::Size(image.cols, image.rows));
+	}
+	else {
+		cv::resize(image(roi), imgROI, cv::Size(image.cols, image.rows));
+	}
 
 	return imgROI;
 }
