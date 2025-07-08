@@ -1949,7 +1949,7 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 			if (verified) break;
 		}
 
-		if (verified) {
+		if (verified && config.catheter.catheterAutoCalibrationOnOff) {
 			pSystem->autoCalibrationInit(param);
 		}
 
