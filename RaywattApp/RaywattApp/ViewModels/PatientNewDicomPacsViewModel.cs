@@ -247,9 +247,9 @@ namespace RaywattApp.ViewModels
 
             Patients.Clear();
 
-            if (string.IsNullOrEmpty(SearchPatientId.Trim()) && string.IsNullOrEmpty(SearchPatientName.Trim()))
-                return;
-            
+            string patientIdParam = string.IsNullOrEmpty(SearchPatientId) ? "*" : "*" + SearchPatientId.Trim() + "*";
+            string patientNameParam = string.IsNullOrEmpty(SearchPatientName) ? "*" : "*" + SearchPatientName.Trim() + "*";
+
             IsChecking = true;
             RayExportWrapper.DicomNetRWError res = await Task.Run(() => (RayExportWrapper.DicomNetRWError)RayExportWrapper.Echo(dicomClient));
             _log.DebugFormat("Echo : {0}", res);
@@ -275,7 +275,7 @@ namespace RaywattApp.ViewModels
 
             int count = 0;
             IsChecking = true;
-            dicomPatients = await Task.Run(() => (RayExportWrapper.FindPatients(dicomClient, SearchPatientId, SearchPatientName, out count)));
+            dicomPatients = await Task.Run(() => (RayExportWrapper.FindPatients(dicomClient, patientIdParam, patientNameParam, out count)));
             IsChecking = false;
 
             if (dicomPatients != IntPtr.Zero)

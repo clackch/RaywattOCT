@@ -1,16 +1,11 @@
 ﻿using RaywattApp.Common.Dialog;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using log4net;
 using RaywattApp.Models;
 using RaywattApp.Services;
-using System.Net;
-using System.Net.Sockets;
-using CommunityToolkit.Mvvm.Input;
-using System.Windows.Input;
 using RaywattApp.Views.Dialog;
 using RaywattApp.Common.Bases;
 using RayCoreWrapper;
@@ -156,9 +151,9 @@ namespace RaywattApp.ViewModels.Dialog
                 return false;
             }
 
-            PatientName = string.IsNullOrWhiteSpace(PatientName) ? "*" : PatientName.Trim();
-            PatientId = string.IsNullOrWhiteSpace(PatientId) ? "*" : PatientId.Trim();
-            ProcedureId = string.IsNullOrWhiteSpace(ProcedureId) ? "*" : ProcedureId.Trim();
+            PatientName = string.IsNullOrWhiteSpace(PatientName) ? "*" : "*" + PatientName.Trim() + "*";
+            PatientId = string.IsNullOrWhiteSpace(PatientId) ? "*" : "*" + PatientId.Trim() + "*";
+            ProcedureId = string.IsNullOrWhiteSpace(ProcedureId) ? "*" : "*" + ProcedureId.Trim() + "*";
             AccessionNumber = string.IsNullOrWhiteSpace(AccessionNumber) ? "*" : AccessionNumber.Trim();
             ScheduledStationAe = string.IsNullOrWhiteSpace(ScheduledStationAe) ? "*" : ScheduledStationAe.Trim();
 
