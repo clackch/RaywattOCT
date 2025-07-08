@@ -2,6 +2,8 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
+using OpenCvSharp;
+using RaywattApp.Common.Angio;
 using RaywattApp.Common.Angio;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
@@ -10,13 +12,16 @@ using RaywattApp.Models;
 using RaywattApp.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
-using RaywattApp.Common.Angio;
-using System.IO;
 
 namespace RaywattApp.ViewModels
 {
@@ -96,6 +101,9 @@ namespace RaywattApp.ViewModels
                 ZoomSmall.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
             }
         }
+
+        private WriteableBitmap? _cachedBitmap;
+        private int _cachedStride;
 
         private ICommand _cmdBack;
         public ICommand CmdBack
@@ -304,13 +312,22 @@ namespace RaywattApp.ViewModels
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {
+            var sw = Stopwatch.StartNew();
+
             if (!DeviceStatus.IsAngioConnected)
             {
                 IsOctExpanded = true;
             }
+
+            sw.Restart();
             DrawCrossSectionImage();
+            Console.WriteLine($"[Timer] DrawCrossSectionImage(): {sw.ElapsedMilliseconds}ms");
+
+            sw.Restart();
             DrawAngioImage();
+            Console.WriteLine($"[Timer] DrawAngioImage(): {sw.ElapsedMilliseconds}ms");
         }
+
 
         private void leaveToPage(string viewPage)
         {
@@ -324,9 +341,32 @@ namespace RaywattApp.ViewModels
             WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
         }
 
+        private void EnsureWriteableBitmap(Mat mat)
+        {
+            PixelFormat format = PixelFormats.Bgr24;
+            int bytesPerPixel = (mat.Channels() * mat.ElemSize1());
+            int stride = mat.Width * bytesPerPixel;
+
+            if (_cachedBitmap == null || _cachedBitmap.PixelWidth != mat.Width || _cachedBitmap.PixelHeight != mat.Height)
+            {
+                _cachedStride = stride;
+                _cachedBitmap = new WriteableBitmap(mat.Width, mat.Height, 96, 96, format, null);
+            }
+        }
+
+        private void UpdateAngioImage(Mat mat)
+        {
+            EnsureWriteableBitmap(mat);
+
+            _cachedBitmap!.WritePixels(new Int32Rect(0, 0, mat.Width, mat.Height), mat.Data, _cachedStride * mat.Height, _cachedStride);
+
+            AngioImage = _cachedBitmap;
+        }
+
         private void DrawAngioImage()
         {
-            AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(_angioManager.ImgAngio);
+            //AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(_angioManager.ImgAngio);
+            UpdateAngioImage(_angioManager.ImgAngio);
         }
     }
 }
