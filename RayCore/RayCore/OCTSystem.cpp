@@ -1800,6 +1800,10 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 		}
 		pRJController->changeSMProfileToLoadUnload();
 
+		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
+		pRJController->Move(eStepMotorIndex::Pullback, 20000, false, 0x08 /* photo-sensor #4 */);
+		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+
 		// in case of homing failed
 		if (!pRJController->GetPhotoSensorOnOff(0))
 		{
@@ -1809,14 +1813,11 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 			if (pSystem->m_pThreadRotaryJunction->isRun && !pRJController->GetPhotoSensorOnOff(0)) {
 				pRJController->Current(eStepMotorIndex::Hub, pRJController->ConvertMMtoStep(PULLBACK_MAX_DISTANCE));
 				pRJController->Move(eStepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL, false, 0x1 /* photo-sensor #1 */);
-				pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
+				pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun, true);
 			}
-			pRJController->Current(eStepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL);		
+			
+			pRJController->Current(eStepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL);
 		}
-
-		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
-		pRJController->Move(eStepMotorIndex::Pullback, 20000, false, 0x08 /* photo-sensor #4 */);
-		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	}
 	else if (pSystem->m_isTestMode)
 	{
@@ -2436,11 +2437,15 @@ void COCTSystem::laserOnOff(bool isOn) {
 
 	pLaser->LaserOnOff(isOn);
 }
-bool COCTSystem::waitForStepMotors(bool& runFlag) {
+bool COCTSystem::waitForStepMotors(bool& runFlag, bool log) {
 	if (!m_pRJController->IsConnected()) return false;
 
 	Sleep(100);
 	while (m_pRJController->IsMoving() && runFlag) {
+		if (log) {
+			PLOGI.printf("photoSensor %d %d %d %d %d %d", m_pRJController->GetPhotoSensorOnOff(0), m_pRJController->GetPhotoSensorOnOff(1), m_pRJController->GetPhotoSensorOnOff(2)
+				, m_pRJController->GetPhotoSensorOnOff(3), m_pRJController->GetPhotoSensorOnOff(4), m_pRJController->GetPhotoSensorOnOff(5));
+		}
 		Sleep(30);
 	}
 

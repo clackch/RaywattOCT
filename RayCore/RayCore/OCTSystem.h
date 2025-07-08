@@ -216,7 +216,7 @@ private:
 	void setBrightnessContrastAllSessions();
 	void redrawCutView();
 	void laserOnOff(bool isOn);
-	bool waitForStepMotors(bool& runFlag);
+	bool waitForStepMotors(bool& runFlag, bool log = false);
 	bool waitForStepMotors(eStepMotorIndex idxMotor, bool& runFlag);
 	void calculateIntensity(cv::Mat image);
 	std::vector<std::vector<std::string>> readLoadSequence();
