@@ -66,12 +66,16 @@ namespace RaywattApp.ViewModels.Dialog
             IsGuidewireTwoOn = ray3DStatus.IsObjectVisible(Ray3DObject.GuideWire2);
         }
 
-        private void updateVisibility(Ray3DObject obj, bool visible)
+        private static void updateVisibility(Ray3DObject obj, bool visible)
         {
 
             Ray3DObjectMode mode = (visible) ? ((ray3DStatus.CutViewOn) ? Ray3DObjectMode.Cut : Ray3DObjectMode.Full) : Ray3DObjectMode.Hide;
             ray3DStatus.ShowObject(obj, mode);
-            ODSOCT_Render();
+            int ray3DResult = ODSOCT_Render();
+            if (ray3DResult == 0)
+            {
+                _log.Error("ODSOCT_Render Error");
+            }
         }
 
         public override void SetParameter(IModelessPatient parent, object parameter)

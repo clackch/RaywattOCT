@@ -15,8 +15,8 @@ namespace RaywattApp.ViewModels.Dialog
             Title = data["title"].ToString();
             Message = data["message"].ToString();
 
-            if(data.ContainsKey("error"))
-                IsError = (bool)data["error"];
+            if (data.TryGetValue("error", out var errorObj) && errorObj is bool error)
+                IsError = error;
             else
                 IsError = false;
         }

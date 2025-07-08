@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using log4net;
 using RaywattApp.Common.Bases;
-using System.Threading;
 using System.Windows.Input;
 using static RaywattOCT.RayCoreWrapper;
 
@@ -15,7 +14,7 @@ namespace RaywattApp.ViewModels.Setting
         [ObservableProperty]
         private string _btnName;
 
-        private bool isRJCleanModeOnOff = false;
+        private bool isRJCleanModeOnOff;
 
         private ICommand _rJCleanModeOnOffCommand;
         public ICommand RJCleanModeOnOffCommand
@@ -35,7 +34,13 @@ namespace RaywattApp.ViewModels.Setting
             _log.Debug("OnNavigating");
 
             if (isRJCleanModeOnOff)
-                RayRJCleanModeOnOff(false);
+            {
+                RayError result = (RayError)RayRJCleanModeOnOff(false);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayRJCleanModeOnOff Error");
+                }
+            }
         }
 
         private void RJCleanModeOnOff()

@@ -14,6 +14,7 @@ using RaywattApp.Common.Angio;
 using System.Diagnostics;
 using System.IO;
 using RaywattApp.Common.Util;
+using RaywattApp.ViewModels.Admin;
 
 namespace RaywattApp
 {
@@ -59,7 +60,7 @@ namespace RaywattApp
         /// <summary>
         /// Configures the services for the application.
         /// </summary>
-        private static IServiceProvider ConfigureServices()
+        private static ServiceProvider ConfigureServices()
         {
             _log.Debug("ConfigureServices");
 
@@ -69,6 +70,7 @@ namespace RaywattApp
 
             //ViewModel 등록
             services.AddTransient(typeof(MainViewModel));
+            services.AddTransient(typeof(OutsetLoginViewModel));
             services.AddTransient(typeof(OutsetLoadingViewModel));
             services.AddTransient(typeof(PatientListViewModel));
             services.AddTransient(typeof(PatientNewViewModel));
@@ -136,6 +138,11 @@ namespace RaywattApp
             services.AddTransient(typeof(NewPatientDialogViewModel));
             services.AddTransient(typeof(DicomPacsDialogViewModel));
 
+            //Admin
+            services.AddTransient(typeof(UserListVIewModel));
+            services.AddTransient(typeof(UserNewViewModel));
+            services.AddTransient(typeof(UserEditViewModel));
+
             //IDatabaseService 등록 (Singleton 사용 안함 => Connection Pooling을 Default로 사용)
             services.AddTransient<IDatabaseService, SqlService>(obj => new SqlService(connectionString));
             services.AddTransient(typeof(SqlManager));
@@ -164,7 +171,7 @@ namespace RaywattApp
             };
         }
 
-        private void LogUnhandledException(Exception exception, string source)
+        private static void LogUnhandledException(Exception exception, string source)
         {
             _log.Debug("LogUnhandledException");
 

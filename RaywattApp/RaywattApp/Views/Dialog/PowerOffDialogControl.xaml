@@ -37,7 +37,7 @@
             <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
                 <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
                 <StackPanel Width="8"/>
-                <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding ExtraCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Switch User], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding ExtraCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Log out], Source={StaticResource L10N}}"/>
             </StackPanel>
 
             <StackPanel Grid.Row="4" Grid.Column="1" VerticalAlignment="Top">

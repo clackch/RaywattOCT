@@ -1,0 +1,65 @@
+﻿<Page x:Class="RaywattApp.Views.Admin.UserListPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:RaywattApp.Views.Admin"
+      xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+      xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
+      mc:Ignorable="d" 
+      d:DesignHeight="1024" d:DesignWidth="1280"
+      Background="{DynamicResource GrayscaleGray8Brush}"
+      Title="UserListPage">
+
+    <Grid Margin="60,0,60,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Height="60">
+            
+        </Grid>
+
+        <StackPanel Grid.Row="1">
+            <StackPanel Height="40"/>
+            <StackPanel Height="164" Orientation="Horizontal">
+                <Image Source="{svgc:SvgImage Source=/res/icon/fasterWhite.svg}" Width="284" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                <StackPanel Width="68"/>
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Institute Info], Source={StaticResource L10N}}"/>
+
+                    </StackPanel>
+                    <StackPanel Height="8"/>
+                    <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Institute Info], Source={StaticResource L10N}}"/>
+                    <StackPanel Height="19"/>
+                    <Label Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Institute Info], Source={StaticResource L10N}}"/>
+                </StackPanel>
+            </StackPanel>
+            <Separator Background="{DynamicResource GrayscaleGray5Brush}"/>
+            <StackPanel Height="38"/>
+            <Grid Height="42">
+                <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [User Management], Source={StaticResource L10N}}"/>
+            </Grid>
+            <StackPanel Height="20"/>
+            <DataGrid ItemsSource="{Binding Users}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding Id}" Header="{Binding [ID], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding Password}" Header="{Binding [Password], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding PasswordChangedAt, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Password Changed At], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding PasswordReset}" Header="{Binding [Password Reset], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding TermsAgreedAt, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Terms Agreed At], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding CreateDate, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Create Date], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding UpdateDate, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Update Date], Source={StaticResource L10N}}" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+        </StackPanel>
+
+        <Grid Grid.Row="2" Height="40" Background="{DynamicResource GrayscaleBlackBrush}"/>
+        
+    </Grid>
+</Page>

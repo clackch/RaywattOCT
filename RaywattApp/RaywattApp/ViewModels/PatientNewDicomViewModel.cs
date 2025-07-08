@@ -93,11 +93,11 @@ namespace RaywattApp.ViewModels
             {
                 Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
                 PrevStatus = (PrevStatus)data["prevStatus"];
-                if (data.ContainsKey("selectedDicomServer"))
+                if (data.TryGetValue("selectedDicomServer", out var serverObj) && serverObj is DicomServer temp)
                 {
-                    DicomServer temp = (DicomServer)data["selectedDicomServer"];
                     SelectedDicomServer = DicomServers.FirstOrDefault(x => x.Id == temp.Id);
                 }
+
             }
         }
 

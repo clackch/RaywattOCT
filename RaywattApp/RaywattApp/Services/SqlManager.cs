@@ -338,7 +338,7 @@ namespace RaywattApp.Services
 
             return _databaseService.UpdateData(commandText, sqlParameters);
         }
-        
+
         public int UpsertPatientCase(Dictionary<string, Object> sqlParameters)
         {
             _log.Debug("UpsertPatientCase");
@@ -546,10 +546,23 @@ namespace RaywattApp.Services
 
             return _databaseService.DeleteData(commandText, sqlParameters);
         }
+
+        /**
+         * User
+         */
+        public IList<User> SelectUserList()
+        {
+            _log.Debug("SelectUserList");
+
+            string commandText = SqlQuery.GetQuery("SelectUserList");
+
+            return _databaseService.GetDatas<User>(commandText);
+        }
+
         /**
          * Extra
          */
-        private string getAdditionalCondition(Dictionary<string, Object> sqlAdditionalCondition)
+        private static string getAdditionalCondition(Dictionary<string, Object> sqlAdditionalCondition)
         {
             _log.Debug("getAddtionalCondition");
 

@@ -29,9 +29,6 @@ using System.IO;
 using System.Windows.Media;
 using RaywattApp.Common.Angio;
 using System.Xml;
-using System.Windows.Controls;
-using OpenCvSharp.WpfExtensions;
-using System.Diagnostics;
 
 namespace RaywattApp.ViewModels
 {
@@ -44,13 +41,13 @@ namespace RaywattApp.ViewModels
         private CallbackFunctionForDetection cbLumenContour;
         public CallbackFunctionForDetection CBLumenContour => (this.cbLumenContour) ?? (this.cbLumenContour = new CallbackFunctionForDetection(OnRecvLumenContour));
 
-        private bool isLumenContourSave = false;
+        private bool isLumenContourSave;
 
-        private bool isLumenDetectedFrontDone = false;
+        private bool isLumenDetectedFrontDone;
 
-        private bool isLumenLoadedInit = false;
+        private bool isLumenLoadedInit;
 
-        private bool isLumenProfileInit = false;
+        private bool isLumenProfileInit;
 
         private double originSectionProximalX;
 
@@ -68,7 +65,11 @@ namespace RaywattApp.ViewModels
             {
                 degree = value;
                 OnPropertyChanged(nameof(Degree));
-                RaySetProperty(Property.LongitudeDegree, degree);
+                RayError result = (RayError)RaySetProperty(Property.LongitudeDegree, degree);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
             }
         }
 
@@ -188,7 +189,11 @@ namespace RaywattApp.ViewModels
             {
                 _brightness = value;
                 OnPropertyChanged(nameof(Brightness));
-                RaySetProperty(Property.Brightness, value);
+                RayError result = (RayError)RaySetProperty(Property.Brightness, value);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayOpenImage Error");
+                }
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
             }
         }
@@ -201,7 +206,7 @@ namespace RaywattApp.ViewModels
             {
                 _contrast = value;
                 OnPropertyChanged(nameof(Contrast));
-                RaySetProperty(Property.Contrast, value);
+                RayError result = (RayError)RaySetProperty(Property.Contrast, value);
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
             }
         }
@@ -398,7 +403,11 @@ namespace RaywattApp.ViewModels
             base.OnNavigated(sender, navigatedEventArgs);
             _log.Debug("OnNavigated");
 
-            RayRegisterDetectionCallback(Marshal.GetFunctionPointerForDelegate(CBLumenContour));
+            RayError result = (RayError)RayRegisterDetectionCallback(Marshal.GetFunctionPointerForDelegate(CBLumenContour));
+            if (result != RayError.OK)
+            {
+                _log.Error("RayRegisterDetectionCallback Error");
+            }
             var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
 
             if (extraData != null)
@@ -456,7 +465,11 @@ namespace RaywattApp.ViewModels
             _log.Debug("OnNavigating");
             Save();
 
-            RayUnregisterDetectionCallback();
+            RayError result = (RayError)RayUnregisterDetectionCallback();
+            if (result != RayError.OK)
+            {
+                _log.Error("RayUnregisterDetectionCallback Error");
+            }
         }
 
         /*
@@ -965,7 +978,7 @@ namespace RaywattApp.ViewModels
                 return normalizedValue >= -2 && normalizedValue <= 2;
             }).ToList();
 
-            if(!filteredValues.Any())
+            if (filteredValues.Count == 0)
             {
                 return 0.0;
             }
@@ -1084,7 +1097,7 @@ namespace RaywattApp.ViewModels
             StopPlayback();
         }
 
-        public void Window_ManipulationStarting(ManipulationStartingEventArgs e)
+        public static void Window_ManipulationStarting(ManipulationStartingEventArgs e)
         {
             _log.Debug("Manipulation Starting");
             e.Handled = true;
@@ -1141,7 +1154,7 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        public void Window_ManipulationCompleted(ManipulationCompletedEventArgs e)
+        public static void Window_ManipulationCompleted(ManipulationCompletedEventArgs e)
         {
             _log.Debug("Manipulation Completed");
             e.Handled = true;
@@ -1355,7 +1368,7 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private string ConvertMeasurementsToJson(List<Measurement> param)
+        private static string ConvertMeasurementsToJson(List<Measurement> param)
         {
             List<Measurement> measurements = new List<Measurement>();
 
@@ -1821,8 +1834,8 @@ namespace RaywattApp.ViewModels
                 int channels = 3;
 
                 string file = PatientCase.Image;
-                string angioFile = file.Substring(0, file.Length - 3) + "angioframes";
-                string paramsFile = file.Substring(0, file.Length - 3) + "params";
+                string angioFile = string.Concat(file.AsSpan(0, file.Length - 3), "angioframes");
+                string paramsFile = string.Concat(file.AsSpan(0, file.Length - 3), "params");
 
                 string directory = Path.Combine(Constants.DataRootPath, PatientCase.PatientId);
                 string angioPath = Path.Combine(directory, angioFile);
@@ -1965,7 +1978,7 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private ImageSource ConvertMatsToImageSource(Mat mat)
+        private static BitmapImage ConvertMatsToImageSource(Mat mat)
         {
             using (var stream = new MemoryStream())
             {
@@ -2221,7 +2234,7 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private void OpticalFlow(List<Mat> frames, ref List<List<Byte>> statusList, ref List<List<Point>> nextPoints, ref List<List<Point>> pastPoints)
+        private static void OpticalFlow(List<Mat> frames, ref List<List<Byte>> statusList, ref List<List<Point>> nextPoints, ref List<List<Point>> pastPoints)
         {
             int checkTooFast = 400;
 
@@ -2310,7 +2323,7 @@ namespace RaywattApp.ViewModels
         }
 
 
-        private Mat Skeletonize(Mat img)
+        private static Mat Skeletonize(Mat img)
         {
             Mat skel = Mat.Zeros(img.Size(), MatType.CV_8UC1);
             Mat temp = new Mat();

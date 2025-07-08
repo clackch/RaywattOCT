@@ -30,8 +30,8 @@
                     <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="home" Margin="14,9,0,9" Command="{Binding HomeCommand}" Visibility="{Binding IsHome, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="setting" Margin="0,9,6,9" Command="{Binding SettingCommand}" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
-                    <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="power" Margin="0,9,12,9" Command="{Binding ExitCommand}" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                    <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="setting" Margin="0,9,6,9" Command="{Binding SettingCommand}" Visibility="{Binding IsSetting, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                    <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="power" Margin="0,9,12,9" Command="{Binding ExitCommand}" Visibility="{Binding IsExit, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                 </StackPanel>
             </Grid>
             <Grid Grid.Row="2">

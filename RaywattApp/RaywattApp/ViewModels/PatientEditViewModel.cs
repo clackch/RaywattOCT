@@ -216,7 +216,7 @@ namespace RaywattApp.ViewModels
             return true;
         }
 
-        private void CopyPatient(Patient src, Patient dest)
+        private static void CopyPatient(Patient src, Patient dest)
         {
             _log.Debug("CopyPatient");
 

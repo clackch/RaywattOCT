@@ -15,13 +15,13 @@ namespace RaywattApp.Common.Converters
             string? classification = parameter.ToString();
             string? code = value.ToString();
 
-            if (classification == null || code == null)
+            if (string.IsNullOrEmpty(classification) || string.IsNullOrEmpty(code))
                 return "";
 
-            if (!CodeDefinition.Codes[classification].ContainsKey(code))
-                return code;
+            if (CodeDefinition.Codes.TryGetValue(classification, out var codeDict) && codeDict.TryGetValue(code, out var label))
+                return label;
 
-            return CodeDefinition.Codes[classification][code];
+            return code;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

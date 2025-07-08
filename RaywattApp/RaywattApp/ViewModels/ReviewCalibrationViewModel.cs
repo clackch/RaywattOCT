@@ -191,7 +191,11 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("RestartReview");
 
-            RayRestartReview();
+            RayError result = (RayError)RayRestartReview();
+            if (result != RayError.OK)
+            {
+                _log.Error("RayRestartReview Error");
+            }
 
             DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current = 0;
             ReviewStatus.IsRestartLumenDetection = true;

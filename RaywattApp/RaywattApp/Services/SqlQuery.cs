@@ -264,6 +264,13 @@ namespace RaywattApp.Services
                 WHERE server_type = @server_type
                 ORDER BY ae_title
                 ";
+
+            //SelectUserList
+            _query["SelectUserList"] = @$"
+                SELECT id, password, comment, password_changed_at, password_reset, terms_agreed_at, create_date, update_date
+                FROM rv_schema.users
+                ORDER BY id
+                ";
         }
 
         private static void SetInsertQuery()
@@ -366,6 +373,13 @@ namespace RaywattApp.Services
                 , brightness=@brightness, contrast=@contrast, section_proximal=@section_proximal, section_distal=@section_distal
                 , update_date=now()
                 WHERE id=@id
+                ";
+
+            //UpdatePatientCaseId
+            _query["UpdatePatientCaseId"] = @$"
+                UPDATE rv_schema.patient_case
+                SET id = REGEXP_REPLACE(id, @originId, @id)
+                WHERE patient_id = @id;
                 ";
 
             //UpdatePatientCaseAnnotationLumenContour

@@ -37,6 +37,7 @@
                 <StackPanel>
                     <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingDatabasePage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingDatabasePage}" Content="{Binding [Storage], Source={StaticResource L10N}}"/>
                     <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingLogPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingLogPage}" Content="{Binding [Log], Source={StaticResource L10N}}"/>
+                    <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingDicomPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingDicomPage}" Content="{Binding [DICOM], Source={StaticResource L10N}}"/>
                     <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingMaintenancePage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingMaintenancePage}" Content="{Binding [Maintenance], Source={StaticResource L10N}}"/>
                     <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingTermsConditionsPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingTermsConditionsPage}" Content="{Binding [Terms and Conditions], Source={StaticResource L10N}}"/>
                 </StackPanel>
@@ -44,7 +45,7 @@
                 <StackPanel VerticalAlignment="Bottom" Margin="0,0,0,20">
                     <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingAboutPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingAboutPage}" Content="{Binding [About], Source={StaticResource L10N}}"/>
                 </StackPanel>
-                
+
                 <!--
                 <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingLocalizationPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingLocalizationPage}" Content="{Binding [Localization], Source={StaticResource L10N}}"/>
                 <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingServicePage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingServicePage}" Content="{Binding [Service], Source={StaticResource L10N}}"/>

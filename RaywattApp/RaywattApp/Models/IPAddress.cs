@@ -117,7 +117,7 @@ namespace RaywattApp.Models
             return null;
         }
 
-        private string ValidateOctet(string value)
+        private static string ValidateOctet(string value)
         {
             int octet = int.Parse(value);
             if (octet < 0 || octet > 255)

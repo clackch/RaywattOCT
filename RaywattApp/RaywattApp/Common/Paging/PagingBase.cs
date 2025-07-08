@@ -41,7 +41,7 @@ namespace RaywattApp.Common.Paging
         [ObservableProperty]
         private IList<int> _pagingPageSize;
 
-        protected bool bCheckInit = false;
+        protected bool bCheckInit;
 
         private int _pagingSelectedPageSize;
         public int PagingSelectedPageSize
