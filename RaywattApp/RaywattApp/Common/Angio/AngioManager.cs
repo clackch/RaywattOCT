@@ -101,6 +101,8 @@ namespace RaywattApp.Common.Angio
         private bool liveView;
         private static ConcurrentQueue<Mat> imageList;
 
+        public Action OnAngioAvailabilityChanged;
+
         private short angioFrameWidth;
         public short AngioFrameWidth { get { return angioFrameWidth; } set { angioFrameWidth = value; } }
         private short angioFrameHeight;
@@ -524,7 +526,6 @@ namespace RaywattApp.Common.Angio
 
             angioBitsPerPixel = (char)tmpBuffer[offset++];
             double live_time = BitConverter.ToInt64(tmpBuffer, offset); // Time Stamp
-
             offset += sizeof(long);
 
             angioImageSize = angioFrameHeight * angioFrameWidth * angioBitsPerPixel / 8;
@@ -562,17 +563,17 @@ namespace RaywattApp.Common.Angio
                 if (command == (byte)CommandType.FGAngioDisconnected)
                 {
                     imgAngio = ShowNoSignal();
-                    _log.Debug("FGAngio Disconnected command");
+                    _log.Debug("FGAngio Disconnected command ");
                     if (isCathRoomDialogOpen)
                     {
-                        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                        System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                         {
                             ViewModelBase.DeviceStatus.IsAngioConnected = false;
                             Dictionary<string, object> parameter = new Dictionary<string, object>();
                             parameter["title"] = _l10n["Error"];
                             parameter["message"] = _l10n["$MSG023"];
                             _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-                        });
+                        }));
                         isCathRoomDialogOpen = false;
                     }
 
@@ -585,6 +586,7 @@ namespace RaywattApp.Common.Angio
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
                         ViewModelBase.DeviceStatus.IsAngioConnected = false;
+                        OnAngioAvailabilityChanged?.Invoke();
                     });
                 }
                 else if (command == (byte)CommandType.FGAngioConnected)
@@ -610,6 +612,7 @@ namespace RaywattApp.Common.Angio
                     {
                         ViewModelBase.DeviceStatus.IsAngioConnected = true;
                         _log.Debug("Now angio is connected");
+                        OnAngioAvailabilityChanged?.Invoke();
                     });
                 }
                 else if (command == (byte)CommandType.FGBoardExist)
@@ -628,16 +631,14 @@ namespace RaywattApp.Common.Angio
                 {
                     AskDeviceInfo();
                     _log.Debug("IsChpFileChangeSuccess = 1");
-                    if(isChpFileConnected == 0)
-                    {
-                        isChpFileConnected = 1;
-                    }
+                    isChpFileConnected = 1;
                     isChpFileChangeSuccess = 1;
                     ViewModelBase.DeviceStatus.IsAngioInitialized = true;
                     ToggleLive(true);
                 }
                 else if (command == (byte)CommandType.FGFailChangeChp)
                 {
+                    isChpFileConnected = 0;
                     isChpFileChangeSuccess = -1;
                 }
                 Array.Copy(tmpBuffer, Constants.CommandPacketSize, tmpBuffer, 0, tmpBuffer.Length - Constants.CommandPacketSize);
@@ -798,6 +799,7 @@ namespace RaywattApp.Common.Angio
             if (imageList != null)
             {
                 imageList.Clear();
+                _log.Debug("Image_List Clear");
             }
 
             if (get_image != null && get_image.IsAlive)
@@ -864,6 +866,7 @@ namespace RaywattApp.Common.Angio
             {
                 Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
                 ViewModelBase.DeviceStatus.SelectedCathRoom = (CathRoom)data["selectedCathRoom"];
+                OnAngioAvailabilityChanged?.Invoke();
             }
 
             isCathRoomDialogOpen = false;

@@ -423,23 +423,20 @@ namespace RaywattApp.ViewModels
                     _log.Error("ODSOCT_InputData Error");
                 }
 
-                if (CommonUtil.IsPostCase(PatientCase.Procedure))
+                buffer = Marshal.AllocHGlobal(diameter * diameter * depth);
+                CommonUtil.StentsToMemory(PatientCase.LumenStents,
+                    new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize),
+                    buffer,
+                    new OpenCvSharp.Size(diameter, diameter));
+                ray3DResult = ODSOCT_InputSurfaceParameter(Ray3DObject.Stent, 10, 15, ".\\data\\stent_tex.jpg");
+                if (ray3DResult == 0)
                 {
-                    buffer = Marshal.AllocHGlobal(diameter * diameter * depth);
-                    CommonUtil.StentsToMemory(PatientCase.LumenStents,
-                        new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize),
-                        buffer,
-                        new OpenCvSharp.Size(diameter, diameter));
-                    ray3DResult = ODSOCT_InputSurfaceParameter(Ray3DObject.Stent, 10, 15, ".\\data\\stent_tex.jpg");
-                    if (ray3DResult == 0)
-                    {
-                        _log.Error("ODSOCT_InputSurfaceParameter Error");
-                    }
-                    ray3DResult = ODSOCT_InputData(Ray3DObject.Stent, buffer, diameter, diameter, depth, 1, 1, zVal);
-                    if (ray3DResult == 0)
-                    {
-                        _log.Error("ODSOCT_InputData Error");
-                    }
+                    _log.Error("ODSOCT_InputSurfaceParameter Error");
+                }
+                ray3DResult = ODSOCT_InputData(Ray3DObject.Stent, buffer, diameter, diameter, depth, 1, 1, zVal);
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_InputData Error");
                 }
 
                 ray3DResult = ODSOCT_ProcessingDatas();

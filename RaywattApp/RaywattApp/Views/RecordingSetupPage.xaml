@@ -39,7 +39,7 @@
                         <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [$MSG001], Source={StaticResource L10N}}"/>
                     </StackPanel>
                     <Border Grid.Row="2" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}"/>
-                    <Grid Grid.Row="1" Grid.RowSpan="3" Visibility="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource RadioButtonVisibilityReverseConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusLoaded}}">
+                    <Grid Grid.Row="1" Grid.RowSpan="3" Visibility="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource RadioButtonVisibilityReverseConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusEnable}}">
                         <Grid Visibility="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource RadioButtonVisibilityReverseConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusLoading}}">
                             <Label Style="{DynamicResource Pretendard-Medium-28}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG006], Source={StaticResource L10N}}" HorizontalAlignment="Center" Margin="0,70,0,0"/>
                             <Image Source="/res/guide/ConnectCatheter.png"/>

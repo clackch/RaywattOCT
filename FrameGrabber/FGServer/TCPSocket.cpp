@@ -35,6 +35,7 @@ TCPSocket::TCPSocket() {
 		}
 
 		listen(serverSocket, 1);
+		repo.Connect();
 	}
 	catch (const std::exception& ex) {
 		PLOGI.printf("Exception occurred: %s", ex.what());
@@ -64,7 +65,7 @@ void TCPSocket::SetCommandPacket(char commandType) {
 }
 
 void TCPSocket::SetImagePacketHeader(FrameGrabber& fg) {
-	imagePacketSize = IMAGE_HEADER_SIZE + fg.lHeight * fg.lWidth * fg.wBitsPerPixel / 8 + IMAGE_TAIL_SIZE;
+	imagePacketSize = IMAGE_HEADER_SIZE + repo.GetCropRegion().height * repo.GetCropRegion().width* fg.wBitsPerPixel / 8 + IMAGE_TAIL_SIZE;
 	fg.sc.pRecvBuf = (uchar*)malloc(imagePacketSize - IMAGE_HEADER_SIZE - IMAGE_TAIL_SIZE);
 	sendBuffer = new char[imagePacketSize];
 
@@ -74,10 +75,11 @@ void TCPSocket::SetImagePacketHeader(FrameGrabber& fg) {
 	offset += sizeof(sof);
 	memcpy(sendBuffer + offset, &type, sizeof(type));
 	offset += sizeof(type);
-	memcpy(sendBuffer + offset, &fg.lHeight, sizeof(fg.lHeight));
-	offset += sizeof(fg.lHeight);
-	memcpy(sendBuffer + offset, &fg.lWidth, sizeof(fg.lWidth));
-	offset += sizeof(fg.lWidth);
+	PLOGI.printf("%hd %hd", repo.GetCropRegion().height, repo.GetCropRegion().width);
+	memcpy(sendBuffer + offset, &repo.GetCropRegion().height, sizeof(repo.GetCropRegion().height));
+	offset += sizeof(repo.GetCropRegion().height);
+	memcpy(sendBuffer + offset, &repo.GetCropRegion().width, sizeof(repo.GetCropRegion().width));
+	offset += sizeof(repo.GetCropRegion().width);
 	memcpy(sendBuffer + offset, &fg.wBitsPerPixel, sizeof(fg.wBitsPerPixel));
 	offset += sizeof(fg.wBitsPerPixel);
 }
@@ -90,10 +92,10 @@ void TCPSocket::SetDeviceInfoPacket(FrameGrabber& fg, char* buffer) {
 	memcpy(buffer + offset++, &sof, sizeof(sof));
 	memcpy(buffer + offset++, &packetType, sizeof(packetType));
 	memcpy(buffer + offset++, &commandType, sizeof(commandType));
-	memcpy(buffer + offset, &fg.lHeight, sizeof(fg.lHeight));
-	offset += sizeof(fg.lHeight);
-	memcpy(buffer + offset, &fg.lWidth, sizeof(fg.lWidth));
-	offset += sizeof(fg.lWidth);
+	memcpy(buffer + offset, &repo.GetCropRegion().height, sizeof(repo.GetCropRegion().height));
+	offset += sizeof(repo.GetCropRegion().height);
+	memcpy(buffer + offset, &repo.GetCropRegion().width, sizeof(repo.GetCropRegion().width));
+	offset += sizeof(repo.GetCropRegion().width);
 	memcpy(buffer + offset++, &fg.wBitsPerPixel, sizeof(fg.wBitsPerPixel));
 	checkSum = CalcCheckSum(buffer, 8);
 	memcpy(buffer + offset++, &checkSum, sizeof(checkSum));
@@ -155,7 +157,6 @@ void TCPSocket::ReceivePacket(FrameGrabber& fg) {
 			int sendResult;
 			switch (commandType) {
 			case CommandType::FGStarted:
-				
 				PLOGI.printf("FGStarted");
 				tmpRecvBufferLen -= 5;
 				memmove(tmpRecvBuffer, tmpRecvBuffer + 5, tmpRecvBufferLen);
@@ -295,6 +296,7 @@ void TCPSocket::ChpFilePacketProcess(FrameGrabber& fg) {
 		PLOGI.printf("Success to read .chp file");
 		free(fg.sc.pRecvBuf);
 		fg.CreateFromFG();
+		repo.InitCropRegion(fg); 
 		SetImagePacketHeader(fg);
 		SetCommandPacket(CommandType::FGSuccessChangeChp);
 		sendResult = send(clientSocket, commandBuffer, 5, 0);
@@ -437,18 +439,23 @@ void TCPSocket::LiveFrame(FrameGrabber& fg) {
 	if (bufferResult != 0 || pVidHeader == nullptr) {
 		retryCount++; 
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		if (retryCount > 100) { // 이미지를 0.1초 이상 받아오지 못하는 경우 새로고침
+		if (retryCount > 100) { // 이미지를 1초 이상 받아오지 못하는 경우 새로고침
 			RefreshLiveStream(fg);
 			retryCount = 0;
 		}
 		return;
 	}
 	std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	//여기에서 Crop 기능을 추가해야하는데
+	int cropsize = repo.GetCropRegion().height * repo.GetCropRegion().width;
+	std::vector<unsigned char> croppedBuffer(cropsize * fg.wBitsPerPixel / 8);
+	if (repo.ApplyCrop(pVidHeader, fg, croppedBuffer));
+	else PLOGI.printf("[Crop] Failed to apply crop. Using full image.");
 	int offset = 7; 
 	memcpy(sendBuffer + offset, &livetime, sizeof(livetime));
 	offset += sizeof(livetime);
-	memcpy(sendBuffer + offset, pVidHeader->pBuffer, fg.m_LiveStreamInfo.nDestinationWidth * fg.m_LiveStreamInfo.nDestinationHeight * fg.wBitsPerPixel / 8);
-	offset += fg.m_LiveStreamInfo.nDestinationWidth * fg.m_LiveStreamInfo.nDestinationHeight * fg.wBitsPerPixel / 8;
+	memcpy(sendBuffer + offset, croppedBuffer.data(), cropsize * fg.wBitsPerPixel / 8);
+	offset += cropsize * fg.wBitsPerPixel / 8;
 	checkSum = CalcCheckSum(sendBuffer, offset); 
 	memcpy(sendBuffer + offset, &checkSum, sizeof(checkSum)); 
 	offset += sizeof(checkSum); 
@@ -464,7 +471,7 @@ void TCPSocket::LiveFrame(FrameGrabber& fg) {
 
 void TCPSocket::StartLiveFrameThread(FrameGrabber& fg) {
 	if (!liveFrameThreadRunning) {
-		 
+
 		ERRTYPE result = eHD_LiveStreamMode(fg.m_ImageHandle, LVM_RUN); // LiveMode_RUN
 		if (result != 0)
 		{

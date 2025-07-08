@@ -19,6 +19,7 @@ using static RaywattOCT.RayCoreWrapper;
 using RaywattApp.Common.Angio;
 using System.Threading;
 using OpenCvSharp;
+using System.Threading.Tasks;
 
 namespace RaywattApp.ViewModels
 {
@@ -450,20 +451,23 @@ namespace RaywattApp.ViewModels
             _log.Debug("CatheterFailReceiver");
             DeviceStatus.CatheterStatus = Constants.CatheterStatusFailed;//Fail Receive
 
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["title"] = _l10n["Error"];
-            parameter["message"] = _l10n["$MSG007"];
-            parameter["error"] = true;
-            var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
-            if (result != null && result.DialogAnswer == DialogResults.Answer.Undefined)
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
-                parameter.Clear();
-                parameter["patient"] = Patient;
-                parameter["patientCase"] = PatientCase;
-                parameter["prevStatus"] = PrevStatus;
-                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingCatheterFailPage) { Parameter = parameter });
-            }
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["title"] = _l10n["Error"];
+                parameter["message"] = _l10n["$MSG007"];
+                parameter["error"] = true;
+                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                if (result != null && result.DialogAnswer == DialogResults.Answer.Undefined)
+                {
+                    parameter.Clear();
+                    parameter["patient"] = Patient;
+                    parameter["patientCase"] = PatientCase;
+                    parameter["prevStatus"] = PrevStatus;
+                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingCatheterFailPage) { Parameter = parameter });
+                }
+            });
         }
 
         private void CatheterUnlockReceiver() 
@@ -615,7 +619,7 @@ namespace RaywattApp.ViewModels
         private DispatcherTimer timer = new DispatcherTimer();
         private void ProgressLoadTest(object sender, EventArgs e)
         {
-            if (DeviceStatus.CatheterStatus == Constants.CatheterStatusLoaded)
+            if (DeviceStatus.CatheterStatus == Constants.CatheterStatusEnable)
             {
                 timer.Stop();
             }
@@ -653,8 +657,26 @@ namespace RaywattApp.ViewModels
             RayScannerState curState = (RayScannerState)RayGetProperty(Property.CurrentState);
             DeviceStatus.IsLiveView = (bool)(RayGetProperty(Property.MotorOnOff) != 0);
         }
+
         protected static void handleProgress(RayCallbackRequest request, int progress, int param) { }
-        protected static void handleError(RayCallbackRequest request, RayError error, int param) { }
+
+        protected static void handleError(RayCallbackRequest request, RayError error, int param)
+        {
+            _log.Debug("error: " + error.ToString());
+
+            Task.Run(() =>
+            {
+                switch (error)
+                {
+                    case RayError.CatheterNotValid:
+                        CatheterFailReceiver();
+                        break;
+                    default:
+                        break;
+                }
+            });
+        }
+
         protected void handleEvent(RayCallbackRequest request, RayEvent e, int param)
         {
             _log.Debug("event: " + e.ToString());
@@ -682,6 +704,7 @@ namespace RaywattApp.ViewModels
                     break;
             }
         }
+
         protected void handleWorkDone(RayCallbackRequest request, RayWorkItem work, int param)
         {
             _log.Debug("workItem - " + work.ToString());
@@ -699,6 +722,9 @@ namespace RaywattApp.ViewModels
                     break;
                 case RayWorkItem.UnloadCatheter:
                     DeviceStatus.CatheterStatus = Constants.CatheterStatusConnected;
+                    break;
+                case RayWorkItem.EnableCatheter:
+                    DeviceStatus.CatheterStatus = Constants.CatheterStatusEnable;
                     break;
                 case RayWorkItem.Recording:
                     if (DeviceStatus.IsAngioConnected)

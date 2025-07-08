@@ -62,6 +62,8 @@ protected:
 	int m_nSheathSearchRange;
 	int m_nZOffset;
 
+	int m_delayLineMovingDirection = 1;
+
 	cv::Ptr<cv::CLAHE> clahe;
 public:
 	COCTImaging(Setting, CMessageService*);
@@ -107,6 +109,7 @@ public:
 
 	int GetSheathPosition() { return m_nSheathPosition; }
 	void SetZOffset(int nOffset) { m_nZOffset = nOffset; }
+	void SetDelayLineMovingDirection(int direction) { m_delayLineMovingDirection = direction; }
 
 	static void SetImageCompensation(bool ImageCompensated);
 	static void SetImageCompensationControlWindow(bool ImageCompensationControlWindowOn, Setting setting);

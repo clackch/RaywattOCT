@@ -20,7 +20,8 @@ enum class RayError {
 	InvalidArgument,
 	WrongState,
 	WrongSession,
-	InvalidFunctionCall
+	InvalidFunctionCall,
+	RotaryJunctionError,
 };
 
 enum class RayProperty {
@@ -96,7 +97,8 @@ enum class RayWorkItem {
 	UnloadCatheter,
 	ValidateCatheter,
 	InitializeRotaryJunction,
-	CleanRotaryJunction
+	CleanRotaryJunction,
+	EnableCatheter
 };
 
 enum class RaySession {
