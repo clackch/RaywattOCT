@@ -60,7 +60,7 @@ namespace RaywattApp
         /// <summary>
         /// Configures the services for the application.
         /// </summary>
-        private static IServiceProvider ConfigureServices()
+        private static ServiceProvider ConfigureServices()
         {
             _log.Debug("ConfigureServices");
 
@@ -171,7 +171,7 @@ namespace RaywattApp
             };
         }
 
-        private void LogUnhandledException(Exception exception, string source)
+        private static void LogUnhandledException(Exception exception, string source)
         {
             _log.Debug("LogUnhandledException");
 

@@ -1,17 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RaywattApp.Common.Bases;
-using System;
 using System.Globalization;
 using System.Windows.Data;
 using Point = System.Windows.Point;
 
 namespace RaywattApp.Common.Converters
 {
-    internal class CoRegistrationTranslateConverter : IValueConverter
+    public class CoRegistrationTranslateConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

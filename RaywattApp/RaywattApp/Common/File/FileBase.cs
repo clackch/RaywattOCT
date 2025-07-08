@@ -49,7 +49,7 @@ namespace RaywattApp.Common.File
             CloseDialog();
         }
 
-        protected void CloseDialog()
+        protected static void CloseDialog()
         {
             DialogWindow? dialog = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive) as DialogWindow;
             if (dialog != null)

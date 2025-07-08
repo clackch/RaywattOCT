@@ -3,14 +3,14 @@ using System.Windows.Controls.Primitives;
 
 namespace RaywattApp.Views.Component
 {
-    internal class IconMultiToggleButton : ToggleButton, SvgComponentBase
+    public class IconMultiToggleButton : ToggleButton, SvgComponentBase
     {
         private const string resPath = "/res/icon/";
 
-        public static DependencyProperty IconProperty = DependencyProperty.Register("Icon", typeof(string), typeof(IconMultiToggleButton), new PropertyMetadata(null, SvgComponentBase.OnIconPropertyChanged));
+        public static readonly DependencyProperty IconProperty = DependencyProperty.Register("Icon", typeof(string), typeof(IconMultiToggleButton), new PropertyMetadata(null, SvgComponentBase.OnIconPropertyChanged));
         public string Icon { get => (string)GetValue(IconProperty); set => SetValue(IconProperty, value); }
 
-        public static DependencyProperty CheckedIconProperty = DependencyProperty.Register("CheckedIcon", typeof(string), typeof(IconMultiToggleButton), new PropertyMetadata(null, OnCheckedIconPropertyChanged));
+        public static readonly DependencyProperty CheckedIconProperty = DependencyProperty.Register("CheckedIcon", typeof(string), typeof(IconMultiToggleButton), new PropertyMetadata(null, OnCheckedIconPropertyChanged));
         public string CheckedIcon { get => (string)GetValue(CheckedIconProperty); set => SetValue(CheckedIconProperty, value); }
 
 

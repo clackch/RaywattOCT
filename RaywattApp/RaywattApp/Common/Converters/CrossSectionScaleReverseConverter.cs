@@ -5,7 +5,7 @@ using System.Windows.Data;
 
 namespace RaywattApp.Common.Converters
 {
-    internal class CrossSectionScaleReverseConverter : IValueConverter
+    public class CrossSectionScaleReverseConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

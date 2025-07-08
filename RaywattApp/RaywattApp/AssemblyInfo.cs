@@ -1,3 +1,4 @@
+using System.Resources;
 using System.Windows;
 
 [assembly: ThemeInfo(
@@ -10,3 +11,5 @@ using System.Windows;
 )]
 
 [assembly: log4net.Config.XmlConfigurator(ConfigFile = "log4net.config", Watch = true)]
+
+[assembly: NeutralResourcesLanguage("en-US", UltimateResourceFallbackLocation.MainAssembly)]
