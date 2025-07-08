@@ -17,7 +17,8 @@ namespace RaywattOCT
             InvalidArgument,
             WrongState,
             WrongSession,
-            InvalidFunctionCall
+            InvalidFunctionCall,
+            RotaryJunctionError
         };
 
         public enum Property : int

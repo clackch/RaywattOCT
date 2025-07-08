@@ -1693,7 +1693,10 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 
 	// In case of Homing failed
 	if (pRJController->GetPhotoSensorOnOff(0) == false) {
+		PLOGI.printf("Pullback Homing failed.");
+		pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_ERROR);
 		pRJController->UpdateState(eRJState::Error);
+		pSystem->postMessage(WM_NOTIFY_ERROR_OCCURED, (WPARAM)RayError::RotaryJunctionError);
 	}
 
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
