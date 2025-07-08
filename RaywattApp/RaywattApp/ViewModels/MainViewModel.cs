@@ -660,7 +660,7 @@ namespace RaywattApp.ViewModels
 
         protected static void handleProgress(RayCallbackRequest request, int progress, int param) { }
 
-        protected static void handleError(RayCallbackRequest request, RayError error, int param)
+        protected void handleError(RayCallbackRequest request, RayError error, int param)
         {
             _log.Debug("error: " + error.ToString());
 

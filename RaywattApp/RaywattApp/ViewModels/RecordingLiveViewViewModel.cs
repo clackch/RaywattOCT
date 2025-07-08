@@ -174,7 +174,7 @@ namespace RaywattApp.ViewModels
             }
             else
             {
-                _angioManager.ImgAngio = _angioManager.ShowNoSignal();
+                _angioManager.ImgAngio = AngioManager.ShowNoSignal();
                 IsExpandButtonVisible = false;
             }
         }
