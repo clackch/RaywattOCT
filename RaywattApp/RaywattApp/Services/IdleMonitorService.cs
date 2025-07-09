@@ -3,14 +3,12 @@ using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Util;
 using RaywattApp.Models;
-using RaywattApp.ViewModels;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using static RaywattOCT.Ray3DWrapper;
 
 namespace RaywattApp.Services
 {
@@ -51,7 +49,7 @@ namespace RaywattApp.Services
                 await Task.Delay(500);
 
                 // TODO: 특정 Page에서는 아래 실행 되지 않도록 기능 추가
-                //Console.WriteLine(Constants.CurrentPage.ToString());
+                Console.WriteLine(Constants.CurrentPage.ToString());
 
                 if (IsUserActive())
                 {
@@ -152,7 +150,6 @@ namespace RaywattApp.Services
         private void ShowLoginScreen()
         {
             CommonUtil.Exit(DeviceStatus, _angioManager);
-            //WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
         }
         private void ShowLogoutPopup()
         {

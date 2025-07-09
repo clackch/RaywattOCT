@@ -32,6 +32,7 @@ namespace RaywattApp.ViewModels
 
         private readonly SqlManager _sqlManager;
         private readonly AngioManager _angioManager;
+        private readonly IdleMonitorService _idleMonitorService;
         private IDialogService _dialogService;
 
         [ObservableProperty]
@@ -216,13 +217,14 @@ namespace RaywattApp.ViewModels
         /// <summary>
         /// 생성자
         /// </summary>
-        public MainViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager)
+        public MainViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager, IdleMonitorService idleMonitorService)
         {
             _log.Debug("MainViewModel");
 
             _sqlManager = sqlManager;
             _angioManager = angioManager;
             _dialogService = dialogService;
+            _idleMonitorService = idleMonitorService;
 
             // Code 정의
             CodeDefinition codeDefinition = new CodeDefinition(_sqlManager);
