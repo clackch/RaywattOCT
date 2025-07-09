@@ -53,7 +53,6 @@ bool CRJController::Connect(void *param) {
 	m_initMotor = m_pConnection->Connect(param);
 	if (m_initMotor) {
 		BOOL result = CUtility::StartThread(threadReadPacket, m_pThread, (LPVOID)this);
-		
 		if (result == FALSE) {
 			Disconnect();
 			m_initMotor = false;
@@ -72,6 +71,7 @@ void CRJController::Disconnect() {
 	CMotorController::Disconnect();
 
 	CUtility::StopThread(m_pThreadState);
+	CUtility::StopThread(m_pThreadRFIDTag);
 	m_state = eRJState::Disconnected;
 }
 bool CRJController::IsMoving() {
@@ -191,6 +191,7 @@ bool CRJController::StartControl() {
 	AutoStatePeriod(100);
 	initSetting();
 	bool result = CUtility::StartThread(threadRJState, m_pThreadState, (LPVOID)this);
+	result &= CUtility::StartThread(threadReadTag, m_pThreadRFIDTag, (LPVOID)this);
 
 	return result;
 }
@@ -441,6 +442,7 @@ void CRJController::resendPacket(eFID fid) {
 	BYTE serialPacket[MAX_PATH];
 	int packetLength;
 	RFIDMessageData::Data* dataValue = RFIDProtocol::getRecentMessageData(fid);
+	if (dataValue == nullptr) return;
 	RFIDProtocol::resetPacketByFID(fid, serialPacket, packetLength, *dataValue);
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
@@ -501,6 +503,16 @@ UINT CRJController::threadReadPacket(LPVOID param) {
 			pRJController->parseSerialPacket();
 		}
 		Sleep(1);
+	}
+
+	return NOERROR;
+}
+UINT CRJController::threadReadTag(LPVOID param) {
+	CRJController* pRJController = (CRJController*)param;
+
+	while (pRJController->m_pThreadRFIDTag->isRun) {
+		pRJController->ReadRFID();
+		Sleep(100);
 	}
 
 	return NOERROR;
@@ -791,6 +803,9 @@ void CRJController::handlePacket() {
 	}
 	else {
 		PLOGI.printf("return %s\n", ((m_vPacket[REPLY_RESULT_IDX] == 0) ? "ok" : "error"));
+		if (m_vPacket[REPLY_RESULT_IDX] != 11) {
+			CUtility::StopThread(m_pThreadRFIDTag);
+		}
 		if (m_vPacket[REPLY_RESULT_IDX] == 12) {
 			if (fid != eFID::FID_RFID_GET_KEY) {
 				if (!RFIDProtocol::getFindingKeyStatus()) {

@@ -76,6 +76,7 @@ private:
 	uint8_t m_nRFIDUsageCount;
 	BYTE m_RFID[MAX_PATH];
 	BYTE m_byManufacturerId[MAX_PATH];
+	CThread* m_pThreadRFIDTag;
 
 	bool m_bManualMode;	// Manual Load Catheter
 
@@ -115,6 +116,7 @@ public:
 	bool SetRFIDStep(int uidSize, BYTE* UID, int step);
 	bool GetRFIDStep();
 	void findCorrectKey();
+
 	UINT GetRFIDInfo(BYTE* pRFIDInfo);
 	bool GetPhotoSensorOnOff(int index) { return m_bPhotoSensor[index]; }
 
@@ -124,6 +126,7 @@ protected:
 	void initSetting();
 	static UINT threadRJState(LPVOID param);
 	static UINT threadReadPacket(LPVOID param);
+	static UINT threadReadTag(LPVOID param);
 	void updateState();
 	void updateStateManualMode();
 	void updateState(eRJState state);
