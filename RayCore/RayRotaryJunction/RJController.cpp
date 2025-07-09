@@ -248,9 +248,13 @@ bool CRJController::ReadRFID() {
 }
 bool CRJController::IncreaseRFIDUsage(int uidSize, BYTE* UID) {
 	if (!m_initMotor) return false;
+	BYTE cnt = RFIDProtocol::getCount(UID, uidSize-CUSTOM_UID_LENGTH)+1;
+	if (cnt == 256) {
+		return false;
+	}
 	BYTE serialPacket[MAX_PATH];
 	int packetLength;
-	RFIDProtocol::setPacketByFID(eFID::FID_RFID_USAGE_INCREMENT, serialPacket, packetLength, uidSize, UID);
+	RFIDProtocol::setPacketByFID(eFID::FID_RFID_SET_USAGE, serialPacket, packetLength, uidSize, UID, 1, &cnt);
 
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
@@ -491,7 +495,6 @@ UINT CRJController::threadReadPacket(LPVOID param) {
 		}
 		Sleep(1);
 	}
-
 	return NOERROR;
 }
 UINT CRJController::threadReadTag(LPVOID param) {
@@ -812,7 +815,6 @@ void CRJController::handlePacket() {
 	case eFID::FID_RFID_SET_UID:
 		RxPacketRFIDGetState(&m_vPacket[0]);
 		break;
-	case eFID::FID_RFID_USAGE_INCREMENT:
 	case eFID::FID_RFID_USAGE_CLEAR:
 	case eFID::FID_RFID_SET_USAGE:
 		RxPacketRFIDGetState(&m_vPacket[0], CNT);

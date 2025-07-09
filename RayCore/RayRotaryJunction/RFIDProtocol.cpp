@@ -28,7 +28,6 @@ void RFIDProtocol::resetPacketByFID(eFID fid, BYTE* packet, int& packetLength, R
 			AddDataToPacket(packet + idx, data.etcData, data.etcLen);
 		}
 		break;
-	case eFID::FID_RFID_USAGE_INCREMENT:
 	case eFID::FID_RFID_USAGE_CLEAR:
 	case eFID::FID_RFID_SET_KEY:
 	case eFID::FID_RFID_SET_MANUF:
@@ -82,7 +81,6 @@ void RFIDProtocol::setPacketByFID(eFID fid, BYTE* packet, int& packetLength, int
 			memcpy(&(messageData.etcData), data, dataSize);
 		}
 		break;
-	case eFID::FID_RFID_USAGE_INCREMENT:
 	case eFID::FID_RFID_USAGE_CLEAR:
 	case eFID::FID_RFID_SET_KEY:
 	case eFID::FID_RFID_SET_MANUF:
@@ -149,10 +147,10 @@ int RFIDProtocol::AddDataToPacket(BYTE* packet, BYTE* data, int len) {
 	return len;
 }
 
-bool RFIDProtocol::cmpUID(BYTE* UID, int uidLength) {
-	if (uidLength != HARDWARE_UID_LENGTH) return false;
+bool RFIDProtocol::cmpUID(BYTE* UID, int hardwardUIDSize) {
+	if (hardwardUIDSize != HARDWARE_UID_LENGTH) return false;
 
-	for (int i = 0; i < uidLength+CUSTOM_UID_LENGTH; i++) {
+	for (int i = 0; i < hardwardUIDSize +CUSTOM_UID_LENGTH; i++) {
 		if (i < HARDWARE_UID_LENGTH && UID[i] != aRFIDState.aHardwareUID[i]
 			|| UID[i] != aRFIDState.aCustomUID[i - HARDWARE_UID_LENGTH]) return false;
 	}
@@ -202,6 +200,10 @@ void RFIDProtocol::setStep(BYTE* packet, int packetLength) {
 		aRFIDState.aStep *= 0x100;
 		aRFIDState.aStep += packet[cycle];
 	}
+}
+BYTE RFIDProtocol::getCount(BYTE* uid, int hardwardUIDSize) {
+	if (!RFIDProtocol::cmpUID(uid, hardwardUIDSize)) return 255;
+	return aRFIDState.aCNT;
 }
 
 void RFIDProtocol::printState() {

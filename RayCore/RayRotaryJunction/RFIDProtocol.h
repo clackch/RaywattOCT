@@ -69,6 +69,7 @@ public:
 	static void setKeyB(BYTE* packet, int packetLength);
 	static void setStep(BYTE* packet, int packetLength);
 	static bool cmpUID(BYTE* UID, int uidLength);
+	static BYTE getCount(BYTE* uid, int uidSize);
 
 	static void initState(bool needLoadKey);
 	static void printState();
