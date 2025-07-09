@@ -176,19 +176,21 @@ Download & Copy/Paste
 
 6. Raywatt App 관리자 권한으로 실행을 위해 레지스트리 수정
 
-   (a) [] + [] + [] 키를 눌러 작업 관리자 실행
+   (a) FASTER 계정으로 윈도우 로그인
+    
+   (b) [ctrl] + [shift] + [esc] 키를 눌러 작업 관리자 실행
 
-   (b) 작업 관리자에서 [파일] - [새 작업 실행] 실행     
+   (c) 작업 관리자에서 [파일] - [새 작업 실행] 실행     
    
-   (c) 실행의 열기란에 'regdit'을 입력 후, [확인] 버튼을 눌러 레지스트리 편집기 실행
+   (d) 실행의 열기란에 'regdit'을 입력 후, [확인] 버튼을 눌러 레지스트리 편집기 실행
 
-   (d) 'EnableLUA'의 값을 1에서 0으로 수정
+   (e) 'EnableLUA'의 값을 1에서 0으로 수정
 
        ※ 위치: [HKEY_LOCAL_MACHINE] - [SOFTWARE] - [Microsoft] - [Windows] - [CurrentVersion] - [Policies] - [System]
    
        ※ 수정 방법: [System]을 클릭하면 우측에 나오는 Key들 중에 'EnableLUA' 찾아 더블 클릭하고, 팝업된 편집창에서 '값 데이터'란의 값을 0으로 수정후 확인 버튼 클릭
    
-   (e) 윈도우 재시작
+   (f) 윈도우 재시작
 
    관련 링크: https://url.kr/fsv46g
 
