@@ -9,7 +9,8 @@ namespace RaywattApp.Common.Dialog
 {
     public class DialogService : IDialogService
     {
-        IDialogWindow? _window;
+        private readonly List<IDialogWindow> _openDialogs = new();
+
         public DialogResults OpenDialog(object dialog, Dictionary<string, object> parameter, double parentWidth, double parentHeight, double left, double top)
         {
             var dialogFE = dialog as FrameworkElement;
@@ -19,44 +20,30 @@ namespace RaywattApp.Common.Dialog
             dialogDataContext.DialogWidth = parentWidth;
             dialogDataContext.DialogHeight = parentHeight;
 
-            _window = new DialogWindow();
-            _window.Content = dialog;
-            _window.DataContext = dialogDataContext;
-            
-            if(double.NaN.Equals(left))
-            {
-                _window.Left = mainWindow.Left + (mainWindow.Width - parentWidth) / 2;
-            }
-            else
-            {
-                _window.Left = left;
-            }
+            IDialogWindow window = new DialogWindow();
+            window.Content = dialog;
+            window.DataContext = dialogDataContext;
 
-            if(double.NaN.Equals(top))
-            {
-                _window.Top = mainWindow.Top + (mainWindow.Height - parentHeight) / 2;
-            }
+            if (double.NaN.Equals(left))
+                window.Left = mainWindow.Left + (mainWindow.Width - parentWidth) / 2;
             else
-            {
-                _window.Top = top; 
-            }
+                window.Left = left;
+
+            if (double.NaN.Equals(top))
+                window.Top = mainWindow.Top + (mainWindow.Height - parentHeight) / 2;
+            else
+                window.Top = top;
 
             if (parameter != null)
                 dialogDataContext.SetParameter(parameter);
 
-            _window.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
-            _window.ShowDialog();
+            window.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
+            _openDialogs.Add(window);
+
+            ((Window)window).Closed += (s, e) => _openDialogs.Remove(window);
+            window.ShowDialog();
 
             return dialogDataContext.DialogResult;
-        }
-
-        public void CloseOpenDialog()
-        {
-            System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                _window?.Close();
-                _window = null;
-            }));
         }
 
         public IDialogWindow OpenChildWindow(object dialog, IModelessPatient parent, Dictionary<string, object> parameter, double width, double height, double left, double top)
@@ -73,30 +60,39 @@ namespace RaywattApp.Common.Dialog
             window.DataContext = dialogDataContext;
 
             if (double.NaN.Equals(left))
-            {
                 window.Left = mainWindow.Left + (mainWindow.Width - width) / 2;
-            }
             else
-            {
                 window.Left = left;
-            }
 
             if (double.NaN.Equals(top))
-            {
                 window.Top = mainWindow.Top + (mainWindow.Height - height) / 2;
-            }
             else
-            {
                 window.Top = top;
-            }
 
             if (parameter != null)
                 dialogDataContext.SetParameter(parent, parameter);
 
             window.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
+            _openDialogs.Add(window); // ✅ 리스트에 추가
+            ((Window)window).Closed += (s, e) => _openDialogs.Remove(window);
             window.Show();
 
             return window;
+        }
+
+        public void CloseAllDialogs()
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                foreach (var dlg in _openDialogs.ToList())
+                {
+                    if (dlg is Window w)
+                    {
+                        w.Close();
+                    }
+                }
+                _openDialogs.Clear();
+            });
         }
     }
 }

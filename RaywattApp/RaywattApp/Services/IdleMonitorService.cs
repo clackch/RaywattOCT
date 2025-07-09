@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace RaywattApp.Services
@@ -22,8 +23,8 @@ namespace RaywattApp.Services
         private DateTime _totalStartTime;
         private DateTime _preAlertStartTime;
 
-        private TimeSpan _totalIdleLimit = TimeSpan.FromSeconds(11111110);
-        private TimeSpan _preAlertLimit = TimeSpan.FromSeconds(51);
+        private TimeSpan _totalIdleLimit = TimeSpan.FromSeconds(15);
+        private TimeSpan _preAlertLimit = TimeSpan.FromSeconds(10);
 
         private bool _isPreAlertShown = false;
         private bool _isLogoutPopupShown = false;
@@ -48,8 +49,12 @@ namespace RaywattApp.Services
             {
                 await Task.Delay(500);
 
-                // TODO: 특정 Page에서는 아래 실행 되지 않도록 기능 추가
-                Console.WriteLine(Constants.CurrentPage.ToString());
+                if (Constants.CurrentPage == Constants.OutsetLoginPage) continue;
+
+                foreach (Window window in Application.Current.Windows)
+                {
+                    Console.WriteLine($"Window: {window.Title}, IsActive: {window.IsActive}");
+                }
 
                 if (IsUserActive())
                 {
@@ -91,7 +96,6 @@ namespace RaywattApp.Services
                 }
             }
         }
-
         private void RegisterUserActivityEvents()
         {
             InputManager.Current.PreNotifyInput += (sender, e) =>
@@ -102,7 +106,6 @@ namespace RaywattApp.Services
                 }
             };
         }
-
         private bool IsUserActive()
         {
             if (_isUserInputDetected)
@@ -144,7 +147,7 @@ namespace RaywattApp.Services
                 return;
             }
 
-            _dialogService?.CloseOpenDialog();
+            _dialogService?.CloseAllDialogs();
             _isPreAlertShown = false;
         }
         private void ShowLoginScreen()
@@ -165,7 +168,6 @@ namespace RaywattApp.Services
                _isLogoutPopupShown = false;
            }));
         }
-
         private async Task WaitForLogoutPopupToClose()
         {
             while (_isLogoutPopupShown)
@@ -178,10 +180,8 @@ namespace RaywattApp.Services
             _cts = new CancellationTokenSource();
             StartIdleMonitorLoop();
         }
-
         public void Dispose()
         {
-            throw new NotImplementedException();
         }
     }
 }
