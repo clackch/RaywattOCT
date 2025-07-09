@@ -148,7 +148,14 @@ namespace RaywattApp
             services.AddTransient(typeof(SqlManager));
 
             services.AddSingleton(typeof(AngioManager));
-            services.AddSingleton(typeof(IdleMonitorService));
+
+            services.AddSingleton<IdleMonitorService>(sp =>
+            {
+                var dialogService = sp.GetRequiredService<IDialogService>();
+                return new IdleMonitorService(dialogService);
+            });
+            var provider = services.BuildServiceProvider();
+            provider.GetRequiredService<IdleMonitorService>();
 
             return services.BuildServiceProvider();
         }

@@ -32,7 +32,6 @@ namespace RaywattApp.ViewModels
 
         private readonly SqlManager _sqlManager;
         private readonly AngioManager _angioManager;
-        private readonly IdleMonitorService _idleMonitorService;
         private IDialogService _dialogService;
 
         [ObservableProperty]
@@ -217,14 +216,13 @@ namespace RaywattApp.ViewModels
         /// <summary>
         /// 생성자
         /// </summary>
-        public MainViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager, IdleMonitorService idleMonitorService)
+        public MainViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager)
         {
             _log.Debug("MainViewModel");
 
             _sqlManager = sqlManager;
             _angioManager = angioManager;
             _dialogService = dialogService;
-            _idleMonitorService = idleMonitorService;
 
             // Code 정의
             CodeDefinition codeDefinition = new CodeDefinition(_sqlManager);
@@ -294,8 +292,6 @@ namespace RaywattApp.ViewModels
             }
 
             DeviceStatus.PowerOffMsg = _l10n["Shutting down"];
-            _idleMonitorService.StartIdleMonitorLoop();
-            _idleMonitorService.RegisterUserActivityEvents();
         }
 
         private void OnNavigationMessage(object recipient, NavigationMessage message)
