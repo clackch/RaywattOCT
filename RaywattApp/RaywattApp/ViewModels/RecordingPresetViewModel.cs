@@ -136,7 +136,6 @@ namespace RaywattApp.ViewModels
                         CurrentLocation = new KeyValuePair<string, string>(PatientCase.Location, loctValue);
                     }
                 }
-
                 else
                 {
                     Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
