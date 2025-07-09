@@ -14,6 +14,7 @@ using RaywattApp.Common.Angio;
 using System.Diagnostics;
 using System.IO;
 using RaywattApp.Common.Util;
+using System.Windows.Input;
 
 namespace RaywattApp
 {
@@ -37,6 +38,8 @@ namespace RaywattApp
 
             SetupExceptionHandling();
             this.SessionEnding += SessionEndingCancelEventHandler;
+            
+            EventManager.RegisterClassHandler(typeof(UIElement), UIElement.ManipulationBoundaryFeedbackEvent, new EventHandler<ManipulationBoundaryFeedbackEventArgs>((s, e) => e.Handled = true));
         }
 
         private void SessionEndingCancelEventHandler(object sender, SessionEndingCancelEventArgs e)
