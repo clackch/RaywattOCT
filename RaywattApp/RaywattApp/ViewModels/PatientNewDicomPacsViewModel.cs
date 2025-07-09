@@ -166,7 +166,7 @@ namespace RaywattApp.ViewModels
 
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["Patient information with the same ID already exists. Update with the selected details?"];
+                parameter["message"] = _l10n["$MSG026"];
                 var result = _dialogService.OpenDialog(new ConfirmDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
                 if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)

@@ -146,7 +146,7 @@ namespace RaywattApp.ViewModels.Dialog
             {
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["title"] = _l10n["Error"];
-                parameter["message"] = _l10n["The start date cannot be later than the end date."];
+                parameter["message"] = _l10n["$MSG025"];
                 _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
                 return false;
             }
