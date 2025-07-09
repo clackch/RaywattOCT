@@ -152,7 +152,9 @@ namespace RaywattApp
             services.AddSingleton<IdleMonitorService>(sp =>
             {
                 var dialogService = sp.GetRequiredService<IDialogService>();
-                return new IdleMonitorService(dialogService);
+                var angioManager = sp.GetRequiredService<AngioManager>();
+                
+                return new IdleMonitorService(dialogService, angioManager);
             });
             var provider = services.BuildServiceProvider();
             provider.GetRequiredService<IdleMonitorService>();

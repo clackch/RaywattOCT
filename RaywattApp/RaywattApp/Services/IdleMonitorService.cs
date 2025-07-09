@@ -1,29 +1,31 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+﻿using RaywattApp.Common.Angio;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
-using RaywattApp.Common.Messages;
+using RaywattApp.Common.Util;
 using RaywattApp.Models;
+using RaywattApp.ViewModels;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
-using System.Reflection.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using static RaywattOCT.Ray3DWrapper;
 
 namespace RaywattApp.Services
 {
-    public class IdleMonitorService
+    public class IdleMonitorService : ViewModelBase, IDisposable
     {
         // TODO: Log 기능 추가
 
         private IDialogService? _dialogService;
+        private AngioManager? _angioManager;
 
         private DateTime _totalStartTime;
         private DateTime _preAlertStartTime;
 
-        private TimeSpan _totalIdleLimit = TimeSpan.FromSeconds(30);
-        private TimeSpan _preAlertLimit = TimeSpan.FromSeconds(20);
+        private TimeSpan _totalIdleLimit = TimeSpan.FromSeconds(11111110);
+        private TimeSpan _preAlertLimit = TimeSpan.FromSeconds(51);
 
         private bool _isPreAlertShown = false;
         private bool _isLogoutPopupShown = false;
@@ -31,34 +33,37 @@ namespace RaywattApp.Services
 
         private CancellationTokenSource _cts = new CancellationTokenSource();
 
-        public IdleMonitorService(IDialogService dialogService)
+        public IdleMonitorService(IDialogService dialogService, AngioManager angioManager)
         {
             StartIdleMonitorLoop();
             RegisterUserActivityEvents();
             _dialogService = dialogService;
+            _angioManager = angioManager;
         }
 
         private async void StartIdleMonitorLoop()
         {
-            _preAlertLimit = _totalIdleLimit - _preAlertLimit;
-
             _totalStartTime = DateTime.Now;
             _preAlertStartTime = DateTime.Now;
 
             while (!_cts.IsCancellationRequested)
             {
-                await Task.Delay(1000);
+                await Task.Delay(500);
+
+                // TODO: 특정 Page에서는 아래 실행 되지 않도록 기능 추가
+                //Console.WriteLine(Constants.CurrentPage.ToString());
 
                 if (IsUserActive())
                 {
-                    if (_isPreAlertShown)
+                    if (!_isPreAlertShown)
                     {
-                        ClosePreAlertPopup();
+                        _totalStartTime = DateTime.Now;
+                        _preAlertStartTime = DateTime.Now;
                     }
-
-                    _totalStartTime = DateTime.Now;
-                    _preAlertStartTime = DateTime.Now;
-                    continue;
+                    else
+                    {
+                        continue;
+                    }
                 }
 
                 if (DateTime.Now - _preAlertStartTime > _preAlertLimit)
@@ -78,8 +83,8 @@ namespace RaywattApp.Services
                     _preAlertStartTime = DateTime.Now;
 
                     ClosePreAlertPopup();
-                    ShowLoginScreen();
                     ShowLogoutPopup();
+                    ShowLoginScreen();
 
                     await WaitForLogoutPopupToClose();
 
@@ -102,8 +107,6 @@ namespace RaywattApp.Services
 
         private bool IsUserActive()
         {
-            Console.WriteLine("Checking user activity...");
-
             if (_isUserInputDetected)
             {
                 _totalStartTime = DateTime.Now;
@@ -111,7 +114,6 @@ namespace RaywattApp.Services
 
                 _isUserInputDetected = false;
 
-                Console.WriteLine("User activity detected.");
                 return true;
             }
 
@@ -119,52 +121,70 @@ namespace RaywattApp.Services
         }
         private void ShowPreAlertPopup()
         {
-            Console.WriteLine("Showing pre-alert popup...");
+            if (_isPreAlertShown)
+            {
+                return;
+            }
+
+            _isPreAlertShown = true;
+
             System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
-                _isPreAlertShown = true;
-
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["title"] = "ShowPreAlertPopup";
-                parameter["message"] = "Pre-Alert: You have been idle for 8 minutes. Please take action to avoid logout";
-                parameter["timer"] = _preAlertLimit;
-                DialogResults result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                parameter["message"] = "";
+                parameter["timer"] = _totalIdleLimit - _preAlertLimit;
+                DialogResults result = _dialogService!.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
                 _isPreAlertShown = false;
             }));
-            Console.WriteLine("Pre-alert popup shown.");
         }
         private void ClosePreAlertPopup()
         {
-            Console.WriteLine("Closing pre-alert popup.");
+            if (!_isPreAlertShown)
+            {
+                return;
+            }
+
             _dialogService?.CloseOpenDialog();
             _isPreAlertShown = false;
         }
         private void ShowLoginScreen()
         {
-            //WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewPresetPage) { });
-            Console.WriteLine("Redirecting to login screen...");
+            CommonUtil.Exit(DeviceStatus, _angioManager);
+            //WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
         }
         private void ShowLogoutPopup()
         {
-            Console.WriteLine("Logout popup shown. Please confirm to logout.");
             _isLogoutPopupShown = true;
+
+            System.Windows.Application.Current.Dispatcher.InvokeAsync(new Action(() =>
+           {
+               Dictionary<string, object> parameter = new Dictionary<string, object>();
+               parameter["title"] = "ShowLogoutPopup";
+               parameter["message"] = "ShowLogoutPopup";
+               DialogResults result = _dialogService!.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+               _isLogoutPopupShown = false;
+           }));
         }
 
         private async Task WaitForLogoutPopupToClose()
         {
-            Console.WriteLine("Waiting for logout popup to close...");
             while (_isLogoutPopupShown)
             {
                 await Task.Delay(1000);
-                _isLogoutPopupShown = false; // Simulate user closing the popup
             }
         }
         private void RestartIdleLoop()
         {
-            Console.WriteLine("Restarting idle monitor loop...");
             _cts = new CancellationTokenSource();
             StartIdleMonitorLoop();
+        }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
         }
     }
 }
