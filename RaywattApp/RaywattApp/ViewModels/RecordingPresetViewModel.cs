@@ -163,6 +163,11 @@ namespace RaywattApp.ViewModels
                     CurrentLocation = new KeyValuePair<string, string>("$000", CodeDefinition.Codes["LOCT"]["$000"]);
                 }
 
+                if (data.ContainsKey("accessionNumber"))
+                {
+                    this.PatientCase.AccessionNumber = (string)data["accessionNumber"];
+                }
+
                 SelectedFlushMedia = PatientCase.FlushMedia;
                 SelectedPullbackType = PatientCase.PullbackType;
             }

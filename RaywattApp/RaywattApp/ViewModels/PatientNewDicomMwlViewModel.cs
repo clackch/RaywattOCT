@@ -13,7 +13,6 @@ using CommunityToolkit.Mvvm.Input;
 using System.Windows.Input;
 using RaywattApp.Views.Dialog;
 using RaywattApp.Common.Util;
-using RayCoreWrapper;
 using System.Collections.ObjectModel;
 
 namespace RaywattApp.ViewModels
@@ -34,6 +33,9 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private DicomWorklist _selectedWorklist;
+
+        [ObservableProperty]
+        private Patient _selectedPatient = new Patient();
 
         [ObservableProperty]
         private DicomServer _selectedDicomServer;
@@ -115,7 +117,16 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("NewRecording");
 
-            /*bool isExist = false;
+            SelectedPatient.Id = SelectedWorklist.PatientId;
+            SelectedPatient.Birthdate = SelectedWorklist.PatientBirthDate;
+            SelectedPatient.Gender = SelectedWorklist.PatientSex;
+
+            string lastname, firstname;
+            CommonUtil.ParseDicomName(SelectedWorklist.PatientName, out lastname, out firstname);
+            SelectedPatient.Lastname = lastname;
+            SelectedPatient.Firstname = firstname;
+
+            bool isExist = false;
             if (!Validate(out isExist))
                 return;
 
@@ -133,14 +144,17 @@ namespace RaywattApp.ViewModels
             parameter["prevStatus"] = PrevStatus;
 
             if (CommonUtil.IsStorageAvailable())
+            {
+                parameter["accessionNumber"] = SelectedWorklist.AccessionNumber;
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingPresetPage) { Parameter = parameter });
+            }
             else
-                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientDetailPage) { Parameter = parameter });*/
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientDetailPage) { Parameter = parameter });
         }
 
         private bool Validate(out bool isExist)
         {
-            /*Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = SelectedPatient.Id;
 
             int nCnt = _sqlManager.CountPatient(sqlParameters);
@@ -168,16 +182,14 @@ namespace RaywattApp.ViewModels
                 isExist = false;
 
                 return true;
-            }*/
-            isExist = false;
-            return false;
+            }
         }
 
         private bool SelectPhysician()
         {
             _log.Debug("SelectPhysician");
 
-            /*Dictionary<string, object> parameter = new Dictionary<string, object>();
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["selectedPhysicianId"] = SelectedPatient.PhysicianId;
 
             var result = _dialogService.OpenDialog(new PhysicianDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
@@ -190,9 +202,42 @@ namespace RaywattApp.ViewModels
                 SelectedPatient.PhysicianName = physician.Name;
 
                 return true;
-            }*/
+            }
 
             return false;
+        }
+
+        private bool Save(bool isExist)
+        {
+            _log.Debug("Save");
+
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = SelectedPatient.Id;
+            sqlParameters["lastname"] = SelectedPatient.Lastname;
+            sqlParameters["firstname"] = SelectedPatient.Firstname;
+            sqlParameters["birthdate"] = SelectedPatient.Birthdate;
+            sqlParameters["gender"] = SelectedPatient.Gender;
+            sqlParameters["physician_id"] = SelectedPatient.PhysicianId;
+
+            int res = 0;
+
+            if (isExist)
+            {
+                sqlParameters["originId"] = SelectedPatient.Id;
+                res = _sqlManager.UpdatePatient(sqlParameters);
+            }
+            else
+            {
+                res = _sqlManager.InsertPatient(sqlParameters);
+            }
+
+            if (res != 1)
+            {
+                _log.Error(isExist ? "Update Error" : "Insert Error");
+                return false;
+            }
+
+            return true;
         }
 
         private void Search()
