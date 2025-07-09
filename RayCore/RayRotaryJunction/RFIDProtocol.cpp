@@ -145,9 +145,7 @@ void RFIDProtocol::writeKeyChangeLog(unsigned char* changedKey)
 int RFIDProtocol::AddDataToPacket(BYTE* packet, BYTE* data, int len) {
 	for (int i = 0; i < len; i++) {
 		*(packet + i) = *(data + i);
-		printf("%02x ", *(data + i));
 	}
-	printf("\n");
 	return len;
 }
 

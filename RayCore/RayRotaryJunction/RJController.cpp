@@ -8,7 +8,7 @@ CRJController::CRJController()
 	:ICommonProtocol(RJ_STX, RJ_ETX)
 	
 {
-	m_resendManager = new WriteTaskController(40);
+	m_resendManager = new WriteTaskController(50);
 	m_pMsg = nullptr;
 	m_pThreadState = nullptr;
 	m_state = eRJState::None;
@@ -369,11 +369,6 @@ bool CRJController::SetRFIDStep(int uidSize, BYTE* UID, int step) {
 	RFIDProtocol::setPacketByFID(eFID::FID_RFID_SET_STEP, serialPacket, packetLength, uidSize, UID, STEP_LEN, stepByte);
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
-
-	for (int i = 0; i < packetLength; i++) {
-		printf("%02x ", serialPacket[i]);
-	}
-
 	int written = m_pConnection->Write(serialPacket, packetLength);
 
 	return (written == packetLength);
@@ -447,15 +442,7 @@ void CRJController::resendPacket(eFID fid) {
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
 
-
 	RFIDProtocol::deleteMessageData(fid);
-	printf("write Len : %d\n", packetLength);
-	printf("buffer\n");
-	for (int p = 0; p < packetLength; p++) {
-		printf("%02x ", serialPacket[p]);
-	}
-	printf("\n");
-	//Sleep(40);
 	m_pConnection->Write(serialPacket, packetLength);
 
 }
@@ -778,15 +765,8 @@ void CRJController::handlePacket() {
 	BYTE length = m_vPacket[LENGTH_IDX];
 	int dataLength = length - HEADER_LEN;
 	eFID fid = (eFID) m_vPacket[FID_IDX];
-	PLOGI.printf("handled : %d\n", fid);
-	if (fid == eFID::FID_RFID_GET_STATE || fid == eFID::FID_RFID_GET_KEY) {
-		PLOGI.printf("-------------------------------------------------------------");
-	}
 	char strTime[MAX_PATH];
 	CUtility::GetCurTime(strTime);
-	for (int c = 0; c < length; c++) {
-		PLOGI.printf("%02x ", m_vPacket[c]);
-	}
 
 	if (fid < eFID::FID_RFID_GET_STATE) {
 		// photo sensor state
@@ -802,7 +782,6 @@ void CRJController::handlePacket() {
 		//PLOGI.printf("\tButton: %02d %02d %02d\n", m_bButton[0], m_bButton[1], m_bLimitSwitch);
 	}
 	else {
-		PLOGI.printf("return %s\n", ((m_vPacket[REPLY_RESULT_IDX] == 0) ? "ok" : "error"));
 		if (m_vPacket[REPLY_RESULT_IDX] != 11) {
 			CUtility::StopThread(m_pThreadRFIDTag);
 		}
