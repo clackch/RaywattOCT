@@ -40,10 +40,15 @@ namespace RaywattApp.Services
             _angioManager = angioManager;
         }
 
-        private async void StartIdleMonitorLoop()
+        private void ResetTimers()
         {
             _totalStartTime = DateTime.Now;
             _preAlertStartTime = DateTime.Now;
+        }
+
+        private async void StartIdleMonitorLoop()
+        {
+            ResetTimers();
 
             while (!_cts.IsCancellationRequested)
             {
@@ -60,8 +65,7 @@ namespace RaywattApp.Services
                 {
                     if (!_isPreAlertShown)
                     {
-                        _totalStartTime = DateTime.Now;
-                        _preAlertStartTime = DateTime.Now;
+                        ResetTimers();
                     }
                     else
                     {
@@ -82,9 +86,7 @@ namespace RaywattApp.Services
                 {
                     _cts.Cancel();
 
-                    _totalStartTime = DateTime.Now;
-                    _preAlertStartTime = DateTime.Now;
-
+                    ResetTimers();
                     ClosePreAlertPopup();
                     ShowLogoutPopup();
                     ShowLoginScreen();
@@ -108,11 +110,14 @@ namespace RaywattApp.Services
         }
         private bool IsUserActive()
         {
-            if (_isUserInputDetected && !_isPreAlertShown)
+            if(_isPreAlertShown)
             {
-                _totalStartTime = DateTime.Now;
-                _preAlertStartTime = DateTime.Now;
+                return false;
+            }
 
+            if (_isUserInputDetected)
+            {
+                ResetTimers();
                 _isUserInputDetected = false;
 
                 return true;
@@ -179,9 +184,6 @@ namespace RaywattApp.Services
         {
             _cts = new CancellationTokenSource();
             StartIdleMonitorLoop();
-        }
-        public void Dispose()
-        {
         }
     }
 }
