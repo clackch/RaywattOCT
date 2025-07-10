@@ -45,10 +45,10 @@ namespace RaywattApp.Common.Dialog
                 dialogDataContext.SetParameter(parameter);
 
             window.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
-            
+
             _openDialogs.Add(window);
             ((Window)window).Closed += (s, e) => _openDialogs.Remove(window);
-            
+
             window.ShowDialog();
             return dialogDataContext.DialogResult;
         }
@@ -87,7 +87,7 @@ namespace RaywattApp.Common.Dialog
                 dialogDataContext.SetParameter(parent, parameter);
 
             window.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
-            
+
             _openDialogs.Add(window);
             ((Window)window).Closed += (s, e) => _openDialogs.Remove(window);
 
@@ -108,6 +108,10 @@ namespace RaywattApp.Common.Dialog
                 }
                 _openDialogs.Clear();
             });
+        }
+        public List<IDialogWindow> GetOpenDialogs()
+        {
+            return _openDialogs.ToList();
         }
     }
 }

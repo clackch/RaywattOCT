@@ -6,6 +6,7 @@ using RaywattApp.Models;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -23,7 +24,7 @@ namespace RaywattApp.Services
         private DateTime _totalStartTime;
         private DateTime _preAlertStartTime;
 
-        private TimeSpan _totalIdleLimit = TimeSpan.FromSeconds(15);
+        private TimeSpan _totalIdleLimit = TimeSpan.FromSeconds(30);
         private TimeSpan _preAlertLimit = TimeSpan.FromSeconds(10);
 
         private bool _isPreAlertShown = false;
@@ -32,34 +33,43 @@ namespace RaywattApp.Services
 
         private CancellationTokenSource _cts = new CancellationTokenSource();
 
+        List<string> _skipPage = new List<string>()
+        {
+            Constants.OutsetLoginPage
+        };
+
+        List<string> _skipDialog = new List<string>()
+        {
+            "FileCopyDialogViewModel",
+        };
+
         public IdleMonitorService(IDialogService dialogService, AngioManager angioManager)
         {
-            StartIdleMonitorLoop();
-            RegisterUserActivityEvents();
+            Init();
             _dialogService = dialogService;
             _angioManager = angioManager;
         }
 
+        private void Init()
+        {
+            StartIdleMonitorLoop();
+            RegisterUserActivityEvents();
+        }
         private void ResetTimers()
         {
             _totalStartTime = DateTime.Now;
             _preAlertStartTime = DateTime.Now;
         }
-
         private async void StartIdleMonitorLoop()
         {
             ResetTimers();
 
             while (!_cts.IsCancellationRequested)
             {
-                await Task.Delay(500);
+                await Task.Delay(1000);
 
-                if (Constants.CurrentPage == Constants.OutsetLoginPage) continue;
-
-                foreach (Window window in Application.Current.Windows)
-                {
-                    Console.WriteLine($"Window: {window.Title}, IsActive: {window.IsActive}");
-                }
+                if (ShouldSkipIdleCheck()) continue;
+                if (SholdSkipDialogCheck()) continue;
 
                 if (IsUserActive())
                 {
@@ -108,9 +118,23 @@ namespace RaywattApp.Services
                 }
             };
         }
+        private bool ShouldSkipIdleCheck()
+        {
+            return _skipPage.Contains(Constants.CurrentPage);
+        }
+        private bool SholdSkipDialogCheck()
+        {
+            var openDialogs = _dialogService!.GetOpenDialogs();
+
+            return openDialogs.Any(dialog =>
+            {
+                var dialogName = dialog.DataContext?.GetType().Name;
+                return _skipDialog.Contains(dialogName!);
+            });
+        }
         private bool IsUserActive()
         {
-            if(_isPreAlertShown)
+            if (_isPreAlertShown)
             {
                 return false;
             }
