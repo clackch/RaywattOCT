@@ -32,6 +32,7 @@ using FFMpegCore;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using RayCoreWrapper;
+using System.Diagnostics;
 
 namespace RaywattApp.Common.Util
 {
@@ -1230,6 +1231,23 @@ namespace RaywattApp.Common.Util
             Thread threadReadyPullback = new Thread(() => ThreadExit(deviceStatus, isShutdown));
             threadReadyPullback.Start();
         }
+        private static void ForceShutdown()
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "shutdown",
+                    Arguments = "/s /f /t 0",
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                });
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"ForceShutdown Error: {ex.Message}");
+            }
+        }
 
         private static void ThreadExit(DeviceStatus? deviceStatus, bool isShutdown)
         {
@@ -1242,12 +1260,12 @@ namespace RaywattApp.Common.Util
 
                 if (deviceStatus == null)
                 {
-                    Win32Helper.Shutdown();
+                    ForceShutdown();
                 }
                 else if (!CommonUtil.IsTestMode(deviceStatus.TestMode, "Power"))
                 {
                     if (isShutdown)
-                        Win32Helper.Shutdown();
+                        ForceShutdown();
                     else
                         Win32Helper.LogOff();
                 }
