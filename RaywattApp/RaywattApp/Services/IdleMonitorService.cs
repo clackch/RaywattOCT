@@ -13,7 +13,7 @@ using System.Windows.Input;
 
 namespace RaywattApp.Services
 {
-    public class IdleMonitorService : ViewModelBase, IDisposable
+    public class IdleMonitorService
     {
         // TODO: Log 기능 추가
 
@@ -108,7 +108,7 @@ namespace RaywattApp.Services
         }
         private bool IsUserActive()
         {
-            if (_isUserInputDetected)
+            if (_isUserInputDetected && !_isPreAlertShown)
             {
                 _totalStartTime = DateTime.Now;
                 _preAlertStartTime = DateTime.Now;
@@ -152,7 +152,7 @@ namespace RaywattApp.Services
         }
         private void ShowLoginScreen()
         {
-            CommonUtil.Exit(DeviceStatus, _angioManager);
+            CommonUtil.Exit(ViewModelBase.DeviceStatus, _angioManager);
         }
         private void ShowLogoutPopup()
         {
