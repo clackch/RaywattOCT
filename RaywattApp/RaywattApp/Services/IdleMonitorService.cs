@@ -36,7 +36,8 @@ namespace RaywattApp.Services
 
         List<string> _skipPage = new List<string>()
         {
-            Constants.OutsetLoginPage
+            Constants.OutsetLoginPage,
+            Constants.OutsetLoadingPage,
         };
 
         List<Type> _skipDialog = new List<Type>()
@@ -163,7 +164,7 @@ namespace RaywattApp.Services
             {
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["title"] = "Logout Remaining time";
-                parameter["message"] = "";
+                parameter["message"] = "Checking time...";
                 parameter["timer"] = _totalIdleLimit - _preAlertLimit;
                 DialogResults result = _dialogService!.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
