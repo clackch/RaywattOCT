@@ -49,7 +49,17 @@ namespace RaywattApp.ViewModels.Dialog
                 else
                 {
                     _remainingTime = _remainingTime.Subtract(TimeSpan.FromSeconds(1));
-                    Message = $"남은 시간: {(int)_remainingTime.TotalSeconds}초";
+                    int minutes = _remainingTime.Minutes;
+                    int seconds = _remainingTime.Seconds;
+
+                    if (_remainingTime.TotalMinutes >= 1)
+                    {
+                        Message = $"{minutes} minutes {seconds} seconds";
+                    }
+                    else
+                    {
+                        Message = $"{seconds} seconds";
+                    }
                 }
                 OnPropertyChanged(nameof(Message));
             };

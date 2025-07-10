@@ -3,6 +3,7 @@ using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Util;
 using RaywattApp.Models;
+using RaywattApp.ViewModels.Dialog;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
@@ -24,8 +25,8 @@ namespace RaywattApp.Services
         private DateTime _totalStartTime;
         private DateTime _preAlertStartTime;
 
-        private TimeSpan _totalIdleLimit = TimeSpan.FromSeconds(30);
-        private TimeSpan _preAlertLimit = TimeSpan.FromSeconds(10);
+        private TimeSpan _totalIdleLimit = TimeSpan.FromSeconds(20);
+        private TimeSpan _preAlertLimit = TimeSpan.FromSeconds(5);
 
         private bool _isPreAlertShown = false;
         private bool _isLogoutPopupShown = false;
@@ -38,9 +39,9 @@ namespace RaywattApp.Services
             Constants.OutsetLoginPage
         };
 
-        List<string> _skipDialog = new List<string>()
+        List<Type> _skipDialog = new List<Type>()
         {
-            "FileCopyDialogViewModel",
+            typeof(FileCopyDialogViewModel),
         };
 
         public IdleMonitorService(IDialogService dialogService, AngioManager angioManager)
@@ -128,8 +129,8 @@ namespace RaywattApp.Services
 
             return openDialogs.Any(dialog =>
             {
-                var dialogName = dialog.DataContext?.GetType().Name;
-                return _skipDialog.Contains(dialogName!);
+                var dataContextType = dialog.DataContext?.GetType();
+                return dataContextType != null && _skipDialog.Contains(dataContextType);
             });
         }
         private bool IsUserActive()
@@ -161,7 +162,7 @@ namespace RaywattApp.Services
             System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["title"] = "ShowPreAlertPopup";
+                parameter["title"] = "Logout Remaining time";
                 parameter["message"] = "";
                 parameter["timer"] = _totalIdleLimit - _preAlertLimit;
                 DialogResults result = _dialogService!.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
@@ -190,8 +191,8 @@ namespace RaywattApp.Services
             System.Windows.Application.Current.Dispatcher.InvokeAsync(new Action(() =>
            {
                Dictionary<string, object> parameter = new Dictionary<string, object>();
-               parameter["title"] = "ShowLogoutPopup";
-               parameter["message"] = "ShowLogoutPopup";
+               parameter["title"] = "Logout";
+               parameter["message"] = "Session expired due to inactivity";
                DialogResults result = _dialogService!.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
                _isLogoutPopupShown = false;
