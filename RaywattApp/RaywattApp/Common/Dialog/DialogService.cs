@@ -1,6 +1,5 @@
 ﻿using RaywattApp.Models;
 using RaywattApp.Views.Dialog;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -25,27 +24,34 @@ namespace RaywattApp.Common.Dialog
             window.DataContext = dialogDataContext;
 
             if (double.NaN.Equals(left))
+            {
                 window.Left = mainWindow.Left + (mainWindow.Width - parentWidth) / 2;
+            }
             else
+            {
                 window.Left = left;
+            }
 
             if (double.NaN.Equals(top))
+            {
                 window.Top = mainWindow.Top + (mainWindow.Height - parentHeight) / 2;
+            }
             else
+            {
                 window.Top = top;
+            }
 
             if (parameter != null)
                 dialogDataContext.SetParameter(parameter);
 
             window.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
+            
             _openDialogs.Add(window);
-
             ((Window)window).Closed += (s, e) => _openDialogs.Remove(window);
+            
             window.ShowDialog();
-
             return dialogDataContext.DialogResult;
         }
-
         public IDialogWindow OpenChildWindow(object dialog, IModelessPatient parent, Dictionary<string, object> parameter, double width, double height, double left, double top)
         {
             var dialogFE = dialog as FrameworkElement;
@@ -60,23 +66,32 @@ namespace RaywattApp.Common.Dialog
             window.DataContext = dialogDataContext;
 
             if (double.NaN.Equals(left))
+            {
                 window.Left = mainWindow.Left + (mainWindow.Width - width) / 2;
+            }
             else
+            {
                 window.Left = left;
+            }
 
             if (double.NaN.Equals(top))
+            {
                 window.Top = mainWindow.Top + (mainWindow.Height - height) / 2;
+            }
             else
+            {
                 window.Top = top;
+            }
 
             if (parameter != null)
                 dialogDataContext.SetParameter(parent, parameter);
 
             window.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
-            _openDialogs.Add(window); // ✅ 리스트에 추가
+            
+            _openDialogs.Add(window);
             ((Window)window).Closed += (s, e) => _openDialogs.Remove(window);
-            window.Show();
 
+            window.Show();
             return window;
         }
 
