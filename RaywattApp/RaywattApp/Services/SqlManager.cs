@@ -505,7 +505,14 @@ namespace RaywattApp.Services
             }
             else
             {
-                commandText = SqlQuery.GetQuery("SelectDicomServerByType");
+                if (sqlParameters.ContainsKey("server_type"))
+                    commandText = SqlQuery.GetQuery("SelectDicomServerByType");
+
+                else if (sqlParameters.ContainsKey("id"))
+                    commandText = SqlQuery.GetQuery("SelectDicomServerExcludeId");
+
+                else
+                    commandText = SqlQuery.GetQuery("SelectDicomServer");
             }                
 
             return _databaseService.GetDatas<DicomServer>(commandText, sqlParameters);

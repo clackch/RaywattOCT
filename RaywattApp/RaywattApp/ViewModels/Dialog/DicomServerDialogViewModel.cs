@@ -128,7 +128,7 @@ namespace RaywattApp.ViewModels.Dialog
             if (!res)
                 return;
 
-            if ((IsNew && ValidateDicomServer()))
+            if (IsNew && CanSaveNewDicomServer())
                 SaveNew();
 
             if (!IsNew)
@@ -189,19 +189,13 @@ namespace RaywattApp.ViewModels.Dialog
 
             if (res != RayExportWrapper.DicomNetRWError.Normal)
             {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["title"] = _l10n["Information"];
-                parameter["message"] = CommonUtil.GetDicomResultMessage(res);
-                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.DicomServerDialogWidth, Constants.DicomServerDialogHeight);
+                ShowAlertDialog(CommonUtil.GetDicomResultMessage(res));
                 return false;
             }
 
             if(serverType == RayExportWrapper.ServerType.UNKNOWN)
             {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["Unknown server type. Please verify the configuration for PACS or MWL."];
-                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.DicomServerDialogWidth, Constants.DicomServerDialogHeight);
+                ShowAlertDialog("Unknown server type. Please verify the configuration for PACS or MWL.");
                 return false;
             }
 
@@ -214,37 +208,39 @@ namespace RaywattApp.ViewModels.Dialog
             return true;
         }
 
-        private bool ValidateDicomServer()
+        private bool CanSaveNewDicomServer()
         {
-            bool canSave = false;
+            var existingServers = _sqlManager.SelectDicomServer().Where(x => x.AeTitle == DicomServer.AeTitle && x.IpAddress == DicomServer.IpAddress && x.Port == DicomServer.Port).ToList();
 
-            IList<DicomServer> DicomServers = _sqlManager.SelectDicomServer();
+            if (existingServers.Count() == 0)
+                return true;
 
-            var existingServers = DicomServers.Where(x => x.AeTitle == DicomServer.AeTitle && x.IpAddress == DicomServer.IpAddress && x.Port == DicomServer.Port);
-
-            if (existingServers == null)
+            if (existingServers.Count() >= 2)
             {
-                canSave = true;
+                ShowAlertDialog("The DICOM server already exists.");
+                return false;
             }
 
-            if (existingServers != null && DicomServer.ServerType == "BOTH")
+            else if (existingServers.First().ServerType == DicomServer.ServerType)
             {
-                var existringTypes = existingServers.Select(x => x.ServerType).ToList();
-                var allTypes = new List<string> { "PACS", "MWL" };
-                var missingType = allTypes.Except(existringTypes).ToList();
+                ShowAlertDialog("The DICOM server already exists.");
+                return false;
+            }
 
-                if (missingType.Count == 1)
+            else if (DicomServer.ServerType == "BOTH")
+            {
+                if (existingServers.First().ServerType == "PACS")
+                    DicomServer.ServerType = "MWL";
+                else if (existingServers.First().ServerType == "MWL")
+                    DicomServer.ServerType = "PACS";
+                else
                 {
-                    canSave = true;
-                    DicomServer.ServerType = missingType[0];
-                }
-                else // Count == 0
-                {
-                    canSave = false; // 이미 전부 저장 됨
+                    ShowAlertDialog("The existing server type is incorrect. Please remove the existing server information to avoid conflicts.");
+                    return false;
                 }
             }
 
-            return canSave;
+            return true;
         }
 
         private void SaveNew()
@@ -270,6 +266,7 @@ namespace RaywattApp.ViewModels.Dialog
                 if (res != 1)
                 {
                     _log.Error(IsNew ? "Insert Error" : "Update Error");
+                    ShowAlertDialog("Failed to connect to the server.");
                 }
             }
         }
@@ -284,7 +281,20 @@ namespace RaywattApp.ViewModels.Dialog
                 if (DicomServer.ServerType == "BOTH")
                     sqlParameters["server_type"] = previousServerType;
                 else
+                {
+                    ShowAlertDialog("The server type doesn't match your existing configuration. Please remove the existing server information to avoid conflicts.");
                     return;
+                }
+            }
+
+            Dictionary<string, object> validateSqlParameters = new Dictionary<string, object>();
+            validateSqlParameters["id"] = DicomServer.Id;
+            IList<DicomServer> DicomServers = _sqlManager.SelectDicomServer(validateSqlParameters);
+
+            if (DicomServers.Any(x => x.AeTitle == DicomServer.AeTitle && x.IpAddress == DicomServer.IpAddress && x.Port == DicomServer.Port && x.ServerType == DicomServer.ServerType))
+            {
+                ShowAlertDialog("The DICOM server already exists.");
+                return;
             }
 
             sqlParameters["ae_title"] = AeTitle.Text.Trim();
@@ -301,7 +311,9 @@ namespace RaywattApp.ViewModels.Dialog
 
             if (res != 1)
             {
-                _log.Error(IsNew ? "Insert Error" : "Update Error");
+                _log.Error("Update Error");
+                ShowAlertDialog("Failed to connect to the server.");
+                return;
             }
         }
 
@@ -397,6 +409,15 @@ namespace RaywattApp.ViewModels.Dialog
                 dialogResults.DialogAnswer = DialogResults.Answer.Yes;
                 CloseDialogWithResult(dialog, dialogResults);
             }
+        }
+
+        private void ShowAlertDialog(string message)
+        {
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["title"] = _l10n["Information"];
+            parameter["message"] = _l10n[message];
+
+            _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.DicomServerDialogWidth, Constants.DicomServerDialogHeight);
         }
     }
 }
