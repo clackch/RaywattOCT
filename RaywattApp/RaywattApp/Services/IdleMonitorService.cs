@@ -21,12 +21,13 @@ namespace RaywattApp.Services
 
         private IDialogService? _dialogService;
         private AngioManager? _angioManager;
+        private SqlManager _sqlManager;
 
         private DateTime _totalStartTime;
         private DateTime _preAlertStartTime;
 
-        private TimeSpan _totalIdleLimit = TimeSpan.FromSeconds(20);
-        private TimeSpan _preAlertLimit = TimeSpan.FromSeconds(5);
+        private TimeSpan _totalIdleLimit = TimeSpan.FromMinutes(60);
+        private TimeSpan _preAlertLimit = TimeSpan.FromMinutes(5);
 
         private bool _isPreAlertShown = false;
         private bool _isLogoutPopupShown = false;
@@ -45,24 +46,45 @@ namespace RaywattApp.Services
             typeof(FileCopyDialogViewModel),
         };
 
-        public IdleMonitorService(IDialogService dialogService, AngioManager angioManager)
+        public TimeSpan TotalIdleLimit { private get => _totalIdleLimit; set => _totalIdleLimit = value; }
+        public TimeSpan PreAlertLimit { private get => _preAlertLimit; set => _preAlertLimit = value; }
+
+        public IdleMonitorService(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager)
         {
             _log.Debug("IdleMonitorService");
 
-            Init();
+            _sqlManager = sqlManager;
             _dialogService = dialogService;
             _angioManager = angioManager;
+
+            Init();
         }
 
         private void Init()
         {
             StartIdleMonitorLoop();
             RegisterUserActivityEvents();
-
+            ApplyLogoutTimeSettings();
+        }
+        private void ApplyLogoutTimeSettings()
+        {
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
-            sqlParameters["classification"] = "LocalHost";
-            SqlManager _sqlManager = (SqlManager)App.Current.Services.GetService(typeof(SqlManager));
-            IList<Configuration> l10Ns = _sqlManager.SelectConfiguration(sqlParameters);
+            sqlParameters["classification"] = "LogoutTime";
+            IList<Configuration> logOutTimes = _sqlManager.SelectConfiguration(sqlParameters);
+
+            foreach (var time in logOutTimes)
+            {
+                var key = time.Key;
+
+                if (key == "TotalTime")
+                {
+                    _totalIdleLimit = TimeSpan.FromMinutes(Convert.ToDouble(time.Value));
+                }
+                else if (key == "PreTime")
+                {
+                    _preAlertLimit = TimeSpan.FromMinutes(Convert.ToDouble(time.Value));
+                }
+            }
         }
         private void ResetTimers()
         {
