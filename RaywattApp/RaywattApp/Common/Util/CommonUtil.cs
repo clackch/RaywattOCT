@@ -43,8 +43,7 @@ namespace RaywattApp.Common.Util
 
         public static bool ValidateText(string input)
         {
-            var regex = new Regex(@"^[a-zA-Z0-9ㄱ-ㅎ가-힣\s,.]+$");
-
+            var regex = new Regex(@"^[a-zA-Z0-9ㄱ-ㅎ가-힣\s,.-]+$");
             if (input.Length == 0)
                 return true;
 

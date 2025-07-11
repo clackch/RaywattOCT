@@ -142,7 +142,7 @@ namespace RaywattApp.ViewModels.Dialog
 
         private bool Validate()
         {
-            if (SpsStartDateFrom > SpsStartDateTo)
+            if (SpsStartDateFrom.Date > SpsStartDateTo.Date)
             {
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["title"] = _l10n["Error"];
