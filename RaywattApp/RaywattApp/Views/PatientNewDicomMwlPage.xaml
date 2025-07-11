@@ -40,13 +40,13 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
                 <DataGrid.Columns>
-                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding PatientName}" Header="{Binding [Patient Name], Source={StaticResource L10N}}" />
-                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="0.8*" Binding="{Binding PatientId}" Header="{Binding [Patient ID], Source={StaticResource L10N}}" />
-                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="0.8*" Binding="{Binding PatientBirthDate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Birth Date], Source={StaticResource L10N}}" />
-                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="0.4*" Binding="{Binding PatientSex, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}" Header="{Binding [Gender], Source={StaticResource L10N}}" />
-                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding AccessionNumber}" Header="{Binding [Accession Number], Source={StaticResource L10N}}" />
-                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding ScheduledStationAET}" Header="{Binding [Scheduled Station AE], Source={StaticResource L10N}}" />
-                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding SPSStartDate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Procedure Start Date], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="1.8*" Binding="{Binding PatientName}" Header="{Binding [Patient Name], Source={StaticResource L10N}}"/>
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="1.2*" Binding="{Binding PatientId}" Header="{Binding [Patient ID], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="1.2*" Binding="{Binding PatientBirthDate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Birth Date], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding PatientSex, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}" Header="{Binding [Gender], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="1.4*" Binding="{Binding AccessionNumber}" Header="{Binding [Accession Number], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="1.8*" Binding="{Binding ScheduledStationAET}" Header="{Binding [Scheduled Station AE], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="1.8*" Binding="{Binding SPSStartDate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Procedure Start Date], Source={StaticResource L10N}}" />
                 </DataGrid.Columns>
             </DataGrid>
             <Grid Grid.Row="14" Grid.Column="1" Margin="0,28,0,0">
