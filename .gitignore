@@ -67,3 +67,4 @@ bin
 .sonarlint
 .scannerwork
 .sonarqube
+FGServer.prj_files/

@@ -303,7 +303,10 @@ namespace RaywattApp.ViewModels
             if (reviewPages.Contains(Constants.CurrentPage))
             {
                 if (!reviewPages.Contains(pageUri))
+                {
                     RayEndReview();
+                    DeviceStatus.IsExecutedAIFFR = false;
+                }
             }
             //Recording(Confirm) 화면에서 나가는 경우, RayEndReview 호출
             if (Constants.CurrentPage == Constants.RecordingConfirmPage)
