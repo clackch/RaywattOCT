@@ -1,4 +1,5 @@
-﻿using RaywattApp.Common.Angio;
+﻿using log4net;
+using RaywattApp.Common.Angio;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Util;
@@ -10,14 +11,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 
 namespace RaywattApp.Services
 {
     public class IdleMonitorService
     {
-        // TODO: Log 기능 추가
+        private static readonly ILog _log = LogManager.GetLogger(typeof(IdleMonitorService));
 
         private IDialogService? _dialogService;
         private AngioManager? _angioManager;
@@ -34,19 +34,21 @@ namespace RaywattApp.Services
 
         private CancellationTokenSource _cts = new CancellationTokenSource();
 
-        List<string> _skipPage = new List<string>()
+        List<string> _skipPages = new List<string>()
         {
             Constants.OutsetLoginPage,
             Constants.OutsetLoadingPage,
         };
 
-        List<Type> _skipDialog = new List<Type>()
+        List<Type> _skipDialogs = new List<Type>()
         {
             typeof(FileCopyDialogViewModel),
         };
 
         public IdleMonitorService(IDialogService dialogService, AngioManager angioManager)
         {
+            _log.Debug("IdleMonitorService");
+
             Init();
             _dialogService = dialogService;
             _angioManager = angioManager;
@@ -56,6 +58,11 @@ namespace RaywattApp.Services
         {
             StartIdleMonitorLoop();
             RegisterUserActivityEvents();
+
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "LocalHost";
+            SqlManager _sqlManager = (SqlManager)App.Current.Services.GetService(typeof(SqlManager));
+            IList<Configuration> l10Ns = _sqlManager.SelectConfiguration(sqlParameters);
         }
         private void ResetTimers()
         {
@@ -89,6 +96,8 @@ namespace RaywattApp.Services
                 {
                     if (!_isPreAlertShown)
                     {
+                        _log.Debug($"Pre Alert Limit: {_preAlertLimit}");
+
                         ShowPreAlertPopup();
                         _isPreAlertShown = true;
                     }
@@ -96,6 +105,8 @@ namespace RaywattApp.Services
 
                 if (DateTime.Now - _totalStartTime > _totalIdleLimit)
                 {
+                    _log.Debug($"Total Idle Limit: {_totalIdleLimit}, Pre Alert Limit: {_preAlertLimit}");
+
                     _cts.Cancel();
 
                     ResetTimers();
@@ -122,7 +133,7 @@ namespace RaywattApp.Services
         }
         private bool ShouldSkipIdleCheck()
         {
-            return _skipPage.Contains(Constants.CurrentPage);
+            return _skipPages.Contains(Constants.CurrentPage);
         }
         private bool SholdSkipDialogCheck()
         {
@@ -131,7 +142,7 @@ namespace RaywattApp.Services
             return openDialogs.Any(dialog =>
             {
                 var dataContextType = dialog.DataContext?.GetType();
-                return dataContextType != null && _skipDialog.Contains(dataContextType);
+                return dataContextType != null && _skipDialogs.Contains(dataContextType);
             });
         }
         private bool IsUserActive()
@@ -159,6 +170,7 @@ namespace RaywattApp.Services
             }
 
             _isPreAlertShown = true;
+            _log.Debug($"Showing Pre Alert Popup with remaining time: {_totalIdleLimit - _preAlertLimit} seconds");
 
             System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
@@ -169,6 +181,7 @@ namespace RaywattApp.Services
                 DialogResults result = _dialogService!.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
                 _isPreAlertShown = false;
+                _log.Debug($"Pre Alert Popup closed with result: {result}");
             }));
         }
         private void ClosePreAlertPopup()
