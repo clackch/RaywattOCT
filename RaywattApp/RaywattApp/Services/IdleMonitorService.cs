@@ -114,7 +114,7 @@ namespace RaywattApp.Services
                     }
                 }
 
-                if (DateTime.Now - _preAlertStartTime > _preAlertLimit)
+                if (DateTime.Now - _preAlertStartTime > _totalIdleLimit - _preAlertLimit)
                 {
                     if (!_isPreAlertShown)
                     {
