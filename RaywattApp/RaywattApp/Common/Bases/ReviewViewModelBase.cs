@@ -139,15 +139,6 @@ namespace RaywattApp.Common.Bases
             parameter["patientCase"] = PatientCase;
             parameter["prevStatus"] = PrevStatus;
             parameter["reviewStatus"] = ReviewStatus;
-
-            if (url == Constants.ReviewFfrSettingPage)
-            {
-                if (DeviceStatus.IsExecutedAIFFR)
-                {
-                    url = Constants.ReviewFfrPage;
-                }
-            }
-
             WeakReferenceMessenger.Default.Send(new NavigationMessage(url) { Parameter = parameter });
         }
 

@@ -85,9 +85,6 @@ namespace RaywattApp.Models
         private bool _isCleaningDone = true;
 
         [ObservableProperty]
-        private bool _isExecutedAIFFR = false;
-
-        [ObservableProperty]
         private Dictionary<string, bool> _testMode = new Dictionary<string, bool>();
 
         [ObservableProperty]
