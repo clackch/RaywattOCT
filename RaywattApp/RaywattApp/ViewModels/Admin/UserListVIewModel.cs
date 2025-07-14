@@ -5,6 +5,8 @@ using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Models;
 using RaywattApp.Services;
+using CommunityToolkit.Mvvm.Input;
+using System.Windows.Input;
 
 namespace RaywattApp.ViewModels.Admin
 {
@@ -18,6 +20,30 @@ namespace RaywattApp.ViewModels.Admin
 
         [ObservableProperty]
         private IList<User> _users;
+
+        private ICommand _editInstituteCommand;
+        public ICommand EditInstituteCommand
+        {
+            get { return this._editInstituteCommand ?? (this._editInstituteCommand = new RelayCommand(EditInstitute)); }
+        }
+
+        private ICommand _changeAdminPasswordCommand;
+        public ICommand ChangeAdminPasswordCommand
+        {
+            get { return this._changeAdminPasswordCommand ?? (this._changeAdminPasswordCommand = new RelayCommand(ChangeAdminPassword)); }
+        }
+
+        private ICommand _addUserCommand;
+        public ICommand AddUserCommand
+        {
+            get { return this._addUserCommand ?? (this._addUserCommand = new RelayCommand(AddUser)); }
+        }
+
+        private ICommand _editUserCommand;
+        public ICommand EditUserCommand
+        {
+            get { return this._editUserCommand ?? (this._editUserCommand = new RelayCommand(EditUser)); }
+        }
 
         public UserListVIewModel(SqlManager sqlManager, IDialogService dialogService)
         {
@@ -39,6 +65,26 @@ namespace RaywattApp.ViewModels.Admin
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
             _log.Debug("OnNavigating");
+        }
+
+        private void EditInstitute()
+        {
+            _log.Debug("EditInstitute");
+        }
+
+        private void ChangeAdminPassword()
+        {
+            _log.Debug("ChangeAdminPassword");
+        }
+
+        private void AddUser()
+        {
+            _log.Debug("AddUser");
+        }
+
+        private void EditUser()
+        {
+            _log.Debug("EditUser");
         }
     }
 }

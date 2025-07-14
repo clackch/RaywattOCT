@@ -6,6 +6,7 @@
       xmlns:local="clr-namespace:RaywattApp.Views.Admin"
       xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
       xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
+      xmlns:component="clr-namespace:RaywattApp.Views.Component"
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
       Background="{DynamicResource GrayscaleGray8Brush}"
@@ -27,21 +28,26 @@
             <StackPanel Height="164" Orientation="Horizontal">
                 <Image Source="{svgc:SvgImage Source=/res/icon/fasterWhite.svg}" Width="284" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                 <StackPanel Width="68"/>
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Institute Info], Source={StaticResource L10N}}"/>
-
+                <StackPanel Width="608">
+                    <StackPanel Orientation="Horizontal" Height="26">
+                        <Label Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Institute Info.], Source={StaticResource L10N}}"/>
+                        <StackPanel Width="16"/>
+                        <component:IconButton Style="{DynamicResource IconButton}" Icon="editSimple" HorizontalAlignment="Right" Command="{Binding EditInstituteCommand}"/>
                     </StackPanel>
                     <StackPanel Height="8"/>
                     <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Institute Info], Source={StaticResource L10N}}"/>
                     <StackPanel Height="19"/>
                     <Label Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Institute Info], Source={StaticResource L10N}}"/>
                 </StackPanel>
+                <StackPanel>
+                    <Button Style="{StaticResource OutlinedBtnType1-Large}" Margin="0,30,0,0" Command="{Binding ChangeAdminPasswordCommand}" Content="{Binding [Password Change], Source={StaticResource L10N}}"/>
+                </StackPanel>
             </StackPanel>
             <Separator Background="{DynamicResource GrayscaleGray5Brush}"/>
             <StackPanel Height="38"/>
             <Grid Height="42">
                 <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [User Management], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource OutlinedBtnType1-Large}" HorizontalAlignment="Right" Command="{Binding AddUserCommand}" Content="{Binding [Add User], Source={StaticResource L10N}}"/>
             </Grid>
             <StackPanel Height="20"/>
             <DataGrid ItemsSource="{Binding Users}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}">
