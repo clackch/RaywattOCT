@@ -211,13 +211,16 @@ namespace RaywattApp.ViewModels
         /// <summary>
         /// 생성자
         /// </summary>
-        public MainViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager)
+
+        FFRFeatureParameter _fFRFeatureParameter;
+        public MainViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager, FFRFeatureParameter fFRFeatureParameter)
         {
             _log.Debug("MainViewModel");
 
             _sqlManager = sqlManager;
             _angioManager = angioManager;
             _dialogService = dialogService;
+            _fFRFeatureParameter = fFRFeatureParameter;
 
             // Code 정의
             CodeDefinition codeDefinition = new CodeDefinition(_sqlManager);
@@ -303,13 +306,18 @@ namespace RaywattApp.ViewModels
             if (reviewPages.Contains(Constants.CurrentPage))
             {
                 if (!reviewPages.Contains(pageUri))
+                {
                     RayEndReview();
+                    _fFRFeatureParameter.IsSkip = false;
+                }
             }
             //Recording(Confirm) 화면에서 나가는 경우, RayEndReview 호출
             if (Constants.CurrentPage == Constants.RecordingConfirmPage)
             {
                 if (!pageUri.Equals(Constants.ReviewPage))
+                {
                     RayEndReview();
+                }
             }
 
             if (NavigationSource == Constants.PatientListPage || (NavigationSource == "Refresh" && Constants.CurrentPage == Constants.PatientListPage))

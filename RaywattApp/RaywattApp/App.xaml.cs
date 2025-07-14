@@ -14,6 +14,7 @@ using RaywattApp.Common.Angio;
 using System.Diagnostics;
 using System.IO;
 using RaywattApp.Common.Util;
+using RaywattApp.Models;
 
 namespace RaywattApp
 {
@@ -141,6 +142,7 @@ namespace RaywattApp
             services.AddTransient(typeof(SqlManager));
 
             services.AddSingleton(typeof(AngioManager));
+            services.AddSingleton(typeof(FFRFeatureParameter));
 
             return services.BuildServiceProvider();
         }

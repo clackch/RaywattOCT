@@ -13,6 +13,13 @@ namespace RaywattApp.Models
         private string? _plaqueArea;
         private string? _percentAreaStenosis;
 
+        private double _fFResult;
+
+        public double FFResult { get => _fFResult; set => _fFResult = value; }
+        
+        private bool _isSkip = false;
+        public bool IsSkip { get => _isSkip; set => _isSkip = value; }
+
         public void SetFFRFeatureParameter(string vesselName, string proximalLumenArea, string distalLumenArea, string lesionLength, string minimalLumenArea, string plaqueArea, string percentAreaStenosis)
         {
             _vesselName = vesselName;
@@ -24,15 +31,21 @@ namespace RaywattApp.Models
             _percentAreaStenosis = percentAreaStenosis;
         }
 
-        public bool IsValid()
+        public bool IsSame( string vesselName,
+                            string proximalLumenArea,
+                            string distalLumenArea,
+                            string lesionLength,
+                            string minimalLumenArea,
+                            string plaqueArea,
+                            string percentAreaStenosis)
         {
-            return !string.IsNullOrEmpty(_vesselName) &&
-                   !string.IsNullOrEmpty(_proximalLumenArea) &&
-                   !string.IsNullOrEmpty(_distalLumenArea) &&
-                   !string.IsNullOrEmpty(_lesionLength) &&
-                   !string.IsNullOrEmpty(_minimalLumenArea) &&
-                   !string.IsNullOrEmpty(_plaqueArea) &&
-                   !string.IsNullOrEmpty(_percentAreaStenosis);
+            return _vesselName == vesselName &&
+                   _proximalLumenArea == proximalLumenArea &&
+                   _distalLumenArea == distalLumenArea &&
+                   _lesionLength == lesionLength &&
+                   _minimalLumenArea == minimalLumenArea &&
+                   _plaqueArea == plaqueArea &&
+                   _percentAreaStenosis == percentAreaStenosis;
         }
 
         public void Clear()
@@ -45,5 +58,6 @@ namespace RaywattApp.Models
             _plaqueArea = string.Empty;
             _percentAreaStenosis = string.Empty;
         }
+
     }
 }

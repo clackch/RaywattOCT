@@ -80,12 +80,13 @@ namespace RaywattApp.ViewModels
         {
             get { return this._ffrSettingCommand ?? (this._ffrSettingCommand = new RelayCommand(FfrSetting)); }
         }
-
-        public ReviewFfrViewModel(SqlManager sqlManager, IDialogService dialogService) : base(sqlManager, dialogService)
+        FFRFeatureParameter _fFRFeatureParameter;
+        public ReviewFfrViewModel(SqlManager sqlManager, IDialogService dialogService, FFRFeatureParameter fFRFeatureParameter) : base(sqlManager, dialogService)
         {
             _log.Debug("ReviewFfrViewModel");
 
             Constants.CurrentPage = Constants.ReviewFfrPage;
+            _fFRFeatureParameter = fFRFeatureParameter;
 
             Section = new Section();
             Section.Proximal.IsVisible = Visibility.Visible;
@@ -141,6 +142,14 @@ namespace RaywattApp.ViewModels
                 DrawCrossSectionImage();
 
                 ShowLumenProfile();
+
+                if (_fFRFeatureParameter.IsSkip)
+                {
+                    FfrResult = _fFRFeatureParameter.FFResult;
+                    OpacityResult = 1.0;
+                    VisibilityResult = Visibility.Visible;
+                    BtnFfrEnabled = false;
+                }
             }
         }
 
@@ -166,13 +175,14 @@ namespace RaywattApp.ViewModels
             DeviceStatus.IsFfrCalculated = false;
             ZIndex = 1;
 
-            ffrCalculatingTimer.Start();            
+            ffrCalculatingTimer.Start();
+            _fFRFeatureParameter.IsSkip = true;
         }
 
         private void FfrSetting()
         {
             _log.Debug("FfrSetting");
-
+            _fFRFeatureParameter.IsSkip = false;
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["patientCase"] = PatientCase;
@@ -217,13 +227,14 @@ namespace RaywattApp.ViewModels
             input[0, 6] = GetVessel();
 
             var inputs = new List<NamedOnnxValue>
-            {            
-                NamedOnnxValue.CreateFromTensor("float_input", input)            
+            {
+                NamedOnnxValue.CreateFromTensor("float_input", input)
             };
 
             using (IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results = sess.Run(inputs))
             {
                 FfrResult = Math.Round(results[0].AsEnumerable<float>().ToArray()[0], 2);
+                _fFRFeatureParameter.FFResult = FfrResult;
             }
         }
 
@@ -281,7 +292,7 @@ namespace RaywattApp.ViewModels
 
         private void OpacityFadeOutTimer(object sender, EventArgs e)
         {
-            if(OpacityPopup <= 0)
+            if (OpacityPopup <= 0)
             {
                 opacityFadeOutTimer.Stop();
                 opacityFadeInTimer.Start();

@@ -1,22 +1,23 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using log4net;
-using RaywattApp.Common.Bases;
-using RaywattApp.Models;
-using System;
-using System.Collections.Generic;
-using static RaywattOCT.RayCoreWrapper;
-using System.Windows.Navigation;
 using CommunityToolkit.Mvvm.Input;
-using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using log4net;
+using Newtonsoft.Json;
+using RaywattApp.Common.Annotation.Models;
+using RaywattApp.Common.Bases;
 using RaywattApp.Common.Messages;
 using RaywattApp.Common.Util;
-using System.Windows;
-using RaywattApp.Common.Annotation.Models;
-using System.Collections.ObjectModel;
+using RaywattApp.Models;
 using RaywattApp.Services;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
-using Newtonsoft.Json;
+using System.Reflection.Metadata;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Navigation;
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
 {
@@ -134,7 +135,8 @@ namespace RaywattApp.ViewModels
             get { return this._manipulationCompletedCommand ?? (this._manipulationCompletedCommand = new RelayCommand<ManipulationCompletedEventArgs>(Window_ManipulationCompleted)); }
         }
 
-        public ReviewFfrSettingViewModel(SqlManager sqlManager)
+        FFRFeatureParameter _fFRFeatureParameter;
+        public ReviewFfrSettingViewModel(SqlManager sqlManager, FFRFeatureParameter fFRFeatureParameter)
         {
             _log.Debug("ReviewFfrSettingViewModel");
 
@@ -149,6 +151,8 @@ namespace RaywattApp.ViewModels
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "VESS";
             VesselList = _sqlManager.SelectCode(sqlParameters);
+
+            _fFRFeatureParameter = fFRFeatureParameter;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -216,6 +220,24 @@ namespace RaywattApp.ViewModels
                 {
                     PlaqueAreaList = FfrFeature.PlaqueAreaList;
                 }
+            }
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = Patient;
+            parameter["patientCase"] = PatientCase;
+            parameter["prevStatus"] = PrevStatus;
+            parameter["reviewStatus"] = ReviewStatus;
+
+            bool isSame = _fFRFeatureParameter.IsSame(CurrentVessel.Buffer1, Section.Proximal.DValue.ToString(), Section.Distal.DValue.ToString(), Section.LesionLength.DValue.ToString(), GetMla().ToString(), FfrFeature.PlaqueArea.ToString(), FfrFeature.PercentAreaStenosis.ToString());
+
+            if(isSame && _fFRFeatureParameter.IsSkip)
+            {
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewFfrPage) { Parameter = parameter });
+            }
+            else
+            {
+                _fFRFeatureParameter.IsSkip = false;
+                _fFRFeatureParameter.SetFFRFeatureParameter(CurrentVessel.Buffer1, Section.Proximal.DValue.ToString(), Section.Distal.DValue.ToString(), Section.LesionLength.DValue.ToString(), GetMla().ToString(), FfrFeature.PlaqueArea.ToString(), FfrFeature.PercentAreaStenosis.ToString());
             }
         }
 
