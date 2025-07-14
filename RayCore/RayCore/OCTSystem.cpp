@@ -1098,12 +1098,12 @@ RayError COCTSystem::SetSheathDiameter(double value)
 	if (!m_bFirstLoad) return RayError::OK;
 	m_bFirstLoad = false;
 
-	/*if (value == 1.7) {
+	if (value == 1.7) {
 		m_pLaserModule->Move(eStepMotorIndex::DelayLine, config.catheter.length);
 	}
 	else {
 		m_pLaserModule->Move(eStepMotorIndex::DelayLine, 0);
-	}*/
+	}
 
 	return RayError::OK;
 }
@@ -2014,40 +2014,14 @@ int COCTSystem::connectRotaryJunction() {
 			m_pLaserModule->SetVLD(0);
 			Sleep(500);
 			m_pLaserModule->SetVOA(config.laserModule.voaValue);
-
 #ifdef DELAY_LINE_HOMING_WORKS
-
-			m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX);
-			m_pLaserModule->Current(eStepMotorIndex::DelayLine, 90000);
-
 			Sleep(500);
-
-			// m_pLaserModule Move 0 OR sensor #1 이동
-			m_pLaserModule->Move(eStepMotorIndex::DelayLine, 0, false, static_cast<char>(3)); // 2는 아래쪽(모터쪽) Photosensor
-
-			Sleep(500);
-
-			while (m_pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) {
-				Sleep(50);
+			m_pLaserModule->Move(MotorIndex::DelayLine, config.laserModule.delayPosition);
+			while (m_pLaserModule->IsMoving(MotorIndex::DelayLine)) {
+				Sleep(10);
 			}
-
 			Sleep(500);
-
-			// m_pLaserModule Current 0
-			m_pLaserModule->Current(eStepMotorIndex::DelayLine, 0);
-
-			Sleep(500);
-
-			m_pLaserModule->Move(eStepMotorIndex::DelayLine, config.laserModule.delayPosition);
-
-			while (m_pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) {
-				Sleep(50);
-			}
-			
-			Sleep(500);
-
-			m_pLaserModule->Current(eStepMotorIndex::DelayLine, config.laserModule.delayPosition);
-			m_pLaserModule->Move(eStepMotorIndex::Polarization, config.laserModule.polarPosition);
+			m_pLaserModule->Move(MotorIndex::Polarization, config.laserModule.polarPosition);
 #endif
 		}
 		else
