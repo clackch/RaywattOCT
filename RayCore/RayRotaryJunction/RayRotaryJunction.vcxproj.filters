@@ -54,12 +54,6 @@
     <ClInclude Include="CommonProtocol.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="ZaberController.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="StepMotorController.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LaserController.cpp">
@@ -90,12 +84,6 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="CommonProtocol.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="ZaberController.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="StepMotorController.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
