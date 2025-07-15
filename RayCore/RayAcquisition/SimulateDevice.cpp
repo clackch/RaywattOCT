@@ -48,7 +48,7 @@ void CSimulateDevice::NextFrame() {
 void CSimulateDevice::SetFrame(int nFrame) {
 	const int nNumOfSamples = m_pDataReader->GetNumOfSamples();
 
-	int nFrameIndex = m_nCurSampleIndex;
+	int nFrameIndex;
 	nFrameIndex = nFrame;
 	nFrameIndex = (nFrameIndex < 0) ? 0 : nFrameIndex;
 	nFrameIndex = (nFrameIndex >= nNumOfSamples) ? nNumOfSamples - 1 : nFrameIndex;
@@ -79,7 +79,6 @@ char* CSimulateDevice::acquire(int& nCurFrame, int& nTotalFrame) {
 
 	NextFrame();
 	nCurFrame = m_nCurSampleIndex;
-	nTotalFrame = nNumOfSamples;
 
 	return m_pDataReader->GetSample(m_nCurSampleIndex);
 }

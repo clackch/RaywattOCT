@@ -83,12 +83,14 @@ OCTHeader CDataReader::ReadHeader(tstring strFilePath)
 
 		if (result && flag == OCTHeader::Bit::SoF)
 		{
-			m_nHeaderSize += OCTHeader::Size();
+			m_nHeaderSize += OCTHeader::Size(); // 11
+			
 			if (header.extraData & (UCHAR)OCTHeader::ExtraData::Dispersion)
 			{
 				int nSize = header.width * 2 * sizeof(int);
 				if (readExtraData(hFile, OCTHeader::ExtraData::Dispersion, nSize)) {
 					m_nHeaderSize += nSize;
+					PLOGI.printf("Disperion ExtraData Size = %d", nSize);
 				}
 			}
 			if (header.extraData & (UCHAR)OCTHeader::ExtraData::Background)
@@ -96,13 +98,20 @@ OCTHeader CDataReader::ReadHeader(tstring strFilePath)
 				int nSize = header.width * header.height * sizeof(USHORT);
 				if (readExtraData(hFile, OCTHeader::ExtraData::Background, nSize)) {
 					m_nHeaderSize += nSize;
+					PLOGI.printf("Background ExtraData Size = %d", nSize);
 				}
 			}
 
 			long long offset = header.width * header.height * header.frames * (int)header.dataType * (int)header.channels;
 			long offsetL = 0xFFFFFFFF & offset;
 			long offsetH = 0xFFFFFFFF & (offset >> 32);
-			SetFilePointer(hFile, offsetL, &offsetH, FILE_CURRENT);
+			DWORD newPos = SetFilePointer(hFile, offsetL, &offsetH, FILE_CURRENT);
+			if (newPos != INVALID_SET_FILE_POINTER) {
+				DWORD err = GetLastError();
+				if (err != NO_ERROR) {
+					PLOGI.printf("SetFilePointer failed. Error : %lu", err);
+				}
+			}
 
 			result &= ReadFile(hFile, &flag, sizeof(OCTHeader::Bit), &dwBytesRead, NULL);
 
@@ -153,7 +162,14 @@ bool CDataReader::readFrame(int nIndex) {
 		long long offset = m_nHeaderSize + m_nDataSize * sizeof(unsigned short) * nIndex;
 		long offsetL = 0xFFFFFFFF & offset;
 		long offsetH = 0xFFFFFFFF & (offset >> 32);
-		SetFilePointer(m_hFile, offsetL, &offsetH, FILE_BEGIN);
+		DWORD newPos = SetFilePointer(m_hFile, offsetL, &offsetH, FILE_BEGIN);
+		if (newPos != INVALID_SET_FILE_POINTER) {
+			DWORD err = GetLastError();
+			if (err != NO_ERROR) {
+				PLOGI.printf("SetFilePointer failed. Error : %lu", err);
+			}
+		}
+
 		result = ReadFile(m_hFile, m_pReadSamples[nIndex], m_nDataSize * sizeof(unsigned short), &dwBytesRead, NULL);
 	}
 
@@ -166,7 +182,11 @@ bool CDataReader::readExtraData(HANDLE hFile, OCTHeader::ExtraData extraData, in
 	BOOL result = ReadFile(hFile, pData, nSize, &dwBytesRead, NULL);
 	if (result)
 	{
+		PLOGI.printf("Success Reading Extra Data");
 		AddExtraData(extraData, pData, nSize);
+	}
+	else {
+		PLOGI.printf("Fail Reading Extra Data");
 	}
 
 	delete[] pData;

@@ -60,7 +60,7 @@ bool CTIFFReader::readFrame(int nIndex)
 	if (m_pReadSamples[nIndex] == NULL) {
 		m_pReadSamples[nIndex] = new char[m_nDataSize * sizeof(char)];
 
-		int revertedIndex = (m_nNumOfSamples - nIndex - 1);
+		//int revertedIndex = (m_nNumOfSamples - nIndex - 1);
 		TIFFSetDirectory(m_pTif, nIndex);
 
 		for (int y = 0; y < m_nHeight; y++) {

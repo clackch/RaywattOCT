@@ -63,7 +63,7 @@ bool CMotorController::SwitchOn() {
 	bool result = false;
 
 	getMotorPacket(MOTOR_INDEX_STATUSWORD, 0, 0, packet, packetLength);
-	result = writeMotor(packet, packetLength);
+	writeMotor(packet, packetLength);
 
 	getMotorPacket(MOTOR_INDEX_CONTROLWORD, MOTOR_DATA_SWITCH_ON, 2, packet, packetLength);
 	result = writeMotor(packet, packetLength);
@@ -237,13 +237,12 @@ bool CMotorController::parsePacket(BYTE* packet, int size) {
 		BYTE length = packet[offset];
 		if (size <= offset + length) return false;
 		if (packet[offset + length] == eof){
-			offset++;
-			BYTE node = packet[offset++];
-			BYTE mode = packet[offset++];
+			offset += 3;
+
 			unsigned short command = packet[offset++];
 			command |= (packet[offset++] << 8);
 
-			BYTE subIndex = packet[offset++];
+			offset++;
 			if (command == MOTOR_INDEX_ACTUALVELOCITY)
 			{
 				m_nActualVelocity = 0;

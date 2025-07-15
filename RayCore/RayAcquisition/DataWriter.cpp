@@ -52,11 +52,21 @@ void CDataWriter::WriteHeader(OCTHeader::Type type, OCTHeader::DataType dataType
 	std::vector<char> vHeader = createHeader(type, dataType, ch, width, height, m_nNumOfSamples, extraData);
 
 	DWORD dwBytesWrote = 0;
-	WriteFile(m_hRecordingFile, vHeader.data(), vHeader.size(), &dwBytesWrote, NULL);
+	if (m_hRecordingFile == INVALID_HANDLE_VALUE) {
+		PLOGI.printf("Create Recording File Error");
+	}
+
+	int err = WriteFile(m_hRecordingFile, vHeader.data(), vHeader.size(), &dwBytesWrote, NULL);
+	if (err != 0) {
+		PLOGI.printf("Raw Data Writing Error : %d", err);
+	}
 }
 void CDataWriter::WriteExtraData(void* pExtraData, long nSize) {
 	DWORD dwBytesWrote = 0;
-	WriteFile(m_hRecordingFile, pExtraData, nSize, &dwBytesWrote, NULL);
+	int err= WriteFile(m_hRecordingFile, pExtraData, nSize, &dwBytesWrote, NULL);
+	if (err != 0) {
+		PLOGI.printf("Extra Data Writing Error : %d", err);
+	}
 }
 bool CDataWriter::WriteFrame(int nFrame) {
 	char* pBuffer = (char *) GetSample(nFrame);
@@ -74,7 +84,10 @@ bool CDataWriter::WriteFrame(int nFrame) {
 void CDataWriter::WriteEOF() {
 	OCTHeader::Bit flag = OCTHeader::Bit::EoF;
 	DWORD dwBytesWrote = 0;
-	WriteFile(m_hRecordingFile, &flag, sizeof(flag), &dwBytesWrote, NULL);
+	int err = WriteFile(m_hRecordingFile, &flag, sizeof(flag), &dwBytesWrote, NULL);
+	if (err != 0) {
+		PLOGI.printf("End of File Data Writing Error : %d", err);
+	}
 }
 void CDataWriter::StopSave() {
 	CloseHandle(m_hRecordingFile);

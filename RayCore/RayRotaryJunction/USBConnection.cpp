@@ -83,6 +83,11 @@ int CUSBConnection::Read(unsigned char* buffer)
 
 	int nRead = 0;
 	int err = libusb_bulk_transfer(m_hUsbHandle, USB_ENDPOINT_IN, buffer, sizeof(buffer), &nRead, USB_TIMEOUT);
+
+	if (err != 0) {
+		PLOGI.printf("USB Read Error : %d", err);
+	}
+
 	return nRead;
 }
 
@@ -98,18 +103,29 @@ bool CUSBConnection::checkUsbDescription(libusb_device* dev) {
 		ret = libusb_get_device_descriptor(dev, &desc);
 		if (ret < 0) {
 			PLOGI.printf("failed to get device descriptor");
-			return false;
 		}
 
 		ret = libusb_open(dev, &handle);
-		if (LIBUSB_SUCCESS == ret) {
-			if (desc.iManufacturer) {
-				ret = libusb_get_string_descriptor_ascii(handle, desc.iManufacturer, string, sizeof(string));
+		if (ret != LIBUSB_SUCCESS) {
+			PLOGI.printf("Failed to open device: %s", libusb_error_name(ret));
+		}
+
+		bool found = false;
+		if (desc.iManufacturer) {
+			ret = libusb_get_string_descriptor_ascii(handle, desc.iManufacturer, string, sizeof(string));
+			if (ret > 0) {
 				if (strcmp((const char*)string, "Dr. Fritz Faulhaber GmbH") == 0) {
-					libusb_close(handle);
-					return true;
+					found = true;
 				}
 			}
+			else {
+				PLOGI.printf("Failed to get manufacturer string: %s", libusb_error_name(ret));
+			}
+		}
+
+		if (handle != nullptr) {
+			libusb_close(handle);
+			return true;
 		}
 	}
 

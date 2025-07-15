@@ -43,7 +43,7 @@ bool CCalibration::loadCalibration() {
 	int offset = 0;
 	memcpy(indexMap, data + offset, nAScan / 2 * sizeof(int)); offset += (nAScan / 2 * sizeof(int));
 	memcpy(weightMap, data + offset, nAScan / 2 * sizeof(float)); offset += (nAScan / 2 * sizeof(float));
-	memcpy(dispersionReal, data + offset, nAScan * sizeof(float)); offset += (nAScan * sizeof(float));
+	memcpy(dispersionReal, data + offset, nAScan * sizeof(float));
 
 	// 실수 허수부를 복합하여 리턴
 	ippsRealToCplx_32f(dispersionReal, dispersionReal + nAScan / 2, (Ipp32fc*)dispersion, nAScan / 2);
@@ -62,9 +62,13 @@ bool CCalibration::readCalibration(LPCTSTR calibrationFileName){
 		return FALSE;
 
 	int fileSize = 0;
-	DWORD dwIgnored;
+	DWORD dwIgnored = NULL;
 
-	ReadFile(hCalibFile, data, calibrationSize, &dwIgnored, nullptr); fileSize += dwIgnored;
+	BOOL result = ReadFile(hCalibFile, data, calibrationSize, &dwIgnored, nullptr);
+	if (!result) {
+		PLOGI.printf("Reading Calibration File Failed");
+	}
+	fileSize += dwIgnored;
 
 	CloseHandle(hCalibFile);
 
@@ -72,7 +76,6 @@ bool CCalibration::readCalibration(LPCTSTR calibrationFileName){
 	{
 		return false;
 	}
-
 
 	return true;
 }

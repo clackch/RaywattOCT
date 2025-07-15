@@ -33,7 +33,6 @@ void CLabImaging::Initialize(CCalibration* calibration, USHORT* backgroundData) 
 
 	const int nAScan = m_setting.nAScan;
 	const int nBScan = m_setting.nBScan;
-	const int nBufferSize = m_setting.nBufferSize;
 	const int nOutputLength = m_setting.nOutputLength;
 
 	this->backgroundData = backgroundData;
@@ -122,7 +121,6 @@ void CLabImaging::subtractBackground(T* fringes, T* background, T* dst, int size
 }
 
 void CLabImaging::generateScopeData(Ipp32f* output, Ipp16u* scope) {
-	const int nFFTLength = m_setting.nFFTLength;
 	const int nOutputLength = m_setting.nOutputLength;
 	Ipp32f* temp = new Ipp32f[nOutputLength];
 	

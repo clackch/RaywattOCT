@@ -38,6 +38,11 @@ bool ICommonProtocol::parseSerialPacket() {
 					BYTE length = m_vPacket[LENGTH_IDX];
 					if (idxETX != (length - 1)) continue;
 
+					if (length - 2 < 0) {
+						PLOGI.printf("Packet Length Too Small");
+						continue;
+					}
+
 					BYTE checksum = calcChecksum(&m_vPacket[0], length - 2);
 					if (checksum == m_vPacket[length - 2]) {
 						handlePacket();

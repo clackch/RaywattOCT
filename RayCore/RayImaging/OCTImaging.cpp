@@ -231,7 +231,6 @@ void COCTImaging::allocateMemory() {
 	const int nFFTOrder = m_setting.nFFTOrder;
 	const int nFFTLength = m_setting.nFFTLength;
 	const int nOutputLength = m_setting.nOutputLength;
-	const int nBufferSize = m_setting.nBufferSize;
 	const int nCircleSize = m_setting.nCircleSize;
 
 	fringes32f = ippsMalloc_32f(nAScan * nBScan);
@@ -1277,8 +1276,8 @@ void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv
 }
 
 void COCTImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<cv::Point> edgePoints, std::vector<double>& theta) {
-	int height = m_nHeight;
-	int width = m_nWidth;
+	/*int height = m_nHeight;
+	int width = m_nWidth;*/
 	theta.clear();
 	static int myint = 0;
 

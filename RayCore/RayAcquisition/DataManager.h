@@ -79,6 +79,8 @@ public:
 		void* pCopyData = new char[nSize];
 		memcpy(pCopyData, pData, nSize);
 		mapExtraData.insert(std::make_pair(extraData, pCopyData));
+
+		delete[] pCopyData;
 	}
 	void* GetExtraData(OCTHeader::ExtraData extraData) {
 		std::map<OCTHeader::ExtraData, void*>::iterator it = mapExtraData.find(extraData);

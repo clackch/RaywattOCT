@@ -358,8 +358,16 @@ bool CImagingSession::LoadZOffset(const char* strDataFilePath) {
 		PLOGI.printf("ZOffset file loaded: %s", strZOffsetFilePath.c_str());
 		for (int i = 0; i < nNumOfSamples; i++) {
 			int offset = 0;
-			fscanf(fp, "%d,", &offset);
-			//PLOGI.printf("%d", offset);
+			int ret = fscanf(fp, "%d,", &offset);
+
+			if (ret != 1) {
+				if (ret == EOF) {
+					PLOGI.printf("fscanf failed or reached EOF");
+				}
+			}
+			else {
+				PLOGI.printf("fscanf: expected 1 item, got %d\n", ret);
+			}
 
 			m_vZOffset.push_back(offset);
 		}
@@ -438,6 +446,10 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 	CCutViewManager* pCutView = pSession->m_pCutView;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 	cv::Mat imgCircle, imgZOffset;
+
+	if (pImaging == nullptr) {
+		return ERROR;
+	}
 
 	PLOGI.printf("Session #%d update cutview - %d frames", pSession->m_nSession, nNumOfSamples);
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadUpdateCutView->isRun; nFrame++) {
@@ -712,6 +724,11 @@ UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 	{
 		delete[] pSession->m_pVolumeData;
 	}
+
+	if (nImageSize >= 600 * 600 || nNumOfSamples > 2000) {
+		PLOGI.printf("Volume Data Size too big : config.volume.size = %d, nNumOfSamples = %d", nDiameter, nNumOfSamples);
+	}
+
 	pSession->m_pVolumeData = new char[nImageSize * nNumOfSamples];
 
 	PLOGI.printf("Session #%d volume generation start - %d frames", pSession->m_nSession, nNumOfSamples);
@@ -747,7 +764,19 @@ USHORT* CImagingSession::readBackground(const char* strBackgroundFile, IImaging:
 	if (fp == nullptr) return nullptr;
 
 	USHORT* pBackground = new USHORT[setting.nBufferSize];
-	fread(pBackground, sizeof(USHORT), setting.nBufferSize, fp);
+	size_t size = fread(pBackground, sizeof(USHORT), setting.nBufferSize, fp);
+
+	if (size != setting.nBufferSize) {
+		if (feof(fp)) {
+			PLOGI.printf("Warning: Reached end of file prematurely");
+		}
+		else if (ferror(fp)) {
+			PLOGI.printf("Error reading file");
+		}
+		else {
+			PLOGI.printf("Unknown fread issue");
+		}
+	}
 
 	fclose(fp);
 

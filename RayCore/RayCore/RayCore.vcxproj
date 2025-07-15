@@ -119,14 +119,14 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\Utility;..\lib\include;..\extern\opencv\include;..\extern\ATS\include;..\extern\ipp\include;..\extern\libusb\include\libusb-1.0;..\extern\libtorch\include;..\extern\libtorch\include\torch\csrc\api\include;..\extern\libtiff\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Utility;..\lib\include;..\extern\opencv\include;..\extern\ATS\include;..\extern\ipp\include;..\extern\libusb\include\libusb-1.0;..\extern\libtiff\include</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>..\lib;..\extern\opencv\lib;..\extern\ATS\Library\x64;..\extern\ipp\lib\intel64;..\extern\libusb\lib\x64;..\extern\libtiff\lib;..\extern\libtorch\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib;..\extern\opencv\lib;..\extern\ATS\Library\x64;..\extern\ipp\lib\intel64;..\extern\libusb\lib\x64;..\extern\libtiff\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
@@ -148,7 +148,7 @@ xcopy "$(TargetDir)RayCore.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" 
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\Utility;..\lib\include;..\extern\opencv\include;..\extern\ATS\include;..\extern\ipp\include;..\extern\libusb\include\libusb-1.0;..\extern\libtorch\include;..\extern\libtorch\include\torch\csrc\api\include;..\extern\libtiff\include;..\extern\libTensorflow\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Utility;..\lib\include;..\extern\opencv\include;..\extern\ATS\include;..\extern\ipp\include;..\extern\libusb\include\libusb-1.0;..\extern\libtiff\include</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
@@ -157,7 +157,7 @@ xcopy "$(TargetDir)RayCore.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" 
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>..\lib;..\extern\opencv\lib;..\extern\ATS\Library\x64;..\extern\ipp\lib\intel64;..\extern\libusb\lib\x64;..\extern\libtiff\lib;..\extern\libtorch\lib\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib;..\extern\opencv\lib;..\extern\ATS\Library\x64;..\extern\ipp\lib\intel64;..\extern\libusb\lib\x64;..\extern\libtiff\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>

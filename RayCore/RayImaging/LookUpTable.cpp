@@ -22,9 +22,9 @@ int CLookUpTable::Load(const char* strLUTPath, bool isTest) {
 
 	FILE* fpLUT = fopen(strLUTPath, "r");
 	if (fpLUT) {
-		char strBuffer[MAX_PATH];
+		char strBuffer[21/*changeable*/];
 		bool bStartLUT = false;
-		while (fscanf(fpLUT, "%s", strBuffer) != EOF) {
+		while (fscanf(fpLUT, "%20s", strBuffer) != EOF) {
 			if (strBuffer[0] == '0') {
 				bStartLUT = true;
 			}
@@ -44,14 +44,17 @@ int CLookUpTable::Load(const char* strLUTPath, bool isTest) {
 		}
 		if (lut.size() == 256 && !isTest) {
 			m_vLUT.push_back(lut);
+			fclose(fpLUT);
 			return m_vLUT.size();
 		}
 		else {
 			m_vLUT.at(3) = lut;
+			fclose(fpLUT);
 			return m_vLUT.size();
 		}
 	}
-	
+
+	fclose(fpLUT);
 	return 0;
 }
 

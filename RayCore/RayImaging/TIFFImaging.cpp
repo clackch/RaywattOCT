@@ -31,12 +31,8 @@ void CTIFFImaging::Initialize()
 
 void CTIFFImaging::Process(char* fringes)
 {
-	m_end = std::chrono::system_clock::now();
-	CLookUpTable& lut = CLookUpTable::GetInstance();
 	cv::Mat imgTIFF(cv::Size(m_setting.nBScan, m_setting.nAScan), CV_8UC1, fringes);
 	imageConvert = imgTIFF.clone();
-
-	m_start = m_end;
 
 	InverseCircularizeImage(imageConvert, imageConvert);
 

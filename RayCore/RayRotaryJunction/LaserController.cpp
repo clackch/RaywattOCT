@@ -24,9 +24,8 @@ CLaserController* CLaserController::GetInstance() {
 	return pInstance;
 }
 CLaserController::~CLaserController() {
-	unsigned long retvallong = 0;
 	// close network interface before exiting
-	retvallong = m_pAxsunOCTControl->StopNetworkControlInterface();
+	m_pAxsunOCTControl->StopNetworkControlInterface();
 	CoUninitialize();
 }
 

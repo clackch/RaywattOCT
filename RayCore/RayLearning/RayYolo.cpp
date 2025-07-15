@@ -12,10 +12,10 @@ CRayYolo::~CRayYolo() {
 
 void CRayYolo::Initialize(bool useGPU){
 	if (m_hDll) {
-		InitializeSegment = (pInitializeSegment)GetProcAddress(m_hDll, "InitializeSegment");
-		InitializeDetect = (pInitializeDetect)GetProcAddress(m_hDll, "InitializeDetect");
-		GetSegmentObjects = (pGetSegmentObjects)GetProcAddress(m_hDll, "GetSegmentObjects");
-		GetDetectObjects = (pGetDetectObjects)GetProcAddress(m_hDll, "GetDetectObjects");
+		InitializeSegment = reinterpret_cast<pInitializeSegment>(GetProcAddress(m_hDll, "InitializeSegment"));
+		InitializeDetect = reinterpret_cast<pInitializeDetect>(GetProcAddress(m_hDll, "InitializeDetect"));
+		GetSegmentObjects = reinterpret_cast<pGetSegmentObjects>(GetProcAddress(m_hDll, "GetSegmentObjects"));
+		GetDetectObjects = reinterpret_cast<pGetDetectObjects>(GetProcAddress(m_hDll, "GetDetectObjects"));
 
 		m_yoloSegment = InitializeSegment();
 		m_yoloDetect = InitializeDetect();
