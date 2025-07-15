@@ -70,10 +70,10 @@
                 <CheckBox Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="4" Content="{Binding [Scheduled Procedure Step Start Date], Source={StaticResource L10N}}" IsChecked="{Binding UseSpsStartDate}"  Margin="0,-5,0,0" VerticalAlignment="Top"/>
 
                 <Label Grid.Row="7" Grid.Column="0"  Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [From], Source={StaticResource L10N}}" Margin="0,18,0,0"/>
-                <DatePicker Grid.Row="7" Grid.Column="1" Style="{DynamicResource DatePickerStyle}" Tag="Entert Date" SelectedDate="{Binding SpsStartDateFrom}" IsEnabled="{Binding UseSpsStartDate}" Width="360" Height="54" VerticalAlignment="Top"/>
+                <DatePicker Grid.Row="7" Grid.Column="1" Style="{DynamicResource DatePickerStyle}" behaviors:DatePickerPopupOffsetBehavior.AutoVerticalOffset="True" Tag="{Binding [Enter Birth Date], Source={StaticResource L10N}}" SelectedDate="{Binding SpsStartDateFrom}" IsEnabled="{Binding UseSpsStartDate}" Width="360" Height="54" VerticalAlignment="Top"/>
 
                 <Label Grid.Row="7" Grid.Column="2"  Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [To], Source={StaticResource L10N}}" Margin="30,18,0,0"/>
-                <DatePicker Grid.Row="7" Grid.Column="3" Style="{DynamicResource DatePickerStyle}" Tag="Entert Date" SelectedDate="{Binding SpsStartDateTo}" IsEnabled="{Binding UseSpsStartDate}" Width="360" Height="54" VerticalAlignment="Top"/>
+                <DatePicker Grid.Row="7" Grid.Column="3" Style="{DynamicResource DatePickerStyle}" behaviors:DatePickerPopupOffsetBehavior.AutoVerticalOffset="True" Tag="{Binding [Enter Birth Date], Source={StaticResource L10N}}" SelectedDate="{Binding SpsStartDateTo}" IsEnabled="{Binding UseSpsStartDate}" Width="360" Height="54" VerticalAlignment="Top"/>
             </Grid>
 
             <Separator Grid.Row="3" Background="{DynamicResource GrayscaleGray5Brush}" Height="1"/>
