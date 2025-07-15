@@ -2,9 +2,14 @@
 #include "SerialPort.h"
 #include "Utility.h"
 
+WriteTaskController* CCOMConnection::m_pWriteManager;
+
 CCOMConnection::CCOMConnection() {
 	m_pPort = new CSerialPort();
-	m_pWriteManager = new WriteTaskController(1);
+	if (m_pWriteManager == nullptr) {
+		m_pWriteManager = new WriteTaskController(10);
+		m_pWriteManager->start();
+	}
 }
 CCOMConnection::~CCOMConnection() {
 	if (m_pPort != nullptr) {
@@ -42,6 +47,8 @@ int CCOMConnection::Write(unsigned char* buffer, int size)
 		m_pPort->WriteByte(copied, size);
 		delete[] copied;
 		});
+
+	//PLOGI.printf("tasknum : %d", m_pWriteManager->getTaskNum());
 	return (result) ? size : 0;
 }
 

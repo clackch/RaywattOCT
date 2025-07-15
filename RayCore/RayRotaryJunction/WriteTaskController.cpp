@@ -2,19 +2,21 @@
 
 WriteTaskController::WriteTaskController(int interval) {
     intervalTime = interval;
-    running = true;
-    workerThread = std::thread(&WriteTaskController::worker, this);
+    running = false;
 }
 
 WriteTaskController::~WriteTaskController() {
     stop();
 }
 
+void WriteTaskController::start() {
+    running = true;
+    workerThread = std::thread(&WriteTaskController::worker, this);
+}
+
 void WriteTaskController::addTask(std::function<void()> task) {
-    {
-        std::lock_guard<std::mutex> lock(queueMutex);
-        taskQueue.push(std::move(task));
-    }
+    //printf("[in add] : %d\n", taskQueue.unsafe_size());
+    taskQueue.push(task);
     cv.notify_one();
 }
 
@@ -28,23 +30,23 @@ void WriteTaskController::stop() {
         workerThread.join();
 }
 
+int WriteTaskController::getTaskNum() {
+    return taskQueue.unsafe_size();
+}
+
 
 void WriteTaskController::worker() {
     while (true) {
         std::function<void()> task;
-
-        {
-            std::unique_lock<std::mutex> lock(queueMutex);
-            cv.wait(lock, [this] {
-                return !taskQueue.empty() || !running;
-                });
-            if (!running && taskQueue.empty())
-                break;
-
-            task = std::move(taskQueue.front()); 
-            taskQueue.pop();
+        if (running) {
+            if (taskQueue.try_pop(task)) {
+                if (task) {
+                    task();
+                }
+                //printf("[in worker] : %d\n", taskQueue.unsafe_size());
+            }
         }
-        task(); 
+        if (!running) break;
         std::this_thread::sleep_for(std::chrono::milliseconds(intervalTime));
     }
 }

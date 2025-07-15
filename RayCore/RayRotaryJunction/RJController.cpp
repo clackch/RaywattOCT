@@ -246,6 +246,20 @@ bool CRJController::ReadRFID() {
 	int written = m_pConnection->Write(serialPacket, packetLength);
 	return (written == packetLength);
 }
+
+bool CRJController::GetIsTagging() {
+	if (!m_initMotor) return false;
+
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	RFIDProtocol::setPacketByFID(eFID::FID_RFID_TAGGING, serialPacket, packetLength);
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+	return (written == packetLength);
+}
+
 bool CRJController::IncreaseRFIDUsage(int uidSize, BYTE* UID) {
 	if (!m_initMotor) return false;
 	BYTE cnt = RFIDProtocol::getCount(UID, uidSize-CUSTOM_UID_LENGTH)+1;
@@ -501,8 +515,8 @@ UINT CRJController::threadReadTag(LPVOID param) {
 	CRJController* pRJController = (CRJController*)param;
 
 	while (pRJController->m_pThreadRFIDTag->isRun) {
-		pRJController->ReadRFID();
-		Sleep(100);
+		pRJController->GetIsTagging();
+		Sleep(1000);
 	}
 
 	return NOERROR;
@@ -761,7 +775,9 @@ void CRJController::RxPacketRFIDGetState(BYTE* buff, RFID_ReadType type)
 		idx += STEP_LEN;
 	}
 
-	RFIDProtocol::printState();
+	if (isTagging) {
+		RFIDProtocol::printState();
+	}
 }
 
 void CRJController::handlePacket() {
@@ -786,7 +802,13 @@ void CRJController::handlePacket() {
 	}
 	else {
 		if (m_vPacket[REPLY_RESULT_IDX] != 11) {
-			CUtility::StopThread(m_pThreadRFIDTag);
+			if (isTagging == false) //PLOGI.printf("tag start\n");
+			isTagging = true;
+		}
+		else {
+			if (isTagging == true) //PLOGI.printf("tag end\n");
+			isTagging = false;
+			return;
 		}
 		if (m_vPacket[REPLY_RESULT_IDX] == 12) {
 			if (fid != eFID::FID_RFID_GET_KEY) {
@@ -795,7 +817,9 @@ void CRJController::handlePacket() {
 					RFIDProtocol::clearFailedFID();
 					findCorrectKey();
 				}
-				RFIDProtocol::addFailedFID(fid);
+				if (fid != eFID::FID_RFID_TAGGING) {
+					RFIDProtocol::addFailedFID(fid);
+				}
 			}
 			return;
 		}
@@ -833,6 +857,9 @@ void CRJController::handlePacket() {
 	case eFID::FID_RFID_SET_STEP:
 	case eFID::FID_RFID_GET_STEP:
 		RxPacketRFIDGetState(&m_vPacket[0], STEP);
+		break;
+
+	case eFID::FID_RFID_TAGGING:
 		break;
 	default:
 		break;

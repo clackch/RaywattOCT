@@ -78,6 +78,8 @@ private:
 	BYTE m_byManufacturerId[MAX_PATH];
 	CThread* m_pThreadRFIDTag;
 
+	bool isTagging;
+
 	bool m_bManualMode;	// Manual Load Catheter
 
 	WriteTaskController* m_resendManager;
@@ -115,6 +117,7 @@ public:
 	bool GetRFIDKey();
 	bool SetRFIDStep(int uidSize, BYTE* UID, int step);
 	bool GetRFIDStep();
+	bool GetIsTagging();
 	void findCorrectKey();
 
 	UINT GetRFIDInfo(BYTE* pRFIDInfo);

@@ -7,7 +7,7 @@ class CCOMConnection : public IConnection
 {
 private:
 	CSerialPort* m_pPort;
-	WriteTaskController* m_pWriteManager;
+	static WriteTaskController* m_pWriteManager;
 
 public:
 	CCOMConnection();

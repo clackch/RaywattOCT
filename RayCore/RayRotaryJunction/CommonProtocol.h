@@ -61,6 +61,7 @@ enum class eFID : BYTE {
 	, FID_RFID_SET_UID = 0x99
 	, FID_RFID_SET_STEP = 0xA0
 	, FID_RFID_GET_STEP = 0xA1
+	, FID_RFID_TAGGING = 0xA2
 };
 
 enum class eSFID : BYTE {

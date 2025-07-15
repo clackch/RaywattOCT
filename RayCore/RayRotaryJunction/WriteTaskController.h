@@ -6,17 +6,25 @@
 #include <mutex>
 #include <thread>
 #include <condition_variable>
+#include <concurrent_queue.h>
 
 class WriteTaskController
 {
 public:
-    WriteTaskController(int interval);
+    explicit WriteTaskController(int interval);
     ~WriteTaskController();
 
+    void start();
     void addTask(std::function<void()> task);
     void stop();
+    int getTaskNum();
+
+    WriteTaskController(const WriteTaskController&) = delete;
+    WriteTaskController& operator=(const WriteTaskController&) = delete;
+    WriteTaskController(WriteTaskController&&) = delete;
+    WriteTaskController& operator=(WriteTaskController&&) = delete;
 private:
-    std::queue<std::function<void()>> taskQueue;
+   Concurrency::concurrent_queue<std::function<void()>> taskQueue;
     std::mutex queueMutex;
     std::condition_variable cv;
     bool running;
