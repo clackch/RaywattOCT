@@ -330,6 +330,24 @@ void COCTImaging::releaseInversedCircularizeMap() {
 	imatYMap.release();
 }
 
+cv::Point COCTImaging::unwrapedPointFromCircular(cv::Point circularPt, int diameter, int srcHeight, int dstHeight, int dstWidth, double scale)
+{
+	double radius = (diameter / 2.0) - 0.5;
+
+	double dx = circularPt.x - radius;
+	double dy = circularPt.y - radius;
+
+	double r = std::sqrt(dx * dx + dy * dy);
+	double theta = std::atan2(dy, dx);
+	if (theta < 0)
+		theta += 2.0 * M_PI;
+
+	float x_unwrap = (theta / (2.0 * M_PI)) * dstWidth;
+	float y_unwrap = dstHeight - r * scale;
+
+	return cv::Point(x_unwrap, y_unwrap);
+}
+
 void COCTImaging::generateBackground(Ipp16u* fringes) {
 	const int nWidth = m_setting.nAScan;
 	const int nHeight = m_setting.nBScan;
@@ -1341,26 +1359,28 @@ void COCTImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<c
 			theta.push_back(0);
 			continue;
 		}
-		/*
+		
 		cv::Mat cloneImage = grayImage.clone();
-
-		cv::Mat mask = (cloneImage == 255);
-		cloneImage.setTo(0, mask);
-		cloneImage.at<uchar>(edgePoint.y, edgePoint.x) = 255;
 
 		cv::Mat inversedImage;
 		cv::remap(cloneImage, inversedImage, imatXMap, imatYMap, cv::INTER_NEAREST);
 		cv::rotate(inversedImage, inversedImage, cv::ROTATE_90_COUNTERCLOCKWISE);
 
-		cv::Point inversedEdgePoint;
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				if (inversedImage.at<uchar>(y, x) == 255) {
-					inversedEdgePoint = cv::Point(x, y);
-					break;
-				}
-			}
-		}
+		//cv::imwrite("checkInversedImage.png", inversedImage);
+		//cv::imwrite("input.png", grayImage);
+		cv::Mat tempImage;;
+		cv::cvtColor(inversedImage, tempImage, cv::COLOR_GRAY2BGR);
+
+		int diameter = tempImage.cols;
+		int srcWidth = tempImage.cols;
+		int srcHeight = tempImage.rows;
+		int dstWidth = diameter;
+		int dstHeight = diameter;
+		cv::Point inversedEdgePoint = unwrapedPointFromCircular(edgePoint, srcWidth, srcHeight, dstWidth, dstHeight, 2.0f);	// 점 변환
+		inversedEdgePoint = cv::Point(inversedEdgePoint.y, inversedImage.rows - inversedEdgePoint.x - 1);	// 90도 회전 적용
+
+		//cv::imwrite("checkLoc.png", tempImage);
+
 		int startY, startX, endX;
 
 		startY = inversedEdgePoint.y;
@@ -1432,7 +1452,7 @@ void COCTImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<c
 			}
 		}
 		PLOGI.printf("start_Guidewire_Shadow_calc, frameNum = %d", whatNumberYouAre);
-		*/
+		
 
 
 		double angle = 360.0 / m_nHeight * 45;

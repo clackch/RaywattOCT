@@ -121,6 +121,7 @@ protected:
 	void releaseCircularizeMap();
 	void initInversedCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
 	void releaseInversedCircularizeMap();
+	cv::Point unwrapedPointFromCircular(cv::Point circularPt, int diameter, int srcHeight, int dstHeight, int dstWidth, double scale);
 
 	void generateBackground(Ipp16u* fringes);
 	void fftProcessing(const Ipp32f* fringes32f);
