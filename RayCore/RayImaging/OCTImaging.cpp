@@ -1388,7 +1388,7 @@ void COCTImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<c
 		endX = inversedEdgePoint.x - 100 < 0 ? inversedEdgePoint.x / 2 : inversedEdgePoint.x - 100;
 
 		//GuideWire 중심점 row에 대한 pixel Value 합
-		double sumOfStandardValue = 0;
+		int sumOfStandardValue = 0;
 		for (int x = startX; x <= endX; x++) {
 			sumOfStandardValue += inversedImage.at<uchar>(startY, x);
 		}
