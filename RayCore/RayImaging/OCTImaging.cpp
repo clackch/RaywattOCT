@@ -1266,7 +1266,6 @@ void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv
 			roiInt = roi;
 		}
 
-		int threshold = 100;
 		// Roi Padding 없는 기존 GuideWire Rectangle Roi
 		cv::Rect originalRoiRect(paddingSize, paddingSize, rect.width, rect.height);
 		cv::Mat originalRoi = roiInt(originalRoiRect);
