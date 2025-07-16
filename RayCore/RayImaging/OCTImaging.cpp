@@ -1348,7 +1348,7 @@ void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv
 	}
 }
 
-void COCTImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<cv::Point> edgePoints, std::vector<double>& theta) {
+void COCTImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<cv::Point>& edgePoints, std::vector<double>& theta) {
 	int height = m_nHeight;
 	int width = m_nWidth;
 	theta.clear();
@@ -1392,76 +1392,104 @@ void COCTImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<c
 		for (int x = startX; x <= endX; x++) {
 			sumOfStandardValue += inversedImage.at<uchar>(startY, x);
 		}
+		PLOGI.printf("row %d : sumOfStandardValue = %d", startY, sumOfStandardValue);
 
-		double gap = 0;
-		int series = 0;
-		int rotationTimes = 0;
-
+		double gapDown = 0, gapUp = 0;
+		double checkWeight = 1.5;
 		// + y 방향 탐색
-		for (int y = startY; y < height; y += 1, gap += 1.0) {
-			int sumOfPixelValues = 0;
-			for (int x = startX; x <= endX; x++) {
-				sumOfPixelValues += inversedImage.at<uchar>(y, x);
-			}
+		while (true) {
+			int series = 0;
+			int rotationTimes = 0;
+			for (int y = startY; y < height; y += 1, gapDown += 1.0) {
+				int sumOfPixelValues = 0;
+				for (int x = startX; x <= endX; x++) {
+					sumOfPixelValues += inversedImage.at<uchar>(y, x);
+				}
 
-			PLOGI.printf("row %d : sumOfPixelValues = %d", y, sumOfPixelValues);
+				//PLOGI.printf("row %d : sumOfPixelValues = %d", y, sumOfPixelValues);
 
-			if (sumOfPixelValues >= sumOfStandardValue * 1.5) {
-				series++;
-				if (series == 3) {
-					PLOGI.printf("end_row1 %d : sumOfPixelValues = %d", y, sumOfPixelValues);
-					series = 0;
-					break;
+				if (sumOfPixelValues >= sumOfStandardValue * checkWeight) {
+					series++;
+					if (series == 3) {
+						PLOGI.printf("end_row1 %d : sumOfPixelValues = %d, gap : %lf", y, sumOfPixelValues, gapDown);
+						series = 0;
+						break;
+					}
+				}
+
+				if (y == height - 1) {
+					rotationTimes++;
+					if (rotationTimes >= 2) {
+						rotationTimes = 0;
+						break;
+					}
+					y = 0;
 				}
 			}
-
-			if (y == height - 1) {
-				rotationTimes++;
-				if (rotationTimes >= 2) {
-					rotationTimes = 0;
-					break;
-				}
-				y = 0;
+			if (gapDown < 50) {
+				int y = startY + (int)gapDown > height - 1 ? startY + (int)gapDown - height : startY + (int)gapDown;
+				PLOGI.printf("end1");
+				
+				cv::line(tempImage, cv::Point(0, y), cv::Point(tempImage.cols - 1, y), cv::Scalar(0, 255, 0), 1);
+				cv::line(tempImage, cv::Point(0, startY), cv::Point(tempImage.cols - 1, startY), cv::Scalar(0, 0, 255), 1);
+				
+				break;
 			}
+			gapDown = 0;
+			checkWeight -= 0.1; // 가중치 감소
 		}
 
 		// - y 방향 탐색
-		for (int y = startY; y >= 0; y -= 1, gap += 1.0) {
-			int sumOfPixelValues = 0;
-			for (int x = startX; x <= endX; x++) {
-				sumOfPixelValues += inversedImage.at<uchar>(y, x);
-			}
+		checkWeight = 1.5;
+		while (true) {
+			int series = 0;
+			int rotationTimes = 0;
+			for (int y = startY; y >= 0; y -= 1, gapUp += 1.0) {
+				int sumOfPixelValues = 0;
+				for (int x = startX; x <= endX; x++) {
+					sumOfPixelValues += inversedImage.at<uchar>(y, x);
+				}
 
-			PLOGI.printf("row %d : sumOfPixelValues = %d", y, sumOfPixelValues);
+				if (sumOfPixelValues >= sumOfStandardValue * checkWeight) {
+					series++;
+					if (series == 3) {
+						PLOGI.printf("end_row2 %d : sumOfPixelValues = %d, gap : %lf", y, sumOfPixelValues, gapUp);
+						break;
+					}
+				}
 
-			if (sumOfPixelValues >= sumOfStandardValue * 1.5) {
-				series++;
-				if (series == 3) {
-					PLOGI.printf("end_row2 %d : sumOfPixelValues = %d", y, sumOfPixelValues);
-					break;
+				if (y == 0) {
+					rotationTimes++;
+					if (rotationTimes >= 2) {
+						rotationTimes = 0;
+						break;
+					}
+					y = height - 1;
 				}
 			}
+			if (gapUp < 50) {
+				int y = startY - (int)gapUp < 0 ? startY - (int)gapUp + height : startY - (int)gapUp;
+				PLOGI.printf("end2");
 
-			if (y == 0) {
-				rotationTimes++;
-				if (rotationTimes >= 2) {
-					rotationTimes = 0;
-					break;
-				}
-				y = height - 1;
+				cv::line(tempImage, cv::Point(0, y), cv::Point(tempImage.cols - 1, y), cv::Scalar(0, 255, 0), 1);
+
+				break;
 			}
+			gapUp = 0;
+			checkWeight -= 0.1; // 가중치 감소
 		}
+		
+		cv::imwrite("guidewire" + std::to_string(whatNumberYouAre) + ".png", tempImage);
 		PLOGI.printf("start_Guidewire_Shadow_calc, frameNum = %d", whatNumberYouAre);
 		
-
-
-		double angle = 360.0 / m_nHeight * 45;
+		double angle = (360.0 * (gapDown + gapUp)/2) / (double)tempImage.rows;
 
 		if (angle >= 20.0 || angle <= 10.0) { // Error 값 처리
 			angle = 15.0; // Normal 값으로 Set
 		}
 
 		double tmp_theta = angle * CV_PI / 180;
+		PLOGI.printf("angle = %lf, theta = %lf", angle, tmp_theta);
 		theta.push_back(tmp_theta);
 	}
 }
