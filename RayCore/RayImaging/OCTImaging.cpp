@@ -1359,30 +1359,25 @@ void COCTImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<c
 			theta.push_back(0);
 			continue;
 		}
-		
 		cv::Mat cloneImage = grayImage.clone();
 
 		cv::Mat inversedImage;
 		cv::remap(cloneImage, inversedImage, imatXMap, imatYMap, cv::INTER_NEAREST);
 		cv::rotate(inversedImage, inversedImage, cv::ROTATE_90_COUNTERCLOCKWISE);
 
-		//cv::imwrite("checkInversedImage.png", inversedImage);
-		//cv::imwrite("input.png", grayImage);
-		cv::Mat tempImage;;
-		cv::cvtColor(inversedImage, tempImage, cv::COLOR_GRAY2BGR);
+		//cv::Mat tempImage;;
+		//cv::cvtColor(inversedImage, tempImage, cv::COLOR_GRAY2BGR);
 
-		int diameter = tempImage.cols;
-		int srcWidth = tempImage.cols;
-		int srcHeight = tempImage.rows;
+		// circle image의 edgePoint를 inversedImage의 좌표로 변환
+		int diameter = inversedImage.cols;
+		int srcWidth = inversedImage.cols;
+		int srcHeight = inversedImage.rows;
 		int dstWidth = diameter;
 		int dstHeight = diameter;
 		cv::Point inversedEdgePoint = unwrapedPointFromCircular(edgePoint, srcWidth, srcHeight, dstWidth, dstHeight, 2.0f);	// 점 변환
 		inversedEdgePoint = cv::Point(inversedEdgePoint.y, inversedImage.rows - inversedEdgePoint.x - 1);	// 90도 회전 적용
 
-		//cv::imwrite("checkLoc.png", tempImage);
-
 		int startY, startX, endX;
-
 		startY = inversedEdgePoint.y;
 		startX = 0;
 		endX = inversedEdgePoint.x - 100 < 0 ? inversedEdgePoint.x / 2 : inversedEdgePoint.x - 100;
@@ -1405,13 +1400,10 @@ void COCTImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<c
 				for (int x = startX; x <= endX; x++) {
 					sumOfPixelValues += inversedImage.at<uchar>(y, x);
 				}
-
-				//PLOGI.printf("row %d : sumOfPixelValues = %d", y, sumOfPixelValues);
-
 				if (sumOfPixelValues >= sumOfStandardValue * checkWeight) {
 					series++;
 					if (series == 3) {
-						PLOGI.printf("end_row1 %d : sumOfPixelValues = %d, gap : %lf", y, sumOfPixelValues, gapDown);
+						//PLOGI.printf("end_row1 %d : sumOfPixelValues = %d, gap : %lf", y, sumOfPixelValues, gapDown);
 						series = 0;
 						break;
 					}
@@ -1428,11 +1420,10 @@ void COCTImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<c
 			}
 			if (gapDown < 50) {
 				int y = startY + (int)gapDown > height - 1 ? startY + (int)gapDown - height : startY + (int)gapDown;
-				PLOGI.printf("end1");
-				
-				cv::line(tempImage, cv::Point(0, y), cv::Point(tempImage.cols - 1, y), cv::Scalar(0, 255, 0), 1);
-				cv::line(tempImage, cv::Point(0, startY), cv::Point(tempImage.cols - 1, startY), cv::Scalar(0, 0, 255), 1);
-				
+
+				//PLOGI.printf("end1");
+				//cv::line(tempImage, cv::Point(0, y), cv::Point(tempImage.cols - 1, y), cv::Scalar(0, 255, 0), 1);
+				//cv::line(tempImage, cv::Point(0, startY), cv::Point(tempImage.cols - 1, startY), cv::Scalar(0, 0, 255), 1);
 				break;
 			}
 			gapDown = 0;
@@ -1453,7 +1444,7 @@ void COCTImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<c
 				if (sumOfPixelValues >= sumOfStandardValue * checkWeight) {
 					series++;
 					if (series == 3) {
-						PLOGI.printf("end_row2 %d : sumOfPixelValues = %d, gap : %lf", y, sumOfPixelValues, gapUp);
+						//PLOGI.printf("end_row2 %d : sumOfPixelValues = %d, gap : %lf", y, sumOfPixelValues, gapUp);
 						break;
 					}
 				}
@@ -1469,20 +1460,18 @@ void COCTImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<c
 			}
 			if (gapUp < 50) {
 				int y = startY - (int)gapUp < 0 ? startY - (int)gapUp + height : startY - (int)gapUp;
-				PLOGI.printf("end2");
 
-				cv::line(tempImage, cv::Point(0, y), cv::Point(tempImage.cols - 1, y), cv::Scalar(0, 255, 0), 1);
-
+				//PLOGI.printf("end2");
+				//cv::line(tempImage, cv::Point(0, y), cv::Point(tempImage.cols - 1, y), cv::Scalar(0, 255, 0), 1);
 				break;
 			}
 			gapUp = 0;
 			checkWeight -= 0.1; // 가중치 감소
 		}
+		//cv::imwrite("guidewire" + std::to_string(whatNumberYouAre) + ".png", tempImage);
+		//PLOGI.printf("start_Guidewire_Shadow_calc, frameNum = %d", whatNumberYouAre);
 		
-		cv::imwrite("guidewire" + std::to_string(whatNumberYouAre) + ".png", tempImage);
-		PLOGI.printf("start_Guidewire_Shadow_calc, frameNum = %d", whatNumberYouAre);
-		
-		double angle = (360.0 * (gapDown + gapUp)/2) / (double)tempImage.rows;
+		double angle = (360.0 * (gapDown + gapUp)/2) / (double)inversedImage.rows;
 
 		if (angle >= 20.0 || angle <= 10.0) { // Error 값 처리
 			angle = 15.0; // Normal 값으로 Set
