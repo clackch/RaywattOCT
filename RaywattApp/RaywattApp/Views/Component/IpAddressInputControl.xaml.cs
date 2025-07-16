@@ -1,8 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using RaywattApp.Models;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
-using RaywattApp.Models;
 
 namespace RaywattApp.Views.Component
 {
@@ -131,6 +131,11 @@ namespace RaywattApp.Views.Component
                 SubnetMask.Octet3 = Octet3TextBox.Text;
                 SubnetMask.Octet4 = Octet4TextBox.Text;
             }
+        }
+
+        private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !char.IsDigit(e.Text, 0);
         }
 
         private void TextBox_GotFocus(object sender, RoutedEventArgs e)

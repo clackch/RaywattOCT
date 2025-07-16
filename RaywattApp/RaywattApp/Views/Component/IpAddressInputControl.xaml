@@ -13,13 +13,13 @@
         
         <Border x:Name="IpAddressBorder" Height="54" CornerRadius="8" BorderBrush="{DynamicResource GrayscaleGray5Brush}" BorderThickness="1" VerticalAlignment="Top">
             <StackPanel Orientation="Horizontal" Margin="20,0,0,0" VerticalAlignment="Top">
-                <TextBox x:Name="Octet1TextBox" Style="{DynamicResource TextBoxIpAddress}" VerticalContentAlignment="Bottom" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus" TextChanged="OnTextChanged"/>
+                <TextBox x:Name="Octet1TextBox" Style="{DynamicResource TextBoxIpAddress}" VerticalContentAlignment="Bottom" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus" TextChanged="OnTextChanged" PreviewTextInput="TextBox_PreviewTextInput"/>
                 <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="." Height="38" VerticalAlignment="Top" VerticalContentAlignment="Bottom"/>
-                <TextBox x:Name="Octet2TextBox" Style="{DynamicResource TextBoxIpAddress}" VerticalContentAlignment="Bottom" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus" TextChanged="OnTextChanged"/>
+                <TextBox x:Name="Octet2TextBox" Style="{DynamicResource TextBoxIpAddress}" VerticalContentAlignment="Bottom" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus" TextChanged="OnTextChanged" PreviewTextInput="TextBox_PreviewTextInput"/>
                 <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="." Height="38" VerticalAlignment="Top" VerticalContentAlignment="Bottom"/>
-                <TextBox x:Name="Octet3TextBox" Style="{DynamicResource TextBoxIpAddress}" VerticalContentAlignment="Bottom" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus" TextChanged="OnTextChanged"/>
+                <TextBox x:Name="Octet3TextBox" Style="{DynamicResource TextBoxIpAddress}" VerticalContentAlignment="Bottom" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus" TextChanged="OnTextChanged" PreviewTextInput="TextBox_PreviewTextInput"/>
                 <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="." Height="38" VerticalAlignment="Top" VerticalContentAlignment="Bottom"/>
-                <TextBox x:Name="Octet4TextBox" Style="{DynamicResource TextBoxIpAddress}" VerticalContentAlignment="Bottom" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus" TextChanged="OnTextChanged"/>
+                <TextBox x:Name="Octet4TextBox" Style="{DynamicResource TextBoxIpAddress}" VerticalContentAlignment="Bottom" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus" TextChanged="OnTextChanged" PreviewTextInput="TextBox_PreviewTextInput"/>
             </StackPanel>
         </Border>
 
