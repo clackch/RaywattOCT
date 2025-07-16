@@ -78,11 +78,11 @@ namespace RaywattApp.Services
 
                 if (key == "TotalTime")
                 {
-                    _totalIdleLimit = TimeSpan.FromMinutes(Convert.ToDouble(time.Value));
+                    _totalIdleLimit = TimeSpan.FromSeconds(Convert.ToDouble(time.Value));
                 }
                 else if (key == "PreTime")
                 {
-                    _preAlertLimit = TimeSpan.FromMinutes(Convert.ToDouble(time.Value));
+                    _preAlertLimit = TimeSpan.FromSeconds(Convert.ToDouble(time.Value));
                 }
             }
         }
@@ -114,7 +114,7 @@ namespace RaywattApp.Services
                     }
                 }
 
-                if (DateTime.Now - _preAlertStartTime > _totalIdleLimit - _preAlertLimit)
+                if (DateTime.Now - _preAlertStartTime > _preAlertLimit)
                 {
                     if (!_isPreAlertShown)
                     {

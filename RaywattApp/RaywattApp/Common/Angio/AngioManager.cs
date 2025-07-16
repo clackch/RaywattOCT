@@ -467,6 +467,8 @@ namespace RaywattApp.Common.Angio
             if (_tcpClient != null)
                 _tcpClient.Close();
 
+            ViewModelBase.DeviceStatus.IsAngioConnected = false;
+
             string processName = CommonUtil.IsTestMode(ViewModelBase.DeviceStatus.TestMode, "FG") ? "FGServerTestStub" : "FGServer";
             foreach (Process process in Process.GetProcessesByName(processName))
             {
