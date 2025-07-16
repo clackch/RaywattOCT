@@ -1477,7 +1477,7 @@ void COCTImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<c
 		}
 
 		double tmp_theta = angle * CV_PI / 180;
-		PLOGI.printf("angle = %lf, theta = %lf", angle, tmp_theta);
+		//PLOGI.printf("angle = %lf, theta = %lf", angle, tmp_theta);
 		theta.push_back(tmp_theta);
 	}
 }
