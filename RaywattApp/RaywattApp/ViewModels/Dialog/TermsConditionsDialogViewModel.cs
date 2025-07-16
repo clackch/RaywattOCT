@@ -17,9 +17,6 @@ namespace RaywattApp.ViewModels.Dialog
         private readonly SqlManager _sqlManager;
 
         [ObservableProperty]
-        private User _termsConditions;
-
-        [ObservableProperty]
         private string _termsAndConditions;
 
         private ICommand _yesCommand;
@@ -32,12 +29,6 @@ namespace RaywattApp.ViewModels.Dialog
         {
             _sqlManager = sqlManager;
             TermsAndConditions = _l10n["$Terms and Conditions"];
-        }
-
-        public override void SetParameter(object parameter)
-        {
-            Dictionary<string, Object> data = (Dictionary<string, Object>)parameter;
-            TermsConditions = (User)data["tnC"];
         }
 
         protected override void AnswerYes(IDialogWindow dialog)
