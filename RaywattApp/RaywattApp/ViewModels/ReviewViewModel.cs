@@ -29,9 +29,6 @@ using System.IO;
 using System.Windows.Media;
 using RaywattApp.Common.Angio;
 using System.Xml;
-using System.Windows.Controls;
-using OpenCvSharp.WpfExtensions;
-using System.Diagnostics;
 
 namespace RaywattApp.ViewModels
 {
@@ -455,6 +452,7 @@ namespace RaywattApp.ViewModels
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
             Save();
+            FfrValueChangedCheck();
 
             RayUnregisterDetectionCallback();
         }
@@ -1386,6 +1384,43 @@ namespace RaywattApp.ViewModels
             longitudeMeasurement.TextGeometries = LModeTextGeometries;
 
             return JsonConvert.SerializeObject(longitudeMeasurement, Newtonsoft.Json.Formatting.Indented);
+        }
+
+        private void FfrValueChangedCheck()
+        {
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["id"] = PatientCase.Id;
+            IList<StringModel> ffrPlaques = _sqlManager.SelectPatientCaseFfr(sqlParameters);
+
+            if (!String.IsNullOrEmpty(ffrPlaques[0].ReturnString2))
+            {
+                FfrFeature ffrValue = JsonConvert.DeserializeObject<FfrFeature>(ffrPlaques[0].ReturnString2);
+                if (ffrValue == null)
+                    return;
+
+                bool isSame = true;
+
+                if (ffrValue.ProximalLumenArea != Section.Proximal.DValue)
+                    isSame = false;
+                if (ffrValue.MinimalLumenArea != Section.MlaValue.DValue)
+                    isSame = false;
+                if (ffrValue.DistalLumenArea != Section.Distal.DValue)
+                    isSame = false;
+                if (ffrValue.LesionLength != Section.LesionLength.DValue)
+                    isSame = false;
+                if (ffrValue.VesselType != PatientCase.Vessel)
+                    isSame = false;
+
+                if (isSame)
+                {
+                    if (PatientCase.FfrFeature == null)
+                        PatientCase.FfrFeature = ffrValue;
+                }
+                else
+                {
+                    PatientCase.FfrFeature = null;
+                }
+            }
         }
 
         #endregion

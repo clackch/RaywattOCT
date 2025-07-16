@@ -229,9 +229,9 @@ namespace RaywattApp.Services
                 WHERE id = @id
                 ";
 
-            //SelectPatientCaseFfrPlaque
-            _query["SelectPatientCaseFfrPlaque"] = @$"
-                SELECT ffr_plaque return_string
+            //SelectPatientCaseFfr
+            _query["SelectPatientCaseFfr"] = @$"
+                SELECT ffr_plaque return_string, ffr_value return_string2
                 FROM rv_schema.patient_case_annotation
                 WHERE id = @id
                 ";
@@ -389,10 +389,10 @@ namespace RaywattApp.Services
                 WHERE id = @id
                 ";
 
-            //UpdatePatientCaseFfrPlaque
-            _query["UpdatePatientCaseFfrPlaque"] = @$"
+            //UpdatePatientCaseFfr
+            _query["UpdatePatientCaseFfr"] = @$"
                 UPDATE rv_schema.patient_case_annotation
-                SET ffr_plaque=@ffr_plaque
+                SET ffr_plaque=@ffr_plaque, ffr_value=@ffr_value
                 WHERE id = @id
                 ";
 

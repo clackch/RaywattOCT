@@ -279,7 +279,7 @@
                                 <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Vessel], Source={StaticResource L10N}}" VerticalAlignment="Center"/>
                                 <StackPanel Width="20"/>
                                 <StackPanel Orientation="Horizontal">
-                                    <Label Style="{DynamicResource Pretendard-Bold-28}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.VesselType, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    <Label Style="{DynamicResource Pretendard-Bold-28}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.VesselTypeGroup, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                     <StackPanel Width="5"/>
                                     <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.ActualVesselType, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,13"/>
                                 </StackPanel>

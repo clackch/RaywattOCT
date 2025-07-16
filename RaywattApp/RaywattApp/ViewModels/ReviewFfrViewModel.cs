@@ -120,7 +120,14 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
-                ReviewStatus.CurrentPage = Constants.ReviewFfrPage;
+                
+                if(PatientCase.FfrFeature.Result > 0)
+                {
+                    FfrResult = PatientCase.FfrFeature.Result;
+                    BtnFfrEnabled = false;
+                    VisibilityResult = Visibility.Visible;
+                    OpacityResult = 1;
+                }
 
                 Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
 
@@ -173,6 +180,8 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("FfrSetting");
 
+            PatientCase.FfrFeature = null;
+
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["patientCase"] = PatientCase;
@@ -185,7 +194,7 @@ namespace RaywattApp.ViewModels
         {
             int vesselType = 0;
 
-            switch (PatientCase.FfrFeature.VesselType)
+            switch (PatientCase.FfrFeature.VesselTypeGroup)
             {
                 case "$002":
                     vesselType = 0;
@@ -224,6 +233,7 @@ namespace RaywattApp.ViewModels
             using (IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results = sess.Run(inputs))
             {
                 FfrResult = Math.Round(results[0].AsEnumerable<float>().ToArray()[0], 2);
+                PatientCase.FfrFeature.Result = FfrResult;
             }
         }
 
