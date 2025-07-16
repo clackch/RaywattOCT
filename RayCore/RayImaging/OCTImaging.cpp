@@ -1126,9 +1126,9 @@ void COCTImaging::GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBounda
 	}
 }
 
-static int whatNumberYouAre = 0;
+//static int whatNumberYouAre = 0;
 void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& centerPoints, std::vector<float>& radius) {
-	whatNumberYouAre++;
+	//whatNumberYouAre++;
 	if (GuideWires.empty()) {
 		return;
 	}
@@ -1202,7 +1202,7 @@ void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f>
 	cv::findContours(mask3, realContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 	//cv::drawContours(imgCheck2, realContours, -1, cv::Scalar(0, 255, 0), 2);
 
-	cv::imwrite("edgePoints" + std::to_string(whatNumberYouAre) + ".png", imgCheck2);
+	//cv::imwrite("edgePoints" + std::to_string(whatNumberYouAre) + ".png", imgCheck2);
 }
 
 void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& edgePoints) {
@@ -1248,7 +1248,6 @@ void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv
 		for (int i = 0; i < 50; i++) {
 			cv::GaussianBlur(gaussian, gaussian, cv::Size(3, 3), 0);
 		}
-
 		gaussian.convertTo(gaussian, CV_8U, 255.0);
 
 		// top 3 pixels에 대한 Mask 작업을 위한 Roi Padding 설정
