@@ -143,7 +143,7 @@ protected:
 	static void on_trackbar(int, void*);
 	void GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBoundary);
 	void GetGuideWireCircleEdgePoints(cv::Mat image, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& edgePoints);
-	void GetGuideWireShadowPointAngles(cv::Mat image, std::vector<cv::Point>& edgePoints, std::vector<double>& theta);
+	void GetGuideWireShadowPointAngles(cv::Mat image, std::vector<cv::Point> edgePoints, std::vector<double>& theta);
 	void InterpolateEdgePoints(std::vector<cv::Point>& edgePoints);
 	void GetCircularizeTransformPoint(cv::Point src, cv::Point& dst);
 	void GetAcuteAngleToXAxis(cv::Vec2d vector1, cv::Vec2d vector2, double& angle);

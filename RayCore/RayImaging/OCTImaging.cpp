@@ -1347,7 +1347,7 @@ void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv
 	}
 }
 
-void COCTImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<cv::Point>& edgePoints, std::vector<double>& theta) {
+void COCTImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<cv::Point> edgePoints, std::vector<double>& theta) {
 	int height = m_nHeight;
 	int width = m_nWidth;
 	theta.clear();
