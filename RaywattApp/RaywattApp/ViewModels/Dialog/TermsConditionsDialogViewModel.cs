@@ -17,7 +17,7 @@ namespace RaywattApp.ViewModels.Dialog
         private readonly SqlManager _sqlManager;
 
         [ObservableProperty]
-        private Configuration _termsConditions;
+        private User _termsConditions;
 
         [ObservableProperty]
         private string _termsAndConditions;
@@ -25,50 +25,24 @@ namespace RaywattApp.ViewModels.Dialog
         private ICommand _yesCommand;
         public ICommand YesCommand
         {
-            get { return this._yesCommand ?? (this._yesCommand = new RelayCommand<IDialogWindow>(AnswerYes, CanAgree)); }
+            get { return this._yesCommand ?? (this._yesCommand = new RelayCommand<IDialogWindow>(AnswerYes)); }
         }
 
         public TermsConditionsDialogViewModel(SqlManager sqlManager)
         {
             _sqlManager = sqlManager;
-
             TermsAndConditions = _l10n["$Terms and Conditions"];
         }
 
         public override void SetParameter(object parameter)
         {
             Dictionary<string, Object> data = (Dictionary<string, Object>)parameter;
-            TermsConditions = (Configuration)data["tnC"];
-            TermsConditions.Buffer = "";
-            TermsConditions.PropertyChanged += TermsConditions_PropertyChanged;
+            TermsConditions = (User)data["tnC"];
         }
 
         protected override void AnswerYes(IDialogWindow dialog)
         {
-            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
-            sqlParameters["classification"] = "Terms&Cond";
-            sqlParameters["key"] = "AgreeYN";
-            sqlParameters["value"] = "Y(" + DateTime.Now.ToString("yyyyMMddHHmmss") + ")";
-            sqlParameters["buffer"] = TermsConditions.Buffer.Trim();
-
-            int res = _sqlManager.UpdateConfiguration(sqlParameters);
-            if (res != 1)
-            {
-                _log.Error("Update Error");
-            }
-
             base.AnswerYes(dialog);
         }
-
-        private bool CanAgree(IDialogWindow dialog)
-        {
-            return !string.IsNullOrEmpty(TermsConditions.Buffer);
-        }
-
-        private void TermsConditions_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            (YesCommand as RelayCommand<IDialogWindow>).NotifyCanExecuteChanged();
-        }
-
     }
 }
