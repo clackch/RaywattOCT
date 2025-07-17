@@ -275,7 +275,7 @@
                                 <StackPanel Height="13"/>
                                 <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
                                 <StackPanel Height="10"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Proximal Lumen Area], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Distal Lumen Area], Source={StaticResource L10N}}"/>
                                 <StackPanel Height="10"/>
                                 <Grid Height="31">
                                     <Grid.ColumnDefinitions>
@@ -288,7 +288,7 @@
                                 <StackPanel Height="13"/>
                                 <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
                                 <StackPanel Height="10"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Distal Lumen Area], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Proximal Lumen Area], Source={StaticResource L10N}}"/>
                                 <StackPanel Height="10"/>
                                 <Grid Height="31">
                                     <Grid.ColumnDefinitions>
