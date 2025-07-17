@@ -130,6 +130,15 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("NewRecording");
 
+            if (!ValidateSelectedPatient(SelectedPatient.HasFirstname))
+            {
+                Dictionary<string, object> param = new Dictionary<string, object>();
+                param["title"] = _l10n["Information"];
+                param["message"] = _l10n["Invalid format for patient information."];
+                _dialogService.OpenDialog(new ConfirmDialogControl(), param, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                return;
+            }
+
             bool isExist = false;
             if (!Validate(out isExist))
                 return;
@@ -151,6 +160,17 @@ namespace RaywattApp.ViewModels
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingPresetPage) { Parameter = parameter });
             else
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientDetailPage) { Parameter = parameter });
+        }
+
+        private bool ValidateSelectedPatient(bool hasFirstname)
+        {
+            if (SelectedPatient.Id == null || SelectedPatient.Birthdate == null || SelectedPatient.Gender == null || SelectedPatient.Lastname == null)
+                return false;
+
+            if (hasFirstname && SelectedPatient.Firstname == string.Empty)
+                return false;
+
+            return true;
         }
 
         private bool Validate(out bool isExist)
@@ -292,6 +312,7 @@ namespace RaywattApp.ViewModels
                     CommonUtil.ParseDicomName(dicomPatient.PatientName, out lastname, out firstname);
                     patient.Lastname = lastname;
                     patient.Firstname = firstname;
+                    patient.HasFirstname = firstname != string.Empty ? true : false;
                     patient.Name = dicomPatient.PatientName;
                     patient.Gender = dicomPatient.PatientSex;
                     DateTime birthdate;

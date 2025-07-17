@@ -35,7 +35,7 @@ namespace RaywattApp.ViewModels
         private DicomWorklist _selectedWorklist;
 
         [ObservableProperty]
-        private Patient _selectedPatient = new Patient();
+        private Patient _selectedPatient;
 
         [ObservableProperty]
         private DicomServer _selectedDicomServer;
@@ -116,6 +116,7 @@ namespace RaywattApp.ViewModels
         private void NewRecording()
         {
             _log.Debug("NewRecording");
+            SelectedPatient = new Patient();
 
             SelectedPatient.Id = SelectedWorklist.PatientId;
             SelectedPatient.Birthdate = SelectedWorklist.PatientBirthDate;
@@ -125,6 +126,16 @@ namespace RaywattApp.ViewModels
             CommonUtil.ParseDicomName(SelectedWorklist.PatientName, out lastname, out firstname);
             SelectedPatient.Lastname = lastname;
             SelectedPatient.Firstname = firstname;
+            SelectedPatient.HasFirstname = (firstname != string.Empty);
+
+            if (!ValidateSelectedPatient(SelectedPatient.HasFirstname))
+            {
+                Dictionary<string, object> param = new Dictionary<string, object>();
+                param["title"] = _l10n["Information"];
+                param["message"] = _l10n["Invalid format for patient information."];
+                _dialogService.OpenDialog(new ConfirmDialogControl(), param, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                return;
+            }
 
             bool isExist = false;
             if (!Validate(out isExist))
@@ -150,6 +161,17 @@ namespace RaywattApp.ViewModels
             }
             else
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientDetailPage) { Parameter = parameter });
+        }
+
+        private bool ValidateSelectedPatient(bool hasFirstname)
+        {
+            if (SelectedPatient.Id == null || SelectedPatient.Birthdate == null || SelectedPatient.Gender == null || SelectedPatient.Lastname == null)
+                return false;
+
+            if (hasFirstname && SelectedPatient.Firstname == string.Empty)
+                return false;
+
+            return true;
         }
 
         private bool Validate(out bool isExist)
