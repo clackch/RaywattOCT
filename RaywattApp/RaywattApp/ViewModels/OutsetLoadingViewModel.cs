@@ -11,6 +11,7 @@ using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
+using System.Reflection.Metadata;
 using System.Threading;
 using System.Windows.Interop;
 using System.Windows.Navigation;
@@ -78,15 +79,23 @@ namespace RaywattApp.ViewModels
                     return;
                 }
 
-                // step 2. terms_agreed_at (users table)
+                // step 2. 초기화 된 user 인가?
+                Console.WriteLine("");
+                bool isPasswordReset = users[0].PasswordReset;
+                if(!isPasswordReset)
+                {
+                    // password 설정 화면 이동
+                    //var result = _dialogService.OpenDialog(new TermsConditionsControl(), parameter1, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                }
+
+                // step 3. terms_agreed_at (users table)
                 bool hasAgreedToTerms = users[0].TermsAgreedAt != DateTime.MinValue;
                 if (!hasAgreedToTerms)
                 {
-                    Dictionary<string, object> parameter1 = new Dictionary<string, object>();
-                    parameter1["tnC"] = users[0];
-                    // Terms and Conditions 동의 안한 경우
-                    var result = _dialogService.OpenDialog(new TermsConditionsControl(), parameter1, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                    Dictionary<string, object> parameter = new Dictionary<string, object>();
+                    parameter["tnC"] = users[0];
 
+                    var result = _dialogService.OpenDialog(new TermsConditionsControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
                     if (result != null && result.DialogAnswer == DialogResults.Answer.No)
                     {
                         WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
@@ -94,7 +103,6 @@ namespace RaywattApp.ViewModels
                     }
                     else
                     {
-                        // update terms_agreed_at (users table)
                         sqlParameters.Clear();
                         sqlParameters["id"] = id;
                         sqlParameters["password"] = password;
