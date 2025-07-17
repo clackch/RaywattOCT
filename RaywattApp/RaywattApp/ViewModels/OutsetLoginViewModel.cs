@@ -1,5 +1,4 @@
-﻿using System.Windows.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
@@ -8,6 +7,8 @@ using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
+using System.Collections.Generic;
+using System.Windows.Input;
 
 namespace RaywattApp.ViewModels
 {
@@ -55,10 +56,16 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Login");
 
-            if("Admin".Equals(Id.Text))
+            if ("Admin".Equals(Id.Text))
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.UserListPage));
             else
-                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoadingPage));
+            {
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["id"] = Id.Text;
+                parameter["password"] = Password.Text;
+
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoadingPage) { Parameter = parameter });
+            }
         }
     }
 }

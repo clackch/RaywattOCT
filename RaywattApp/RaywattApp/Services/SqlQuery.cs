@@ -271,6 +271,14 @@ namespace RaywattApp.Services
                 FROM rv_schema.users
                 ORDER BY id
                 ";
+
+            //SelectUserList
+            _query["SelectUserListById"] = @$"
+                SELECT id, password, comment, password_changed_at, password_reset, terms_agreed_at, create_date, update_date
+                FROM rv_schema.users
+                WHERE id = @id AND password = @password
+                ORDER BY id
+                ";
         }
 
         private static void SetInsertQuery()
@@ -433,6 +441,13 @@ namespace RaywattApp.Services
                 SET ae_title=@ae_title, hostname=@hostname, specify_ip_address=@specify_ip_address
                 , ip_address=@ip_address, port=@port, tls_yn=@tls_yn, server_type=@server_type, comment=@comment, ca_file_path=@ca_file_path, update_date=now()
                 WHERE id=@id
+                ";
+
+            //UpdateUser
+            _query["UpdateTermsAgreedDateUser"] = @$"
+                UPDATE rv_schema.users
+                SET terms_agreed_at=now()
+                WHERE id=@id And password=@password
                 ";
         }
 
