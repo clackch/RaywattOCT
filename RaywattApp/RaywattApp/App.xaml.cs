@@ -1,20 +1,21 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using log4net;
+using Microsoft.Extensions.DependencyInjection;
+using RaywattApp.Common.Angio;
+using RaywattApp.Common.Dialog;
+using RaywattApp.Common.Util;
 using RaywattApp.Services;
 using RaywattApp.ViewModels;
+using RaywattApp.ViewModels.Admin;
+using RaywattApp.ViewModels.Dialog;
 using RaywattApp.ViewModels.File;
+using RaywattApp.ViewModels.Password;
 using RaywattApp.ViewModels.Setting;
 using System;
 using System.Configuration;
-using System.Windows;
-using RaywattApp.ViewModels.Dialog;
-using RaywattApp.Common.Dialog;
-using System.Threading.Tasks;
-using log4net;
-using RaywattApp.Common.Angio;
 using System.Diagnostics;
 using System.IO;
-using RaywattApp.Common.Util;
-using RaywattApp.ViewModels.Admin;
+using System.Threading.Tasks;
+using System.Windows;
 
 namespace RaywattApp
 {
@@ -96,6 +97,7 @@ namespace RaywattApp
             services.AddTransient(typeof(ReviewCalibrationViewModel));
             services.AddTransient(typeof(PatientNewDicomViewModel));
             services.AddTransient(typeof(PatientNewDicomPacsViewModel));
+            services.AddTransient(typeof(InitialPasswordSetupViewModel));
 
             //Setting
             services.AddTransient(typeof(SettingAcquisitionViewModel));
