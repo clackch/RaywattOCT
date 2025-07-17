@@ -67,6 +67,9 @@ namespace RaywattApp.Common.Bases
         public const string UserNewPage = "Views/Admin/UserNewPage.xaml";
         public const string UserEditPage = "Views/Admin/UserEditPage.xaml";
 
+        //Password
+        public const string InitialPasswordSetupPage = "Views/Password/InitialPasswordSetupPage.xaml";
+
         //Resolution
         public const double ApplicationWidth = 1280;
         public const double ApplicationHeight = 1024;
@@ -179,7 +182,7 @@ namespace RaywattApp.Common.Bases
 
         //Export Image
         public const int ExportAnnotationFontSize = 12;
-        
+
         //Export DICOM Prefix
         public const string ExportDicomPrefix = "IMG";
         public const double DICOMPhysicalDeltaXY = 0.00684931506849; /*0.0289256198347107;*/ // mm
@@ -321,7 +324,7 @@ namespace RaywattApp.Common.Bases
         public const double SectionIndicatorWidth = 7.5;
         public const double SectionIndicatorMoveWidth = 28;
         public const double SectionIndicatorCenterWidth = 1;
-        public const double SectionIndicatorMoveCenterWidth = SectionIndicatorMoveWidth/2;
+        public const double SectionIndicatorMoveCenterWidth = SectionIndicatorMoveWidth / 2;
         public const double SectionValueWidth = 24;
         public const double SectionValueCenterWidth = 0.25;
         public const double LumenProfileExtraHeight = 6;
@@ -344,7 +347,7 @@ namespace RaywattApp.Common.Bases
         public const double CutView3dY = 130; // 140 - 10 (for View Edge Round)
         public const double CutView3dWidth = 734;
         public const double CutView3dHeight = 540; // 560 - 20 (for View Edge Round)
-        public const double XYScale3D = 1024/500;
+        public const double XYScale3D = 1024 / 500;
 
         //Review - 3D - Fly Through View
         public const double FlyThroughView3dX = 886;
@@ -483,7 +486,7 @@ namespace RaywattApp.Common.Bases
         public const double ZoomScaleMax = ZoomScaleDefault * 2;
         public const double ZoomAngioCsScaleDefault = CrossSectionAngio / OCTImageSize;
         public const double ZoomAngioCsScaleMax = ZoomAngioCsScaleDefault * 2;
-        public const int Zoom3DScaleMax = 5;    
+        public const int Zoom3DScaleMax = 5;
 
         //AngioManager
         public const string ServerIP = "127.0.0.1";

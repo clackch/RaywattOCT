@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection.Metadata;
 using System.Threading;
+using System.Windows.Documents;
 using System.Windows.Interop;
 using System.Windows.Navigation;
 using System.Windows.Threading;
@@ -85,7 +86,8 @@ namespace RaywattApp.ViewModels
                 if(!isPasswordReset)
                 {
                     // password 설정 화면 이동
-                    //var result = _dialogService.OpenDialog(new TermsConditionsControl(), parameter1, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.InitialPasswordSetupPage));
+                    return;
                 }
 
                 // step 3. terms_agreed_at (users table)
