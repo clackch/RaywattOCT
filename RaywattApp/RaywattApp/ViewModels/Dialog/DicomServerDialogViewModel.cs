@@ -279,7 +279,7 @@ namespace RaywattApp.ViewModels.Dialog
             if (DicomServer.ServerType != previousServerType)
             {
                 if (DicomServer.ServerType == "BOTH")
-                    sqlParameters["server_type"] = previousServerType;
+                    DicomServer.ServerType = previousServerType;
                 else
                 {
                     ShowAlertDialog("The server type doesn't match your existing configuration. Please remove the existing server information to avoid conflicts.");
@@ -306,6 +306,7 @@ namespace RaywattApp.ViewModels.Dialog
             sqlParameters["comment"] = DicomServer.Comment;
             sqlParameters["ca_file_path"] = DicomServer.CaFilePath;
             sqlParameters["id"] = DicomServer.Id;
+            sqlParameters["server_type"] = previousServerType;
 
             int res = _sqlManager.UpdateDicomServer(sqlParameters);
 
