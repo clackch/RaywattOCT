@@ -36,6 +36,7 @@ namespace RaywattApp.Views.Component
         }
 
         private bool _isInitialized;
+        private bool _hasError => !string.IsNullOrEmpty(ToolTip);
 
         public IpAddressInputControl()
         {
@@ -90,7 +91,7 @@ namespace RaywattApp.Views.Component
 
         private void UpdateToolTipVisibility()
         {
-            if (!string.IsNullOrEmpty(ToolTip))
+            if (_hasError)
             {
                 Validator.Visibility = Visibility.Visible;
                 var errorBrush = TryFindResource("AdditionalColor3Brush") as Brush;
@@ -99,16 +100,26 @@ namespace RaywattApp.Views.Component
             else
             {
                 Validator.Visibility = Visibility.Collapsed;
-                if (IsAnyIpTextBoxFocused())
-                {
-                    var focusBrush = TryFindResource("MainPrimaryColorBrush") as Brush;
-                    IpAddressBorder.BorderBrush = focusBrush;
-                }
-                else
-                {
-                    var normalBrush = TryFindResource("GrayscaleGray5Brush") as Brush;
-                    IpAddressBorder.BorderBrush = normalBrush;
-                }
+                UpdateBorderBrush();
+            }
+        }
+
+        private void UpdateBorderBrush()
+        {
+            if (_hasError)
+            {
+                var errorBrush = TryFindResource("AdditionalColor3Brush") as Brush;
+                IpAddressBorder.BorderBrush = errorBrush;
+            }
+            else if (IsAnyIpTextBoxFocused())
+            {
+                var focusBrush = TryFindResource("MainPrimaryColorBrush") as Brush;
+                IpAddressBorder.BorderBrush = focusBrush;
+            }
+            else
+            {
+                var normalBrush = TryFindResource("GrayscaleGray5Brush") as Brush;
+                IpAddressBorder.BorderBrush = normalBrush;
             }
         }
 
@@ -131,6 +142,8 @@ namespace RaywattApp.Views.Component
                 SubnetMask.Octet3 = Octet3TextBox.Text;
                 SubnetMask.Octet4 = Octet4TextBox.Text;
             }
+
+            UpdateBorderBrush();
         }
 
         private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -140,16 +153,14 @@ namespace RaywattApp.Views.Component
 
         private void TextBox_GotFocus(object sender, RoutedEventArgs e)
         {
-            var focusBrush = TryFindResource("MainPrimaryColorBrush") as Brush;
-            IpAddressBorder.BorderBrush = focusBrush;
+            UpdateBorderBrush();
         }
 
         private void TextBox_LostFocus(object sender, RoutedEventArgs e)
         {
             if (!IsAnyIpTextBoxFocused())
             {
-                var normalBrush = TryFindResource("GrayscaleGray5Brush") as Brush;
-                IpAddressBorder.BorderBrush = normalBrush;
+                UpdateBorderBrush();
             }
         }
 
