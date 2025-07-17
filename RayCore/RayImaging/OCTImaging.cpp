@@ -1192,7 +1192,6 @@ void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f>
 			(int)(edgePoints[i].y + YDirection * guideWireRadius * std::sin(angle))));
 		radius.push_back(guideWireRadius);
 		cv::circle(imgCheck2, edgePoints[i], 2, cv::Scalar(0, 0, 255), -1);
-		
 	}
 	cv::Mat mask3 = cv::Mat::zeros(imgCheck2.cols, imgCheck2.cols, CV_8UC1);
 	for (int i = 0; i < GuideWires.size(); i++) {
@@ -1207,51 +1206,31 @@ void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f>
 
 void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& edgePoints) {
 	int paddingSize = 1;
+
+	int width = grayImage.cols;
+	int height = grayImage.rows;
+	int centerX = width / 2;
+	int centerY = height / 2;
+
+	cv::Mat floatImage, gaussian;
+
+	grayImage.convertTo(floatImage, CV_32F, 1.0 / 255.0);
+
+	cv::GaussianBlur(floatImage, gaussian, cv::Size(3, 3), 0);
+	for (int i = 0; i < 50; i++) {
+		cv::GaussianBlur(gaussian, gaussian, cv::Size(3, 3), 0);
+	}
+
+	gaussian.convertTo(gaussian, CV_8U, 255.0);
+
 	for (const auto& rect : GuideWires) {
 		if (rect.width == 0 && rect.height == 0) {
 			edgePoints.push_back(cv::Point(-1, -1));
 			continue;
 		}
 
-		int width = grayImage.cols;
-		int height = grayImage.rows;
-		int centerX = width / 2;
-		int centerY = height / 2;
-		double sigma = 100.0;
-
-		cv::Mat mask(height, width, CV_8UC1);
-
-		for (int y = 0 ; y < height; ++y)
-		{
-			for (int x = 0 ; x < width; ++x)
-			{
-				double dx = x - centerX;
-				double dy = y - centerY;
-				double distanceSquared = dx * dx + dy * dy;
-
-				// 2D Gaussian Formula
-				double value = std::exp(-distanceSquared / (2 * sigma * sigma));
-				mask.at<uchar>(y, x) = static_cast<uchar>(value * 255.0);
-			}
-		}
-
-		cv::Mat filtered;
-		cv::Mat floatImage, floatMask;
-
-		grayImage.convertTo(floatImage, CV_32F, 1.0 / 255.0);
-		mask.convertTo(floatMask, CV_32F, 1.0 / 255.0);
-
-		cv::multiply(floatImage, floatMask, filtered);
-
-		cv::Mat gaussian;
-		cv::GaussianBlur(filtered, gaussian, cv::Size(3, 3), 0);
-		for (int i = 0; i < 50; i++) {
-			cv::GaussianBlur(gaussian, gaussian, cv::Size(3, 3), 0);
-		}
-		gaussian.convertTo(gaussian, CV_8U, 255.0);
-
 		// top 3 pixels에 대한 Mask 작업을 위한 Roi Padding 설정
-		if (rect.x - paddingSize < 0 || rect.y - paddingSize < 0 || rect.x + rect.width + paddingSize > filtered.cols || rect.y + rect.height + paddingSize > filtered.rows) {
+		if (rect.x - paddingSize < 0 || rect.y - paddingSize < 0 || rect.x + rect.width + paddingSize > gaussian.cols || rect.y + rect.height + paddingSize > gaussian.rows) {
 			continue;
 		}
 
@@ -1385,7 +1364,7 @@ void COCTImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<c
 		for (int x = startX; x <= endX; x++) {
 			sumOfStandardValue += inversedImage.at<uchar>(startY, x);
 		}
-		PLOGI.printf("row %d : sumOfStandardValue = %d", startY, sumOfStandardValue);
+		//PLOGI.printf("row %d : sumOfStandardValue = %d", startY, sumOfStandardValue);
 
 		double gapDown = 0, gapUp = 0;
 		double checkWeight = 1.5;
