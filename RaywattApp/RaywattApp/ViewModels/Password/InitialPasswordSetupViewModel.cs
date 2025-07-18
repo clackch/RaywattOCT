@@ -5,6 +5,7 @@ using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
 
@@ -64,8 +65,33 @@ namespace RaywattApp.ViewModels.Password
             string id = Id.Text.Trim();
             string password = Password;
             // step 1. 패스워드 규칙
+            string? isPassowrd = GetPasswordValidationError(password);
             // step 2. DB Update
             // step 3. 다음 페이지로 이동
         }
+
+        public string? GetPasswordValidationError(string password)
+        {
+            if (string.IsNullOrEmpty(password))
+                return "Please enter a password.";
+
+            if (password.Length < 8)
+                return "Password must be at least 8 characters long.";
+
+            if (!Regex.IsMatch(password, @"[A-Z]"))
+                return "Password must include at least one uppercase letter.";
+
+            if (!Regex.IsMatch(password, @"\d"))
+                return "Password must include at least one number.";
+
+            if (!Regex.IsMatch(password, @"[!@#$%^&*()_\-+=\[\]{};':""\\|,.<>\/?]"))
+                return "Password must include at least one special character.";
+
+            if (!Regex.IsMatch(password, @"^[a-zA-Z0-9!@#$%^&*()_\-+=\[\]{};':""\\|,.<>\/?]+$"))
+                return "Password can only contain English letters, numbers, and special characters.";
+
+            return null;
+        }
+
     }
 }
