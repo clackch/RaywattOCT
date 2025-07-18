@@ -18,7 +18,7 @@
                 <component:IconToggleButton Style="{DynamicResource IconToggleButton}" Icon="length" Click="length_Add" IsChecked="{Binding IsLengthOn, ElementName=UserControl}"/>
                 <Grid Width="6"/>
 
-                <component:IconToggleButton Style="{DynamicResource IconToggleButton}" Icon="length" Click="angle_Add" IsChecked="{Binding IsAngleOn, ElementName=UserControl}"/>
+                <component:IconToggleButton Style="{DynamicResource IconToggleButton}" Icon="angle" Click="angle_Add" IsChecked="{Binding IsAngleOn, ElementName=UserControl}"/>
                 <Grid Width="6"/>
 
                 <component:IconToggleButton Style="{DynamicResource IconToggleButton}" Icon="text" Click="text_Add" IsChecked="{Binding IsTextOn, ElementName=UserControl}"/>
