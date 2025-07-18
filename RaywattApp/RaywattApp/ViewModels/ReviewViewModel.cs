@@ -1399,7 +1399,7 @@ namespace RaywattApp.ViewModels
                 if (ffrValue == null)
                     return;
 
-                bool isSame = true;
+            //    bool isSame = true;
 
                 if (ffrValue.DistalLumenArea != Section.Proximal.DValue) //P/D 위치 바꾸면서, FFR Value는 P/D 값은 반대로 들어가 있음
                     isSame = false;

@@ -102,7 +102,7 @@ namespace RaywattApp.Common.Annotation
 
             foreach (Measurement measurement in orderedMeasurements)
             {
-                if (measurement.AreaGeometries.Count + measurement.LengthGeometries.Count + measurement.TextGeometries.Count > 0)
+                if (measurement.AreaGeometries.Count + measurement.LengthGeometries.Count + measurement.TextGeometries.Count + +measurement.AngleGeometries.Count > 0)
                     notEmptyMeasurments.Add(measurement);
             }
 
