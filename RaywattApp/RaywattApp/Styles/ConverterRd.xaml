@@ -158,6 +158,4 @@
     <!--  FFR Step Visibility Conveter  -->
     <converters:FfrStepVisibilityConveter x:Key="FfrStepVisibilityConveter" />
 
-    <converters:StringNullToVisibilityConverter x:Key="StringNullToVisibilityConverter" />
-
 </ResourceDictionary>
