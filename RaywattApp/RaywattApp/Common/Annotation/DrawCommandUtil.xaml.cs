@@ -144,5 +144,10 @@ namespace RaywattApp.Common.Annotation
             if(!isEraseOn)
                 IsEraseOn = false;
         }
+
+        private void IconToggleButton_Checked(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
