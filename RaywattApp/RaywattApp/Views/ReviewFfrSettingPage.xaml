@@ -90,9 +90,9 @@
                                     </StackPanel>
                                     <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource AdditionalColor3Brush}" Content="* Vessel type not supported." VerticalAlignment="Bottom" Margin="25,0,0,-20" Visibility="{Binding IsVesselTypeValid, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                                 </Grid>
-                                <!-- Step 2 : Define Reference Proximal Lumen -->
-                                <StackPanel Grid.Row="1" VerticalAlignment="Center" Visibility="{Binding FfrStep, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FfrStep2}}">
-                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Step 2.], Source={StaticResource L10N}}"/>
+                                <!-- Step 3 : Define Reference Proximal Lumen -->
+                                <StackPanel Grid.Row="1" VerticalAlignment="Center" Visibility="{Binding FfrStep, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FfrStep3}}">
+                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Step 3.], Source={StaticResource L10N}}"/>
                                     <StackPanel Height="16"/>
                                     <Label Style="{DynamicResource Pretendard-Semibold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}">
                                         <Label.Content>
@@ -100,9 +100,9 @@
                                         </Label.Content>
                                     </Label>
                                 </StackPanel>
-                                <!-- Step 3 : Define Reference Distal Lumen -->
-                                <StackPanel Grid.Row="1" VerticalAlignment="Center" Visibility="{Binding FfrStep, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FfrStep3}}">
-                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Step 3.], Source={StaticResource L10N}}"/>
+                                <!-- Step 2 : Define Reference Distal Lumen -->
+                                <StackPanel Grid.Row="1" VerticalAlignment="Center" Visibility="{Binding FfrStep, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FfrStep2}}">
+                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Step 2.], Source={StaticResource L10N}}"/>
                                     <StackPanel Height="16"/>
                                     <Label Style="{DynamicResource Pretendard-Semibold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}">
                                         <Label.Content>
