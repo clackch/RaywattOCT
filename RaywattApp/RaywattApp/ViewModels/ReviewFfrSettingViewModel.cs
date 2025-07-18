@@ -379,8 +379,8 @@ namespace RaywattApp.ViewModels
             PatientCase.FfrFeature.VesselType = CurrentVessel.Key;
             PatientCase.FfrFeature.VesselTypeGroup = CurrentVessel.Buffer1;
             PatientCase.FfrFeature.ActualVesselType = CurrentVessel.Buffer2;
-            PatientCase.FfrFeature.ProximalLumenArea = Section.Proximal.DValue;
-            PatientCase.FfrFeature.DistalLumenArea = Section.Distal.DValue;
+            PatientCase.FfrFeature.ProximalLumenArea = Section.Distal.DValue;
+            PatientCase.FfrFeature.DistalLumenArea = Section.Proximal.DValue;
             PatientCase.FfrFeature.LesionLength = Section.LesionLength.DValue;
             PatientCase.FfrFeature.MinimalLumenFrameNumber = GetMlaFrameNumber();
             PatientCase.FfrFeature.MinimalLumenArea = GetMla();
