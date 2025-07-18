@@ -617,25 +617,17 @@ namespace RaywattApp.ViewModels
 
             //Cross-Section
             Measurements = JsonConvert.DeserializeObject<List<Measurement>>(tempCrossSection);
-
-            // add by gordon 250718 하위 버전 호환
-            foreach (Measurement measurement in Measurements)
-            {
-                if (measurement.AngleGeometries == null)
-                    measurement.AngleGeometries = new ObservableCollection<AngleGeometry>();
-            }
-            // add by gordon 250718 하위 버전 호환
-
+            
             if (Measurements == null)
                 Measurements = new List<Measurement>();
             for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
             {
                 Measurement measurement = new Measurement();
                 measurement.FrameNumber = i;
-                measurement.AreaGeometries = new ObservableCollection<AreaGeometry>();
-                measurement.LengthGeometries = new ObservableCollection<LengthGeometry>();
-                measurement.AngleGeometries = new ObservableCollection<AngleGeometry>();
-                measurement.TextGeometries = new List<TextGeometry>();
+                //measurement.AreaGeometries = new ObservableCollection<AreaGeometry>();
+                //measurement.LengthGeometries = new ObservableCollection<LengthGeometry>();
+                //measurement.AngleGeometries = new ObservableCollection<AngleGeometry>();
+                //measurement.TextGeometries = new List<TextGeometry>();
                 Measurements.Add(measurement);
             }
             Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
