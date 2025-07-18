@@ -18,7 +18,7 @@ namespace RaywattApp.ViewModels.Password
         private TextValidator _id = new TextValidator();
 
         [ObservableProperty]
-        private string _password;
+        private string _password = string.Empty;
 
         [RelayCommand]
         private void CheckPassword()
