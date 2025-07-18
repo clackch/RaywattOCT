@@ -5,6 +5,7 @@ using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
+using System.Windows;
 using System.Windows.Input;
 
 namespace RaywattApp.ViewModels.Password
@@ -17,7 +18,13 @@ namespace RaywattApp.ViewModels.Password
         private TextValidator _id = new TextValidator();
 
         [ObservableProperty]
-        private TextValidator _password = new TextValidator();
+        private string _password;
+
+        [RelayCommand]
+        private void CheckPassword()
+        {
+            MessageBox.Show($"입력한 비밀번호: {Password}");
+        }
 
         private ICommand _cancelCommand;
         public ICommand CancelCommand
@@ -55,7 +62,7 @@ namespace RaywattApp.ViewModels.Password
         private void Yes()
         {
             string id = Id.Text.Trim();
-            string password = Password.Text.Trim();
+            string password = Password;
             // step 1. 패스워드 규칙
             // step 2. DB Update
             // step 3. 다음 페이지로 이동
