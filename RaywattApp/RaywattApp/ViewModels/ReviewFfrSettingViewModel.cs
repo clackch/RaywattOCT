@@ -213,10 +213,10 @@ namespace RaywattApp.ViewModels
                     {
                         Measurement measurement = new Measurement();
                         measurement.FrameNumber = i;
-                        measurement.AreaGeometries = new ObservableCollection<AreaGeometry>();
-                        measurement.LengthGeometries = new ObservableCollection<LengthGeometry>();
-                        measurement.AngleGeometries = new ObservableCollection<AngleGeometry>();  //add by gordon 250718
-                        measurement.TextGeometries = new List<TextGeometry>();
+                        //measurement.AreaGeometries = new ObservableCollection<AreaGeometry>();
+                        //measurement.LengthGeometries = new ObservableCollection<LengthGeometry>();
+                        //measurement.AngleGeometries = new ObservableCollection<AngleGeometry>();  //add by gordon 250718
+                        //measurement.TextGeometries = new List<TextGeometry>();
                         PlaqueAreaList.Add(measurement);
                     }
                     PlaqueAreaList = PlaqueAreaList.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
