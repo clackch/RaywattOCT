@@ -1393,35 +1393,35 @@ namespace RaywattApp.ViewModels
             sqlParameters["id"] = PatientCase.Id;
             IList<StringModel> ffrPlaques = _sqlManager.SelectPatientCaseFfr(sqlParameters);
 
-            //if (!String.IsNullOrEmpty(ffrPlaques[0].ReturnString2))
-            //{
-            //    FfrFeature ffrValue = JsonConvert.DeserializeObject<FfrFeature>(ffrPlaques[0].ReturnString2);
-            //    if (ffrValue == null)
-            //        return;
+            if (!String.IsNullOrEmpty(ffrPlaques[0].ReturnString2))
+            {
+                FfrFeature ffrValue = JsonConvert.DeserializeObject<FfrFeature>(ffrPlaques[0].ReturnString2);
+                if (ffrValue == null)
+                    return;
 
-            //    bool isSame = true;
+                bool isSame = true;
 
-            //    if (ffrValue.ProximalLumenArea != Section.Proximal.DValue)
-            //        isSame = false;
-            //    if (ffrValue.MinimalLumenArea != Section.MlaValue.DValue)
-            //        isSame = false;
-            //    if (ffrValue.DistalLumenArea != Section.Distal.DValue)
-            //        isSame = false;
-            //    if (ffrValue.LesionLength != Section.LesionLength.DValue)
-            //        isSame = false;
-            //    if (ffrValue.VesselType != PatientCase.Vessel)
-            //        isSame = false;
+                if (ffrValue.ProximalLumenArea != Section.Proximal.DValue)
+                    isSame = false;
+                if (ffrValue.MinimalLumenArea != Section.MlaValue.DValue)
+                    isSame = false;
+                if (ffrValue.DistalLumenArea != Section.Distal.DValue)
+                    isSame = false;
+                if (ffrValue.LesionLength != Section.LesionLength.DValue)
+                    isSame = false;
+                if (ffrValue.VesselType != PatientCase.Vessel)
+                    isSame = false;
 
-            //    if (isSame)
-            //    {
-            //        if (PatientCase.FfrFeature == null)
-            //            PatientCase.FfrFeature = ffrValue;
-            //    }
-            //    else
-            //    {
-            //        PatientCase.FfrFeature = null;
-            //    }
-            //}
+                if (isSame)
+                {
+                    if (PatientCase.FfrFeature == null)
+                        PatientCase.FfrFeature = ffrValue;
+                }
+                else
+                {
+                    PatientCase.FfrFeature = null;
+                }
+            }
         }
 
         #endregion
