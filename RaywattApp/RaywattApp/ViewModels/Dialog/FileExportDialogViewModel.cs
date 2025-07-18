@@ -495,6 +495,7 @@ namespace RaywattApp.ViewModels.Dialog
                 measurement.FrameNumber = i;
                 measurement.AreaGeometries = new ObservableCollection<AreaGeometry>();
                 measurement.LengthGeometries = new ObservableCollection<LengthGeometry>();
+                measurement.AngleGeometries = new ObservableCollection<AngleGeometry>();
                 measurement.TextGeometries = new List<TextGeometry>();
                 Measurements.Add(measurement);
             }

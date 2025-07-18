@@ -625,6 +625,7 @@ namespace RaywattApp.ViewModels
                 measurement.FrameNumber = i;
                 measurement.AreaGeometries = new ObservableCollection<AreaGeometry>();
                 measurement.LengthGeometries = new ObservableCollection<LengthGeometry>();
+                measurement.AngleGeometries = new ObservableCollection<AngleGeometry>();
                 measurement.TextGeometries = new List<TextGeometry>();
                 Measurements.Add(measurement);
             }
@@ -1360,7 +1361,7 @@ namespace RaywattApp.ViewModels
             //Cross-section
             foreach (Measurement measurement in param)
             {
-                if (measurement.AreaGeometries.Count > 0 || measurement.LengthGeometries.Count > 0 || measurement.TextGeometries.Count > 0)
+                if (measurement.AreaGeometries.Count > 0 || measurement.LengthGeometries.Count > 0 || measurement.TextGeometries.Count > 0 || measurement.AngleGeometries.Count > 0) //add by gordon 250718
                 {
                     if (measurement.AreaGeometries.Count > 0)
                     {
