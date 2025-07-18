@@ -91,7 +91,7 @@ namespace RaywattApp.Common.Annotation
 
             if (this.isDrawing && this.isCanvasClicked)
             {    
-                this.isAngleFirstPoint = false;
+                this.isAngleFirstPoint = true;
                 this.isCanvasClicked = false;
 
                 DeleteLine(true, this.angleGeometries.Count);
@@ -100,16 +100,10 @@ namespace RaywattApp.Common.Annotation
                 DeleteEllipse(this.angleGeometries.Count, 2);
                 DeleteLabel(constAngle, this.angleGeometries.Count);
 
-
-                DeleteAngleAll();
-                DrawAngleAll();
-
-                //Canvas 마우스 이벤트 비활성화 
-                this.canvas.MouseLeftButtonDown -= angle_canvas_MouseLeftButtonDown;
-                this.canvas.MouseMove -= angle_canvas_MouseMove;
-                this.canvas.MouseLeave -= angle_canvas_MouseLeave;                    
-
-                MouseCursor = 0;
+                //DeleteAngleAll();
+                //DrawAngleAll();
+                
+                MouseCursor = 2;
             }
         }
 
@@ -267,6 +261,28 @@ namespace RaywattApp.Common.Annotation
         private void Ellipse_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             _log.Debug("ellipse_MouseLeftButtonDown");
+
+            if (this.isDrawing)
+                return;
+
+            if (this.isErasing)
+            {
+                Ellipse ellipse = sender as Ellipse;
+                string[] tempArr = ellipse.Name.Split('_');
+                int group = int.Parse(tempArr[1]);
+
+                DeleteAngleAll();
+
+                for (int i = group; i < this.angleGeometries.Count; i++)
+                {
+                    this.angleGeometries[i].AngleGroup--;
+                }
+                this.angleGeometries.RemoveAt(group);
+
+                DrawAngleAll();
+
+                return;
+            }
 
             this.isEllipseClicked = true;
             Mouse.Capture((FrameworkElement)sender);
@@ -777,7 +793,8 @@ namespace RaywattApp.Common.Annotation
                 angleGeometry.ArcPoint2 = getArcPoint(angleGeometry.AngleSecondPoint, angleGeometry.AngleThirdPoint, 10);
 
                 DrawLine(angleGeometry.AngleFirstPoint, angleGeometry.AngleSecondPoint, true, angleGeometry.AngleGroup);
-                DrawLine(angleGeometry.AngleSecondPoint, angleGeometry.AngleThirdPoint, false, angleGeometry.AngleGroup);
+                DrawLine(angleGeometry.AngleSecondPoint, angleGeometry.AngleThirdPoint, false, angleGeometry.AngleGroup);          
+
                 DrawLabel(angleGeometry.AngleSecondPoint, angleGeometry.AngleGroup, angleGeometry.Angle);
                 DrawEllipse(angleGeometry.AngleFirstPoint, angleGeometry.AngleGroup, 1);
                 DrawEllipse(angleGeometry.AngleSecondPoint, angleGeometry.AngleGroup, 2);
