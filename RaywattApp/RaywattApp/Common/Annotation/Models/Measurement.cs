@@ -15,6 +15,11 @@ namespace RaywattApp.Common.Annotation.Models
         private ObservableCollection<LengthGeometry> lengthGeometries;
         public ObservableCollection<LengthGeometry> LengthGeometries { get { return lengthGeometries; } set { lengthGeometries = value; OnPropertyChanged(nameof(LengthGeometries)); } }
 
+        // add by gordon 250716
+        private ObservableCollection<AngleGeometry> angleGeometries;
+        public ObservableCollection<AngleGeometry> AngleGeometries { get { return angleGeometries; } set { angleGeometries = value; OnPropertyChanged(nameof(AngleGeometries)); } }
+        // add by gordon 250716
+
         private List<TextGeometry> textGeometries;
         public List<TextGeometry> TextGeometries { get { return textGeometries; } set { textGeometries = value; OnPropertyChanged(nameof(TextGeometries)); } }
     }

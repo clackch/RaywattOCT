@@ -396,10 +396,14 @@ namespace RaywattApp.Common.Bases
         public const string MeasureDeleteAll = "DeleteAll";  //Delete All
         public const string MeasureAddArea = "AddArea";  //Add Area
         public const string MeasureAddLength = "AddLength";  //Add Length
+        //add by gordon 250716
+        public const string MeasureAddAngle = "AddAngle";  //Add Length
+        //add by gordon 250716
         public const string MeasureAddText = "AddText";  //Add Text
         public const string MeasureErasePoint = "ErasePoint";  //Erase Point
         public const string MeasureDeleteArea = "GridDeleteArea";  //(Grid) Delete Area
-        public const string MeasureDisableLength = "DisableLength";  //Disable Length
+        public const string MeasureDisableLength = "DisableLength";  //Disable Length // add by gordon 250716
+        public const string MeasureDisableAngle = "DisableAngle";  //Disable Length
         public const string MeasureDisableText = "DisableText";  //Disable Text
         public const string MeasureDisableErase = "DisableErase";  //Disable Erase
         public const string MeasureZoomIn = "ZoomIn";  //ZoomIn
@@ -436,6 +440,7 @@ namespace RaywattApp.Common.Bases
         public const int MeasureCmdLength = 2;
         public const int MeasureCmdText = 3;
         public const int MeasureCmdErase = 4;
+        public const int MeasureCmdAngle = 5;
 
         //Lumen Contour Command
         public const string LumenContourZoomIn = "ZoomIn";

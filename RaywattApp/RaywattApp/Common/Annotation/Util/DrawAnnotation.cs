@@ -50,6 +50,17 @@ namespace RaywattApp.Common.Annotation.Util
                 }
             }
 
+            // add by gordon 250718
+            if (measurement.AngleGeometries != null)
+            {
+                foreach (AngleGeometry Angle in measurement.AngleGeometries)
+                {
+                    DrawAngleGeometry(context, Angle, xScale, yScale);
+                }
+            }
+            // add by gordon 250718
+
+
             if (measurement.TextGeometries != null)
             {
                 foreach (TextGeometry text in measurement.TextGeometries)
@@ -94,6 +105,16 @@ namespace RaywattApp.Common.Annotation.Util
             context.DrawLine(new Pen(brush, 1.0), CommonUtil.GetScaledPoint(length.FirstPoint, xScale, yScale), CommonUtil.GetScaledPoint(length.SecondPoint, xScale, yScale));
 
             DrawLengthLabel(context, length.FirstPoint, length.SecondPoint, GetLabelText(length.Length), xScale, yScale);
+        }
+
+        public static void DrawAngleGeometry(DrawingContext context, AngleGeometry angle, double xScale, double yScale)
+        {
+            // add by gordon 250718 보류 사용처를 모르겠음
+            //Brush brush = Constants.AnnotationBrushes[angle.Group % Constants.AnnotationBrushes.Length];
+
+            //context.DrawLine(new Pen(brush, 1.0), CommonUtil.GetScaledPoint(length.FirstPoint, xScale, yScale), CommonUtil.GetScaledPoint(length.SecondPoint, xScale, yScale));
+
+            //DrawLengthLabel(context, length.FirstPoint, length.SecondPoint, GetLabelText(length.Length), xScale, yScale);
         }
 
         public static void DrawTextGeometry(DrawingContext context, TextGeometry text, double xScale, double yScale)
