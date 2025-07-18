@@ -232,10 +232,12 @@
     </Style>
 
     <Style TargetType="PasswordBox" x:Key="PasswordBoxValidator">
-        <Setter Property="Foreground" Value="White"/>
-        <Setter Property="ToolTipService.IsEnabled" Value="False"/>
-        <Setter Property="Height" Value="72"/>
-        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="Cursor" Value="{StaticResource iBeam}"/>
+        <Setter Property="Width" Value="408"/>
+        <Setter Property="SelectionBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
+        <Setter Property="SelectionOpacity" Value="0.30"/>
+        <Setter Property="CaretBrush" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="PasswordBox">
@@ -245,7 +247,6 @@
                             <RowDefinition Height="18"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Border + Content -->
                         <Border x:Name="border"
                             Height="54"
                             CornerRadius="8"
@@ -258,7 +259,6 @@
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
 
-                                <!-- ContentHost는 PasswordBox에서는 ScrollViewer 아님 -->
                                 <ScrollViewer x:Name="PART_ContentHost"
                                           Grid.Column="1"
                                           VerticalAlignment="Center"
@@ -267,7 +267,6 @@
                             </Grid>
                         </Border>
 
-                        <!-- Validator 영역 -->
                         <StackPanel Grid.Row="1"
                                 x:Name="validator"
                                 Orientation="Horizontal"
@@ -297,7 +296,6 @@
                             <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource GrayscaleGray5Brush}"/>
                         </Trigger>
 
-                        <!-- 유효성 실패 시 Validator 활성화 -->
                         <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=ToolTip, Converter={StaticResource NotEmptyStringToEnableConverter}}" Value="True">
                             <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AdditionalColor3Brush}"/>
                             <Setter TargetName="validator" Property="Visibility" Value="Visible"/>
