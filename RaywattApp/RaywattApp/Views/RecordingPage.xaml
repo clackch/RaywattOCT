@@ -7,6 +7,7 @@
       xmlns:const="clr-namespace:RaywattApp.Common.Bases"
       xmlns:System="clr-namespace:System;assembly=mscorlib"
       xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+      xmlns:component="clr-namespace:RaywattApp.Views.Component"
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
       Background="{DynamicResource GrayscaleGray8Brush}"
@@ -44,9 +45,20 @@
                         <RowDefinition Height="620"/>
                         <RowDefinition Height="30"/>
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0">
-                        <StackPanel>
+                    <Grid Grid.Row="0" Grid.RowSpan="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
                             <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Recording], Source={StaticResource L10N}}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                            <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="calibrationZoomIn" Width="42" Height="42" Command="{Binding CmdManualZoomIn}" CommandParameter="{StaticResource TrueValue}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}"/>
+                            <StackPanel Width="10"/>
+                            <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="calibrationZoomOut" Width="42" Height="42" Command="{Binding CmdManualZoomIn}" CommandParameter="{StaticResource FalseValue}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}"/>
+                            <StackPanel Width="10"/>
+                            <Button Style="{StaticResource OutlinedBtnType3-Large}" Width="174" Command="{Binding CmdAutoCalibration}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}" Content="{Binding [Auto Calibration], Source={StaticResource L10N}}"/>
                         </StackPanel>
                     </Grid>
                     <Separator Grid.Row="2" Background="{DynamicResource GrayscaleGray5Brush}"/>

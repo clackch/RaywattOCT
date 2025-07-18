@@ -84,6 +84,18 @@ namespace RaywattApp.ViewModels
             get { return this._startCommand ?? (this._startCommand = new RelayCommand(Start)); }
         }
 
+        private ICommand _cmdManualZoomIn;
+        public ICommand CmdManualZoomIn
+        {
+            get { return _cmdManualZoomIn ?? (this._cmdManualZoomIn = new RelayCommand<bool>(ManualZoomIn)); }
+        }
+
+        private ICommand _cmdAutoCalibration;
+        public ICommand CmdAutoCalibration
+        {
+            get { return _cmdAutoCalibration ?? (this._cmdAutoCalibration = new RelayCommand(AutoCalibration)); }
+        }
+
         public RecordingViewModel(SqlManager sqlManager, AngioManager angioManager)
         {
             _log.Debug("RecordingViewModel");
@@ -332,6 +344,19 @@ namespace RaywattApp.ViewModels
             AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(_angioManager.ImgAngio);
 
             return true;
+        }
+
+        private void ManualZoomIn(bool zoomIn)
+        {
+            _log.Debug("ManualZoomIn : " + ((zoomIn) ? "IN" : "OUT"));
+
+            RayManualCalibration(zoomIn);
+        }
+
+        private void AutoCalibration()
+        {
+            RayAutoCalibration();
+            DeviceStatus.CanExecuteCalibration = false;
         }
     }
 }
