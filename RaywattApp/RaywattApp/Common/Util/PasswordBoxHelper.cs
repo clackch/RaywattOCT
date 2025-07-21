@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace RaywattApp.Services
+namespace RaywattApp.Common.Util
 {
     public static class PasswordBoxHelper
     {
