@@ -5,6 +5,7 @@ using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
+using RaywattApp.Models;
 using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System;

@@ -111,6 +111,8 @@ namespace RaywattApp.ViewModels
                     }
                 }
 
+                DeviceStatus.LoginID = id;
+
                 Thread threadCoreAndDeviceInit = new Thread(() => ThreadCoreAndDeviceInit());
                 threadCoreAndDeviceInit.Start();
 
