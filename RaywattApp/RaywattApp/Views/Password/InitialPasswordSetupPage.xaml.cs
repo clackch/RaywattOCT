@@ -1,4 +1,5 @@
-﻿using RaywattApp.ViewModels.Password;
+﻿using RaywattApp.ViewModels.Admin;
+using RaywattApp.ViewModels.Password;
 using System.Windows.Controls;
 
 namespace RaywattApp.Views.Password
@@ -11,7 +12,7 @@ namespace RaywattApp.Views.Password
         public InitialPasswordSetupPage()
         {
             InitializeComponent();
-            DataContext = new InitialPasswordSetupViewModel();
+            DataContext = App.Current.Services.GetService(typeof(InitialPasswordSetupViewModel));
         }
     }
 }

@@ -81,12 +81,11 @@ namespace RaywattApp.ViewModels
                 }
 
                 // step 2. 초기화 된 user 인가?
-                Console.WriteLine("");
                 bool isPasswordReset = users[0].PasswordReset;
                 if(!isPasswordReset)
                 {
                     // password 설정 화면 이동
-                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.InitialPasswordSetupPage));
+                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.InitialPasswordSetupPage) { Parameter = data});
                     return;
                 }
 
