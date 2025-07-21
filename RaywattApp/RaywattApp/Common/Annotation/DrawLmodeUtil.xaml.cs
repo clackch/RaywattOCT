@@ -94,11 +94,11 @@ namespace RaywattApp.Common.Annotation
 
         public string PullbackLength
         {
-            get { return (string)GetValue(PullbackTypeProperty); }
-            set { this.SetValue(PullbackTypeProperty, value); }
+            get { return (string)GetValue(PullbackLengthProperty); }
+            set { this.SetValue(PullbackLengthProperty, value); }
         }
 
-        private static readonly DependencyProperty PullbackTypeProperty =
+        private static readonly DependencyProperty PullbackLengthProperty =
             DependencyProperty.Register("PullbackLength", typeof(string), typeof(DrawLmodeUtil), new PropertyMetadata(null));
 
         //---------------------------------------------------------------------------------------------------- Constructor
