@@ -62,6 +62,8 @@ namespace RaywattApp.Common.Bases
         public const string SettingTermsConditionsPage = "Views/Setting/SettingTermsConditionsPage.xaml";
         public const string SettingMaintenancePage = "Views/Setting/SettingMaintenancePage.xaml";
         public const string SettingDicomPage = "Views/Setting/SettingDicomPage.xaml";
+        public const string SettingPasswordChangePage = "Views/Setting/SettingPasswordChangePage.xaml";
+
         //Admin
         public const string UserListPage = "Views/Admin/UserListPage.xaml";
         public const string UserNewPage = "Views/Admin/UserNewPage.xaml";
