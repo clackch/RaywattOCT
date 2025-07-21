@@ -845,7 +845,6 @@
     </Style>
 
     <Style TargetType="{x:Type Calendar}" x:Key="CalendarStyle">
-        <Setter Property="MinWidth" Value="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type DatePicker}}, Path=ActualWidth}" />
         <Setter Property="CalendarButtonStyle" Value="{StaticResource CalendarButtonStyle}" />
         <Setter Property="CalendarDayButtonStyle" Value="{StaticResource CalendarDayButtonStyle}" />
         <Setter Property="CalendarItemStyle" Value="{StaticResource CalendarItemStyle}" />
@@ -853,13 +852,16 @@
         <Setter Property="Background" Value="{DynamicResource GrayscaleGray6Brush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource GrayscaleGray5Brush}"/>
         <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Margin" Value="20"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Calendar}">
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4">
-                        <StackPanel x:Name="PART_Root" HorizontalAlignment="Center" >
-                            <CalendarItem x:Name="PART_CalendarItem" Background="Transparent" Style="{TemplateBinding CalendarItemStyle}"
-                            Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type DatePicker}}, Path=ActualWidth}" />
+                        <Border.Effect>
+                            <DropShadowEffect ShadowDepth="0" Color="#4D000000" Opacity="0.8" BlurRadius="30"/>
+                        </Border.Effect>
+                        <StackPanel x:Name="PART_Root" HorizontalAlignment="Center">
+                            <CalendarItem x:Name="PART_CalendarItem" Background="Transparent" Style="{TemplateBinding CalendarItemStyle}" Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type DatePicker}}, Path=ActualWidth}" />
                         </StackPanel>
                     </Border>
                 </ControlTemplate>
