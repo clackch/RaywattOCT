@@ -65,7 +65,7 @@ private:
 	char sof = 0x3A;
 	char type = 0x00;
 	byte checkSum = 0x00;
-	char eof = 0xA3;
+	unsigned char eof = 0xA3;
 
 	WSADATA wsaData;
 	SOCKET serverSocket;

@@ -32,12 +32,19 @@ bool Repository::ApplyCrop(const HDVID_HEADER* pVidHeader, const FrameGrabber& f
     if (!pVidHeader || !pVidHeader->pBuffer) return false;
     if (isSetupFile) {
         size_t fullSize = fg.lHeight * fg.lWidth * fg.wBitsPerPixel / 8;
-        outBuffer.resize(fullSize);
-        memcpy(outBuffer.data(), pVidHeader->pBuffer, fullSize);
+
+        if (fullSize > 0) {
+            outBuffer.resize(fullSize);
+            memcpy(outBuffer.data(), pVidHeader->pBuffer, fullSize);
+        }
+        else {
+            outBuffer.clear();
+        }
+
         return true;
     }
     const int origWidth = fg.m_LiveStreamInfo.nDestinationWidth;
-    const int origHeight = fg.m_LiveStreamInfo.nDestinationHeight;
+    //const int origHeight = fg.m_LiveStreamInfo.nDestinationHeight;
     const int bytesPerPixel = fg.wBitsPerPixel / 8;
 
     const CropRegion& region = GetCropRegion();
@@ -51,13 +58,22 @@ bool Repository::ApplyCrop(const HDVID_HEADER* pVidHeader, const FrameGrabber& f
     if (outBuffer.size() < requiredSize)
         outBuffer.resize(requiredSize);
 
-    for (int y = 0; y < cropHeight; ++y) {
-        const unsigned char* srcLine = static_cast<const unsigned char*>(pVidHeader->pBuffer) + ((top + y) * origWidth + left) * bytesPerPixel;
-        unsigned char* dstLine = outBuffer.data() + y * cropWidth * bytesPerPixel;
-        memcpy(dstLine, srcLine, cropWidth * bytesPerPixel);
+    if (pVidHeader->pBuffer && !outBuffer.empty() && outBuffer.data() != nullptr && cropWidth > 0 && cropHeight > 0) {
+        for (int y = 0; y < cropHeight; ++y) {
+            const unsigned char* srcLine = static_cast<const unsigned char*>(pVidHeader->pBuffer)
+                + ((top + y) * origWidth + left) * bytesPerPixel;
+            unsigned char* dstLine = outBuffer.data() + y * cropWidth * bytesPerPixel;
+            memcpy(dstLine, srcLine, cropWidth * bytesPerPixel);
+        }
     }
 
     return true;
+}
+
+short ClampToShort(int value) {
+    if (value < SHRT_MIN) return SHRT_MIN;
+    if (value > SHRT_MAX) return SHRT_MAX;
+    return static_cast<short>(value);
 }
 
 bool Repository::InitCropRegion(FrameGrabber& fg)
@@ -65,7 +81,7 @@ bool Repository::InitCropRegion(FrameGrabber& fg)
     if (!conn) return false;
 
     std::string query = "SELECT rect_left, rect_top, rect_right, rect_bottom ""FROM rv_schema.cath_room WHERE app_chp = '" + std::string(fg.chpFileName.c_str()) + "';";
-    short cropWidth, cropHeight;
+    int cropWidth, cropHeight;
 
     PGresult* res = PQexec(conn, query.c_str());
 
@@ -90,25 +106,27 @@ bool Repository::InitCropRegion(FrameGrabber& fg)
         return false;
     }
     
-    short left = static_cast<short>(std::stoi(PQgetvalue(res, 0, 0)));
-    short top = static_cast<short>(std::stoi(PQgetvalue(res, 0, 1)));
-    short right = static_cast<short>(std::stoi(PQgetvalue(res, 0, 2)));
-    short bottom = static_cast<short>(std::stoi(PQgetvalue(res, 0, 3)));
+    int left = static_cast<int>(std::stoi(PQgetvalue(res, 0, 0)));
+    int top = static_cast<int>(std::stoi(PQgetvalue(res, 0, 1)));
+    int right = static_cast<int>(std::stoi(PQgetvalue(res, 0, 2)));
+    int bottom = static_cast<int>(std::stoi(PQgetvalue(res, 0, 3)));
     PQclear(res);
 
     cropWidth = right - left;
     cropHeight = bottom - top;
 
     if (cropWidth <= 0 || cropHeight <= 0 || left < 0 || top < 0) {
-        PLOGI.printf("[Crop] Invalid crop region: left=%hd, top=%hd, right=%hd, bottom=%hd",left, top, right, bottom);
+        PLOGI.printf("[Crop] Invalid crop region: left=%hd, top=%hd, right=%hd, bottom=%hd", left, top, right, bottom);
 
         return false;
     }
 
-    cropRegion.left = left;
-    cropRegion.top = top;
-    cropRegion.width = cropWidth;
-    cropRegion.height = cropHeight;
+    cropRegion.left = ClampToShort(left);
+    cropRegion.top = ClampToShort(top);
+    cropRegion.height = ClampToShort(cropHeight);
+    cropRegion.width = ClampToShort(cropWidth);
+
+    PLOGI.printf("%hd %hd", cropRegion.width, cropRegion.height);
     PLOGI.printf("%hd %hd", cropRegion.width, cropRegion.height);
     return true;
 }

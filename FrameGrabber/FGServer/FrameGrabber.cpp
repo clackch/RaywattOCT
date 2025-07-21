@@ -81,7 +81,7 @@ ERRTYPE FrameGrabber::ReadFormatFile(char* m_CHPFilePath) {
 		char errMsg[2048];
 		DecodeError(errMsg, e);
 		PLOGI.printf("m_BoardHandle init Fail %s", m_CHPFilePath);
-		PLOGI.printf(errMsg);
+		PLOGI.printf("%s", errMsg);
 		return e;
 	}
 
@@ -98,7 +98,7 @@ ERRTYPE FrameGrabber::ReadFormatFile(char* m_CHPFilePath) {
 		char errMsg[2048];
 		DecodeError(errMsg, e);
 		PLOGI.printf("Unable to load hardware profile : %s", m_CHPFilePath);
-		PLOGI.printf(errMsg);
+		PLOGI.printf("%s", errMsg);
 		return e;
 	}
 
@@ -183,8 +183,20 @@ void FrameGrabber::CreateFromFG() {
 	}
 
 	sc.wFormat = wMode;
-	sc.hLUT = 0;
-	sc.bTrigger = FALSE;
+	//sc.hLUT = 0;
+	//sc.bTrigger = FALSE;
+}
+
+bool SafeMultiply(size_t a, size_t b, size_t& result) {
+	if (a == 0 || b == 0) {
+		result = 0;
+		return true;
+	}
+	if (a > SIZE_MAX / b) {
+		return false; // overflow 발생
+	}
+	result = a * b;
+	return true;
 }
 
 void FrameGrabber::InitializeLiveStreamInfo() {
@@ -196,27 +208,45 @@ void FrameGrabber::InitializeLiveStreamInfo() {
 	m_LiveStreamInfo.nDestinationHeight = m_RSet.lRegs[HPR_HEIGHT];
 	m_LiveStreamInfo.dwNumberOfBuffers = STREAM_FRAMES;
 
+	m_LiveStreamInfo.nDataType = (wBitsPerPixel == 24) ? IDEA_TYPE_RGB_24 : IDEA_TYPE_MONO_8;
+
 	if (wBitsPerPixel == 24) {
-		m_LiveStreamInfo.nDataType = IDEA_TYPE_RGB_24;
 		channel = 3;
 	}
 	else {
-		m_LiveStreamInfo.nDataType = IDEA_TYPE_MONO_8;
 		channel = 1;
 	}
 
 	m_LiveStreamInfo.bDIBTarget = TRUE; // 상하 반전
-	m_LiveStreamInfo.pBufferList = new void* [m_LiveStreamInfo.dwNumberOfBuffers];
-	for (DWORD i = 0; i < m_LiveStreamInfo.dwNumberOfBuffers; ++i)
-	{
-		m_LiveStreamInfo.pBufferList[i] = new char[m_LiveStreamInfo.nDestinationWidth * m_LiveStreamInfo.nDestinationHeight * channel];
+
+	size_t width = static_cast<size_t>(m_LiveStreamInfo.nDestinationWidth);
+	size_t height = static_cast<size_t>(m_LiveStreamInfo.nDestinationHeight);
+
+	size_t channel_u = static_cast<size_t>(channel);
+
+	size_t tmpSize = 0;
+	size_t bufferSize = 0;
+
+	if (!SafeMultiply(width, height, tmpSize) ||
+		!SafeMultiply(tmpSize, channel_u, bufferSize)) {
+		throw std::overflow_error("Buffer size overflow detected.");
 	}
-	m_LiveStreamInfo.nDecimateFrames = 0;
-	m_LiveStreamInfo.bFieldUpdate = FALSE;
+
+	if (bufferSize == 0) {
+		throw std::runtime_error("Invalid buffer size (zero).");
+	}
+
+	m_LiveStreamInfo.pBufferList = new void* [m_LiveStreamInfo.dwNumberOfBuffers];
+	for (DWORD i = 0; i < m_LiveStreamInfo.dwNumberOfBuffers; ++i) {
+		m_LiveStreamInfo.pBufferList[i] = new char[bufferSize];
+	}
+
+	//m_LiveStreamInfo.nDecimateFrames = 0;
+	//m_LiveStreamInfo.bFieldUpdate = FALSE;
 	m_LiveStreamInfo.hLUT = m_hVPLUT;
-	m_LiveStreamInfo.nTop = 0;
+	//m_LiveStreamInfo.nTop = 0;
 	m_LiveStreamInfo.nBottom = m_RSet.lRegs[HPR_HEIGHT];
-	m_LiveStreamInfo.nLeft = 0;
+	//m_LiveStreamInfo.nLeft = 0;
 	m_LiveStreamInfo.nRight = m_RSet.lRegs[HPR_WIDTH];
 	m_LiveStreamInfo.hStartEvent = CreateEvent(0, TRUE, FALSE, NULL);
 	m_LiveStreamInfo.hStopEvent = CreateEvent(0, TRUE, FALSE, NULL);
@@ -230,16 +260,17 @@ void FrameGrabber::DecodeError(char* szErrMsg, ERRTYPE e)
 	char		szErrText[1024];
 	int			nErrSize;
 
-	if (e == 0) return;
-
-	//
-	// Call nHP_ErrMessage() to read from hdperror.dat
-	//
-	nErrSize = nHP_ErrMessage(e, 1023, szErrText);
-	if (nErrSize > 0)
-	{
-		sprintf(szErrMsg, "%s %s\n", szErrMsg, szErrText);
+	if (e == 0) {
+		strcpy(szErrMsg, "No error.");  // 혹은 빈 문자열
+		return;
 	}
 
-	sprintf(szErrMsg, "%s [Error Code = %d]", szErrMsg, e);
+	nErrSize = nHP_ErrMessage(e, 1023, szErrText);
+
+	if (nErrSize > 0) {
+		snprintf(szErrMsg, 2048, "%s\n[Error Code = %d]", szErrText, e);
+	}
+	else {
+		snprintf(szErrMsg, 2048, "[Error Code = %d]", e);
+	}
 }

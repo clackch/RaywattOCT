@@ -1,4 +1,7 @@
 ﻿#include "TCPSocket.h"
+#include <future>
+#include <vector>
+#define MAX_RECV_BUFFER_SIZE 1024
 
 TCPSocket::TCPSocket() {
 
@@ -15,7 +18,12 @@ TCPSocket::TCPSocket() {
 		if (serverSocket == INVALID_SOCKET)
 		{
 			PLOGI.printf("Failed to create socket. Error code: %d", WSAGetLastError());
-			closesocket(serverSocket);
+
+			if (serverSocket != INVALID_SOCKET)
+			{
+				closesocket(serverSocket);
+			}
+
 			WSACleanup();
 			//exit(0);
 			throw std::runtime_error("Failed to create socket");
@@ -29,6 +37,7 @@ TCPSocket::TCPSocket() {
 		{
 			PLOGI.printf("Failed to bind socket. Error code: %d", WSAGetLastError());
 			closesocket(serverSocket);
+			serverSocket = INVALID_SOCKET;
 			WSACleanup();
 			//exit(0);
 			throw std::runtime_error("Failed to bind socket");
@@ -99,7 +108,7 @@ void TCPSocket::SetDeviceInfoPacket(FrameGrabber& fg, char* buffer) {
 	memcpy(buffer + offset++, &fg.wBitsPerPixel, sizeof(fg.wBitsPerPixel));
 	checkSum = CalcCheckSum(buffer, 8);
 	memcpy(buffer + offset++, &checkSum, sizeof(checkSum));
-	memcpy(buffer + offset++, &eof, sizeof(eof));
+	memcpy(buffer + offset, &eof, sizeof(eof));
 }
 
 /*
@@ -148,6 +157,13 @@ void TCPSocket::ReceivePacket(FrameGrabber& fg) {
 	}
 	else if (bytesReceived > 0)
 	{
+		if (tmpRecvBufferLen + bytesReceived >= MAX_RECV_BUFFER_SIZE) {
+			PLOGI.printf("Buffer overflow detected. Dropping packet.");
+			tmpRecvBufferLen = 0;
+			recvBuffer[0] = '\0';
+			return;
+		}
+
 		strcat(tmpRecvBuffer, recvBuffer);
 		memset(recvBuffer, '\0', strlen(recvBuffer));
 		tmpRecvBufferLen += bytesReceived;
@@ -237,7 +253,7 @@ CommandType TCPSocket::CheckCommandType(const char* tmpRecvBuffer) {
 		if (tmpRecvBuffer[1] == PacketType::Command) {
 			if (tmpRecvBuffer[2] == CommandType::FGChpFile) {
 				short packetLen = tmpRecvBuffer[3];
-				if (tmpRecvBuffer[packetLen - 2] == (char)CalcCheckSum((char*)tmpRecvBuffer, packetLen - 2)) {
+				if ((unsigned char)tmpRecvBuffer[packetLen - 2] == CalcCheckSum((char*)tmpRecvBuffer, packetLen - 2)) {
 					if (tmpRecvBuffer[packetLen - 1] == (char)0xA3) {
 						return CommandType::FGChpFile;
 					}
@@ -291,6 +307,7 @@ void TCPSocket::ChpFilePacketProcess(FrameGrabber& fg) {
 		PLOGI.printf(".chp file is missing");
 		SetCommandPacket(CommandType::FGFailChangeChp);
 		sendResult = send(clientSocket, commandBuffer, 5, 0);
+		PLOGI.printf("Send FailChangeChp Info: %d ", sendResult);
 	}
 	else {
 		PLOGI.printf("Success to read .chp file");
@@ -300,7 +317,7 @@ void TCPSocket::ChpFilePacketProcess(FrameGrabber& fg) {
 		SetImagePacketHeader(fg);
 		SetCommandPacket(CommandType::FGSuccessChangeChp);
 		sendResult = send(clientSocket, commandBuffer, 5, 0);
-		PLOGI.printf("Send SuccessChangeChp Info: %d " + sendResult);
+		PLOGI.printf("Send SuccessChangeChp Info: %d ", sendResult);
 		SetDeviceInfoPacket(fg, deviceInfoBuffer);
 		sendResult = send(clientSocket, deviceInfoBuffer, 10, 0);
 		PLOGI.printf("Send Device Info: %d", sendResult);
@@ -340,14 +357,14 @@ void TCPSocket::PortEventThread(FrameGrabber& fg) {
 				{
 					fg.portConnection = 1;
 					SetCommandPacket(CommandType::FGAngioConnected);
-					int sendResult = send(clientSocket, commandBuffer, 5, 0);
+					send(clientSocket, commandBuffer, 5, 0);
 					PLOGI.printf("Send Port Connected");
 				}
 				else if (!fg.m_bSyncValid && fg.portConnection != 0)
 				{
 					fg.portConnection = 0;
 					SetCommandPacket(CommandType::FGAngioDisconnected);
-					int sendResult = send(clientSocket, commandBuffer, 5, 0);
+					send(clientSocket, commandBuffer, 5, 0);
 					PLOGI.printf("Send Port Disconnected");
 				}
 
@@ -395,25 +412,15 @@ void TCPSocket::CheckClientThread() {
 	}
 }
 
-void TCPSocket::StartInitThreads(FrameGrabber& fg) {
-	thread portEvent;
-	if (fg.boardConnection) {
-		// FrameGrabber 보드의 이벤트를 감지하는 Thread
-		portEvent = thread(&TCPSocket::PortEventThread, this, ref(fg));
-		PLOGI.printf("Start port thread");
+void TCPSocket::StartInitThreads(FrameGrabber& fg) 
+{
+	auto portEventFuture = std::async(std::launch::async, &TCPSocket::PortEventThread, this, std::ref(fg));
+	auto receiveCmdFuture = std::async(std::launch::async, &TCPSocket::ReceiveCmdThread, this, std::ref(fg));
+	auto checkClientFuture = std::async(std::launch::async, &TCPSocket::CheckClientThread, this);
 
-	}
-
-	thread receiveCmd(&TCPSocket::ReceiveCmdThread, this, ref(fg));
-	PLOGI.printf("Start receive thread");
-
-	// Client 통신 상태를 점검하는 Thread
-	thread checkClient(&TCPSocket::CheckClientThread, this);
-	PLOGI.printf("Start check bthread");
-
-	if (fg.boardConnection) { portEvent.join(); }
-	receiveCmd.join();
-	checkClient.join();
+	if (fg.boardConnection) portEventFuture.get();
+	receiveCmdFuture.get();
+	checkClientFuture.get();
 }
 
 byte TCPSocket::CalcCheckSum(char* sendBuffer, int size) {
@@ -454,7 +461,7 @@ void TCPSocket::LiveFrame(FrameGrabber& fg) {
 	int offset = 7; 
 	memcpy(sendBuffer + offset, &livetime, sizeof(livetime));
 	offset += sizeof(livetime);
-	memcpy(sendBuffer + offset, croppedBuffer.data(), cropsize * fg.wBitsPerPixel / 8);
+	if(!croppedBuffer.empty()) memcpy(sendBuffer + offset, croppedBuffer.data(), cropsize * fg.wBitsPerPixel / 8);
 	offset += cropsize * fg.wBitsPerPixel / 8;
 	checkSum = CalcCheckSum(sendBuffer, offset); 
 	memcpy(sendBuffer + offset, &checkSum, sizeof(checkSum)); 
