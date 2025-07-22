@@ -1280,6 +1280,12 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Save");
 
+            if(PatientCase == null)
+            {
+                _log.Error("PatientCase == null");
+                return;
+            }
+
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
             sqlParameters["physician_name"] = PatientCase.PhysicianName;
@@ -1386,6 +1392,14 @@ namespace RaywattApp.ViewModels
 
         private void FfrValueChangedCheck()
         {
+            _log.Info("FfrValueChangedCheck");
+
+            if (PatientCase == null)
+            {
+                _log.Error("PatientCase == null");
+                return;
+            }
+
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["id"] = PatientCase.Id;
             IList<StringModel> ffrPlaques = _sqlManager.SelectPatientCaseFfr(sqlParameters);
