@@ -559,7 +559,7 @@
                             </RectangleGeometry.Rect>
                         </RectangleGeometry>
                     </Grid.Clip>
-                    <Grid>
+                    <Grid Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}">
                         <annotation:DrawUtil Zoom="{Binding ReviewStatus.Zoom}" IsDrawOn="{Binding ReviewStatus.IsMeasurementOn}" MeasureUIElements="{Binding PatientCase.MeasureUIElements}" Measurements="{Binding Measurements}" IsMeasureInit="{Binding ReviewStatus.IsMeasureInit}" FrameNumberForInit="{Binding FrameNumberForInit}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" CommandOff="{Binding MeasurementCommandOff, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEditOn="True" Visibility="Collapsed">
                             <annotation:DrawUtil.RenderTransform>
                                 <TransformGroup>
