@@ -30,7 +30,7 @@ namespace RaywattApp.ViewModels.Dialog
         private ICommand _cancelCommand;
         public ICommand CancelCommand
         {
-            get { return this._cancelCommand ?? (this._cancelCommand = new RelayCommand<IDialogWindow>(Cancel)); }
+            get { return this._cancelCommand ?? (this._cancelCommand = new RelayCommand<IDialogWindow>(OnCancel)); }
         }
 
         private readonly IDialogService _dialogService;
@@ -39,7 +39,7 @@ namespace RaywattApp.ViewModels.Dialog
         private ICommand _okCommand;
         public ICommand OkCommand
         {
-            get { return this._okCommand ?? (this._okCommand = new RelayCommand<IDialogWindow>(Ok)); }
+            get { return this._okCommand ?? (this._okCommand = new RelayCommand<IDialogWindow>(OnOk)); }
         }
 
         public PasswordChangeDialogViewModel(IDialogService dialogService, IDatabaseService databaseService)
@@ -48,11 +48,7 @@ namespace RaywattApp.ViewModels.Dialog
             _databaseService = databaseService;
         }
 
-        public override void SetParameter(object parameter)
-        {
-        }
-
-        private void Cancel(IDialogWindow dialog)
+        private void OnCancel(IDialogWindow dialog)
         {
             DialogResults dialogResults = new();
             dialogResults.DialogAnswer = DialogResults.Answer.No;
@@ -60,7 +56,7 @@ namespace RaywattApp.ViewModels.Dialog
             CloseDialogWithResult(dialog, dialogResults);
         }
 
-        private void Ok(IDialogWindow dialog)
+        private void OnOk(IDialogWindow dialog)
         {
             if (!ExecuteChangePassword())
             {
@@ -78,11 +74,13 @@ namespace RaywattApp.ViewModels.Dialog
 
         private bool ExecuteChangePassword()
         {
-            if (!GetPasswordByUserId()) return false;
-            if (!CheckOldPassword()) return false;
+            _getID = ViewModelBase.DeviceStatus.LoginID;
+            if (!GetPasswordByUserId(_getID)) return false;
+            if (!IsSamePassword(_getPassword, OldPassword)) return false;
             if (!IsNewPasswordSameAsOld(OldPassword, NewPassword)) return false;
-            if (!CheckInputPassword()) return false;
-            if (!UpdatePasswordInDatabase()) return false;
+            if (!IsSamePassword(NewPassword, ConfirmPassword)) return false;
+            if (!IsValidationPassword()) return false;
+            if (!UpdatePasswordReset()) return false;
 
             ShowAlert(_l10n["Information"], "Password changed successfully");
 
@@ -91,23 +89,18 @@ namespace RaywattApp.ViewModels.Dialog
 
         private bool IsNewPasswordSameAsOld(string oldPwd, string newPwd)
         {
-            if (!oldPwd.Equals(newPwd))
+            if (oldPwd.Equals(newPwd))
             {
-                ShowAlert(_l10n["Information"], "Passwords do not match.");
+                ShowAlert(_l10n["Information"], "Passwords do match.");
                 return false;
             }
 
             return true;
         }
-        private bool CheckInputPassword()
+        private bool IsValidationPassword()
         {
-            if (NewPassword != ConfirmPassword)
-            {
-                ShowAlert(_l10n["Information"], "Passwords do not match.");
-                return false;
-            }
-
             string? error = GetPasswordValidationError();
+
             if (error != null)
             {
                 ShowAlert(_l10n["Information"], error);
@@ -117,29 +110,21 @@ namespace RaywattApp.ViewModels.Dialog
             return true;
         }
 
-        private bool CheckOldPassword()
+        private bool IsSamePassword(string beforePassword, string inputPassword)
         {
-            if (!OldPassword.Equals(_getPassword))
+            if (!beforePassword.Equals(inputPassword))
             {
-                ShowAlert("info", "The current password \r\nyou entered is incorrect");
+                ShowAlert("info", "Incorrect current password.\r\nPlease try again.");
                 return false;
             }
 
             return true;
         }
 
-        private bool GetPasswordByUserId()
+        private bool GetPasswordByUserId(string id)
         {
-            _getID = ViewModelBase.DeviceStatus.LoginID ?? string.Empty;
-
-            if (_getID == string.Empty)
-            {
-                ShowAlert("info", "Login ID is not set.");
-                return false;
-            }
-
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
-            sqlParameters["id"] = _getID;
+            sqlParameters["id"] = id;
 
             var commandText = SqlQuery.GetQuery("SelectUserListById");
             var userData = _databaseService.GetDatas<User>(commandText, sqlParameters);
@@ -153,7 +138,6 @@ namespace RaywattApp.ViewModels.Dialog
 
             return true;
         }
-
 
         private void ShowAlert(string title, string message)
         {
@@ -195,7 +179,7 @@ namespace RaywattApp.ViewModels.Dialog
             return null;
         }
 
-        private bool UpdatePasswordInDatabase()
+        private bool UpdatePasswordReset()
         {
             var commandText = SqlQuery.GetQuery("UpdatePasswordReset");
 

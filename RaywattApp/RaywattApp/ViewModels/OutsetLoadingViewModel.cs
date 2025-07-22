@@ -69,12 +69,17 @@ namespace RaywattApp.ViewModels
                 // step 1.id, password (users table)
                 Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
                 sqlParameters["id"] = id;
-                //sqlParameters["password"] = password;
                 IList<User> users = _sqlManager.SelectUserListById(sqlParameters);
 
                 bool isExistUser = users.Count == 1;
 
                 if (!isExistUser)
+                {
+                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
+                    return;
+                }
+
+                if (!users[0].Password.Equals(password))
                 {
                     WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
                     return;
