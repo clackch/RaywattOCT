@@ -128,11 +128,11 @@ namespace RaywattApp.ViewModels.Dialog
             if (!res)
                 return;
 
-            if (IsNew && CanSaveNewDicomServer())
-                SaveNew();
+            if (IsNew && (!CanSaveNewDicomServer() || !SaveNew()))
+                return;
 
-            if (!IsNew)
-                SaveEdit();
+            if (!IsNew && !SaveEdit())
+                return;
 
             RayExportWrapper.DestroyDcmClient(dicomClient);
 
@@ -217,13 +217,13 @@ namespace RaywattApp.ViewModels.Dialog
 
             if (existingServers.Count() >= 2)
             {
-                ShowAlertDialog("The DICOM server already exists.");
+                AeTitle.Msg = "The DICOM server already exists.";
                 return false;
             }
 
             else if (existingServers.First().ServerType == DicomServer.ServerType)
             {
-                ShowAlertDialog("The DICOM server already exists.");
+                AeTitle.Msg = "The DICOM server already exists.";
                 return false;
             }
 
@@ -243,7 +243,7 @@ namespace RaywattApp.ViewModels.Dialog
             return true;
         }
 
-        private void SaveNew()
+        private bool SaveNew()
         {
             bool isBoth = DicomServer.ServerType == "BOTH";
             string[] serverTypes = isBoth ? new[] { "PACS", "MWL" } : new[] { DicomServer.ServerType };
@@ -267,11 +267,13 @@ namespace RaywattApp.ViewModels.Dialog
                 {
                     _log.Error(IsNew ? "Insert Error" : "Update Error");
                     ShowAlertDialog("Failed to connect to the server.");
+                    return false;
                 }
             }
+            return true;
         }
 
-        private void SaveEdit()
+        private bool SaveEdit()
         {
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["server_type"] = DicomServer.ServerType;
@@ -283,7 +285,7 @@ namespace RaywattApp.ViewModels.Dialog
                 else
                 {
                     ShowAlertDialog("The server type doesn't match your existing configuration. Please remove the existing server information to avoid conflicts.");
-                    return;
+                    return false;
                 }
             }
 
@@ -293,8 +295,8 @@ namespace RaywattApp.ViewModels.Dialog
 
             if (DicomServers.Any(x => x.AeTitle == DicomServer.AeTitle && x.IpAddress == DicomServer.IpAddress && x.Port == DicomServer.Port && x.ServerType == DicomServer.ServerType))
             {
-                ShowAlertDialog("The DICOM server already exists.");
-                return;
+                AeTitle.Msg = "The DICOM server already exists.";
+                return false;
             }
 
             sqlParameters["ae_title"] = AeTitle.Text.Trim();
@@ -314,8 +316,9 @@ namespace RaywattApp.ViewModels.Dialog
             {
                 _log.Error("Update Error");
                 ShowAlertDialog("Failed to connect to the server.");
-                return;
+                return false;
             }
+            return true;
         }
 
         private async Task SetIpAddressAsync()
