@@ -23,6 +23,9 @@
                 <DataTrigger Binding="{Binding CommandType, ElementName=UserControl}" Value="4">
                     <Setter Property="Cursor" Value="{StaticResource measureErase}"/>
                 </DataTrigger>
+                <DataTrigger Binding="{Binding CommandType, ElementName=UserControl}" Value="5">
+                    <Setter Property="Cursor" Value="{StaticResource measureAngle}"/>
+                </DataTrigger>
             </Style.Triggers>
         </Style>
         <Style TargetType="Path" x:Key="StylePath">

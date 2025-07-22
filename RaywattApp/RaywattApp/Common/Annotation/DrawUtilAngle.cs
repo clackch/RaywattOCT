@@ -915,17 +915,7 @@ namespace RaywattApp.Common.Annotation
 
             int plusX = 5;
             int plusY = 10;
-
-            if (centerPoint.X > canvas.ActualWidth - 70)
-            {
-                plusX = -55;
-            }
-            else if (centerPoint.Y > canvas.ActualHeight - 10)
-            {
-                plusY = 20;
-            }
-
-
+                        
             Canvas.SetLeft(label, centerPoint.X + plusX);
             Canvas.SetTop(label, centerPoint.Y - plusY);
             this.canvas.Children.Add(label);
