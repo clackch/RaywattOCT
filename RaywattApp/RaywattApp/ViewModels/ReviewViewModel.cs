@@ -1297,6 +1297,12 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Save");
 
+            if (PatientCase == null)
+            {
+                _log.Error("PatientCase == null");
+                return;
+            }
+
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
             sqlParameters["physician_name"] = PatientCase.PhysicianName;
