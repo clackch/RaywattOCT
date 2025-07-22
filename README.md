@@ -87,7 +87,8 @@ Download & Install OCT Host
 3. 환경 변수 추가
    - 시스템 변수에 PYTHON_DLL - C:\Users\Raywatt\AppData\Local\Programs\Python\Python312\python312.dll 추가
 
-     ※ 경로 및 Python dll은 해당 PC에 맞춰서 적용
+     ※ 경로 및 Python dll은 해당 PC에 맞춰서 적용![Uploading 11757@3x.png…]()
+
 4. 코드 복사
    - RaywattExt\Python\ImageProcess.py 파일을 runtime에 복사
 
@@ -104,7 +105,7 @@ Download & Install Font
 
 ## [Cursor]
 Download & Create Folder, Copy/Paste
-1. [cursor.zip](https://github.com/user-attachments/files/18683414/cursor.zip) 다운로드 후 압축 해제
+1. [cursor.zip](https://github.com/user-attachments/files/21361471/cursor.zip) 다운로드 후 압축 해제
 2. C:\Raywatt\system\image\cursor 폴더 생성 및 복사/붙여넣기
 
 Windows Default Mouse Cursor Setting (※ 필요 시 진행)
