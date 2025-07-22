@@ -47,17 +47,15 @@ namespace RaywattApp.Common.Annotation
 
         private static readonly DependencyProperty IsLengthOnProperty =
             DependencyProperty.Register("IsLengthOn", typeof(bool), typeof(DrawCommandUtil), new PropertyMetadata(default(bool)));
-
-        //add by gordon 250716
+         
         public bool IsAngleOn
         {
             get { return (bool)GetValue(IsAngleOnProperty); }
             set { this.SetValue(IsAngleOnProperty, value); }
         }
-
         private static readonly DependencyProperty IsAngleOnProperty =
             DependencyProperty.Register("IsAngleOn", typeof(bool), typeof(DrawCommandUtil), new PropertyMetadata(default(bool)));
-        //add by gordon 250716
+
         public bool IsTextOn
         {
             get { return (bool)GetValue(IsTextOnProperty); }
@@ -103,14 +101,12 @@ namespace RaywattApp.Common.Annotation
             DisableCommand(false, true, false, false, false);
             OutCommand = Constants.MeasureAddLength + "|" + IsLengthOn;
         }
-
-        //add by gordon 250716
         private void angle_Add(object sender, RoutedEventArgs e)
         {
             DisableCommand(false, false, false, false, true);
             OutCommand = Constants.MeasureAddAngle + "|" + IsAngleOn;
         }
-        //add by gordon 250716
+
         private void text_Add(object sender, RoutedEventArgs e)
         {
             DisableCommand(false, false, true, false, false);
@@ -129,25 +125,18 @@ namespace RaywattApp.Common.Annotation
             OutCommand = Constants.MeasureDeleteAll;
         }
 
-        private void DisableCommand(bool isAreaOn, bool isLengthOn, bool isTextOn, bool isEraseOn, bool isAngleOn)  // add by gordon 250717 added isAngleOn
+        private void DisableCommand(bool isAreaOn, bool isLengthOn, bool isTextOn, bool isEraseOn, bool isAngleOn)
         {
             if(!isAreaOn)
                 IsAreaOn = false;
             if(!isLengthOn)
                 IsLengthOn = false;
-            //add by gordon 250716
             if (!isAngleOn)
                 IsAngleOn = false;
-            //add by gordon 250716
             if (!isTextOn)
                 IsTextOn = false;
             if(!isEraseOn)
                 IsEraseOn = false;
-        }
-
-        private void IconToggleButton_Checked(object sender, RoutedEventArgs e)
-        {
-
         }
     }
 }

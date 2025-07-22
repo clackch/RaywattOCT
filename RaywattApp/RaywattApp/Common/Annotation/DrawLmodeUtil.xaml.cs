@@ -150,11 +150,9 @@ namespace RaywattApp.Common.Annotation
                 case Constants.MeasureDisableLength:
                     drawLmodeUtil.DisableCommand();
                     break;
-                // add by gordon 250717
                 case Constants.MeasureDisableAngle:
                     drawLmodeUtil.DisableCommand();
                     break;
-                // add by gordon 250717
                 case Constants.MeasureDisableText:
                     drawLmodeUtil.DisableCommand();
                     break;

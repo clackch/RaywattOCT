@@ -28,13 +28,11 @@ namespace RaywattApp.Common.Annotation
 
         private bool init = false;
 
-        // add by gordon 250716
         private Brush[] brushes = { Brushes.Red, Brushes.Orange, Brushes.YellowGreen, Brushes.Green, Brushes.Blue, Brushes.Navy, Brushes.Purple };
         private double ellipseWidth;
         private double ellipseHeight;
         private double scaleFactor;
         private bool isMove;
-        // add by gordon 250716
 
         public string InCommand
         {
@@ -171,7 +169,6 @@ namespace RaywattApp.Common.Annotation
         private static readonly DependencyProperty IsMeasureInitProperty =
             DependencyProperty.Register("IsMeasureInit", typeof(bool), typeof(DrawUtil), new PropertyMetadata(default(bool)));
 
-        //add by gordon 250716
         public int MouseCursor
         {
             get { return (int)GetValue(MouseCursorProperty); }
@@ -180,7 +177,6 @@ namespace RaywattApp.Common.Annotation
 
         private static readonly DependencyProperty MouseCursorProperty =
             DependencyProperty.Register("MouseCursor", typeof(int), typeof(DrawUtil), new PropertyMetadata(default(int)));
-        //add by gordon 250716
         //---------------------------------------------------------------------------------------------------- Constructor
         public DrawUtil()
         {
@@ -214,11 +210,9 @@ namespace RaywattApp.Common.Annotation
                 case Constants.MeasureAddLength:
                     drawUtil.AddLength(command[1]);
                     break;
-                // add by gordon 250716
                 case Constants.MeasureAddAngle:
                     drawUtil.AddAngle(command[1]);
                     break;
-                // add by gordon 250716
                 case Constants.MeasureAddText:
                     drawUtil.AddText(command[1]);
                     break;
@@ -234,11 +228,9 @@ namespace RaywattApp.Common.Annotation
                 case Constants.MeasureDisableLength:
                     drawUtil.DisableCommand();
                     break;
-                // add by gordon 250716
                 case Constants.MeasureDisableAngle:
                     drawUtil.DisableCommand();
                     break;
-                // add by gordon 250716
                 case Constants.MeasureDisableText:
                     drawUtil.DisableCommand();
                     break;
@@ -429,10 +421,8 @@ namespace RaywattApp.Common.Annotation
                     DrawAreaAll();
                 if(this.lengthGeometries.Count > 0)
                     DrawLengthAll();
-                // add by gordon 250716
                 if (this.angleGeometries.Count > 0)
                     DrawAngleAll();
-                // add by gordon 250716
                 if (this.textGeometries.Count > 0)
                     DrawTextAll();
             }
@@ -449,7 +439,7 @@ namespace RaywattApp.Common.Annotation
             this.areaGeometrys.Clear();
             this.lengthGeometries.Clear();
             this.textGeometries.Clear();
-            this.angleGeometries.Clear();   // add by gordon 250716
+            this.angleGeometries.Clear();
 
             DisableCommand();
 
@@ -558,7 +548,6 @@ namespace RaywattApp.Common.Annotation
                     this.canvas.MouseRightButtonDown -= erase_canvas_MouseRightButtonDown;                    
                     this.isErasing = false;
                     break;
-                // add by gordon 250716
                 case 5://Angle
                     this.canvas.MouseLeftButtonDown -= angle_canvas_MouseLeftButtonDown;
                     this.canvas.MouseMove -= angle_canvas_MouseMove;
@@ -566,7 +555,6 @@ namespace RaywattApp.Common.Annotation
                     this.isAngleFirstPoint = true;
                     this.isCanvasClicked = false;
                     break;
-                // add by gordon 250716
                 default:
                     break;
             }

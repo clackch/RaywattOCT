@@ -1362,7 +1362,7 @@ namespace RaywattApp.ViewModels
             //Cross-section
             foreach (Measurement measurement in param)
             {
-                if (measurement.AreaGeometries.Count > 0 || measurement.LengthGeometries.Count > 0 || measurement.TextGeometries.Count > 0 || measurement.AngleGeometries.Count > 0) //add by gordon 250718
+                if (measurement.AreaGeometries.Count > 0 || measurement.LengthGeometries.Count > 0 || measurement.TextGeometries.Count > 0 || measurement.AngleGeometries.Count > 0)
                 {
                     if (measurement.AreaGeometries.Count > 0)
                     {
