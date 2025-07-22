@@ -558,7 +558,7 @@ namespace RaywattApp.Services
 
             return _databaseService.GetDatas<User>(commandText);
         }
-        public IList<User> SelectUserList(Dictionary<string, Object> sqlParameters)
+        public IList<User> SelectUserListById(Dictionary<string, Object> sqlParameters)
         {
             _log.Debug("SelectUserListById");
 

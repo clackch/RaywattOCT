@@ -35,7 +35,10 @@ namespace RaywattApp.ViewModels.Setting
 
         private void PasswordChange()
         {
-            var result = _dialogService.OpenDialog(new PasswordChangeDialogControl(), null, Constants.ApplicationWidth, Constants.ApplicationHeight);
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                var result = _dialogService.OpenDialog(new PasswordChangeDialogControl(), null, Constants.ApplicationWidth, Constants.ApplicationHeight);
+            });
         }
     }
 }

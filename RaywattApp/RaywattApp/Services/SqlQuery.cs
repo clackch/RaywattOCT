@@ -276,7 +276,7 @@ namespace RaywattApp.Services
             _query["SelectUserListById"] = @$"
                 SELECT id, password, comment, password_changed_at, password_reset, terms_agreed_at, create_date, update_date
                 FROM rv_schema.users
-                WHERE id = @id AND password = @password
+                WHERE id = @id
                 ORDER BY id
                 ";
         }

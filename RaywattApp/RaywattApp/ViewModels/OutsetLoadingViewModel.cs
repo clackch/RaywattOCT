@@ -69,8 +69,8 @@ namespace RaywattApp.ViewModels
                 // step 1.id, password (users table)
                 Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
                 sqlParameters["id"] = id;
-                sqlParameters["password"] = password;
-                IList<User> users = _sqlManager.SelectUserList(sqlParameters);
+                //sqlParameters["password"] = password;
+                IList<User> users = _sqlManager.SelectUserListById(sqlParameters);
 
                 bool isExistUser = users.Count == 1;
 

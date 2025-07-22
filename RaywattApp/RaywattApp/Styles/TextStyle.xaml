@@ -1,5 +1,5 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:sv="clr-namespace:RaywattApp.Services"
+                    xmlns:ut="clr-namespace:RaywattApp.Common.Util"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Style TargetType="Label">
@@ -297,7 +297,7 @@
                     </Grid>
 
                     <ControlTemplate.Triggers>
-                        <DataTrigger Binding="{Binding Path=(sv:PasswordBoxHelper.BindablePassword), RelativeSource={RelativeSource Mode=Self}}" Value="">
+                        <DataTrigger Binding="{Binding Path=(ut:PasswordBoxHelper.BindablePassword), RelativeSource={RelativeSource Mode=Self}}" Value="">
                             <Setter TargetName="placeholder" Property="Visibility" Value="Visible"/>
                         </DataTrigger>
 
