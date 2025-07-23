@@ -1533,7 +1533,7 @@ UINT COCTSystem::threadInitializeRotaryJunction(LPVOID param) {
 /*
 * threadAutoCalibration
 */
-UINT COCTSystem::threadAutoCalibration(LPVOID param) {
+UINT COCTSystem::threadAutoCalibration(LPVOID param) { // 수정
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CLaserModule* pLaserModule = pSystem->m_pLaserModule;
 	int nTargetPos = 0;
@@ -1561,14 +1561,21 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		const int nSheathPosition = CConfiguration::GetInstance().measurement.nSheathPosition;
 		int nMinDiff = INT_MAX;
 		int nZOffset = 0;
-		for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
+		/*for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
 			int nDiff = abs(nSheathPosition - pSystem->m_vCalibrationInfo.at(i).first);
 			if (nMinDiff > nDiff) {
 				nMinDiff = nDiff;
 				nZOffset = pSystem->m_vCalibrationInfo.at(i).second;
 				PLOGI.printf("nDiff: %d, Calibrated zOffset: %d", nDiff, nZOffset);
 			}
-		}
+		}*/
+		std::sort(pSystem->m_vCalibrationInfo.begin(), pSystem->m_vCalibrationInfo.end(),
+			[](const std::pair<int, int>& a, const std::pair<int, int>& b) {
+				if(a.first == b.first)
+					return a.second < b.second;
+				return a.first > b.first;
+			});
+		nZOffset = pSystem->m_vCalibrationInfo.front().second; // Get the first element's second value
 
 		// 1-3. Move to calibrated position
 		nTargetPos = nZOffset;
@@ -2305,7 +2312,7 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 
 		switch (m_cathState)
 		{
-		case CatheterState::FindingSheath:
+		case CatheterState::FindingSheath: //
 		{
 			int nSheathPosition = m_pImagingRealtime->GetSheathPosition();
 			int nDelayLinePos = m_pLaserModule->GetPosition(eStepMotorIndex::DelayLine);
