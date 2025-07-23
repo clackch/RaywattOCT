@@ -11,8 +11,11 @@ using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
+using System.Reflection.Metadata;
 using System.Threading;
+using System.Windows.Documents;
 using System.Windows.Interop;
+using System.Windows.Navigation;
 using System.Windows.Threading;
 using static RaywattOCT.Ray3DWrapper;
 using static RaywattOCT.RayCoreWrapper;
@@ -55,32 +58,72 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("OnNavigated");
 
-            // Terms and Contidions 확인
-            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
-            sqlParameters["classification"] = "Terms&Cond";
-            IList<Configuration> tnCs = _sqlManager.SelectConfiguration(sqlParameters);
-            if (tnCs != null || tnCs.Count == 1)
+            var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
+
+            if (extraData != null)
             {
-                if ("N".Equals(tnCs[0].Value))
+                Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
+                string id = (string)data["id"];
+                string password = (string)data["password"];
+
+                // step 1.id, password (users table)
+                Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+                sqlParameters["id"] = id;
+                IList<User> users = _sqlManager.SelectUserListById(sqlParameters);
+
+                bool isExistUser = users.Count == 1;
+
+                if (!isExistUser)
+                {
+                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
+                    return;
+                }
+
+                if (!users[0].Password.Equals(password))
+                {
+                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
+                    return;
+                }
+
+                // step 2. password reset ?
+                bool isPasswordReset = users[0].PasswordReset; // true: reset 필요
+                if(isPasswordReset)
+                {
+                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.InitialPasswordSetupPage) { Parameter = data});
+                    return;
+                }
+
+                // step 3. terms_agreed_at (users table)
+                bool hasAgreedToTerms = users[0].TermsAgreedAt != DateTime.MinValue;
+                if (!hasAgreedToTerms)
                 {
                     Dictionary<string, object> parameter = new Dictionary<string, object>();
-                    parameter["tnC"] = tnCs[0];
-                    var result = _dialogService.OpenDialog(new TermsConditionsControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                    parameter["tnC"] = users[0];
 
+                    var result = _dialogService.OpenDialog(new TermsConditionsControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
                     if (result != null && result.DialogAnswer == DialogResults.Answer.No)
                     {
-                        DeviceStatus.PowerOffMsg = _l10n["Logging out"];
-                        CommonUtil.Exit(DeviceStatus, null, false);
+                        WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
+                        return;
+                    }
+                    else
+                    {
+                        sqlParameters.Clear();
+                        sqlParameters["id"] = id;
+                        sqlParameters["password"] = password;
+                        _sqlManager.UpdateTermsAgreedDateUser(sqlParameters);
                     }
                 }
+
+                DeviceStatus.LoginID = id;
+
+                Thread threadCoreAndDeviceInit = new Thread(() => ThreadCoreAndDeviceInit());
+                threadCoreAndDeviceInit.Start();
+
+                timer.Interval = TimeSpan.FromMilliseconds(25);
+                timer.Tick += new EventHandler(ProgressTest);
+                timer.Start();
             }
-
-            Thread threadCoreAndDeviceInit = new Thread(() => ThreadCoreAndDeviceInit());
-            threadCoreAndDeviceInit.Start();
-
-            timer.Interval = TimeSpan.FromMilliseconds(25);
-            timer.Tick += new EventHandler(ProgressTest);
-            timer.Start();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -164,7 +207,7 @@ namespace RaywattApp.ViewModels
             RayError result = (RayError)RayInitSystem();
 
             result |= (RayError)RayStartSystem();
-            
+
             if (result == RayError.OK)
             {
                 result |= (RayError)RayConnectDevices();

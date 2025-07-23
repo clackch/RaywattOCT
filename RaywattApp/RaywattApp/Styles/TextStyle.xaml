@@ -1,4 +1,5 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:ut="clr-namespace:RaywattApp.Common.Util"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Style TargetType="Label">
@@ -231,4 +232,101 @@
         <Setter Property="MaxLength" Value="3"/>
     </Style>
 
+    <Style TargetType="PasswordBox" x:Key="PasswordBoxValidator">
+        <Setter Property="Cursor" Value="{StaticResource iBeam}"/>
+        <Setter Property="Width" Value="408"/>
+        <Setter Property="Height" Value="70"/>
+        <Setter Property="SelectionBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
+        <Setter Property="SelectionOpacity" Value="0.30"/>
+        <Setter Property="CaretBrush" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="PasswordBox">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="54"/>
+                            <RowDefinition Height="18"/>
+                        </Grid.RowDefinitions>
+
+                        <Border x:Name="border"
+                            Height="54"
+                            CornerRadius="8"
+                            BorderBrush="{DynamicResource GrayscaleGray5Brush}"
+                            BorderThickness="1"
+                            Background="Transparent">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Placeholder -->
+                                <Label Grid.Column="1" 
+                                       x:Name="placeholder" 
+                                       Content="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Tag}" 
+                                       Foreground="{DynamicResource GrayscaleGray3Brush}" 
+                                       Visibility="Collapsed" 
+                                       Focusable="false" 
+                                       FontSize="20"
+                                       VerticalAlignment="Center"/>
+
+
+                                <!-- Password Content -->
+                                <ScrollViewer x:Name="PART_ContentHost"
+                                          Grid.Column="1"
+                                          VerticalAlignment="Center"
+                                          HorizontalScrollBarVisibility="Hidden"
+                                          VerticalScrollBarVisibility="Hidden"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Validator 메시지 -->
+                        <StackPanel Grid.Row="1"
+                                x:Name="validator"
+                                Orientation="Horizontal"
+                                Visibility="Collapsed"
+                                Margin="0,4,0,0">
+                            <Label Content="* "
+                               Foreground="{DynamicResource AdditionalColor3Brush}"
+                               FontSize="12"/>
+                            <Label Content="{TemplateBinding ToolTip}"
+                               Foreground="{DynamicResource AdditionalColor3Brush}"
+                               FontSize="12"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <DataTrigger Binding="{Binding Path=(ut:PasswordBoxHelper.BindablePassword), RelativeSource={RelativeSource Mode=Self}}" Value="">
+                            <Setter TargetName="placeholder" Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+
+                        <Trigger Property="IsFocused" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
+                        </Trigger>
+
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=ToolTip, Converter={StaticResource NotEmptyStringToEnableConverter}}" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AdditionalColor3Brush}"/>
+                            <Setter TargetName="validator" Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+
+                        <!-- Focus 색상 -->
+                        <Trigger Property="IsFocused" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
+                        </Trigger>
+
+                        <Trigger Property="IsFocused" Value="False">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource GrayscaleGray5Brush}"/>
+                        </Trigger>
+
+                        <!-- Validator 표시 -->
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=ToolTip, Converter={StaticResource NotEmptyStringToEnableConverter}}" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AdditionalColor3Brush}"/>
+                            <Setter TargetName="validator" Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>
