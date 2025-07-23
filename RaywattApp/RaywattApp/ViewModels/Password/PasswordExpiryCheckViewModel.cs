@@ -70,7 +70,7 @@ namespace RaywattApp.ViewModels.Password
 
         private void OnChangeLater(IDialogWindow dialog)
         {
-            UpdatePasswordChangedAt();
+            UpdatePasswordChangedAt(_loginId, _loginPassword, 90);
 
             var parameter = new Dictionary<string, object>
             {
@@ -128,6 +128,7 @@ namespace RaywattApp.ViewModels.Password
             }
 
             UpdatePasswordReset();
+            UpdatePasswordChangedAt(_loginId, ConfirmPassword, 90);
 
             _passwordService.ShowAlert(_l10n["Information"], "Password changed successfully");
 
@@ -150,15 +151,15 @@ namespace RaywattApp.ViewModels.Password
             return true;
         }
 
-        private bool UpdatePasswordChangedAt()
+        private bool UpdatePasswordChangedAt(string id, string password, int day = 0)
         {
             var commandText = SqlQuery.GetQuery("UpdatePasswordChangedAt");
 
             var parameters = new Dictionary<string, object>
             {
-                ["id"] = _loginId,
-                ["password"] = _loginPassword,
-                ["password_changed_at"] = DateTime.Now.AddDays(90)
+                ["id"] = id,
+                ["password"] = password,
+                ["password_changed_at"] = DateTime.Now.AddDays(day)
             };
 
             _databaseService.UpdateData(commandText, parameters);
