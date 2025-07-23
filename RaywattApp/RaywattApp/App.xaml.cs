@@ -98,6 +98,7 @@ namespace RaywattApp
             services.AddTransient(typeof(PatientNewDicomViewModel));
             services.AddTransient(typeof(PatientNewDicomPacsViewModel));
             services.AddTransient(typeof(InitialPasswordSetupViewModel));
+            services.AddTransient(typeof(PasswordExpiryCheckViewModel));
 
             //Setting
             services.AddTransient(typeof(SettingAcquisitionViewModel));

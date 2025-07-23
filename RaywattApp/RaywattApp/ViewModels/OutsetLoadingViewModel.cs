@@ -11,9 +11,7 @@ using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
-using System.Reflection.Metadata;
 using System.Threading;
-using System.Windows.Documents;
 using System.Windows.Interop;
 using System.Windows.Navigation;
 using System.Windows.Threading;
@@ -58,6 +56,9 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("OnNavigated");
 
+            //WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PasswordExpiryCheckPage));
+            //return;
+
             var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
 
             if (extraData != null)
@@ -93,7 +94,15 @@ namespace RaywattApp.ViewModels
                     return;
                 }
 
-                // step 3. terms_agreed_at (users table)
+                // Step 3. Check password expiration period (from users table, update_date)
+                DateTime updateDate = users[0].PasswordChangedAt;
+                if((DateTime.Now - updateDate).TotalDays > -1)
+                {
+                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PasswordExpiryCheckPage) { Parameter = data });
+                    return;
+                }
+
+                // step 4. terms_agreed_at (users table)
                 bool hasAgreedToTerms = users[0].TermsAgreedAt != DateTime.MinValue;
                 if (!hasAgreedToTerms)
                 {

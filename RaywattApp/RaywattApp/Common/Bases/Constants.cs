@@ -71,6 +71,7 @@ namespace RaywattApp.Common.Bases
 
         //Password
         public const string InitialPasswordSetupPage = "Views/Password/InitialPasswordSetupPage.xaml";
+        public const string PasswordExpiryCheckPage = "Views/Password/PasswordExpiryCheckPage.xaml";
 
         //Resolution
         public const double ApplicationWidth = 1280;
