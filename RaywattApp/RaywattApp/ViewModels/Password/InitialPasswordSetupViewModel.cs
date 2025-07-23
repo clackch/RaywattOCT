@@ -23,6 +23,7 @@ namespace RaywattApp.ViewModels.Password
 
         private readonly IDialogService _dialogService;
         private readonly IDatabaseService _databaseService;
+        private readonly PasswordService _passwordService;
 
         private string _loginId = string.Empty;
         private string _loginPassword = string.Empty;
@@ -36,10 +37,11 @@ namespace RaywattApp.ViewModels.Password
         public ICommand CancelCommand => new RelayCommand(OnCancel);
         public ICommand ConfrmCommand => new RelayCommand(OnConfirm);
 
-        public InitialPasswordSetupViewModel(IDialogService dialogService, IDatabaseService databaseService)
+        public InitialPasswordSetupViewModel(IDialogService dialogService, IDatabaseService databaseService, PasswordService passwordService)
         {
             _dialogService = dialogService;
             _databaseService = databaseService;
+            _passwordService = passwordService;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -53,7 +55,7 @@ namespace RaywattApp.ViewModels.Password
 
                 if(string.IsNullOrEmpty(_loginId) || string.IsNullOrEmpty(_loginPassword))
                 {
-                    ShowAlert(_l10n["Error"], "Login ID or password is missing.");
+                    _passwordService.ShowAlert(_l10n["Error"], "Login ID or password is missing.");
                     WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
                 }
             }
@@ -71,17 +73,15 @@ namespace RaywattApp.ViewModels.Password
 
         private void OnConfirm()
         {
-            if (Password != ConfirmPassword)
+            if (!_passwordService.IsSamePassword(Password, ConfirmPassword))
             {
-                ShowAlert(_l10n["Information"], "Passwords do not match.");
                 ClearPasswords();
                 return;
             }
 
-            string? error = GetPasswordValidationError();
-            if (error != null)
+            if (_passwordService.GetPasswordValidationError(ConfirmPassword) is { } message)
             {
-                ShowAlert(_l10n["Information"], error);
+                _passwordService.ShowAlert(_l10n["Information"], message);
                 ClearPasswords();
                 return;
             }
@@ -97,50 +97,10 @@ namespace RaywattApp.ViewModels.Password
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoadingPage) { Parameter = parameter });
         }
 
-        private void ShowAlert(string title, string message)
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                var parameters = new Dictionary<string, object>
-                {
-                    ["title"] = title,
-                    ["message"] = message
-                };
-
-                _dialogService.OpenDialog(new AlertDialogControl(), parameters, Constants.ApplicationWidth, Constants.ApplicationHeight);
-            });
-        }
-
         private void ClearPasswords()
         {
             Password = string.Empty;
             ConfirmPassword = string.Empty;
-        }
-
-        private string? GetPasswordValidationError()
-        {
-            if (string.IsNullOrWhiteSpace(ConfirmPassword))
-                return "Please enter a password.";
-
-            if (ConfirmPassword.Contains(" "))
-                return "Password cannot contain spaces.";
-
-            if (ConfirmPassword.Length < 8)
-                return "Password must be at least 8 characters long.";
-
-            if (!Regex.IsMatch(ConfirmPassword, @"[A-Z]"))
-                return "Password must include at least one uppercase letter.";
-
-            if (!Regex.IsMatch(ConfirmPassword, @"\d"))
-                return "Password must include at least one number.";
-
-            if (!Regex.IsMatch(ConfirmPassword, @"[!@#$%^&*()_\-+=\[\]{};':""\\|,.<>\/?]"))
-                return "Password must include at least one special character.";
-
-            if (!Regex.IsMatch(ConfirmPassword, @"^[a-zA-Z0-9!@#$%^&*()_\-+=\[\]{};':""\\|,.<>\/?]+$"))
-                return "Password can only contain English letters, numbers, and special characters.";
-
-            return null;
         }
 
         private void UpdatePasswordInDatabase()
@@ -152,7 +112,7 @@ namespace RaywattApp.ViewModels.Password
                 ["id"] = _loginId,
                 ["password"] = ConfirmPassword,
                 ["before_password"] = _loginPassword,
-                ["reset"] = true
+                ["reset"] = false
             };
 
             _databaseService.UpdateData(commandText, parameters);

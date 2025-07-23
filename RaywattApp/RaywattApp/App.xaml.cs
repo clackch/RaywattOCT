@@ -151,6 +151,8 @@ namespace RaywattApp
             services.AddTransient<IDatabaseService, SqlService>(obj => new SqlService(connectionString));
             services.AddTransient(typeof(SqlManager));
 
+            services.AddTransient(typeof(PasswordService));
+
             services.AddSingleton(typeof(AngioManager));
 
             return services.BuildServiceProvider();
