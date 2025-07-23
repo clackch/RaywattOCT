@@ -414,6 +414,11 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 	const int minPeakHeight = 1500.f;
 	const int distBetweenLayer = 24;
 
+	if (nOutputLength > 1024 * 10) {
+		PLOGI.printf("nOutputLength is too big");
+		return;
+	}
+
 	Ipp32f* fScope = new Ipp32f[nOutputLength];
 	std::vector<int> sheathPoints;
 	int sheathPointSum = 0;
@@ -712,6 +717,10 @@ void COCTImaging::adaptive_compensation()
 				}
 			}
 			else {
+				if (stop_cumsum == 0) {
+					stop_cumsum = 1;
+					PLOGI.printf("the value cannot be divided by zero");
+				}
 				result_img.at<float>(z, x) = I_n.at<float>(z) / stop_cumsum;
 			}
 		}
@@ -774,7 +783,10 @@ void COCTImaging::logarithmic_contrast_stretching(cv::Mat& img, float lower_perc
 	// 1. 1D 벡터로 변환하여 퍼센타일 계산
 	cv::Mat img_reshaped = img.reshape(1, img.rows * img.cols);  // 1D로 변환
 	std::vector<float> img_values;
-	img_values.assign((float*)img_reshaped.datastart, (float*)img_reshaped.dataend);
+	if (!img_reshaped.empty()) {
+		float* ptr = img_reshaped.ptr<float>(0);
+		img_values.assign(ptr, ptr + img_reshaped.total());
+	}
 
 	// 2. 퍼센타일 값 계산
 	int total_elements = img_values.size();
@@ -891,7 +903,7 @@ void COCTImaging::sharpening(cv::Mat& img) {
 
 void COCTImaging::get_PDF_array(cv::Mat& img, std::vector<double>& pdf_i, bool& AGCWD_apply) {
 	int number_of_pixels = img.rows * img.cols;
-	pdf_i.assign(256, 0);
+	pdf_i.assign(256, static_cast<double>(0));
 
 	// Histogram 계산
 	for (int y = 0; y < img.rows; y++) {
@@ -939,9 +951,19 @@ void COCTImaging::get_CDF_array(std::vector<double> pdf_i, std::vector<double>& 
 	// cumulative distribution function (CDF) 계산
 	double pdf_sum = std::accumulate(pdfw_i.begin(), pdfw_i.end(), 0.0);
 	double cumulative = 0.0;
-	for (int i = 0; i < 256; i++) {
-		cumulative += pdfw_i[i] / pdf_sum;
-		cdf_i[i] = cumulative;
+
+	if (pdf_sum > 0) {
+		for (int i = 0; i < 256; i++) {
+			cumulative += pdfw_i[i] / pdf_sum;
+			cdf_i[i] = cumulative;
+		}
+	}
+	else {
+		PLOGI.printf("pdf_sum value is zero. zero should not be used to divide any value");
+		for (int i = 0; i < 256; i++) {
+			cumulative += pdfw_i[i];
+			cdf_i[i] = cumulative;
+		}
 	}
 }
 
@@ -1084,6 +1106,12 @@ void COCTImaging::SetLumenContourOffset(std::vector<cv::Point> lumenContour) {
 				count++;
 			}
 		}
+
+		if (count == 0) {
+			count = 1;
+			PLOGI.printf("the value cannot be divided by zero");
+		}
+
 		int avgX = (int)(sumOfx / count);
 		if (avgX >= 0 && avgX < width) {
 			inversedContourYPoints.push_back(cv::Point(avgX, y));

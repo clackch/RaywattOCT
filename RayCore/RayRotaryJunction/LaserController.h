@@ -13,6 +13,7 @@ private:
 	IAxsunOCTControlPtr m_pAxsunOCTControl;
 	unsigned long m_pDeviceList[AXSUN_MAX_DEVICES];
 	long m_numDevices;
+	bool m_bInitialized;
 private:
 	CLaserController();
 
@@ -26,5 +27,6 @@ public:
 private:
 	long searchDeviceList(long whichDevice, unsigned long* myDeviceList);
 	long enumerateDevices(unsigned long* myDeviceList, IAxsunOCTControlPtr pAxsunOCTControl);
+	bool IsInitialized() const { return m_bInitialized; }
 };
 

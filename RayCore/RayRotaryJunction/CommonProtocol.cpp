@@ -39,7 +39,7 @@ bool ICommonProtocol::parseSerialPacket() {
 					if (idxETX != (length - 1)) continue;
 
 					if (length - 2 < 0) {
-						PLOGI.printf("Packet Length Too Small");
+						PLOGI.printf("Packet Length is Too Small");
 						continue;
 					}
 

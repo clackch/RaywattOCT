@@ -31,9 +31,7 @@ bool CUSBConnection::Connect(void* param)
 		}
 	}
 
-	if (pUsbDevices) {
-		libusb_free_device_list(pUsbDevices, 1);
-	}
+	libusb_free_device_list(pUsbDevices, 1);
 
 	return result;
 }

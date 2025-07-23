@@ -6,20 +6,40 @@ CLaserController* CLaserController::pInstance = NULL;
 CLaserController::CLaserController() {
 	CoInitialize(NULL);
 	m_pAxsunOCTControl = IAxsunOCTControlPtr(__uuidof(struct AxsunOCTControl));
+	if (m_pAxsunOCTControl) {
+		m_bInitialized = true;
+	}
+	else {
+		m_bInitialized = false;
+	}
 
 	// open network interface and wait 2 seconds (time for connection to be established)
-	unsigned long retvallong = m_pAxsunOCTControl->StartNetworkControlInterface();		// retvallong = 0 if successful or = 1047 if the network interface is already open (possibly from a different application)
-	PLOGI.printf("StartNetworkControlInterface - %ld", retvallong);
+	unsigned long retvallong; // retvallong = 0 if successful or = 1047 if the network interface is already open (possibly from a different application)
+	if (m_pAxsunOCTControl) {
+		retvallong = m_pAxsunOCTControl->StartNetworkControlInterface();
+		PLOGI.printf("StartNetworkControlInterface - %ld", retvallong);
+	}
+	else {
+		PLOGE << "Failed to initialize AxsunOCTControl COM object";
+		return;
+	}
 	Sleep(2000);
 
 	// Enumerate the device list (redo this step whenever devices are connected or disconnected)
 	// More robust architectures would occasionally poll for device list changes or utilize the "OCTDeviceConnectOrDisconnectEvent" callback to re-enumerate devices
+	for (int i = 0; i < AXSUN_MAX_DEVICES; i++) {
+		m_pDeviceList[i] = -1;
+	}
 	m_numDevices = enumerateDevices(m_pDeviceList, m_pAxsunOCTControl);
 	PLOGI.printf("enumerateDevices - %ld", m_numDevices);
 }
 CLaserController* CLaserController::GetInstance() {
 	if (pInstance == NULL) {
 		pInstance = new CLaserController();
+		if (!pInstance || !pInstance->IsInitialized()) {
+			delete pInstance;
+			pInstance = nullptr;
+		}
 	}
 	return pInstance;
 }
@@ -34,6 +54,11 @@ int CLaserController::LaserOnOff(bool on) {
 	// initialize a simple static array to be used as a user device list
 	// (This can be done a variety of ways, such as a linked list or other dynamic array if desired.)
 	VARIANT_BOOL isConnected = 0;
+
+	if (m_pDeviceList == nullptr) {
+		PLOGI.printf("Laser Device is not identified");
+		return ERROR;
+	}
 
 	// Stop Laser Emission
 	isConnected = m_pAxsunOCTControl->ConnectToOCTDevice(searchDeviceList(AXSUN_LASER_DEVICE, m_pDeviceList));		// search device list and connect to laser

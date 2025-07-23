@@ -64,6 +64,10 @@ CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSess
 	{
 		pReader = new CDataReader();
 		OCTHeader header = pReader->ReadHeader(CUtility::StringToWstring(strFilePath));
+		if (header.width == 0 || header.height == 0) {
+			PLOGI.printf("The OCT file header is abnormal");
+			return nullptr;
+		}
 		setting.Set(header.width, header.height);
 		nNumOfSamples = pReader->Initialize(CUtility::StringToWstring(strFilePath), setting.nBufferSize);
 	}
@@ -116,6 +120,10 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 	if (pData != nullptr && pData->GetExtraData(OCTHeader::ExtraData::Background) != nullptr) 
 	{
 		PLOGI.printf("Read background from .oct file.");
+		if (setting.nBufferSize > 1024 * 1024) {
+			PLOGI.printf("BufferSize is too big : %d", setting.nBufferSize);
+			return nullptr;
+		}
 		background = new USHORT[setting.nBufferSize];
 		memcpy(background, pData->GetExtraData(OCTHeader::ExtraData::Background), sizeof(USHORT) * setting.nBufferSize);
 	}
@@ -402,6 +410,11 @@ CImagingSession* CImagingSession::createSession(CMessageService* pMsg, IImaging:
 	pSession->m_imagingType = type;
 	pSession->m_pDataManager = pData;
 	pSession->m_pImaging = CreateColorImaging(pMsg, setting, pData, type);
+
+	if (pSession->m_pImaging == nullptr) {
+		PLOGI.printf("ImagingSession is not initialized");
+		return nullptr;
+	}
 	pSession->m_pImaging->SetSession(nSession);
 
 	return pSession;
@@ -714,10 +727,15 @@ UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 	// prepare imaging (without message)
 	COCTImaging* pImaging = CreateColorImaging(nullptr, pSession->m_pImaging->GetSetting(), pDataManager, pSession->GetImagingType());
 
+	if (pImaging == nullptr) {
+		PLOGI.printf("pImaging is not initialized");
+		return ERROR;
+	}
+
 	CConfiguration& config = CConfiguration::GetInstance();
-	const int nNumOfSamples = pDataManager->GetNumOfSamples();
-	const int nDiameter = config.volume.size;
-	const int nImageSize = nDiameter * nDiameter;
+	const size_t nNumOfSamples = pDataManager->GetNumOfSamples();
+	const size_t nDiameter = config.volume.size;
+	const size_t nImageSize = nDiameter * nDiameter;
 	cv::Mat imgCircle, imgResize, imgZOffset;
 
 	if (pSession->m_pVolumeData != nullptr)
@@ -725,11 +743,22 @@ UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 		delete[] pSession->m_pVolumeData;
 	}
 
-	if (nImageSize >= 600 * 600 || nNumOfSamples > 2000) {
+	if (nImageSize >= 600 * 600 || nNumOfSamples > 1600) {
 		PLOGI.printf("Volume Data Size too big : config.volume.size = %d, nNumOfSamples = %d", nDiameter, nNumOfSamples);
+		return ERROR;
 	}
 
-	pSession->m_pVolumeData = new char[nImageSize * nNumOfSamples];
+	if (nImageSize > 0 &&
+		nNumOfSamples > 0 &&
+		nImageSize <= SIZE_MAX / nNumOfSamples)
+	{
+		size_t totalSize = nImageSize * nNumOfSamples;
+		pSession->m_pVolumeData = new char[totalSize];
+	}
+	else {
+		PLOGE.printf("Requested memory too large or invalid input");
+		return ERROR;
+	}
 
 	PLOGI.printf("Session #%d volume generation start - %d frames", pSession->m_nSession, nNumOfSamples);
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadVolumeGeneration->isRun; nFrame++) {
@@ -761,7 +790,15 @@ USHORT* CImagingSession::readBackground(const char* strBackgroundFile, IImaging:
 	if (strBackgroundFile == nullptr) return nullptr;
 	
 	FILE* fp = fopen(strBackgroundFile, "rb");
-	if (fp == nullptr) return nullptr;
+	if (fp == nullptr) {
+		return nullptr;
+	}
+
+	if (setting.nBufferSize > 1024 * 1024 * 100) {
+		PLOGI.printf("BufferSize is too big : %d", setting.nBufferSize);
+		fclose(fp);
+		return nullptr;
+	}
 
 	USHORT* pBackground = new USHORT[setting.nBufferSize];
 	size_t size = fread(pBackground, sizeof(USHORT), setting.nBufferSize, fp);

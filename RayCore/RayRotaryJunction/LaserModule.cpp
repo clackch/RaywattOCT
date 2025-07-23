@@ -61,6 +61,11 @@ bool CLaserModule::ReadPosition() {
 	int packetLength = 0;
 	getSerialPacket(eFID::FID_SM_GET_STATE, 0, serialPacket, packetLength);
 
+	if (packetLength < 2) {
+		PLOGI.printf("packetLength too small");
+		return false;
+	}
+
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
 

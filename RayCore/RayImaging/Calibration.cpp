@@ -29,8 +29,15 @@ bool CCalibration::Initialize(tstring calibFile)
 }
 bool CCalibration::Initialize(char* data)
 {
+	if (nAScan > 1024 * 1024) {
+		return false;
+	}
 	const int calibrationSize = nAScan * sizeof(int) * 2;
 	if (data == nullptr) return false;
+
+	if (this->data == nullptr) {
+		this->data = new char[calibrationSize];
+	}
 
 	memcpy(this->data, data, calibrationSize);
 
@@ -38,11 +45,25 @@ bool CCalibration::Initialize(char* data)
 }
 
 bool CCalibration::loadCalibration() {
+	if (nAScan > 1024 * 1024) {
+		return false;
+	}
+
 	float* dispersionReal = new float[nAScan];
+	
+	if (indexMap == nullptr) {
+		indexMap = new int[(nAScan / 2)];
+	}
+
+	if (weightMap == nullptr) {
+		weightMap = new float[(nAScan / 2)];
+	}
 
 	int offset = 0;
-	memcpy(indexMap, data + offset, nAScan / 2 * sizeof(int)); offset += (nAScan / 2 * sizeof(int));
-	memcpy(weightMap, data + offset, nAScan / 2 * sizeof(float)); offset += (nAScan / 2 * sizeof(float));
+	memcpy(indexMap, data + offset, nAScan / 2 * sizeof(int));
+	offset += (nAScan / 2 * sizeof(int));
+	memcpy(weightMap, data + offset, nAScan / 2 * sizeof(float));
+	offset += (nAScan / 2 * sizeof(float));
 	memcpy(dispersionReal, data + offset, nAScan * sizeof(float));
 
 	// 실수 허수부를 복합하여 리턴
@@ -58,26 +79,35 @@ bool CCalibration::readCalibration(LPCTSTR calibrationFileName){
 	// open calibration file
 	HANDLE hCalibFile = CreateFile(calibrationFileName, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
 
-	if (hCalibFile == INVALID_HANDLE_VALUE) 
-		return FALSE;
-
-	int fileSize = 0;
-	DWORD dwIgnored = NULL;
-
-	BOOL result = ReadFile(hCalibFile, data, calibrationSize, &dwIgnored, nullptr);
-	if (!result) {
-		PLOGI.printf("Reading Calibration File Failed");
-	}
-	fileSize += dwIgnored;
-
-	CloseHandle(hCalibFile);
-
-	if (fileSize != calibrationSize)
+	if (hCalibFile == INVALID_HANDLE_VALUE)
 	{
 		return false;
 	}
+	else {
+		int fileSize = 0;
+		DWORD dwIgnored = NULL;
 
-	return true;
+		if (data == nullptr) {
+			PLOGI.printf("data is not initialized");
+			CloseHandle(hCalibFile);
+			return false;
+		}
+
+		BOOL result = ReadFile(hCalibFile, data, calibrationSize, &dwIgnored, nullptr);
+		if (!result) {
+			PLOGI.printf("Reading Calibration File Failed");
+		}
+		fileSize += dwIgnored;
+
+		CloseHandle(hCalibFile);
+
+		if (fileSize != calibrationSize)
+		{
+			return false;
+		}
+
+		return true;
+	}
 }
 
 void CCalibration::setWindow(enum Windows eWindow)
@@ -110,11 +140,17 @@ void CCalibration::setWindow(enum Windows eWindow)
 
 void CCalibration::allocateMemory() {
 	// memory allocate
-	data = new char[nAScan * sizeof(int) * 2];
-	indexMap = new int[nAScan / 2];
-	weightMap = new float[nAScan / 2];
-	dispersion = new complex_t[nAScan / 2];
-	window = new float[nFFTLength];
+
+	if (nAScan < 1024 * 1024) {
+		data = new char[nAScan * sizeof(int) * 2];
+		indexMap = new int[nAScan / 2];
+		weightMap = new float[nAScan / 2];
+		dispersion = new complex_t[nAScan / 2];
+	}
+
+	if (nFFTLength < 1024 * 1024) {
+		window = new float[nFFTLength];
+	}
 }
 
 void CCalibration::releaseMemory() {

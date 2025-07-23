@@ -215,6 +215,12 @@ RayError COCTSystem::ConnectDevices() {
 
 		// Connect to COM Interface first time
 		CLaserController* pLaser = CLaserController::GetInstance();
+
+		if (pLaser == nullptr) {
+			PLOGI.printf("Laser is not initialized");
+			return RayError::DeviceNotConnected;
+		}
+
 		pLaser->LaserOnOff(true);
 
 		result |= connectAcqDevice();
@@ -2231,6 +2237,11 @@ int COCTSystem::disconnectRotaryJunction() {
 
 	PLOGI.printf("Laser Off");
 	CLaserController* pLaser = CLaserController::GetInstance();
+	if (pLaser == nullptr) {
+		PLOGI.printf("pLaser is not initialized");
+		return false;
+	}
+
 	pLaser->LaserOnOff(false);
 	
 	if (m_pRJController->IsConnected()) {
@@ -2434,6 +2445,11 @@ void COCTSystem::redrawCutView() {
 }
 void COCTSystem::laserOnOff(bool isOn) {
 	CLaserController* pLaser = CLaserController::GetInstance();
+
+	if (pLaser == nullptr) {
+		PLOGI.printf("Laser is not initialized");
+		return;
+	}
 
 	pLaser->LaserOnOff(isOn);
 }

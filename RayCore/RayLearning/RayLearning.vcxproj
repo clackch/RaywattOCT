@@ -119,7 +119,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\Utility;..\extern\opencv\include;..\extern\libtorch\include;..\extern\libtorch\include\torch\csrc\api\include;..\extern\libTensorflow\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Utility;..\extern\opencv\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>

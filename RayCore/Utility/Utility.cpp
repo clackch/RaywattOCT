@@ -50,8 +50,8 @@ std::vector<tstring> CUtility::findSerialPort() {
 	HKEY hKey;
 	RegOpenKey(HKEY_LOCAL_MACHINE, TEXT("HARDWARE\\DEVICEMAP\\SERIALCOMM"), &hKey);
 
-	wchar_t szData[20];
-	wchar_t szName[100];
+	wchar_t szData[20] = {};
+	wchar_t szName[100] = {};
 	DWORD dwSize = 100;
 	DWORD dwSize2 = 20;
 	DWORD dwType = REG_SZ;
@@ -79,7 +79,13 @@ void CUtility::GetCurTime(char* strTime) {
 	ltime = timebuffer.time;
 	msec = timebuffer.millitm;
 	now = localtime(&ltime);
-	sprintf(strTime, "%d:%d:%d:%d", now->tm_hour, now->tm_min, now->tm_sec, msec);
+
+	if (now == nullptr) {
+		PLOGI.printf("Getting localTime Error");
+	}
+	else {
+		sprintf(strTime, "%d:%d:%d:%d", now->tm_hour, now->tm_min, now->tm_sec, msec);
+	}
 }
 std::wstring CUtility::StringToWstring(const std::string& var)
 {

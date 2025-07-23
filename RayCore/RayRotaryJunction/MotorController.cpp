@@ -11,9 +11,9 @@ CMotorController::CMotorController() {
 	m_pThread = nullptr;
 }
 
-CMotorController::~CMotorController() {	
+CMotorController::~CMotorController() {
 	Disconnect();
-	
+
 	if (m_pConnection != nullptr) delete m_pConnection;
 }
 
@@ -106,7 +106,7 @@ bool CMotorController::StopMotor() {
 	return result;
 }
 bool CMotorController::SwitchOff() {
-	BYTE packet[MAX_PATH];
+	BYTE packet[MAX_PATH] = {};
 	int packetLength = 0;
 	bool result = false;
 
