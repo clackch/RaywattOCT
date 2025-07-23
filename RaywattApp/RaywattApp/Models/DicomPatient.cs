@@ -7,17 +7,17 @@ namespace RaywattApp.Models
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
     class DicomPatient
     {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
-        private byte[] _patientId = new byte[64];
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 65)]
+        private byte[] _patientId = new byte[65];
 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
-        private byte[] _patientName = new byte[64];
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 130)]
+        private byte[] _patientName = new byte[130];
 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-        private byte[] _patientSex = new byte[16];
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+        private byte[] _patientSex = new byte[2];
 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        private byte[] _patientBirthDate = new byte[32];
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 9)]
+        private byte[] _patientBirthDate = new byte[9];
 
         private static string GetString(byte[] bytes) =>
             Encoding.ASCII.GetString(bytes).Split('\0')[0];
