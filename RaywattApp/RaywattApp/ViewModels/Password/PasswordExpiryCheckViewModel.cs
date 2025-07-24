@@ -6,7 +6,6 @@ using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
 using RaywattApp.Services;
-using System;
 using System.Collections.Generic;
 using System.Windows.Input;
 using System.Windows.Navigation;
@@ -35,9 +34,7 @@ namespace RaywattApp.ViewModels.Password
             get { return this._changeLaterCommand ?? (this._changeLaterCommand = new RelayCommand<IDialogWindow>(OnChangeLater)); }
         }
 
-        private readonly IDialogService _dialogService;
-        private readonly IDatabaseService _databaseService;
-        private readonly PasswordService _passwordService;
+        private readonly IPasswordService _passwordService;
 
         private ICommand _okCommand;
         public ICommand OkCommand
@@ -45,10 +42,8 @@ namespace RaywattApp.ViewModels.Password
             get { return this._okCommand ?? (this._okCommand = new RelayCommand<IDialogWindow>(OnOk)); }
         }
 
-        public PasswordExpiryCheckViewModel(IDialogService dialogService, IDatabaseService databaseService, PasswordService passwordService)
+        public PasswordExpiryCheckViewModel(IPasswordService passwordService)
         {
-            _dialogService = dialogService;
-            _databaseService = databaseService;
             _passwordService = passwordService;
         }
 
@@ -70,7 +65,7 @@ namespace RaywattApp.ViewModels.Password
 
         private void OnChangeLater(IDialogWindow dialog)
         {
-            UpdatePasswordChangedAt(_loginId, _loginPassword, 90);
+            _passwordService.UpdatePasswordReset(_loginId, _loginPassword, _loginPassword);
 
             var parameter = new Dictionary<string, object>
             {
@@ -127,42 +122,9 @@ namespace RaywattApp.ViewModels.Password
                 return false;
             }
 
-            UpdatePasswordReset();
-            UpdatePasswordChangedAt(_loginId, ConfirmPassword, 90);
+            _passwordService.UpdatePasswordReset(_loginId, ConfirmPassword, _loginPassword);
 
             _passwordService.ShowAlert(_l10n["Information"], "Password changed successfully");
-
-            return true;
-        }
-        private bool UpdatePasswordReset()
-        {
-            var commandText = SqlQuery.GetQuery("UpdatePasswordReset");
-
-            var parameters = new Dictionary<string, object>
-            {
-                ["id"] = _loginId,
-                ["password"] = ConfirmPassword,
-                ["before_password"] = _loginPassword,
-                ["reset"] = false
-            };
-
-            _databaseService.UpdateData(commandText, parameters);
-
-            return true;
-        }
-
-        private bool UpdatePasswordChangedAt(string id, string password, int day = 0)
-        {
-            var commandText = SqlQuery.GetQuery("UpdatePasswordChangedAt");
-
-            var parameters = new Dictionary<string, object>
-            {
-                ["id"] = id,
-                ["password"] = password,
-                ["password_changed_at"] = DateTime.Now.AddDays(day)
-            };
-
-            _databaseService.UpdateData(commandText, parameters);
 
             return true;
         }

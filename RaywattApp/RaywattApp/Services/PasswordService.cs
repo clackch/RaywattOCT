@@ -9,11 +9,17 @@ using System.Windows;
 
 namespace RaywattApp.Services
 {
-    public class PasswordService
+    public class PasswordService : IPasswordService
     {
         private readonly IDialogService _dialogService;
         private readonly IDatabaseService _databaseService;
         protected readonly DynamicResource _l10n;
+        private const int _passwordExpiryDays = 90;
+
+        public int PasswordExpiryDays
+        {
+            get => _passwordExpiryDays;
+        }
 
         public PasswordService(IDialogService dialogService, IDatabaseService databaseService)
         {
@@ -23,28 +29,6 @@ namespace RaywattApp.Services
             _databaseService = databaseService;
         }
 
-        public bool IsNewPasswordSameAsOld(string oldPwd, string newPwd)
-        {
-            if (!oldPwd.Equals(newPwd))
-            {
-                ShowAlert(_l10n["Information"], "Passwords do not match.");
-                return false;
-            }
-
-            return true;
-        }
-        //private bool IsValidationPassword()
-        //{
-        //    string? error = GetPasswordValidationError();
-
-        //    if (error != null)
-        //    {
-        //        ShowAlert(_l10n["Information"], error);
-        //        return false;
-        //    }
-
-        //    return true;
-        //}
         public bool IsSamePassword(string beforePassword, string inputPassword, string message = "")
         {
             if (!beforePassword.Equals(inputPassword))
@@ -84,6 +68,7 @@ namespace RaywattApp.Services
 
             return password;
         }
+
         public string? GetPasswordValidationError(string password)
         {
             if (string.IsNullOrWhiteSpace(password) || password == string.Empty)
@@ -122,6 +107,23 @@ namespace RaywattApp.Services
 
                 _dialogService.OpenDialog(new AlertDialogControl(), parameters, Constants.ApplicationWidth, Constants.ApplicationHeight);
             });
+        }
+
+        public bool UpdatePasswordReset(string id, string password, string before_passowrd)
+        {
+            var commandText = SqlQuery.GetQuery("UpdatePasswordReset");
+
+            var parameters = new Dictionary<string, object>
+            {
+                ["id"] = id,
+                ["password"] = password,
+                ["before_password"] = before_passowrd,
+                ["reset"] = false
+            };
+
+            _databaseService.UpdateData(commandText, parameters);
+
+            return true;
         }
     }
 }

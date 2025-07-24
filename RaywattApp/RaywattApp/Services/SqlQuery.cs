@@ -456,13 +456,6 @@ namespace RaywattApp.Services
                 SET password_reset=@reset, password=@password, password_changed_at=now(), update_date=now()
                 WHERE id=@id AND password=@before_password
                 ";
-
-            // UpdatePasswordChangedAt
-            _query["UpdatePasswordChangedAt"] = @$"
-                UPDATE rv_schema.users
-                SET password_changed_at = @password_changed_at, update_date = now()
-                WHERE id = @id AND password = @password
-                ";
         }
 
         private static void SetDeleteQuery()

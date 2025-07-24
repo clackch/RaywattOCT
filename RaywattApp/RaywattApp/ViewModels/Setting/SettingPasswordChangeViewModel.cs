@@ -13,8 +13,6 @@ namespace RaywattApp.ViewModels.Setting
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(SettingAboutViewModel));
 
-        private readonly SqlManager _sqlManager;
-
         private IDialogService _dialogService;
 
         [ObservableProperty]
@@ -28,7 +26,6 @@ namespace RaywattApp.ViewModels.Setting
 
         public SettingPasswordChangeViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
-            _sqlManager = sqlManager;
             _dialogService = dialogService;
             _loginID = DeviceStatus.LoginID ?? string.Empty;
         }

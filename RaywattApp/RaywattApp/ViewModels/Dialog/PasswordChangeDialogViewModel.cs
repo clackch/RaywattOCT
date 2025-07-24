@@ -4,7 +4,6 @@ using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Models;
 using RaywattApp.Services;
-using System.Collections.Generic;
 using System.Windows.Input;
 
 namespace RaywattApp.ViewModels.Dialog
@@ -29,9 +28,7 @@ namespace RaywattApp.ViewModels.Dialog
             get { return this._cancelCommand ?? (this._cancelCommand = new RelayCommand<IDialogWindow>(OnCancel)); }
         }
 
-        private readonly IDialogService _dialogService;
-        private readonly IDatabaseService _databaseService;
-        private readonly PasswordService _passwordService;
+        private readonly IPasswordService _passwordService;
 
         private ICommand _okCommand;
         public ICommand OkCommand
@@ -39,10 +36,8 @@ namespace RaywattApp.ViewModels.Dialog
             get { return this._okCommand ?? (this._okCommand = new RelayCommand<IDialogWindow>(OnOk)); }
         }
 
-        public PasswordChangeDialogViewModel(IDialogService dialogService, IDatabaseService databaseService, PasswordService passwordService)
+        public PasswordChangeDialogViewModel(IPasswordService passwordService)
         {
-            _dialogService = dialogService;
-            _databaseService = databaseService;
             _passwordService = passwordService;
         }
 
@@ -99,31 +94,11 @@ namespace RaywattApp.ViewModels.Dialog
                 return false;
             }
 
-            UpdatePasswordReset();
+            _passwordService.UpdatePasswordReset(_curruntID, ConfirmPassword, _currentPassword );
 
             _passwordService.ShowAlert(_l10n["Information"], "Password changed successfully");
 
             return true;
         }
-
-
-
-        private bool UpdatePasswordReset()
-        {
-            var commandText = SqlQuery.GetQuery("UpdatePasswordReset");
-
-            var parameters = new Dictionary<string, object>
-            {
-                ["id"] = _curruntID,
-                ["password"] = ConfirmPassword,
-                ["before_password"] = _currentPassword,
-                ["reset"] = false
-            };
-
-            _databaseService.UpdateData(commandText, parameters);
-
-            return true;
-        }
-
     }
 }

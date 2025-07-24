@@ -28,6 +28,8 @@ namespace RaywattApp.ViewModels
 
         private readonly AngioManager _angioManager;
 
+        private readonly IPasswordService _passwordService;
+
         private IDialogService _dialogService;
 
         private DispatcherTimer timer = new DispatcherTimer();
@@ -41,7 +43,7 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private double _progress;
 
-        public OutsetLoadingViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager)
+        public OutsetLoadingViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager, IPasswordService passwordService)
         {
             _log.Debug("OutsetLoadingViewModel");
 
@@ -50,14 +52,12 @@ namespace RaywattApp.ViewModels
             _sqlManager = sqlManager;
             _angioManager = angioManager;
             _dialogService = dialogService;
+            _passwordService = passwordService;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             _log.Debug("OnNavigated");
-
-            //WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PasswordExpiryCheckPage));
-            //return;
 
             var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
 
@@ -96,7 +96,7 @@ namespace RaywattApp.ViewModels
 
                 // Step 3. Check password expiration period (from users table, update_date)
                 DateTime updateDate = users[0].PasswordChangedAt;
-                if((DateTime.Now - updateDate).TotalDays > -1)
+                if((DateTime.Now - updateDate).TotalDays > _passwordService.PasswordExpiryDays)
                 {
                     WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PasswordExpiryCheckPage) { Parameter = data });
                     return;

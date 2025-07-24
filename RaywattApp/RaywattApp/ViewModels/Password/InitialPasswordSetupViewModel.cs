@@ -21,9 +21,7 @@ namespace RaywattApp.ViewModels.Password
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(InitialPasswordSetupViewModel));
 
-        private readonly IDialogService _dialogService;
-        private readonly IDatabaseService _databaseService;
-        private readonly PasswordService _passwordService;
+        private readonly IPasswordService _passwordService;
 
         private string _loginId = string.Empty;
         private string _loginPassword = string.Empty;
@@ -37,10 +35,8 @@ namespace RaywattApp.ViewModels.Password
         public ICommand CancelCommand => new RelayCommand(OnCancel);
         public ICommand ConfrmCommand => new RelayCommand(OnConfirm);
 
-        public InitialPasswordSetupViewModel(IDialogService dialogService, IDatabaseService databaseService, PasswordService passwordService)
+        public InitialPasswordSetupViewModel(IPasswordService passwordService)
         {
-            _dialogService = dialogService;
-            _databaseService = databaseService;
             _passwordService = passwordService;
         }
 
@@ -86,7 +82,7 @@ namespace RaywattApp.ViewModels.Password
                 return;
             }
 
-            UpdatePasswordInDatabase();
+            _passwordService.UpdatePasswordReset(_loginId, ConfirmPassword, _loginPassword);
 
             var parameter = new Dictionary<string, object>
             {
@@ -101,21 +97,6 @@ namespace RaywattApp.ViewModels.Password
         {
             Password = string.Empty;
             ConfirmPassword = string.Empty;
-        }
-
-        private void UpdatePasswordInDatabase()
-        {
-            var commandText = SqlQuery.GetQuery("UpdatePasswordReset");
-
-            var parameters = new Dictionary<string, object>
-            {
-                ["id"] = _loginId,
-                ["password"] = ConfirmPassword,
-                ["before_password"] = _loginPassword,
-                ["reset"] = false
-            };
-
-            _databaseService.UpdateData(commandText, parameters);
         }
     }
 }
