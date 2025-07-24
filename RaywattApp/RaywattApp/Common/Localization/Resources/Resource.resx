@@ -120,4 +120,19 @@
   <data name="Default Language" xml:space="preserve">
     <value>en US</value>
   </data>
+  <data name="PasswordChange" xml:space="preserve">
+    <value />
+  </data>
+  <data name="MSG_EnterCurrentPassword" xml:space="preserve">
+    <value />
+  </data>
+  <data name="MSG_EnterNewPassword" xml:space="preserve">
+    <value />
+  </data>
+  <data name="MSG_ConfirmNewPassword" xml:space="preserve">
+    <value />
+  </data>
+  <data name="MSG_PasswordRequirement" xml:space="preserve">
+    <value />
+  </data>
 </root>
