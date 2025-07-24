@@ -1894,9 +1894,15 @@ UINT COCTSystem::threadRFIDValidation(LPVOID param) {
 	while (isValid == WAITING) {
 		isValid = pRJController->isValidRFID();
 		Sleep(100);
-		if (!pSystem->m_pThreadRotaryJunction->isRun) return NOERROR;
+		if (!pSystem->m_pThreadRotaryJunction->isRun) {
+			return NOERROR;
+		}
 	}
 	pRJController->UpdateState(eRJState::Validating);
+	
+	while (pSystem->m_pThreadRotaryJunction->isRun) {
+		Sleep(DELAY_FOR_STOP_THREAD);
+	}
 
 	return NOERROR;
 }
@@ -2438,16 +2444,24 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 		if (isValid == RFID_ValidType::VALID)
 #endif
 		{
+			if(isValidating)
+				CUtility::StopThread(m_pThreadRotaryJunction);
+			isValidating = false;
 			// To-Do: Validation
 			//영상 validation 스레드 실행할 것
 			PLOGI.printf("validation true");
 		}
 		else if(isValid == RFID_ValidType::INVALID){
+			if (isValidating)
+				CUtility::StopThread(m_pThreadRotaryJunction);
+			isValidating = false;
 			PLOGI.printf("validation false");
 			m_pRJController->UpdateState(eRJState::Error);
 		}
 		else {
-			CUtility::StartThread(threadRFIDValidation, m_pThreadRotaryJunction, this);
+			if (CUtility::StartThread(threadRFIDValidation, m_pThreadRotaryJunction, this)) {
+				isValidating = true;
+			}
 		}
 		break;
 	}

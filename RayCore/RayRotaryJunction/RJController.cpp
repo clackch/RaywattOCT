@@ -543,6 +543,7 @@ void CRJController::updateState() {
 	case eRJState::Connected:
 		if (m_bLimitSwitch) {
 #if ENABLE_RFID
+			RFIDProtocol::initState(false);
 			ReadRFID();
 			m_nextState = eRJState::Validating;
 #else
@@ -618,7 +619,9 @@ RFID_ValidType CRJController::isValidRFID() {
 			break;
 		}
 	}
-	if (isNoData) return RFID_ValidType::WAITING;
+	if (isNoData) {
+		return RFID_ValidType::WAITING;
+	}
 	for (size_t i = 0; i < arrayLength; ++i) {
 		if (rfidState.aMANU[i] != static_cast<unsigned int>(RFID_MANUFACTURER[i])) {
 			return RFID_ValidType::INVALID;
