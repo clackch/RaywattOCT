@@ -32,6 +32,6 @@
         /// <summary>
         /// Updates the password for a user, resetting it if necessary
         /// </summary>
-        bool UpdatePasswordReset(string id, string password, string before_passowrd);
+        bool UpdatePasswordReset(string id, string password, string before_passowrd, bool admin);
     }
 }

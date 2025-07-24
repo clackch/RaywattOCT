@@ -70,7 +70,9 @@ namespace RaywattApp.ViewModels
                 // step 1.id, password (users table)
                 Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
                 sqlParameters["id"] = id;
-                IList<User> users = _sqlManager.SelectUserListById(sqlParameters);
+                sqlParameters["admin"] = false;
+
+                IList<User> users = _sqlManager.SelectUserById(sqlParameters);
 
                 bool isExistUser = users.Count == 1;
 
@@ -118,8 +120,11 @@ namespace RaywattApp.ViewModels
                     else
                     {
                         sqlParameters.Clear();
+                        
                         sqlParameters["id"] = id;
                         sqlParameters["password"] = password;
+                        sqlParameters["admin"] = false;
+
                         _sqlManager.UpdateTermsAgreedDateUser(sqlParameters);
                     }
                 }

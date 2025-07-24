@@ -558,11 +558,11 @@ namespace RaywattApp.Services
 
             return _databaseService.GetDatas<User>(commandText);
         }
-        public IList<User> SelectUserListById(Dictionary<string, Object> sqlParameters)
+        public IList<User> SelectUserById(Dictionary<string, Object> sqlParameters)
         {
-            _log.Debug("SelectUserListById");
+            _log.Debug("SelectUserById");
 
-            string commandText = SqlQuery.GetQuery("SelectUserListById");
+            string commandText = SqlQuery.GetQuery("SelectUserById");
 
             return _databaseService.GetDatas<User>(commandText, sqlParameters);
         }

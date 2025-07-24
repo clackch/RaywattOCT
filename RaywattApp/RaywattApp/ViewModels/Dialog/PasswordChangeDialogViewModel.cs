@@ -107,7 +107,7 @@ namespace RaywattApp.ViewModels.Dialog
                 return false;
             }
 
-            _passwordService.UpdatePasswordReset(_curruntID, ConfirmPassword, _currentPassword );
+            _passwordService.UpdatePasswordReset(_curruntID, ConfirmPassword, _currentPassword, false);
 
             _passwordService.ShowAlert(_l10n["Information"], "Password changed successfully");
 

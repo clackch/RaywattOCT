@@ -69,7 +69,7 @@ namespace RaywattApp.ViewModels.Password
         {
             _log.Debug("OnChangeLater");
 
-            _passwordService.UpdatePasswordReset(_loginId, _loginPassword, _loginPassword);
+            _passwordService.UpdatePasswordReset(_loginId, _loginPassword, _loginPassword, false);
 
             var parameter = new Dictionary<string, object>
             {
@@ -132,7 +132,7 @@ namespace RaywattApp.ViewModels.Password
                 return false;
             }
 
-            _passwordService.UpdatePasswordReset(_loginId, ConfirmPassword, _loginPassword);
+            _passwordService.UpdatePasswordReset(_loginId, ConfirmPassword, _loginPassword, false);
 
             _passwordService.ShowAlert(_l10n["Information"], "Password changed successfully");
 

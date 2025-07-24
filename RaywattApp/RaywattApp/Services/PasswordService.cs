@@ -66,8 +66,9 @@ namespace RaywattApp.Services
 
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["id"] = id;
-
-            var commandText = SqlQuery.GetQuery("SelectUserListById");
+            sqlParameters["admin"] = false;
+            
+            var commandText = SqlQuery.GetQuery("SelectUserById");
             var userData = _databaseService.GetDatas<User>(commandText, sqlParameters);
             string password = userData.Count > 0 ? userData[0].Password : string.Empty;
 
@@ -124,7 +125,7 @@ namespace RaywattApp.Services
             });
         }
 
-        public bool UpdatePasswordReset(string id, string password, string before_passowrd)
+        public bool UpdatePasswordReset(string id, string password, string before_passowrd, bool admin)
         {
             _log.Debug("UpdatePasswordReset");
 
@@ -135,7 +136,8 @@ namespace RaywattApp.Services
                 ["id"] = id,
                 ["password"] = password,
                 ["before_password"] = before_passowrd,
-                ["reset"] = false
+                ["reset"] = false,
+                ["admin"] = admin
             };
 
             _databaseService.UpdateData(commandText, parameters);
