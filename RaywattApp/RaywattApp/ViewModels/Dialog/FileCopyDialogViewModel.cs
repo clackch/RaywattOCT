@@ -566,7 +566,7 @@ namespace RaywattApp.ViewModels.Dialog
                 sqlParameters["id"] = patient.Id;
                 sqlParameters["lastname"] = patient.Lastname;
                 sqlParameters["firstname"] = patient.Firstname;
-                sqlParameters["birthdate"] = patient.Birthdate;
+                sqlParameters["birthdate"] = patient.Birthdate.HasValue ? patient.Birthdate.Value : (object)DBNull.Value;
                 sqlParameters["gender"] = patient.Gender;
                 sqlParameters["create_date"] = patient.CreateDate;
                 sqlParameters["update_date"] = patient.UpdateDate;
