@@ -1884,6 +1884,24 @@ UINT COCTSystem::threadCleanRotaryJunction(LPVOID param)
 }
 
 /*
+* RFIDValidating
+*/
+UINT COCTSystem::threadRFIDValidation(LPVOID param) {
+	COCTSystem* pSystem = (COCTSystem*)param;
+	CConfiguration& config = CConfiguration::GetInstance();
+	CRJController* pRJController = pSystem->m_pRJController;
+	RFID_ValidType isValid = RFID_ValidType::WAITING;
+	while (isValid == WAITING) {
+		isValid = pRJController->isValidRFID();
+		Sleep(100);
+		if (!pSystem->m_pThreadRotaryJunction->isRun) return NOERROR;
+	}
+	pRJController->UpdateState(eRJState::Validating);
+
+	return NOERROR;
+}
+
+/*
 * createColorImaging
 */
 bool COCTSystem::checkConnection() {
@@ -1972,8 +1990,6 @@ int COCTSystem::connectRotaryJunction() {
 		result &= m_pRJController->Connect(config.bldcMotor.port);
 
 		if (result) {
-			m_pRJController->ReadRFID();
-
 			m_pRJController->StartControl();
 			m_pRJController->UpdateState(eRJState::Initializing);
 		}
@@ -2416,22 +2432,22 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 		break;
 	case eRJState::Validating:
 	{
-		BYTE RFIDInfo[MAX_PATH];
-		UINT nRFIDLength = m_pRJController->GetRFIDInfo(RFIDInfo);
+		RFID_ValidType isValid = m_pRJController->isValidRFID();
 
 #if ENABLE_RFID
-		if (nRFIDLength != 0) 
+		if (isValid == RFID_ValidType::VALID)
 #endif
 		{
 			// To-Do: Validation
-			bool isValid = true;
-			
-			if (isValid) {
-				m_pRJController->UpdateState(eRJState::Loading);
-			}
-			else {
-				m_pRJController->UpdateState(eRJState::Error);
-			}
+			//영상 validation 스레드 실행할 것
+			PLOGI.printf("validation true");
+		}
+		else if(isValid == RFID_ValidType::INVALID){
+			PLOGI.printf("validation false");
+			m_pRJController->UpdateState(eRJState::Error);
+		}
+		else {
+			CUtility::StartThread(threadRFIDValidation, m_pThreadRotaryJunction, this);
 		}
 		break;
 	}

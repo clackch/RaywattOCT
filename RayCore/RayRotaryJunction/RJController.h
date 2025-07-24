@@ -8,7 +8,7 @@
 #include <iomanip>
 
 
-#define ENABLE_RFID		false
+#define ENABLE_RFID		true
 
 // position: step, speed: step/s
 #define PULLBACK_MAX_DISTANCE			100		/* mm */	
@@ -22,6 +22,9 @@
 
 #define RFID_REPLY_DATA_IDX				4
 #define RFID_REPLY_LENGTH_IDX			1
+#define RFID_MAX_COUNT					5
+#define RFID_MANUFACTURER				"RAYWATT"
+#define RFID_MANUFACTURER_LEN			7
 
 enum class eRJState {
 	None = 0,
@@ -46,6 +49,13 @@ enum RFID_ReadType
 	MANUF,
 	CNT,
 	MANUF_CNT
+};
+
+enum RFID_ValidType
+{
+	VALID,
+	INVALID,
+	WAITING
 };
 
 class CMessageService;
@@ -122,6 +132,7 @@ public:
 
 	UINT GetRFIDInfo(BYTE* pRFIDInfo);
 	bool GetPhotoSensorOnOff(int index) { return m_bPhotoSensor[index]; }
+	RFID_ValidType isValidRFID();
 
 	int ConvertMMtoStep(UINT mm);
 	void SetManualMode(bool on) { m_bManualMode = on; }

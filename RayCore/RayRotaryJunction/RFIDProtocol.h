@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <map>
 #include <deque>
+#include <mutex>
 
 #define FIXED_HEADER_FRONT_LEN			3
 #define FIXED_HEADER_BACK_LEN			2	
@@ -40,6 +41,7 @@ public:
 
 class RFIDProtocol
 {
+public:
 	struct SRFIDState {
 		uint8_t aHardwareUID[HARDWARE_UID_LENGTH];
 		uint8_t aCustomUID[CUSTOM_UID_LENGTH];
@@ -54,6 +56,9 @@ private:
 	static int AddDataToPacket(BYTE* packet, BYTE* data, int len);
 	static SRFIDState aRFIDState;
 	static RFIDMessageData aRFIDMessageData;
+	static std::mutex mtx;
+
+	static bool cmpUID_NOLOCK(BYTE* UID, int hardwardUIDSize);
 public:
 	RFIDProtocol() {}
 	~RFIDProtocol() {}
@@ -73,6 +78,7 @@ public:
 
 	static void initState(bool needLoadKey);
 	static void printState();
+	static void printStateData(SRFIDState stateData);
 	static bool getFindingKeyStatus();
 	static void setFindingKeyStatus(bool status);
 	static RFIDMessageData::Data* getMessageData(eFID fid);
@@ -81,4 +87,5 @@ public:
 	static eFID popFailedFID();
 	static void clearFailedFID();
 	static RFIDMessageData::Data* getRecentMessageData(eFID fid);
+	static void getCurRFIDData(SRFIDState* txState);
 };

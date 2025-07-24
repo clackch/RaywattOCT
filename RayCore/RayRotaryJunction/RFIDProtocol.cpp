@@ -2,7 +2,8 @@
 #include "RFIDKeyController.h"
 
 RFIDProtocol::SRFIDState RFIDProtocol::aRFIDState;
-RFIDMessageData RFIDProtocol::aRFIDMessageData;
+RFIDMessageData RFIDProtocol::aRFIDMessageData; 
+std::mutex RFIDProtocol::mtx;
 
 
 void RFIDProtocol::resetPacketByFID(eFID fid, BYTE* packet, int& packetLength, RFIDMessageData::Data data) {
@@ -150,6 +151,7 @@ int RFIDProtocol::AddDataToPacket(BYTE* packet, BYTE* data, int len) {
 }
 
 bool RFIDProtocol::cmpUID(BYTE* UID, int hardwardUIDSize) {
+	std::lock_guard<std::mutex> lock(mtx);
 	if (hardwardUIDSize != HARDWARE_UID_LENGTH) return false;
 
 	for (int i = 0; i < hardwardUIDSize +CUSTOM_UID_LENGTH; i++) {
@@ -160,42 +162,49 @@ bool RFIDProtocol::cmpUID(BYTE* UID, int hardwardUIDSize) {
 }
 
 void RFIDProtocol::setHardwareUID(BYTE* packet, int packetLength) {
+	std::lock_guard<std::mutex> lock(mtx);
 	if (packetLength != HARDWARE_UID_LENGTH) return;
 	for (int cycle = 0; cycle < packetLength; cycle++) {
 		aRFIDState.aHardwareUID[cycle] = packet[cycle];
 	}
 }
 void RFIDProtocol::setCustomUID(BYTE* packet, int packetLength) {
+	std::lock_guard<std::mutex> lock(mtx);
 	if (packetLength != CUSTOM_UID_LENGTH) return;
 	for (int cycle = 0; cycle < packetLength; cycle++) {
 		aRFIDState.aCustomUID[cycle] = packet[cycle];
 	}
 }
 void RFIDProtocol::setManuf(BYTE* packet, int packetLength) {
+	std::lock_guard<std::mutex> lock(mtx);
 	if (packetLength != MANUF_LEN) return;
 	for (int cycle = 0; cycle < packetLength; cycle++) {
 		aRFIDState.aMANU[cycle] = packet[cycle];
 	}
 }
 void RFIDProtocol::setCount(BYTE* packet, int packetLength) {
+	std::lock_guard<std::mutex> lock(mtx);
 	if (packetLength != COUNT_LEN) return;
 	for (int cycle = 0; cycle < packetLength; cycle++) {
 		aRFIDState.aCNT = packet[cycle];
 	}
 }
 void RFIDProtocol::setKeyA(BYTE* packet, int packetLength) {
+	std::lock_guard<std::mutex> lock(mtx);
 	if (packetLength != KEY_LEN) return;
 	for (int cycle = 0; cycle < packetLength; cycle++) {
 		aRFIDState.aKeyA[cycle] = packet[cycle];
 	}
 }
 void RFIDProtocol::setKeyB(BYTE* packet, int packetLength) {
+	std::lock_guard<std::mutex> lock(mtx);
 	if (packetLength != KEY_LEN) return;
 	for (int cycle = 0; cycle < packetLength; cycle++) {
 		aRFIDState.aKeyB[cycle] = packet[cycle];
 	}
 }
 void RFIDProtocol::setStep(BYTE* packet, int packetLength) {
+	std::lock_guard<std::mutex> lock(mtx);
 	if (packetLength != STEP_LEN) return;
 	aRFIDState.aStep = 0;
 	for (int cycle = 0; cycle < packetLength; cycle++) {
@@ -204,52 +213,69 @@ void RFIDProtocol::setStep(BYTE* packet, int packetLength) {
 	}
 }
 BYTE RFIDProtocol::getCount(BYTE* uid, int hardwardUIDSize) {
-	if (!RFIDProtocol::cmpUID(uid, hardwardUIDSize)) return 255;
+	std::lock_guard<std::mutex> lock(mtx);
+	if (!RFIDProtocol::cmpUID_NOLOCK(uid, hardwardUIDSize)) return 255;
 	return aRFIDState.aCNT;
 }
 
+bool RFIDProtocol::cmpUID_NOLOCK(BYTE* UID, int hardwardUIDSize) {
+	if (hardwardUIDSize != HARDWARE_UID_LENGTH) return false;
+
+	for (int i = 0; i < hardwardUIDSize + CUSTOM_UID_LENGTH; i++) {
+		if (i < HARDWARE_UID_LENGTH && UID[i] != aRFIDState.aHardwareUID[i]
+			|| UID[i] != aRFIDState.aCustomUID[i - HARDWARE_UID_LENGTH]) return false;
+	}
+	return true;
+}
+
 void RFIDProtocol::printState() {
+	std::lock_guard<std::mutex> lock(mtx);
+	printStateData(aRFIDState);
+}
+
+void RFIDProtocol::printStateData(RFIDProtocol::SRFIDState stateData) {
 	std::stringstream strStream;
 
 	for (int idx = 0; idx < HARDWARE_UID_LENGTH; idx++) {
-		strStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(aRFIDState.aHardwareUID[idx]);
+		strStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(stateData.aHardwareUID[idx]);
 	}
 	PLOGI.printf("Hardware UID : %s", strStream.str());
 	strStream.clear();
 	strStream.str("");
 
 	for (int idx = 0; idx < CUSTOM_UID_LENGTH; idx++) {
-		strStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(aRFIDState.aCustomUID[idx]);
+		strStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(stateData.aCustomUID[idx]);
 	}
 	PLOGI.printf("Custom UID : %s", strStream.str());
 	strStream.clear();
 	strStream.str("");
 
 	for (int idx = 0; idx < MANUF_LEN; idx++) {
-		strStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(aRFIDState.aMANU[idx]);
+		strStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(stateData.aMANU[idx]);
 	}
 	PLOGI.printf("Manufacturer : %s", strStream.str());
 	strStream.str("");
 
 	for (int idx = 0; idx < KEY_LEN; idx++) {
-		strStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(aRFIDState.aKeyA[idx]);
+		strStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(stateData.aKeyA[idx]);
 	}
-	PLOGI.printf("keyA : %s" ,strStream.str());
+	PLOGI.printf("keyA : %s", strStream.str());
 	strStream.clear();
 	strStream.str("");
 
 	for (int idx = 0; idx < KEY_LEN; idx++) {
-		strStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(aRFIDState.aKeyB[idx]);
+		strStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(stateData.aKeyB[idx]);
 	}
 	PLOGI.printf("keyB : %s", strStream.str());
 	strStream.clear();
 	strStream.str("");
 
-	PLOGI.printf("count : %d", aRFIDState.aCNT);
-	PLOGI.printf("step : %d\n", aRFIDState.aStep);
+	PLOGI.printf("count : %d", stateData.aCNT);
+	PLOGI.printf("step : %d\n", stateData.aStep);
 }
 
 void RFIDProtocol::initState(bool needLoadKey) {
+	std::lock_guard<std::mutex> lock(mtx);
 	memset(aRFIDState.aHardwareUID, 0x00, HARDWARE_UID_LENGTH);
 	memset(aRFIDState.aCustomUID, 0x00, CUSTOM_UID_LENGTH);
 	memset(aRFIDState.aMANU, 0x00, MANUF_LEN);
@@ -279,10 +305,12 @@ RFIDMessageData::Data* RFIDProtocol::getMessageData(eFID fid) {
 }
 
 bool RFIDProtocol::getFindingKeyStatus() {
+	std::lock_guard<std::mutex> lock(mtx);
 	return aRFIDState.findingKey;
 }
 
 void RFIDProtocol::setFindingKeyStatus(bool status) {
+	std::lock_guard<std::mutex> lock(mtx);
 	aRFIDState.findingKey = status;
 }
 
@@ -305,4 +333,27 @@ eFID RFIDProtocol::popFailedFID() {
 }
 void RFIDProtocol::clearFailedFID() {
 	aRFIDMessageData.failedFID.clear();
+}
+
+void RFIDProtocol::getCurRFIDData(RFIDProtocol::SRFIDState* txState) {
+	std::lock_guard<std::mutex> lock(mtx);
+	for (int i = 0; i < CUSTOM_UID_LENGTH; i++) {
+		txState->aCustomUID[i] = aRFIDState.aCustomUID[i];
+	}
+	for (int i = 0; i < HARDWARE_UID_LENGTH; i++) {
+		txState->aHardwareUID[i] = aRFIDState.aHardwareUID[i];
+	}
+	for (int i = 0; i < KEY_LEN; i++) {
+		txState->aKeyA[i] = aRFIDState.aKeyA[i];
+	}
+	for (int i = 0; i < KEY_LEN; i++) {
+		txState->aKeyB[i] = aRFIDState.aKeyB[i];
+	}
+	for (int i = 0; i < MANUF_LEN; i++) {
+		txState->aMANU[i] = aRFIDState.aMANU[i];
+	}
+	txState->aStep = aRFIDState.aStep;
+	txState->aCNT = aRFIDState.aCNT;
+	txState->findingKey = aRFIDState.findingKey;
+	return;
 }

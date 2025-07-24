@@ -51,6 +51,7 @@ bool CRJController::Connect(void *param) {
 
 	m_pConnection = new CCOMConnection();
 	m_initMotor = m_pConnection->Connect(param);
+	m_resendManager->start();
 	if (m_initMotor) {
 		BOOL result = CUtility::StartThread(threadReadPacket, m_pThread, (LPVOID)this);
 		if (result == FALSE) {
@@ -191,7 +192,7 @@ bool CRJController::StartControl() {
 	AutoStatePeriod(100);
 	initSetting();
 	bool result = CUtility::StartThread(threadRJState, m_pThreadState, (LPVOID)this);
-	result &= CUtility::StartThread(threadReadTag, m_pThreadRFIDTag, (LPVOID)this);
+	//result &= CUtility::StartThread(threadReadTag, m_pThreadRFIDTag, (LPVOID)this);
 
 	return result;
 }
@@ -467,6 +468,7 @@ void CRJController::resendPacket(eFID fid) {
 
 void CRJController::resendAllSaved() {
 	eFID fid = RFIDProtocol::popFailedFID();
+	//PLOGI.printf("resend start: work %d", fid);
 	while (fid != eFID::NO_FID) {
 		m_resendManager->addTask([=]() {
 			resendPacket(fid);
@@ -541,12 +543,8 @@ void CRJController::updateState() {
 	case eRJState::Connected:
 		if (m_bLimitSwitch) {
 #if ENABLE_RFID
-			if (m_nRFIDLength == 0) {
-				ReadRFID();
-			}
-			else {
-				m_nextState = eRJState::Validating;
-			}
+			ReadRFID();
+			m_nextState = eRJState::Validating;
 #else
 			m_nextState = eRJState::Validating;
 #endif
@@ -556,6 +554,7 @@ void CRJController::updateState() {
 		}
 		break;
 	case eRJState::Validating:
+		if(!m_bLimitSwitch) m_nextState = eRJState::Disconnected;
 		break;
 	case eRJState::Loading:
 		if (m_bButton[1] || !m_bLimitSwitch) {
@@ -594,9 +593,38 @@ void CRJController::updateState() {
 		break;
 	}
 
+	//PLOGI.printf("update state : %d", m_state);
+
 	if (m_state != m_nextState) {
 		updateState(m_nextState);
 	}
+}
+
+RFID_ValidType CRJController::isValidRFID() {
+	RFIDProtocol::SRFIDState rfidState;
+	RFIDProtocol::getCurRFIDData(&rfidState);
+	if (rfidState.aCNT >= RFID_MAX_COUNT) {
+		return RFID_ValidType::INVALID;
+	}
+	bool isNoData = true;
+
+	size_t arrayLength = sizeof(rfidState.aMANU) / sizeof(rfidState.aMANU[0]);
+	if (arrayLength != RFID_MANUFACTURER_LEN) {
+		return RFID_ValidType::INVALID;
+	}
+	for (int i = 0; i < RFID_MANUFACTURER_LEN; i++) {
+		if (rfidState.aMANU[i] != 0) {
+			isNoData = false;
+			break;
+		}
+	}
+	if (isNoData) return RFID_ValidType::WAITING;
+	for (size_t i = 0; i < arrayLength; ++i) {
+		if (rfidState.aMANU[i] != static_cast<unsigned int>(RFID_MANUFACTURER[i])) {
+			return RFID_ValidType::INVALID;
+		}
+	}
+	return RFID_ValidType::VALID;
 }
 
 void CRJController::updateStateManualMode() {
@@ -702,6 +730,9 @@ void CRJController::updateState(eRJState state) {
 	default:
 		break;
 	}
+
+	//PLOGI.printf("update next-state : %d", m_state);
+
 	m_state = m_nextState = state;
 	if (m_pMsg != nullptr) m_pMsg->postPriorMessage(WM_UPDATE_RJ_STATE, (WPARAM)m_state);
 }
