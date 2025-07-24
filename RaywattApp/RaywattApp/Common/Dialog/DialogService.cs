@@ -8,6 +8,8 @@ namespace RaywattApp.Common.Dialog
 {
     public class DialogService : IDialogService
     {
+        private readonly List<IDialogWindow> _openDialogs = new();
+
         public DialogResults OpenDialog(object dialog, Dictionary<string, object> parameter, double parentWidth, double parentHeight, double left, double top)
         {
             var dialogFE = dialog as FrameworkElement;
@@ -20,8 +22,8 @@ namespace RaywattApp.Common.Dialog
             IDialogWindow window = new DialogWindow();
             window.Content = dialog;
             window.DataContext = dialogDataContext;
-            
-            if(double.NaN.Equals(left))
+
+            if (double.NaN.Equals(left))
             {
                 window.Left = mainWindow.Left + (mainWindow.Width - parentWidth) / 2;
             }
@@ -30,21 +32,24 @@ namespace RaywattApp.Common.Dialog
                 window.Left = left;
             }
 
-            if(double.NaN.Equals(top))
+            if (double.NaN.Equals(top))
             {
                 window.Top = mainWindow.Top + (mainWindow.Height - parentHeight) / 2;
             }
             else
             {
-                window.Top = top; 
+                window.Top = top;
             }
 
             if (parameter != null)
                 dialogDataContext.SetParameter(parameter);
-            
-            window.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
-            window.ShowDialog();
 
+            window.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
+
+            _openDialogs.Add(window);
+            ((Window)window).Closed += (s, e) => _openDialogs.Remove(window);
+
+            window.ShowDialog();
             return dialogDataContext.DialogResult;
         }
         public IDialogWindow OpenChildWindow(object dialog, IModelessPatient parent, Dictionary<string, object> parameter, double width, double height, double left, double top)
@@ -82,9 +87,31 @@ namespace RaywattApp.Common.Dialog
                 dialogDataContext.SetParameter(parent, parameter);
 
             window.Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
-            window.Show();
 
+            _openDialogs.Add(window);
+            ((Window)window).Closed += (s, e) => _openDialogs.Remove(window);
+
+            window.Show();
             return window;
+        }
+
+        public void CloseAllDialogs()
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                foreach (var dlg in _openDialogs.ToList())
+                {
+                    if (dlg is Window w)
+                    {
+                        w.Close();
+                    }
+                }
+                _openDialogs.Clear();
+            });
+        }
+        public List<IDialogWindow> GetOpenDialogs()
+        {
+            return _openDialogs.ToList();
         }
     }
 }

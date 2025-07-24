@@ -119,7 +119,7 @@ namespace RaywattApp
             services.AddTransient(typeof(FileImportViewModel));
 
             //Dialog 등록
-            services.AddTransient<IDialogService, DialogService>();
+            services.AddSingleton<IDialogService, DialogService>();
             services.AddTransient(typeof(AlertDialogViewModel));
             services.AddTransient(typeof(ConfirmDialogViewModel));
             services.AddTransient(typeof(EditCaseInfoDialogViewModel));
@@ -155,6 +155,7 @@ namespace RaywattApp
             services.AddTransient<IPasswordService, PasswordService>();
 
             services.AddSingleton(typeof(AngioManager));
+            services.AddSingleton(typeof(IdleMonitorService));
 
             return services.BuildServiceProvider();
         }
