@@ -1,5 +1,7 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Accord.Statistics.Kernels;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Models;
@@ -10,6 +12,8 @@ namespace RaywattApp.ViewModels.Dialog
 {
     public partial class PasswordChangeDialogViewModel : DialogViewModelBase
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(PasswordChangeDialogViewModel));
+
         [ObservableProperty]
         private string _oldPassword = string.Empty;
 
@@ -38,11 +42,15 @@ namespace RaywattApp.ViewModels.Dialog
 
         public PasswordChangeDialogViewModel(IPasswordService passwordService)
         {
+            _log.Info("PasswordChangeDialogViewModel");
+
             _passwordService = passwordService;
         }
 
         private void OnCancel(IDialogWindow dialog)
         {
+            _log.Info("OnCancel");
+
             DialogResults dialogResults = new();
             dialogResults.DialogAnswer = DialogResults.Answer.No;
 
@@ -50,6 +58,8 @@ namespace RaywattApp.ViewModels.Dialog
         }
         private void OnOk(IDialogWindow dialog)
         {
+            _log.Info("OnOk");
+
             if (OldPassword == string.Empty | NewPassword == string.Empty | ConfirmPassword == string.Empty)
             {
                 InputPasswordClear();
@@ -70,6 +80,8 @@ namespace RaywattApp.ViewModels.Dialog
 
         private void InputPasswordClear()
         {
+            _log.Info("InputPasswordClear");
+
             OldPassword = string.Empty;
             NewPassword = string.Empty;
             ConfirmPassword = string.Empty;
@@ -77,6 +89,8 @@ namespace RaywattApp.ViewModels.Dialog
 
         private bool ExecuteChangePassword()
         {
+            _log.Info("ExecuteChangePassword");
+
             _curruntID = ViewModelBase.DeviceStatus.LoginID;
 
             _currentPassword = _passwordService.GetPasswordByUserId(_curruntID);

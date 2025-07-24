@@ -3,15 +3,9 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
-using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
-using RaywattApp.Models;
 using RaywattApp.Services;
-using RaywattApp.Views.Dialog;
-using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Windows;
 using System.Windows.Input;
 using System.Windows.Navigation;
 
@@ -37,6 +31,8 @@ namespace RaywattApp.ViewModels.Password
 
         public InitialPasswordSetupViewModel(IPasswordService passwordService)
         {
+            _log.Debug("InitialPasswordSetupViewModel");
+
             _passwordService = passwordService;
         }
 
@@ -64,11 +60,15 @@ namespace RaywattApp.ViewModels.Password
 
         private void OnCancel()
         {
+            _log.Debug("OnCancel");
+
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
         }
 
         private void OnConfirm()
         {
+            _log.Debug("OnConfirm");
+
             if (!_passwordService.IsSamePassword(Password, ConfirmPassword))
             {
                 ClearPasswords();
@@ -95,6 +95,8 @@ namespace RaywattApp.ViewModels.Password
 
         private void ClearPasswords()
         {
+            _log.Debug("ClearPasswords");
+
             Password = string.Empty;
             ConfirmPassword = string.Empty;
         }

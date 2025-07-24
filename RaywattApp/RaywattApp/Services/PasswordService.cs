@@ -1,4 +1,5 @@
-﻿using RaywattApp.Common.Bases;
+﻿using log4net;
+using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Localization;
 using RaywattApp.Models;
@@ -11,6 +12,8 @@ namespace RaywattApp.Services
 {
     public class PasswordService : IPasswordService
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(PasswordService));
+
         private readonly IDialogService _dialogService;
         private readonly IDatabaseService _databaseService;
         protected readonly DynamicResource _l10n;
@@ -23,6 +26,8 @@ namespace RaywattApp.Services
 
         public PasswordService(IDialogService dialogService, IDatabaseService databaseService)
         {
+            _log.Debug("PasswordService");
+
             _l10n = (DynamicResource)App.Current.Resources["L10N"];
 
             _dialogService = dialogService;
@@ -31,6 +36,8 @@ namespace RaywattApp.Services
 
         public bool IsSamePassword(string beforePassword, string inputPassword, string message = "")
         {
+            _log.Debug("IsSamePassword");
+
             if (!beforePassword.Equals(inputPassword))
             {
                 ShowAlert(_l10n["Information"], $"The password is incorrect.\r\n{message}");
@@ -42,6 +49,8 @@ namespace RaywattApp.Services
 
         public bool IsNotSamePassword(string beforePassword, string inputPassword, string message = "")
         {
+            _log.Debug("IsNotSamePassword");
+
             if (beforePassword.Equals(inputPassword))
             {
                 ShowAlert(_l10n["Information"], $"The password is correct.\r\n{message}");
@@ -53,6 +62,8 @@ namespace RaywattApp.Services
 
         public string GetPasswordByUserId(string id)
         {
+            _log.Debug("GetPasswordByUserId");
+
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["id"] = id;
 
@@ -71,6 +82,8 @@ namespace RaywattApp.Services
 
         public string? GetPasswordValidationError(string password)
         {
+            _log.Debug("GetPasswordValidationError");
+
             if (string.IsNullOrWhiteSpace(password) || password == string.Empty)
                 return "Please enter a password.";
 
@@ -97,6 +110,8 @@ namespace RaywattApp.Services
 
         public void ShowAlert(string title, string message)
         {
+            _log.Debug("ShowAlert");
+
             Application.Current.Dispatcher.Invoke(() =>
             {
                 var parameters = new Dictionary<string, object>
@@ -111,6 +126,8 @@ namespace RaywattApp.Services
 
         public bool UpdatePasswordReset(string id, string password, string before_passowrd)
         {
+            _log.Debug("UpdatePasswordReset");
+
             var commandText = SqlQuery.GetQuery("UpdatePasswordReset");
 
             var parameters = new Dictionary<string, object>

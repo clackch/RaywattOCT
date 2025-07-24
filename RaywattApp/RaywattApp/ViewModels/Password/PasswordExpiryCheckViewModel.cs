@@ -44,6 +44,8 @@ namespace RaywattApp.ViewModels.Password
 
         public PasswordExpiryCheckViewModel(IPasswordService passwordService)
         {
+            _log.Debug("PasswordExpiryCheckViewModel");
+
             _passwordService = passwordService;
         }
 
@@ -65,6 +67,8 @@ namespace RaywattApp.ViewModels.Password
 
         private void OnChangeLater(IDialogWindow dialog)
         {
+            _log.Debug("OnChangeLater");
+
             _passwordService.UpdatePasswordReset(_loginId, _loginPassword, _loginPassword);
 
             var parameter = new Dictionary<string, object>
@@ -77,6 +81,8 @@ namespace RaywattApp.ViewModels.Password
         }
         private void OnOk(IDialogWindow dialog)
         {
+            _log.Debug("OnOk");
+
             if (OldPassword == string.Empty | NewPassword == string.Empty | ConfirmPassword == string.Empty)
             {
                 InputPasswordClear();
@@ -101,6 +107,8 @@ namespace RaywattApp.ViewModels.Password
 
         private void InputPasswordClear()
         {
+            _log.Debug("InputPasswordClear");
+
             OldPassword = string.Empty;
             NewPassword = string.Empty;
             ConfirmPassword = string.Empty;
@@ -108,6 +116,8 @@ namespace RaywattApp.ViewModels.Password
 
         private bool ExecuteChangePassword()
         {
+            _log.Debug("ExecuteChangePassword");
+
             if (_loginPassword == string.Empty) return false;
 
             if (!_passwordService.IsSamePassword(_loginPassword, OldPassword, "[Old Password]")) return false;

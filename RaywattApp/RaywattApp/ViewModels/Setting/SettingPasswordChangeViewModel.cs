@@ -11,7 +11,7 @@ namespace RaywattApp.ViewModels.Setting
 {
     public partial class SettingPasswordChangeViewModel : ViewModelBase
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(SettingAboutViewModel));
+        private static readonly ILog _log = LogManager.GetLogger(typeof(SettingPasswordChangeViewModel));
 
         private IDialogService _dialogService;
 
@@ -26,12 +26,16 @@ namespace RaywattApp.ViewModels.Setting
 
         public SettingPasswordChangeViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
+            _log.Debug("SettingPasswordChangeViewModel");
+
             _dialogService = dialogService;
             _loginID = DeviceStatus.LoginID ?? string.Empty;
         }
 
         private void PasswordChange()
         {
+            _log.Debug("PasswordChange");
+
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 var result = _dialogService.OpenDialog(new PasswordChangeDialogControl(), null, Constants.ApplicationWidth, Constants.ApplicationHeight);
