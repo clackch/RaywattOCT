@@ -1836,7 +1836,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 
 	if (pRJController->IsConnected()) {
 		pRJController->changeSMProfileToLoadUnload();
-		pRJController->Current(eStepMotorIndex::Pullback, 11, 150);
+		pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
 
 		for (const auto& commands : loadCommands) {
 			if (commands.size() != 3) {
