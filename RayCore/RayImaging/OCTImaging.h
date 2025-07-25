@@ -61,6 +61,7 @@ protected:
 	int m_nSheathPosition;
 	int m_nSheathSearchRange;
 	int m_nZOffset;
+	cv::Mat m_nImageForCalib;
 
 	int m_delayLineMovingDirection = 1;
 
@@ -108,6 +109,7 @@ public:
 	void GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& centerPoints, std::vector<float>& radius);
 
 	int GetSheathPosition() { return m_nSheathPosition; }
+	cv::Mat GetImageForCalib() { return m_nImageForCalib; }
 	void SetZOffset(int nOffset) { m_nZOffset = nOffset; }
 	void SetDelayLineMovingDirection(int direction) { m_delayLineMovingDirection = direction; }
 
