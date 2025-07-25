@@ -29,7 +29,7 @@
         /// <summary>
         /// Displays an alert dialog with the specified title and message
         /// </summary>
-        void ShowAlert(string title, string message);
+        void ShowAlert(string title, string message, string timer = "");
 
         /// <summary>
         /// Updates the password for a user, resetting it if necessary

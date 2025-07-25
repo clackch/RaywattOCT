@@ -20,18 +20,18 @@ namespace RaywattApp.Services
         private readonly IDatabaseService _databaseService;
         protected readonly DynamicResource _l10n;
         private const int _passwordExpiryDays = 90;
+        private readonly int _maxPasswordRetryCount = 5;
+        static private int _currentPasswordRetryCount = 0;
 
         public int PasswordExpiryDays
         {
             get => _passwordExpiryDays;
         }
 
-        private int _passwordCountBase = 10;
-        static private int _passwordCount = 0;
         public void ResetPasswordCount()
         {
             _log.Debug("ResetPasswordCount");
-            _passwordCount = 0;
+            _currentPasswordRetryCount = 0;
         }
 
         public PasswordService(IDialogService dialogService, IDatabaseService databaseService)
@@ -59,9 +59,9 @@ namespace RaywattApp.Services
 
         public bool CheckLoginWithRetryCount(string id, string inputPassword)
         {
-            _passwordCount++;
+            _currentPasswordRetryCount++;
 
-            _log.Debug("CheckLoginWithRetryCount " + _passwordCount);
+            _log.Debug("CheckLoginWithRetryCount " + _currentPasswordRetryCount);
 
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["id"] = id;
@@ -71,14 +71,15 @@ namespace RaywattApp.Services
 
             if(password != inputPassword || password == string.Empty)
             {
-                if (_passwordCount >= _passwordCountBase)
+                if (_currentPasswordRetryCount >= _maxPasswordRetryCount)
                 {
-                    ShowAlert(_l10n["Information"], $"You have entered the wrong password {_passwordCountBase} times.");
+                    ShowAlert(_l10n["Information"], $"You have entered the wrong password {_maxPasswordRetryCount} times.");
                     WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
                     ResetPasswordCount();
                     return false;
                 }
-                ShowAlert(_l10n["Information"], "The password is incorrect. Please try again. " + _passwordCount);
+
+                ShowAlert(_l10n["Information"], "Please verify your ID and password and try again\r\n" + _currentPasswordRetryCount);
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
                 return false;
             }
@@ -142,7 +143,7 @@ namespace RaywattApp.Services
             return null;
         }
 
-        public void ShowAlert(string title, string message)
+        public void ShowAlert(string title, string message, string timer = "")
         {
             _log.Debug("ShowAlert");
 
@@ -153,6 +154,11 @@ namespace RaywattApp.Services
                     ["title"] = title,
                     ["message"] = message
                 };
+
+                if(timer != "")
+                {
+                    parameters.Add("timer", timer);
+                }
 
                 _dialogService.OpenDialog(new AlertDialogControl(), parameters, Constants.ApplicationWidth, Constants.ApplicationHeight);
             });

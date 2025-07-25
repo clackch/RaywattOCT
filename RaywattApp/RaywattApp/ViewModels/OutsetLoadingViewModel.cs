@@ -73,7 +73,7 @@ namespace RaywattApp.ViewModels
             DeviceStatus.LoginID = id;
             _passwordService.ResetPasswordCount();
 
-            if (CheckPasswordReset(user, data)) return;
+            if (HandleInitialPasswordReset(user, data)) return;
             if (CheckPasswordExpiry(user, data)) return;
             if (!EnsureTermsAgreement(user, id, password)) return;
 
@@ -207,7 +207,7 @@ namespace RaywattApp.ViewModels
             return users?.Count > 0 ? users[0] : null;
         }
 
-        private bool CheckPasswordReset(User user, Dictionary<string, object> data)
+        private bool HandleInitialPasswordReset(User user, Dictionary<string, object> data)
         {
             if (user.PasswordReset)
             {
