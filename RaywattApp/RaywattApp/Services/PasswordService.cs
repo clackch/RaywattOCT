@@ -6,6 +6,7 @@ using RaywattApp.Common.Localization;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Views.Dialog;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -73,7 +74,7 @@ namespace RaywattApp.Services
             {
                 if (_currentPasswordRetryCount >= _maxPasswordRetryCount)
                 {
-                    ShowAlert(_l10n["Information"], $"You have entered the wrong password {_maxPasswordRetryCount} times.");
+                    ShowAlert(_l10n["Information"], $"You have entered the wrong password {_maxPasswordRetryCount} times.","10");
                     WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
                     ResetPasswordCount();
                     return false;
@@ -157,7 +158,7 @@ namespace RaywattApp.Services
 
                 if(timer != "")
                 {
-                    parameters.Add("timer", timer);
+                    parameters.Add("timer", TimeSpan.FromSeconds(30));
                 }
 
                 _dialogService.OpenDialog(new AlertDialogControl(), parameters, Constants.ApplicationWidth, Constants.ApplicationHeight);
