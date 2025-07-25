@@ -1,6 +1,5 @@
 ﻿using log4net;
 using RaywattApp.Common.Dialog;
-using SharpDX.Direct3D11;
 using System;
 using System.Collections.Generic;
 using System.Windows.Threading;
