@@ -27,13 +27,25 @@ namespace RaywattApp.ViewModels.Password
         private string confirmPassword = string.Empty;
 
         public ICommand CancelCommand => new RelayCommand(OnCancel);
-        public ICommand ConfrmCommand => new RelayCommand(OnConfirm);
+
+        private ICommand? _okCommand;
+        public ICommand OkCommand => _okCommand ??= new RelayCommand(OnOk, CanOk);
 
         public InitialPasswordSetupViewModel(IPasswordService passwordService)
         {
             _log.Debug("InitialPasswordSetupViewModel");
 
             _passwordService = passwordService;
+        }
+
+        partial void OnConfirmPasswordChanged(string value)
+        {
+            (OkCommand as RelayCommand)?.NotifyCanExecuteChanged();
+        }
+
+        partial void OnPasswordChanged(string value)
+        {
+            (OkCommand as RelayCommand)?.NotifyCanExecuteChanged();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -65,7 +77,7 @@ namespace RaywattApp.ViewModels.Password
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
         }
 
-        private void OnConfirm()
+        private void OnOk()
         {
             _log.Debug("OnConfirm");
 
@@ -91,6 +103,11 @@ namespace RaywattApp.ViewModels.Password
             };
 
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoadingPage) { Parameter = parameter });
+        }
+
+        private bool CanOk()
+        {
+            return !string.IsNullOrEmpty(Password) && !string.IsNullOrEmpty(ConfirmPassword);
         }
 
         private void ClearPasswords()
