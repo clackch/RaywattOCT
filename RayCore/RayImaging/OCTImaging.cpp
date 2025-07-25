@@ -459,7 +459,16 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 int num = 0;
 void COCTImaging::findSheath(cv::Mat img) {
 	num++;
-	cv::Mat edgeX, edgeY;
+	cv::Mat circularizedImage;
+	CircularizeImage(img, circularizedImage);
+	m_nImageForCalib = circularizedImage.clone();
+
+	m_nSheathPosition = 0;
+
+	cv::imwrite("circularizedImage" + std::to_string(num) + ".tif", circularizedImage);
+
+
+	/*cv::Mat edgeX, edgeY;
 	cv::Sobel(img, edgeX, CV_32F, 1, 0, 3);
 	cv::Sobel(img, edgeY, CV_32F, 0, 1, 3);
 
@@ -490,7 +499,7 @@ void COCTImaging::findSheath(cv::Mat img) {
 
 	PLOGI.printf("Edge X: %f, Y: %f, Magnitude: %f", maxX, maxY, maxMagnitude);
 
-	m_nSheathPosition = maxX;
+	m_nSheathPosition = maxX;*/
 
 
 

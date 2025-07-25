@@ -73,6 +73,7 @@ private:
 	// Laser Module
 	CLaserModule* m_pLaserModule;
 	std::vector<std::pair<int, int>> m_vCalibrationInfo;
+	std::vector<std::pair<cv::Mat, int>> m_vAutoCalibrationInfo;
 
 	RayScannerState m_prevState;
 	RayScannerState m_curState;

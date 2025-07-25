@@ -1545,7 +1545,8 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) { // 수정
 		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
 
 		// 1. Start Finding Sheath
-		pSystem->m_vCalibrationInfo.clear();
+		pSystem->m_vAutoCalibrationInfo.clear();
+		// 초기화
 		pSystem->m_cathState = CatheterState::FindingSheath;
 		
 		// 1-1. Move Delay-line & Find Sheath
@@ -1553,14 +1554,20 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) { // 수정
 		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, -1000 * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
 		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
+		int sectionNum = 5; // 구간 수
+		int checkStep = pSystem->m_vCalibrationInfo.size() * 2;	// 0~-1000까지가 m_vCalibrationInfo.size()이므로 두 배
+		PLOGI.printf("checkStep: %d, sectionNum: %d", checkStep, sectionNum);
+		pSystem->m_vAutoCalibrationInfo.clear();	// -1000부터 1000까지의 이미지 정보 저장을 위해 초기화
+
 		pSystem->m_pImagingLiveView->SetDelayLineMovingDirection(1);
 		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, 2000 * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
 		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
 		// 1-2. Find Z-Offset Position
 		const int nSheathPosition = CConfiguration::GetInstance().measurement.nSheathPosition;
-		int nMinDiff = INT_MAX;
+		double nMinDiff = std::numeric_limits<double>::max();
 		int nZOffset = 0;
+
 		/*for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
 			int nDiff = abs(nSheathPosition - pSystem->m_vCalibrationInfo.at(i).first);
 			if (nMinDiff > nDiff) {
@@ -1569,18 +1576,122 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) { // 수정
 				PLOGI.printf("nDiff: %d, Calibrated zOffset: %d", nDiff, nZOffset);
 			}
 		}*/
-		std::sort(pSystem->m_vCalibrationInfo.begin(), pSystem->m_vCalibrationInfo.end(),
+		/*std::sort(pSystem->m_vCalibrationInfo.begin(), pSystem->m_vCalibrationInfo.end(),
 			[](const std::pair<int, int>& a, const std::pair<int, int>& b) {
 				if(a.first == b.first)
 					return a.second < b.second;
 				return a.first > b.first;
 			});
-		nZOffset = pSystem->m_vCalibrationInfo.front().second; // Get the first element's second value
+		nZOffset = pSystem->m_vCalibrationInfo.front().second;*/
+
+		int checkStart = 0;
+		int bestFrameIndex = checkStart;
+		int EnoughStep = 100; // 한 구간의 step 수가 충분히 작다고 판단되는 기준
+		while (checkStep > EnoughStep) {
+			checkStep /= sectionNum * 2;
+			for (int i = checkStep + checkStart; i < checkStart + checkStep * (sectionNum * 2 - 1) - 1; i += checkStep) {
+				cv::Mat diff = pSystem->m_vAutoCalibrationInfo.at(i).first - pSystem->m_vAutoCalibrationInfo.at(i + checkStep - 1).first;
+				double tmpDiff = cv::norm(diff, cv::NORM_L1);
+				PLOGI.printf("i: %d, tmpDiff: %f", i, tmpDiff);
+				if (nMinDiff > tmpDiff) {
+					nMinDiff = tmpDiff;
+					bestFrameIndex = i;
+				}
+			}
+			checkStart = bestFrameIndex;
+		} // 시간 축소용 코드
+
+		map<int, std::pair<double, int>> diffInfo;
+		for(int i = checkStart; i < checkStart + checkStep * (sectionNum * 2 - 1) - 1; i++) {
+			cv::Mat diff = pSystem->m_vAutoCalibrationInfo.at(i).first - pSystem->m_vAutoCalibrationInfo.at(i + 1).first;
+			double tmpDiff = cv::norm(diff);
+			PLOGI.printf("i: %d, tmpDiff: %f", i, tmpDiff);
+			diffInfo.insert({ i, std::make_pair(tmpDiff, pSystem->m_vAutoCalibrationInfo.at(i).second) });
+			if (nMinDiff > tmpDiff) {
+				nMinDiff = tmpDiff;
+				bestFrameIndex = i;
+			}
+		}
+		PLOGI.printf("bestFrameIndex: %d, nMinDiff: %f", bestFrameIndex, nMinDiff);
+
+		// 이렇게 찾은 위치는 아직 정확하지 않음. 얘와 비슷한 diff를 가지면서도 이상적인 sheath와 가장 가까운 checkStart를 찾아야 함.
+		nZOffset = pSystem->m_vAutoCalibrationInfo.at(bestFrameIndex).second + nSheathPosition;		
 
 		// 1-3. Move to calibrated position
 		nTargetPos = nZOffset;
 		pLaserModule->Move(eStepMotorIndex::DelayLine, nZOffset);
 		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
+
+		// 1-4. 2차 확인
+		int minusLoc = 0, plusLoc = 0;
+		int minusCheck = 0, plusCheck = 0;
+		bool stopMinus = false, stopPlus = false;
+		while(minusCheck < 3 && plusCheck < 3) {
+			// -1
+			if(!stopMinus){
+				minusLoc++;
+				auto diffIndexNow = diffInfo.find(bestFrameIndex - minusLoc);
+				auto diffIndexBefore = diffInfo.find(bestFrameIndex - minusLoc - 1);
+				if (diffIndexBefore != diffInfo.end()) {
+					if (diffIndexNow->second.first < diffIndexBefore->second.first) {
+						minusCheck++;
+					}
+					else {
+						minusCheck = 0;
+					}
+				}
+				else {
+					if (bestFrameIndex - minusLoc - 1 >= 0) {
+						cv::Mat diff = pSystem->m_vAutoCalibrationInfo.at(bestFrameIndex - minusLoc - 1).first - pSystem->m_vAutoCalibrationInfo.at(bestFrameIndex - minusLoc).first;
+						double tmpDiff = cv::norm(diff);
+						diffInfo.insert({ bestFrameIndex - minusLoc - 1, std::make_pair(tmpDiff, pSystem->m_vAutoCalibrationInfo.at(bestFrameIndex - minusLoc - 1).second) });
+					}
+					else {
+						stopMinus = true;
+					}
+				}
+				if (minusCheck == 3) stopMinus = true;
+			}
+
+			// +1
+			if(!stopPlus){
+				plusLoc++;
+				auto diffIndexNow = diffInfo.find(bestFrameIndex + plusLoc);
+				auto diffIndexAfter = diffInfo.find(bestFrameIndex + plusLoc + 1);
+				if (diffIndexAfter != diffInfo.end()) {
+					if (diffIndexNow->second.first < diffIndexAfter->second.first) {
+						plusCheck++;
+					}
+					else {
+						plusCheck = 0;
+					}
+				}
+				else {
+					if (bestFrameIndex + plusLoc + 1 < pSystem->m_vAutoCalibrationInfo.size()) {
+						cv::Mat diff = pSystem->m_vAutoCalibrationInfo.at(bestFrameIndex + plusLoc).first - pSystem->m_vAutoCalibrationInfo.at(bestFrameIndex + plusLoc + 1).first;
+						double tmpDiff = cv::norm(diff);
+						diffInfo.insert({ bestFrameIndex + plusLoc, std::make_pair(tmpDiff, pSystem->m_vAutoCalibrationInfo.at(bestFrameIndex + plusLoc).second) });
+					}
+					else {
+						stopPlus = true;
+					}
+				}
+				if (plusCheck == 3) stopPlus = true;
+			}
+		}
+		// 1-5. Move to final calibrated position
+		minusLoc -= minusCheck;
+		plusLoc -= plusCheck;
+		int centerLoc = bestFrameIndex + (plusLoc - minusLoc) / 2;
+
+		nZOffset = pSystem->m_vAutoCalibrationInfo.at(centerLoc).second;
+		pLaserModule->Move(eStepMotorIndex::DelayLine, nZOffset);
+		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
+
+		nZOffset += nSheathPosition; // 최종적으로 sheath 위치를 더해줘야 함.
+		pLaserModule->Current(eStepMotorIndex::DelayLine, nZOffset);
+		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
+
 
 #if 1
 		// 2. Start Finding Peak
@@ -2315,8 +2426,9 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 		case CatheterState::FindingSheath: //
 		{
 			int nSheathPosition = m_pImagingRealtime->GetSheathPosition();
+			cv::Mat circularImage = m_pImagingRealtime->GetCircleImage();
 			int nDelayLinePos = m_pLaserModule->GetPosition(eStepMotorIndex::DelayLine);
-			m_vCalibrationInfo.push_back(std::make_pair(nSheathPosition, nDelayLinePos));
+			m_vAutoCalibrationInfo.push_back(std::make_pair(circularImage, nDelayLinePos));
 			PLOGI.printf("FindingSheath - %d, %d", nSheathPosition, nDelayLinePos);
 		}
 			break;
