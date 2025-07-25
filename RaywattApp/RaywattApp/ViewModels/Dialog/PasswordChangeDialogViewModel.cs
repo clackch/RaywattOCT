@@ -118,9 +118,9 @@ namespace RaywattApp.ViewModels.Dialog
             _currentPassword = _passwordService.GetPasswordByUserId(_curruntID);
             if (_currentPassword == string.Empty) return false;
 
-            if (!_passwordService.IsSamePassword(_currentPassword, OldPassword, "[Old Password]")) return false;
+            if (!_passwordService.IsSamePassword(_currentPassword, OldPassword, "[Current Password]")) return false;
 
-            if (!_passwordService.IsNotSamePassword(OldPassword, NewPassword, "[Old/New Password]")) return false;
+            if (!_passwordService.IsNotSamePassword(OldPassword, NewPassword, "[Current/New Password]")) return false;
 
             if (!_passwordService.IsSamePassword(NewPassword, ConfirmPassword, "[New/Confirm Password]")) return false;
 

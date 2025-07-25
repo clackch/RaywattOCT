@@ -8,6 +8,7 @@ using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Windows.Input;
 
 namespace RaywattApp.ViewModels
@@ -24,12 +25,12 @@ namespace RaywattApp.ViewModels
         private TextValidator _id = new TextValidator();
 
         [ObservableProperty]
-        private TextValidator _password = new TextValidator();
+        private string _password = string.Empty;
 
         private ICommand _loginCommand;
         public ICommand LoginCommand
         {
-            get { return this._loginCommand ?? (this._loginCommand = new RelayCommand(Login)); }
+            get { return this._loginCommand ?? (this._loginCommand = new RelayCommand(Login, CanLogin)); }
         }
 
         public OutsetLoginViewModel(SqlManager sqlManager, IDialogService dialogService)
@@ -37,6 +38,8 @@ namespace RaywattApp.ViewModels
             _log.Debug("OutsetLoginViewModel");
 
             Constants.CurrentPage = Constants.OutsetLoginPage;
+
+            Id.PropertyChanged += OnIdPropertyChanged;
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
@@ -62,10 +65,28 @@ namespace RaywattApp.ViewModels
             {
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["id"] = Id.Text;
-                parameter["password"] = Password.Text;
+                parameter["password"] = Password;
 
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoadingPage) { Parameter = parameter });
             }
+        }
+
+        partial void OnPasswordChanged(string value)
+        {
+            (LoginCommand as RelayCommand)?.NotifyCanExecuteChanged();
+        }
+
+        private void OnIdPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(TextValidator.Text))
+            {
+                (LoginCommand as RelayCommand)?.NotifyCanExecuteChanged();
+            }
+        }
+
+        private bool CanLogin()
+        {
+            return !string.IsNullOrEmpty(Id.Text) && !string.IsNullOrEmpty(Password);
         }
     }
 }
