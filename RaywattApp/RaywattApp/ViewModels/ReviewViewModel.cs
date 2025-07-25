@@ -29,9 +29,6 @@ using System.IO;
 using System.Windows.Media;
 using RaywattApp.Common.Angio;
 using System.Xml;
-using System.Windows.Controls;
-using OpenCvSharp.WpfExtensions;
-using System.Diagnostics;
 
 namespace RaywattApp.ViewModels
 {
@@ -455,6 +452,7 @@ namespace RaywattApp.ViewModels
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
             Save();
+            FfrValueChangedCheck();
 
             RayUnregisterDetectionCallback();
         }
@@ -619,15 +617,13 @@ namespace RaywattApp.ViewModels
 
             //Cross-Section
             Measurements = JsonConvert.DeserializeObject<List<Measurement>>(tempCrossSection);
+            
             if (Measurements == null)
                 Measurements = new List<Measurement>();
             for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
             {
                 Measurement measurement = new Measurement();
-                measurement.FrameNumber = i;
-                measurement.AreaGeometries = new ObservableCollection<AreaGeometry>();
-                measurement.LengthGeometries = new ObservableCollection<LengthGeometry>();
-                measurement.TextGeometries = new List<TextGeometry>();
+                measurement.FrameNumber = i;                
                 Measurements.Add(measurement);
             }
             Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
@@ -1284,6 +1280,12 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Save");
 
+            if(PatientCase == null)
+            {
+                _log.Error("PatientCase == null");
+                return;
+            }
+
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
             sqlParameters["physician_name"] = PatientCase.PhysicianName;
@@ -1362,7 +1364,7 @@ namespace RaywattApp.ViewModels
             //Cross-section
             foreach (Measurement measurement in param)
             {
-                if (measurement.AreaGeometries.Count > 0 || measurement.LengthGeometries.Count > 0 || measurement.TextGeometries.Count > 0)
+                if (measurement.AreaGeometries.Count > 0 || measurement.LengthGeometries.Count > 0 || measurement.TextGeometries.Count > 0 || measurement.AngleGeometries.Count > 0)
                 {
                     if (measurement.AreaGeometries.Count > 0)
                     {
@@ -1386,6 +1388,65 @@ namespace RaywattApp.ViewModels
             longitudeMeasurement.TextGeometries = LModeTextGeometries;
 
             return JsonConvert.SerializeObject(longitudeMeasurement, Newtonsoft.Json.Formatting.Indented);
+        }
+
+        private void FfrValueChangedCheck()
+        {
+            _log.Info("FfrValueChangedCheck");
+
+            if (PatientCase == null)
+            {
+                _log.Error("PatientCase == null");
+                return;
+            }
+
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["id"] = PatientCase.Id;
+            IList<StringModel> ffrPlaques = _sqlManager.SelectPatientCaseFfr(sqlParameters);
+
+            if (ffrPlaques != null && ffrPlaques.Count > 0 && !String.IsNullOrEmpty(ffrPlaques[0].ReturnString2))
+            {
+                FfrFeature ffrValue = JsonConvert.DeserializeObject<FfrFeature>(ffrPlaques[0].ReturnString2);
+                if (ffrValue == null)
+                    return;
+
+                bool isSame = true;
+
+                if (ffrValue.DistalLumenArea != Section.Proximal.DValue) //P/D 위치 바꾸면서, FFR Value는 P/D 값은 반대로 들어가 있음
+                    isSame = false;
+                if (ffrValue.MinimalLumenArea != Section.MlaValue.DValue)
+                    isSame = false;
+                if (ffrValue.ProximalLumenArea != Section.Distal.DValue) //P/D 위치 바꾸면서, FFR Value는 P/D 값은 반대로 들어가 있음
+                    isSame = false;
+                if (ffrValue.LesionLength != Section.LesionLength.DValue)
+                    isSame = false;
+                if (ffrValue.VesselType != PatientCase.Vessel)
+                    isSame = false;
+
+                if (isSame)
+                {
+                    if (PatientCase.FfrFeature == null)
+                    {
+                        PatientCase.FfrFeature = ffrValue;
+                        List < Measurement> plaqueAreaList = JsonConvert.DeserializeObject<List<Measurement>>(ffrPlaques[0].ReturnString);
+
+                        for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
+                        {
+                            Measurement measurement = new Measurement();
+                            measurement.FrameNumber = i;
+                            measurement.AreaGeometries = new ObservableCollection<AreaGeometry>();
+                            measurement.LengthGeometries = new ObservableCollection<LengthGeometry>();
+                            measurement.TextGeometries = new List<TextGeometry>();
+                            plaqueAreaList.Add(measurement);
+                        }
+                        PatientCase.FfrFeature.PlaqueAreaList = plaqueAreaList.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
+                    }
+                }
+                else
+                {
+                    PatientCase.FfrFeature = null;
+                }
+            }
         }
 
         #endregion

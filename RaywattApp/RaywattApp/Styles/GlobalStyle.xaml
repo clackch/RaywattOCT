@@ -8,6 +8,7 @@
     <Cursor x:Key="wait">C:\Raywatt\system\image\cursor\wait.cur</Cursor>
     <Cursor x:Key="measureArea">C:\Raywatt\system\image\cursor\measureArea.cur</Cursor>
     <Cursor x:Key="measureLength">C:\Raywatt\system\image\cursor\measureLength.cur</Cursor>
+    <Cursor x:Key="measureAngle">C:\Raywatt\system\image\cursor\measureAngle.cur</Cursor>
     <Cursor x:Key="measureText">C:\Raywatt\system\image\cursor\measureText.cur</Cursor>
     <Cursor x:Key="measureErase">C:\Raywatt\system\image\cursor\measureErase.cur</Cursor>
     <Cursor x:Key="coregistration">C:\Raywatt\system\image\cursor\coregistration.cur</Cursor>

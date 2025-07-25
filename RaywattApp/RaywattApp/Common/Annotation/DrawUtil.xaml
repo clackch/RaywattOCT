@@ -23,6 +23,9 @@
                 <DataTrigger Binding="{Binding CommandType, ElementName=UserControl}" Value="4">
                     <Setter Property="Cursor" Value="{StaticResource measureErase}"/>
                 </DataTrigger>
+                <DataTrigger Binding="{Binding CommandType, ElementName=UserControl}" Value="5">
+                    <Setter Property="Cursor" Value="{StaticResource measureAngle}"/>
+                </DataTrigger>
             </Style.Triggers>
         </Style>
         <Style TargetType="Path" x:Key="StylePath">
@@ -106,14 +109,14 @@
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
                         <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
-                        <Condition Binding="{Binding CommandType, ElementName=UserControl}" Value="0"/>
+                        <Condition Binding="{Binding CommandType, Source={x:Reference UserControl}}" Value="0"/>
                     </MultiDataTrigger.Conditions>
                     <Setter Property="Background" Value="{Binding RelativeSource={RelativeSource Self}, Path=BorderBrush}"/>
                 </MultiDataTrigger>
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
                         <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
-                        <Condition Binding="{Binding CommandType, ElementName=UserControl}" Value="4"/>
+                        <Condition Binding="{Binding CommandType, Source={x:Reference UserControl}}" Value="4"/>
                     </MultiDataTrigger.Conditions>
                     <Setter Property="Background" Value="{Binding RelativeSource={RelativeSource Self}, Path=BorderBrush}"/>
                 </MultiDataTrigger>

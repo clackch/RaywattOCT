@@ -165,11 +165,19 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
-                ReviewStatus.CurrentPage = Constants.ReviewFfrSettingPage;
+
                 if (PatientCase.FfrFeature == null)
                     FfrFeature = new FfrFeature();
                 else
-                    FfrFeature = PatientCase.FfrFeature;
+                {
+                    Dictionary<string, object> parameter = new Dictionary<string, object>();
+                    parameter["patient"] = Patient;
+                    parameter["patientCase"] = PatientCase;
+                    parameter["prevStatus"] = PrevStatus;
+                    parameter["reviewStatus"] = ReviewStatus;
+                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewFfrPage) { Parameter = parameter });
+                    return;
+                }                    
                 FfrFeature.PlaqueArea = 0;
                 FfrFeature.PercentAreaStenosis = 0;
                 FfrFeature.IsPlaqueAreaValid = false;
@@ -194,7 +202,7 @@ namespace RaywattApp.ViewModels
                 {
                     Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
                     sqlParameters["id"] = PatientCase.Id;
-                    IList<StringModel> ffrPlaques = _sqlManager.SelectPatientCaseFfrPlaque(sqlParameters);
+                    IList<StringModel> ffrPlaques = _sqlManager.SelectPatientCaseFfr(sqlParameters);
 
                     if (String.IsNullOrEmpty(ffrPlaques[0].ReturnString))
                         PlaqueAreaList = new List<Measurement>();
@@ -204,10 +212,7 @@ namespace RaywattApp.ViewModels
                     for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
                     {
                         Measurement measurement = new Measurement();
-                        measurement.FrameNumber = i;
-                        measurement.AreaGeometries = new ObservableCollection<AreaGeometry>();
-                        measurement.LengthGeometries = new ObservableCollection<LengthGeometry>();
-                        measurement.TextGeometries = new List<TextGeometry>();
+                        measurement.FrameNumber = i;                        
                         PlaqueAreaList.Add(measurement);
                     }
                     PlaqueAreaList = PlaqueAreaList.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
@@ -368,23 +373,27 @@ namespace RaywattApp.ViewModels
             double scaleArea = Constants.ImageResolution * Constants.ImageResolution;
 
             PatientCase.FfrFeature = FfrFeature;
-            PatientCase.FfrFeature.VesselType = CurrentVessel.Buffer1;
+            PatientCase.FfrFeature.VesselType = CurrentVessel.Key;
+            PatientCase.FfrFeature.VesselTypeGroup = CurrentVessel.Buffer1;
             PatientCase.FfrFeature.ActualVesselType = CurrentVessel.Buffer2;
-            PatientCase.FfrFeature.ProximalLumenArea = Section.Proximal.DValue;
-            PatientCase.FfrFeature.DistalLumenArea = Section.Distal.DValue;
+            PatientCase.FfrFeature.ProximalLumenArea = Section.Distal.DValue;
+            PatientCase.FfrFeature.DistalLumenArea = Section.Proximal.DValue;
             PatientCase.FfrFeature.LesionLength = Section.LesionLength.DValue;
             PatientCase.FfrFeature.MinimalLumenFrameNumber = GetMlaFrameNumber();
             PatientCase.FfrFeature.MinimalLumenArea = GetMla();
             PatientCase.FfrFeature.PlaqueArea = FfrFeature.PlaqueArea;
             PatientCase.FfrFeature.PercentAreaStenosis = FfrFeature.PercentAreaStenosis;
+            PatientCase.FfrFeature.PlaqueAreaList = null;
+            string ffrValue = JsonConvert.SerializeObject(PatientCase.FfrFeature, Newtonsoft.Json.Formatting.Indented);
             PatientCase.FfrFeature.PlaqueAreaList = PlaqueAreaList;
 
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["id"] = PatientCase.Id;
             sqlParameters["ffr_plaque"] = ConvertMeasurementsToJson(PlaqueAreaList);
-            int nRows = _sqlManager.UpdatePatientCaseFfrPlaque(sqlParameters);
-            
-            if(nRows == 0)
+            sqlParameters["ffr_value"] = ffrValue;
+            int nRows = _sqlManager.UpdatePatientCaseFfr(sqlParameters);
+
+            if (nRows == 0)
             {
                 _log.Error("Update Error");
             }
