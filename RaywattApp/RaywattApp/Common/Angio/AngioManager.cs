@@ -713,7 +713,6 @@ namespace RaywattApp.Common.Angio
 
         public Mat ShowNoSignal()
         {
-            _log.Debug("No signal");
             Mat image = new Mat(1080, 1920, MatType.CV_8UC3);
             image.SetTo(new Scalar(0, 0, 0));
             return image;
