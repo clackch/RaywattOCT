@@ -66,6 +66,21 @@ namespace RaywattApp.ViewModels.Password
             _log.Debug("OnNavigating");
         }
 
+        partial void OnConfirmPasswordChanged(string value)
+        {
+            (OkCommand as RelayCommand<IDialogWindow>)?.NotifyCanExecuteChanged();
+        }
+
+        partial void OnNewPasswordChanged(string value)
+        {
+            (OkCommand as RelayCommand<IDialogWindow>)?.NotifyCanExecuteChanged();
+        }
+
+        partial void OnOldPasswordChanged(string value)
+        {
+            (OkCommand as RelayCommand<IDialogWindow>)?.NotifyCanExecuteChanged();
+        }
+
         private void OnChangeLater(IDialogWindow dialog)
         {
             _log.Debug("OnChangeLater");
@@ -108,7 +123,9 @@ namespace RaywattApp.ViewModels.Password
 
         private bool CanOk(IDialogWindow? obj)
         {
-            throw new NotImplementedException();
+            return !string.IsNullOrEmpty(OldPassword) &&
+                   !string.IsNullOrEmpty(NewPassword) &&
+                   !string.IsNullOrEmpty(ConfirmPassword);
         }
 
         private void InputPasswordClear()

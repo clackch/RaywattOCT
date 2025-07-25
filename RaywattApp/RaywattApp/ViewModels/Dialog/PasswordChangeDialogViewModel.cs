@@ -116,7 +116,11 @@ namespace RaywattApp.ViewModels.Dialog
             _curruntID = ViewModelBase.DeviceStatus.LoginID;
 
             _currentPassword = _passwordService.GetPasswordByUserId(_curruntID);
-            if (_currentPassword == string.Empty) return false;
+            if (_currentPassword == string.Empty)
+            {
+                _passwordService.ShowAlert(_l10n["Information"], "Current password not found. Please contact support.");
+                return false;
+            }
 
             if (!_passwordService.IsSamePassword(_currentPassword, OldPassword, "[Current Password]")) return false;
 

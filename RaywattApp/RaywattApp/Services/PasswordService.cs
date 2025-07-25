@@ -1,7 +1,9 @@
-﻿using log4net;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Localization;
+using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Views.Dialog;
 using System.Collections.Generic;
@@ -24,6 +26,14 @@ namespace RaywattApp.Services
             get => _passwordExpiryDays;
         }
 
+        private int _passwordCountBase = 10;
+        static private int _passwordCount = 0;
+        public void ResetPasswordCount()
+        {
+            _log.Debug("ResetPasswordCount");
+            _passwordCount = 0;
+        }
+
         public PasswordService(IDialogService dialogService, IDatabaseService databaseService)
         {
             _log.Debug("PasswordService");
@@ -41,6 +51,35 @@ namespace RaywattApp.Services
             if (!beforePassword.Equals(inputPassword))
             {
                 ShowAlert(_l10n["Information"], $"The password is incorrect.\r\n{message}");
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool CheckLoginWithRetryCount(string id, string inputPassword)
+        {
+            _passwordCount++;
+
+            _log.Debug("CheckLoginWithRetryCount " + _passwordCount);
+
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["id"] = id;
+            sqlParameters["admin"] = false;
+
+            string password = GetPasswordByUserId(id);
+
+            if(password != inputPassword || password == string.Empty)
+            {
+                if (_passwordCount >= _passwordCountBase)
+                {
+                    ShowAlert(_l10n["Information"], $"You have entered the wrong password {_passwordCountBase} times.");
+                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
+                    ResetPasswordCount();
+                    return false;
+                }
+                ShowAlert(_l10n["Information"], "The password is incorrect. Please try again. " + _passwordCount);
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
                 return false;
             }
 
@@ -71,12 +110,6 @@ namespace RaywattApp.Services
             var commandText = SqlQuery.GetQuery("SelectUserById");
             var userData = _databaseService.GetDatas<User>(commandText, sqlParameters);
             string password = userData.Count > 0 ? userData[0].Password : string.Empty;
-
-            if (password == string.Empty)
-            {
-                ShowAlert(_l10n["Information"], "The login ID is not registered.");
-                return string.Empty;
-            }
 
             return password;
         }

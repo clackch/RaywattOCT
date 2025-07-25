@@ -3,6 +3,8 @@
     public interface IPasswordService
     {
         int PasswordExpiryDays { get; }
+        void ResetPasswordCount();
+        bool CheckLoginWithRetryCount(string id, string inputPassword);
 
         /// <summary>
         /// Checks if the input password matches the existing password

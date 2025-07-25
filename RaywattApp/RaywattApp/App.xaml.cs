@@ -155,7 +155,7 @@ namespace RaywattApp
             services.AddTransient<IPasswordService, PasswordService>();
 
             services.AddSingleton(typeof(AngioManager));
-            services.AddSingleton(typeof(IdleMonitorService));
+            services.AddTransient(typeof(IdleMonitorService));
 
             return services.BuildServiceProvider();
         }

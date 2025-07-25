@@ -12,6 +12,7 @@ using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Interop;
 using System.Windows.Navigation;
 using System.Windows.Threading;
@@ -59,85 +60,24 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("OnNavigated");
 
-            var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
+            if (navigatedEventArgs is not NavigationEventArgs navArgs || navArgs.ExtraData is not Dictionary<string, object> data)
+                return;
 
-            if (extraData != null)
-            {
-                Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
-                string id = (string)data["id"];
-                string password = (string)data["password"];
+            string id = data["id"] as string;
+            string password = data["password"] as string;
 
-                // step 1.id, password (users table)
-                Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
-                sqlParameters["id"] = id;
-                sqlParameters["admin"] = false;
+            if (!_passwordService.CheckLoginWithRetryCount(id, password)) return;
 
-                IList<User> users = _sqlManager.SelectUserById(sqlParameters);
+            var user = GetUserById(id);
 
-                bool isExistUser = users.Count == 1;
+            DeviceStatus.LoginID = id;
+            _passwordService.ResetPasswordCount();
 
-                if (!isExistUser)
-                {
-                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
-                    return;
-                }
+            if (CheckPasswordReset(user, data)) return;
+            if (CheckPasswordExpiry(user, data)) return;
+            if (!EnsureTermsAgreement(user, id, password)) return;
 
-                if (!users[0].Password.Equals(password))
-                {
-                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
-                    return;
-                }
-
-                // step 2. password reset ?
-                bool isPasswordReset = users[0].PasswordReset; // true: reset 필요
-                if(isPasswordReset)
-                {
-                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.InitialPasswordSetupPage) { Parameter = data});
-                    return;
-                }
-
-                // Step 3. Check password expiration period (from users table, update_date)
-                DateTime updateDate = users[0].PasswordChangedAt;
-                if((DateTime.Now - updateDate).TotalDays > _passwordService.PasswordExpiryDays)
-                {
-                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PasswordExpiryCheckPage) { Parameter = data });
-                    return;
-                }
-
-                // step 4. terms_agreed_at (users table)
-                bool hasAgreedToTerms = users[0].TermsAgreedAt != DateTime.MinValue;
-                if (!hasAgreedToTerms)
-                {
-                    Dictionary<string, object> parameter = new Dictionary<string, object>();
-                    parameter["tnC"] = users[0];
-
-                    var result = _dialogService.OpenDialog(new TermsConditionsControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-                    if (result != null && result.DialogAnswer == DialogResults.Answer.No)
-                    {
-                        WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
-                        return;
-                    }
-                    else
-                    {
-                        sqlParameters.Clear();
-                        
-                        sqlParameters["id"] = id;
-                        sqlParameters["password"] = password;
-                        sqlParameters["admin"] = false;
-
-                        _sqlManager.UpdateTermsAgreedDateUser(sqlParameters);
-                    }
-                }
-
-                DeviceStatus.LoginID = id;
-
-                Thread threadCoreAndDeviceInit = new Thread(() => ThreadCoreAndDeviceInit());
-                threadCoreAndDeviceInit.Start();
-
-                timer.Interval = TimeSpan.FromMilliseconds(25);
-                timer.Tick += new EventHandler(ProgressTest);
-                timer.Start();
-            }
+            InitializeSystem();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -254,5 +194,70 @@ namespace RaywattApp.ViewModels
 
             _log.Debug("ThreadCoreAndDeviceInit - Done");
         }
+
+        private User? GetUserById(string id)
+        {
+            var sqlParams = new Dictionary<string, object>
+            {
+                ["id"] = id,
+                ["admin"] = false
+            };
+
+            var users = _sqlManager.SelectUserById(sqlParams);
+            return users?.Count > 0 ? users[0] : null;
+        }
+
+        private bool CheckPasswordReset(User user, Dictionary<string, object> data)
+        {
+            if (user.PasswordReset)
+            {
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.InitialPasswordSetupPage) { Parameter = data });
+                return true;
+            }
+            return false;
+        }
+
+        private bool CheckPasswordExpiry(User user, Dictionary<string, object> data)
+        {
+            if ((DateTime.Now - user.PasswordChangedAt).TotalDays > _passwordService.PasswordExpiryDays)
+            {
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PasswordExpiryCheckPage) { Parameter = data });
+                return true;
+            }
+            return false;
+        }
+
+        private bool EnsureTermsAgreement(User user, string id, string password)
+        {
+            var parameter = new Dictionary<string, object> { ["tnC"] = user };
+            var result = _dialogService.OpenDialog(
+                new TermsConditionsControl(), parameter,
+                Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+            if (result?.DialogAnswer == DialogResults.Answer.No)
+            {
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
+                return false;
+            }
+
+            _sqlManager.UpdateTermsAgreedDateUser(new Dictionary<string, object>
+            {
+                ["id"] = id,
+                ["password"] = password,
+                ["admin"] = false
+            });
+
+            return true;
+        }
+        private void InitializeSystem()
+        {
+            Task.Run(() => ThreadCoreAndDeviceInit());
+
+            timer.Tick -= ProgressTest; // 중복 방지
+            timer.Tick += ProgressTest;
+            timer.Interval = TimeSpan.FromMilliseconds(25);
+            timer.Start();
+        }
+
     }
 }
