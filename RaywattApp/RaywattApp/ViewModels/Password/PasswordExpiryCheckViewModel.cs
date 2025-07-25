@@ -6,6 +6,7 @@ using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
 using RaywattApp.Services;
+using System;
 using System.Collections.Generic;
 using System.Windows.Input;
 using System.Windows.Navigation;
@@ -39,7 +40,7 @@ namespace RaywattApp.ViewModels.Password
         private ICommand _okCommand;
         public ICommand OkCommand
         {
-            get { return this._okCommand ?? (this._okCommand = new RelayCommand<IDialogWindow>(OnOk)); }
+            get { return this._okCommand ?? (this._okCommand = new RelayCommand<IDialogWindow>(OnOk, CanOk)); }
         }
 
         public PasswordExpiryCheckViewModel(IPasswordService passwordService)
@@ -105,6 +106,11 @@ namespace RaywattApp.ViewModels.Password
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoadingPage) { Parameter = parameter });
         }
 
+        private bool CanOk(IDialogWindow? obj)
+        {
+            throw new NotImplementedException();
+        }
+
         private void InputPasswordClear()
         {
             _log.Debug("InputPasswordClear");
@@ -120,9 +126,9 @@ namespace RaywattApp.ViewModels.Password
 
             if (_loginPassword == string.Empty) return false;
 
-            if (!_passwordService.IsSamePassword(_loginPassword, OldPassword, "[Old Password]")) return false;
+            if (!_passwordService.IsSamePassword(_loginPassword, OldPassword, "[Current Password]")) return false;
 
-            if (!_passwordService.IsNotSamePassword(OldPassword, NewPassword, "[Old/New Password]")) return false;
+            if (!_passwordService.IsNotSamePassword(OldPassword, NewPassword, "[Current/New Password]")) return false;
 
             if (!_passwordService.IsSamePassword(NewPassword, ConfirmPassword, "[New/Confirm Password]")) return false;
 

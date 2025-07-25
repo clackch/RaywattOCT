@@ -5,6 +5,7 @@ using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Models;
 using RaywattApp.Services;
+using System;
 using System.Windows.Input;
 
 namespace RaywattApp.ViewModels.Dialog
@@ -36,7 +37,7 @@ namespace RaywattApp.ViewModels.Dialog
         private ICommand _okCommand;
         public ICommand OkCommand
         {
-            get { return this._okCommand ?? (this._okCommand = new RelayCommand<IDialogWindow>(OnOk)); }
+            get { return this._okCommand ?? (this._okCommand = new RelayCommand<IDialogWindow>(OnOk, CanOk)); }
         }
 
         public PasswordChangeDialogViewModel(IPasswordService passwordService)
@@ -44,6 +45,21 @@ namespace RaywattApp.ViewModels.Dialog
             _log.Info("PasswordChangeDialogViewModel");
 
             _passwordService = passwordService;
+        }
+
+        partial void OnConfirmPasswordChanged(string value)
+        {
+            (OkCommand as RelayCommand<IDialogWindow>)?.NotifyCanExecuteChanged();
+        }
+
+        partial void OnNewPasswordChanged(string value)
+        {
+            (OkCommand as RelayCommand<IDialogWindow>)?.NotifyCanExecuteChanged();
+        }
+
+        partial void OnOldPasswordChanged(string value)
+        {
+            (OkCommand as RelayCommand<IDialogWindow>)?.NotifyCanExecuteChanged();
         }
 
         private void OnCancel(IDialogWindow dialog)
@@ -75,6 +91,13 @@ namespace RaywattApp.ViewModels.Dialog
             DialogResults dialogResults = new();
             dialogResults.DialogAnswer = DialogResults.Answer.Yes;
             CloseDialogWithResult(dialog, dialogResults);
+        }
+
+        private bool CanOk(IDialogWindow? obj)
+        {
+            return !string.IsNullOrEmpty(OldPassword) &&
+                   !string.IsNullOrEmpty(NewPassword) &&
+                   !string.IsNullOrEmpty(ConfirmPassword);
         }
 
         private void InputPasswordClear()
