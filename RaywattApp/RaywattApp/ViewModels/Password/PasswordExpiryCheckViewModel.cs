@@ -6,7 +6,6 @@ using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
 using RaywattApp.Services;
-using System;
 using System.Collections.Generic;
 using System.Windows.Input;
 using System.Windows.Navigation;
@@ -18,7 +17,7 @@ namespace RaywattApp.ViewModels.Password
         private static readonly ILog _log = LogManager.GetLogger(typeof(PasswordExpiryCheckViewModel));
 
         [ObservableProperty]
-        private string _oldPassword = string.Empty;
+        private string _currentPassword = string.Empty;
 
         [ObservableProperty]
         private string _newPassword = string.Empty;
@@ -76,7 +75,7 @@ namespace RaywattApp.ViewModels.Password
             (OkCommand as RelayCommand<IDialogWindow>)?.NotifyCanExecuteChanged();
         }
 
-        partial void OnOldPasswordChanged(string value)
+        partial void OnCurrentPasswordChanged(string value)
         {
             (OkCommand as RelayCommand<IDialogWindow>)?.NotifyCanExecuteChanged();
         }
@@ -99,7 +98,7 @@ namespace RaywattApp.ViewModels.Password
         {
             _log.Debug("OnOk");
 
-            if (OldPassword == string.Empty | NewPassword == string.Empty | ConfirmPassword == string.Empty)
+            if (CurrentPassword == string.Empty | NewPassword == string.Empty | ConfirmPassword == string.Empty)
             {
                 InputPasswordClear();
                 _passwordService.ShowAlert(_l10n["Information"], "Password entry is required");
@@ -123,7 +122,7 @@ namespace RaywattApp.ViewModels.Password
 
         private bool CanOk(IDialogWindow? obj)
         {
-            return !string.IsNullOrEmpty(OldPassword) &&
+            return !string.IsNullOrEmpty(CurrentPassword) &&
                    !string.IsNullOrEmpty(NewPassword) &&
                    !string.IsNullOrEmpty(ConfirmPassword);
         }
@@ -132,7 +131,7 @@ namespace RaywattApp.ViewModels.Password
         {
             _log.Debug("InputPasswordClear");
 
-            OldPassword = string.Empty;
+            CurrentPassword = string.Empty;
             NewPassword = string.Empty;
             ConfirmPassword = string.Empty;
         }
@@ -143,9 +142,9 @@ namespace RaywattApp.ViewModels.Password
 
             if (_loginPassword == string.Empty) return false;
 
-            if (!_passwordService.IsSamePassword(_loginPassword, OldPassword, "[Current Password]")) return false;
+            if (!_passwordService.IsSamePassword(_loginPassword, CurrentPassword, "[Current Password]")) return false;
 
-            if (!_passwordService.IsNotSamePassword(OldPassword, NewPassword, "[Current/New Password]")) return false;
+            if (!_passwordService.IsNotSamePassword(CurrentPassword, NewPassword, "[Current/New Password]")) return false;
 
             if (!_passwordService.IsSamePassword(NewPassword, ConfirmPassword, "[New/Confirm Password]")) return false;
 

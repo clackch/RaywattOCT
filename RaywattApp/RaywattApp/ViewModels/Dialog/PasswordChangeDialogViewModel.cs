@@ -5,7 +5,6 @@ using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Models;
 using RaywattApp.Services;
-using System;
 using System.Windows.Input;
 
 namespace RaywattApp.ViewModels.Dialog
@@ -15,7 +14,7 @@ namespace RaywattApp.ViewModels.Dialog
         private static readonly ILog _log = LogManager.GetLogger(typeof(PasswordChangeDialogViewModel));
 
         [ObservableProperty]
-        private string _oldPassword = string.Empty;
+        private string _currentPassword = string.Empty;
 
         [ObservableProperty]
         private string _newPassword = string.Empty;
@@ -23,8 +22,8 @@ namespace RaywattApp.ViewModels.Dialog
         [ObservableProperty]
         private string _confirmPassword = string.Empty;
 
-        private string _currentPassword = string.Empty;
-        private string _curruntID = string.Empty;
+        private string _loginPassword = string.Empty;
+        private string _loginID = string.Empty;
 
         private ICommand _cancelCommand;
         public ICommand CancelCommand
@@ -57,7 +56,7 @@ namespace RaywattApp.ViewModels.Dialog
             (OkCommand as RelayCommand<IDialogWindow>)?.NotifyCanExecuteChanged();
         }
 
-        partial void OnOldPasswordChanged(string value)
+        partial void OnCurrentPasswordChanged(string value)
         {
             (OkCommand as RelayCommand<IDialogWindow>)?.NotifyCanExecuteChanged();
         }
@@ -71,11 +70,12 @@ namespace RaywattApp.ViewModels.Dialog
 
             CloseDialogWithResult(dialog, dialogResults);
         }
+
         private void OnOk(IDialogWindow dialog)
         {
             _log.Info("OnOk");
 
-            if (OldPassword == string.Empty | NewPassword == string.Empty | ConfirmPassword == string.Empty)
+            if (CurrentPassword == string.Empty | NewPassword == string.Empty | ConfirmPassword == string.Empty)
             {
                 InputPasswordClear();
                 _passwordService.ShowAlert(_l10n["Information"], "Password entry is required");
@@ -95,7 +95,7 @@ namespace RaywattApp.ViewModels.Dialog
 
         private bool CanOk(IDialogWindow? obj)
         {
-            return !string.IsNullOrEmpty(OldPassword) &&
+            return !string.IsNullOrEmpty(CurrentPassword) &&
                    !string.IsNullOrEmpty(NewPassword) &&
                    !string.IsNullOrEmpty(ConfirmPassword);
         }
@@ -104,7 +104,7 @@ namespace RaywattApp.ViewModels.Dialog
         {
             _log.Info("InputPasswordClear");
 
-            OldPassword = string.Empty;
+            CurrentPassword = string.Empty;
             NewPassword = string.Empty;
             ConfirmPassword = string.Empty;
         }
@@ -113,18 +113,18 @@ namespace RaywattApp.ViewModels.Dialog
         {
             _log.Info("ExecuteChangePassword");
 
-            _curruntID = ViewModelBase.DeviceStatus.LoginID;
+            _loginID = ViewModelBase.DeviceStatus.LoginID;
 
-            _currentPassword = _passwordService.GetPasswordByUserId(_curruntID);
-            if (_currentPassword == string.Empty)
+            _loginPassword = _passwordService.GetPasswordByUserId(_loginID);
+            if (_loginPassword == string.Empty)
             {
                 _passwordService.ShowAlert(_l10n["Information"], "Current password not found. Please contact support.");
                 return false;
             }
 
-            if (!_passwordService.IsSamePassword(_currentPassword, OldPassword, "[Current Password]")) return false;
+            if (!_passwordService.IsSamePassword(_loginPassword, CurrentPassword, "[Current Password]")) return false;
 
-            if (!_passwordService.IsNotSamePassword(OldPassword, NewPassword, "[Current/New Password]")) return false;
+            if (!_passwordService.IsNotSamePassword(CurrentPassword, NewPassword, "[Current/New Password]")) return false;
 
             if (!_passwordService.IsSamePassword(NewPassword, ConfirmPassword, "[New/Confirm Password]")) return false;
 
@@ -134,7 +134,7 @@ namespace RaywattApp.ViewModels.Dialog
                 return false;
             }
 
-            _passwordService.UpdatePasswordReset(_curruntID, ConfirmPassword, _currentPassword, false);
+            _passwordService.UpdatePasswordReset(_loginID, ConfirmPassword, _loginPassword, false);
 
             _passwordService.ShowAlert(_l10n["Information"], "Password changed successfully");
 
