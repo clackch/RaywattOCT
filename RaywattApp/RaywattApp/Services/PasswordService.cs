@@ -23,6 +23,7 @@ namespace RaywattApp.Services
         private const int _passwordExpiryDays = 90;
         private readonly int _maxPasswordRetryCount = 3;
         static private int _currentPasswordRetryCount = 0;
+        private static readonly TimeSpan PasswordRetryLockDuration = TimeSpan.FromSeconds(10);
 
         public int PasswordExpiryDays
         {
@@ -74,13 +75,13 @@ namespace RaywattApp.Services
             {
                 if (_currentPasswordRetryCount >= _maxPasswordRetryCount)
                 {
-                    ShowTimerAlert(_l10n["Information"], $"You have entered the wrong password {_maxPasswordRetryCount} times.", false, TimeSpan.FromSeconds(10));
+                    ShowTimerAlert(_l10n["Information"], $"Wrong password entered\r\n\r\n{_maxPasswordRetryCount} times", false, PasswordRetryLockDuration);
                     WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
                     ResetPasswordCount();
                     return false;
                 }
 
-                ShowAlert(_l10n["Information"], "Please verify your ID and password and try again\r\n" + _currentPasswordRetryCount);
+                ShowAlert(_l10n["Information"], "Invalid ID or password\r\nPlease try again\r\n\r\nAttempt: " + _currentPasswordRetryCount + "/"+ _maxPasswordRetryCount);
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
                 return false;
             }
@@ -170,7 +171,7 @@ namespace RaywattApp.Services
                 {
                     ["title"] = title,
                     ["message"] = message,
-                    ["wait_timer"] = timeSpan!,
+                    ["wait_seconds"] = timeSpan!,
                     ["show_button"] = isShowButton
                 };
 
