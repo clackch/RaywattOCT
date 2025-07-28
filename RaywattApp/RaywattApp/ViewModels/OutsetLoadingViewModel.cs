@@ -227,6 +227,7 @@ namespace RaywattApp.ViewModels
             return false;
         }
 
+
         private bool EnsureTermsAgreement(User user, string id, string password)
         {
             if (user.TermsAgreedAt > DateTime.MinValue) return true;

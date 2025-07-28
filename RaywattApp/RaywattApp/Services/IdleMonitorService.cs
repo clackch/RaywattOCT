@@ -199,12 +199,7 @@ namespace RaywattApp.Services
 
             System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
-                //Dictionary<string, object> parameter = new Dictionary<string, object>();
-                //parameter["title"] = "Logout Remaining time";
-                //parameter["message"] = "Checking time...";
-                //parameter["timer"] = _totalIdleLimit - _preAlertLimit;
-                //DialogResults result = _dialogService!.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-                _passwordService.ShowAlert("Logout Remaining time", "Checking time...", _totalIdleLimit - _preAlertLimit);
+                _passwordService.ShowTimerAlert("Logout Remaining time", "Checking time...", true, _totalIdleLimit - _preAlertLimit);
                 _isPreAlertShown = false;
                 _log.Debug($"Pre Alert Popup closed");
             }));

@@ -35,7 +35,11 @@
                 </Label>
             </StackPanel>
             <StackPanel Grid.Row="4" HorizontalAlignment="Center">
-                <Button Style="{StaticResource ContainedBtnType1-Large-Short}" Command="{Binding OKCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource ContainedBtnType1-Large-Short}" 
+                        Command="{Binding OKCommand}" 
+                        CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" 
+                        Visibility="{Binding OkButtonVisibility, Converter={StaticResource BoolToVisibilityConverter} }"
+                        Content="{Binding [OK], Source={StaticResource L10N}}"/>
             </StackPanel>
         </Grid>
     </Border>

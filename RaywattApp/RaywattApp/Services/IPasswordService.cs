@@ -31,7 +31,9 @@ namespace RaywattApp.Services
         /// <summary>
         /// Displays an alert dialog with the specified title and message
         /// </summary>
-        void ShowAlert(string title, string message, TimeSpan? timeSpan = null);
+        void ShowAlert(string title, string message);
+
+        public void ShowTimerAlert(string title, string message, bool isShowButton, TimeSpan? timeSpan);
 
         /// <summary>
         /// Updates the password for a user, resetting it if necessary

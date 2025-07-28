@@ -74,7 +74,7 @@ namespace RaywattApp.Services
             {
                 if (_currentPasswordRetryCount >= _maxPasswordRetryCount)
                 {
-                    ShowAlert(_l10n["Information"], $"You have entered the wrong password {_maxPasswordRetryCount} times.", TimeSpan.FromSeconds(10));
+                    ShowTimerAlert(_l10n["Information"], $"You have entered the wrong password {_maxPasswordRetryCount} times.", false, TimeSpan.FromSeconds(10));
                     WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
                     ResetPasswordCount();
                     return false;
@@ -144,7 +144,7 @@ namespace RaywattApp.Services
             return null;
         }
 
-        public void ShowAlert(string title, string message, TimeSpan? timeSpan = null)
+        public void ShowAlert(string title, string message)
         {
             _log.Debug("ShowAlert");
 
@@ -156,18 +156,28 @@ namespace RaywattApp.Services
                     ["message"] = message
                 };
 
-                if (timeSpan != null)
-                {
-                    parameters.Add("timer", timeSpan);
-
-                    _dialogService.OpenDialog(new AlertTimerDialogControl(), parameters, Constants.ApplicationWidth, Constants.ApplicationHeight);
-                }
-                else
-                {
-                    _dialogService.OpenDialog(new AlertDialogControl(), parameters, Constants.ApplicationWidth, Constants.ApplicationHeight);
-                }
+                _dialogService.OpenDialog(new AlertDialogControl(), parameters, Constants.ApplicationWidth, Constants.ApplicationHeight);
             });
         }
+
+        public void ShowTimerAlert(string title, string message, bool isShowButton, TimeSpan? timeSpan)
+        {
+            _log.Debug("ShowTimerAlert");
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                var parameters = new Dictionary<string, object>
+                {
+                    ["title"] = title,
+                    ["message"] = message,
+                    ["wait_timer"] = timeSpan!,
+                    ["show_button"] = isShowButton
+                };
+
+                _dialogService.OpenDialog(new AlertTimerDialogControl(), parameters, Constants.ApplicationWidth, Constants.ApplicationHeight);
+            });
+        }
+
 
         public bool UpdatePasswordReset(string id, string password, string before_passowrd, bool admin)
         {
