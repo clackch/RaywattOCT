@@ -59,14 +59,5 @@ namespace RaywattApp.Common.Localization.Resources {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   en US과(와) 유사한 지역화된 문자열을 찾습니다.
-        /// </summary>
-        internal static string Default_Language {
-            get {
-                return ResourceManager.GetString("Default Language", resourceCulture);
-            }
-        }
     }
 }

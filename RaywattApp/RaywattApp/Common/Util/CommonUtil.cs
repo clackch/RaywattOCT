@@ -2716,5 +2716,23 @@ namespace RaywattApp.Common.Util
             }
         }
 
+        public static string GenerateRandomPassword(int length = 8)
+        {
+            char[] PasswordChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()".ToCharArray();
+        
+            var password = new StringBuilder();
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                byte[] buffer = new byte[sizeof(uint)];
+                for (int i = 0; i < length; i++)
+                {
+                    rng.GetBytes(buffer);
+                    uint num = BitConverter.ToUInt32(buffer, 0);
+                    password.Append(PasswordChars[num % PasswordChars.Length]);
+                }
+            }
+            return password.ToString();
+        }
+
     }
 }

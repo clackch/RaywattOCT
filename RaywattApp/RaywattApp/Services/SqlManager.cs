@@ -559,6 +559,51 @@ namespace RaywattApp.Services
             return _databaseService.GetDatas<User>(commandText);
         }
 
+        public int CountUser(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("CountUser");
+
+            string commandText = SqlQuery.GetCountQuery("SelectUser");
+
+            return _databaseService.GetDataCount(commandText, sqlParameters);
+        }
+
+        public int InsertUser(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("InsertUser");
+
+            string commandText = SqlQuery.GetQuery("InsertUser");
+
+            return _databaseService.InsertData(commandText, sqlParameters);
+        }
+
+        public int UpdateUser(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpdateUser");
+
+            string commandText = SqlQuery.GetQuery("UpdateUser");
+
+            return _databaseService.UpdateData(commandText, sqlParameters);
+        }
+
+        public int ResetPasswordUser(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("ResetPasswordUser");
+
+            string commandText = SqlQuery.GetQuery("ResetPasswordUser");
+
+            return _databaseService.UpdateData(commandText, sqlParameters);
+        }
+
+        public int DeleteUser(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("DeleteUser");
+
+            string commandText = SqlQuery.GetQuery("DeleteUser");
+
+            return _databaseService.DeleteData(commandText, sqlParameters);
+        }
+
         /**
          * Extra
          */

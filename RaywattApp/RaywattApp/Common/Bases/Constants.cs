@@ -112,14 +112,17 @@ namespace RaywattApp.Common.Bases
         public const double NewPatientDialogHeight = 269;
         public const double DicomPacsDialogWidth = 860;
         public const double DicomPacsDialogHeight = 606;
+        public const double EditInstituteDialogWidth = 472;
+        public const double EditInstituteDialogHeight = 380;
 
         //Max Length
-        public const int MaxPatientId = 16;
+        public const int MaxPatientId = 64;
         public const int MaxLastname = 20;
         public const int MaxFirstname = 20;
         public const int MaxPatientCaseAccessionNumber = 16;
         public const int MaxPatientCaseComment = 200;
         public const int MaxVolumeLabel = 15;
+        public const int MaxConfigurationValue = 100;
 
         //Page
         public const int PageNumberMax = 5;
