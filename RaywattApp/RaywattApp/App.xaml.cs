@@ -121,6 +121,7 @@ namespace RaywattApp
             //Dialog 등록
             services.AddSingleton<IDialogService, DialogService>();
             services.AddTransient(typeof(AlertDialogViewModel));
+            services.AddTransient(typeof(AlertTimerDialogViewModel));
             services.AddTransient(typeof(ConfirmDialogViewModel));
             services.AddTransient(typeof(EditCaseInfoDialogViewModel));
             services.AddTransient(typeof(SettingDialogViewModel));

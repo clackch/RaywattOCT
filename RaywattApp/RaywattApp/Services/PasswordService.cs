@@ -21,7 +21,7 @@ namespace RaywattApp.Services
         private readonly IDatabaseService _databaseService;
         protected readonly DynamicResource _l10n;
         private const int _passwordExpiryDays = 90;
-        private readonly int _maxPasswordRetryCount = 5;
+        private readonly int _maxPasswordRetryCount = 3;
         static private int _currentPasswordRetryCount = 0;
 
         public int PasswordExpiryDays
@@ -70,11 +70,11 @@ namespace RaywattApp.Services
 
             string password = GetPasswordByUserId(id);
 
-            if(password != inputPassword || password == string.Empty)
+            if (password != inputPassword || password == string.Empty)
             {
                 if (_currentPasswordRetryCount >= _maxPasswordRetryCount)
                 {
-                    ShowAlert(_l10n["Information"], $"You have entered the wrong password {_maxPasswordRetryCount} times.","10");
+                    ShowAlert(_l10n["Information"], $"You have entered the wrong password {_maxPasswordRetryCount} times.", TimeSpan.FromSeconds(10));
                     WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
                     ResetPasswordCount();
                     return false;
@@ -108,7 +108,7 @@ namespace RaywattApp.Services
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["id"] = id;
             sqlParameters["admin"] = false;
-            
+
             var commandText = SqlQuery.GetQuery("SelectUserById");
             var userData = _databaseService.GetDatas<User>(commandText, sqlParameters);
             string password = userData.Count > 0 ? userData[0].Password : string.Empty;
@@ -144,7 +144,7 @@ namespace RaywattApp.Services
             return null;
         }
 
-        public void ShowAlert(string title, string message, string timer = "")
+        public void ShowAlert(string title, string message, TimeSpan? timeSpan = null)
         {
             _log.Debug("ShowAlert");
 
@@ -156,12 +156,16 @@ namespace RaywattApp.Services
                     ["message"] = message
                 };
 
-                if(timer != "")
+                if (timeSpan != null)
                 {
-                    parameters.Add("timer", TimeSpan.FromSeconds(30));
-                }
+                    parameters.Add("timer", timeSpan);
 
-                _dialogService.OpenDialog(new AlertDialogControl(), parameters, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                    _dialogService.OpenDialog(new AlertTimerDialogControl(), parameters, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                }
+                else
+                {
+                    _dialogService.OpenDialog(new AlertDialogControl(), parameters, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                }
             });
         }
 

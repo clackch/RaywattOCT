@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows.Input;
 
 namespace RaywattApp.Services
@@ -22,6 +23,7 @@ namespace RaywattApp.Services
         private IDialogService? _dialogService;
         private AngioManager? _angioManager;
         private SqlManager _sqlManager;
+        private IPasswordService _passwordService;
 
         private DateTime _totalStartTime;
         private DateTime _preAlertStartTime;
@@ -49,13 +51,14 @@ namespace RaywattApp.Services
         public TimeSpan TotalIdleLimit { private get => _totalIdleLimit; set => _totalIdleLimit = value; }
         public TimeSpan PreAlertLimit { private get => _preAlertLimit; set => _preAlertLimit = value; }
 
-        public IdleMonitorService(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager)
+        public IdleMonitorService(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager, IPasswordService passwordService)
         {
             _log.Debug("IdleMonitorService");
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
             _angioManager = angioManager;
+            _passwordService = passwordService;
 
             Init();
         }
@@ -196,14 +199,14 @@ namespace RaywattApp.Services
 
             System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["title"] = "Logout Remaining time";
-                parameter["message"] = "Checking time...";
-                parameter["timer"] = _totalIdleLimit - _preAlertLimit;
-                DialogResults result = _dialogService!.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
+                //Dictionary<string, object> parameter = new Dictionary<string, object>();
+                //parameter["title"] = "Logout Remaining time";
+                //parameter["message"] = "Checking time...";
+                //parameter["timer"] = _totalIdleLimit - _preAlertLimit;
+                //DialogResults result = _dialogService!.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                _passwordService.ShowAlert("Logout Remaining time", "Checking time...", _totalIdleLimit - _preAlertLimit);
                 _isPreAlertShown = false;
-                _log.Debug($"Pre Alert Popup closed with result: {result}");
+                _log.Debug($"Pre Alert Popup closed");
             }));
         }
         private void ClosePreAlertPopup()

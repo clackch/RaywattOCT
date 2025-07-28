@@ -229,6 +229,8 @@ namespace RaywattApp.ViewModels
 
         private bool EnsureTermsAgreement(User user, string id, string password)
         {
+            if (user.TermsAgreedAt > DateTime.MinValue) return true;
+
             var parameter = new Dictionary<string, object> { ["tnC"] = user };
             var result = _dialogService.OpenDialog(
                 new TermsConditionsControl(), parameter,

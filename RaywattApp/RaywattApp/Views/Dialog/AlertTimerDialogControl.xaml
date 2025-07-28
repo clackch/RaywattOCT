@@ -1,0 +1,42 @@
+﻿<UserControl x:Class="RaywattApp.Views.Dialog.AlertTimerDialogControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:RaywattApp.Views.Dialog"
+             xmlns:const="clr-namespace:RaywattApp.Common.Bases"
+             xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+             mc:Ignorable="d" 
+             Width="{Binding DialogWidth}" Height="{Binding DialogHeight}">
+
+    <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" Width="{x:Static const:Constants.AlertDialogWidth}" VerticalAlignment="Center">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="21"/>
+                <RowDefinition Height="14"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition MinHeight="104"/>
+                <RowDefinition Height="70"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Label Style="{DynamicResource Pretendard-Medium-12}" Content="{Binding Title}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+            </StackPanel>
+            <StackPanel Grid.Row="2" Height="10" Visibility="{Binding IsError, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+            <StackPanel Grid.Row="2" Visibility="{Binding IsError, Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel Height="30"/>
+                <Image Source="{svgc:SvgImage Source=/res/icon/alertError.svg}" Width="60" Height="60"/>
+            </StackPanel>
+            <StackPanel Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10,20,10,20">
+                <Label Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource GrayscaleWhiteBrush}" TextBlock.TextAlignment="Center">
+                    <Label.Content>
+                        <AccessText TextWrapping="Wrap" Text="{Binding Message}"/>
+                    </Label.Content>
+                </Label>
+            </StackPanel>
+            <StackPanel Grid.Row="4" HorizontalAlignment="Center">
+                <Button Style="{StaticResource ContainedBtnType1-Large-Short}" Command="{Binding OKCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

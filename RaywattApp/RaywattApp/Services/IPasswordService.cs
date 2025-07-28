@@ -1,4 +1,6 @@
-﻿namespace RaywattApp.Services
+﻿using System;
+
+namespace RaywattApp.Services
 {
     public interface IPasswordService
     {
@@ -29,7 +31,7 @@
         /// <summary>
         /// Displays an alert dialog with the specified title and message
         /// </summary>
-        void ShowAlert(string title, string message, string timer = "");
+        void ShowAlert(string title, string message, TimeSpan? timeSpan = null);
 
         /// <summary>
         /// Updates the password for a user, resetting it if necessary
