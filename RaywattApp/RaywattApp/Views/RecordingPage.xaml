@@ -56,7 +56,7 @@
                         <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
                             <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="calibrationZoomIn" Width="42" Height="42" Command="{Binding CmdManualZoomIn}" CommandParameter="{StaticResource TrueValue}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}"/>
                             <StackPanel Width="10"/>
-                            <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="calibrationZoomOut" Width="42" Height="42" Command="{Binding CmdManualZoomIn}" CommandParameter="{StaticResource FalseValue}" IsEnabled="False"/>
+                            <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="calibrationZoomOut" Width="42" Height="42" Command="{Binding CmdManualZoomIn}" CommandParameter="{StaticResource FalseValue}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}"/>
                             <StackPanel Width="10"/>
                             <component:ButtonUnableComponent Style="{StaticResource OutlinedBtnType3-Large}" Width="174" Command="{Binding CmdAutoCalibration}" Content="{Binding [Auto Calibration], Source={StaticResource L10N}}" IsFirst="{Binding DeviceStatus.CanExecuteCalibration}" IsSecond="{Binding IsReady}">
                                 <component:ButtonUnableComponent.IsEnabled>
