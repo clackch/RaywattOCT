@@ -199,7 +199,7 @@ namespace RaywattApp.Services
 
             System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
-                _passwordService.ShowTimerAlert("Logout Remaining time", "Checking time...", true, _totalIdleLimit - _preAlertLimit);
+                _passwordService.ShowTimerAlert("Session Timeout", "No activity.\r\nLogging out soon.", true, _totalIdleLimit - _preAlertLimit);
                 _isPreAlertShown = false;
                 _log.Debug($"Pre Alert Popup closed");
             }));

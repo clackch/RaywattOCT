@@ -1,5 +1,4 @@
-﻿using Accord.Statistics.Kernels;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using log4net;
 using RaywattApp.Common.Dialog;
 using System;
@@ -47,7 +46,7 @@ namespace RaywattApp.ViewModels.Dialog
             else
                 IsError = false;
 
-            WaitForShowDialog(2);
+            WaitForShowDialog(1);
         }
 
         private void WaitForShowDialog(int waitSeconds)
@@ -79,7 +78,11 @@ namespace RaywattApp.ViewModels.Dialog
             {
                 if (_remainingTime.TotalSeconds <= 0)
                 {
-                    _dialogService.CloseAllDialogs();
+                    if (!OkButtonVisibility)
+                    {
+                        _dialogService.CloseAllDialogs();
+                    }
+
                     _timer.Stop();
                 }
                 else
