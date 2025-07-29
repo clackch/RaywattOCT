@@ -665,21 +665,30 @@ namespace RaywattApp.Common.Util
             //Side Branch
             if (lumenSidebranch.Points != null && lumenSidebranch.Points.Count > 0)
             {
-                int sbThickness = 5;
-                if (lumenArea / 2 < sbThickness)
-                    sbThickness = lumenArea / 2 - 1;
-
-                if (curFrame >= frameProximal && curFrame <= frameDistal)
+                if (!lumenSidebranch.IsCalcOverlapping)
                 {
-                    Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - sbThickness), new Point(position, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0xe4, 0xe4, 0xe4));
-                    if (!isEdge)
-                        Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - sbThickness), new Point(position + 1, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0xe4, 0xe4, 0xe4));
+                    lumenSidebranch.IsOverlapping = IsTargetPolygonOverlapping(lumenSidebranch.Points, lumenContour.Points);
+                    lumenSidebranch.IsCalcOverlapping = true;
                 }
-                else
+
+                if (lumenSidebranch.IsOverlapping)
                 {
-                    Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - sbThickness), new Point(position, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0x7d, 0x7d, 0x7d));
-                    if (!isEdge)
-                        Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - sbThickness), new Point(position + 1, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0x7d, 0x7d, 0x7d));
+                    int sbThickness = 5;
+                    if (lumenArea / 2 < sbThickness)
+                        sbThickness = lumenArea / 2 - 1;
+
+                    if (curFrame >= frameProximal && curFrame <= frameDistal)
+                    {
+                        Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - sbThickness), new Point(position, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0xe4, 0xe4, 0xe4));
+                        if (!isEdge)
+                            Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - sbThickness), new Point(position + 1, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0xe4, 0xe4, 0xe4));
+                    }
+                    else
+                    {
+                        Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - sbThickness), new Point(position, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0x7d, 0x7d, 0x7d));
+                        if (!isEdge)
+                            Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - sbThickness), new Point(position + 1, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0x7d, 0x7d, 0x7d));
+                    }
                 }
             }
 
@@ -2686,6 +2695,48 @@ namespace RaywattApp.Common.Util
                 default:
                     return "An unknown error has occurred.";
             }
+        }
+
+        // List<Point> → PathGeometry 변환
+        public static PathGeometry CreatePolygonGeometry(List<System.Windows.Point> points)
+        {
+            var figure = new PathFigure
+            {
+                StartPoint = points[0],
+                IsClosed = true,
+                IsFilled = true
+            };
+
+            for (int i = 1; i < points.Count; i++)
+            {
+                figure.Segments.Add(new LineSegment(points[i], true));
+            }
+
+            return new PathGeometry(new[] { figure });
+        }
+
+        // 두 도형이 겹치는지 확인
+        public static bool ArePolygonsOverlapping(List<System.Windows.Point> polygon1, List<System.Windows.Point> polygon2)
+        {
+            if (polygon1 == null || polygon1.Count < 3 || polygon2 == null || polygon2.Count < 3)
+                return false;
+
+            var geom1 = CreatePolygonGeometry(polygon1);
+            var geom2 = CreatePolygonGeometry(polygon2);
+
+            var intersect = Geometry.Combine(geom1, geom2, GeometryCombineMode.Intersect, null);
+            return !intersect.IsEmpty();
+        }
+
+        // 여러 도형 중 하나라도 겹치는지 확인
+        public static bool IsTargetPolygonOverlapping(List<List<System.Windows.Point>> polygons, List<System.Windows.Point> targetPolygon)
+        {
+            foreach (var polygon in polygons)
+            {
+                if (ArePolygonsOverlapping(polygon, targetPolygon))
+                    return true;
+            }
+            return false;
         }
 
     }
