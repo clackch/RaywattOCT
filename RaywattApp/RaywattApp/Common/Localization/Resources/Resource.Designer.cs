@@ -72,45 +72,9 @@ namespace RaywattApp.Common.Localization.Resources {
         /// <summary>
         ///   과(와) 유사한 지역화된 문자열을 찾습니다.
         /// </summary>
-        internal static string MSG_ConfirmNewPassword {
+        internal static string MSG_ChangeLaterContent {
             get {
-                return ResourceManager.GetString("MSG_ConfirmNewPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   과(와) 유사한 지역화된 문자열을 찾습니다.
-        /// </summary>
-        internal static string MSG_EnterCurrentPassword {
-            get {
-                return ResourceManager.GetString("MSG_EnterCurrentPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   과(와) 유사한 지역화된 문자열을 찾습니다.
-        /// </summary>
-        internal static string MSG_EnterNewPassword {
-            get {
-                return ResourceManager.GetString("MSG_EnterNewPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   과(와) 유사한 지역화된 문자열을 찾습니다.
-        /// </summary>
-        internal static string MSG_PasswordRequirement {
-            get {
-                return ResourceManager.GetString("MSG_PasswordRequirement", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   과(와) 유사한 지역화된 문자열을 찾습니다.
-        /// </summary>
-        internal static string PasswordChange {
-            get {
-                return ResourceManager.GetString("PasswordChange", resourceCulture);
+                return ResourceManager.GetString("MSG_ChangeLaterContent", resourceCulture);
             }
         }
     }

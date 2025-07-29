@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
+using RaywattApp.Common.Localization;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
@@ -16,6 +17,7 @@ namespace RaywattApp.ViewModels.Password
     partial class PasswordExpiryCheckViewModel : ViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(PasswordExpiryCheckViewModel));
+        protected readonly DynamicResource _l10n;
 
         [ObservableProperty]
         private string _currentPassword = string.Empty;
@@ -25,6 +27,9 @@ namespace RaywattApp.ViewModels.Password
 
         [ObservableProperty]
         private string _confirmPassword = string.Empty;
+
+        [ObservableProperty]
+        private string _chageLaterContent = string.Empty;
 
         private string _loginId = string.Empty;
         private string _loginPassword = string.Empty;
@@ -47,8 +52,10 @@ namespace RaywattApp.ViewModels.Password
         public PasswordExpiryCheckViewModel(IPasswordService passwordService)
         {
             _log.Debug("PasswordExpiryCheckViewModel");
+            _l10n = (DynamicResource)App.Current.Resources["L10N"];
 
             _passwordService = passwordService;
+            _chageLaterContent = string.Format(_l10n["MSG_ChangeLaterContent"], _passwordService.PasswordExpiryDays);
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)

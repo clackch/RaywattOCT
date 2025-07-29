@@ -8,6 +8,7 @@ using RaywattApp.Models;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 
@@ -19,11 +20,14 @@ namespace RaywattApp.Services
 
         private readonly IDialogService _dialogService;
         private readonly IDatabaseService _databaseService;
+        private readonly SqlManager _sqlManager;
+
         protected readonly DynamicResource _l10n;
-        private const int _passwordExpiryDays = 90;
-        private readonly int _maxPasswordRetryCount = 3;
+        private int _passwordExpiryDays = 90;
+        private int _maxPasswordRetryCount = 3;
+        private TimeSpan PasswordRetryLockDuration = TimeSpan.FromSeconds(30);
+
         static private int _currentPasswordRetryCount = 0;
-        private static readonly TimeSpan PasswordRetryLockDuration = TimeSpan.FromSeconds(30);
 
         public int PasswordExpiryDays
         {
@@ -36,7 +40,7 @@ namespace RaywattApp.Services
             _currentPasswordRetryCount = 0;
         }
 
-        public PasswordService(IDialogService dialogService, IDatabaseService databaseService)
+        public PasswordService(IDialogService dialogService, IDatabaseService databaseService, SqlManager sqlManager)
         {
             _log.Debug("PasswordService");
 
@@ -44,6 +48,9 @@ namespace RaywattApp.Services
 
             _dialogService = dialogService;
             _databaseService = databaseService;
+            _sqlManager = sqlManager;
+
+            GetPasswordParameter();
         }
 
         public bool IsSamePassword(string beforePassword, string inputPassword, string message = "")
@@ -77,7 +84,7 @@ namespace RaywattApp.Services
                     return false;
                 }
 
-                ShowAlert(_l10n["Information"], "Invalid ID or Password\r\nPlease try again\r\n\r\nAttempt: " + _currentPasswordRetryCount + "/"+ _maxPasswordRetryCount);
+                ShowAlert(_l10n["Information"], "Invalid ID or Password\r\nPlease try again\r\n\r\nAttempt: " + _currentPasswordRetryCount + "/" + _maxPasswordRetryCount);
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
                 return false;
             }
@@ -179,8 +186,6 @@ namespace RaywattApp.Services
         {
             _log.Debug("UpdatePasswordReset");
 
-            var commandText = SqlQuery.GetQuery("UpdatePasswordReset");
-
             var parameters = new Dictionary<string, object>
             {
                 ["id"] = id,
@@ -190,9 +195,24 @@ namespace RaywattApp.Services
                 ["admin"] = admin
             };
 
-            _databaseService.UpdateData(commandText, parameters);
+            _sqlManager.UpdatePasswordReset(parameters);
 
             return true;
+        }
+
+        private void GetPasswordParameter()
+        {
+            _log.Debug("PasswordParameter");
+
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "Password";
+
+            IList<Configuration> passwordParameter = _sqlManager.SelectConfiguration(sqlParameters);
+
+            _passwordExpiryDays = int.Parse(passwordParameter.FirstOrDefault(x => x.Key == "ExpiryDay").Value);
+            _maxPasswordRetryCount = int.Parse(passwordParameter.FirstOrDefault(x => x.Key == "MaxCount").Value);
+            int waitSeconds = int.Parse(passwordParameter.FirstOrDefault(x => x.Key == "WaitSecond").Value);
+            PasswordRetryLockDuration = TimeSpan.FromSeconds(waitSeconds);
         }
     }
 }

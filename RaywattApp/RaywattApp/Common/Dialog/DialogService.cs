@@ -8,7 +8,7 @@ namespace RaywattApp.Common.Dialog
 {
     public class DialogService : IDialogService
     {
-        private readonly List<IDialogWindow> _openDialogs = new();
+        private static List<IDialogWindow> _openDialogs = new();
 
         public DialogResults OpenDialog(object dialog, Dictionary<string, object> parameter, double parentWidth, double parentHeight, double left, double top)
         {

@@ -43,18 +43,12 @@
                 </StackPanel>
 
                 <StackPanel VerticalAlignment="Bottom" Margin="0,0,0,20">
-                    <!--<Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingAboutPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingAboutPage}" Content="{Binding [About], Source={StaticResource L10N}}"/>-->
                     <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingPasswordChangePage}}" 
                             Command="{Binding PopupNavigateCommand}" 
                             CommandParameter="{x:Static const:Constants.SettingPasswordChangePage}" 
                             Content="{Binding [Account], Source={StaticResource L10N}}"/>
+                    <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingAboutPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingAboutPage}" Content="{Binding [About], Source={StaticResource L10N}}"/>
                 </StackPanel>
-
-                <!--
-                <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingLocalizationPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingLocalizationPage}" Content="{Binding [Localization], Source={StaticResource L10N}}"/>
-                <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingServicePage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingServicePage}" Content="{Binding [Service], Source={StaticResource L10N}}"/>
-                <Button Style="{Binding PopupNavigationSource, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.SettingAcquisitionPage}}" Command="{Binding PopupNavigateCommand}" CommandParameter="{x:Static const:Constants.SettingAcquisitionPage}" Content="{Binding [Acquisition], Source={StaticResource L10N}}"/>
-                -->
             </Grid>
 
             <StackPanel Grid.Row="2" Grid.Column="2" Grid.RowSpan="4">

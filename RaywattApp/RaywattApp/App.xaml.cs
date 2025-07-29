@@ -119,7 +119,7 @@ namespace RaywattApp
             services.AddTransient(typeof(FileImportViewModel));
 
             //Dialog 등록
-            services.AddSingleton<IDialogService, DialogService>();
+            services.AddTransient<IDialogService, DialogService>();
             services.AddTransient(typeof(AlertDialogViewModel));
             services.AddTransient(typeof(AlertTimerDialogViewModel));
             services.AddTransient(typeof(ConfirmDialogViewModel));

@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
-using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System.Windows.Input;
 
@@ -24,7 +23,7 @@ namespace RaywattApp.ViewModels.Setting
             get { return this._passwordChangeCommand ?? (this._passwordChangeCommand = new RelayCommand(PasswordChange)); }
         }
 
-        public SettingPasswordChangeViewModel(SqlManager sqlManager, IDialogService dialogService)
+        public SettingPasswordChangeViewModel(IDialogService dialogService)
         {
             _log.Debug("SettingPasswordChangeViewModel");
 

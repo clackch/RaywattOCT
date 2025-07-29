@@ -1180,4 +1180,7 @@ Overwrite existing data?</value>
   <data name="MSG_PasswordRequirement" xml:space="preserve">
     <value>[K]Password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters</value>
   </data>
+  <data name="MSG_ChangeLaterContent" xml:space="preserve">
+    <value>[K]Change after {0} days</value>
+  </data>
 </root>

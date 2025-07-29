@@ -621,6 +621,20 @@ namespace RaywattApp.Services
             return _databaseService.DeleteData(commandText, sqlParameters);
         }
 
+        /*
+        Password
+        */
+        public bool UpdatePasswordReset(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpdatePasswordReset");
+
+            var commandText = SqlQuery.GetQuery("UpdatePasswordReset");
+
+            _databaseService.UpdateData(commandText, sqlParameters);
+
+            return true;
+        }
+
         /**
          * Extra
          */
