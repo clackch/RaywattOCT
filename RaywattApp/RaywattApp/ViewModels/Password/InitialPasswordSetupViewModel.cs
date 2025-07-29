@@ -99,13 +99,11 @@ namespace RaywattApp.ViewModels.Password
 
             _passwordService.UpdatePasswordReset(_loginId, ConfirmPassword, _loginPassword);
 
-            var parameter = new Dictionary<string, object>
-            {
-                ["id"] = _loginId,
-                ["password"] = ConfirmPassword
-            };
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["login_step"] = 3;
+            parameter["user"] = _user;
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoadingPage) { Parameter = parameter });
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage) { Parameter  = parameter});
         }
 
         private bool CanOk()

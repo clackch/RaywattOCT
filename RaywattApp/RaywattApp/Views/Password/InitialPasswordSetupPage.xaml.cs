@@ -1,5 +1,4 @@
-﻿using RaywattApp.ViewModels.Admin;
-using RaywattApp.ViewModels.Password;
+﻿using RaywattApp.ViewModels.Password;
 using System.Windows.Controls;
 
 namespace RaywattApp.Views.Password

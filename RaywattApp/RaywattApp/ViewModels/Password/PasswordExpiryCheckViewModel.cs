@@ -98,11 +98,12 @@ namespace RaywattApp.ViewModels.Password
 
             var parameter = new Dictionary<string, object>
             {
-                ["id"] = _loginId,
-                ["password"] = _loginPassword
+                ["login_step"] = 4,
+                ["user"] = _user
             };
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoadingPage) { Parameter = parameter });
+
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage) { Parameter = parameter });
         }
         private void OnOk(IDialogWindow dialog)
         {
@@ -123,11 +124,11 @@ namespace RaywattApp.ViewModels.Password
 
             var parameter = new Dictionary<string, object>
             {
-                ["id"] = _loginId,
-                ["password"] = ConfirmPassword
+                ["login_step"] = 4,
+                ["user"] = _user
             };
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoadingPage) { Parameter = parameter });
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage) { Parameter = parameter });
         }
 
         private bool CanOk(IDialogWindow? obj)

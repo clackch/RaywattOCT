@@ -62,26 +62,6 @@ namespace RaywattApp.ViewModels
             if (navigatedEventArgs is not NavigationEventArgs navArgs || navArgs.ExtraData is not Dictionary<string, object> data)
                 return;
 
-            string id = data["id"] as string;
-            string password = data["password"] as string;
-
-            if (!_passwordService.CheckLoginWithRetryCount(id, password)) return;
-
-            var user = GetUserById(id);
-
-            DeviceStatus.LoginID = id;
-            _passwordService.ResetPasswordCount();
-
-            if (HandleInitialPasswordReset(user)) return;
-            if (CheckPasswordExpiry(user)) return;
-            if (!EnsureTermsAgreement(user)) return;
-
-            if(user.Admin)
-            {
-                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.UserListPage));
-                return;
-            }
-
             InitializeSystem();
         }
 
@@ -200,66 +180,6 @@ namespace RaywattApp.ViewModels
             _log.Debug("ThreadCoreAndDeviceInit - Done");
         }
 
-        private User? GetUserById(string id)
-        {
-            var sqlParams = new Dictionary<string, object>
-            {
-                ["id"] = id,
-            };
-
-            var users = _sqlManager.SelectUserById(sqlParams);
-            return users?.Count > 0 ? users[0] : null;
-        }
-
-        private bool HandleInitialPasswordReset(User user)
-        {
-            if (user.PasswordReset)
-            {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["user"] = user;
-
-                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.InitialPasswordSetupPage) { Parameter = parameter });
-                return true;
-            }
-            return false;
-        }
-
-        private bool CheckPasswordExpiry(User user)
-        {
-            if ((DateTime.Now - user.PasswordChangedAt).TotalDays > _passwordService.PasswordExpiryDays)
-            {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["user"] = user;
-
-                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PasswordExpiryCheckPage) { Parameter = parameter });
-                return true;
-            }
-            return false;
-        }
-
-
-        private bool EnsureTermsAgreement(User user)
-        {
-            if (user.TermsAgreedAt > DateTime.MinValue) return true;
-
-            var parameter = new Dictionary<string, object> { ["tnC"] = user };
-            var result = _dialogService.OpenDialog(
-                new TermsConditionsControl(), parameter,
-                Constants.ApplicationWidth, Constants.ApplicationHeight);
-
-            if (result?.DialogAnswer == DialogResults.Answer.No)
-            {
-                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
-                return false;
-            }
-
-            _sqlManager.UpdateTermsAgreedDateUser(new Dictionary<string, object>
-            {
-                ["id"] = user.Id,
-            });
-
-            return true;
-        }
         private void InitializeSystem()
         {
             Task.Run(() => ThreadCoreAndDeviceInit());
