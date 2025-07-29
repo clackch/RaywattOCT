@@ -59,151 +59,109 @@ namespace RaywattApp.ViewModels
             _passwordService = passwordService;
         }
 
+        public override void OnNavigating(object sender, object navigationEventArgs)
+        {
+            _log.Debug("OnNavigating");
+        }
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             _log.Debug("OnNavigated");
 
-            if (navigatedEventArgs is not NavigationEventArgs navArgs || navArgs.ExtraData is not Dictionary<string, object> data)
-                return;
-
-            if (data.TryGetValue("login_step", out object? stepObj) && stepObj is int step)
+            if (navigatedEventArgs is NavigationEventArgs navArgs && navArgs.ExtraData is Dictionary<string, object> data)
             {
-                _user = data["user"] as User ?? new User();
-                LoginStep(step);
+                if (data.TryGetValue("login_step", out var stepObj) && stepObj is int step)
+                {
+                    _user = data.GetValueOrDefault("user") as User ?? new User();
+                    ExecuteLoginStep(step);
+                }
             }
-        }
-
-        public override void OnNavigating(object sender, object navigationEventArgs)
-        {
-            _log.Debug("OnNavigating");
         }
 
         private void Login()
         {
             _log.Debug("Login");
-
-            LoginStep(1);
+            ExecuteLoginStep(1);
         }
 
-        private void LoginStep(int nStep)
+        private void ExecuteLoginStep(int step)
         {
-            switch (nStep)
+            switch (step)
             {
                 case 1:
-                    // login 시도
-                    if (!_passwordService.CheckLoginWithRetryCount(Id.Text, Password))
-                    {
-                        ClearTextBox();
-                        return;
-                    }
-
-                    var user = GetUserById(Id.Text);
-
-                    DeviceStatus.LoginID = user!.Id;
-                    _passwordService.ResetPasswordCount();
-                    _user = user;
-
-                    LoginStep(2);
-
+                    AttemptLogin();
                     break;
-
                 case 2:
-                    // 첫 사용자 비밀번호 수정
-
-                    if (HandleInitialPasswordReset(_user))
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        LoginStep(3);
-                    }
-
+                    if (!HandleInitialPasswordReset()) ExecuteLoginStep(3);
                     break;
-
-
                 case 3:
-                    // 비밀 번호 주기
-                    if (CheckPasswordExpiry(_user))
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        LoginStep(4);
-                    }
-
+                    if (!CheckPasswordExpiry()) ExecuteLoginStep(4);
                     break;
-
                 case 4:
-                    // 약관 동의
-                    if (!EnsureTermsAgreement(_user))
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        LoginStep(5);
-                    }
-
+                    if (EnsureTermsAgreement()) ExecuteLoginStep(5);
                     break;
                 case 5:
-                    // 로그인 성공 후 페이지 이동
-                    if (_user.Admin)
-                    {
-                        WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.UserListPage));
-                        return;
-                    }
-                    else
-                    {
-                        Dictionary<string, object> parameter = new Dictionary<string, object>();
-                        parameter["id"] = Id.Text;
-                        parameter["password"] = Password;
-
-                        WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoadingPage) { Parameter = parameter });
-                    }
-
-                    break;
-
-                default:
+                    FinalizeLogin();
                     break;
             }
-
         }
 
-        private bool HandleInitialPasswordReset(User user)
+        private void AttemptLogin()
         {
-            if (user.PasswordReset)
-            {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["user"] = user;
+            _log.Debug("AttemptLogin");
 
-                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.InitialPasswordSetupPage) { Parameter = parameter });
+            if (!_passwordService.CheckLoginWithRetryCount(Id.Text, Password))
+            {
+                ClearTextBox();
+                return;
+            }
+
+            var user = GetUserById(Id.Text);
+
+            DeviceStatus.LoginID = user.Id;
+            _passwordService.ResetPasswordCount();
+            _user = user;
+
+            ExecuteLoginStep(2);
+        }
+
+        private bool HandleInitialPasswordReset()
+        {
+            _log.Debug("HandleInitialPasswordReset");
+
+            if (_user?.PasswordReset == true)
+            {
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.InitialPasswordSetupPage)
+                {
+                    Parameter = new Dictionary<string, object> { ["user"] = _user }
+                });
                 return true;
             }
             return false;
         }
 
-        private bool CheckPasswordExpiry(User user)
+        private bool CheckPasswordExpiry()
         {
-            if ((DateTime.Now - user.PasswordChangedAt).TotalDays > _passwordService.PasswordExpiryDays)
-            {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["user"] = user;
+            _log.Debug("CheckPasswordExpiry");
 
-                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PasswordExpiryCheckPage) { Parameter = parameter });
+            if ((DateTime.Now - _user.PasswordChangedAt).TotalDays > _passwordService.PasswordExpiryDays)
+            {
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PasswordExpiryCheckPage)
+                {
+                    Parameter = new Dictionary<string, object> { ["user"] = _user }
+                });
                 return true;
             }
             return false;
         }
-        private bool EnsureTermsAgreement(User user)
-        {
-            if (user.TermsAgreedAt > DateTime.MinValue) return true;
 
-            var parameter = new Dictionary<string, object> { ["tnC"] = user };
-            var result = _dialogService.OpenDialog(
-                new TermsConditionsControl(), parameter,
-                Constants.ApplicationWidth, Constants.ApplicationHeight);
+        private bool EnsureTermsAgreement()
+        {
+            _log.Debug("EnsureTermsAgreement");
+
+            if (_user.TermsAgreedAt > DateTime.MinValue) return true;
+
+            var parameter = new Dictionary<string, object> { ["tnC"] = _user };
+            var result = _dialogService.OpenDialog(new TermsConditionsControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
             if (result?.DialogAnswer == DialogResults.Answer.No)
             {
@@ -211,29 +169,45 @@ namespace RaywattApp.ViewModels
                 return false;
             }
 
-            _sqlManager.UpdateTermsAgreedDateUser(new Dictionary<string, object>
-            {
-                ["id"] = user.Id,
-            });
-
+            _sqlManager.UpdateTermsAgreedDateUser(new Dictionary<string, object> { ["id"] = _user.Id });
             return true;
+        }
+
+        private void FinalizeLogin()
+        {
+            _log.Debug("FinalizeLogin");
+
+            if (_user?.Admin == true)
+            {
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.UserListPage));
+            }
+            else
+            {
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoadingPage)
+                {
+                    Parameter = new Dictionary<string, object>
+                    {
+                        ["id"] = Id.Text,
+                        ["password"] = Password
+                    }
+                });
+            }
         }
 
         private void ClearTextBox()
         {
-            Id.Text = "";
-            Password = "";
+            _log.Debug("ClearTextBox");
+
+            Id.Text = string.Empty;
+            Password = string.Empty;
         }
 
         private User? GetUserById(string id)
         {
-            var sqlParams = new Dictionary<string, object>
-            {
-                ["id"] = id,
-            };
+            _log.Debug($"GetUserById: {id}");
 
-            var users = _sqlManager.SelectUserById(sqlParams);
-            return users?.Count > 0 ? users[0] : null;
+            var result = _sqlManager.SelectUserById(new Dictionary<string, object> { ["id"] = id });
+            return result?.Count > 0 ? result[0] : null;
         }
 
         partial void OnPasswordChanged(string value)
