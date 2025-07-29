@@ -81,7 +81,7 @@ namespace RaywattApp.Services
                     return false;
                 }
 
-                ShowAlert(_l10n["Information"], "Invalid ID or password\r\nPlease try again\r\n\r\nAttempt: " + _currentPasswordRetryCount + "/"+ _maxPasswordRetryCount);
+                ShowAlert(_l10n["Information"], "Invalid ID or Password\r\nPlease try again\r\n\r\nAttempt: " + _currentPasswordRetryCount + "/"+ _maxPasswordRetryCount);
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
                 return false;
             }

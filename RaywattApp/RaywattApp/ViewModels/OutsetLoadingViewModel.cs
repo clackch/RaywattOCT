@@ -11,7 +11,6 @@ using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Interop;
 using System.Windows.Navigation;
@@ -66,16 +65,16 @@ namespace RaywattApp.ViewModels
             string id = data["id"] as string;
             string password = data["password"] as string;
 
-            if (!_passwordService.CheckLoginWithRetryCount(id, password)) return;
+            if (!_passwordService.CheckLoginWithRetryCount(user)) return;
 
             var user = GetUserById(id);
 
             DeviceStatus.LoginID = id;
             _passwordService.ResetPasswordCount();
 
-            if (HandleInitialPasswordReset(user, data)) return;
-            if (CheckPasswordExpiry(user, data)) return;
-            if (!EnsureTermsAgreement(user, id, password)) return;
+            if (HandleInitialPasswordReset(user)) return;
+            if (CheckPasswordExpiry(user)) return;
+            if (!EnsureTermsAgreement(user)) return;
 
             InitializeSystem();
         }
@@ -207,28 +206,36 @@ namespace RaywattApp.ViewModels
             return users?.Count > 0 ? users[0] : null;
         }
 
-        private bool HandleInitialPasswordReset(User user, Dictionary<string, object> data)
+        private bool HandleInitialPasswordReset(User user)
         {
             if (user.PasswordReset)
             {
-                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.InitialPasswordSetupPage) { Parameter = data });
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["id"] = user.Id;
+                parameter["password"] = user.Password;
+
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.InitialPasswordSetupPage) { Parameter = parameter });
                 return true;
             }
             return false;
         }
 
-        private bool CheckPasswordExpiry(User user, Dictionary<string, object> data)
+        private bool CheckPasswordExpiry(User user)
         {
             if ((DateTime.Now - user.PasswordChangedAt).TotalDays > _passwordService.PasswordExpiryDays)
             {
-                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PasswordExpiryCheckPage) { Parameter = data });
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["id"] = user.Id;
+                parameter["password"] = user.Password;
+
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PasswordExpiryCheckPage) { Parameter = parameter });
                 return true;
             }
             return false;
         }
 
 
-        private bool EnsureTermsAgreement(User user, string id, string password)
+        private bool EnsureTermsAgreement(User user)
         {
             if (user.TermsAgreedAt > DateTime.MinValue) return true;
 
@@ -245,9 +252,9 @@ namespace RaywattApp.ViewModels
 
             _sqlManager.UpdateTermsAgreedDateUser(new Dictionary<string, object>
             {
-                ["id"] = id,
-                ["password"] = password,
-                ["admin"] = false
+                ["id"] = user.Id,
+                ["password"] = user.Password,
+                ["admin"] = user.Admin
             });
 
             return true;
