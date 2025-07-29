@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Messages;
+using RaywattApp.Models;
 using RaywattApp.Services;
 using System.Collections.Generic;
 using System.Windows.Input;
@@ -19,6 +20,7 @@ namespace RaywattApp.ViewModels.Password
 
         private string _loginId = string.Empty;
         private string _loginPassword = string.Empty;
+        private User _user;
 
         [ObservableProperty]
         private string password = string.Empty;
@@ -54,10 +56,11 @@ namespace RaywattApp.ViewModels.Password
 
             if (navigatedEventArgs is NavigationEventArgs navArgs && navArgs.ExtraData is Dictionary<string, object> data)
             {
-                _loginId = data["id"] as string ?? string.Empty;
-                _loginPassword = data["password"] as string ?? string.Empty;
+                _user = data["user"] as User ?? new User();
+                _loginId = _user.Id;
+                _loginPassword = _user.Password;
 
-                if(string.IsNullOrEmpty(_loginId) || string.IsNullOrEmpty(_loginPassword))
+                if (string.IsNullOrEmpty(_loginId) || string.IsNullOrEmpty(_loginPassword))
                 {
                     _passwordService.ShowAlert(_l10n["Error"], "Login ID or password is missing.");
                     WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
@@ -94,7 +97,7 @@ namespace RaywattApp.ViewModels.Password
                 return;
             }
 
-            _passwordService.UpdatePasswordReset(_loginId, ConfirmPassword, _loginPassword, false);
+            _passwordService.UpdatePasswordReset(_loginId, ConfirmPassword, _loginPassword, _user.Admin);
 
             var parameter = new Dictionary<string, object>
             {

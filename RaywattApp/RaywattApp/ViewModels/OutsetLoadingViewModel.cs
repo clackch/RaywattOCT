@@ -65,7 +65,7 @@ namespace RaywattApp.ViewModels
             string id = data["id"] as string;
             string password = data["password"] as string;
 
-            if (!_passwordService.CheckLoginWithRetryCount(user)) return;
+            if (!_passwordService.CheckLoginWithRetryCount(id, password)) return;
 
             var user = GetUserById(id);
 
@@ -75,6 +75,12 @@ namespace RaywattApp.ViewModels
             if (HandleInitialPasswordReset(user)) return;
             if (CheckPasswordExpiry(user)) return;
             if (!EnsureTermsAgreement(user)) return;
+
+            if(user.Admin)
+            {
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.UserListPage));
+                return;
+            }
 
             InitializeSystem();
         }
@@ -199,7 +205,6 @@ namespace RaywattApp.ViewModels
             var sqlParams = new Dictionary<string, object>
             {
                 ["id"] = id,
-                ["admin"] = false
             };
 
             var users = _sqlManager.SelectUserById(sqlParams);
@@ -211,8 +216,7 @@ namespace RaywattApp.ViewModels
             if (user.PasswordReset)
             {
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["id"] = user.Id;
-                parameter["password"] = user.Password;
+                parameter["user"] = user;
 
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.InitialPasswordSetupPage) { Parameter = parameter });
                 return true;
@@ -225,8 +229,7 @@ namespace RaywattApp.ViewModels
             if ((DateTime.Now - user.PasswordChangedAt).TotalDays > _passwordService.PasswordExpiryDays)
             {
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["id"] = user.Id;
-                parameter["password"] = user.Password;
+                parameter["user"] = user;
 
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PasswordExpiryCheckPage) { Parameter = parameter });
                 return true;

@@ -65,10 +65,6 @@ namespace RaywattApp.Services
 
             _log.Debug("CheckLoginWithRetryCount " + _currentPasswordRetryCount);
 
-            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
-            sqlParameters["id"] = id;
-            sqlParameters["admin"] = false;
-
             string password = GetPasswordByUserId(id);
 
             if (password != inputPassword || password == string.Empty)
@@ -108,7 +104,6 @@ namespace RaywattApp.Services
 
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["id"] = id;
-            sqlParameters["admin"] = false;
 
             var commandText = SqlQuery.GetQuery("SelectUserById");
             var userData = _databaseService.GetDatas<User>(commandText, sqlParameters);

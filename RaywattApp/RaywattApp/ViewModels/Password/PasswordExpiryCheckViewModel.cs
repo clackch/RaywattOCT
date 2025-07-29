@@ -5,6 +5,7 @@ using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
+using RaywattApp.Models;
 using RaywattApp.Services;
 using System.Collections.Generic;
 using System.Windows.Input;
@@ -27,6 +28,7 @@ namespace RaywattApp.ViewModels.Password
 
         private string _loginId = string.Empty;
         private string _loginPassword = string.Empty;
+        private User _user;
 
         private ICommand _changeLaterCommand;
         public ICommand ChangeLaterCommand
@@ -55,8 +57,9 @@ namespace RaywattApp.ViewModels.Password
 
             if (navigatedEventArgs is NavigationEventArgs navArgs && navArgs.ExtraData is Dictionary<string, object> data)
             {
-                _loginId = data["id"] as string ?? string.Empty;
-                _loginPassword = data["password"] as string ?? string.Empty;
+                _user = data["user"] as User ?? new User();
+                _loginPassword = _user.Password;
+                _loginId = _user.Id;
             }
         }
 
