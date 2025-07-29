@@ -272,6 +272,8 @@ CommandType TCPSocket::CheckCommandType(const char* tmpRecvBuffer) {
 						case CommandType::FGAskPort:
 							return CommandType::FGAskPort;
 							break;
+
+
 						case CommandType::FGAskBoard:
 							return CommandType::FGAskBoard;
 							break;
@@ -330,58 +332,62 @@ void TCPSocket::ChpFilePacketProcess(FrameGrabber& fg) {
 
 }
 
-void TCPSocket::PortEventThread(FrameGrabber& fg) {
+void TCPSocket::PortEventThread(FrameGrabber& fg)
+{
 	while (portEventThreadRunning)
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-		DWORD status = WaitForSingleObject(fg.pIdeaInfo->hInfoEvent, 100);
-		
+
+		// ✅ pIdeaInfo를 로컬 변수로 복사 (중간에 nullptr로 바뀌는 문제 방지)
+		auto* pInfo = fg.pIdeaInfo;
+		if (pInfo == nullptr)
+			continue;
+
+		HANDLE hEvent = pInfo->hInfoEvent;
+		if (hEvent == nullptr)
+			continue;
+
+		DWORD status = WaitForSingleObject(hEvent, 100);
+
 		switch (status)
 		{
+		case WAIT_TIMEOUT:
+			PLOGI.printf("WAIT_TIMEOUT called");
+			break;
+
+		default:
 			PLOGI.printf("PortEventThread called");
 
-			case WAIT_TIMEOUT:
-			{
+			ResetEvent(hEvent);
+			pInfo->bNewInfo = FALSE;
 
-				PLOGI.printf("WAIT_TIMEOUT called");
-				break;
+			fg.m_bSyncValid = bHP_CSyncDetect(fg.m_BoardHandle);
+
+			if (fg.m_bSyncValid && fg.portConnection != 1)
+			{
+				fg.portConnection = 1;
+				SetCommandPacket(CommandType::FGAngioConnected);
+				send(clientSocket, commandBuffer, 5, 0);
+				PLOGI.printf("Send Port Connected");
+			}
+			else if (!fg.m_bSyncValid && fg.portConnection != 0)
+			{
+				fg.portConnection = 0;
+				SetCommandPacket(CommandType::FGAngioDisconnected);
+				send(clientSocket, commandBuffer, 5, 0);
+				PLOGI.printf("Send Port Disconnected");
 			}
 
-			default:
+			// ✅ 다시 로컬 변수 pInfo를 사용 (fg.pIdeaInfo 재접근 금지)
+			HANDLE hInfoEvent = pInfo->hInfoEvent;
+			if (hInfoEvent)
 			{
-				ResetEvent(fg.pIdeaInfo->hInfoEvent);
-				fg.pIdeaInfo->bNewInfo = FALSE;
-				fg.m_bSyncValid = bHP_CSyncDetect(fg.m_BoardHandle);
-				//PLOGI.printf("Port Event...");
-				if (fg.m_bSyncValid && fg.portConnection != 1)
-				{
-					fg.portConnection = 1;
-					SetCommandPacket(CommandType::FGAngioConnected);
-					send(clientSocket, commandBuffer, 5, 0);
-					PLOGI.printf("Send Port Connected");
-				}
-				else if (!fg.m_bSyncValid && fg.portConnection != 0)
-				{
-					fg.portConnection = 0;
-					SetCommandPacket(CommandType::FGAngioDisconnected);
-					send(clientSocket, commandBuffer, 5, 0);
-					PLOGI.printf("Send Port Disconnected");
-				}
-
-				if (fg.pIdeaInfo)
-				{
-					//PLOGI.printf("fg.pIdealInfo true called");
-					HANDLE	hInfoEvent = fg.pIdeaInfo->hInfoEvent;
-					if (hInfoEvent)
-					{
-						// Must be done in this order to prevent a problem in the DLL thread.
-						fg.pIdeaInfo->hInfoEvent = 0;
-						CloseHandle(hInfoEvent);
-					}
-
-				}
-				break;
+				// DLL Thread 문제 방지를 위한 순서
+				pInfo->hInfoEvent = nullptr;
+				CloseHandle(hInfoEvent);
 			}
+
+			break;
 		}
 	}
 }
