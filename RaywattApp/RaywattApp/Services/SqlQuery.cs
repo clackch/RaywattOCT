@@ -89,9 +89,10 @@ namespace RaywattApp.Services
             //SelectPatientListByCase
             _query["SelectPatientListByCase"] = @$"
                 SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, gender, FALSE is_checked, create_date, update_date
+                , COALESCE(TO_CHAR((SELECT create_date FROM rv_schema.patient_case WHERE patient_id = p.id ORDER BY create_date DESC LIMIT 1), 'YYYY-MM-DD HH24:MI:SS'), '') AS last_case
                 FROM rv_schema.patient p
                 WHERE (SELECT count(*) FROM rv_schema.patient_case WHERE patient_id = p.id) > 0
-                ORDER BY id
+                ORDER BY last_case DESC
                 ";
 
             //SelectPatient
