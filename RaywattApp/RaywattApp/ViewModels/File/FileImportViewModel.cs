@@ -466,7 +466,7 @@ namespace RaywattApp.ViewModels.File
                         patient.Lastname = GetStrValue(patientObj, "Lastname");
                         patient.Firstname = GetStrValue(patientObj, "Firstname");
                         patient.Name = patient.Firstname + ", " + patient.Lastname;
-                        patient.Birthdate = GetDateValue(patientObj, "Birthdate");
+                        patient.Birthdate = GetDateValueNullable(patientObj, "Birthdate");
                         patient.Gender = GetStrValue(patientObj, "Gender");
                         patient.CreateDate = GetDateValue(patientObj, "CreateDate");
                         patient.UpdateDate = GetDateValue(patientObj, "UpdateDate");
@@ -561,6 +561,20 @@ namespace RaywattApp.ViewModels.File
         {
             if (!obj.ContainsKey(key))
                 return DateTime.Now;
+
+            return Convert.ToDateTime(obj[key]);
+        }
+
+        private DateTime? GetDateValueNullable(JObject obj, string key)
+        {
+            if (!obj.ContainsKey(key))
+                return DateTime.Now;
+
+            if (String.IsNullOrEmpty(obj[key].ToString()))
+                return null;
+
+            if (obj[key].Equals("null"))
+                return null;
 
             return Convert.ToDateTime(obj[key]);
         }

@@ -1,15 +1,17 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.Generic;
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
+using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Services;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Windows.Input;
+using RaywattApp.Views.Dialog;
 
 namespace RaywattApp.ViewModels
 {
@@ -31,6 +33,12 @@ namespace RaywattApp.ViewModels
         public ICommand LoginCommand
         {
             get { return this._loginCommand ?? (this._loginCommand = new RelayCommand(Login, CanLogin)); }
+        }
+
+        private ICommand _exitCommand;
+        public ICommand ExitCommand
+        {
+            get { return this._exitCommand ?? (this._exitCommand = new RelayCommand(Exit)); }
         }
 
         public OutsetLoginViewModel(SqlManager sqlManager, IDialogService dialogService)
@@ -87,6 +95,21 @@ namespace RaywattApp.ViewModels
         private bool CanLogin()
         {
             return !string.IsNullOrEmpty(Id.Text) && !string.IsNullOrEmpty(Password);
+        }
+
+        private void Exit()
+        {
+            _log.Debug("Exit");
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["title"] = _l10n["Power Off"];
+            parameter["message"] = _l10n["Are you sure you want to shut down the power?"];
+            var result = _dialogService.OpenDialog(new ConfirmDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
+            {
+                CommonUtil.Exit(DeviceStatus, null, true, true);
+            }
         }
     }
 }

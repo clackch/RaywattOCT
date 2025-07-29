@@ -305,7 +305,7 @@ namespace RaywattApp.ViewModels
             NavigationParameter = message.Parameter;
             NavigationSource = pageUri;
 
-            if(message.Parameter != null)
+            if (message.Parameter != null)
             {
                 Dictionary<string, object> data = (Dictionary<string, object>)message.Parameter;
 
@@ -324,7 +324,7 @@ namespace RaywattApp.ViewModels
                 else
                     PatientCase = null;
             }
-            
+
             if ((reviewPages.Contains(Constants.CurrentPage) && !reviewPages.Contains(pageUri))//Review 화면에서 나가는 경우, RayEndReview 호출
                 || (Constants.CurrentPage == Constants.RecordingConfirmPage && !pageUri.Equals(Constants.ReviewPage)))//Recording(Confirm) 화면에서 나가는 경우, RayEndReview 호출
             {
@@ -350,16 +350,13 @@ namespace RaywattApp.ViewModels
                 this.isAdmin = true;
             }
 
-            if (Constants.OutsetLoadingPage.Equals(NavigationSource))
+            if (Constants.OutsetLoadingPage.Equals(NavigationSource) || Constants.OutsetLoginPage.Equals(NavigationSource))
             {
                 IsHome = true;
                 IsSetting = true;
                 IsExit = true;
                 this.isAdmin = true;
             }
-
-            if (Constants.OutsetLoginPage.Equals(NavigationSource))
-                this.isAdmin = true;
         }
 
         private void Home()

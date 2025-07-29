@@ -6,7 +6,6 @@ using RaywattApp.Models;
 using RaywattApp.Services;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace RaywattApp.ViewModels.Dialog
 {
@@ -40,6 +39,8 @@ namespace RaywattApp.ViewModels.Dialog
 
         public EditCaseInfoDialogViewModel(SqlManager sqlManager)
         {
+            _log.Info("EditCaseInfoDialogViewModel");
+
             _sqlManager = sqlManager;
 
             PatientCase = new PatientCase();
