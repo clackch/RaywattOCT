@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
+using RaywattApp.Common.Enums;
 using RaywattApp.Common.Messages;
 using RaywattApp.Common.Util;
 using RaywattApp.Models;
@@ -17,6 +18,7 @@ using System.Windows.Navigation;
 
 namespace RaywattApp.ViewModels
 {
+
     public partial class OutsetLoginViewModel : ViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(OutsetLoginViewModel));
@@ -69,7 +71,7 @@ namespace RaywattApp.ViewModels
 
             if (navigatedEventArgs is NavigationEventArgs navArgs && navArgs.ExtraData is Dictionary<string, object> data)
             {
-                if (data.TryGetValue("login_step", out var stepObj) && stepObj is int step)
+                if (data.TryGetValue("login_step", out var stepObj) && stepObj is LoginStep step)
                 {
                     _user = data.GetValueOrDefault("user") as User ?? new User();
                     ExecuteLoginStep(step);
@@ -80,26 +82,28 @@ namespace RaywattApp.ViewModels
         private void Login()
         {
             _log.Debug("Login");
-            ExecuteLoginStep(1);
+            ExecuteLoginStep(LoginStep.AttemptLogin);
         }
 
-        private void ExecuteLoginStep(int step)
+        private void ExecuteLoginStep(LoginStep step)
         {
+            _log.Debug($"ExecuteLoginStep: {step}");
+
             switch (step)
             {
-                case 1:
+                case LoginStep.AttemptLogin:
                     AttemptLogin();
                     break;
-                case 2:
-                    if (!HandleInitialPasswordReset()) ExecuteLoginStep(3);
+                case LoginStep.CheckInitialPasswordReset:
+                    if (!HandleInitialPasswordReset()) ExecuteLoginStep(LoginStep.CheckPasswordExpiry);
                     break;
-                case 3:
-                    if (!CheckPasswordExpiry()) ExecuteLoginStep(4);
+                case LoginStep.CheckPasswordExpiry:
+                    if (!CheckPasswordExpiry()) ExecuteLoginStep(LoginStep.CheckTermsAgreement);
                     break;
-                case 4:
-                    if (EnsureTermsAgreement()) ExecuteLoginStep(5);
+                case LoginStep.CheckTermsAgreement:
+                    if (EnsureTermsAgreement()) ExecuteLoginStep(LoginStep.FinalizeLogin);
                     break;
-                case 5:
+                case LoginStep.FinalizeLogin:
                     FinalizeLogin();
                     break;
             }
@@ -121,7 +125,7 @@ namespace RaywattApp.ViewModels
             _passwordService.ResetPasswordCount();
             _user = user;
 
-            ExecuteLoginStep(2);
+            ExecuteLoginStep(LoginStep.CheckInitialPasswordReset);
         }
 
         private bool HandleInitialPasswordReset()

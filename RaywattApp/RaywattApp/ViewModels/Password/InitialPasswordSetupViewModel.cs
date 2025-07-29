@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
+using RaywattApp.Common.Enums;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
@@ -100,7 +101,7 @@ namespace RaywattApp.ViewModels.Password
             _passwordService.UpdatePasswordReset(_loginId, ConfirmPassword, _loginPassword);
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["login_step"] = 3;
+            parameter["login_step"] = LoginStep.CheckPasswordExpiry;
             parameter["user"] = _user;
 
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage) { Parameter  = parameter});

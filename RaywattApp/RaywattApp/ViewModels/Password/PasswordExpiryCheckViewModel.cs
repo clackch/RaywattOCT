@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
+using RaywattApp.Common.Enums;
 using RaywattApp.Common.Localization;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
@@ -98,10 +99,9 @@ namespace RaywattApp.ViewModels.Password
 
             var parameter = new Dictionary<string, object>
             {
-                ["login_step"] = 4,
+                ["login_step"] = LoginStep.CheckTermsAgreement,
                 ["user"] = _user
             };
-
 
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage) { Parameter = parameter });
         }
@@ -124,7 +124,7 @@ namespace RaywattApp.ViewModels.Password
 
             var parameter = new Dictionary<string, object>
             {
-                ["login_step"] = 4,
+                ["login_step"] = LoginStep.CheckTermsAgreement,
                 ["user"] = _user
             };
 
