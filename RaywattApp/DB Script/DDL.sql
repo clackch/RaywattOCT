@@ -269,15 +269,15 @@ ALTER TABLE IF EXISTS rv_schema.dicom_server
 CREATE TABLE IF NOT EXISTS rv_schema.user
 (
     id character varying(64) COLLATE pg_catalog."default" NOT NULL,
-    admin boolean DEFAULT false NOT NULL,    
     password text COLLATE pg_catalog."default" NOT NULL,
+    admin boolean DEFAULT false NOT NULL,	
     comment text COLLATE pg_catalog."default",
     password_changed_at timestamp without time zone,
     password_reset boolean DEFAULT false,
     terms_agreed_at timestamp without time zone,
     create_date timestamp without time zone,
     update_date timestamp without time zone,
-    CONSTRAINT users_pkey PRIMARY KEY (id, admin)
+    CONSTRAINT users_pkey PRIMARY KEY (id)
         USING INDEX TABLESPACE rv_tablespace
 )
 

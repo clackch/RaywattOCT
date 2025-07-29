@@ -281,7 +281,7 @@ namespace RaywattApp.Services
             _query["SelectUser"] = @$"
                 SELECT id, password, comment, password_changed_at, password_reset, terms_agreed_at, create_date, update_date
                 FROM rv_schema.user
-                WHERE LOWER(id) = LOWER(@id) AND admin IS NOT true
+                WHERE LOWER(id) = LOWER(@id)
                 ";
         }
 
@@ -450,14 +450,14 @@ namespace RaywattApp.Services
             _query["UpdateUser"] = @$"
                 UPDATE rv_schema.user
                 SET id=@newId, comment=@comment, update_date=now()
-                WHERE id=@id AND admin IS NOT true
+                WHERE id=@id
                 ";
 
             //ResetPasswordUser
             _query["ResetPasswordUser"] = @$"
                 UPDATE rv_schema.user
                 SET password=@password, password_reset=true, update_date=now()
-                WHERE id=@id AND admin IS NOT true
+                WHERE id=@id
                 ";
         }
 
@@ -492,7 +492,7 @@ namespace RaywattApp.Services
             //DeleteUser
             _query["DeleteUser"] = @$"
                 DELETE FROM rv_schema.user
-                WHERE id=@id AND admin IS NOT true
+                WHERE id=@id
                 ";
         }
 

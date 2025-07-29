@@ -77,4 +77,4 @@ INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00080064', 
 INSERT INTO rv_schema.dicom_property( tag, tag_name, value) VALUES ('00180015', 'Body Part Examined', 'HEART');
 
 -- rv_schema.user
-INSERT INTO rv_schema.user(id, admin, password, comment, create_date, update_date) VALUES ('admin', true, 'admin', 'Administrator', now(), now());
+INSERT INTO rv_schema.user(id, password, admin, comment, create_date, update_date) VALUES ('admin', 'admin', true, 'Administrator', now(), now());
