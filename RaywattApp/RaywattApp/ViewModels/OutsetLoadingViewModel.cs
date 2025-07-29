@@ -256,8 +256,6 @@ namespace RaywattApp.ViewModels
             _sqlManager.UpdateTermsAgreedDateUser(new Dictionary<string, object>
             {
                 ["id"] = user.Id,
-                ["password"] = user.Password,
-                ["admin"] = user.Admin
             });
 
             return true;

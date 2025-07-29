@@ -97,7 +97,7 @@ namespace RaywattApp.ViewModels.Password
                 return;
             }
 
-            _passwordService.UpdatePasswordReset(_loginId, ConfirmPassword, _loginPassword, _user.Admin);
+            _passwordService.UpdatePasswordReset(_loginId, ConfirmPassword, _loginPassword);
 
             var parameter = new Dictionary<string, object>
             {

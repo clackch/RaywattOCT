@@ -182,7 +182,7 @@ namespace RaywattApp.Services
         }
 
 
-        public bool UpdatePasswordReset(string id, string password, string before_passowrd, bool admin)
+        public bool UpdatePasswordReset(string id, string password, string before_passowrd)
         {
             _log.Debug("UpdatePasswordReset");
 
@@ -192,7 +192,6 @@ namespace RaywattApp.Services
                 ["password"] = password,
                 ["before_password"] = before_passowrd,
                 ["reset"] = false,
-                ["admin"] = admin
             };
 
             _sqlManager.UpdatePasswordReset(parameters);
