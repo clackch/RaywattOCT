@@ -198,6 +198,12 @@ for FFR</value>
   <data name="$MSG024" xml:space="preserve">
     <value>Not enough storage space. Please free up space and try again.</value>
   </data>
+  <data name="$MSG025" xml:space="preserve">
+    <value>The start date cannot be later than the end date.</value>
+  </data>
+  <data name="$MSG026" xml:space="preserve">
+    <value>Patient information with the same ID already exists. Update with the selected details?</value>
+  </data>
   <data name="$Terms and Conditions" xml:space="preserve">
     <value>Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.
 
@@ -867,11 +873,17 @@ Overwrite existing data?</value>
   <data name="Patient Case" xml:space="preserve">
     <value>Patient Case</value>
   </data>
+  <data name="Patient ID" xml:space="preserve">
+    <value>Patient ID</value>
+  </data>
   <data name="Patient Information Anonymize" xml:space="preserve">
     <value>Patient Information Anonymize</value>
   </data>
   <data name="Patient List" xml:space="preserve">
     <value>Patient List</value>
+  </data>
+  <data name="Patient Name" xml:space="preserve">
+    <value>Patient Name</value>
   </data>
   <data name="Patient Summary" xml:space="preserve">
     <value>Patient Summary</value>
@@ -930,6 +942,9 @@ Overwrite existing data?</value>
   <data name="Procedure" xml:space="preserve">
     <value>Procedure</value>
   </data>
+  <data name="Procedure Start Date" xml:space="preserve">
+    <value>Procedure Start Date</value>
+  </data>
   <data name="Proximal" xml:space="preserve">
     <value>Proximal</value>
   </data>
@@ -984,6 +999,9 @@ Overwrite existing data?</value>
   <data name="Rename Folder" xml:space="preserve">
     <value>Rename Folder</value>
   </data>
+  <data name="Requested Procedure ID" xml:space="preserve">
+    <value>Requested Procedure ID</value>
+  </data>
   <data name="Reset" xml:space="preserve">
     <value>Reset</value>
   </data>
@@ -1004,6 +1022,12 @@ Overwrite existing data?</value>
   </data>
   <data name="Save" xml:space="preserve">
     <value>Save</value>
+  </data>
+  <data name="Scheduled Procedure Step Start Date" xml:space="preserve">
+    <value>Scheduled Procedure Step Start Date</value>
+  </data>
+  <data name="Scheduled Station AE" xml:space="preserve">
+    <value>Scheduled Station AE</value>
   </data>
   <data name="Search" xml:space="preserve">
     <value>Search</value>

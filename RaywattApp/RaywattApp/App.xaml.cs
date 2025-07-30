@@ -14,6 +14,8 @@ using System;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
+using RaywattApp.Common.Util;
+using System.Windows.Input;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -39,6 +41,8 @@ namespace RaywattApp
 
             SetupExceptionHandling();
             this.SessionEnding += SessionEndingCancelEventHandler;
+            
+            EventManager.RegisterClassHandler(typeof(UIElement), UIElement.ManipulationBoundaryFeedbackEvent, new EventHandler<ManipulationBoundaryFeedbackEventArgs>((s, e) => e.Handled = true));
         }
 
         private void SessionEndingCancelEventHandler(object sender, SessionEndingCancelEventArgs e)
@@ -97,6 +101,7 @@ namespace RaywattApp
             services.AddTransient(typeof(ReviewCalibrationViewModel));
             services.AddTransient(typeof(PatientNewDicomViewModel));
             services.AddTransient(typeof(PatientNewDicomPacsViewModel));
+            services.AddTransient(typeof(PatientNewDicomMwlViewModel));
             services.AddTransient(typeof(InitialPasswordSetupViewModel));
             services.AddTransient(typeof(PasswordExpiryCheckViewModel));
 
@@ -142,6 +147,7 @@ namespace RaywattApp
             services.AddTransient(typeof(DicomServerDialogViewModel));
             services.AddTransient(typeof(NewPatientDialogViewModel));
             services.AddTransient(typeof(DicomPacsDialogViewModel));
+            services.AddTransient(typeof(MwlSearchDialogViewModel));
             services.AddTransient(typeof(PasswordChangeDialogViewModel));
             services.AddTransient(typeof(EditInstituteDialogViewModel));
 

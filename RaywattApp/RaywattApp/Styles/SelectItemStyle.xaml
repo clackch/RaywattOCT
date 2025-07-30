@@ -420,8 +420,6 @@
     </Style>
 
     <Style TargetType="{x:Type DatePicker}" x:Key="DatePickerStyle" BasedOn="{StaticResource Pretendard-Medium-18}">
-        <Setter Property="Width" Value="408"/>
-        <Setter Property="Height" Value="54"/>
         <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray3Brush}" />
         <Setter Property="IsTodayHighlighted" Value="True" />
         <Setter Property="BorderThickness" Value="1" />
@@ -448,7 +446,7 @@
                             <Label x:Name="placeholder" Opacity="0" Content="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Tag}" Foreground="{TemplateBinding Foreground}" Margin="20,17,0,16"/>
                             <Button x:Name="PART_Button" Grid.ColumnSpan="2" Foreground="{TemplateBinding Foreground}" Focusable="False" Style="{StaticResource DropDownButtonStyle}"/>
                             <Grid x:Name="PART_DisabledVisual" Grid.ColumnSpan="2" Grid.Column="0" IsHitTestVisible="False" Opacity="0">
-                                <Popup x:Name="PART_Popup" AllowsTransparency="True" Placement="Bottom" PlacementTarget="{Binding ElementName=PART_DisabledVisual}" HorizontalOffset="-1" VerticalOffset="6" StaysOpen="False" />
+                                <Popup x:Name="PART_Popup" AllowsTransparency="True" Placement="Bottom" PlacementTarget="{Binding ElementName=PART_DisabledVisual}" HorizontalOffset="2" VerticalOffset="6" StaysOpen="False" />
                             </Grid>
                         </Grid>
                     </Border>
@@ -461,6 +459,68 @@
                         <Trigger Property="SelectedDate" Value="{x:Null}">
                             <Setter TargetName="placeholder" Property="Opacity" Value="1"/>
                         </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type DatePicker}" x:Key="DatePickerValidator" BasedOn="{StaticResource Pretendard-Medium-18}">
+        <Setter Property="ToolTipService.IsEnabled" Value="False"/>
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray3Brush}" />
+        <Setter Property="IsTodayHighlighted" Value="True" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Height" Value="72" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="CalendarStyle" Value="{DynamicResource CalendarStyle}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type DatePicker}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="54"/>
+                            <RowDefinition Height="18"/>
+                        </Grid.RowDefinitions>
+                        <Border x:Name="border" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" BorderBrush="{DynamicResource GrayscaleGray5Brush}">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal" />
+                                    <VisualState x:Name="Disabled"/>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <Grid x:Name="PART_Root" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <DatePickerTextBox x:Name="PART_TextBox" Grid.Column="0" Foreground="{TemplateBinding Foreground}" Focusable="{TemplateBinding Focusable}"
+                                                   HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center" Margin="20,17,0,16"
+                                                   Background="Transparent" Style="{DynamicResource DatePickerTextBoxStyle1}"/>
+                                <Label x:Name="placeholder" Opacity="0" Content="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Tag}" Foreground="{TemplateBinding Foreground}" Margin="20,17,0,16"/>
+                                <Button x:Name="PART_Button" Grid.ColumnSpan="2" Foreground="{TemplateBinding Foreground}" Focusable="False" Style="{StaticResource DropDownButtonStyle}"/>
+                                <Grid x:Name="PART_DisabledVisual" Grid.ColumnSpan="2" Grid.Column="0" IsHitTestVisible="False" Opacity="0">
+                                    <Popup x:Name="PART_Popup" AllowsTransparency="True" Placement="Bottom" PlacementTarget="{Binding ElementName=PART_DisabledVisual}" HorizontalOffset="2" VerticalOffset="6" StaysOpen="True" />
+                                </Grid>
+                            </Grid>
+                        </Border>
+                        <StackPanel Grid.Row="1" x:Name="validator" Orientation="Horizontal" Visibility="Collapsed" Margin="0,4,0,0">
+                            <Label Content="* " Foreground="{DynamicResource AdditionalColor3Brush}" FontSize="12"/>
+                            <Label Content="{TemplateBinding ToolTip}" Foreground="{DynamicResource AdditionalColor3Brush}" FontSize="12"/>
+                        </StackPanel>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsDropDownOpen" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
+                            <Setter TargetName="PART_TextBox" Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+                            <Setter TargetName="PART_Button" Property="Style" Value="{StaticResource DropDownButtonStyleActive}"/>
+                        </Trigger>
+                        <Trigger Property="SelectedDate" Value="{x:Null}">
+                            <Setter TargetName="placeholder" Property="Opacity" Value="1"/>
+                        </Trigger>
+                        <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self},Path=ToolTip, Converter={StaticResource NotEmptyStringToEnableConverter}}" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AdditionalColor3Brush}"/>
+                            <Setter TargetName="validator" Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
@@ -777,31 +837,28 @@
                         <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" CornerRadius="4">
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="62" />
-                                    <ColumnDefinition Width="284" />
-                                    <ColumnDefinition Width="62" />
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="20" />
+                                    <RowDefinition Height="16" />
                                     <RowDefinition Height="26" />
-                                    <RowDefinition Height="20" />
+                                    <RowDefinition Height="16" />
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
-                                <Button x:Name="PART_PreviousButton" Template="{StaticResource PreviousButtonTemplate}" Focusable="False" HorizontalAlignment="Left" 
-                                            Grid.Column="0" Grid.Row="1" Margin="24,0,0,0"/>
-                                <Button x:Name="PART_HeaderButton" Focusable="False" HorizontalAlignment="Center" VerticalAlignment="Center" 
-                                            Grid.Column="1" Grid.Row="1" Template="{StaticResource HeaderButtonTemplate}" />
-                                <Button x:Name="PART_NextButton" Template="{StaticResource NextButtonTemplate}" Focusable="False" HorizontalAlignment="Right" 
-                                            Grid.Column="2" Grid.Row="1"  Margin="0,0,24,0"/>
-                                <Grid x:Name="PART_MonthView" Visibility="Visible" Grid.ColumnSpan="3" Grid.Row="3" HorizontalAlignment="Center">
+                                <Button x:Name="PART_PreviousButton" Template="{StaticResource PreviousButtonTemplate}" Focusable="False" HorizontalAlignment="Left"  Grid.Column="0" Grid.Row="1" Margin="16,0,0,0"/>
+                                <Button x:Name="PART_HeaderButton" Focusable="False" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="1" Grid.Row="1" Template="{StaticResource HeaderButtonTemplate}" />
+                                <Button x:Name="PART_NextButton" Template="{StaticResource NextButtonTemplate}" Focusable="False" HorizontalAlignment="Right" Grid.Column="2" Grid.Row="1" Margin="0,0,16,0"/>
+                                <Grid x:Name="PART_MonthView" Visibility="Visible" Grid.ColumnSpan="3" Grid.Row="3" HorizontalAlignment="Stretch" >
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="58.2"/>
-                                        <ColumnDefinition Width="58.2"/>
-                                        <ColumnDefinition Width="58.2"/>
-                                        <ColumnDefinition Width="58.2"/>
-                                        <ColumnDefinition Width="58.2"/>
-                                        <ColumnDefinition Width="58.2"/>
-                                        <ColumnDefinition Width="58.2"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="28" />
@@ -813,23 +870,23 @@
                                         <RowDefinition Height="34" />
                                     </Grid.RowDefinitions>
                                 </Grid>
-                                <Grid x:Name="PART_YearView" Visibility="Hidden" Grid.ColumnSpan="3" Grid.Row="3" HorizontalAlignment="Center">
+                                <Grid x:Name="PART_YearView" Visibility="Hidden" Grid.ColumnSpan="3" Grid.Row="3" HorizontalAlignment="Stretch" >
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="102"/>
-                                        <ColumnDefinition Width="102" />
-                                        <ColumnDefinition Width="102" />
-                                        <ColumnDefinition Width="102" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="63"/>
-                                        <RowDefinition Height="63"/>
-                                        <RowDefinition Height="63"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
                                 </Grid>
                             </Grid>
                         </Border>
                         <Rectangle x:Name="PART_DisabledVisual" Fill="{StaticResource DisabledColor}" Opacity="0" RadiusY="2" RadiusX="2" Stretch="Fill"
-                                   Stroke="{StaticResource DisabledColor}" StrokeThickness="1" Visibility="Collapsed" />
+                               Stroke="{StaticResource DisabledColor}" StrokeThickness="1" Visibility="Collapsed" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsEnabled" Value="False">
@@ -856,14 +913,19 @@
         <Setter Property="Foreground" Value="white" />
         <Setter Property="Background" Value="{DynamicResource GrayscaleGray6Brush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource GrayscaleGray5Brush}"/>
-        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Margin" Value="20"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Calendar}">
-                    <StackPanel x:Name="PART_Root" HorizontalAlignment="Center">
-                        <CalendarItem x:Name="PART_CalendarItem"
-                        Background="{TemplateBinding Background}" Style="{TemplateBinding CalendarItemStyle}" />
-                    </StackPanel>
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4">
+                        <Border.Effect>
+                            <DropShadowEffect ShadowDepth="0" Color="#4D000000" Opacity="0.8" BlurRadius="30"/>
+                        </Border.Effect>
+                        <StackPanel x:Name="PART_Root" HorizontalAlignment="Center">
+                            <CalendarItem x:Name="PART_CalendarItem" Background="Transparent" Style="{TemplateBinding CalendarItemStyle}" Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type DatePicker}}, Path=ActualWidth}" />
+                        </StackPanel>
+                    </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

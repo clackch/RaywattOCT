@@ -28,7 +28,7 @@ namespace RaywattApp.Common.Localization
         /// 윈도우 리소스로더
         /// </summary>
         private readonly ResourceManager _resourceManager;
-        private CultureInfo _clutureInfo;
+        private CultureInfo _cultureInfo;
 
         private bool IsInDesignMode
         {
@@ -77,7 +77,7 @@ namespace RaywattApp.Common.Localization
             {
                 //1. 리소스에서 값 조회
                 if (string.IsNullOrEmpty(id)) return null;
-                string str = _resourceManager.GetString(id, _clutureInfo);
+                string str = _resourceManager.GetString(id, _cultureInfo);
                 if (string.IsNullOrEmpty(str))
                 //2. 없으면 키 반환
                 {
@@ -93,7 +93,7 @@ namespace RaywattApp.Common.Localization
         public override bool TryGetMember(GetMemberBinder binder, out object result)
         {
             string id = binder.Name;
-            string str = _resourceManager.GetString(id, _clutureInfo);
+            string str = _resourceManager.GetString(id, _cultureInfo);
             if (string.IsNullOrEmpty(str))
             {
                 str = id;
@@ -155,16 +155,16 @@ namespace RaywattApp.Common.Localization
             _log.Debug("SetLanguage : " + languageCode);
 
             //언어 설정
-            _clutureInfo = new CultureInfo(languageCode);
-            Thread.CurrentThread.CurrentCulture = _clutureInfo;
-            Thread.CurrentThread.CurrentUICulture = _clutureInfo;
+            _cultureInfo = new CultureInfo(languageCode);
+            Thread.CurrentThread.CurrentCulture = _cultureInfo;
+            Thread.CurrentThread.CurrentUICulture = _cultureInfo;
 
             //윈도우의 언어코드 변경
             foreach (Window window in Application.Current.Windows.Cast<Window>())
             {
                 if (!window.AllowsTransparency)
                 {
-                    window.Language = XmlLanguage.GetLanguage(_clutureInfo.Name);
+                    window.Language = XmlLanguage.GetLanguage(_cultureInfo.Name);
                 }
             }
         }

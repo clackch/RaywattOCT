@@ -13,16 +13,13 @@ using CommunityToolkit.Mvvm.Input;
 using System.Windows.Input;
 using RaywattApp.Views.Dialog;
 using RaywattApp.Common.Util;
-using RayCoreWrapper;
-using System.Runtime.InteropServices;
 using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 
 namespace RaywattApp.ViewModels
 {
-    public partial class PatientNewDicomPacsViewModel : ViewModelBase
+    public partial class PatientNewDicomMwlViewModel : ViewModelBase
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(PatientNewDicomPacsViewModel));
+        private static readonly ILog _log = LogManager.GetLogger(typeof(PatientNewDicomMwlViewModel));
 
         private readonly SqlManager _sqlManager;
 
@@ -32,13 +29,10 @@ namespace RaywattApp.ViewModels
         private PrevStatus _prevStatus;
 
         [ObservableProperty]
-        private TextValidator _searchPatientId = new TextValidator();
+        private ObservableCollection<DicomWorklist> _worklists = new ObservableCollection<DicomWorklist>();
 
         [ObservableProperty]
-        private string _searchPatientName = "";
-
-        [ObservableProperty]
-        private ObservableCollection<Patient> _patients = new ObservableCollection<Patient>();
+        private DicomWorklist _selectedWorklist;
 
         [ObservableProperty]
         private Patient _selectedPatient;
@@ -70,25 +64,23 @@ namespace RaywattApp.ViewModels
         private ICommand _searchCommand;
         public ICommand SearchCommand
         {
-            get { return this._searchCommand ?? (this._searchCommand = new RelayCommand(async () => await Search())); }
+            get { return this._searchCommand ?? (this._searchCommand = new RelayCommand(Search)); }
         }
 
         private ICommand _selectionChangedCommand;
         public ICommand SelectionChangedCommand
         {
-            get { return this._selectionChangedCommand ?? (this._selectionChangedCommand = new RelayCommand<Patient>(SelectionChanged)); }
+            get { return this._selectionChangedCommand ?? (this._selectionChangedCommand = new RelayCommand<DicomWorklist>(SelectionChanged)); }
         }
 
-        public PatientNewDicomPacsViewModel(SqlManager sqlManager, IDialogService dialogService)
+        public PatientNewDicomMwlViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
-            _log.Debug("PatientNewDicomPacsViewModel");
+            _log.Debug("PatientNewDicomMwlViewModel");
 
-            Constants.CurrentPage = Constants.PatientNewDicomPacsPage;
+            Constants.CurrentPage = Constants.PatientNewDicomMwlPage;
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
-
-            dicomClient = RayExportWrapper.CreateDcmClient();            
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -103,17 +95,12 @@ namespace RaywattApp.ViewModels
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 LocalHostAeTitle = (string)data["localHostAeTitle"];
                 SelectedDicomServer = (DicomServer)data["selectedDicomServer"];
-
-                bool usePeerVerification = CommonUtil.IsTestMode(DeviceStatus.TestMode, "CertIgnore") == true ? false : true;
-                RayExportWrapper.DicomNetRWError res = (RayExportWrapper.DicomNetRWError)RayExportWrapper.Initialize(dicomClient, LocalHostAeTitle, SelectedDicomServer.IpAddress, int.Parse(SelectedDicomServer.Port), SelectedDicomServer.AeTitle, SelectedDicomServer.TlsYn, usePeerVerification, SelectedDicomServer.CaFilePath);
             }
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
             _log.Debug("OnNavigating");
-
-            RayExportWrapper.DestroyDcmClient(dicomClient);
         }
 
         private void Back()
@@ -129,6 +116,17 @@ namespace RaywattApp.ViewModels
         private void NewRecording()
         {
             _log.Debug("NewRecording");
+            SelectedPatient = new Patient();
+
+            SelectedPatient.Id = SelectedWorklist.PatientId;
+            SelectedPatient.Birthdate = SelectedWorklist.PatientBirthDate;
+            SelectedPatient.Gender = SelectedWorklist.PatientSex;
+
+            string lastname, firstname;
+            CommonUtil.ParseDicomName(SelectedWorklist.PatientName, out lastname, out firstname);
+            SelectedPatient.Lastname = lastname;
+            SelectedPatient.Firstname = firstname;
+            SelectedPatient.HasFirstname = (firstname != string.Empty);
 
             if (!ValidateSelectedPatient(SelectedPatient.HasFirstname))
             {
@@ -157,7 +155,10 @@ namespace RaywattApp.ViewModels
             parameter["prevStatus"] = PrevStatus;
 
             if (CommonUtil.IsStorageAvailable())
+            {
+                parameter["accessionNumber"] = SelectedWorklist.AccessionNumber;
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingPresetPage) { Parameter = parameter });
+            }
             else
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientDetailPage) { Parameter = parameter });
         }
@@ -196,7 +197,7 @@ namespace RaywattApp.ViewModels
                 else
                 {
                     return false;
-                }                                    
+                }
             }
             else
             {
@@ -248,7 +249,7 @@ namespace RaywattApp.ViewModels
                 res = _sqlManager.UpdatePatient(sqlParameters);
             }
             else
-            {                
+            {
                 res = _sqlManager.InsertPatient(sqlParameters);
             }
 
@@ -261,90 +262,37 @@ namespace RaywattApp.ViewModels
             return true;
         }
 
-        private async Task Search()
+        private void Search()
         {
             _log.Debug("Search");
 
-            Patients.Clear();
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["localHostAeTitle"] = LocalHostAeTitle;
+            parameter["dicomServer"] = SelectedDicomServer;
+            parameter["deviceStatus"] = DeviceStatus;
 
-            if (string.IsNullOrEmpty(SearchPatientId.Text) && string.IsNullOrEmpty(SearchPatientName))
+            var result = _dialogService.OpenDialog(new MwlSearchDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+            
+            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
             {
-                SearchPatientId.Msg = "Please enter the value to search for.";
-                return;
-            }
+                List<DicomWorklist> worklists = (List<DicomWorklist>)result.DialogReturn;
 
-            string patientIdParam = string.IsNullOrEmpty(SearchPatientId.Text) ? "*" : "*" + SearchPatientId.Text.Trim() + "*";
-            string patientNameParam = string.IsNullOrEmpty(SearchPatientName) ? "*" : "*" + SearchPatientName.Trim() + "*";
-
-            IsChecking = true;
-            RayExportWrapper.DicomNetRWError res = await Task.Run(() => (RayExportWrapper.DicomNetRWError)RayExportWrapper.Echo(dicomClient));
-            _log.DebugFormat("Echo : {0}", res);
-            IsChecking = false;
-
-            if (res == RayExportWrapper.DicomNetRWError.NoConnection || res == RayExportWrapper.DicomNetRWError.EchoFail)
-            {
-                IsChecking = true;
-                bool usePeerVerification = CommonUtil.IsTestMode(DeviceStatus.TestMode, "CertIgnore") == true ? false : true;
-                res = await Task.Run(() => (RayExportWrapper.DicomNetRWError)RayExportWrapper.Initialize(dicomClient, LocalHostAeTitle, SelectedDicomServer.IpAddress, int.Parse(SelectedDicomServer.Port), SelectedDicomServer.AeTitle, SelectedDicomServer.TlsYn, usePeerVerification, SelectedDicomServer.CaFilePath));
-                _log.DebugFormat("Initialize : {0}", res);
-                IsChecking = false;
-
-                if (res != RayExportWrapper.DicomNetRWError.Normal)
+                Worklists.Clear();
+                foreach (var worklist in worklists)
                 {
-                    Dictionary<string, object> parameter = new Dictionary<string, object>();
-                    parameter["title"] = _l10n["Information"];
-                    parameter["message"] = CommonUtil.GetDicomResultMessage(res);
-                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-                    return;
+                    Worklists.Add(worklist);
                 }
             }
-
-            int count = 0;
-            IsChecking = true;
-            dicomPatients = await Task.Run(() => (RayExportWrapper.FindPatients(dicomClient, patientIdParam, patientNameParam, out count)));
-            IsChecking = false;
-
-            if (dicomPatients != IntPtr.Zero)
-            {
-                IntPtr current = dicomPatients;
-
-                for (int i = 0; i < count; i++)
-                {
-                    var dicomPatient = Marshal.PtrToStructure<DicomPatient>(current);
-
-                    Patient patient = new Patient();
-                    patient.Id = dicomPatient.PatientId;
-                    string lastname, firstname;
-                    CommonUtil.ParseDicomName(dicomPatient.PatientName, out lastname, out firstname);
-                    patient.Lastname = lastname;
-                    patient.Firstname = firstname;
-                    patient.HasFirstname = firstname != string.Empty ? true : false;
-                    patient.Name = dicomPatient.PatientName;
-                    patient.Gender = dicomPatient.PatientSex;
-                    DateTime birthdate;
-                    if (DateTime.TryParseExact(dicomPatient.PatientBirthDate, "yyyyMMdd", null, System.Globalization.DateTimeStyles.None, out birthdate))
-                    {
-                        patient.Birthdate = birthdate;
-                    }
-                    else
-                    {
-                        patient.Birthdate = null;
-                    }
-                    Patients.Add(patient);
-                    current += Marshal.SizeOf<DicomPatient>();
-                }
-            }
-            RayExportWrapper.FreeMemory(dicomPatients);
         }
 
         private bool CanNext()
         {
             _log.Debug("CanNext");
 
-            return SelectedPatient == null ? false : true;
+            return SelectedWorklist == null ? false : true;
         }
 
-        private void SelectionChanged(Patient patient)
+        private void SelectionChanged(DicomWorklist worklist)
         {
             _log.Debug("SelectionChanged");
 

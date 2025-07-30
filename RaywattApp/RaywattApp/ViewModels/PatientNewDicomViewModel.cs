@@ -130,7 +130,12 @@ namespace RaywattApp.ViewModels
             parameter["prevStatus"] = PrevStatus;
             parameter["localHostAeTitle"] = LocalHostAeTitle;
             parameter["selectedDicomServer"] = SelectedDicomServer;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientNewDicomPacsPage) { Parameter = parameter });
+
+            if (SelectedDicomServer.ServerType == "PACS")
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientNewDicomPacsPage) { Parameter = parameter });
+
+            if (SelectedDicomServer.ServerType == "MWL")
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientNewDicomMwlPage) { Parameter = parameter });
         }
 
         private async Task<bool> ConnectionTest()

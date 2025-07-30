@@ -265,6 +265,13 @@ namespace RaywattApp.Services
                 ORDER BY ae_title
                 ";
 
+            //SelectDicomServerExcludeId
+            _query["SelectDicomServerExcludeId"] = @$"
+                SELECT id, ae_title, hostname, specify_ip_address, ip_address, port, tls_yn, server_type, comment, ca_file_path, create_date, update_date
+                FROM rv_schema.dicom_server
+                WHERE id != @id
+                ORDER BY ae_title
+                  
             //SelectUserList
             _query["SelectUserList"] = @$"
                 SELECT id

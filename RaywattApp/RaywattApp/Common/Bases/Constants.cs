@@ -26,6 +26,7 @@ namespace RaywattApp.Common.Bases
         public const string PatientEditPage = "Views/PatientEditPage.xaml";
         public const string PatientNewDicomPage = "Views/PatientNewDicomPage.xaml";
         public const string PatientNewDicomPacsPage = "Views/PatientNewDicomPacsPage.xaml";
+        public const string PatientNewDicomMwlPage = "Views/PatientNewDicomMwlPage.xaml";
         //Physician
         public const string PhysicianListPage = "Views/PhysicianListPage.xaml";
         public const string PhysicianEditPage = "Views/PhysicianEditPage.xaml";
@@ -118,6 +119,13 @@ namespace RaywattApp.Common.Bases
         public const double NewPatientDialogHeight = 269;
         public const double DicomPacsDialogWidth = 860;
         public const double DicomPacsDialogHeight = 606;
+        public const double MwlSearchDialogWidth = 960;
+        public const double MwlSearchDialogHeight = 683;
+
+        //Max Length
+        public const int MaxPatientId = 64;
+        public const int MaxLastname = 64;
+        public const int MaxFirstname = 64;
         public const double EditInstituteDialogWidth = 472;
         public const double EditInstituteDialogHeight = 380;
 
