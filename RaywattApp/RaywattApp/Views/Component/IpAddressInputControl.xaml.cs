@@ -187,6 +187,13 @@ namespace RaywattApp.Views.Component
             {
                 UpdateBorderBrush();
             }
+
+            var textBox = sender as TextBox;
+            if (textBox != null && !string.IsNullOrEmpty(textBox.Text))
+            {
+                string cleaned = textBox.Text.TrimStart('0');
+                textBox.Text = string.IsNullOrEmpty(cleaned) ? "0" : cleaned;
+            }
         }
 
         private bool IsAnyIpTextBoxFocused()
