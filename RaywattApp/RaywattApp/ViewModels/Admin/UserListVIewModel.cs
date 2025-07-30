@@ -106,6 +106,8 @@ namespace RaywattApp.ViewModels.Admin
         private void ChangeAdminPassword()
         {
             _log.Debug("ChangeAdminPassword");
+
+            var result = _dialogService.OpenDialog(new PasswordChangeDialogControl(), null, Constants.ApplicationWidth, Constants.ApplicationHeight);
         }
 
         private void AddUser()
