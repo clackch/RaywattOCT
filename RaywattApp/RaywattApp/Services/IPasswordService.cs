@@ -21,7 +21,7 @@ namespace RaywattApp.Services
         /// <summary>
         /// Retrieves the password for a user by their ID
         /// </summary>
-        string GetPasswordByUserId(string id); // 
+        string GetPassword(string id); // 
 
         /// <summary>
         /// Validates the password and returns an error message if it does not meet the criteria

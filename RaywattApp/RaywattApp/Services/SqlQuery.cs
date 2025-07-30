@@ -277,16 +277,9 @@ namespace RaywattApp.Services
                 ORDER BY id
                 ";
 
-            //SelectUserList
-            _query["SelectUserById"] = @$"
-                SELECT id, admin, password, comment, password_changed_at, password_reset, terms_agreed_at, create_date, update_date
-                FROM rv_schema.user
-                WHERE LOWER(id) = LOWER(@id)
-                ";
-
             //SelectUser
             _query["SelectUser"] = @$"
-                SELECT id, password, comment, password_changed_at, password_reset, terms_agreed_at, create_date, update_date
+                SELECT id, admin, password, comment, password_changed_at, password_reset, terms_agreed_at, create_date, update_date
                 FROM rv_schema.user
                 WHERE LOWER(id) = LOWER(@id) AND admin IS NOT true
                 ";

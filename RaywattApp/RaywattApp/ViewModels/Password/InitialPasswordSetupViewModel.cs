@@ -36,6 +36,8 @@ namespace RaywattApp.ViewModels.Password
 
         public InitialPasswordSetupViewModel(IPasswordService passwordService)
         {
+            Constants.CurrentPage = Constants.InitialPasswordSetupPage;
+
             _log.Debug("InitialPasswordSetupViewModel");
 
             _passwordService = passwordService;

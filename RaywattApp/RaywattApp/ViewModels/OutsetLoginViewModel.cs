@@ -93,6 +93,7 @@ namespace RaywattApp.ViewModels
             {
                 case LoginStep.AttemptLogin:
                     AttemptLogin();
+                    ClearTextBox();
                     break;
                 case LoginStep.CheckInitialPasswordReset:
                     if (!HandleInitialPasswordReset()) ExecuteLoginStep(LoginStep.CheckPasswordExpiry);
@@ -115,15 +116,14 @@ namespace RaywattApp.ViewModels
 
             if (!_passwordService.CheckLoginWithRetryCount(Id.Text, Password))
             {
-                ClearTextBox();
                 return;
             }
 
-            var user = GetUserById(Id.Text);
+            DeviceStatus.LoginID = Id.Text;
 
-            DeviceStatus.LoginID = user.Id;
+            _user = GetUser(DeviceStatus.LoginID);
+            
             _passwordService.ResetPasswordCount();
-            _user = user;
 
             ExecuteLoginStep(LoginStep.CheckInitialPasswordReset);
         }
@@ -131,6 +131,8 @@ namespace RaywattApp.ViewModels
         private bool HandleInitialPasswordReset()
         {
             _log.Debug("HandleInitialPasswordReset");
+
+            _user = GetUser(DeviceStatus.LoginID);
 
             if (_user?.PasswordReset == true)
             {
@@ -147,6 +149,8 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("CheckPasswordExpiry");
 
+            _user = GetUser(DeviceStatus.LoginID);
+
             if ((DateTime.Now - _user.PasswordChangedAt).TotalDays > _passwordService.PasswordExpiryDays)
             {
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PasswordExpiryCheckPage)
@@ -161,6 +165,8 @@ namespace RaywattApp.ViewModels
         private bool EnsureTermsAgreement()
         {
             _log.Debug("EnsureTermsAgreement");
+
+            _user = GetUser(DeviceStatus.LoginID);
 
             if (_user.TermsAgreedAt > DateTime.MinValue) return true;
 
@@ -181,6 +187,8 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("FinalizeLogin");
 
+            _user = GetUser(DeviceStatus.LoginID);
+
             if (_user?.Admin == true)
             {
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.UserListPage));
@@ -191,8 +199,8 @@ namespace RaywattApp.ViewModels
                 {
                     Parameter = new Dictionary<string, object>
                     {
-                        ["id"] = Id.Text,
-                        ["password"] = Password
+                        ["id"] = _user.Id,
+                        ["password"] = _user.Password
                     }
                 });
             }
@@ -206,11 +214,11 @@ namespace RaywattApp.ViewModels
             Password = string.Empty;
         }
 
-        private User? GetUserById(string id)
+        private User? GetUser(string id)
         {
-            _log.Debug($"GetUserById: {id}");
+            _log.Debug($"GetUser: {id}");
 
-            var result = _sqlManager.SelectUserById(new Dictionary<string, object> { ["id"] = id });
+            var result = _sqlManager.SelectUser(new Dictionary<string, object> { ["id"] = id });
             return result?.Count > 0 ? result[0] : null;
         }
 

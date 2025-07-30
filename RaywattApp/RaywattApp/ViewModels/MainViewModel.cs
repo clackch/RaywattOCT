@@ -350,7 +350,7 @@ namespace RaywattApp.ViewModels
                 this.isAdmin = true;
             }
 
-            if (Constants.OutsetLoadingPage.Equals(NavigationSource) || Constants.OutsetLoginPage.Equals(NavigationSource))
+            if (Constants.OutsetLoadingPage.Equals(NavigationSource) || Constants.OutsetLoginPage.Equals(NavigationSource) || Constants.InitialPasswordSetupPage.Equals(NavigationSource) || Constants.PasswordExpiryCheckPage.Equals(NavigationSource))
             {
                 IsHome = true;
                 IsSetting = true;

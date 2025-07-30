@@ -24,7 +24,7 @@ namespace RaywattApp.Services
 
         protected readonly DynamicResource _l10n;
         private int _passwordExpiryDays = 90;
-        private int _maxPasswordRetryCount = 3;
+        private int _maxPasswordRetryCount = 5;
         private TimeSpan _passwordRetryLockDuration = TimeSpan.FromSeconds(30);
 
         static private int _currentPasswordRetryCount = 0;
@@ -72,7 +72,7 @@ namespace RaywattApp.Services
 
             _log.Debug("CheckLoginWithRetryCount " + _currentPasswordRetryCount);
 
-            string password = GetPasswordByUserId(id);
+            string password = GetPassword(id);
 
             if (password != inputPassword || password == string.Empty)
             {
@@ -105,14 +105,14 @@ namespace RaywattApp.Services
             return true;
         }
 
-        public string GetPasswordByUserId(string id)
+        public string GetPassword(string id)
         {
-            _log.Debug("GetPasswordByUserId");
+            _log.Debug("GetPassword");
 
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["id"] = id;
-
-            var commandText = SqlQuery.GetQuery("SelectUserById");
+            
+            var commandText = SqlQuery.GetQuery("SelectUser");
             var userData = _databaseService.GetDatas<User>(commandText, sqlParameters);
             string password = userData.Count > 0 ? userData[0].Password : string.Empty;
 
@@ -208,10 +208,17 @@ namespace RaywattApp.Services
 
             IList<Configuration> passwordParameter = _sqlManager.SelectConfiguration(sqlParameters);
 
-            _passwordExpiryDays = int.Parse(passwordParameter.FirstOrDefault(x => x.Key == "ExpiryDay").Value);
-            _maxPasswordRetryCount = int.Parse(passwordParameter.FirstOrDefault(x => x.Key == "MaxCount").Value);
-            int waitSeconds = int.Parse(passwordParameter.FirstOrDefault(x => x.Key == "WaitSecond").Value);
-            _passwordRetryLockDuration = TimeSpan.FromSeconds(waitSeconds);
+            _passwordExpiryDays = int.TryParse(
+                passwordParameter.FirstOrDefault(x => x.Key == "ExpiryDay")?.Value,
+                out var parsed) ? parsed : _passwordExpiryDays;
+
+            _maxPasswordRetryCount = int.TryParse(
+                passwordParameter.FirstOrDefault(x => x.Key == "MaxCount")?.Value,
+                out var count) ? count : _maxPasswordRetryCount;
+
+            _passwordRetryLockDuration = TimeSpan.TryParse(
+                passwordParameter.FirstOrDefault(x => x.Key == "WaitSecond")?.Value,
+                out var value1) ? value1 : _passwordRetryLockDuration;
         }
     }
 }

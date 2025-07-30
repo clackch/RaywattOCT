@@ -52,6 +52,8 @@ namespace RaywattApp.ViewModels.Password
 
         public PasswordExpiryCheckViewModel(IPasswordService passwordService)
         {
+            Constants.CurrentPage = Constants.PasswordExpiryCheckPage;
+
             _log.Debug("PasswordExpiryCheckViewModel");
             _l10n = (DynamicResource)App.Current.Resources["L10N"];
 
