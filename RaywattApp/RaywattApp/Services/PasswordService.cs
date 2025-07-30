@@ -25,7 +25,7 @@ namespace RaywattApp.Services
         protected readonly DynamicResource _l10n;
         private int _passwordExpiryDays = 90;
         private int _maxPasswordRetryCount = 3;
-        private TimeSpan PasswordRetryLockDuration = TimeSpan.FromSeconds(30);
+        private TimeSpan _passwordRetryLockDuration = TimeSpan.FromSeconds(30);
 
         static private int _currentPasswordRetryCount = 0;
 
@@ -78,7 +78,7 @@ namespace RaywattApp.Services
             {
                 if (_currentPasswordRetryCount >= _maxPasswordRetryCount)
                 {
-                    ShowTimerAlert("Login Failed", $"Too many incorrect password attempts.\r\n\r\n{_maxPasswordRetryCount} times", false, PasswordRetryLockDuration);
+                    ShowTimerAlert("Login Failed", $"Too many incorrect password attempts.\r\n\r\n{_maxPasswordRetryCount} times", false, _passwordRetryLockDuration);
                     WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
                     ResetPasswordCount();
                     return false;
@@ -211,7 +211,7 @@ namespace RaywattApp.Services
             _passwordExpiryDays = int.Parse(passwordParameter.FirstOrDefault(x => x.Key == "ExpiryDay").Value);
             _maxPasswordRetryCount = int.Parse(passwordParameter.FirstOrDefault(x => x.Key == "MaxCount").Value);
             int waitSeconds = int.Parse(passwordParameter.FirstOrDefault(x => x.Key == "WaitSecond").Value);
-            PasswordRetryLockDuration = TimeSpan.FromSeconds(waitSeconds);
+            _passwordRetryLockDuration = TimeSpan.FromSeconds(waitSeconds);
         }
     }
 }
