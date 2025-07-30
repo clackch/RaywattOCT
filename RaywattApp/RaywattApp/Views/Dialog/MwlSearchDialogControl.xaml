@@ -36,9 +36,9 @@
             <Grid Grid.Row="2" Margin="50 0 50 0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="49"/>
-                    <RowDefinition Height="74"/>
-                    <RowDefinition Height="25"/>
                     <RowDefinition Height="68"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="74"/>
                     <RowDefinition Height="25"/>
                     <RowDefinition Height="84"/>
                     <RowDefinition Height="35"/>
@@ -59,7 +59,7 @@
                 <TextBox Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Style="{DynamicResource TextBoxBase}" Text="{Binding ProcedureId}" Tag="{Binding [Enter Procedure ID], Source={StaticResource L10N}}" VerticalAlignment="Top" Width="422" Height="54" Margin="16,0,0,0"/>
 
                 <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Patient ID], Source={StaticResource L10N}}"/>
-                <TextBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Style="{DynamicResource TextBoxBase}" Text="{Binding PatientId}" Tag="{Binding [Enter Patient ID], Source={StaticResource L10N}}" VerticalAlignment="Top" Width="422" Height="54"/>
+                <TextBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Style="{DynamicResource TextBoxValidator}" Text="{Binding PatientId.Text, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter Patient ID], Source={StaticResource L10N}}" ToolTip="{Binding PatientId.Msg}" VerticalAlignment="Top" Width="422"/>
 
                 <Label Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Accession Number], Source={StaticResource L10N}}" Margin="16,0,0,0"/>
                 <TextBox Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" Style="{DynamicResource TextBoxBase}" Text="{Binding AccessionNumber}" Tag="{Binding [Enter Accession Number], Source={StaticResource L10N}}" VerticalAlignment="Top" Width="422" Height="54" Margin="16,0,0,0"/>
@@ -70,7 +70,7 @@
                 <CheckBox Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="4" Content="{Binding [Scheduled Procedure Step Start Date], Source={StaticResource L10N}}" IsChecked="{Binding UseSpsStartDate}"  Margin="0,-5,0,0" VerticalAlignment="Top"/>
 
                 <Label Grid.Row="7" Grid.Column="0"  Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [From], Source={StaticResource L10N}}" Margin="0,18,0,0"/>
-                <DatePicker Grid.Row="7" Grid.Column="1" Style="{DynamicResource DatePickerStyle}" behaviors:DatePickerPopupOffsetBehavior.AutoVerticalOffset="True" Tag="{Binding [Enter Birth Date], Source={StaticResource L10N}}" SelectedDate="{Binding SpsStartDateFrom}" IsEnabled="{Binding UseSpsStartDate}" Width="360" Height="54" VerticalAlignment="Top"/>
+                <DatePicker Grid.Row="7" Grid.Column="1" Style="{DynamicResource DatePickerValidator}" behaviors:DatePickerPopupOffsetBehavior.AutoVerticalOffset="True" Tag="{Binding [Enter Birth Date], Source={StaticResource L10N}}" SelectedDate="{Binding SpsStartDateFrom}" IsEnabled="{Binding UseSpsStartDate}" ToolTip="{Binding SpsMsg}" Width="360" VerticalAlignment="Top"/>
 
                 <Label Grid.Row="7" Grid.Column="2"  Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [To], Source={StaticResource L10N}}" Margin="30,18,0,0"/>
                 <DatePicker Grid.Row="7" Grid.Column="3" Style="{DynamicResource DatePickerStyle}" behaviors:DatePickerPopupOffsetBehavior.AutoVerticalOffset="True" Tag="{Binding [Enter Birth Date], Source={StaticResource L10N}}" SelectedDate="{Binding SpsStartDateTo}" IsEnabled="{Binding UseSpsStartDate}" Width="360" Height="54" VerticalAlignment="Top"/>

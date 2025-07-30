@@ -32,7 +32,7 @@ namespace RaywattApp.ViewModels
         private PrevStatus _prevStatus;
 
         [ObservableProperty]
-        private string _searchPatientId = "";
+        private TextValidator _searchPatientId = new TextValidator();
 
         [ObservableProperty]
         private string _searchPatientName = "";
@@ -267,7 +267,13 @@ namespace RaywattApp.ViewModels
 
             Patients.Clear();
 
-            string patientIdParam = string.IsNullOrEmpty(SearchPatientId) ? "*" : "*" + SearchPatientId.Trim() + "*";
+            if (string.IsNullOrEmpty(SearchPatientId.Text) && string.IsNullOrEmpty(SearchPatientName))
+            {
+                SearchPatientId.Msg = "Please enter the value to search for.";
+                return;
+            }
+
+            string patientIdParam = string.IsNullOrEmpty(SearchPatientId.Text) ? "*" : "*" + SearchPatientId.Text.Trim() + "*";
             string patientNameParam = string.IsNullOrEmpty(SearchPatientName) ? "*" : "*" + SearchPatientName.Trim() + "*";
 
             IsChecking = true;

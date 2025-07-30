@@ -35,7 +35,7 @@ namespace RaywattApp.ViewModels.Dialog
         private string _patientName;
 
         [ObservableProperty]
-        private string _patientId;
+        private TextValidator _patientId = new TextValidator();
 
         [ObservableProperty]
         private string _procedureId;
@@ -54,6 +54,9 @@ namespace RaywattApp.ViewModels.Dialog
 
         [ObservableProperty]
         private bool _useSpsStartDate = false;
+
+        [ObservableProperty]
+        private string _spsMsg;
 
         private IntPtr dicomClient;
         private IntPtr dicomWorklists;
@@ -122,7 +125,7 @@ namespace RaywattApp.ViewModels.Dialog
 
             int count = 0;
             IsChecking = true;
-            dicomWorklists = await Task.Run(() => RayExportWrapper.FindWorklist(dicomClient, PatientId, PatientName, AccessionNumber, "*" /* Modality */, ScheduledStationAe, SpsStartDateFrom.ToString("yyyyMMdd"), SpsStartDateTo.ToString("yyyyMMdd"), ProcedureId, out count));
+            dicomWorklists = await Task.Run(() => RayExportWrapper.FindWorklist(dicomClient, PatientId.Text, PatientName, AccessionNumber, "OCT", ScheduledStationAe, SpsStartDateFrom.ToString("yyyyMMdd"), SpsStartDateTo.ToString("yyyyMMdd"), ProcedureId, out count));
             IsChecking = false;
 
             if (dicomWorklists != IntPtr.Zero)
@@ -142,17 +145,20 @@ namespace RaywattApp.ViewModels.Dialog
 
         private bool Validate()
         {
+            if (IsAllSearchParametersEmpty())
+            {
+                PatientId.Msg = "Please enter the value to search for.";
+                return false;
+            }
+
             if (SpsStartDateFrom.Date > SpsStartDateTo.Date)
             {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["title"] = _l10n["Error"];
-                parameter["message"] = _l10n["$MSG025"];
-                _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                SpsMsg = _l10n["$MSG025"].ToString();
                 return false;
             }
 
             PatientName = string.IsNullOrWhiteSpace(PatientName) ? "*" : "*" + PatientName.Trim() + "*";
-            PatientId = string.IsNullOrWhiteSpace(PatientId) ? "*" : "*" + PatientId.Trim() + "*";
+            PatientId.Text = string.IsNullOrWhiteSpace(PatientId.Text) ? "*" : "*" + PatientId.Text.Trim() + "*";
             ProcedureId = string.IsNullOrWhiteSpace(ProcedureId) ? "*" : "*" + ProcedureId.Trim() + "*";
             AccessionNumber = string.IsNullOrWhiteSpace(AccessionNumber) ? "*" : AccessionNumber.Trim();
             ScheduledStationAe = string.IsNullOrWhiteSpace(ScheduledStationAe) ? "*" : ScheduledStationAe.Trim();
@@ -160,6 +166,14 @@ namespace RaywattApp.ViewModels.Dialog
             return true;
         }
 
+        private bool IsAllSearchParametersEmpty()
+        {
+            return string.IsNullOrWhiteSpace(PatientName) &&
+                   string.IsNullOrWhiteSpace(PatientId.Text) &&
+                   string.IsNullOrWhiteSpace(ProcedureId) &&
+                   string.IsNullOrWhiteSpace(AccessionNumber) &&
+                   string.IsNullOrWhiteSpace(ScheduledStationAe);
+        }
 
         partial void OnUseSpsStartDateChanged(bool value)
         {
@@ -173,6 +187,11 @@ namespace RaywattApp.ViewModels.Dialog
                 SpsStartDateFrom = DateTime.MinValue;
                 SpsStartDateTo = DateTime.MaxValue;
             }
+        }
+
+        partial void OnSpsStartDateFromChanged(DateTime value)
+        {
+            SpsMsg = "";
         }
     }
 }
