@@ -100,7 +100,7 @@ bool CLaserModule::Current(eStepMotorIndex idxMotor, int posStep) {
 bool CLaserModule::Move(eStepMotorIndex idxMotor, int posStep, bool delay, char sensor) {
 	if (!m_initMotor) return false;
 
-	PLOGI.printf("StepMotor #%d Move: %d (Speed - #1: %d, #2: %d step/s", idxMotor, posStep, m_nStepSpeed[0], m_nStepSpeed[1]);
+	//PLOGI.printf("StepMotor #%d Move: %d (Speed - #1: %d, #2: %d step/s", idxMotor, posStep, m_nStepSpeed[0], m_nStepSpeed[1]);
 
 	char sensorStop[2] = { 0x00, 0x00 };
 	if (idxMotor == eStepMotorIndex::Both) {
@@ -144,7 +144,7 @@ bool CLaserModule::Move(eStepMotorIndex idxMotor, int posStep, bool delay, char 
 bool CLaserModule::Set(eStepMotorIndex idxMotor, int velStep) {
 	if (!m_initMotor) return false;
 
-	PLOGI.printf("velocity: %d", velStep);
+	//PLOGI.printf("velocity: %d", velStep);
 	if (idxMotor == eStepMotorIndex::Both) {
 		m_nStepSpeed[0] = velStep;
 		m_nStepSpeed[1] = velStep;
@@ -301,7 +301,7 @@ void CLaserModule::parseSMPacket(BYTE* packet, int size) {
 		for (int j = 0; j < 4; j++) {
 			curPos |= (packet[offset + j] << (j * 8));
 		}
-		PLOGI.printf("StepMotor #%d (%s): %d", i, ((m_isSMMoving[i]) ? "Moving" : "Stop"), curPos);
+		//PLOGI.printf("StepMotor #%d (%s): %d", i, ((m_isSMMoving[i]) ? "Moving" : "Stop"), curPos);
 		m_nActualPosition[i] = curPos;
 		offset += 13;	// current pos (4byte), target pos (4byte), current speed (4byte), stop condition (1byte, photo-sensor)
 	}

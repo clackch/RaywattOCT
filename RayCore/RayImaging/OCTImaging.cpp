@@ -459,16 +459,8 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 int num = 0;
 void COCTImaging::findSheath(cv::Mat img) {
 	num++;
-	cv::Mat circularizedImage;
-	CircularizeImage(img, circularizedImage);
-	m_nImageForCalib = circularizedImage.clone();
-
-	m_nSheathPosition = 0;
-
-	cv::imwrite("circularizedImage" + std::to_string(num) + ".tif", circularizedImage);
-
-
-	/*cv::Mat edgeX, edgeY;
+	/* // way1~way6
+	cv::Mat edgeX, edgeY;
 	cv::Sobel(img, edgeX, CV_32F, 1, 0, 3);
 	cv::Sobel(img, edgeY, CV_32F, 0, 1, 3);
 
@@ -480,28 +472,55 @@ void COCTImaging::findSheath(cv::Mat img) {
 	cv::magnitude(edgeX, edgeY, edgeMagnitude);
 	cv::convertScaleAbs(edgeMagnitude, absEdgeMagnitude);
 
-	int totalX, totalY, totalMagnitude;
+	int totalX = 0, totalY = 0, totalMagnitude = 0;
 	float maxX = 0, maxY = 0, maxMagnitude = 0;
-	totalX = totalY = totalMagnitude = 0;
-	for(int y = 0; y < img.rows; y++) {
+	for (int y = 0; y < img.rows; y++) {
 		for (int x = 0; x < img.cols; x++) {
 			totalX += absEdgeX.at<uchar>(y, x);
 			totalY += absEdgeY.at<uchar>(y, x);
 			totalMagnitude += absEdgeMagnitude.at<uchar>(y, x);
+
 			if (maxX < edgeX.at<float>(y, x)) maxX = edgeX.at<float>(y, x);
-			if (maxY < edgeY.at<uchar>(y, x)) maxY = edgeY.at<float>(y, x);
+			if (maxY < edgeY.at<float>(y, x)) maxY = edgeY.at<float>(y, x);
 			if (maxMagnitude < edgeMagnitude.at<float>(y, x)) maxMagnitude = edgeMagnitude.at<float>(y, x);
 		}
 	}
-	cv::imwrite("edgeX" + std::to_string(num) + ".tif", absEdgeX);
-	cv::imwrite("edgeY" + std::to_string(num) + ".tif", absEdgeY);
-	cv::imwrite("edgeMagnitude" + std::to_string(num) + ".tif", absEdgeMagnitude);
 
-	PLOGI.printf("Edge X: %f, Y: %f, Magnitude: %f", maxX, maxY, maxMagnitude);
+	// way1~way3
+	//cv::imwrite("edgeX" + std::to_string(num) + ".tif", absEdgeX);
+	//cv::imwrite("edgeY" + std::to_string(num) + ".tif", absEdgeY);
+	//cv::imwrite("edgeMagnitude" + std::to_string(num) + ".tif", absEdgeMagnitude);
+	//PLOGI.printf("Edge X: %d, Y: %d, Magnitude: %d", totalX, totalY, totalMagnitude);
+	// way1
+	//m_nSheathPosition = totalMagnitude;
+	// way2
+	//m_nSheathPosition = totalX;
+	// way3 
+	//m_nSheathPosition = totalY;
 
-	m_nSheathPosition = maxX;*/
+	
+	// way4~way6
+	//cv::imwrite("edgeX" + std::to_string(num) + ".tif", edgeX);
+	//cv::imwrite("edgeY" + std::to_string(num) + ".tif", edgeY);
+	//cv::imwrite("edgeMagnitude" + std::to_string(num) + ".tif", edgeMagnitude);
+	//PLOGI.printf("Edge X: %f, Y: %f, Magnitude: %f", maxX, maxY, maxMagnitude);
+	// way4
+	//m_nSheathPosition = maxMagnitude;
+	// way5
+	//m_nSheathPosition = maxX;
+	// way6
+	//m_nSheathPosition = maxY;
+	*/
 
+	// way7
+	cv::Mat circularizedImage;
+	CircularizeImage(img, circularizedImage);
+	m_nImageForCalib = circularizedImage.clone();
 
+	m_nSheathPosition = 0;
+
+	cv::imwrite("circularizedImage" + std::to_string(num) + ".tif", circularizedImage);
+	
 
 	//m_nSheathSearchRange = 300; /*1mm 오차 범위 설정*/
 	//double maxMinusEdge = 0.3;
