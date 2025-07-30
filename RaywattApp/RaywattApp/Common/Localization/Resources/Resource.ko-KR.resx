@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="$MSG001" xml:space="preserve">
-    <value>[K]Get ready for the recording</value>
-  </data>
   <data name="$MSG002" xml:space="preserve">
     <value>[K]Verify the catheter position for flush, Prepare for pullback.</value>
   </data>
@@ -1164,5 +1161,26 @@ Overwrite existing data?</value>
   </data>
   <data name="Zoom Out" xml:space="preserve">
     <value>[K]Zoom Out</value>
+  </data>
+  <data name="$MSG001" xml:space="preserve">
+    <value>[K]Get ready for the recording</value>
+  </data>
+  <data name="PasswordChange" xml:space="preserve">
+    <value>[K]Password Change</value>
+  </data>
+  <data name="MSG_EnterCurrentPassword" xml:space="preserve">
+    <value>[K]Enter Current Password</value>
+  </data>
+  <data name="MSG_EnterNewPassword" xml:space="preserve">
+    <value>[K]Enter New Password</value>
+  </data>
+  <data name="MSG_ConfirmNewPassword" xml:space="preserve">
+    <value>[K]Confirm New Password</value>
+  </data>
+  <data name="MSG_PasswordRequirement" xml:space="preserve">
+    <value>[K]Password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters</value>
+  </data>
+  <data name="MSG_ChangeLaterContent" xml:space="preserve">
+    <value>[K]Change after {0} days</value>
   </data>
 </root>

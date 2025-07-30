@@ -277,6 +277,13 @@ namespace RaywattApp.Services
                 ORDER BY id
                 ";
 
+            //SelectUserList
+            _query["SelectUserById"] = @$"
+                SELECT id, admin, password, comment, password_changed_at, password_reset, terms_agreed_at, create_date, update_date
+                FROM rv_schema.user
+                WHERE LOWER(id) = LOWER(@id)
+                ";
+
             //SelectUser
             _query["SelectUser"] = @$"
                 SELECT id, password, comment, password_changed_at, password_reset, terms_agreed_at, create_date, update_date
@@ -447,6 +454,19 @@ namespace RaywattApp.Services
                 ";
 
             //UpdateUser
+            _query["UpdateTermsAgreedDateUser"] = @$"
+                UPDATE rv_schema.user
+                SET terms_agreed_at=now(), update_date=now()
+                WHERE id=@id
+                ";
+
+            // UpdatePasswordReset
+            _query["UpdatePasswordReset"] = @$"
+                UPDATE rv_schema.user
+                SET password_reset=@reset, password=@password, password_changed_at=now(), update_date=now()
+                WHERE id=@id AND password=@before_password
+            ";
+
             _query["UpdateUser"] = @$"
                 UPDATE rv_schema.user
                 SET id=@newId, comment=@comment, update_date=now()

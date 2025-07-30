@@ -7,7 +7,11 @@ INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES (
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Present', 'contrast', '20', '');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Present', 'FoV', '10.0', '');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('LocalHost', 'AeTitle', '', '');
-INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Institute', 'Info', '', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('LogoutTime', 'TotalTime', '60', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('LogoutTime', 'PreTime', '57', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Password', 'ExpiryDay', '90', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Password', 'MaxCount', '5', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Password', 'WaitSecond', '30', '');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'Power', 'Y', 'Raywatt;');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'RJ', 'Y', 'Raywatt;');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'FG', 'Y', 'Raywatt;');

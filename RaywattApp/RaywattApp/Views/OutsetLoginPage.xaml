@@ -5,28 +5,37 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:RaywattApp.Views"
       xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+      xmlns:ut="clr-namespace:RaywattApp.Common.Util"
       xmlns:component="clr-namespace:RaywattApp.Views.Component"
       mc:Ignorable="d"
       d:DesignHeight="1024" d:DesignWidth="1280"
       Background="{DynamicResource GrayscaleGray8Brush}"
       Title="OutsetLoginPage">
-
+   
     <Grid>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
-            <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="power" Margin="0,9,12,9" Command="{Binding ExitCommand}"/>
-        </StackPanel>
         <StackPanel Margin="415,280,415,314">
             <Image Source="{svgc:SvgImage Source=/res/icon/fasterWhite.svg}"/>
             <StackPanel Height="40"/>
             <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [ID], Source={StaticResource L10N}}"/>
             <StackPanel Height="6"/>
-            <TextBox Style="{DynamicResource TextBoxValidator}" MaxLength="50" Text="{Binding Id.Text, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter ID], Source={StaticResource L10N}}" ToolTip="{Binding Id.Msg}" Width="450"/>
+            <TextBox Style="{DynamicResource TextBoxValidator}"
+              MaxLength="50" 
+              Text="{Binding Id.Text, UpdateSourceTrigger=PropertyChanged}" 
+              Tag="{Binding [Enter ID], Source={StaticResource L10N}}"
+              ToolTip="{Binding Id.Msg}"
+              Width="450"/>
             <StackPanel Height="6"/>
             <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Password], Source={StaticResource L10N}}"/>
             <StackPanel Height="6"/>
-            <TextBox Style="{DynamicResource TextBoxValidator}" MaxLength="50" Text="{Binding Password.Text, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter Password], Source={StaticResource L10N}}" ToolTip="{Binding Password.Msg}" Width="450"/>
+            <PasswordBox Style="{DynamicResource PasswordBoxValidator}"
+                  Tag="{Binding [Enter Password], Source={StaticResource L10N}}"
+                  MaxLength="50"
+                  ut:PasswordBoxHelper.Attach="True"
+                  ut:PasswordBoxHelper.BindablePassword="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                  Width="450"
+                  Background="Transparent"/>
             <StackPanel Height="10"/>
             <Button Style="{StaticResource ContainedBtnType1-XLarge-Wide}" Command="{Binding LoginCommand}" Content="{Binding [Login], Source={StaticResource L10N}}"/>
         </StackPanel>
-    </Grid>
+        </Grid>
 </Page>

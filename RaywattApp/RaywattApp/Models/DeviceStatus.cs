@@ -16,6 +16,9 @@ namespace RaywattApp.Models
         };
 
         [ObservableProperty]
+        private string _loginID = string.Empty;
+
+        [ObservableProperty]
         private bool _isPowerOff = false;
 
         [ObservableProperty]

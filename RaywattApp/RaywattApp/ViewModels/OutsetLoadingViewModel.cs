@@ -11,8 +11,9 @@ using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
-using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Interop;
+using System.Windows.Navigation;
 using System.Windows.Threading;
 using static RaywattOCT.Ray3DWrapper;
 using static RaywattOCT.RayCoreWrapper;
@@ -27,6 +28,8 @@ namespace RaywattApp.ViewModels
 
         private readonly AngioManager _angioManager;
 
+        private readonly IPasswordService _passwordService;
+
         private IDialogService _dialogService;
 
         private DispatcherTimer timer = new DispatcherTimer();
@@ -40,7 +43,7 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private double _progress;
 
-        public OutsetLoadingViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager)
+        public OutsetLoadingViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager, IPasswordService passwordService)
         {
             _log.Debug("OutsetLoadingViewModel");
 
@@ -49,38 +52,17 @@ namespace RaywattApp.ViewModels
             _sqlManager = sqlManager;
             _angioManager = angioManager;
             _dialogService = dialogService;
+            _passwordService = passwordService;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             _log.Debug("OnNavigated");
 
-            // Terms and Contidions 확인
-            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
-            sqlParameters["classification"] = "Terms&Cond";
-            IList<Configuration> tnCs = _sqlManager.SelectConfiguration(sqlParameters);
-            if (tnCs != null || tnCs.Count == 1)
-            {
-                if ("N".Equals(tnCs[0].Value))
-                {
-                    Dictionary<string, object> parameter = new Dictionary<string, object>();
-                    parameter["tnC"] = tnCs[0];
-                    var result = _dialogService.OpenDialog(new TermsConditionsControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+            if (navigatedEventArgs is not NavigationEventArgs navArgs || navArgs.ExtraData is not Dictionary<string, object> data)
+                return;
 
-                    if (result != null && result.DialogAnswer == DialogResults.Answer.No)
-                    {
-                        DeviceStatus.PowerOffMsg = _l10n["Logging out"];
-                        CommonUtil.Exit(DeviceStatus, null, false);
-                    }
-                }
-            }
-
-            Thread threadCoreAndDeviceInit = new Thread(() => ThreadCoreAndDeviceInit());
-            threadCoreAndDeviceInit.Start();
-
-            timer.Interval = TimeSpan.FromMilliseconds(25);
-            timer.Tick += new EventHandler(ProgressTest);
-            timer.Start();
+            InitializeSystem();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -164,7 +146,7 @@ namespace RaywattApp.ViewModels
             RayError result = (RayError)RayInitSystem();
 
             result |= (RayError)RayStartSystem();
-            
+
             if (result == RayError.OK)
             {
                 result |= (RayError)RayConnectDevices();
@@ -197,5 +179,16 @@ namespace RaywattApp.ViewModels
 
             _log.Debug("ThreadCoreAndDeviceInit - Done");
         }
+
+        private void InitializeSystem()
+        {
+            Task.Run(() => ThreadCoreAndDeviceInit());
+
+            timer.Tick -= ProgressTest; // 중복 방지
+            timer.Tick += ProgressTest;
+            timer.Interval = TimeSpan.FromMilliseconds(25);
+            timer.Start();
+        }
+
     }
 }

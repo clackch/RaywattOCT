@@ -558,6 +558,23 @@ namespace RaywattApp.Services
 
             return _databaseService.GetDatas<User>(commandText);
         }
+        public IList<User> SelectUserById(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("SelectUserById");
+
+            string commandText = SqlQuery.GetQuery("SelectUserById");
+
+            return _databaseService.GetDatas<User>(commandText, sqlParameters);
+        }
+
+        public int UpdateTermsAgreedDateUser(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpdateTermsAgreedDateUser");
+
+            string commandText = SqlQuery.GetQuery("UpdateTermsAgreedDateUser");
+
+            return _databaseService.UpdateData(commandText, sqlParameters);
+        }
 
         public int CountUser(Dictionary<string, Object> sqlParameters)
         {
@@ -602,6 +619,20 @@ namespace RaywattApp.Services
             string commandText = SqlQuery.GetQuery("DeleteUser");
 
             return _databaseService.DeleteData(commandText, sqlParameters);
+        }
+
+        /*
+        Password
+        */
+        public bool UpdatePasswordReset(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpdatePasswordReset");
+
+            var commandText = SqlQuery.GetQuery("UpdatePasswordReset");
+
+            _databaseService.UpdateData(commandText, sqlParameters);
+
+            return true;
         }
 
         /**

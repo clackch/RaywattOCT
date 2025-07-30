@@ -31,6 +31,9 @@ namespace RaywattApp.Models
         private string validateId;
 
         [ObservableProperty]
+        private bool _admin;
+
+        [ObservableProperty]
         private string _password;
 
         private string _comment;
