@@ -271,6 +271,7 @@ namespace RaywattApp.Services
                 FROM rv_schema.dicom_server
                 WHERE id != @id
                 ORDER BY ae_title
+                ";
                   
             //SelectUserList
             _query["SelectUserList"] = @$"
