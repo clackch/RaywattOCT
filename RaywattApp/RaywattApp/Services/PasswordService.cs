@@ -223,7 +223,7 @@ namespace RaywattApp.Services
 
             _passwordExpiryDays = int.TryParse(
                 passwordParameter.FirstOrDefault(x => x.Key == "ExpiryDay")?.Value,
-                out var parsed) ? parsed : _passwordExpiryDays;
+                out var day) ? day : _passwordExpiryDays;
 
             _maxPasswordRetryCount = int.TryParse(
                 passwordParameter.FirstOrDefault(x => x.Key == "MaxCount")?.Value,
@@ -231,7 +231,7 @@ namespace RaywattApp.Services
 
             _passwordRetryLockDuration = TimeSpan.TryParse(
                 passwordParameter.FirstOrDefault(x => x.Key == "WaitSecond")?.Value,
-                out var value1) ? value1 : _passwordRetryLockDuration;
+                out var second) ? second : _passwordRetryLockDuration;
         }
 
 
