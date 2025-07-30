@@ -456,7 +456,7 @@ namespace RaywattApp.Services
             //UpdateUser
             _query["UpdateTermsAgreedDateUser"] = @$"
                 UPDATE rv_schema.user
-                SET terms_agreed_at=now()
+                SET terms_agreed_at=now(), update_date=now()
                 WHERE id=@id
                 ";
 
