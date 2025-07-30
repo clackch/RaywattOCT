@@ -320,7 +320,11 @@ namespace RaywattApp.ViewModels
                 LumenContourCommand = Constants.LumenContourClear;
                 HideLumenProfileCompare();
 
-                RayEndCompare();
+                RayError result = (RayError)RayEndCompare();
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayEndCompare Error");
+                }
                 DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current = 0;
                 RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath, ReviewStatus.SelectedPatientCase.ImageResolution, ReviewStatus.SelectedPatientCase.ZOffset);
                 ZoomCompare.SetFieldOfView(Constants.OCTImageSize * ReviewStatus.SelectedPatientCase.ImageResolution / PatientCase.FieldOfView);

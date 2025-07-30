@@ -223,6 +223,20 @@ bool CRJController::StopStepMotors() {
 
 	return (written == packetLength);
 }
+
+void CRJController::DisableStepMotors() {
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+
+	getSerialPacket(eFID::FID_SM_DISABLE, 0, serialPacket, packetLength);
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+	PLOGI.printf("Disable Done");
+}
+
 bool CRJController::DisplayLCD(eLCDImage image) {
 	if (!m_initMotor) return false;
 	if (m_state == eRJState::Error) return false;
@@ -384,6 +398,10 @@ void CRJController::updateState() {
 		if (!m_bLimitSwitch) {
 			m_nextState = eRJState::Disconnected;
 		}
+		
+		if (m_bPhotoSensor[3] == 0) {
+			m_nextState = eRJState::Error;
+		}
 		break;
 	case eRJState::Error:
 		if (!m_isInit) {
@@ -485,6 +503,7 @@ void CRJController::updateState(eRJState state) {
 		m_nRFIDLength = 0;	// clear RFID info.
 		break;
 	case eRJState::Validating:
+		displayLCD(eLCDImage::LCD_IMAGE_BOOTING);
 		break;
 	case eRJState::Loading:
 		displayLCD(eLCDImage::LCD_IMAGE_LOADING);
@@ -505,8 +524,10 @@ void CRJController::updateState(eRJState state) {
 	default:
 		break;
 	}
+
+	bool bStopThread = (m_state == eRJState::Error) ? true : false;
 	m_state = m_nextState = state;
-	if (m_pMsg != nullptr) m_pMsg->postPriorMessage(WM_UPDATE_RJ_STATE, (WPARAM)m_state);
+	if (m_pMsg != nullptr) m_pMsg->postPriorMessage(WM_UPDATE_RJ_STATE, (WPARAM)m_state, (LPARAM)bStopThread);
 }
 bool CRJController::displayLCD(eLCDImage image) {
 	BYTE serialPacket[MAX_PATH];
@@ -598,9 +619,9 @@ void CRJController::changeSMProfileToPullback() {
 
 	const int minSpeed = 630;
 	const int maxSpeed = 314960;
-	const int accTime = 30;
+	const int accTime = 10;
 	const int accStep = 100;
-	const int decTime = 30;
+	const int decTime = 10;
 	const int decStep = 0;
 	const int minStep = 100;
 

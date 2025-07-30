@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Point = System.Windows.Point;
 using log4net;
-using System.Reflection.Metadata;
 
 namespace RaywattApp.Common.Angio
 {
@@ -11,9 +10,9 @@ namespace RaywattApp.Common.Angio
         private static readonly ILog _log = LogManager.GetLogger(typeof(DijkstraHeap));
         private int[] imagePixels; // stores Pixels from original image
         PriorityQueue<PixelNode, double> pixelCosts;
-        double[] gradientx = new double[0]; // stores image gradient modulus 
-        double[] gradienty = new double[0]; // stores image gradient modulus 
-        public double[] gradientr = new double[0]; // stores image gradient RESULTANT modulus 
+        double[] gradientx = Array.Empty<double>(); // stores image gradient modulus 
+        double[] gradienty = Array.Empty<double>(); // stores image gradient modulus 
+        public double[] gradientr = Array.Empty<double>(); // stores image gradient RESULTANT modulus 
         double grmin;// gradient global minimum
         public double grmax;// gradient global maximum
 

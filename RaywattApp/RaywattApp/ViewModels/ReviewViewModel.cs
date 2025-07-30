@@ -29,7 +29,6 @@ using System.IO;
 using System.Windows.Media;
 using RaywattApp.Common.Angio;
 using System.Xml;
-using System.Windows.Controls;
 
 namespace RaywattApp.ViewModels
 {
@@ -42,13 +41,13 @@ namespace RaywattApp.ViewModels
         private CallbackFunctionForDetection cbLumenContour;
         public CallbackFunctionForDetection CBLumenContour => (this.cbLumenContour) ?? (this.cbLumenContour = new CallbackFunctionForDetection(OnRecvLumenContour));
 
-        private bool isLumenContourSave = false;
+        private bool isLumenContourSave;
 
-        private bool isLumenDetectedFrontDone = false;
+        private bool isLumenDetectedFrontDone;
 
-        private bool isLumenLoadedInit = false;
+        private bool isLumenLoadedInit;
 
-        private bool isLumenProfileInit = false;
+        private bool isLumenProfileInit;
 
         private double originSectionProximalX;
 
@@ -66,7 +65,11 @@ namespace RaywattApp.ViewModels
             {
                 degree = value;
                 OnPropertyChanged(nameof(Degree));
-                RaySetProperty(Property.LongitudeDegree, degree);
+                RayError result = (RayError)RaySetProperty(Property.LongitudeDegree, degree);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
             }
         }
 
@@ -115,9 +118,6 @@ namespace RaywattApp.ViewModels
 
         private int _currentAngioFrameNumber;
         public int CurrentAngioFrameNumber { get { return _currentAngioFrameNumber; } set { _currentAngioFrameNumber = value; OnPropertyChanged(nameof(CurrentAngioFrameNumber)); } }
-
-        private int _angioFrameNumber;
-        public int AngioFrameNumber { get { return _angioFrameNumber; } set { _angioFrameNumber = value; OnPropertyChanged(nameof(AngioFrameNumber)); syncAngioFrame(value); } }
 
         private string _measurementCommand;
         public string MeasurementCommand { get { return _measurementCommand; } set { _measurementCommand = value; OnPropertyChanged(nameof(MeasurementCommand)); } }
@@ -168,6 +168,12 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private List<LumenGuidewire> _lumenGuidewires;
 
+        [ObservableProperty]
+        private List<double> _guideWireRadiusList;
+
+        [ObservableProperty]
+        private Zoom _zoomAngio = new Zoom(Constants.CrossSectionAngio / Constants.OCTImageSize);
+
         private double _lModeIndicatorX;
         public double LModeIndicatorX
         {
@@ -183,7 +189,11 @@ namespace RaywattApp.ViewModels
             {
                 _brightness = value;
                 OnPropertyChanged(nameof(Brightness));
-                RaySetProperty(Property.Brightness, value);
+                RayError result = (RayError)RaySetProperty(Property.Brightness, value);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayOpenImage Error");
+                }
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
             }
         }
@@ -196,7 +206,7 @@ namespace RaywattApp.ViewModels
             {
                 _contrast = value;
                 OnPropertyChanged(nameof(Contrast));
-                RaySetProperty(Property.Contrast, value);
+                RayError result = (RayError)RaySetProperty(Property.Contrast, value);
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
             }
         }
@@ -393,7 +403,11 @@ namespace RaywattApp.ViewModels
             base.OnNavigated(sender, navigatedEventArgs);
             _log.Debug("OnNavigated");
 
-            RayRegisterDetectionCallback(Marshal.GetFunctionPointerForDelegate(CBLumenContour));
+            RayError result = (RayError)RayRegisterDetectionCallback(Marshal.GetFunctionPointerForDelegate(CBLumenContour));
+            if (result != RayError.OK)
+            {
+                _log.Error("RayRegisterDetectionCallback Error");
+            }
             var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
 
             if (extraData != null)
@@ -434,7 +448,6 @@ namespace RaywattApp.ViewModels
                 SetAnnotation();
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
 
-                AngioFrameNumber = ReviewStatus.AngioFrameNumber;
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
 
                 ReviewStatus.IsNoPullback = PatientCase.PullbackType == "TEST" ? true : false;
@@ -452,7 +465,11 @@ namespace RaywattApp.ViewModels
             _log.Debug("OnNavigating");
             Save();
 
-            RayUnregisterDetectionCallback();
+            RayError result = (RayError)RayUnregisterDetectionCallback();
+            if (result != RayError.OK)
+            {
+                _log.Error("RayUnregisterDetectionCallback Error");
+            }
         }
 
         /*
@@ -581,6 +598,7 @@ namespace RaywattApp.ViewModels
                     if(!String.IsNullOrEmpty(patientCaseAnnotations[0].LumenGuidewire))
                     {
                         LumenGuidewires = JsonConvert.DeserializeObject<List<LumenGuidewire>>(patientCaseAnnotations[0].LumenGuidewire);
+                        
                     }
                     else
                     {
@@ -598,6 +616,7 @@ namespace RaywattApp.ViewModels
                     InitializeLumenData();
                     Thread threadLumenDetectionDone = new Thread(() => ThreadLumenDetectionDone());
                     threadLumenDetectionDone.Start();
+
                 }
             }
 
@@ -656,6 +675,7 @@ namespace RaywattApp.ViewModels
             LumenSidebranches = new List<LumenSidebranch>();
             LumenStents = new List<LumenStent>();
             LumenGuidewires = new List<LumenGuidewire>();
+            GuideWireRadiusList = new List<double>();
 
             for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
             {
@@ -720,6 +740,8 @@ namespace RaywattApp.ViewModels
                 //TODO - ML detection에서 Calcium 가져오도록 개발되면 삭제 필요
                 if (false)
                     GetMlData();
+
+                PatientCase.GuidewireRadius = GetGuidewireAverageRadius();
 
                 if (ReviewStatus.IsContourStentOn)
                     LumenContourCommand = Constants.LumenContourDraw;
@@ -832,13 +854,28 @@ namespace RaywattApp.ViewModels
                 IntPtr contour = RayGetGuidewirePoints(frameInfo);
                 if (contour == IntPtr.Zero) return;
 
-                Mat mat = CommonUtil.ByteMemoryToCvMat(contour, 1, guidewireHeight, 2);
+                IntPtr radius = RayGetGuidewireRadius(frameInfo);
+                if (radius == IntPtr.Zero) return;
 
+                Mat mat = CommonUtil.ByteMemoryToCvMat(contour, 1, guidewireHeight, 2);
                 LumenGuidewires[frameInfo].Points = new List<Point>();
-                for (int row = 0; row < mat.Rows; row++)
+
+                unsafe
                 {
-                    Vec2i point = mat.At<Vec2i>(0, row);
-                    LumenGuidewires[frameInfo].Points.Add(new Point(point.Item0, point.Item1));
+                    float* doublePtr = (float*)radius.ToPointer();
+                    for (int row = 0; row < mat.Rows; row++)
+                    {
+                        Vec2i point = mat.At<Vec2i>(0, row);
+                        if(point.Item0 < 0 || point.Item0 < 0)
+                        {
+                            LumenGuidewires[frameInfo].Points.Add(new Point(0, 0));
+                        }
+                        else
+                        {
+                            LumenGuidewires[frameInfo].Points.Add(new Point(point.Item0, point.Item1));
+                        }
+                        GuideWireRadiusList.Add(*(doublePtr + row));
+                    }
                 }
             }
         }
@@ -910,6 +947,47 @@ namespace RaywattApp.ViewModels
                 if (firstSize + secondSize + thirdSize == 0)
                     lumenContour.Calcium.MaxThicknessDegree = -1;
             }
+        }
+
+        private double GetGuidewireAverageRadius()
+        {
+            if(GuideWireRadiusList == null || !(GuideWireRadiusList.Any()))
+            {
+                return 0.0;
+            }
+
+            // 0보다 작은 값들을 제거
+            List<double> validRadiusList = GuideWireRadiusList.Where(v => v >= 0 && double.IsFinite(v) && v <= 90).ToList();
+
+            if (validRadiusList.Count == 0)
+            {
+                _log.Debug("No valid radius values.");
+                return 0.0;
+            }
+
+            double mean = validRadiusList.Average();
+            double stdDev = Math.Sqrt(validRadiusList.Average(v => Math.Pow(v - mean, 2)));
+
+            // 정규화된 값 계산
+            List<double> normalizedValues = GuideWireRadiusList.Select(v => (v - mean) / stdDev).ToList();
+
+            // 편차가 ±2 이하인 값들만 선택(95%)하고 ±3 이상인 값들을 제거
+            List<double> filteredValues = GuideWireRadiusList.Where((v, index) =>
+            {
+                double normalizedValue = normalizedValues[index];
+                return normalizedValue >= -2 && normalizedValue <= 2;
+            }).ToList();
+
+            if (filteredValues.Count == 0)
+            {
+                return 0.0;
+            }
+            
+            double filteredAverage = filteredValues.Average();
+
+            _log.Debug("Average Radius Value" + filteredAverage.ToString());
+
+            return filteredAverage;
         }
 
         #endregion
@@ -1019,7 +1097,7 @@ namespace RaywattApp.ViewModels
             StopPlayback();
         }
 
-        public void Window_ManipulationStarting(ManipulationStartingEventArgs e)
+        public static void Window_ManipulationStarting(ManipulationStartingEventArgs e)
         {
             _log.Debug("Manipulation Starting");
             e.Handled = true;
@@ -1076,7 +1154,7 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        public void Window_ManipulationCompleted(ManipulationCompletedEventArgs e)
+        public static void Window_ManipulationCompleted(ManipulationCompletedEventArgs e)
         {
             _log.Debug("Manipulation Completed");
             e.Handled = true;
@@ -1219,6 +1297,12 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Save");
 
+            if (PatientCase == null)
+            {
+                _log.Error("PatientCase == null");
+                return;
+            }
+
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
             sqlParameters["physician_name"] = PatientCase.PhysicianName;
@@ -1245,6 +1329,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["section_proximal"] = PatientCase.SectionProximal;
             PatientCase.SectionDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth);
             sqlParameters["section_distal"] = PatientCase.SectionDistal;
+            sqlParameters["guidewire_radius"] = PatientCase.GuidewireRadius;
 
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
             if (nRows == 0)
@@ -1289,7 +1374,7 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private string ConvertMeasurementsToJson(List<Measurement> param)
+        private static string ConvertMeasurementsToJson(List<Measurement> param)
         {
             List<Measurement> measurements = new List<Measurement>();
 
@@ -1363,18 +1448,7 @@ namespace RaywattApp.ViewModels
             bool ret = base.MoveToFrame(session, nFrame);
 
             if (ret == false || PatientCase.AngioYn == false || PatientCase.AngioFrame.AngioImage.Count == 0) return false;
-
-            int OctFrameLength = ReviewStatus.NumberOfFrames;
-            int angioTotalFrameNum = PatientCase.AngioFrame.AngioFrameNum;
-            
-            double ratio = (double)angioTotalFrameNum / OctFrameLength * FrameNumber;
-            CurrentAngioFrameNumber = (int)ratio;
-
-            if (CurrentAngioFrameNumber < PatientCase.AngioFrame.AngioImage.Count)
-            {
-                CurrentAngioImage = PatientCase.AngioFrame.AngioImage[CurrentAngioFrameNumber];
-            }
-
+            syncAngioFrame(nFrame);
             return true;
         }
         protected override void UpdateCrossSectionImage()
@@ -1745,14 +1819,16 @@ namespace RaywattApp.ViewModels
         #region CoRegistration
         private void syncAngioFrame(int value)
         {
-            if (value < 0) return;
-
             int OctFrameLength = ReviewStatus.NumberOfFrames;
-            double FrameNumber = (double)PatientCase.AngioFrame.AngioImage.Count / OctFrameLength / value;
-            FrameNumber = 1 / FrameNumber;
+            int angioTotalFrameNum = PatientCase.AngioFrame.AngioFrameNum;
 
-            base.MoveToFrame(RaySession.Review, (int)FrameNumber);
-            CurrentAngioImage = PatientCase.AngioFrame.AngioImage[value];
+            double ratio = (double)angioTotalFrameNum / OctFrameLength * value;
+            CurrentAngioFrameNumber = (int)ratio;
+
+            if (CurrentAngioFrameNumber < PatientCase.AngioFrame.AngioImage.Count)
+            {
+                CurrentAngioImage = PatientCase.AngioFrame.AngioImage[CurrentAngioFrameNumber];
+            }
         }
 
         private void ThreadReadAngioFrames()
@@ -1764,8 +1840,8 @@ namespace RaywattApp.ViewModels
                 int channels = 3;
 
                 string file = PatientCase.Image;
-                string angioFile = file.Substring(0, file.Length - 3) + "angioframes";
-                string paramsFile = file.Substring(0, file.Length - 3) + "params";
+                string angioFile = string.Concat(file.AsSpan(0, file.Length - 3), "angioframes");
+                string paramsFile = string.Concat(file.AsSpan(0, file.Length - 3), "params");
 
                 string directory = Path.Combine(Constants.DataRootPath, PatientCase.PatientId);
                 string angioPath = Path.Combine(directory, angioFile);
@@ -1908,7 +1984,7 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private ImageSource ConvertMatsToImageSource(Mat mat)
+        private static BitmapImage ConvertMatsToImageSource(Mat mat)
         {
             using (var stream = new MemoryStream())
             {
@@ -2164,7 +2240,7 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private void OpticalFlow(List<Mat> frames, ref List<List<Byte>> statusList, ref List<List<Point>> nextPoints, ref List<List<Point>> pastPoints)
+        private static void OpticalFlow(List<Mat> frames, ref List<List<Byte>> statusList, ref List<List<Point>> nextPoints, ref List<List<Point>> pastPoints)
         {
             int checkTooFast = 400;
 
@@ -2253,7 +2329,7 @@ namespace RaywattApp.ViewModels
         }
 
 
-        private Mat Skeletonize(Mat img)
+        private static Mat Skeletonize(Mat img)
         {
             Mat skel = Mat.Zeros(img.Size(), MatType.CV_8UC1);
             Mat temp = new Mat();

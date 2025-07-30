@@ -373,7 +373,7 @@ namespace RaywattApp.ViewModels.Dialog
             }
         }
 
-        private bool IsValidIPAddress(string ipAddress)
+        private static bool IsValidIPAddress(string ipAddress)
         {
             if (!IPAddress.TryParse(ipAddress, out IPAddress ip))
                 return false;

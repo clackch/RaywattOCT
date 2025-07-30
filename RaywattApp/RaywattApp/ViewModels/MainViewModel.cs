@@ -19,6 +19,7 @@ using static RaywattOCT.RayCoreWrapper;
 using RaywattApp.Common.Angio;
 using System.Threading;
 using OpenCvSharp;
+using System.Threading.Tasks;
 
 namespace RaywattApp.ViewModels
 {
@@ -30,16 +31,20 @@ namespace RaywattApp.ViewModels
         private static readonly ILog _log = LogManager.GetLogger(typeof(MainViewModel));
 
         private readonly SqlManager _sqlManager;
-
         private readonly AngioManager _angioManager;
-
+        private readonly IdleMonitorService _idleMonitorService;
         private IDialogService _dialogService;
 
         [ObservableProperty]
         private bool _isHome;
 
         [ObservableProperty]
-        private bool _isLoading;
+        private bool _isSetting;
+
+        [ObservableProperty]
+        private bool _isExit;
+
+        private bool isAdmin;
 
         [ObservableProperty]
         private string _navigationSource;
@@ -48,6 +53,8 @@ namespace RaywattApp.ViewModels
         private object _navigationParameter;
 
         private List<string> reviewPages;
+
+        private List<string> adminPages;
 
         [ObservableProperty]
         private PrevStatus? _prevStatus;
@@ -173,8 +180,8 @@ namespace RaywattApp.ViewModels
             get { return this._compensationWindowTest ?? (this._compensationWindowTest = new RelayCommand(CompensationControlWindowTest)); }
         }
 
-        private Thread threadCompensationWindow = null;
-        private bool showCompensationWindow = false;
+        private Thread threadCompensationWindow;
+        private bool showCompensationWindow;
 
         private ICommand _SaveVTIFileTest;
         public ICommand SaveVTIFileTestCommand
@@ -210,27 +217,37 @@ namespace RaywattApp.ViewModels
         /// <summary>
         /// 생성자
         /// </summary>
-        public MainViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager)
+        public MainViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager, IdleMonitorService idleMonitorService)
         {
             _log.Debug("MainViewModel");
 
             _sqlManager = sqlManager;
             _angioManager = angioManager;
             _dialogService = dialogService;
+            _idleMonitorService = idleMonitorService;
 
             // Code 정의
             CodeDefinition codeDefinition = new CodeDefinition(_sqlManager);
             codeDefinition.GetCode();
 
             //시작 페이지 설정
-            NavigationSource = Constants.OutsetLoadingPage;
+            NavigationSource = Constants.OutsetLoginPage;
 
             //네비게이션 메시지 수신 등록
             WeakReferenceMessenger.Default.Register<NavigationMessage>(this, OnNavigationMessage);
 
-            RayRegisterCallback(Marshal.GetFunctionPointerForDelegate(CBFunction));
+            RayError result = (RayError)RayRegisterCallback(Marshal.GetFunctionPointerForDelegate(CBFunction));
+            if (result != RayError.OK)
+            {
+                _log.Error("RayRegisterCallback Error");
+            }
 
             Directory.CreateDirectory(Constants.DataRootPath);
+
+            adminPages = new List<string>();
+            adminPages.Add(Constants.UserListPage);
+            adminPages.Add(Constants.UserNewPage);
+            adminPages.Add(Constants.UserEditPage);
 
             reviewPages = new List<string>();
             reviewPages.Add(Constants.ReviewPage);
@@ -244,7 +261,8 @@ namespace RaywattApp.ViewModels
             reviewPages.Add(Constants.ReviewCalibrationPage);
 
             IsHome = true;
-            IsLoading = true;
+            IsSetting = true;
+            IsExit = true;
 
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "TestMode";
@@ -260,7 +278,13 @@ namespace RaywattApp.ViewModels
                     DeviceStatus.TestMode.Add(config.Key, "Y".Equals(config.Value) ? true : false);
 
                     if ("RJ".Equals(config.Key))
-                        RaySetProperty(Property.TestMode, "Y".Equals(config.Value) ? 1.0f : 0.0f);
+                    {
+                        result = (RayError)RaySetProperty(Property.TestMode, "Y".Equals(config.Value) ? 1.0f : 0.0f);
+                        if (result != RayError.OK)
+                        {
+                            _log.Error("RaySetProperty Error");
+                        }
+                    }                        
 
                     if ("Image".Equals(config.Key))
                     {
@@ -281,42 +305,58 @@ namespace RaywattApp.ViewModels
             NavigationParameter = message.Parameter;
             NavigationSource = pageUri;
 
-            if(message.Parameter != null)
+            if (message.Parameter != null)
             {
-                Dictionary<string, Object> data = (Dictionary<string, Object>)message.Parameter;
-                if (data.ContainsKey("prevStatus"))
-                    PrevStatus = (PrevStatus)data["prevStatus"];
+                Dictionary<string, object> data = (Dictionary<string, object>)message.Parameter;
+
+                if (data.TryGetValue("prevStatus", out var prevStatusObj) && prevStatusObj is PrevStatus prevStatus)
+                    PrevStatus = prevStatus;
                 else
                     PrevStatus = null;
-                if (data.ContainsKey("patient"))
-                    Patient = (Patient)data["patient"];
+
+                if (data.TryGetValue("patient", out var patientObj) && patientObj is Patient patient)
+                    Patient = patient;
                 else
                     Patient = null;
-                if (data.ContainsKey("patientCase"))
-                    PatientCase = (PatientCase)data["patientCase"];
+
+                if (data.TryGetValue("patientCase", out var patientCaseObj) && patientCaseObj is PatientCase patientCase)
+                    PatientCase = patientCase;
                 else
                     PatientCase = null;
             }
 
-            //Review 화면에서 나가는 경우, RayEndReview 호출
-            if (reviewPages.Contains(Constants.CurrentPage))
+            if ((reviewPages.Contains(Constants.CurrentPage) && !reviewPages.Contains(pageUri))//Review 화면에서 나가는 경우, RayEndReview 호출
+                || (Constants.CurrentPage == Constants.RecordingConfirmPage && !pageUri.Equals(Constants.ReviewPage)))//Recording(Confirm) 화면에서 나가는 경우, RayEndReview 호출
             {
-                if (!reviewPages.Contains(pageUri))
-                    RayEndReview();
+                RayError result = (RayError)RayEndReview();
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayEndReview Error");
+                }
             }
-            //Recording(Confirm) 화면에서 나가는 경우, RayEndReview 호출
-            if (Constants.CurrentPage == Constants.RecordingConfirmPage)
-            {
-                if (!pageUri.Equals(Constants.ReviewPage))
-                    RayEndReview();
-            }
+
+            IsHome = false;
+            IsSetting = false;
+            IsExit = false;
+            this.isAdmin = false;
 
             if (NavigationSource == Constants.PatientListPage || (NavigationSource == "Refresh" && Constants.CurrentPage == Constants.PatientListPage))
                 IsHome = true;
-            else
-                IsHome = false;
 
-            IsLoading = false;
+            if (adminPages.Contains(NavigationSource))
+            {
+                IsHome = true;
+                IsSetting = true;
+                this.isAdmin = true;
+            }
+
+            if (Constants.OutsetLoadingPage.Equals(NavigationSource) || Constants.OutsetLoginPage.Equals(NavigationSource))
+            {
+                IsHome = true;
+                IsSetting = true;
+                IsExit = true;
+                this.isAdmin = true;
+            }
         }
 
         private void Home()
@@ -354,10 +394,9 @@ namespace RaywattApp.ViewModels
 
                 if (result.DialogAnswer == DialogResults.Answer.Extra)
                 {
-                    DeviceStatus.PowerOffMsg = _l10n["Switching user"];
+                    DeviceStatus.PowerOffMsg = _l10n["Logging out"];
                 }
-                CommonUtil.Exit(DeviceStatus, _angioManager, result.DialogAnswer == DialogResults.Answer.Yes ? true : false); // 여기다
-                _angioManager.StopSoketCheck();
+                CommonUtil.Exit(DeviceStatus, _angioManager, result.DialogAnswer == DialogResults.Answer.Yes ? true : false, this.isAdmin);
             }
         }
 
@@ -409,20 +448,23 @@ namespace RaywattApp.ViewModels
             _log.Debug("CatheterFailReceiver");
             DeviceStatus.CatheterStatus = Constants.CatheterStatusFailed;//Fail Receive
 
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["title"] = _l10n["Error"];
-            parameter["message"] = _l10n["$MSG007"];
-            parameter["error"] = true;
-            var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
-            if (result != null && result.DialogAnswer == DialogResults.Answer.Undefined)
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
-                parameter.Clear();
-                parameter["patient"] = Patient;
-                parameter["patientCase"] = PatientCase;
-                parameter["prevStatus"] = PrevStatus;
-                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingCatheterFailPage) { Parameter = parameter });
-            }
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["title"] = _l10n["Error"];
+                parameter["message"] = _l10n["$MSG007"];
+                parameter["error"] = true;
+                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                if (result != null && result.DialogAnswer == DialogResults.Answer.Undefined)
+                {
+                    parameter.Clear();
+                    parameter["patient"] = Patient;
+                    parameter["patientCase"] = PatientCase;
+                    parameter["prevStatus"] = PrevStatus;
+                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingCatheterFailPage) { Parameter = parameter });
+                }
+            });
         }
 
         private void CatheterUnlockReceiver() 
@@ -433,7 +475,11 @@ namespace RaywattApp.ViewModels
 
             LeaveFromRecording();
 
-            RayUnloadCatheter();
+            RayError result = (RayError)RayUnloadCatheter();
+            if (result != RayError.OK)
+            {
+                _log.Error("RayUnloadCatheter Error");
+            }
         }
 
         private DispatcherTimer timerUnload = new DispatcherTimer();
@@ -453,7 +499,11 @@ namespace RaywattApp.ViewModels
             _log.Debug("CatheterConnectReceiver");
             DeviceStatus.CatheterStatus = Constants.CatheterStatusLoading;    // Micro-limit switch on
 
-            RayLoadCatheter();
+            RayError result = (RayError)RayLoadCatheter();
+            if (result != RayError.OK)
+            {
+                _log.Error("RayLoadCatheter Error");
+            }
         }
 
         private void ImageAnalysisTest()
@@ -469,7 +519,11 @@ namespace RaywattApp.ViewModels
 
             bool bImageCompensation = (bool)(RayGetProperty(Property.ImageCompensation) != 0);
 
-            RaySetProperty(Property.ImageCompensation, bImageCompensation ? 0 : 1);
+            RayError result = (RayError)RaySetProperty(Property.ImageCompensation, bImageCompensation ? 0 : 1);
+            if (result != RayError.OK)
+            {
+                _log.Error("RaySetProperty Error");
+            }
         }
 
         private void CompensationControlWindowTest()
@@ -493,14 +547,22 @@ namespace RaywattApp.ViewModels
             _log.Debug("ThreadCompensationWindow");
 
             model.showCompensationWindow = true;
-            RaySetProperty(Property.ImageCompensationControlWindow, 1);
+            RayError result = (RayError)RaySetProperty(Property.ImageCompensationControlWindow, 1);
+            if (result != RayError.OK)
+            {
+                _log.Error("RaySetProperty Error");
+            }
 
             while (model.showCompensationWindow) 
             {
                 Cv2.WaitKey(1);
             }
 
-            RaySetProperty(Property.ImageCompensationControlWindow, 0);
+            result = (RayError)RaySetProperty(Property.ImageCompensationControlWindow, 0);
+            if (result != RayError.OK)
+            {
+                _log.Error("RaySetProperty Error");
+            }
 
             _log.Debug("ThreadCompensationWindow done.");
         }
@@ -509,8 +571,8 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("SaveVTIFileTest");
 
-            CommonUtil.isVTIFileSave = !CommonUtil.isVTIFileSave;
-            if(CommonUtil.isVTIFileSave)
+            CommonUtil.IsVTIFileSave = !CommonUtil.IsVTIFileSave;
+            if(CommonUtil.IsVTIFileSave)
                 _log.Debug("SaveVTIFileTest True");
             else
             {
@@ -537,8 +599,16 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ImageAnalysisApply");
 
-            RaySetProperty(Property.ImageThreshold, Double.Parse(ImageThreshold));
-            RaySetProperty(Property.ImageRoi, Double.Parse(ImageRoi));
+            RayError result = (RayError)RaySetProperty(Property.ImageThreshold, Double.Parse(ImageThreshold));
+            if (result != RayError.OK)
+            {
+                _log.Error("RaySetProperty Error");
+            }
+            result = (RayError)RaySetProperty(Property.ImageRoi, Double.Parse(ImageRoi));
+            if (result != RayError.OK)
+            {
+                _log.Error("RaySetProperty Error");
+            }
         }
 
         //Test
@@ -546,7 +616,7 @@ namespace RaywattApp.ViewModels
         private DispatcherTimer timer = new DispatcherTimer();
         private void ProgressLoadTest(object sender, EventArgs e)
         {
-            if (DeviceStatus.CatheterStatus == Constants.CatheterStatusLoaded)
+            if (DeviceStatus.CatheterStatus == Constants.CatheterStatusEnable)
             {
                 timer.Stop();
             }
@@ -584,8 +654,26 @@ namespace RaywattApp.ViewModels
             RayScannerState curState = (RayScannerState)RayGetProperty(Property.CurrentState);
             DeviceStatus.IsLiveView = (bool)(RayGetProperty(Property.MotorOnOff) != 0);
         }
-        protected void handleProgress(RayCallbackRequest request, int progress, int param) { }
-        protected void handleError(RayCallbackRequest request, RayError error, int param) { }
+
+        protected static void handleProgress(RayCallbackRequest request, int progress, int param) { }
+
+        protected void handleError(RayCallbackRequest request, RayError error, int param)
+        {
+            _log.Debug("error: " + error.ToString());
+
+            Task.Run(() =>
+            {
+                switch (error)
+                {
+                    case RayError.CatheterNotValid:
+                        CatheterFailReceiver();
+                        break;
+                    default:
+                        break;
+                }
+            });
+        }
+
         protected void handleEvent(RayCallbackRequest request, RayEvent e, int param)
         {
             _log.Debug("event: " + e.ToString());
@@ -613,6 +701,7 @@ namespace RaywattApp.ViewModels
                     break;
             }
         }
+
         protected void handleWorkDone(RayCallbackRequest request, RayWorkItem work, int param)
         {
             _log.Debug("workItem - " + work.ToString());
@@ -630,6 +719,9 @@ namespace RaywattApp.ViewModels
                     break;
                 case RayWorkItem.UnloadCatheter:
                     DeviceStatus.CatheterStatus = Constants.CatheterStatusConnected;
+                    break;
+                case RayWorkItem.EnableCatheter:
+                    DeviceStatus.CatheterStatus = Constants.CatheterStatusEnable;
                     break;
                 case RayWorkItem.Recording:
                     if (DeviceStatus.IsAngioConnected)

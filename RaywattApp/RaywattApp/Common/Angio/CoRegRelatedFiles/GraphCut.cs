@@ -6,7 +6,7 @@ using Accord.MachineLearning;
 
 namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 {
-    internal class GraphCut
+    public class GraphCut
     {
         private Mat image;
         private int[,] superpixelLabels;
@@ -109,7 +109,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             return (graph, source, sink);
         }
 
-        private double[,] NetworkFlow(double[,] graph, int source, int sink)
+        private static double[,] NetworkFlow(double[,] graph, int source, int sink)
         {
             int N = graph.GetLength(0);
             double[,] flow = new double[N, N];
@@ -158,7 +158,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             return flow;
         }
 
-        private bool[] MinCut(double[,] graph, double[,] flow, int source)
+        private static bool[] MinCut(double[,] graph, double[,] flow, int source)
         {
             int N = graph.GetLength(0);
             bool[] visited = new bool[N];

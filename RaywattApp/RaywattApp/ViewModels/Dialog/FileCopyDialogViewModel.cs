@@ -67,7 +67,7 @@ namespace RaywattApp.ViewModels.Dialog
         [ObservableProperty]
         private bool enableDone = false;
 
-        private bool isPacs = false;
+        private bool isPacs;
 
         private IntPtr dicomClient;
 
@@ -90,9 +90,9 @@ namespace RaywattApp.ViewModels.Dialog
             Title = data["title"].ToString();
 
             //Export
-            if (data.ContainsKey("fileExport"))
+            if (data.TryGetValue("fileExport", out var fileExportObj) && fileExportObj is FileExport export)
             {
-                FileExport = (FileExport)data["fileExport"];
+                FileExport = export;
                 PatientCases = (IList<PatientCase>)data["patientCases"];
 
                 if (FileExport.Type == Constants.ExportTypeNative)
@@ -117,9 +117,9 @@ namespace RaywattApp.ViewModels.Dialog
                 if (FileExport != null)
                     FileExportAction();
             }
-            else if (data.ContainsKey("fileImport"))//Import
+            else if (data.TryGetValue("fileImport", out var importObj) && importObj is Dictionary<string, string> importFiles)//Import
             {
-                copyfiles = (Dictionary<string, string>)data["fileImport"];
+                copyfiles = importFiles;
                 Patients = (IList<Patient>)data["patients"];
                 Path = data["path"].ToString();
                 AnnotationFilePath = data["annotationFilePath"].ToString();
@@ -127,9 +127,9 @@ namespace RaywattApp.ViewModels.Dialog
                 if (copyfiles != null)
                     FileImportAction();
             }
-            else if (data.ContainsKey("logExport"))//logExport
+            else if (data.TryGetValue("logExport", out var logObj) && logObj is Dictionary<string, string> logFiles)//logExport
             {
-                copyfiles = (Dictionary<string, string>)data["logExport"];
+                copyfiles = logFiles;
 
                 if (copyfiles != null)
                     LogExportAction();
@@ -566,7 +566,7 @@ namespace RaywattApp.ViewModels.Dialog
                 sqlParameters["id"] = patient.Id;
                 sqlParameters["lastname"] = patient.Lastname;
                 sqlParameters["firstname"] = patient.Firstname;
-                sqlParameters["birthdate"] = patient.Birthdate;
+                sqlParameters["birthdate"] = patient.Birthdate.HasValue ? patient.Birthdate.Value : (object)DBNull.Value;
                 sqlParameters["gender"] = patient.Gender;
                 sqlParameters["create_date"] = patient.CreateDate;
                 sqlParameters["update_date"] = patient.UpdateDate;
@@ -610,6 +610,7 @@ namespace RaywattApp.ViewModels.Dialog
                             string srcPath = CommonUtil.GetDirectoryPath(path) + "\\" + patientCase.Image;
                             sqlParameters["image"] = System.IO.File.Exists(srcPath) ? patientCase.Image : "";
                             sqlParameters["image_resolution"] = patientCase.ImageResolution;
+                            sqlParameters["guidewire_radius"] = patientCase.GuidewireRadius;
                             sqlParameters["z_offset"] = patientCase.ZOffset;
 
                             var nRows = _sqlManager.UpsertPatientCase(sqlParameters);
@@ -784,7 +785,7 @@ namespace RaywattApp.ViewModels.Dialog
             //(0028, 2112)	Lossy Image Compression Ratio	-	U	DS
         }
 
-        private string GetTimeOffset()
+        private static string GetTimeOffset()
         {
             var offset = DateTimeOffset.Now.Offset;
             var hour = Math.Abs(offset.Hours);
@@ -794,7 +795,7 @@ namespace RaywattApp.ViewModels.Dialog
             return sign + String.Format("{0:00}", hour) + String.Format("{0:00}", minute);
         }
 
-        private string GetAge(DateTime birthDate, DateTime createDate)
+        private static string GetAge(DateTime birthDate, DateTime createDate)
         {
             int age = 0;
 
@@ -821,7 +822,7 @@ namespace RaywattApp.ViewModels.Dialog
             return age.ToString();
         }
 
-        private void SetSequenceProperty()
+        private static void SetSequenceProperty()
         {
             int itemnum = 4;
 

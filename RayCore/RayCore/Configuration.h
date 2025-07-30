@@ -14,7 +14,10 @@ public:
 		int voaValue;
 		int vldValue;
 		int delayPosition;
+		int delayPositionOnePointSeven;
 		int polarPosition;
+		int delayLineSMSteps;
+		int delayLineSMSpeed;
 	};
 
 	class StepMotorSetting {
@@ -39,6 +42,7 @@ public:
 		int rotationTime;	// To-Do: remove
 		bool manualLoad;
 		int length;			// 2.6fr -> 1.6fr
+		bool catheterValidationOnOff;
 	};
 
 	class Volume {

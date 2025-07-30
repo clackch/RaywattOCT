@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
+using RaywattApp.Common.Angio;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
@@ -26,16 +27,16 @@ namespace RaywattApp.ViewModels
         private readonly SqlManager? _sqlManager;
 
         private IDialogService? _dialogService;
-               
+
         private readonly AngioManager _angioManager;
 
         private IList<Code> pullbackTypes;
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
-        private bool isStartRecording = false;
+        private bool isStartRecording;
 
-        private bool isMoveCalibration = false;
+        private bool isMoveCalibration;
 
         [ObservableProperty]
         private Patient _patient;
@@ -64,29 +65,50 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private Zoom _zoomSmall = new Zoom(Constants.SmallCrossSectionSize);
 
+        [ObservableProperty]
+        private bool _isExpandButtonVisible = false;
+
         private int _brightness;
         public int Brightness
         {
             get { return _brightness; }
-            set { _brightness = value; OnPropertyChanged(nameof(Brightness)); RaySetProperty(Property.Brightness, value); }
+            set 
+            { 
+                _brightness = value; 
+                OnPropertyChanged(nameof(Brightness));
+                RayError result = (RayError)RaySetProperty(Property.Brightness, value);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
+            }
         }
 
         private int _contrast;
         public int Contrast
         {
             get { return _contrast; }
-            set { _contrast = value; OnPropertyChanged(nameof(Contrast)); RaySetProperty(Property.Contrast, value); }
+            set 
+            { 
+                _contrast = value; 
+                OnPropertyChanged(nameof(Contrast));
+                RayError result = (RayError)RaySetProperty(Property.Contrast, value);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
+            }
         }
 
         private double _fieldOfView;
         public double FieldOfView
         {
             get { return _fieldOfView; }
-            set 
-            { 
+            set
+            {
                 _fieldOfView = value;
                 OnPropertyChanged(nameof(FieldOfView));
-                
+
                 PatientCase.FieldOfView = value;
                 Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
                 ZoomSmall.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
@@ -137,12 +159,31 @@ namespace RaywattApp.ViewModels
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "PBTY";
             pullbackTypes = _sqlManager.SelectCode(sqlParameters);
+            _angioManager.OnAngioAvailabilityChanged = UpdateAngioAvailabilityUI;
+        }
+
+        private void UpdateAngioAvailabilityUI()
+        {
+            bool isAngioConnected = DeviceStatus.IsAngioConnected;
+            var cathRoom = DeviceStatus.SelectedCathRoom;
+            bool isCathRoomSelected = cathRoom != null && cathRoom.Name != "Not Selected";
+
+            if (isAngioConnected && isCathRoomSelected)
+            {
+                IsExpandButtonVisible = true;
+            }
+            else
+            {
+                _angioManager.ImgAngio = AngioManager.ShowNoSignal();
+                IsExpandButtonVisible = false;
+            }
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             base.OnNavigated(sender, navigatedEventArgs);
             _log.Debug("OnNavigated");
+            UpdateAngioAvailabilityUI();
 
             var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
 
@@ -168,7 +209,11 @@ namespace RaywattApp.ViewModels
                     }
                 }
 
-                RayShowCalibrationGuide(true);
+                RayError result = (RayError)RayShowCalibrationGuide(true);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayShowCalibrationGuide Error");
+                }
 
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
@@ -186,29 +231,38 @@ namespace RaywattApp.ViewModels
                     PbSpeed = temp[1];
                     PbTime = temp[2];
                 }
-                RaySetProperty(Property.PullbackDistance, Double.Parse(PbLength));
-                RaySetProperty(Property.PullbackSpeed, Double.Parse(PbSpeed));
+                result = (RayError)RaySetProperty(Property.PullbackDistance, Double.Parse(PbLength));
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
+                result = (RayError)RaySetProperty(Property.PullbackSpeed, Double.Parse(PbSpeed));
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
 
-                if (!ViewModelBase._deviceStatus.IsAngioInitialized && DeviceStatus.IsAngioConnected && (DeviceStatus.SelectedCathRoom == null || DeviceStatus.SelectedCathRoom.Id != -1))
+                if (!ViewModelBase.DeviceStatus.IsAngioInitialized && DeviceStatus.IsAngioConnected && (DeviceStatus.SelectedCathRoom == null || DeviceStatus.SelectedCathRoom.Id != -1))
                 {
                     _angioManager.SelectCathRoom();
                 }
             }
 
 
-            if (ViewModelBase._deviceStatus.IsAngioInitialized && !_angioManager.ReadyToRecv)
+            if (ViewModelBase.DeviceStatus.IsAngioInitialized && !_angioManager.ReadyToRecv)
             {
                 _angioManager.SendCommandPacket(CommandType.FGStarted);
                 _angioManager.ToggleLive(true);
             }
             _angioManager.ReadyToRecv = true;
-            _angioManager.ImgAngio = _angioManager.ShowNoSignal();
+            _angioManager.ImgAngio = AngioManager.ShowNoSignal();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
+            UpdateAngioAvailabilityUI();
 
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
@@ -221,13 +275,19 @@ namespace RaywattApp.ViewModels
             }
 
             if(!this.isStartRecording && !this.isMoveCalibration)
-                RayStopLiveView();
+            {
+                RayError result = (RayError)RayStopLiveView();
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayStopLiveView Error");
+                }
+            }
         }
 
         private void Back()
         {
             _log.Debug("Back");
-            
+
             leaveToPage(Constants.RecordingPresetPage);
         }
 
@@ -235,13 +295,23 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ChangeViewMode : " + DeviceStatus.IsLiveView);
 
+            RayError result;
+
             if (DeviceStatus.IsLiveView)
             {
-                RayStartLiveView();
+                result = (RayError)RayStartLiveView();
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayStartLiveView Error");
+                }
             }
             else
             {
-                RayStopLiveView();
+                result = (RayError)RayStopLiveView();
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayStopLiveView Error");
+                }
             }
         }
 
@@ -262,10 +332,14 @@ namespace RaywattApp.ViewModels
             _log.Debug("StartRecording");
 
             this.isStartRecording = true;
-            
+
             if (!DeviceStatus.IsLiveView)
             {
-                RayStartLiveView();
+                RayError result = (RayError)RayStartLiveView();
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayStartLiveView Error");
+                }
             }
 
             leaveToPage(Constants.RecordingPage);
@@ -282,7 +356,7 @@ namespace RaywattApp.ViewModels
         {
             if (!DeviceStatus.IsAngioConnected)
             {
-                IsOctExpanded =  true;
+                IsOctExpanded = true;
             }
             DrawCrossSectionImage();
             DrawAngioImage();

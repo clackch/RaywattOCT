@@ -127,12 +127,17 @@
                             </StackPanel>
                             <Border Grid.Row="4" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
                                 <Grid>
-                                    <Grid Visibility="{Binding DeviceStatus.IsAngioInitialized, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG023], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                    </Grid>
-                                    <Grid Visibility="{Binding DeviceStatus.IsAngioInitialized, Converter={StaticResource BoolToVisibilityConverter}}">
-                                        <Image Source="{Binding AngioImage}" Width="{x:Static const:Constants.SmallCrossSectionSize}" Height="{x:Static const:Constants.SmallCrossSectionSize}" Stretch="Uniform"/>
-                                    </Grid>
+                                    <Image Source="{Binding AngioImage}" 
+                                           Visibility="{Binding DeviceStatus.IsAngioInitialized, Converter={StaticResource BoolToVisibilityConverter}}"
+                                           Width="{x:Static const:Constants.SmallCrossSectionSize}"
+                                           Height="{x:Static const:Constants.SmallCrossSectionSize}"
+                                           Stretch="Uniform"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-14}"
+                                           Foreground="{DynamicResource GrayscaleGray3Brush}"
+                                           Content="{Binding [$MSG023], Source={StaticResource L10N}}"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center"
+                                           Visibility="{Binding IsDeviceConnectedMessage, Converter={StaticResource BoolToVisibilityConverter}}"/>
                                 </Grid>
                             </Border>
                         </Grid>

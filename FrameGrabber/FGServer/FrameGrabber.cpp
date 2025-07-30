@@ -54,7 +54,9 @@ void FrameGrabber::CheckPortConnection() {
 		UpdateVideoSettingLong	uvsl;
 		uvsl.lValue = 0;
 		uvsl.pRSet = 0;
-		eHP_SetControlValue(m_BoardHandle, "ContinuousGrabEnable", sizeof(uvsl), (void*)&uvsl);
+		char* my_char = new char[256];
+		strcpy(my_char, "ContinuousGrabEnable");
+		eHP_SetControlValue(m_BoardHandle, my_char, sizeof(uvsl), (void*)&uvsl);
 
 		pIdeaInfo->hInfoEvent = CreateEvent(0, TRUE, FALSE, NULL);
 		m_bSyncValid = bHP_CSyncDetect(m_BoardHandle);

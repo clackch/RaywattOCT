@@ -59,7 +59,7 @@ namespace RaywattApp.ViewModels
             get { return this._resetCommand ?? (this._resetCommand = new RelayCommand(Reset)); }
         }
 
-        private bool _isRendering = false;
+        private bool _isRendering;
         public bool IsRendering
         {
             get { return _isRendering; }

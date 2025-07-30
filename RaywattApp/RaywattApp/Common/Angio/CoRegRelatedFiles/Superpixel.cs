@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Accord.Math;
 using log4net;
 using OpenCvSharp;
 using RaywattApp.ViewModels;
 
 namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 {
-    internal class Superpixel
+    public class Superpixel
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewViewModel));
         private int m_numSuperpixels;
@@ -31,7 +30,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             this.m_labelSegments = null;
         }
 
-        private List<float[]> InitializeCenters(Mat image, int step)
+        private static List<float[]> InitializeCenters(Mat image, int step)
         {
             int height = image.Rows;
             int width = image.Cols;
@@ -257,7 +256,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             //Visualize(nlabels, centers, width, height, numOfLabels);
         }
 
-        private int[,] EnforceLabelConnectivity(int[,] labels, int width, int height, int numSuperpixels, out int numLabels)
+        private static int[,] EnforceLabelConnectivity(int[,] labels, int width, int height, int numSuperpixels, out int numLabels)
         {
             int[] dx4 = { -1, 0, 1, 0 };
             int[] dy4 = { 0, -1, 0, 1 };
@@ -342,7 +341,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             return nlabels;
         }
 
-        private void Visualize(int[,] label, List<float[]> centers, int width, int height, int numLabel)
+        private static void Visualize(int[,] label, List<float[]> centers, int width, int height, int numLabel)
         {
             Mat outputImage = new Mat(height, width, MatType.CV_8UC1);
 

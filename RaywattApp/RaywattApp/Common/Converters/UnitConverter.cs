@@ -5,7 +5,7 @@ using System.Windows.Data;
 
 namespace RaywattApp.Common.Converters
 {
-    class UnitConverter : IValueConverter
+    public class UnitConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

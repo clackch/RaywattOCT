@@ -126,6 +126,7 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case
 	angio_yn boolean,
 	angio_co_registration boolean,
 	indicator_degree real,
+	guidewire_radius real,
     physician_name character varying(50) COLLATE pg_catalog."default",	
     flush_media character varying(4) COLLATE pg_catalog."default",
     pullback_trigger character varying(4) COLLATE pg_catalog."default",
@@ -258,6 +259,31 @@ CREATE TABLE IF NOT EXISTS rv_schema.dicom_server
 TABLESPACE rv_tablespace;
 
 ALTER TABLE IF EXISTS rv_schema.dicom_server
+    OWNER to rv_user;
+
+
+-- Table: rv_schema.user
+
+-- DROP TABLE IF EXISTS rv_schema.user;
+
+CREATE TABLE IF NOT EXISTS rv_schema.user
+(
+    id character varying(64) COLLATE pg_catalog."default" NOT NULL,
+    password text COLLATE pg_catalog."default" NOT NULL,
+    admin boolean DEFAULT false NOT NULL,	
+    comment text COLLATE pg_catalog."default",
+    password_changed_at timestamp without time zone,
+    password_reset boolean DEFAULT false,
+    terms_agreed_at timestamp without time zone,
+    create_date timestamp without time zone,
+    update_date timestamp without time zone,
+    CONSTRAINT users_pkey PRIMARY KEY (id)
+        USING INDEX TABLESPACE rv_tablespace
+)
+
+TABLESPACE rv_tablespace;
+
+ALTER TABLE IF EXISTS rv_schema.user
     OWNER to rv_user;
 
 

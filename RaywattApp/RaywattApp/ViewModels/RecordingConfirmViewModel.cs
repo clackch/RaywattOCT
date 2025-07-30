@@ -55,8 +55,12 @@ namespace RaywattApp.ViewModels
 
             _sqlManager = sqlManager;
             _angioManager = angioManager;
-            
-            RayLaserOnOff(false);
+
+            RayError result = (RayError)RayLaserOnOff(false);
+            if (result != RayError.OK)
+            {
+                _log.Error("RayLaserOnOff Error");
+            }
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -76,7 +80,11 @@ namespace RaywattApp.ViewModels
                 Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
 
                 GetImageInfo(RaySession.Review);
-                RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+                RayError result = (RayError)RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
 
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
                 Playback();
@@ -124,10 +132,18 @@ namespace RaywattApp.ViewModels
             //    _log.Debug("RayUnloadCatheter - " + result);
             //}
 
-            RaySetSession(RaySession.Review);
+            RayError result = (RayError)RaySetSession(RaySession.Review);
+            if (result != RayError.OK)
+            {
+                _log.Error("RaySetSession Error");
+            }
             int numOfFrames = (int) RayGetProperty(Property.ImageDepth);
 
-            RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+            result = (RayError)RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+            if (result != RayError.OK)
+            {
+                _log.Error("RaySetProperty Error");
+            }
 
             _angioManager.StartSaveAngioFrames();
             _angioManager.fromRecording = true;
@@ -176,6 +192,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["section_proximal"] = PatientCase.SectionProximal;
             PatientCase.SectionDistal = PatientCase.NumOfFrames - 1;
             sqlParameters["section_distal"] = PatientCase.SectionDistal;
+            sqlParameters["guidewire_radius"] = PatientCase.GuidewireRadius;
 
             int nRows = _sqlManager.InsertPatientCase(sqlParameters);
 

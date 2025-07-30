@@ -67,3 +67,7 @@ bin
 .sonarlint
 .scannerwork
 .sonarqube
+Python.prj_files
+python*.conf
+Python.prj
+FGServer.prj_files

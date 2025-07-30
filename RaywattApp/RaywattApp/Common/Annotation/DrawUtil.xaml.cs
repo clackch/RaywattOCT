@@ -26,7 +26,7 @@ namespace RaywattApp.Common.Annotation
 
         private bool isErasing;
 
-        private bool init = false;
+        private bool init;
 
         public string InCommand
         {
@@ -339,6 +339,10 @@ namespace RaywattApp.Common.Annotation
 
                     this.canvas.Children.Add(element);
                 }
+
+                this.areaGeometrys = this.Measurements[frameNumber].AreaGeometries;
+                this.lengthGeometries = this.Measurements[frameNumber].LengthGeometries;
+                this.textGeometries = this.Measurements[frameNumber].TextGeometries;
             }
             else
             {

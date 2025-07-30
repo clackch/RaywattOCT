@@ -280,8 +280,8 @@ namespace RaywattApp.ViewModels
                 else
                 {
                     WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientNewDicomPage) { Parameter = parameter });
-                }                
-            }           
+                }
+            }
         }
 
         private PrevStatus GetListStatus()

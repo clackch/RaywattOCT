@@ -158,4 +158,7 @@
     <!--  FFR Step Visibility Conveter  -->
     <converters:FfrStepVisibilityConveter x:Key="FfrStepVisibilityConveter" />
 
+    <!--  DateTime Min To Empty Converter  -->
+    <converters:DateTimeMinToEmptyConverter x:Key="DateTimeMinToEmptyConverter" />
+
 </ResourceDictionary>

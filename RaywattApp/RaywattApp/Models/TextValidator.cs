@@ -24,7 +24,7 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private string _msg;
 
-        private bool typeNumber = false;
+        private bool typeNumber;
 
         public void SetSpecialType(int type)
         {

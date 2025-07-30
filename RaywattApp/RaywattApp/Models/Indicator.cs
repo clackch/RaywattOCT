@@ -19,23 +19,23 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private double _pointLongitudeX;
 
-        public double IndicatorDiff = 0;
+        public double IndicatorDiff;
 
-        public bool OppositeCaptured = false;
+        public bool OppositeCaptured;
 
-        public bool IsCompare = false;
+        public bool IsCompare;
 
-        public bool IsCrossSection = false;
+        public bool IsCrossSection;
 
-        public bool IsLongitudeClicked = false;
+        public bool IsLongitudeClicked;
 
-        public bool IsLongitudeMove = false;
+        public bool IsLongitudeMove;
 
-        public bool IsCrossSectionClicked = false;
+        public bool IsCrossSectionClicked;
 
-        public bool IsSectionIndicator = false;
+        public bool IsSectionIndicator;
 
-        public bool IsSectionProximal = false;
+        public bool IsSectionProximal;
 
         private ICommand _cmdSetCaptured;
 

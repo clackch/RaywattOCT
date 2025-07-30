@@ -40,7 +40,8 @@
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [2D], Source={StaticResource L10N}}" IsChecked="True" IsEnabled="False"/>
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [3D], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.Review3dPage}" IsEnabled="{Binding ReviewStatus.IsNoPullback, Converter={StaticResource BoolToEnableReverseConverter}}"/>
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [Compare], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewComparePage}" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$002|$003}"/>
-                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrSettingPage}"/>
+                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrSettingPage}" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}"/>
+                    
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                     <component:IconButton Style="{StaticResource IconButton}" Icon="editLumenContourSimple" Width="42" Height="42" Command="{Binding EditLumenContourCommand}"/>
@@ -558,7 +559,7 @@
                             </RectangleGeometry.Rect>
                         </RectangleGeometry>
                     </Grid.Clip>
-                    <Grid>
+                    <Grid Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}">
                         <annotation:DrawUtil Zoom="{Binding ReviewStatus.Zoom}" IsDrawOn="{Binding ReviewStatus.IsMeasurementOn}" MeasureUIElements="{Binding PatientCase.MeasureUIElements}" Measurements="{Binding Measurements}" IsMeasureInit="{Binding ReviewStatus.IsMeasureInit}" FrameNumberForInit="{Binding FrameNumberForInit}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" CommandOff="{Binding MeasurementCommandOff, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEditOn="True" Visibility="Collapsed">
                             <annotation:DrawUtil.RenderTransform>
                                 <TransformGroup>

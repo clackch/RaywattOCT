@@ -14,7 +14,7 @@ namespace RaywattApp.Common.Bases
 
         private readonly SqlManager _sqlManager;
 
-        public static Dictionary<string, Dictionary<string, string>> Codes = new Dictionary<string, Dictionary<string, string>>();
+        public static readonly Dictionary<string, Dictionary<string, string>> Codes = new();
 
         public CodeDefinition(SqlManager sqlManager)
         {

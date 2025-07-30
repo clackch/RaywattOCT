@@ -87,7 +87,8 @@ Download & Install OCT Host
 3. 환경 변수 추가
    - 시스템 변수에 PYTHON_DLL - C:\Users\Raywatt\AppData\Local\Programs\Python\Python312\python312.dll 추가
 
-     ※ 경로 및 Python dll은 해당 PC에 맞춰서 적용
+     ※ 경로 및 Python dll은 해당 PC에 맞춰서 적용![Uploading 11757@3x.png…]()
+
 4. 코드 복사
    - RaywattExt\Python\ImageProcess.py 파일을 runtime에 복사
 
@@ -104,7 +105,7 @@ Download & Install Font
 
 ## [Cursor]
 Download & Create Folder, Copy/Paste
-1. [cursor.zip](https://github.com/user-attachments/files/18683414/cursor.zip) 다운로드 후 압축 해제
+1. [cursor.zip](https://github.com/user-attachments/files/21361471/cursor.zip) 다운로드 후 압축 해제
 2. C:\Raywatt\system\image\cursor 폴더 생성 및 복사/붙여넣기
 
 Windows Default Mouse Cursor Setting (※ 필요 시 진행)
@@ -174,27 +175,25 @@ Download & Copy/Paste
    
    (b) 컴퓨터 구성 > 관리 템플릿 > 시스템 -> 로그온 > 네트워크 선택 UI 표시 안 함 > 사용   
 
-6. Raywatt App 관리자 권한으로 작업 스케줄러 등록
+6. Raywatt App 관리자 권한으로 실행을 위해 레지스트리 수정
 
-   (a) PowerShell 관리자 권한으로 실행
+   (a) FASTER 계정으로 윈도우 로그인
+    
+   (b) [ctrl] + [shift] + [esc] 키를 눌러 작업 관리자 실행
 
-   (b) 아래 내용 실행
+   (c) 작업 관리자에서 [파일] - [새 작업 실행] 실행     
    
-       $taskAction = New-ScheduledTaskAction -Execute "C:\Raywatt\system\runtime\RaywattApp.exe"
+   (d) 실행의 열기란에 'regdit'을 입력 후, [확인] 버튼을 눌러 레지스트리 편집기 실행
+
+   (e) 'EnableLUA'의 값을 1에서 0으로 수정
+
+       ※ 위치: [HKEY_LOCAL_MACHINE] - [SOFTWARE] - [Microsoft] - [Windows] - [CurrentVersion] - [Policies] - [System]
    
-       $taskPrincipal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+       ※ 수정 방법: [System]을 클릭하면 우측에 나오는 Key들 중에 'EnableLUA' 찾아 더블 클릭하고, 팝업된 편집창에서 '값 데이터'란의 값을 0으로 수정후 확인 버튼 클릭
    
-       $taskSettings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -DontStopOnIdleEnd
-   
-       Register-ScheduledTask -TaskName "RaywattAppAdmin" -Action $taskAction -Principal $taskPrincipal -Settings $taskSettings
-   
-   (c) 적용 확인 방법
-   
-       Win + R → taskschd.msc 입력 후 Enter
-   
-       "작업 스케줄러 라이브러리" 클릭
-   
-       오른쪽 창에서 "RaywattAppAdmin" 작업이 있는지 확인
+   (f) 윈도우 재시작
+
+   관련 링크: https://url.kr/fsv46g
 
 8. Shell Launcher (고정 프로그램)
    

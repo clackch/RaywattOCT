@@ -1,20 +1,23 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using log4net;
+using Microsoft.Extensions.DependencyInjection;
+using RaywattApp.Common.Angio;
+using RaywattApp.Common.Dialog;
+using RaywattApp.Common.Util;
 using RaywattApp.Services;
 using RaywattApp.ViewModels;
+using RaywattApp.ViewModels.Admin;
+using RaywattApp.ViewModels.Dialog;
 using RaywattApp.ViewModels.File;
+using RaywattApp.ViewModels.Password;
 using RaywattApp.ViewModels.Setting;
 using System;
 using System.Configuration;
-using System.Windows;
-using RaywattApp.ViewModels.Dialog;
-using RaywattApp.Common.Dialog;
-using System.Threading.Tasks;
-using log4net;
-using RaywattApp.Common.Angio;
 using System.Diagnostics;
 using System.IO;
 using RaywattApp.Common.Util;
 using System.Windows.Input;
+using System.Threading.Tasks;
+using System.Windows;
 
 namespace RaywattApp
 {
@@ -62,7 +65,7 @@ namespace RaywattApp
         /// <summary>
         /// Configures the services for the application.
         /// </summary>
-        private static IServiceProvider ConfigureServices()
+        private static ServiceProvider ConfigureServices()
         {
             _log.Debug("ConfigureServices");
 
@@ -72,6 +75,7 @@ namespace RaywattApp
 
             //ViewModel 등록
             services.AddTransient(typeof(MainViewModel));
+            services.AddTransient(typeof(OutsetLoginViewModel));
             services.AddTransient(typeof(OutsetLoadingViewModel));
             services.AddTransient(typeof(PatientListViewModel));
             services.AddTransient(typeof(PatientNewViewModel));
@@ -98,6 +102,8 @@ namespace RaywattApp
             services.AddTransient(typeof(PatientNewDicomViewModel));
             services.AddTransient(typeof(PatientNewDicomPacsViewModel));
             services.AddTransient(typeof(PatientNewDicomMwlViewModel));
+            services.AddTransient(typeof(InitialPasswordSetupViewModel));
+            services.AddTransient(typeof(PasswordExpiryCheckViewModel));
 
             //Setting
             services.AddTransient(typeof(SettingAcquisitionViewModel));
@@ -108,6 +114,7 @@ namespace RaywattApp
             services.AddTransient(typeof(SettingTermsConditionsViewModel));
             services.AddTransient(typeof(SettingMaintenanceViewModel));
             services.AddTransient(typeof(SettingDicomViewModel));
+            services.AddTransient(typeof(SettingPasswordChangeViewModel));
 
             //File
             services.AddTransient(typeof(FileExportStep1ViewModel));
@@ -119,6 +126,7 @@ namespace RaywattApp
             //Dialog 등록
             services.AddTransient<IDialogService, DialogService>();
             services.AddTransient(typeof(AlertDialogViewModel));
+            services.AddTransient(typeof(AlertTimerDialogViewModel));
             services.AddTransient(typeof(ConfirmDialogViewModel));
             services.AddTransient(typeof(EditCaseInfoDialogViewModel));
             services.AddTransient(typeof(SettingDialogViewModel));
@@ -140,12 +148,22 @@ namespace RaywattApp
             services.AddTransient(typeof(NewPatientDialogViewModel));
             services.AddTransient(typeof(DicomPacsDialogViewModel));
             services.AddTransient(typeof(MwlSearchDialogViewModel));
+            services.AddTransient(typeof(PasswordChangeDialogViewModel));
+            services.AddTransient(typeof(EditInstituteDialogViewModel));
+
+            //Admin
+            services.AddTransient(typeof(UserListVIewModel));
+            services.AddTransient(typeof(UserNewViewModel));
+            services.AddTransient(typeof(UserEditViewModel));
 
             //IDatabaseService 등록 (Singleton 사용 안함 => Connection Pooling을 Default로 사용)
             services.AddTransient<IDatabaseService, SqlService>(obj => new SqlService(connectionString));
             services.AddTransient(typeof(SqlManager));
 
+            services.AddTransient<IPasswordService, PasswordService>();
+
             services.AddSingleton(typeof(AngioManager));
+            services.AddTransient(typeof(IdleMonitorService));
 
             return services.BuildServiceProvider();
         }
@@ -169,7 +187,7 @@ namespace RaywattApp
             };
         }
 
-        private void LogUnhandledException(Exception exception, string source)
+        private static void LogUnhandledException(Exception exception, string source)
         {
             _log.Debug("LogUnhandledException");
 

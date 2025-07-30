@@ -9,6 +9,8 @@
 #define CM_SM_SPEED_AUTO				2500
 #define DELAYLINE_BACKWARD_POSITION		(-50)
 #define DELAYLINE_FORWARD_POSITION		(50)
+#define DELAY_LINE_HOMING_WORKS			1 
+#define DELAY_LINE_UPPER_END_POSITION	90000
 
 class CLaserModule
 	: public CMotorController,
@@ -41,6 +43,7 @@ public:
 	int MoveRelative(eStepMotorIndex idxMotor, int nOffset);
 	void SetVOA(unsigned short voa);
 	void SetVLD(unsigned short vld);
+	void PrintPhotoSensor();
 
 	bool AutoStatePeriod(USHORT interval);
 	bool StopStepMotors();

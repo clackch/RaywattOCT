@@ -327,6 +327,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["section_proximal"] = PatientCase.SectionProximal;
             sqlParameters["section_distal"] = PatientCase.SectionDistal;
             sqlParameters["z_offset"] = PatientCase.ZOffset;
+            sqlParameters["guidewire_radius"] = PatientCase.GuidewireRadius;
 
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
             if (nRows == 0)

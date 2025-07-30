@@ -5,7 +5,7 @@ using System.Text;
 namespace RaywattApp.Models
 {
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-    class DicomPatient
+    sealed class DicomPatient
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 65)]
         private byte[] _patientId = new byte[65];

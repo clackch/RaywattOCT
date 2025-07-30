@@ -11,8 +11,9 @@ using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
-using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Interop;
+using System.Windows.Navigation;
 using System.Windows.Threading;
 using static RaywattOCT.Ray3DWrapper;
 using static RaywattOCT.RayCoreWrapper;
@@ -27,11 +28,13 @@ namespace RaywattApp.ViewModels
 
         private readonly AngioManager _angioManager;
 
+        private readonly IPasswordService _passwordService;
+
         private IDialogService _dialogService;
 
         private DispatcherTimer timer = new DispatcherTimer();
 
-        private bool isError = false;
+        private bool isError;
 
         private ConnectionStatus connState = ConnectionStatus.Default;
 
@@ -40,7 +43,7 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private double _progress;
 
-        public OutsetLoadingViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager)
+        public OutsetLoadingViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager, IPasswordService passwordService)
         {
             _log.Debug("OutsetLoadingViewModel");
 
@@ -49,39 +52,17 @@ namespace RaywattApp.ViewModels
             _sqlManager = sqlManager;
             _angioManager = angioManager;
             _dialogService = dialogService;
+            _passwordService = passwordService;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             _log.Debug("OnNavigated");
 
-            // Terms and Contidions 확인
-            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
-            sqlParameters["classification"] = "Terms&Cond";
-            IList<Configuration> tnCs = _sqlManager.SelectConfiguration(sqlParameters);
-            if (tnCs != null || tnCs.Count == 1)
-            {
-                if ("N".Equals(tnCs[0].Value))
-                {
-                    Dictionary<string, object> parameter = new Dictionary<string, object>();
-                    parameter["tnC"] = tnCs[0];
-                    var result = _dialogService.OpenDialog(new TermsConditionsControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+            if (navigatedEventArgs is not NavigationEventArgs navArgs || navArgs.ExtraData is not Dictionary<string, object> data)
+                return;
 
-                    if (result != null && result.DialogAnswer == DialogResults.Answer.No)
-                    {
-                        DeviceStatus.PowerOffMsg = _l10n["Switching user"];
-                        CommonUtil.Exit(DeviceStatus);
-                        _angioManager.StopSoketCheck();
-                    }
-                }
-            }
-
-            Thread threadCoreAndDeviceInit = new Thread(() => ThreadCoreAndDeviceInit());
-                threadCoreAndDeviceInit.Start();
-
-            timer.Interval = TimeSpan.FromMilliseconds(25);
-            timer.Tick += new EventHandler(ProgressTest);
-            timer.Start();
+            InitializeSystem();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -94,15 +75,43 @@ namespace RaywattApp.ViewModels
             if (Progress >= 100 && DeviceStatus.IsServiceStarted && DeviceStatus.IsDeviceConnected)
             {
                 IntPtr hWnd = new WindowInteropHelper(Constants.mainWindow).Handle;
-                ODSOCT_CreateDll(hWnd);
-                ODSOCT_CreateOCTWindowByPos(Ray3DViewID.CutView, (int)Constants.CutView3dX, (int)Constants.CutView3dY,
+                int ray3DResult = ODSOCT_CreateDll(hWnd);
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_CreateDll Error");
+                }
+                ray3DResult = ODSOCT_CreateOCTWindowByPos(Ray3DViewID.CutView, (int)Constants.CutView3dX, (int)Constants.CutView3dY,
                     (int)Constants.CutView3dWidth, (int)Constants.CutView3dHeight);
-                ODSOCT_CreateOCTWindowByPos(Ray3DViewID.FlyThrough, (int)Constants.FlyThroughView3dX, (int)Constants.FlyThroughView3dY,
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_CreateOCTWindowByPos Error");
+                }
+                ray3DResult = ODSOCT_CreateOCTWindowByPos(Ray3DViewID.FlyThrough, (int)Constants.FlyThroughView3dX, (int)Constants.FlyThroughView3dY,
                     (int)Constants.FlyThroughView3dWidth, (int)Constants.FlyThroughView3dHeight);
-                ODSOCT_StartRendering();
-                ODSOCT_EnableInteractor(Ray3DViewID.CutView, false);
-                ODSOCT_EnableInteractor(Ray3DViewID.FlyThrough, false);
-                ODSOCT_EnableWheelEvent(false);
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_CreateOCTWindowByPos Error");
+                }
+                ray3DResult = ODSOCT_StartRendering();
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_StartRendering Error");
+                }
+                ray3DResult = ODSOCT_EnableInteractor(Ray3DViewID.CutView, false);
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_EnableInteractor Error");
+                }
+                ray3DResult = ODSOCT_EnableInteractor(Ray3DViewID.FlyThrough, false);
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_EnableInteractor Error");
+                }
+                ray3DResult = ODSOCT_EnableWheelEvent(false);
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_EnableWheelEvent Error");
+                }
 
                 timer.Stop();
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
@@ -124,7 +133,6 @@ namespace RaywattApp.ViewModels
                 if (resultDialog != null && resultDialog.DialogAnswer == DialogResults.Answer.Undefined)
                 {
                     CommonUtil.Exit(DeviceStatus, _angioManager, true);
-                    _angioManager.StopSoketCheck();
                 }
             }
 
@@ -135,9 +143,10 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ThreadCoreAndDeviceInit");
 
-            RayError result = RayError.OK;
+            RayError result = (RayError)RayInitSystem();
 
             result |= (RayError)RayStartSystem();
+
             if (result == RayError.OK)
             {
                 result |= (RayError)RayConnectDevices();
@@ -170,5 +179,16 @@ namespace RaywattApp.ViewModels
 
             _log.Debug("ThreadCoreAndDeviceInit - Done");
         }
+
+        private void InitializeSystem()
+        {
+            Task.Run(() => ThreadCoreAndDeviceInit());
+
+            timer.Tick -= ProgressTest; // 중복 방지
+            timer.Tick += ProgressTest;
+            timer.Interval = TimeSpan.FromMilliseconds(25);
+            timer.Start();
+        }
+
     }
 }

@@ -55,8 +55,6 @@ namespace RaywattApp.ViewModels.Dialog
 
         protected override void AnswerYes(IDialogWindow dialog)
         {
-            DirectoryProvider directoryProvider = new DirectoryProvider();
-
             if (folderAction == Constants.FolderActionRename)
             {
                 if (SelectedDir.Name.Equals(CreateRenameFolderName.Trim()))
@@ -65,7 +63,7 @@ namespace RaywattApp.ViewModels.Dialog
                     return;
                 }
 
-                bool result = directoryProvider.DuplicateCheckRename(SelectedDir.Path, SelectedDir.Name, CreateRenameFolderName.Trim());
+                bool result = DirectoryProvider.DuplicateCheckRename(SelectedDir.Path, SelectedDir.Name, CreateRenameFolderName.Trim());
                 if (!result)
                 {
                     ValidateCreateRenameFolderName = _l10n["Folder name is duplicated"];
@@ -74,7 +72,7 @@ namespace RaywattApp.ViewModels.Dialog
             }
             else
             {
-                bool result = directoryProvider.DuplicateCheck(SelectedDir.Path, CreateRenameFolderName.Trim());
+                bool result = DirectoryProvider.DuplicateCheck(SelectedDir.Path, CreateRenameFolderName.Trim());
                 if (!result)
                 {
                     ValidateCreateRenameFolderName = _l10n["Folder name is duplicated"];

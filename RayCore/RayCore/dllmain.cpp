@@ -13,6 +13,9 @@ _declspec(dllexport) RayError RayStartSystem() {
 _declspec(dllexport) RayError RayStopSystem() {
     return octSystem.Stop();
 }
+_declspec(dllexport) RayError RayInitSystem() {
+    return octSystem.Init();
+}
 _declspec(dllexport) RayError RayRegisterCallback(FunctionPtr cb) {
     return octSystem.RegisterCallback(cb);
 }
@@ -255,6 +258,9 @@ _declspec(dllexport) void* RayGetGuidewirePoints(int nFrame) {
 }
 _declspec(dllexport) int RayGetNumOfGuidewirePoints(int nFrame) {
     return octSystem.GetNumOfGuidewirePoints(nFrame);
+}
+_declspec(dllexport) void* RayGetGuidewireRadius(int nFrame) {
+    return octSystem.GetGuidewireRadius(nFrame);
 }
 
 BOOL APIENTRY DllMain( HMODULE hModule,

@@ -7,7 +7,7 @@ namespace RaywattApp.Views.Component
     {
         private const string resPath = "/res/icon/";
 
-        public static DependencyProperty IconProperty = DependencyProperty.Register("Icon", typeof(string), typeof(IconButton), new PropertyMetadata(null, SvgComponentBase.OnIconPropertyChanged));
+        public static readonly DependencyProperty IconProperty = DependencyProperty.Register("Icon", typeof(string), typeof(IconButton), new PropertyMetadata(null, SvgComponentBase.OnIconPropertyChanged));
         public string Icon { get => (string)GetValue(IconProperty); set => SetValue(IconProperty, value); }
 
         public void InitializeIconPath(string iconName)

@@ -14,10 +14,10 @@ namespace RaywattApp.Models
         private bool _isAngioOn = false;
 
         [ObservableProperty]
-        private bool _isLumenProfile = true;
+        private bool _isLumenProfile = false;
 
         [ObservableProperty]
-        private bool _isContourStentOn = true;
+        private bool _isContourStentOn = false;
 
         [ObservableProperty]
         private bool _isMeasurementOn = false;
