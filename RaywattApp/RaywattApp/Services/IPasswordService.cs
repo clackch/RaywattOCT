@@ -11,7 +11,9 @@ namespace RaywattApp.Services
         /// <summary>
         /// Checks if the input password matches the existing password
         /// </summary>
-        bool IsSamePassword(string beforePassword, string inputPassword, string message = "");
+        bool IsPasswordConfirmed(string beforePassword, string inputPassword, string message = "");
+
+        bool IsPasswordCorrect(string actualPassword, string inputPassword, string message = "");
 
         /// <summary>
         /// Checks if the input password does not match the existing password

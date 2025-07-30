@@ -122,11 +122,11 @@ namespace RaywattApp.ViewModels.Dialog
                 return false;
             }
 
-            if (!_passwordService.IsSamePassword(_loginPassword, CurrentPassword, "[Current Password]")) return false;
+            if (!_passwordService.IsPasswordCorrect(_loginPassword, CurrentPassword, "[Current Password]")) return false;
 
             if (!_passwordService.IsNotSamePassword(CurrentPassword, NewPassword, "[Current/New Password]")) return false;
 
-            if (!_passwordService.IsSamePassword(NewPassword, ConfirmPassword, "[New/Confirm Password]")) return false;
+            if (!_passwordService.IsPasswordConfirmed(NewPassword, ConfirmPassword, "[New/Confirm Password]")) return false;
 
             if (_passwordService.GetPasswordValidationError(ConfirmPassword) is { } message)
             {

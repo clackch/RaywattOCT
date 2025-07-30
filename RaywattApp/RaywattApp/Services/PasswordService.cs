@@ -53,9 +53,22 @@ namespace RaywattApp.Services
             GetPasswordParameter();
         }
 
-        public bool IsSamePassword(string beforePassword, string inputPassword, string message = "")
+        public bool IsPasswordConfirmed(string beforePassword, string inputPassword, string message = "")
         {
-            _log.Debug("IsSamePassword");
+            _log.Debug("IsPasswordConfirmed");
+
+            if (!beforePassword.Equals(inputPassword))
+            {
+                ShowAlert(_l10n["Information"], $"The passwords do not match.\r\n{message}");
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool IsPasswordCorrect(string beforePassword, string inputPassword, string message = "")
+        {
+            _log.Debug("IsPasswordCorrect");
 
             if (!beforePassword.Equals(inputPassword))
             {
@@ -98,7 +111,7 @@ namespace RaywattApp.Services
 
             if (beforePassword.Equals(inputPassword))
             {
-                ShowAlert(_l10n["Information"], $"The password is correct.\r\n{message}");
+                ShowAlert(_l10n["Information"], $"The password must be different.\r\n{message}");
                 return false;
             }
 
@@ -220,5 +233,7 @@ namespace RaywattApp.Services
                 passwordParameter.FirstOrDefault(x => x.Key == "WaitSecond")?.Value,
                 out var value1) ? value1 : _passwordRetryLockDuration;
         }
+
+
     }
 }

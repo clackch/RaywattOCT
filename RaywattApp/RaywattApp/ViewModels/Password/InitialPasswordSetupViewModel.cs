@@ -87,7 +87,7 @@ namespace RaywattApp.ViewModels.Password
         {
             _log.Debug("OnConfirm");
 
-            if (!_passwordService.IsSamePassword(Password, ConfirmPassword))
+            if (!_passwordService.IsPasswordConfirmed(Password, ConfirmPassword))
             {
                 ClearPasswords();
                 return;
