@@ -1,5 +1,8 @@
 ﻿<Page x:Class="RaywattApp.Views.OutsetLoginPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+      xmlns:ei="http://schemas.microsoft.com/xaml/behaviors/2010"
+        xmlns:cmd="clr-namespace:Microsoft.Xaml.Behaviors.Core;assembly=Microsoft.Xaml.Behaviors"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
@@ -11,7 +14,14 @@
       d:DesignHeight="1024" d:DesignWidth="1280"
       Background="{DynamicResource GrayscaleGray8Brush}"
       Title="OutsetLoginPage">
-   
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <i:InvokeCommandAction Command="{Binding EnterKeyCommand}" 
+                                   PassEventArgsToCommand="True"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
     <Grid>
         <StackPanel Margin="415,280,415,314">
             <Image Source="{svgc:SvgImage Source=/res/icon/fasterWhite.svg}"/>
