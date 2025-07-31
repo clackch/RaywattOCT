@@ -123,6 +123,8 @@ namespace RaywattApp.Common.Bases
         public const double MwlSearchDialogHeight = 683;
         public const double EditInstituteDialogWidth = 472;
         public const double EditInstituteDialogHeight = 380;
+        public const double PasswordChangeDialogWidth = 472;
+        public const double PasswordChangeDialogHeight = 552;
 
         //Max Length
         public const int MaxPatientId = 64;
