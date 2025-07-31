@@ -138,10 +138,11 @@ namespace RaywattApp.ViewModels
             }
 
             bool isExist = false;
-            if (!Validate(out isExist))
+            bool needPhysician = true;
+            if (!Validate(out isExist, out needPhysician))
                 return;
 
-            if (!SelectPhysician())
+            if (needPhysician && !SelectPhysician())
                 return;
 
             if (!Save(isExist))
@@ -174,16 +175,36 @@ namespace RaywattApp.ViewModels
             return true;
         }
 
-        private bool Validate(out bool isExist)
+        private bool Validate(out bool isExist, out bool needPhysician)
         {
+            needPhysician = true;
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = SelectedPatient.Id;
 
-            int nCnt = _sqlManager.CountPatient(sqlParameters);
+            IList<Patient> Patients = _sqlManager.SelectPatientById(sqlParameters);
 
-            if (nCnt > 0)
+            if (Patients.Count > 0)
             {
                 isExist = true;
+
+                Patient patient = Patients[0];
+                sqlParameters["id"] = patient.PhysicianId;
+                IList<Physician> Physicians = _sqlManager.SelectPhysician(sqlParameters);
+
+                if (Physicians.Count > 0)
+                {
+                    needPhysician = false;
+                    SelectedPatient.PhysicianId = Physicians[0].Id;
+                    SelectedPatient.PhysicianName = Physicians[0].Name;
+                }
+
+                if (patient.Lastname == SelectedPatient.Lastname && 
+                    patient.Firstname == SelectedPatient.Firstname && 
+                    patient.Birthdate == SelectedPatient.Birthdate && 
+                    patient.Gender == SelectedPatient.Gender)
+                {
+                    return true;
+                }
 
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["title"] = _l10n["Information"];

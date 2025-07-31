@@ -96,7 +96,7 @@ namespace RaywattApp.Services
 
             //SelectPatient
             _query["SelectPatient"] =  @$"
-                SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, gender, create_date, update_date
+                SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, gender, physician_id, create_date, update_date
                 FROM rv_schema.patient
                 WHERE LOWER(id) = LOWER(@id)
                 ";
