@@ -83,7 +83,7 @@ namespace RaywattApp.Services
 
             _log.Debug("CheckLoginWithRetryCount " + _currentPasswordRetryCount);
 
-            string password = GetAccount(id)!.Password;
+            string password = GetAccount(id)?.Password ?? string.Empty;
 
             if (password != inputPassword || password == string.Empty)
             {
