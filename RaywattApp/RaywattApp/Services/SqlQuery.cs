@@ -296,7 +296,7 @@ namespace RaywattApp.Services
             _query["SelectUser"] = @$"
                 SELECT id, admin, password, comment, password_changed_at, password_reset, terms_agreed_at, create_date, update_date
                 FROM rv_schema.user
-                WHERE LOWER(id) = LOWER(@id) AND admin IS NOT true
+                WHERE LOWER(id) = LOWER(@id)
                 ";
         }
 

@@ -23,6 +23,9 @@
     </i:Interaction.Triggers>
 
     <Grid>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+            <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="power" Margin="0,9,12,9" Command="{Binding ExitCommand}"/>
+        </StackPanel>
         <StackPanel Margin="415,280,415,314">
             <Image Source="{svgc:SvgImage Source=/res/icon/fasterWhite.svg}"/>
             <StackPanel Height="40"/>
