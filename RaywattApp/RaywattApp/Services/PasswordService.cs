@@ -19,7 +19,6 @@ namespace RaywattApp.Services
         private static readonly ILog _log = LogManager.GetLogger(typeof(PasswordService));
 
         private readonly IDialogService _dialogService;
-        private readonly IDatabaseService _databaseService;
         private readonly SqlManager _sqlManager;
 
         protected readonly DynamicResource _l10n;
@@ -40,14 +39,13 @@ namespace RaywattApp.Services
             _currentPasswordRetryCount = 0;
         }
 
-        public PasswordService(IDialogService dialogService, IDatabaseService databaseService, SqlManager sqlManager)
+        public PasswordService(IDialogService dialogService, SqlManager sqlManager)
         {
             _log.Debug("PasswordService");
 
             _l10n = (DynamicResource)App.Current.Resources["L10N"];
 
             _dialogService = dialogService;
-            _databaseService = databaseService;
             _sqlManager = sqlManager;
 
             GetPasswordParameter();
