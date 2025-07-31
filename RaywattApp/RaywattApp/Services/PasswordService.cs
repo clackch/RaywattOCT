@@ -85,7 +85,7 @@ namespace RaywattApp.Services
 
             _log.Debug("CheckLoginWithRetryCount " + _currentPasswordRetryCount);
 
-            string password = GetPassword(id);
+            string password = GetAccount(id)!.Password;
 
             if (password != inputPassword || password == string.Empty)
             {
@@ -118,18 +118,25 @@ namespace RaywattApp.Services
             return true;
         }
 
-        public string GetPassword(string id)
+        public User? GetAccount(string id)
         {
-            _log.Debug("GetPassword");
+            _log.Debug($"GetAccount: {id}");
 
-            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
-            sqlParameters["id"] = id;
-            
-            var commandText = SqlQuery.GetQuery("SelectUser");
-            var userData = _databaseService.GetDatas<User>(commandText, sqlParameters);
-            string password = userData.Count > 0 ? userData[0].Password : string.Empty;
+            var parameters = new Dictionary<string, object> { ["id"] = id };
 
-            return password;
+            var userList = _sqlManager.SelectUser(parameters);
+            if (userList != null && userList.Count > 0)
+            {
+                return userList[0];
+            }
+
+            var adminList = _sqlManager.SelectAdmin(parameters);
+            if (adminList != null && adminList.Count > 0)
+            {
+                return adminList[0];
+            }
+
+            return null;
         }
 
         public string? GetPasswordValidationError(string password)

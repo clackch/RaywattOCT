@@ -121,7 +121,7 @@ namespace RaywattApp.ViewModels
 
             DeviceStatus.LoginID = Id.Text;
 
-            _user = GetUser(DeviceStatus.LoginID);
+            _user = _passwordService.GetAccount(DeviceStatus.LoginID);
             
             _passwordService.ResetPasswordCount();
 
@@ -132,7 +132,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("HandleInitialPasswordReset");
 
-            _user = GetUser(DeviceStatus.LoginID);
+            _user = _passwordService.GetAccount(DeviceStatus.LoginID);
 
             if (_user?.PasswordReset == true)
             {
@@ -149,7 +149,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("CheckPasswordExpiry");
 
-            _user = GetUser(DeviceStatus.LoginID);
+            _user = _passwordService.GetAccount(DeviceStatus.LoginID);
 
             if ((DateTime.Now - _user.PasswordChangedAt).TotalDays > _passwordService.PasswordExpiryDays)
             {
@@ -166,7 +166,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("EnsureTermsAgreement");
 
-            _user = GetUser(DeviceStatus.LoginID);
+            _user = _passwordService.GetAccount(DeviceStatus.LoginID);
 
             if (_user.TermsAgreedAt > DateTime.MinValue) return true;
 
@@ -187,7 +187,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("FinalizeLogin");
 
-            _user = GetUser(DeviceStatus.LoginID);
+            _user = _passwordService.GetAccount(DeviceStatus.LoginID);
 
             if (_user?.Admin == true)
             {
@@ -212,14 +212,6 @@ namespace RaywattApp.ViewModels
 
             Id.Text = string.Empty;
             Password = string.Empty;
-        }
-
-        private User? GetUser(string id)
-        {
-            _log.Debug($"GetUser: {id}");
-
-            var result = _sqlManager.SelectUser(new Dictionary<string, object> { ["id"] = id });
-            return result?.Count > 0 ? result[0] : null;
         }
 
         partial void OnPasswordChanged(string value)
