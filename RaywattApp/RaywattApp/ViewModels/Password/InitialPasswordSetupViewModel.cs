@@ -36,6 +36,8 @@ namespace RaywattApp.ViewModels.Password
 
         public InitialPasswordSetupViewModel(IPasswordService passwordService)
         {
+            Constants.CurrentPage = Constants.InitialPasswordSetupPage;
+
             _log.Debug("InitialPasswordSetupViewModel");
 
             _passwordService = passwordService;
@@ -85,7 +87,7 @@ namespace RaywattApp.ViewModels.Password
         {
             _log.Debug("OnConfirm");
 
-            if (!_passwordService.IsSamePassword(Password, ConfirmPassword))
+            if (!_passwordService.IsPasswordConfirmed(Password, ConfirmPassword))
             {
                 ClearPasswords();
                 return;

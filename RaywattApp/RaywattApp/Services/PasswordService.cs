@@ -19,12 +19,11 @@ namespace RaywattApp.Services
         private static readonly ILog _log = LogManager.GetLogger(typeof(PasswordService));
 
         private readonly IDialogService _dialogService;
-        private readonly IDatabaseService _databaseService;
         private readonly SqlManager _sqlManager;
 
         protected readonly DynamicResource _l10n;
         private int _passwordExpiryDays = 90;
-        private int _maxPasswordRetryCount = 3;
+        private int _maxPasswordRetryCount = 5;
         private TimeSpan _passwordRetryLockDuration = TimeSpan.FromSeconds(30);
 
         static private int _currentPasswordRetryCount = 0;
@@ -40,22 +39,34 @@ namespace RaywattApp.Services
             _currentPasswordRetryCount = 0;
         }
 
-        public PasswordService(IDialogService dialogService, IDatabaseService databaseService, SqlManager sqlManager)
+        public PasswordService(IDialogService dialogService, SqlManager sqlManager)
         {
             _log.Debug("PasswordService");
 
             _l10n = (DynamicResource)App.Current.Resources["L10N"];
 
             _dialogService = dialogService;
-            _databaseService = databaseService;
             _sqlManager = sqlManager;
 
             GetPasswordParameter();
         }
 
-        public bool IsSamePassword(string beforePassword, string inputPassword, string message = "")
+        public bool IsPasswordConfirmed(string beforePassword, string inputPassword, string message = "")
         {
-            _log.Debug("IsSamePassword");
+            _log.Debug("IsPasswordConfirmed");
+
+            if (!beforePassword.Equals(inputPassword))
+            {
+                ShowAlert(_l10n["Information"], $"The passwords do not match.\r\n{message}");
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool IsPasswordCorrect(string beforePassword, string inputPassword, string message = "")
+        {
+            _log.Debug("IsPasswordCorrect");
 
             if (!beforePassword.Equals(inputPassword))
             {
@@ -72,7 +83,7 @@ namespace RaywattApp.Services
 
             _log.Debug("CheckLoginWithRetryCount " + _currentPasswordRetryCount);
 
-            string password = GetPasswordByUserId(id);
+            string password = GetAccount(id)?.Password ?? string.Empty;
 
             if (password != inputPassword || password == string.Empty)
             {
@@ -98,25 +109,32 @@ namespace RaywattApp.Services
 
             if (beforePassword.Equals(inputPassword))
             {
-                ShowAlert(_l10n["Information"], $"The password is correct.\r\n{message}");
+                ShowAlert(_l10n["Information"], $"The password must be different.\r\n{message}");
                 return false;
             }
 
             return true;
         }
 
-        public string GetPasswordByUserId(string id)
+        public User? GetAccount(string id)
         {
-            _log.Debug("GetPasswordByUserId");
+            _log.Debug($"GetAccount: {id}");
 
-            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
-            sqlParameters["id"] = id;
+            var parameters = new Dictionary<string, object> { ["id"] = id };
 
-            var commandText = SqlQuery.GetQuery("SelectUserById");
-            var userData = _databaseService.GetDatas<User>(commandText, sqlParameters);
-            string password = userData.Count > 0 ? userData[0].Password : string.Empty;
+            var userList = _sqlManager.SelectUser(parameters);
+            if (userList != null && userList.Count > 0)
+            {
+                return userList[0];
+            }
 
-            return password;
+            var adminList = _sqlManager.SelectAdmin(parameters);
+            if (adminList != null && adminList.Count > 0)
+            {
+                return adminList[0];
+            }
+
+            return null;
         }
 
         public string? GetPasswordValidationError(string password)
@@ -208,10 +226,19 @@ namespace RaywattApp.Services
 
             IList<Configuration> passwordParameter = _sqlManager.SelectConfiguration(sqlParameters);
 
-            _passwordExpiryDays = int.Parse(passwordParameter.FirstOrDefault(x => x.Key == "ExpiryDay").Value);
-            _maxPasswordRetryCount = int.Parse(passwordParameter.FirstOrDefault(x => x.Key == "MaxCount").Value);
-            int waitSeconds = int.Parse(passwordParameter.FirstOrDefault(x => x.Key == "WaitSecond").Value);
-            _passwordRetryLockDuration = TimeSpan.FromSeconds(waitSeconds);
+            _passwordExpiryDays = int.TryParse(
+                passwordParameter.FirstOrDefault(x => x.Key == "ExpiryDay")?.Value,
+                out var day) ? day : _passwordExpiryDays;
+
+            _maxPasswordRetryCount = int.TryParse(
+                passwordParameter.FirstOrDefault(x => x.Key == "MaxCount")?.Value,
+                out var count) ? count : _maxPasswordRetryCount;
+
+            _passwordRetryLockDuration = TimeSpan.TryParse(
+                passwordParameter.FirstOrDefault(x => x.Key == "WaitSecond")?.Value,
+                out var second) ? second : _passwordRetryLockDuration;
         }
+
+
     }
 }

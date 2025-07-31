@@ -52,6 +52,8 @@ namespace RaywattApp.ViewModels.Password
 
         public PasswordExpiryCheckViewModel(IPasswordService passwordService)
         {
+            Constants.CurrentPage = Constants.PasswordExpiryCheckPage;
+
             _log.Debug("PasswordExpiryCheckViewModel");
             _l10n = (DynamicResource)App.Current.Resources["L10N"];
 
@@ -153,11 +155,11 @@ namespace RaywattApp.ViewModels.Password
 
             if (_loginPassword == string.Empty) return false;
 
-            if (!_passwordService.IsSamePassword(_loginPassword, CurrentPassword, "[Current Password]")) return false;
+            if (!_passwordService.IsPasswordCorrect(_loginPassword, CurrentPassword, "[Current Password]")) return false;
 
             if (!_passwordService.IsNotSamePassword(CurrentPassword, NewPassword, "[Current/New Password]")) return false;
 
-            if (!_passwordService.IsSamePassword(NewPassword, ConfirmPassword, "[New/Confirm Password]")) return false;
+            if (!_passwordService.IsPasswordConfirmed(NewPassword, ConfirmPassword, "[New/Confirm Password]")) return false;
 
             if (_passwordService.GetPasswordValidationError(ConfirmPassword) is { } message)
             {

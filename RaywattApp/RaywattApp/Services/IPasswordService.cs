@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RaywattApp.Models;
+using System;
 
 namespace RaywattApp.Services
 {
@@ -11,18 +12,17 @@ namespace RaywattApp.Services
         /// <summary>
         /// Checks if the input password matches the existing password
         /// </summary>
-        bool IsSamePassword(string beforePassword, string inputPassword, string message = "");
+        bool IsPasswordConfirmed(string beforePassword, string inputPassword, string message = "");
+
+        bool IsPasswordCorrect(string actualPassword, string inputPassword, string message = "");
 
         /// <summary>
         /// Checks if the input password does not match the existing password
         /// </summary>
         bool IsNotSamePassword(string beforePassword, string inputPassword, string message = ""); 
 
-        /// <summary>
-        /// Retrieves the password for a user by their ID
-        /// </summary>
-        string GetPasswordByUserId(string id); // 
-
+        User? GetAccount(string id);
+        
         /// <summary>
         /// Validates the password and returns an error message if it does not meet the criteria
         /// </summary>
