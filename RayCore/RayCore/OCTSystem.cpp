@@ -1653,13 +1653,15 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
 		int sectionNum = 5; // 구간 수
-		int checkStep = pSystem->m_vCalibrationInfo.size() * 2;	// 0~-1000까지가 m_vCalibrationInfo.size()이므로 두 배
+		int checkStep = pSystem->m_vAutoCalibrationInfo.size() * 2;	// 0~-1000까지가 m_vCalibrationInfo.size()이므로 두 배
 		PLOGI.printf("checkStep: %d, sectionNum: %d", checkStep, sectionNum);
 		pSystem->m_vAutoCalibrationInfo.clear();	// -1000부터 1000까지의 이미지 정보 저장을 위해 초기화
 
 		pSystem->m_pImagingLiveView->SetDelayLineMovingDirection(1);
 		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, 2000 * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
 		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
+
+		PLOGI.printf("m_vAutoCalibrationInfo size: %d", pSystem->m_vAutoCalibrationInfo.size());
 
 		// 1-2. Find Z-Offset Position
 		const int nSheathPosition = CConfiguration::GetInstance().measurement.nSheathPosition;
