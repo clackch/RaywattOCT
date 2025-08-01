@@ -229,6 +229,20 @@ bool CRJController::StopStepMotors() {
 
 	return (written == packetLength);
 }
+
+void CRJController::DisableStepMotors() {
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+
+	getSerialPacket(eFID::FID_SM_DISABLE, 0, serialPacket, packetLength);
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+	PLOGI.printf("Disable Done");
+}
+
 bool CRJController::DisplayLCD(eLCDImage image) {
 	if (!m_initMotor) return false;
 	if (m_state == eRJState::Error) return false;
@@ -427,7 +441,7 @@ void CRJController::initSetting() {
 	const int maxSpeed = 157480;
 	const int accTime = 1;
 	const int accStep = 100;
-	const int decTime = 2;
+	const int decTime = 1;
 	const int decStep = 0;
 	const int minStep = 100;
 
@@ -451,32 +465,6 @@ void CRJController::initSetting() {
 		PLOGI.printf("Written size is not matched. (%d / %d bytes)", written, packetLength);
 	}
 }
-
-void CRJController::resendPacket(eFID fid) {
-	BYTE serialPacket[MAX_PATH];
-	int packetLength;
-	RFIDMessageData::Data* dataValue = RFIDProtocol::getRecentMessageData(fid);
-	if (dataValue == nullptr) return;
-	RFIDProtocol::resetPacketByFID(fid, serialPacket, packetLength, *dataValue);
-	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
-	serialPacket[packetLength - 2] = checksum;
-
-	RFIDProtocol::deleteMessageData(fid);
-	m_pConnection->Write(serialPacket, packetLength);
-
-}
-
-void CRJController::resendAllSaved() {
-	eFID fid = RFIDProtocol::popFailedFID();
-	//PLOGI.printf("resend start: work %d", fid);
-	while (fid != eFID::NO_FID) {
-		m_resendManager->addTask([=]() {
-			resendPacket(fid);
-			});
-		fid = RFIDProtocol::popFailedFID();
-	}
-}
-
 UINT CRJController::threadRJState(LPVOID param) {
 	CRJController* pRJController = (CRJController*)param;
 
@@ -580,6 +568,10 @@ void CRJController::updateState() {
 	case eRJState::Unloaded:
 		if (!m_bLimitSwitch) {
 			m_nextState = eRJState::Disconnected;
+		}
+		
+		if (m_bPhotoSensor[3] == 0) {
+			m_nextState = eRJState::Error;
 		}
 		break;
 	case eRJState::Error:
@@ -713,6 +705,7 @@ void CRJController::updateState(eRJState state) {
 		m_nRFIDLength = 0;	// clear RFID info.
 		break;
 	case eRJState::Validating:
+		displayLCD(eLCDImage::LCD_IMAGE_BOOTING);
 		break;
 	case eRJState::Loading:
 		displayLCD(eLCDImage::LCD_IMAGE_LOADING);
@@ -734,10 +727,12 @@ void CRJController::updateState(eRJState state) {
 		break;
 	}
 
+	bool bStopThread = (m_state == eRJState::Error) ? true : false;
+
 	//PLOGI.printf("update next-state : %d", m_state);
 
 	m_state = m_nextState = state;
-	if (m_pMsg != nullptr) m_pMsg->postPriorMessage(WM_UPDATE_RJ_STATE, (WPARAM)m_state);
+	if (m_pMsg != nullptr) m_pMsg->postPriorMessage(WM_UPDATE_RJ_STATE, (WPARAM)m_state, (LPARAM)bStopThread);
 }
 bool CRJController::displayLCD(eLCDImage image) {
 	BYTE serialPacket[MAX_PATH];
@@ -934,4 +929,72 @@ bool CRJController::writeMotor(BYTE* packet, int size) {
 	int written = m_pConnection->Write(serialPacket, packetLength);
 
 	return (written == packetLength);
+}
+
+void CRJController::changeSMProfileToPullback() {
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	getSerialPacket(eFID::FID_SM_SET_CONFIG, (sizeof(int) * 7) * 2, serialPacket, packetLength);
+
+	const int minSpeed = 630;
+	const int maxSpeed = 314960;
+	const int accTime = 10;
+	const int accStep = 100;
+	const int decTime = 10;
+	const int decStep = 0;
+	const int minStep = 100;
+
+	int offset = 0;
+	for (int i = 0; i < 2; i++) {
+		memcpy(serialPacket + DATA_IDX + offset, &minSpeed, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &maxSpeed, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &accTime, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &accStep, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &decTime, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &decStep, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &minStep, sizeof(int)); offset += sizeof(int);
+	}
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+	if (written != packetLength)
+	{
+		PLOGI.printf("Written size is not matched. (%d / %d bytes)", written, packetLength);
+	}
+}
+
+void CRJController::changeSMProfileToLoadUnload() {
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	getSerialPacket(eFID::FID_SM_SET_CONFIG, (sizeof(int) * 7) * 2, serialPacket, packetLength);
+
+	const int minSpeed = 630;
+	const int maxSpeed = 314960;
+	const int accTime = 1;
+	const int accStep = 100;
+	const int decTime = 1;
+	const int decStep = 0;
+	const int minStep = 100;
+
+	int offset = 0;
+	for (int i = 0; i < 2; i++) {
+		memcpy(serialPacket + DATA_IDX + offset, &minSpeed, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &maxSpeed, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &accTime, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &accStep, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &decTime, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &decStep, sizeof(int)); offset += sizeof(int);
+		memcpy(serialPacket + DATA_IDX + offset, &minStep, sizeof(int)); offset += sizeof(int);
+	}
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+	if (written != packetLength)
+	{
+		PLOGI.printf("Written size is not matched. (%d / %d bytes)", written, packetLength);
+	}
 }

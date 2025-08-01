@@ -1,6 +1,7 @@
 #include "FGServer.h"
 #include "FrameGrabber.h"
 #include "TCPSocket.h"
+#include "Repository.h"
 
 FrameGrabber fg;
 TCPSocket* ts;

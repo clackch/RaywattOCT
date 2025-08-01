@@ -8,8 +8,6 @@ private:
 	std::chrono::system_clock::time_point m_start, m_end;
 	cv::Mat imageOrigin;
 	cv::Mat imageMask;
-	cv::Mat inverseMatXMap;
-	cv::Mat inverseMatYMap;
 	std::vector<cv::Point> inversedContourYPoints;
 
 public:
@@ -20,12 +18,5 @@ public:
 	virtual void Process(char* fringes);
 	virtual void PostProcess(cv::Mat image);
 	virtual cv::Mat GetProcessedImage() { return imageConvert; }
-	virtual void initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
-	virtual void InverseCircularizeImage(cv::Mat& src, cv::Mat& dst);
-	virtual void EraseStentOutLier(cv::Mat& stent);
-	virtual void SetLumenContourOffset(std::vector<cv::Point> lumenContour);
-
-protected:
-	void GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBoundary);
 };
 

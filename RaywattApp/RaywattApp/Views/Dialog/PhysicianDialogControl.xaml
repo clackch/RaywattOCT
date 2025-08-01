@@ -10,7 +10,7 @@
              mc:Ignorable="d" 
              Width="{Binding DialogWidth}" Height="{Binding DialogHeight}">
 
-    <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Width="{x:Static const:Constants.PhysicianDialogHeight}" Height="{x:Static const:Constants.PhysicianDialogWidth}">
+    <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Width="{x:Static const:Constants.PhysicianDialogWidth}" Height="{x:Static const:Constants.PhysicianDialogHeight}">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="32"/>

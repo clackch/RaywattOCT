@@ -50,7 +50,7 @@
                             <Border Grid.Row="1" Grid.Column="0" Height="542" CornerRadius="10" BorderThickness="0" Background="{DynamicResource GrayscaleGray8Brush}" Margin="0,16,0,0">
                                 <StackPanel>
                                     <StackPanel>
-                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="30,12,0,10" Content="{Binding [Name], Source={StaticResource L10N}}"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="0,12,0,10" Content="{Binding [Name], Source={StaticResource L10N}}" HorizontalAlignment="Center"/>
                                     </StackPanel>
                                     <Separator Background="{DynamicResource GrayscaleGray6Brush}"/>
                                     <StackPanel Height="495">
@@ -61,7 +61,7 @@
                                                 </i:EventTrigger>
                                             </i:Interaction.Triggers>
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipLeft}" Width="*" Binding="{Binding Name}"/>
+                                                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Name}"/>
                                             </DataGrid.Columns>
                                         </DataGrid>
                                     </StackPanel>
@@ -88,8 +88,6 @@
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="51"/>
                                             <RowDefinition Height="1"/>
-                                            <RowDefinition Height="51"/>
-                                            <RowDefinition Height="1"/>
                                             <RowDefinition Height="73"/>
                                             <RowDefinition Height="1"/>
                                             <RowDefinition Height="51"/>
@@ -105,12 +103,9 @@
                                         <Label Grid.Row="0" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Flush Media], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="24,0,0,0"/>
                                         <Label Grid.Row="0" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Physician.FlushMedia, Converter={StaticResource CodeConverter}, ConverterParameter='FLMD'}" VerticalAlignment="Center"/>
                                         <Separator Grid.Row="1" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray7Brush}"/>
-                                        <Label Grid.Row="2" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Trigger], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="24,0,0,0"/>
-                                        <Label Grid.Row="2" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Physician.PullbackTrigger, Converter={StaticResource CodeConverter}, ConverterParameter='PBTG'}" VerticalAlignment="Center"/>
-                                        <Separator Grid.Row="3" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray7Brush}"/>
-                                        <Label Grid.Row="4" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Type], Source={StaticResource L10N}}" Margin="24,16,0,0"/>
-                                        <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,16,0,0">
-                                            <Label Grid.Row="4" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Physician.PullbackType, Converter={StaticResource CodeConverter}, ConverterParameter='PBTY'}" HorizontalAlignment="Left"/>
+                                        <Label Grid.Row="2" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Type], Source={StaticResource L10N}}" Margin="24,16,0,0"/>
+                                        <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,16,0,0">
+                                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Physician.PullbackType, Converter={StaticResource CodeConverter}, ConverterParameter='PBTY'}" HorizontalAlignment="Left"/>
                                             <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
                                                 <StackPanel Orientation="Horizontal">
                                                     <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Length], Source={StaticResource L10N}}"/>
@@ -132,28 +127,28 @@
                                                 </StackPanel>
                                             </StackPanel>
                                         </StackPanel>
+                                        <Separator Grid.Row="3" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray7Brush}"/>
+                                        <Label Grid.Row="4" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [OCT Colormap], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="24,0,0,0"/>
+                                        <Label Grid.Row="4" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Physician.Colormap, Converter={StaticResource CodeConverter}, ConverterParameter='CLMP'}" VerticalAlignment="Center"/>
                                         <Separator Grid.Row="5" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray7Brush}"/>
-                                        <Label Grid.Row="6" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [OCT Colormap], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="24,0,0,0"/>
-                                        <Label Grid.Row="6" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Physician.Colormap, Converter={StaticResource CodeConverter}, ConverterParameter='CLMP'}" VerticalAlignment="Center"/>
-                                        <Separator Grid.Row="7" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray7Brush}"/>
-                                        <Label Grid.Row="8" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Calcium Threshold], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="24,0,0,0"/>
-                                        <StackPanel Grid.Row="8" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Label Grid.Row="6" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Calcium Threshold], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="24,0,0,0"/>
+                                        <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                             <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Physician.CalciumThreshold}"/>
                                             <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="º"/>
                                         </StackPanel>
-                                        <Separator Grid.Row="9" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray7Brush}"/>
-                                        <Label Grid.Row="10" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Expansion Threshold], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="24,0,0,0"/>
-                                        <StackPanel Grid.Row="10" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Separator Grid.Row="7" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray7Brush}"/>
+                                        <Label Grid.Row="8" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Expansion Threshold], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="24,0,0,0"/>
+                                        <StackPanel Grid.Row="8" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                             <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Physician.ExpansionThreshold}"/>
                                             <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="%"/>
                                         </StackPanel>
-                                        <Separator Grid.Row="11" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray7Brush}"/>
-                                        <Label Grid.Row="12" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Apposition Threshold], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="24,0,0,0"/>
-                                        <StackPanel Grid.Row="12" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Separator Grid.Row="9" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray7Brush}"/>
+                                        <Label Grid.Row="10" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Apposition Threshold], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="24,0,0,0"/>
+                                        <StackPanel Grid.Row="10" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                             <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Physician.AppositionThreshold}"/>
                                             <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="㎜"/>
                                         </StackPanel>
-                                        <Separator Grid.Row="13" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray7Brush}"/>
+                                        <Separator Grid.Row="11" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray7Brush}"/>
                                     </Grid>
                                 </Grid>
                             </Border>

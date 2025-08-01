@@ -136,6 +136,11 @@ public:
 
 	int ConvertMMtoStep(UINT mm);
 	void SetManualMode(bool on) { m_bManualMode = on; }
+
+	void changeSMProfileToPullback();
+	void changeSMProfileToLoadUnload();
+	void DisableStepMotors();
+  
 protected:
 	void initSetting();
 	static UINT threadRJState(LPVOID param);

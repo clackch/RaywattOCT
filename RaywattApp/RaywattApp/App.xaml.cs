@@ -92,6 +92,8 @@ namespace RaywattApp
             services.AddTransient(typeof(ReviewAngioCoRegViewModel));
             services.AddTransient(typeof(ReviewLumenEditViewModel));
             services.AddTransient(typeof(ReviewCalibrationViewModel));
+            services.AddTransient(typeof(PatientNewDicomViewModel));
+            services.AddTransient(typeof(PatientNewDicomPacsViewModel));
 
             //Setting
             services.AddTransient(typeof(SettingAcquisitionViewModel));
@@ -101,6 +103,7 @@ namespace RaywattApp
             services.AddTransient(typeof(SettingLogViewModel));
             services.AddTransient(typeof(SettingTermsConditionsViewModel));
             services.AddTransient(typeof(SettingMaintenanceViewModel));
+            services.AddTransient(typeof(SettingDicomViewModel));
 
             //File
             services.AddTransient(typeof(FileExportStep1ViewModel));
@@ -128,6 +131,10 @@ namespace RaywattApp
             services.AddTransient(typeof(PowerOffDialogViewModel));
             services.AddTransient(typeof(CathRoomDialogViewModel));
             services.AddTransient(typeof(PhysicianDialogViewModel));
+            services.AddTransient(typeof(LocalHostDialogViewModel));
+            services.AddTransient(typeof(DicomServerDialogViewModel));
+            services.AddTransient(typeof(NewPatientDialogViewModel));
+            services.AddTransient(typeof(DicomPacsDialogViewModel));
 
             //IDatabaseService 등록 (Singleton 사용 안함 => Connection Pooling을 Default로 사용)
             services.AddTransient<IDatabaseService, SqlService>(obj => new SqlService(connectionString));
@@ -161,20 +168,38 @@ namespace RaywattApp
         {
             _log.Debug("LogUnhandledException");
 
-            string message = $"Unhandled exception ({source})";
             try
             {
                 System.Reflection.AssemblyName assemblyName = System.Reflection.Assembly.GetExecutingAssembly().GetName();
-                message = string.Format("{0} in {1} v{2}", message, assemblyName.Name, assemblyName.Version);
+                string appInfo = $"{assemblyName.Name} v{assemblyName.Version}";
+
+                string detailedError = $"[Unhandled Exception]\n" +
+                    $"Source     : {source}\n" +
+                    $"App        : {appInfo}\n" +
+                    $"Message    : {exception.Message}\n" +
+                    $"Type       : {exception.GetType()}\n" +
+                    $"TargetSite : {exception.TargetSite}\n" +
+                    $"StackTrace : \n" +
+                    $"{exception.StackTrace}";
+
+                // InnerException 파고들기 (있으면)
+                if (exception.InnerException != null)
+                {
+                    detailedError += $"-- Inner Exception --\n" +
+                        $"Type       : {exception.InnerException.GetType()}\n" +
+                        $"Message    : {exception.InnerException.Message}\n" +
+                        $"TargetSite : {exception.InnerException.TargetSite}\n" +
+                        $"StackTrace : \n" +
+                        $"{exception.InnerException.StackTrace}";
+                }
+
+                _log.Error(detailedError);
             }
-            catch (Exception ex)
+            catch (Exception logEx)
             {
-                _log.Error(ex + "Exception in LogUnhandledException");
-            }
-            finally
-            {
-                _log.Error(exception + "\n" + message);
+                _log.Fatal($"Exception in LogUnhandledException: {logEx}");
             }
         }
+
     }
 }

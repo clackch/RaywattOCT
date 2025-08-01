@@ -492,13 +492,13 @@ UINT CRaywattLabDlg::threadPullback(LPVOID param) {
 UINT CRaywattLabDlg::threadCompensationParamWindow(LPVOID param) {
 	CRaywattLabDlg* pDlg = (CRaywattLabDlg*)param;
 
-	pDlg->m_pImagingSimulate->SetImageCompensationControlWindow(true);
+	//pDlg->m_pImagingSimulate->SetImageCompensationControlWindow(true);
 
 	while (pDlg->m_pThreadCompParamWin->isRun) {
 		cv::waitKey(1);
 	}
 
-	pDlg->m_pImagingSimulate->SetImageCompensationControlWindow(false);
+	//pDlg->m_pImagingSimulate->SetImageCompensationControlWindow(false);
 	
 	return NOERROR;
 }

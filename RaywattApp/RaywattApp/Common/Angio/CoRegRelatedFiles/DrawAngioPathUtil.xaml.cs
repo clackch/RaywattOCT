@@ -356,7 +356,6 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             });
 
             int markerIndex = path.IndexOf(CurrentCoRegistration.MarkerPoint);
-            
             if (markerIndex == -1)
             {
                 _log.Debug("-------------------marker is not detected #" + CurrentAngioFrameNumber);
@@ -394,10 +393,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
             int pathIndex = markerIndex + (int)markerDrawInterval >= path.Count ? path.Count - 1 : 
                 markerIndex + (int)markerDrawInterval < 0 ? 0 : markerIndex + (int)markerDrawInterval;
-
-            _log.Debug("pathIndex = " + pathIndex);
-            _log.Debug("markerDrawInterval = " + markerDrawInterval);
-
+            
             Canvas.SetLeft(marker, path[pathIndex].X - marker.Width / 2);
             Canvas.SetTop(marker, path[pathIndex].Y - marker.Height / 2);
 
@@ -1098,8 +1094,19 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
                 int angioFrameNum = coRegistrations.Count;
 
-                coRegistrations[angioFrameNum - 1].MarkerPoint = coRegistrations[angioFrameNum - 1].Line.Last().Last();
-                coRegistrations[0].MarkerPoint = coRegistrations[0].Line[0][0];
+                List<Point> tmpPathStart = new List<Point>();
+                foreach (var line in coRegistrations[0].Line)
+                {
+                    tmpPathStart.AddRange(line);
+                }
+                coRegistrations[0].MarkerPoint = tmpPathStart.First();
+
+                List<Point> tmpPathEnd = new List<Point>();
+                foreach (var line in coRegistrations[angioFrameNum-1].Line)
+                {
+                    tmpPathEnd.AddRange(line);
+                }
+                coRegistrations[angioFrameNum - 1].MarkerPoint = tmpPathEnd.Last();
 
                 for (int i = angioFrameNum - 1; i > 1; i--)
                 {
@@ -1143,7 +1150,8 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             }
             catch (Exception ex)
             {
-                _log.Debug($"Error : {ex.Message}");
+                _log.Debug($"Error : {ex.Message}, Source : {ex.Source}");
+                
             }
         }
 

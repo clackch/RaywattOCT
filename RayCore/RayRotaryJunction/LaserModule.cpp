@@ -114,7 +114,7 @@ bool CLaserModule::Move(eStepMotorIndex idxMotor, int posStep, bool delay, char 
 	else {
 		m_nStepPosition[(int)idxMotor - 1] = posStep;
 		m_isSMMoving[(int)idxMotor - 1] = true;
-		sensorStop[(int)idxMotor - 1] = sensor;
+		sensorStop[(int)idxMotor - 1] = sensor; // sensor == 2 : DelayLine upperside, sensor == 3 : DelayLine downside
 	}
 
 	BYTE serialPacket[MAX_PATH];
@@ -175,6 +175,9 @@ void CLaserModule::SetVOA(unsigned short voa) {
 void CLaserModule::SetVLD(unsigned short vld) {
 	m_nVLD = vld;
 	setVOAVLD();
+}
+void CLaserModule::PrintPhotoSensor() {
+	PLOGI.printf("PhotoSensor: %d %d %d", m_bPhotoSensor[0], m_bPhotoSensor[1], m_bPhotoSensor[2]);
 }
 bool CLaserModule::AutoStatePeriod(USHORT interval) {
 	if (!m_initMotor) return false;

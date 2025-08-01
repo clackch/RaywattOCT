@@ -33,6 +33,12 @@ namespace RaywattApp.ViewModels.Setting
             get { return this._modifyInstituteCommand ?? (this._modifyInstituteCommand = new RelayCommand(ModifyInstitute)); }
         }
 
+        private ICommand _confirmInstituteCommand;
+        public ICommand ConfirmInstituteCommand
+        {
+            get { return this._confirmInstituteCommand ?? (this._confirmInstituteCommand = new RelayCommand(ConfirmInstitute)); }
+        }
+
         public SettingTermsConditionsViewModel(SqlManager sqlManager)
         {
             _log.Debug("SettingTermsConditionsViewModel");
@@ -61,9 +67,6 @@ namespace RaywattApp.ViewModels.Setting
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
             _log.Debug("OnNavigating");
-
-            if (Validate())
-                Save();
         }
 
         private void Init()
@@ -71,7 +74,7 @@ namespace RaywattApp.ViewModels.Setting
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "Terms&Cond";
             IList<Configuration> tnCs = _sqlManager.SelectConfiguration(sqlParameters);
-            if(tnCs != null || tnCs.Count == 1)
+            if (tnCs != null || tnCs.Count == 1)
             {
                 TermsConditions.Value = tnCs[0].Value;
                 TermsConditions.Buffer = tnCs[0].Buffer;
@@ -83,9 +86,19 @@ namespace RaywattApp.ViewModels.Setting
             IsModify = true;
         }
 
+        private void ConfirmInstitute()
+        {
+            
+            if (Validate())
+            {
+                Save();
+                IsModify = false;
+            }                
+        }
+
         private bool Validate()
         {
-            if(string.IsNullOrEmpty(TermsConditions.Buffer))
+            if (string.IsNullOrEmpty(TermsConditions.Buffer))
             {
                 ValidateInstituteName = _l10n["Enter Institute Name"];
                 return false;
@@ -105,11 +118,12 @@ namespace RaywattApp.ViewModels.Setting
 
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "Terms&Cond";
+            sqlParameters["key"] = "AgreeYN";
             sqlParameters["value"] = TermsConditions.Value;
             sqlParameters["buffer"] = TermsConditions.Buffer;
 
             int res = _sqlManager.UpdateConfiguration(sqlParameters);
-            if(res != 1)
+            if (res != 1)
             {
                 _log.Error("Insert Error");
             }

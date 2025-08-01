@@ -40,7 +40,7 @@ namespace RaywattApp.Models
             {
                 if (value.Length <= Constants.MaxPatientCaseAccessionNumber)
                 {
-                    if (!CommonUtil.ValidateNumber(value))
+                    if (!CommonUtil.ValidateId(value))
                         return;
 
                     _accessionNumber = value;
@@ -195,6 +195,9 @@ namespace RaywattApp.Models
         [ObservableProperty]
         private string _strLumenGuidewire;
 
+        [ObservableProperty]
+        private double _guidewireRadius;
+        
         [ObservableProperty]
         private string _ffrPlaque;
 

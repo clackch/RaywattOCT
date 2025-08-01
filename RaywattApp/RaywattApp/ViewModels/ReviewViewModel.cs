@@ -30,6 +30,8 @@ using System.Windows.Media;
 using RaywattApp.Common.Angio;
 using System.Xml;
 using System.Windows.Controls;
+using OpenCvSharp.WpfExtensions;
+using System.Diagnostics;
 
 namespace RaywattApp.ViewModels
 {
@@ -116,9 +118,6 @@ namespace RaywattApp.ViewModels
         private int _currentAngioFrameNumber;
         public int CurrentAngioFrameNumber { get { return _currentAngioFrameNumber; } set { _currentAngioFrameNumber = value; OnPropertyChanged(nameof(CurrentAngioFrameNumber)); } }
 
-        private int _angioFrameNumber;
-        public int AngioFrameNumber { get { return _angioFrameNumber; } set { _angioFrameNumber = value; OnPropertyChanged(nameof(AngioFrameNumber)); syncAngioFrame(value); } }
-
         private string _measurementCommand;
         public string MeasurementCommand { get { return _measurementCommand; } set { _measurementCommand = value; OnPropertyChanged(nameof(MeasurementCommand)); } }
 
@@ -167,6 +166,12 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private List<LumenGuidewire> _lumenGuidewires;
+
+        [ObservableProperty]
+        private List<double> _guideWireRadiusList;
+
+        [ObservableProperty]
+        private Zoom _zoomAngio = new Zoom(Constants.CrossSectionAngio / Constants.OCTImageSize);
 
         private double _lModeIndicatorX;
         public double LModeIndicatorX
@@ -434,7 +439,6 @@ namespace RaywattApp.ViewModels
                 SetAnnotation();
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
 
-                AngioFrameNumber = ReviewStatus.AngioFrameNumber;
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
 
                 ReviewStatus.IsNoPullback = PatientCase.PullbackType == "TEST" ? true : false;
@@ -442,7 +446,7 @@ namespace RaywattApp.ViewModels
                 if (ReviewStatus.IsPlay)
                     Playback();
 
-                DrawSheathIndicator();
+                DrawSheathIndicator(PatientCase.SheathDiameter);
             }
         }
 
@@ -581,6 +585,7 @@ namespace RaywattApp.ViewModels
                     if(!String.IsNullOrEmpty(patientCaseAnnotations[0].LumenGuidewire))
                     {
                         LumenGuidewires = JsonConvert.DeserializeObject<List<LumenGuidewire>>(patientCaseAnnotations[0].LumenGuidewire);
+                        
                     }
                     else
                     {
@@ -598,6 +603,7 @@ namespace RaywattApp.ViewModels
                     InitializeLumenData();
                     Thread threadLumenDetectionDone = new Thread(() => ThreadLumenDetectionDone());
                     threadLumenDetectionDone.Start();
+
                 }
             }
 
@@ -656,6 +662,7 @@ namespace RaywattApp.ViewModels
             LumenSidebranches = new List<LumenSidebranch>();
             LumenStents = new List<LumenStent>();
             LumenGuidewires = new List<LumenGuidewire>();
+            GuideWireRadiusList = new List<double>();
 
             for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
             {
@@ -720,6 +727,8 @@ namespace RaywattApp.ViewModels
                 //TODO - ML detection에서 Calcium 가져오도록 개발되면 삭제 필요
                 if (false)
                     GetMlData();
+
+                PatientCase.GuidewireRadius = GetGuidewireAverageRadius();
 
                 if (ReviewStatus.IsContourStentOn)
                     LumenContourCommand = Constants.LumenContourDraw;
@@ -832,13 +841,28 @@ namespace RaywattApp.ViewModels
                 IntPtr contour = RayGetGuidewirePoints(frameInfo);
                 if (contour == IntPtr.Zero) return;
 
-                Mat mat = CommonUtil.ByteMemoryToCvMat(contour, 1, guidewireHeight, 2);
+                IntPtr radius = RayGetGuidewireRadius(frameInfo);
+                if (radius == IntPtr.Zero) return;
 
+                Mat mat = CommonUtil.ByteMemoryToCvMat(contour, 1, guidewireHeight, 2);
                 LumenGuidewires[frameInfo].Points = new List<Point>();
-                for (int row = 0; row < mat.Rows; row++)
+
+                unsafe
                 {
-                    Vec2i point = mat.At<Vec2i>(0, row);
-                    LumenGuidewires[frameInfo].Points.Add(new Point(point.Item0, point.Item1));
+                    float* doublePtr = (float*)radius.ToPointer();
+                    for (int row = 0; row < mat.Rows; row++)
+                    {
+                        Vec2i point = mat.At<Vec2i>(0, row);
+                        if(point.Item0 < 0 || point.Item0 < 0)
+                        {
+                            LumenGuidewires[frameInfo].Points.Add(new Point(0, 0));
+                        }
+                        else
+                        {
+                            LumenGuidewires[frameInfo].Points.Add(new Point(point.Item0, point.Item1));
+                        }
+                        GuideWireRadiusList.Add(*(doublePtr + row));
+                    }
                 }
             }
         }
@@ -910,6 +934,47 @@ namespace RaywattApp.ViewModels
                 if (firstSize + secondSize + thirdSize == 0)
                     lumenContour.Calcium.MaxThicknessDegree = -1;
             }
+        }
+
+        private double GetGuidewireAverageRadius()
+        {
+            if(GuideWireRadiusList == null || !(GuideWireRadiusList.Any()))
+            {
+                return 0.0;
+            }
+
+            // 0보다 작은 값들을 제거
+            List<double> validRadiusList = GuideWireRadiusList.Where(v => v >= 0 && double.IsFinite(v) && v <= 90).ToList();
+
+            if (validRadiusList.Count == 0)
+            {
+                _log.Debug("No valid radius values.");
+                return 0.0;
+            }
+
+            double mean = validRadiusList.Average();
+            double stdDev = Math.Sqrt(validRadiusList.Average(v => Math.Pow(v - mean, 2)));
+
+            // 정규화된 값 계산
+            List<double> normalizedValues = GuideWireRadiusList.Select(v => (v - mean) / stdDev).ToList();
+
+            // 편차가 ±2 이하인 값들만 선택(95%)하고 ±3 이상인 값들을 제거
+            List<double> filteredValues = GuideWireRadiusList.Where((v, index) =>
+            {
+                double normalizedValue = normalizedValues[index];
+                return normalizedValue >= -2 && normalizedValue <= 2;
+            }).ToList();
+
+            if(!filteredValues.Any())
+            {
+                return 0.0;
+            }
+            
+            double filteredAverage = filteredValues.Average();
+
+            _log.Debug("Average Radius Value" + filteredAverage.ToString());
+
+            return filteredAverage;
         }
 
         #endregion
@@ -1245,6 +1310,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["section_proximal"] = PatientCase.SectionProximal;
             PatientCase.SectionDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth);
             sqlParameters["section_distal"] = PatientCase.SectionDistal;
+            sqlParameters["guidewire_radius"] = PatientCase.GuidewireRadius;
 
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
             if (nRows == 0)
@@ -1363,18 +1429,7 @@ namespace RaywattApp.ViewModels
             bool ret = base.MoveToFrame(session, nFrame);
 
             if (ret == false || PatientCase.AngioYn == false || PatientCase.AngioFrame.AngioImage.Count == 0) return false;
-
-            int OctFrameLength = ReviewStatus.NumberOfFrames;
-            int angioTotalFrameNum = PatientCase.AngioFrame.AngioFrameNum;
-            
-            double ratio = (double)angioTotalFrameNum / OctFrameLength * FrameNumber;
-            CurrentAngioFrameNumber = (int)ratio;
-
-            if (CurrentAngioFrameNumber < PatientCase.AngioFrame.AngioImage.Count)
-            {
-                CurrentAngioImage = PatientCase.AngioFrame.AngioImage[CurrentAngioFrameNumber];
-            }
-
+            syncAngioFrame(nFrame);
             return true;
         }
         protected override void UpdateCrossSectionImage()
@@ -1745,126 +1800,169 @@ namespace RaywattApp.ViewModels
         #region CoRegistration
         private void syncAngioFrame(int value)
         {
-            if (value < 0) return;
-
             int OctFrameLength = ReviewStatus.NumberOfFrames;
-            double FrameNumber = (double)PatientCase.AngioFrame.AngioImage.Count / OctFrameLength / value;
-            FrameNumber = 1 / FrameNumber;
+            int angioTotalFrameNum = PatientCase.AngioFrame.AngioFrameNum;
 
-            base.MoveToFrame(RaySession.Review, (int)FrameNumber);
-            CurrentAngioImage = PatientCase.AngioFrame.AngioImage[value];
+            double ratio = (double)angioTotalFrameNum / OctFrameLength * value;
+            CurrentAngioFrameNumber = (int)ratio;
+
+            if (CurrentAngioFrameNumber < PatientCase.AngioFrame.AngioImage.Count)
+            {
+                CurrentAngioImage = PatientCase.AngioFrame.AngioImage[CurrentAngioFrameNumber];
+            }
         }
 
         private void ThreadReadAngioFrames()
         {
-            string file = PatientCase.Image;
-            string angioFile = file.Substring(0, file.Length - 3) + "angioframes";
-            string paramsFile = file.Substring(0, file.Length - 3) + "params";
-            
-            string directory = Path.Combine(Constants.DataRootPath, PatientCase.PatientId);
-            string angioPath = Path.Combine(directory, angioFile);
-            string paramsPath = Path.Combine(directory, paramsFile);
-
-            //Read .params
-            XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.Load(paramsPath);
-
-            XmlNode configNode = xmlDoc.SelectSingleNode("/config");
-            int angioFrameHeight = int.Parse(configNode.SelectSingleNode("AngioFrameHeight").InnerText);
-            int angioFrameWidth = int.Parse(configNode.SelectSingleNode("AngioFrameWidth").InnerText);
-            PatientCase.AngioFrame.AngioFrameNum = int.Parse(configNode.SelectSingleNode("AngioFrameNumber").InnerText);
-            int channels = int.Parse(configNode.SelectSingleNode("BitsPerPixel").InnerText) / 8;
-
-            float Scale = angioFrameHeight > angioFrameWidth ? (float)Constants.AngioSize / angioFrameHeight : (float)Constants.AngioSize / angioFrameWidth;
-
-            int newHeight, newWidth;
-            if (Scale >= 1.0)
+            try
             {
-                newHeight = (int)(angioFrameHeight / Scale);
-                newWidth = (int)(angioFrameWidth / Scale);
-            }
-            else
-            {
-                newHeight = (int)(angioFrameHeight * Scale);
-                newWidth = (int)(angioFrameWidth * Scale);
-            }
+                int angioFrameHeight = 0;
+                int angioFrameWidth = 0;
+                int channels = 3;
 
-            //Recording -> Review
-            if (_angioManager.AngioSaveBuffer.Count != 0)
-            {
-                foreach (byte[] data in _angioManager.AngioSaveBuffer)
+                string file = PatientCase.Image;
+                string angioFile = file.Substring(0, file.Length - 3) + "angioframes";
+                string paramsFile = file.Substring(0, file.Length - 3) + "params";
+
+                string directory = Path.Combine(Constants.DataRootPath, PatientCase.PatientId);
+                string angioPath = Path.Combine(directory, angioFile);
+                string paramsPath = Path.Combine(directory, paramsFile);
+                int newHeight, newWidth;
+                float Scale;
+
+                // Recording -> Review
+                if (_angioManager.fromRecording)
                 {
-                    Mat frame = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(channels), data);
-                    Cv2.Resize(frame, frame, new OpenCvSharp.Size(newWidth, newHeight));
+                    _angioManager.fromRecording = false;
 
-                    switch (channels)
+                    while (!_angioManager.threadOnSaveFinished)
                     {
-                        case 3:
-                            Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
-                            break;
-
-                        case 4:
-                            Cv2.CvtColor(frame, frame, ColorConversionCodes.RGBA2GRAY);
-                            break;
+                        Thread.Sleep(300);
                     }
 
-                    Mat paddedFrame = new Mat((int)Constants.AngioSize, (int)Constants.AngioSize, MatType.CV_8UC1, Scalar.Black);
+                    angioFrameHeight = _angioManager.AngioFrameHeight;
+                    angioFrameWidth = _angioManager.AngioFrameWidth;
+                    PatientCase.AngioFrame.AngioFrameNum = _angioManager.AngioSaveFrameNum;
+                    channels = _angioManager.AngioBitsPerPixel / 8;
 
-                    int top = ((int)Constants.AngioSize - newHeight) / 2;
-                    int left = ((int)Constants.AngioSize - newWidth) / 2;
-                    OpenCvSharp.Rect roi = new OpenCvSharp.Rect(left, top, newWidth, newHeight);
-                    Mat destinationROI = new Mat(paddedFrame, roi);
-                    frame.CopyTo(destinationROI);
+                    _log.Debug($"angio : Height = {angioFrameHeight}, Width = {angioFrameWidth}, Channel = {channels}");
 
-                    AngioFrames.Add(paddedFrame);
-                    PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(paddedFrame));
-                }
-
-                AngioFrames.Reverse();
-                PatientCase.AngioFrame.AngioImage.Reverse();
-
-                _angioManager.AngioSaveBuffer.Clear();
-                _angioManager.angioSaveTimes.Clear();
-                return;
-            }
-
-            //PatientCaseList -> Review
-            using (BinaryReader reader = new BinaryReader(System.IO.File.Open(angioPath, FileMode.Open)))
-            {
-                while (reader.BaseStream.Position != reader.BaseStream.Length)
-                {
-                    byte[] data = reader.ReadBytes(angioFrameWidth * angioFrameHeight * channels);
-
-                    Mat frame = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(channels), data);
-                    Cv2.Resize(frame, frame, new OpenCvSharp.Size(newWidth, newHeight));
-
-                    switch (channels)
+                    Scale = angioFrameHeight > angioFrameWidth ? (float)Constants.AngioSize / angioFrameHeight : (float)Constants.AngioSize / angioFrameWidth;
+                    
+                    if (Scale >= 1.0)
                     {
-                        case 3:
-                            Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
-                            break;
-
-                        case 4:
-                            Cv2.CvtColor(frame, frame, ColorConversionCodes.RGBA2GRAY);
-                            break;
+                        newHeight = (int)(angioFrameHeight / Scale);
+                        newWidth = (int)(angioFrameWidth / Scale);
+                    }
+                    else
+                    {
+                        newHeight = (int)(angioFrameHeight * Scale);
+                        newWidth = (int)(angioFrameWidth * Scale);
                     }
 
-                    Mat paddedFrame = new Mat((int)Constants.AngioSize, (int)Constants.AngioSize, MatType.CV_8UC1, Scalar.Black);
+                    for (int i = 0; i < _angioManager.AngioSaveFrameNum; i++)
+                    {
+                        if (!_angioManager.angioBuffer.TryDequeue(out byte[] data))
+                        {
+                            _log.Debug("Buffer underrun while reading angioBuffer, currIndex = " + i.ToString());
+                            break;
+                        }
+                        Mat frame = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(channels), data);
+                        Cv2.Resize(frame, frame, new OpenCvSharp.Size(newWidth, newHeight));
 
-                    int top = ((int)Constants.AngioSize - newHeight) / 2;
-                    int left = ((int)Constants.AngioSize - newWidth) / 2;
-                    OpenCvSharp.Rect roi = new OpenCvSharp.Rect(left, top, newWidth, newHeight);
-                    Mat destinationROI = new Mat(paddedFrame, roi);
-                    frame.CopyTo(destinationROI);
+                        switch (channels)
+                        {
+                            case 3:
+                                Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
+                                break;
 
-                    AngioFrames.Add(paddedFrame);
-                    PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(paddedFrame));
+                            case 4:
+                                Cv2.CvtColor(frame, frame, ColorConversionCodes.RGBA2GRAY);
+                                break;
+                        }
+
+                        Mat paddedFrame = new Mat((int)Constants.AngioSize, (int)Constants.AngioSize, MatType.CV_8UC1, Scalar.Black);
+
+                        int top = ((int)Constants.AngioSize - newHeight) / 2;
+                        int left = ((int)Constants.AngioSize - newWidth) / 2;
+                        OpenCvSharp.Rect roi = new OpenCvSharp.Rect(left, top, newWidth, newHeight);
+                        Mat destinationROI = new Mat(paddedFrame, roi);
+                        frame.CopyTo(destinationROI);
+
+                        AngioFrames.Add(paddedFrame);
+                        PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(paddedFrame));
+                    }
+
+                    AngioFrames.Reverse();
+                    PatientCase.AngioFrame.AngioImage.Reverse();
+                    return;
                 }
+                else // PatientCaseList -> Review
+                {
+                    //Read .params
+                    XmlDocument xmlDoc = new XmlDocument();
+                    xmlDoc.Load(paramsPath);
+                    XmlNode configNode = xmlDoc.SelectSingleNode("/config");
+                    angioFrameHeight = int.Parse(configNode.SelectSingleNode("AngioFrameHeight").InnerText);
+                    angioFrameWidth = int.Parse(configNode.SelectSingleNode("AngioFrameWidth").InnerText);
+                    PatientCase.AngioFrame.AngioFrameNum = int.Parse(configNode.SelectSingleNode("AngioFrameNumber").InnerText);
+                    channels = int.Parse(configNode.SelectSingleNode("BitsPerPixel").InnerText) / 8;
 
-                reader.Close();
+                    Scale = angioFrameHeight > angioFrameWidth ? (float)Constants.AngioSize / angioFrameHeight : (float)Constants.AngioSize / angioFrameWidth;
+
+                    if (Scale >= 1.0)
+                    {
+                        newHeight = (int)(angioFrameHeight / Scale);
+                        newWidth = (int)(angioFrameWidth / Scale);
+                    }
+                    else
+                    {
+                        newHeight = (int)(angioFrameHeight * Scale);
+                        newWidth = (int)(angioFrameWidth * Scale);
+                    }
+
+                    using (BinaryReader reader = new BinaryReader(System.IO.File.Open(angioPath, FileMode.Open)))
+                    {
+                        while (reader.BaseStream.Position != reader.BaseStream.Length)
+                        {
+                            byte[] data = reader.ReadBytes(angioFrameWidth * angioFrameHeight * channels);
+
+                            Mat frame = new Mat(angioFrameHeight, angioFrameWidth, MatType.CV_8UC(channels), data);
+                            Cv2.Resize(frame, frame, new OpenCvSharp.Size(newWidth, newHeight));
+
+                            switch (channels)
+                            {
+                                case 3:
+                                    Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
+                                    break;
+
+                                case 4:
+                                    Cv2.CvtColor(frame, frame, ColorConversionCodes.RGBA2GRAY);
+                                    break;
+                            }
+
+                            Mat paddedFrame = new Mat((int)Constants.AngioSize, (int)Constants.AngioSize, MatType.CV_8UC1, Scalar.Black);
+
+                            int top = ((int)Constants.AngioSize - newHeight) / 2;
+                            int left = ((int)Constants.AngioSize - newWidth) / 2;
+                            OpenCvSharp.Rect roi = new OpenCvSharp.Rect(left, top, newWidth, newHeight);
+                            Mat destinationROI = new Mat(paddedFrame, roi);
+                            frame.CopyTo(destinationROI);
+
+                            AngioFrames.Add(paddedFrame);
+                            PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(paddedFrame));
+                        }
+
+                        reader.Close();
+                    }
+
+                    AngioImageProcessing();
+                }
             }
-
-            AngioImageProcessing();
+            catch (Exception ex)
+            {
+                _log.Error($"[ThreadReadAngioFrames] Exception: {ex.Message}\n{ex.StackTrace}");
+            }
         }
 
         private ImageSource ConvertMatsToImageSource(Mat mat)

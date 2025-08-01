@@ -29,6 +29,9 @@ using RaywattApp.Common.Angio;
 using System.Xml;
 using Python.Runtime;
 using FFMpegCore;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using RayCoreWrapper;
 
 namespace RaywattApp.Common.Util
 {
@@ -50,7 +53,7 @@ namespace RaywattApp.Common.Util
 
         public static bool ValidateId(string input)
         {
-            var regex = new Regex(@"^[a-zA-Z0-9]+$");
+            var regex = new Regex(@"^[a-zA-Z0-9_\-\.]+$");
 
             if (input.Length == 0)
                 return true;
@@ -296,7 +299,10 @@ namespace RaywattApp.Common.Util
 
         public static void DeleteFolder(string path)
         {
-            Directory.Delete(path, true);
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, true);
+            }            
         }
 
         public static async Task CopyFiles(Dictionary<string, string> files, Action<double> progressCallback, double progressSize, Action<string> progressTextCallback)
@@ -1219,6 +1225,8 @@ namespace RaywattApp.Common.Util
             if (angioManager != null)
                 angioManager.CloseAngioManager();
 
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
+
             Thread threadReadyPullback = new Thread(() => ThreadExit(deviceStatus, isShutdown));
             threadReadyPullback.Start();
         }
@@ -1226,9 +1234,7 @@ namespace RaywattApp.Common.Util
         private static void ThreadExit(DeviceStatus? deviceStatus, bool isShutdown)
         {
             RayDisconnectDevices();
-            RayStopSystem();
-
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
+            RayStopSystem();            
 
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
@@ -1726,11 +1732,13 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        unsafe public static void GuideWireToMemory(List<LumenGuidewire>? guidewireList, Size sizeContour, IntPtr buffer, Size sizeBuffer)
+        unsafe public static void GuideWireToMemory(List<LumenGuidewire>? guidewireList, Size sizeContour, IntPtr buffer, Size sizeBuffer, double radius)
         {
             if (guidewireList == null) return;
 
             int frameSize = sizeBuffer.Width * sizeBuffer.Height;
+
+            OpenCvSharp.Point prevPoint = new OpenCvSharp.Point(0, 0);
             for (int i = 0; i < guidewireList.Count; i++)
             {
                 Mat imgLumen = new Mat(sizeContour, MatType.CV_8UC1);
@@ -1742,23 +1750,26 @@ namespace RaywattApp.Common.Util
 
                 if (guidewireList[i].Points == null)
                     continue;
-
+                 
                 foreach (System.Windows.Point point in guidewireList[i].Points)
                 {
+                    OpenCvSharp.Point currentPoint = new OpenCvSharp.Point();
+                    if (point.X == 0 || point.Y == 0)
+                    {
+                        currentPoint.X = prevPoint.X;
+                        currentPoint.Y = prevPoint.Y;
+                    }
+                    else
+                    {
+                        currentPoint.X = (int)point.X;
+                        currentPoint.Y = (int)point.Y;
+                    }
                     //TODO - 실제 Guidewire 반지름에 맞춰서 Size( , )를 설정해 주어야 함.
-                    imgLumen.Ellipse(new OpenCvSharp.Point(point.X, point.Y), new Size(50, 50), 0, 0, 360, Scalar.White, 1);
+                    imgLumen.Ellipse(currentPoint, new Size(radius, radius), 0, 0, 360, Scalar.White, -1);
+
+                    prevPoint = currentPoint;
                 }
-
-                Mat binary = new Mat();
-                Cv2.Threshold(imgLumen, binary, 128, 255, ThresholdTypes.Binary);
-
-                Cv2.FindContours(binary, out contours, out HierarchyIndex[] hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
-
-                Cv2.DrawContours(imgLumen, contours, -1, Scalar.White, 1);
-
                 Cv2.Resize(imgLumen, imgResize, imgResize.Size());
-
-                Cv2.Blur(imgResize, imgResize, new Size(7, 7) /* 필터 크기 */, new Point(-1, -1) /* 필터 중심*/);
                 Buffer.MemoryCopy((void*)imgResize.Data, (void*)(IntPtr.Add(buffer, i * frameSize)), frameSize, frameSize);
             }
         }
@@ -2543,5 +2554,121 @@ namespace RaywattApp.Common.Util
 
             return true;
         }
+
+        public static LocalHost GetNetworkInfo()
+        {
+            LocalHost localHost = new LocalHost();
+            localHost.Hostname = Environment.MachineName;
+
+            foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (nic.OperationalStatus == OperationalStatus.Up && nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                {
+                    _log.Debug($"Network Adapter: {nic.Description}");
+                    localHost.AdapterName = nic.Description;
+                    _log.Debug($"MAC Address: {nic.GetPhysicalAddress()}");
+
+                    IPInterfaceProperties ipProperties = nic.GetIPProperties();
+
+                    //DHCP 여부 확인
+                    bool isDhcpEnabled = ipProperties.GetIPv4Properties().IsDhcpEnabled;
+                    _log.Debug($"DHCP?: {(isDhcpEnabled ? "DHCP" : "Static IP")}");
+                    localHost.IsManual = !isDhcpEnabled;
+
+                    foreach (UnicastIPAddressInformation ip in ipProperties.UnicastAddresses)
+                    {
+                        if (ip.Address.AddressFamily == AddressFamily.InterNetwork) // IPv4만 가져오기
+                        {
+                            _log.Debug($"IP Address: {ip.Address}");
+                            localHost.IpAddress = ip.Address.ToString();
+                            _log.Debug($"Subnet Mask: {ip.IPv4Mask}");
+                            localHost.SubnetMask = ip.IPv4Mask.ToString();
+                        }
+                    }
+
+                    foreach (GatewayIPAddressInformation gateway in ipProperties.GatewayAddresses)
+                    {
+                        _log.Debug($"Default Gateway: {gateway.Address}");
+                        localHost.DefaultGateway = gateway.Address.ToString();
+                    }
+
+                    if (ipProperties.DnsAddresses.Count > 0)
+                    {
+                        _log.Debug($"Preferred Dns Server: {ipProperties.DnsAddresses[0]}");
+                        localHost.PreferredDnsServer = ipProperties.DnsAddresses[0].ToString();
+                    }
+
+                    if (ipProperties.DnsAddresses.Count > 1)
+                    {
+                        _log.Debug($"Alternate Dns Server: {ipProperties.DnsAddresses[1]}");
+                        localHost.AlternateDnsServer = ipProperties.DnsAddresses[1].ToString();
+                    }
+                    else
+                    {
+                        _log.Debug($"Alternate Dns Server: (Not set)");
+                    }
+
+                    break;
+                }
+            }
+
+            return localHost;
+        }
+
+        public static void ParseDicomName(string dicomName, out string lastname, out string firstname)
+        {
+            lastname = string.Empty;
+            firstname = string.Empty;
+
+            if (string.IsNullOrWhiteSpace(dicomName))
+                return;
+
+            string[] nameParts = dicomName.Split('^');
+
+            if (nameParts.Length > 0)
+                lastname = nameParts[0];
+
+            if (nameParts.Length > 1)
+                firstname = nameParts[1];
+        }
+
+        public static string GetDicomResultMessage(RayExportWrapper.DicomNetRWError resultCode)
+        {
+            switch (resultCode)
+            {
+                case RayExportWrapper.DicomNetRWError.Normal:
+                    return "Operation completed successfully.";
+                case RayExportWrapper.DicomNetRWError.InitializeFail:
+                    return "Initialization failed. Please check the configuration.";
+                case RayExportWrapper.DicomNetRWError.NetworkInitFail:
+                    return "Failed to initialize network. Please check your network connection.";
+                case RayExportWrapper.DicomNetRWError.AssociationFail:
+                    return "Failed to establish DICOM association with the server.";
+                case RayExportWrapper.DicomNetRWError.EchoFail:
+                    return "DICOM Echo test failed. Please verify the server status.";
+                case RayExportWrapper.DicomNetRWError.FindFail:
+                    return "Failed to perform query (Find).";
+                case RayExportWrapper.DicomNetRWError.StoreFail:
+                    return "Failed to store/send image (Store).";
+                case RayExportWrapper.DicomNetRWError.NoPresentationConterxt:
+                    return "No supported Presentation Contexts found.";
+                case RayExportWrapper.DicomNetRWError.NoUncompressedPC:
+                    return "No uncompressed Presentation Contexts available.";
+                case RayExportWrapper.DicomNetRWError.NoSOPClass:
+                    return "Unsupported SOP Class.";
+                case RayExportWrapper.DicomNetRWError.FileLoadFail:
+                    return "Failed to load the file.";
+                case RayExportWrapper.DicomNetRWError.TLSProfileFail:
+                    return "TLS security profile error.";
+                case RayExportWrapper.DicomNetRWError.NoConnection:
+                    return "No connection to the server.";
+                case RayExportWrapper.DicomNetRWError.NoSCU:
+                    return "No SCU (Service Class User) is configured.";
+                case RayExportWrapper.DicomNetRWError.UnknownError:
+                default:
+                    return "An unknown error has occurred.";
+            }
+        }
+
     }
 }

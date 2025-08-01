@@ -100,6 +100,10 @@ namespace RaywattApp.ViewModels
             DeviceStatus.IsOCTImagingDone = true;
             DeviceStatus.IsPullbackDone = false;
 
+            _angioManager.threadOnRedoPullback = true;
+            if (_angioManager.threadFuncSaveAngioFrames != null)
+                _angioManager.threadFuncSaveAngioFrames.Join();
+
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
@@ -125,12 +129,19 @@ namespace RaywattApp.ViewModels
 
             RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
 
+            _angioManager.StartSaveAngioFrames();
+            _angioManager.fromRecording = true;
+
             //초기값 설정
             PatientCase.Id = Patient.Id + "_" + DateTime.Now.ToString("yyyyMMddHHmmss");
             PatientCase.PatientId = Patient.Id;
             PatientCase.NumOfFrames = numOfFrames;
-            PatientCase.AngioYn = DeviceStatus.IsAngioInitialized;
             PatientCase.IndicatorDegree = 90;
+            PatientCase.AngioYn = false;
+            if (_angioManager.isChpFileConnected == 1 && DeviceStatus.IsAngioConnected) 
+            {
+                PatientCase.AngioYn = true;
+            }
 
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
@@ -165,6 +176,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["section_proximal"] = PatientCase.SectionProximal;
             PatientCase.SectionDistal = PatientCase.NumOfFrames - 1;
             sqlParameters["section_distal"] = PatientCase.SectionDistal;
+            sqlParameters["guidewire_radius"] = PatientCase.GuidewireRadius;
 
             int nRows = _sqlManager.InsertPatientCase(sqlParameters);
 

@@ -58,7 +58,7 @@ namespace RaywattApp.ViewModels
                 this.PatientCase = (PatientCase)data["patientCase"];
                 this.PrevStatus = (PrevStatus)data["prevStatus"];
 
-                if (DeviceStatus.CatheterStatus == Constants.CatheterStatusLoaded)
+                if (DeviceStatus.CatheterStatus == Constants.CatheterStatusEnable)
                 {
                     Next();
                 }
@@ -97,7 +97,7 @@ namespace RaywattApp.ViewModels
 
         private void CheckCatheterStatus(object sender, EventArgs e)
         {
-            if(DeviceStatus.CatheterStatus == Constants.CatheterStatusLoaded)
+            if(DeviceStatus.CatheterStatus == Constants.CatheterStatusEnable)
                 Next();
         }
     }
