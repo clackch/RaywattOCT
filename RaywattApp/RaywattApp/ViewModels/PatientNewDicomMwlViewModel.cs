@@ -181,7 +181,7 @@ namespace RaywattApp.ViewModels
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = SelectedPatient.Id;
 
-            IList<Patient> Patients = _sqlManager.SelectPatientById(sqlParameters);
+            IList<Patient> Patients = _sqlManager.SelectPatient(sqlParameters);
 
             if (Patients.Count > 0)
             {
