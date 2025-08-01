@@ -48,20 +48,6 @@ namespace RaywattApp.ViewModels
             get { return this._exitCommand ?? (this._exitCommand = new RelayCommand(Exit)); }
         }
 
-        public IRelayCommand<KeyEventArgs> EnterKeyCommand => new RelayCommand<KeyEventArgs>(OnKeyDown);
-
-        private void OnKeyDown(KeyEventArgs args)
-        {
-            if(args != null && args.Key == Key.Enter)
-            {
-                if (CanLogin())
-                {
-                    Login();
-                    ClearTextBox();
-                }
-            }
-        }
-
         public OutsetLoginViewModel(SqlManager sqlManager, IDialogService dialogService, IPasswordService passwordService)
         {
             _log.Debug("OutsetLoginViewModel");

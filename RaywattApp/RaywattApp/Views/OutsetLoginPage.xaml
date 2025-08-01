@@ -2,7 +2,8 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:ei="http://schemas.microsoft.com/xaml/behaviors/2010"
-        xmlns:cmd="clr-namespace:Microsoft.Xaml.Behaviors.Core;assembly=Microsoft.Xaml.Behaviors"
+      xmlns:cmd="clr-namespace:Microsoft.Xaml.Behaviors.Core;assembly=Microsoft.Xaml.Behaviors"
+      xmlns:bh="clr-namespace:RaywattApp.Common.Behaviors"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
@@ -15,19 +16,12 @@
       Background="{DynamicResource GrayscaleGray8Brush}"
       Title="OutsetLoginPage">
 
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="KeyDown">
-            <i:InvokeCommandAction Command="{Binding EnterKeyCommand}" 
-                                   PassEventArgsToCommand="True"/>
-        </i:EventTrigger>
-    </i:Interaction.Triggers>
-
     <Grid>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
             <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="power" Margin="0,9,12,9" Command="{Binding ExitCommand}"/>
         </StackPanel>
-        <StackPanel Margin="415,280,415,314">
-            <Image Source="{svgc:SvgImage Source=/res/icon/fasterWhite.svg}"/>
+        <StackPanel Margin="415,280,415,314" bh:EnterKeyLoginBehavior.EnableLoginBehavior="True">
+            <Image  x:Name="FocusDummy" Focusable="True" Source="{svgc:SvgImage Source=/res/icon/fasterWhite.svg}"/>
             <StackPanel Height="40"/>
             <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [ID], Source={StaticResource L10N}}"/>
             <StackPanel Height="6"/>
