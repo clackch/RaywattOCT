@@ -465,6 +465,33 @@ void CRJController::initSetting() {
 		PLOGI.printf("Written size is not matched. (%d / %d bytes)", written, packetLength);
 	}
 }
+
+void CRJController::resendPacket(eFID fid) {
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	RFIDMessageData::Data* dataValue = RFIDProtocol::getRecentMessageData(fid);
+	if (dataValue == nullptr) return;
+	RFIDProtocol::resetPacketByFID(fid, serialPacket, packetLength, *dataValue);
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	RFIDProtocol::deleteMessageData(fid);
+	m_pConnection->Write(serialPacket, packetLength);
+
+}
+
+void CRJController::resendAllSaved() {
+	eFID fid = RFIDProtocol::popFailedFID();
+	//PLOGI.printf("resend start: work %d", fid);
+	while (fid != eFID::NO_FID) {
+		m_resendManager->addTask([=]() {
+			resendPacket(fid);
+			});
+		fid = RFIDProtocol::popFailedFID();
+	}
+}
+
+
 UINT CRJController::threadRJState(LPVOID param) {
 	CRJController* pRJController = (CRJController*)param;
 
