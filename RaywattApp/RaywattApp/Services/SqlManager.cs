@@ -163,6 +163,17 @@ namespace RaywattApp.Services
             return _databaseService.GetDatas<Patient>(commandText, sqlParameters);
         }
 
+        public IList<Patient> SelectPatient(Dictionary<string, object> sqlParameters)
+        {
+            _log.Debug("SelectPatient");
+
+            string commandText;
+
+            commandText = SqlQuery.GetQuery("SelectPatient");
+
+            return _databaseService.GetDatas<Patient>(commandText, sqlParameters);
+        }
+
         public int CountPatient(Dictionary<string, Object> sqlParameters)
         {
             _log.Debug("CountPatient");
