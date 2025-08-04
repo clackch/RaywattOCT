@@ -2660,7 +2660,6 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 
 #if ENABLE_RFID
 		if (isValid == RFID_ValidType::VALID)
-#endif
 		{
 			if(isValidating)
 				CUtility::StopThread(m_pThreadRotaryJunction);
@@ -2681,6 +2680,7 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 				isValidating = true;
 			}
 		}
+#endif
 		break;
 	}
 	case eRJState::Loading:
