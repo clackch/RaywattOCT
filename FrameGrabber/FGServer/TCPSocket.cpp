@@ -147,16 +147,35 @@ void TCPSocket::ConnectClient(FrameGrabber& fg, int arg) {
 	}
 }
 
+// 🔧 헬퍼 함수: 오버플로우/오버런 방지 및 로그 기록
+inline void ClampRecvBuffer(char* buffer, int& len, int maxSize) {
+	const size_t bufferLimit = std::min(static_cast<size_t>(maxSize), sizeof(MAX_RECV_BUFFER_SIZE));
+
+	if (len >= maxSize) {
+		PLOGW.printf("Buffer overflow risk: tmpRecvBufferLen=%d exceeds MAX_RECV_BUFFER_SIZE (%d)", len, maxSize - 1);
+	}
+
+	if (len >= sizeof(MAX_RECV_BUFFER_SIZE)) {
+		PLOGE.printf("Buffer overrun risk: tmpRecvBufferLen=%d >= sizeof(tmpRecvBuffer) (%zu)", len, sizeof(MAX_RECV_BUFFER_SIZE) - 1);
+	}
+
+	if (len >= bufferLimit) {
+		len = bufferLimit - 1;
+	}
+
+	buffer[len] = '\0';
+}
+
+// 🔧 메인 함수
 void TCPSocket::ReceivePacket(FrameGrabber& fg) {
 	int bytesReceived = recv(clientSocket, recvBuffer, 100, 0);
-	if (bytesReceived == SOCKET_ERROR)
-	{
-		PLOGI.printf("Failed to receive data from client. Error code : %d, %d", WSAGetLastError(), bytesReceived); //
+	if (bytesReceived == SOCKET_ERROR) {
+		PLOGI.printf("Failed to receive data from client. Error code : %d, %d", WSAGetLastError(), bytesReceived);
 		exit(1);
 		return;
 	}
-	else if (bytesReceived > 0)
-	{
+
+	if (bytesReceived > 0) {
 		if (tmpRecvBufferLen + bytesReceived >= MAX_RECV_BUFFER_SIZE) {
 			PLOGI.printf("Buffer overflow detected. Dropping packet.");
 			tmpRecvBufferLen = 0;
@@ -164,36 +183,38 @@ void TCPSocket::ReceivePacket(FrameGrabber& fg) {
 			return;
 		}
 
-		strcat(tmpRecvBuffer, recvBuffer);
-		memset(recvBuffer, '\0', strlen(recvBuffer));
+		strncat(tmpRecvBuffer, recvBuffer, bytesReceived);
+		memset(recvBuffer, '\0', bytesReceived);
 		tmpRecvBufferLen += bytesReceived;
 
 		while (true) {
 			CommandType commandType = CheckCommandType(tmpRecvBuffer);
 			int sendResult;
+
 			switch (commandType) {
 			case CommandType::FGStarted:
 				PLOGI.printf("FGStarted");
 				tmpRecvBufferLen -= 5;
 				memmove(tmpRecvBuffer, tmpRecvBuffer + 5, tmpRecvBufferLen);
-				tmpRecvBuffer[tmpRecvBufferLen] = '\0';
+				ClampRecvBuffer(tmpRecvBuffer, tmpRecvBufferLen, MAX_RECV_BUFFER_SIZE);
 				isStarted = true;
-				//StartSnapFrameThread(fg);
 				StartLiveFrameThread(fg);
 				break;
+
 			case CommandType::FGStopped:
 				PLOGI.printf("FGStopped");
 				tmpRecvBufferLen -= 5;
 				memmove(tmpRecvBuffer, tmpRecvBuffer + 5, tmpRecvBufferLen);
-				tmpRecvBuffer[tmpRecvBufferLen] = '\0';
+				ClampRecvBuffer(tmpRecvBuffer, tmpRecvBufferLen, MAX_RECV_BUFFER_SIZE);
 				isStarted = false;
 				StopLiveFrameThread(fg);
 				break;
+
 			case CommandType::FGAskPort:
 				PLOGI.printf("FGAskPort");
 				tmpRecvBufferLen -= 5;
 				memmove(tmpRecvBuffer, tmpRecvBuffer + 5, tmpRecvBufferLen);
-				tmpRecvBuffer[tmpRecvBufferLen] = '\0';
+				ClampRecvBuffer(tmpRecvBuffer, tmpRecvBufferLen, MAX_RECV_BUFFER_SIZE);
 
 				if (fg.portConnection == 0) {
 					SetCommandPacket(CommandType::FGAngioDisconnected);
@@ -207,11 +228,12 @@ void TCPSocket::ReceivePacket(FrameGrabber& fg) {
 					PLOGI.printf("Send Port Connected");
 				}
 				break;
+
 			case CommandType::FGAskBoard:
 				PLOGI.printf("FGAskBoard");
 				tmpRecvBufferLen -= 5;
 				memmove(tmpRecvBuffer, tmpRecvBuffer + 5, tmpRecvBufferLen);
-				tmpRecvBuffer[tmpRecvBufferLen] = '\0';
+				ClampRecvBuffer(tmpRecvBuffer, tmpRecvBufferLen, MAX_RECV_BUFFER_SIZE);
 
 				if (fg.boardConnection == 0) {
 					SetCommandPacket(CommandType::FGBoardNotExist);
@@ -224,26 +246,30 @@ void TCPSocket::ReceivePacket(FrameGrabber& fg) {
 					PLOGI.printf("Send FGBoardExist");
 				}
 				break;
+
 			case CommandType::FGAskDeviceInfo:
 				PLOGI.printf("FGAskDeviceInfo");
 				tmpRecvBufferLen -= 5;
 				memmove(tmpRecvBuffer, tmpRecvBuffer + 5, tmpRecvBufferLen);
-				tmpRecvBuffer[tmpRecvBufferLen] = '\0';
+				ClampRecvBuffer(tmpRecvBuffer, tmpRecvBufferLen, MAX_RECV_BUFFER_SIZE);
 
 				SetDeviceInfoPacket(fg, deviceInfoBuffer);
-
 				sendResult = send(clientSocket, deviceInfoBuffer, 10, 0);
-				PLOGI.printf("Send Device Info: %d" + sendResult);
+				PLOGI.printf("Send Device Info: %d", sendResult);
 				break;
+
 			case CommandType::FGChpFile:
 				PLOGI.printf("FGChpFile");
 				StopLiveFrameThread(fg);
 				ChpFilePacketProcess(fg);
 				break;
+
 			case CommandType::FGNothing:
 				break;
 			}
-			if (commandType == CommandType::FGNothing) break;
+
+			if (commandType == CommandType::FGNothing)
+				break;
 		}
 	}
 }
