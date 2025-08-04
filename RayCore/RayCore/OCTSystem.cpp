@@ -1112,7 +1112,7 @@ RayError COCTSystem::SetSheathDiameter(double value)
 		Sleep(500);
 
 		PLOGI.printf("Homing start =========================================");
-		// m_pLaserModule Move 0 OR sensor #1 ?´ë™
+		// m_pLaserModule Move 0 OR sensor #1 ì´ë™
 		m_pLaserModule->Move(eStepMotorIndex::DelayLine, 0, false, static_cast<char>(0x03));
 
 		Sleep(500);
@@ -2202,7 +2202,7 @@ int COCTSystem::connectRotaryJunction() {
 			Sleep(500);
 
 			PLOGI.printf("Homing start =========================================");
-			// m_pLaserModule Move 0 OR sensor #1 ?´ë™
+			// m_pLaserModule Move 0 OR sensor #1 ì´ë™
 			m_pLaserModule->Move(eStepMotorIndex::DelayLine, 0, false, static_cast<char>(0x03));
 
 			Sleep(500);
@@ -2666,7 +2666,7 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 				CUtility::StopThread(m_pThreadRotaryJunction);
 			isValidating = false;
 			// To-Do: Validation
-			//¿µ»ó validation ½º·¹µå ½ÇÇàÇÒ °Í
+			//ì˜ìƒ validation ìŠ¤ë ˆë“œ ì‹¤í–‰í•  ê²ƒ
 			PLOGI.printf("validation true");
 		}
 		else if(isValid == RFID_ValidType::INVALID){
