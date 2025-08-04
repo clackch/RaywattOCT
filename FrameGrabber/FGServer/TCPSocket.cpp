@@ -147,7 +147,6 @@ void TCPSocket::ConnectClient(FrameGrabber& fg, int arg) {
 	}
 }
 
-// 🔧 헬퍼 함수: 오버플로우/오버런 방지 및 로그 기록
 inline void ClampRecvBuffer(char* buffer, int& len, int maxSize) {
 	const size_t bufferLimit = std::min(static_cast<size_t>(maxSize), sizeof(MAX_RECV_BUFFER_SIZE));
 
@@ -166,7 +165,6 @@ inline void ClampRecvBuffer(char* buffer, int& len, int maxSize) {
 	buffer[len] = '\0';
 }
 
-// 🔧 메인 함수
 void TCPSocket::ReceivePacket(FrameGrabber& fg) {
 	int bytesReceived = recv(clientSocket, recvBuffer, 100, 0);
 	if (bytesReceived == SOCKET_ERROR) {
@@ -345,11 +343,18 @@ void TCPSocket::ChpFilePacketProcess(FrameGrabber& fg) {
 		SetImagePacketHeader(fg);
 		SetCommandPacket(CommandType::FGSuccessChangeChp);
 		sendResult = send(clientSocket, commandBuffer, 5, 0);
+		if (sendResult == SOCKET_ERROR) {
+			PLOGE.printf("Failed to send FailChangeChp Info. Error: %d", WSAGetLastError());
+		}
 		PLOGI.printf("Send SuccessChangeChp Info: %d ", sendResult);
 		SetDeviceInfoPacket(fg, deviceInfoBuffer);
 		sendResult = send(clientSocket, deviceInfoBuffer, 10, 0);
 		PLOGI.printf("Send Device Info: %d", sendResult);
 		Chp_selected = true;
+	}
+
+	if (sendResult == SOCKET_ERROR) {
+		PLOGE.printf("Failed to send FailChangeChp Info. Error: %d", WSAGetLastError());
 	}
 
 	tmpRecvBufferLen -= packetLen;
