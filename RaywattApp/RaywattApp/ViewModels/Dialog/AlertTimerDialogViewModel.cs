@@ -27,18 +27,14 @@ namespace RaywattApp.ViewModels.Dialog
         {
             _log.Debug("SetParameter");
 
-            Dictionary<string, Object> data = (Dictionary<string, Object>)parameter;
+            Dictionary<string, object> data = (Dictionary<string, object>)parameter;
 
             Title = data["title"].ToString();
-            Message = data["message"].ToString();
             _remainingTime = data["wait_seconds"] is TimeSpan ts ? ts : TimeSpan.FromSeconds(0);
 
-            if (data.TryGetValue("show_button", out var okButtonVisibleObj))
+            if (data.TryGetValue("show_button", out var okButtonVisibleObj) && okButtonVisibleObj is bool isVisibility)
             {
-                if (okButtonVisibleObj is bool isVisibility)
-                {
-                    OkButtonVisibility = isVisibility;
-                }
+                OkButtonVisibility = isVisibility;
             }
 
             if (data.TryGetValue("error", out var errorObj) && errorObj is bool error)
@@ -46,7 +42,7 @@ namespace RaywattApp.ViewModels.Dialog
             else
                 IsError = false;
 
-            WaitForShowDialog(1);
+            WaitForShowDialog(0);
         }
 
         private void WaitForShowDialog(int waitSeconds)
@@ -57,6 +53,7 @@ namespace RaywattApp.ViewModels.Dialog
             {
                 Interval = TimeSpan.FromSeconds(waitSeconds)
             };
+
             delayTimer.Tick += (s, e) =>
             {
                 delayTimer.Stop();
@@ -70,40 +67,42 @@ namespace RaywattApp.ViewModels.Dialog
         {
             _log.Debug("StartReducingTime");
 
-            DispatcherTimer _timer = new DispatcherTimer();
+            DispatcherTimer _timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(1)
+            };
 
-            _timer.Interval = TimeSpan.FromSeconds(1);
+            UpdateMessage();
 
             _timer.Tick += (s, e) =>
             {
+                _remainingTime = _remainingTime.Subtract(TimeSpan.FromSeconds(1));
+
                 if (_remainingTime.TotalSeconds <= 0)
                 {
                     if (!OkButtonVisibility)
-                    {
                         _dialogService.CloseAllDialogs();
-                    }
 
                     _timer.Stop();
                 }
-                else
-                {
-                    _remainingTime = _remainingTime.Subtract(TimeSpan.FromSeconds(1));
-                    int minutes = _remainingTime.Minutes;
-                    int seconds = _remainingTime.Seconds;
 
-                    if (_remainingTime.TotalMinutes >= 1)
-                    {
-                        Message = $"{minutes} minutes {seconds} seconds";
-                    }
-                    else
-                    {
-                        Message = $"{seconds} seconds";
-                    }
-                }
-                OnPropertyChanged(nameof(Message));
+                UpdateMessage();
             };
+
             _timer.Start();
         }
 
+        private void UpdateMessage()
+        {
+            int minutes = _remainingTime.Minutes;
+            int seconds = _remainingTime.Seconds;
+
+            if (_remainingTime.TotalMinutes >= 1)
+                Message = $"{minutes} minutes {seconds} seconds";
+            else
+                Message = $"{seconds} seconds";
+
+            OnPropertyChanged(nameof(Message));
+        }
     }
 }
