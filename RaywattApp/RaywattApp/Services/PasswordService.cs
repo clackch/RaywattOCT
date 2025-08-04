@@ -33,6 +33,7 @@ namespace RaywattApp.Services
             get => _passwordExpiryDays;
         }
 
+
         public void ResetPasswordCount()
         {
             _log.Debug("ResetPasswordCount");
@@ -51,13 +52,13 @@ namespace RaywattApp.Services
             GetPasswordParameter();
         }
 
-        public bool IsPasswordConfirmed(string beforePassword, string inputPassword, string message = "")
+        public bool IsPasswordConfirmed(string beforePassword, string inputPassword, string message1, string message2)
         {
             _log.Debug("IsPasswordConfirmed");
 
             if (!beforePassword.Equals(inputPassword))
             {
-                ShowAlert(_l10n["Information"], $"The passwords do not match.\r\n{message}");
+                ShowAlert(_l10n["Information"], string.Format("{0} password and {1} password do not match.\r\nRe-enter passwords.", message1, message2));
                 return false;
             }
 
@@ -70,7 +71,7 @@ namespace RaywattApp.Services
 
             if (!beforePassword.Equals(inputPassword))
             {
-                ShowAlert(_l10n["Information"], $"The password is incorrect.\r\n{message}");
+                ShowAlert(_l10n["Information"], string.Format("{0} password is incorrect.", message));
                 return false;
             }
 
@@ -87,15 +88,17 @@ namespace RaywattApp.Services
 
             if (password != inputPassword || password == string.Empty)
             {
-                if (_currentPasswordRetryCount >= _maxPasswordRetryCount)
+                if (_currentPasswordRetryCount >= _maxPasswordRetryCount + 1)
                 {
-                    ShowTimerAlert("Login Failed", $"Too many incorrect password attempts.\r\n\r\n{_maxPasswordRetryCount} times", false, _passwordRetryLockDuration);
+                    ShowTimerAlert(_l10n["Information"], "Login temporarily disabled.\r\nPlease try again in {0} seconds.", false, _passwordRetryLockDuration);
                     WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
                     ResetPasswordCount();
                     return false;
                 }
 
-                ShowAlert(_l10n["Information"], "Invalid ID or Password\r\nPlease try again\r\n\r\nAttempt: " + _currentPasswordRetryCount + "/" + _maxPasswordRetryCount);
+                string alertMessage = string.Format("The user ID or password\r\nentered is incorrect.\r\nPlease try again. {0}/{1}", _currentPasswordRetryCount, _maxPasswordRetryCount);
+                ShowAlert(_l10n["Information"], alertMessage);
+
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
                 return false;
             }
@@ -103,13 +106,13 @@ namespace RaywattApp.Services
             return true;
         }
 
-        public bool IsNotSamePassword(string beforePassword, string inputPassword, string message = "")
+        public bool IsNotSamePassword(string beforePassword, string inputPassword, string message1, string message2)
         {
             _log.Debug("IsNotSamePassword");
 
             if (beforePassword.Equals(inputPassword))
             {
-                ShowAlert(_l10n["Information"], $"The password must be different.\r\n{message}");
+                ShowAlert(_l10n["Information"], string.Format("{0} password and {1} password cannot be the same.", message1, message2));
                 return false;
             }
 
@@ -141,28 +144,24 @@ namespace RaywattApp.Services
         {
             _log.Debug("GetPasswordValidationError");
 
-            if (string.IsNullOrWhiteSpace(password) || password == string.Empty)
-                return "Please enter a password.";
-
-            if (password.Contains(" "))
-                return "Spaces are not allowed in the password.";
-
             if (password.Length < 8)
-                return "Password should be at least 8 characters.";
+                return "Password requires at least 8 characters.";
 
             if (!Regex.IsMatch(password, @"[A-Z]"))
-                return "Please include at least one uppercase letter.";
+                return "Include at least one uppercase letter in the password.";
 
             if (!Regex.IsMatch(password, @"\d"))
-                return "Please include at least one number.";
+                return "Include at least one number in the password.";
 
             if (!Regex.IsMatch(password, @"[!@#$%^&*()_\-+=\[\]{};':""\\|,.<>\/?]"))
-                return "Please include at least one special character.";
-
-            if (!Regex.IsMatch(password, @"^[a-zA-Z0-9!@#$%^&*()_\-+=\[\]{};':""\\|,.<>\/?]+$"))
-                return "Only English letters, numbers, and common symbols are allowed.";
+                return "Include at least one special character in the password.\r\n";
 
             return null;
+        }
+
+        public string MessagePasswordChangedSuccessfully()
+        {
+            return "Password changed successfully.";
         }
 
         public void ShowAlert(string title, string message)

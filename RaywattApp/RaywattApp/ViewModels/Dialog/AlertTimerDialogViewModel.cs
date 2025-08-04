@@ -23,13 +23,17 @@ namespace RaywattApp.ViewModels.Dialog
 
         private TimeSpan _remainingTime;
 
+        private string _message = string.Empty;
+
         public override void SetParameter(object parameter)
         {
             _log.Debug("SetParameter");
 
             Dictionary<string, object> data = (Dictionary<string, object>)parameter;
 
-            Title = data["title"].ToString();
+            Title = data["title"]?.ToString();
+            _message = data["message"]?.ToString();
+
             _remainingTime = data["wait_seconds"] is TimeSpan ts ? ts : TimeSpan.FromSeconds(0);
 
             if (data.TryGetValue("show_button", out var okButtonVisibleObj) && okButtonVisibleObj is bool isVisibility)
@@ -80,10 +84,10 @@ namespace RaywattApp.ViewModels.Dialog
 
                 if (_remainingTime.TotalSeconds <= 0)
                 {
+                    _timer.Stop();
+
                     if (!OkButtonVisibility)
                         _dialogService.CloseAllDialogs();
-
-                    _timer.Stop();
                 }
 
                 UpdateMessage();
@@ -97,10 +101,14 @@ namespace RaywattApp.ViewModels.Dialog
             int minutes = _remainingTime.Minutes;
             int seconds = _remainingTime.Seconds;
 
+            string timeMessage = string.Empty;
+
             if (_remainingTime.TotalMinutes >= 1)
-                Message = $"{minutes} minutes {seconds} seconds";
+                timeMessage = $"{minutes} minutes {seconds} seconds";
             else
-                Message = $"{seconds} seconds";
+                timeMessage = $"{seconds} seconds";
+
+            Message = string.Format(_message, timeMessage);
 
             OnPropertyChanged(nameof(Message));
         }

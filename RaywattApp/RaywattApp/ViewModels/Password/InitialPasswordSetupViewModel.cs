@@ -87,7 +87,7 @@ namespace RaywattApp.ViewModels.Password
         {
             _log.Debug("OnConfirm");
 
-            if (!_passwordService.IsPasswordConfirmed(Password, ConfirmPassword))
+            if (!_passwordService.IsPasswordConfirmed(Password, ConfirmPassword, "New", "Confirm"))
             {
                 ClearPasswords();
                 return;
@@ -101,6 +101,8 @@ namespace RaywattApp.ViewModels.Password
             }
 
             _passwordService.UpdatePasswordReset(_loginId, ConfirmPassword, _loginPassword);
+
+            _passwordService.ShowAlert(_l10n["Information"], _passwordService.MessagePasswordChangedSuccessfully());
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["login_step"] = LoginStep.CheckPasswordExpiry;

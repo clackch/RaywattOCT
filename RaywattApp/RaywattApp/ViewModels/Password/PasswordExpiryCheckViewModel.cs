@@ -155,11 +155,11 @@ namespace RaywattApp.ViewModels.Password
 
             if (_loginPassword == string.Empty) return false;
 
-            if (!_passwordService.IsPasswordCorrect(_loginPassword, CurrentPassword, "[Current Password]")) return false;
+            if (!_passwordService.IsPasswordCorrect(_loginPassword, CurrentPassword, "Current")) return false;
 
-            if (!_passwordService.IsNotSamePassword(CurrentPassword, NewPassword, "[Current/New Password]")) return false;
+            if (!_passwordService.IsNotSamePassword(CurrentPassword, NewPassword, "Current", "New")) return false;
 
-            if (!_passwordService.IsPasswordConfirmed(NewPassword, ConfirmPassword, "[New/Confirm Password]")) return false;
+            if (!_passwordService.IsPasswordConfirmed(NewPassword, ConfirmPassword, "New", "Confirm")) return false;
 
             if (_passwordService.GetPasswordValidationError(ConfirmPassword) is { } message)
             {
@@ -169,7 +169,7 @@ namespace RaywattApp.ViewModels.Password
 
             _passwordService.UpdatePasswordReset(_loginId, ConfirmPassword, _loginPassword);
 
-            _passwordService.ShowAlert(_l10n["Information"], "Password changed successfully");
+            _passwordService.ShowAlert(_l10n["Information"], _passwordService.MessagePasswordChangedSuccessfully());
 
             return true;
         }

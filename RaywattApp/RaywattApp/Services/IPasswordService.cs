@@ -12,14 +12,14 @@ namespace RaywattApp.Services
         /// <summary>
         /// Checks if the input password matches the existing password
         /// </summary>
-        bool IsPasswordConfirmed(string beforePassword, string inputPassword, string message = "");
+        bool IsPasswordConfirmed(string beforePassword, string inputPassword, string message1, string message2);
 
         bool IsPasswordCorrect(string actualPassword, string inputPassword, string message = "");
 
         /// <summary>
         /// Checks if the input password does not match the existing password
         /// </summary>
-        bool IsNotSamePassword(string beforePassword, string inputPassword, string message = ""); 
+        bool IsNotSamePassword(string beforePassword, string inputPassword, string message1, string message2);
 
         User? GetAccount(string id);
         
@@ -39,5 +39,7 @@ namespace RaywattApp.Services
         /// Updates the password for a user, resetting it if necessary
         /// </summary>
         bool UpdatePasswordReset(string id, string password, string before_passowrd);
+
+        string MessagePasswordChangedSuccessfully();
     }
 }

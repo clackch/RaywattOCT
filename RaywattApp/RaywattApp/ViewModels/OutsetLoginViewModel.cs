@@ -65,6 +65,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("OnNavigating");
         }
+
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             _log.Debug("OnNavigated");
@@ -168,9 +169,9 @@ namespace RaywattApp.ViewModels
 
             _user = _passwordService.GetAccount(DeviceStatus.LoginID);
 
-            if (_user.TermsAgreedAt > DateTime.MinValue) return true;
+            if (_user?.TermsAgreedAt > DateTime.MinValue) return true;
 
-            var parameter = new Dictionary<string, object> { ["tnC"] = _user };
+            var parameter = new Dictionary<string, object> { ["tnC"] = _user! };
             var result = _dialogService.OpenDialog(new TermsConditionsControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
             if (result?.DialogAnswer == DialogResults.Answer.No)
@@ -179,7 +180,7 @@ namespace RaywattApp.ViewModels
                 return false;
             }
 
-            _sqlManager.UpdateTermsAgreedDateUser(new Dictionary<string, object> { ["id"] = _user.Id });
+            _sqlManager.UpdateTermsAgreedDateUser(new Dictionary<string, object> { ["id"] = _user!.Id });
             return true;
         }
 
@@ -189,7 +190,7 @@ namespace RaywattApp.ViewModels
 
             _user = _passwordService.GetAccount(DeviceStatus.LoginID);
 
-            if (_user?.Admin == true)
+            if (_user!.Admin == true)
             {
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.UserListPage));
             }
@@ -199,8 +200,8 @@ namespace RaywattApp.ViewModels
                 {
                     Parameter = new Dictionary<string, object>
                     {
-                        ["id"] = _user.Id,
-                        ["password"] = _user.Password
+                        ["id"] = _user!.Id,
+                        ["password"] = _user!.Password
                     }
                 });
             }

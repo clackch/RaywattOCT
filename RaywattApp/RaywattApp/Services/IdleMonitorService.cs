@@ -2,6 +2,7 @@
 using RaywattApp.Common.Angio;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
+using RaywattApp.Common.Localization;
 using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.ViewModels.Dialog;
@@ -19,6 +20,7 @@ namespace RaywattApp.Services
     public class IdleMonitorService
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(IdleMonitorService));
+        protected readonly DynamicResource _l10n;
 
         private IDialogService? _dialogService;
         private AngioManager? _angioManager;
@@ -59,6 +61,7 @@ namespace RaywattApp.Services
             _dialogService = dialogService;
             _angioManager = angioManager;
             _passwordService = passwordService;
+            _l10n = (DynamicResource)App.Current.Resources["L10N"];
 
             Init();
         }
@@ -199,7 +202,7 @@ namespace RaywattApp.Services
 
             System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
-                _passwordService.ShowTimerAlert("Session Timeout", "No activity.\r\nLogging out soon.", true, _totalIdleLimit - _preAlertLimit);
+                _passwordService.ShowTimerAlert(_l10n["Information"], "No activity detected.\r\nLogging out in {0} seconds.", true, _totalIdleLimit - _preAlertLimit);
                 _isPreAlertShown = false;
                 _log.Debug($"Pre Alert Popup closed");
             }));
@@ -225,8 +228,8 @@ namespace RaywattApp.Services
             System.Windows.Application.Current.Dispatcher.InvokeAsync(new Action(() =>
            {
                Dictionary<string, object> parameter = new Dictionary<string, object>();
-               parameter["title"] = "Logout";
-               parameter["message"] = "Session expired due to inactivity";
+               parameter["title"] = _l10n["Information"];
+               parameter["message"] = "Logged out due to inactivity.";
                DialogResults result = _dialogService!.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
                _isLogoutPopupShown = false;
