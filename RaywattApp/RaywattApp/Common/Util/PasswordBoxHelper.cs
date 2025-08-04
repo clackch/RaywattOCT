@@ -1,20 +1,29 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace RaywattApp.Common.Util
 {
     public static class PasswordBoxHelper
     {
         public static readonly DependencyProperty BindablePasswordProperty =
-            DependencyProperty.RegisterAttached("BindablePassword", typeof(string), 
+            DependencyProperty.RegisterAttached("BindablePassword", typeof(string),
                 typeof(PasswordBoxHelper),
                 new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnPasswordPropertyChanged));
+
         public static string GetBindablePassword(DependencyObject dp) => (string)dp.GetValue(BindablePasswordProperty);
         public static void SetBindablePassword(DependencyObject dp, string value) => dp.SetValue(BindablePasswordProperty, value);
+
         private static void OnPasswordPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is PasswordBox passwordBox && !GetIsUpdating(passwordBox))
             {
+                passwordBox.PreviewKeyDown -= HandleKeyDown;
+                passwordBox.PreviewKeyDown += HandleKeyDown;
+
+                DataObject.RemovePastingHandler(passwordBox, OnPaste);
+                DataObject.AddPastingHandler(passwordBox, OnPaste);
+
                 passwordBox.PasswordChanged -= HandlePasswordChanged;
                 passwordBox.Password = e.NewValue?.ToString() ?? string.Empty;
                 passwordBox.PasswordChanged += HandlePasswordChanged;
@@ -24,18 +33,33 @@ namespace RaywattApp.Common.Util
         public static readonly DependencyProperty AttachProperty =
             DependencyProperty.RegisterAttached("Attach", typeof(bool), typeof(PasswordBoxHelper),
                 new PropertyMetadata(false, AttachChanged));
+
         public static bool GetAttach(DependencyObject dp) => (bool)dp.GetValue(AttachProperty);
         public static void SetAttach(DependencyObject dp, bool value) => dp.SetValue(AttachProperty, value);
+
         private static void AttachChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is PasswordBox passwordBox)
             {
                 if ((bool)e.NewValue)
+                {
                     passwordBox.PasswordChanged += HandlePasswordChanged;
+
+                    passwordBox.PreviewKeyDown -= HandleKeyDown;
+                    passwordBox.PreviewKeyDown += HandleKeyDown;
+
+                    DataObject.RemovePastingHandler(passwordBox, OnPaste);
+                    DataObject.AddPastingHandler(passwordBox, OnPaste);
+                }
                 else
+                {
                     passwordBox.PasswordChanged -= HandlePasswordChanged;
+                    passwordBox.PreviewKeyDown -= HandleKeyDown;
+                    DataObject.RemovePastingHandler(passwordBox, OnPaste);
+                }
             }
         }
+
         private static void HandlePasswordChanged(object sender, RoutedEventArgs e)
         {
             if (sender is PasswordBox passwordBox)
@@ -43,6 +67,28 @@ namespace RaywattApp.Common.Util
                 SetIsUpdating(passwordBox, true);
                 SetBindablePassword(passwordBox, passwordBox.Password);
                 SetIsUpdating(passwordBox, false);
+            }
+        }
+
+        private static void HandleKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Space)
+            {
+                e.Handled = true;
+            }
+        }
+
+        private static void OnPaste(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(DataFormats.Text))
+            {
+                string text = (string)e.DataObject.GetData(DataFormats.Text);
+                if (text.Contains(" "))
+                    e.CancelCommand();
+            }
+            else
+            {
+                e.CancelCommand();
             }
         }
 
