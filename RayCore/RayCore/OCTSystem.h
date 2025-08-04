@@ -68,7 +68,7 @@ private:
 
 	// Rotary Junction
 	CRJController* m_pRJController;
-	bool m_bFirstLoad;	// To-Do: RFID ¿¬µ¿ÇØ¼­ µ¿ÀÏÇÑ Ä«Å×ÅÍ Àç¿¬°á½Ã¿¡µµ FirstLoad ·Î ÀÎ½ÄµÇ°Ô ¼öÁ¤ ÇÊ¿ä
+	bool m_bFirstLoad;	// To-Do: RFID ì—°ë™í•´ì„œ ë™ì¼í•œ ì¹´í…Œí„° ì¬ì—°ê²°ì‹œì—ë„ FirstLoad ë¡œ ì¸ì‹ë˜ê²Œ ìˆ˜ì • í•„ìš”
 	bool isValidating = false;
 
 	// Laser Module
