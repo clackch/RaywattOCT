@@ -655,26 +655,16 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		std::vector<float> Radius;
 		cv::Mat mGuidewire(vGuidewires.size(), 1, CV_32SC2);
 
-		/*cv::Mat mask3 = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
-		for (int i = 0; i < vGuidewires.size(); i++) {
-			cv::rectangle(mask3, vGuidewires[i], cv::Scalar(255), -1);
-		}
-		std::vector<std::vector<cv::Point>> realContours;
-		cv::Mat imgCheck = circleImage.clone();
-		cv::findContours(mask3, realContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-		cv::drawContours(imgCheck, realContours, -1, cv::Scalar(0, 255, 0), 2);
-
-		string check = "GW Center Image" + std::to_string(nFrame) + ".png";
-		cv::imwrite(check, imgCheck);*/
-
 		pImaging->GetGuideWireCenterPoint(circleImage, vGuidewires, centerPoints, Radius);
+		//cv::Mat drawnCircle = circleImage.clone();
 
 		if (centerPoints.size() > 0)
 		{
 			for (size_t row = 0; row < vGuidewires.size(); row++) {
 				mGuidewire.at<cv::Point>(row, 0) = cv::Point(centerPoints[row].x, centerPoints[row].y);
 				if (Radius[row] < 0) continue;
-				cv::circle(circleImage, centerPoints[row], static_cast<int>(Radius[row]), cv::Scalar(0, 255, 0), 2);
+				//cv::circle(drawnCircle, centerPoints[row], static_cast<int>(Radius[row]), cv::Scalar(0, 255, 0), 2);
+				//cv::circle(drawnCircle, centerPoints[row], 2, cv::Scalar(0, 255, 0), -1);
 			}
 			vGuidewire.push_back(mGuidewire);
 			vGuidewireRadius.push_back(Radius);
@@ -683,7 +673,8 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 			vGuidewire.push_back(mGuidewire);
 			vGuidewireRadius.push_back(std::vector<float>(1));
 		}
-
+		//string name2 = "circle Image" + std::to_string(nFrame) + ".png";
+		//cv::imwrite(name2, drawnCircle);
 		pSession->m_pMsg->postMessage(WM_PROCESS_DETECTION, nSession, nFrame);
 	}
 	delete pImaging;

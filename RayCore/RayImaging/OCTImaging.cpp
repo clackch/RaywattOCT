@@ -330,6 +330,24 @@ void COCTImaging::releaseInversedCircularizeMap() {
 	imatYMap.release();
 }
 
+cv::Point COCTImaging::unwrapedPointFromCircular(cv::Point circularPt, int diameter, int srcHeight, int dstHeight, int dstWidth, double scale)
+{
+	double radius = (diameter / 2.0) - 0.5;
+
+	double dx = circularPt.x - radius;
+	double dy = circularPt.y - radius;
+
+	double r = std::sqrt(dx * dx + dy * dy);
+	double theta = std::atan2(dy, dx);
+	if (theta < 0)
+		theta += 2.0 * M_PI;
+
+	float x_unwrap = (theta / (2.0 * M_PI)) * dstWidth;
+	float y_unwrap = dstHeight - r * scale;
+
+	return cv::Point(x_unwrap, y_unwrap);
+}
+
 void COCTImaging::generateBackground(Ipp16u* fringes) {
 	const int nWidth = m_setting.nAScan;
 	const int nHeight = m_setting.nBScan;
@@ -1108,7 +1126,9 @@ void COCTImaging::GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBounda
 	}
 }
 
+//static int whatNumberYouAre = 0;
 void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& centerPoints, std::vector<float>& radius) {
+	//whatNumberYouAre++;
 	if (GuideWires.empty()) {
 		return;
 	}
@@ -1147,6 +1167,8 @@ void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f>
 	int centerX = image.cols / 2;
 	int centerY = image.rows / 2;
 
+	cv::Mat imgCheck2 = image.clone();
+
 	for (int i = 0; i < edgePoints.size(); i++) {
 		int XDirection, YDirection;
 		double centerToEdgePointDistance, guideWireRadius, angle;
@@ -1169,58 +1191,53 @@ void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f>
 		centerPoints.push_back(cv::Point((int)(edgePoints[i].x + XDirection * guideWireRadius * std::cos(angle)),
 			(int)(edgePoints[i].y + YDirection * guideWireRadius * std::sin(angle))));
 		radius.push_back(guideWireRadius);
+		cv::circle(imgCheck2, edgePoints[i], 2, cv::Scalar(0, 0, 255), -1);
 	}
+	cv::Mat mask3 = cv::Mat::zeros(imgCheck2.cols, imgCheck2.cols, CV_8UC1);
+	for (int i = 0; i < GuideWires.size(); i++) {
+		cv::rectangle(mask3, GuideWires[i], cv::Scalar(255), -1);
+	}
+	std::vector<std::vector<cv::Point>> realContours;
+	cv::findContours(mask3, realContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	//cv::drawContours(imgCheck2, realContours, -1, cv::Scalar(0, 255, 0), 2);
+
+	//cv::imwrite("edgePoints" + std::to_string(whatNumberYouAre) + ".png", imgCheck2);
 }
 
 void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& edgePoints) {
 	int paddingSize = 1;
+
+	int width = grayImage.cols;
+	int height = grayImage.rows;
+	int centerX = width / 2;
+	int centerY = height / 2;
+
+	cv::Mat floatImage, gaussian;
+
+	grayImage.convertTo(floatImage, CV_32F, 1.0 / 255.0);
+
+	cv::GaussianBlur(floatImage, gaussian, cv::Size(3, 3), 0);
+	for (int i = 0; i < 50; i++) {
+		cv::GaussianBlur(gaussian, gaussian, cv::Size(3, 3), 0);
+	}
+
+	gaussian.convertTo(gaussian, CV_8U, 255.0);
+
 	for (const auto& rect : GuideWires) {
 		if (rect.width == 0 && rect.height == 0) {
 			edgePoints.push_back(cv::Point(-1, -1));
 			continue;
 		}
 
-		int width = grayImage.cols;
-		int height = grayImage.rows;
-		int centerX = width / 2;
-		int centerY = height / 2;
-		double sigma = 100.0;
-
-		cv::Mat mask(height, width, CV_8UC1);
-
-		for (int y = 0 ; y < height; ++y)
-		{
-			for (int x = 0 ; x < width; ++x)
-			{
-				double dx = x - centerX;
-				double dy = y - centerY;
-				double distanceSquared = dx * dx + dy * dy;
-
-				// 2D Gaussian Formula
-				double value = std::exp(-distanceSquared / (2 * sigma * sigma));
-				mask.at<uchar>(y, x) = static_cast<uchar>(value * 255.0);
-			}
-		}
-
-		cv::Mat filtered;
-		cv::Mat floatImage, floatMask;
-
-		grayImage.convertTo(floatImage, CV_32F, 1.0 / 255.0);
-		mask.convertTo(floatMask, CV_32F, 1.0 / 255.0);
-
-		cv::multiply(floatImage, floatMask, filtered);
-
-		filtered.convertTo(filtered, CV_8U, 255.0);
-
 		// top 3 pixels에 대한 Mask 작업을 위한 Roi Padding 설정
-		if (rect.x - paddingSize < 0 || rect.y - paddingSize < 0 || rect.x + rect.width + paddingSize > filtered.cols || rect.y + rect.height + paddingSize > filtered.rows) {
+		if (rect.x - paddingSize < 0 || rect.y - paddingSize < 0 || rect.x + rect.width + paddingSize > gaussian.cols || rect.y + rect.height + paddingSize > gaussian.rows) {
 			continue;
 		}
 
 		cv::Rect roiRect(rect.x - paddingSize, rect.y - paddingSize, rect.width + paddingSize * 2, rect.height + paddingSize * 2);
-		cv::Mat roi = filtered(roiRect);
+		cv::Mat roi = gaussian(roiRect);
 
-		cv::Mat roiInt;
+		cv::Mat roiInt, roiGInt, roiLInt;
 		if (roi.type() != CV_8U) {
 			roi.convertTo(roiInt, CV_8U);
 		}
@@ -1271,7 +1288,39 @@ void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv
 
 		if (maxAvgIt != avgValues.end()) {
 			cv::Point maxAvgPoint = maxAvgIt->second + cv::Point(rect.x, rect.y);
-			edgePoints.push_back(maxAvgPoint);
+			int nowX = maxAvgPoint.x, nowY = maxAvgPoint.y;
+			int dx = abs(centerX - nowX), dy = abs(centerY - nowY);
+			int dirX = (maxAvgPoint.x < centerX) ? 1 : -1, dirY = (maxAvgPoint.y < centerY) ? 1 : -1;
+
+			bool steep = dy > dx;
+			if (steep) {
+				std::swap(dx, dy);
+			}
+			int err = 2 * dy - dx;
+
+			while (true) {
+				if (nowX < rect.x || nowY < rect.y || nowX >= rect.x + rect.width || nowY >= rect.y + rect.height)
+					break;
+
+				int e2 = 2 * err;
+				if (e2 > -dy) {
+					err -= dy;
+					if (steep)
+						nowY += dirY;
+					else
+						nowX += dirX;
+				}
+				if (e2 < dx) {
+					err += dx;
+					if (steep)
+						nowX += dirX;
+					else
+						nowY += dirY;
+				}
+				if (grayImage.at<unsigned char>(nowY, nowX) <= grayImage.at<unsigned char>(maxAvgPoint) * 0.8)
+					break;
+			}
+			edgePoints.push_back(cv::Point(nowX, nowY));
 		}
 	}
 }
@@ -1287,103 +1336,126 @@ void COCTImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<c
 			theta.push_back(0);
 			continue;
 		}
-		//cv::Mat cloneImage = grayImage.clone();
+		cv::Mat cloneImage = grayImage.clone();
 
-		//cv::Mat mask = (cloneImage == 255);
-		//cloneImage.setTo(0, mask);
-		//cloneImage.at<uchar>(edgePoint.y, edgePoint.x) = 255;
+		cv::Mat inversedImage;
+		cv::remap(cloneImage, inversedImage, imatXMap, imatYMap, cv::INTER_NEAREST);
+		cv::rotate(inversedImage, inversedImage, cv::ROTATE_90_COUNTERCLOCKWISE);
 
-		//cv::Mat inversedImage;
-		//cv::remap(cloneImage, inversedImage, inverseMatXMap, inverseMatYMap, cv::INTER_NEAREST);
-		//cv::rotate(inversedImage, inversedImage, cv::ROTATE_90_COUNTERCLOCKWISE);
+		//cv::Mat tempImage;;
+		//cv::cvtColor(inversedImage, tempImage, cv::COLOR_GRAY2BGR);
 
-		//cv::Point inversedEdgePoint;
-		//for (int y = 0; y < height; y++) {
-		//	for (int x = 0; x < width; x++) {
-		//		if (inversedImage.at<uchar>(y, x) == 255) {
-		//			inversedEdgePoint = cv::Point(x, y);
-		//			break;
-		//		}
-		//	}
-		//}
-		//int startY, startX, endX;
+		// circle image의 edgePoint를 inversedImage의 좌표로 변환
+		int diameter = inversedImage.cols;
+		int srcWidth = inversedImage.cols;
+		int srcHeight = inversedImage.rows;
+		int dstWidth = diameter;
+		int dstHeight = diameter;
+		cv::Point inversedEdgePoint = unwrapedPointFromCircular(edgePoint, srcWidth, srcHeight, dstWidth, dstHeight, 2.0f);	// 점 변환
+		inversedEdgePoint = cv::Point(inversedEdgePoint.y, inversedImage.rows - inversedEdgePoint.x - 1);	// 90도 회전 적용
 
-		//startY = inversedEdgePoint.y;
-		//startX = 0;
-		//endX = inversedEdgePoint.x - 100 < 0 ? inversedEdgePoint.x / 2 : inversedEdgePoint.x - 100;
+		int startY, startX, endX;
+		startY = inversedEdgePoint.y;
+		startX = 0;
+		endX = inversedEdgePoint.x - 100 < 0 ? inversedEdgePoint.x / 2 : inversedEdgePoint.x - 100;
 
-		////GuideWire 중심점 row에 대한 pixel Value 합
-		//double sumOfStandardValue = 0;
-		//for (int x = startX; x <= endX; x++) {
-		//	sumOfStandardValue += inversedImage.at<uchar>(startY, x);
-		//}
+		//GuideWire 중심점 row에 대한 pixel Value 합
+		int sumOfStandardValue = 0;
+		for (int x = startX; x <= endX; x++) {
+			sumOfStandardValue += inversedImage.at<uchar>(startY, x);
+		}
+		//PLOGI.printf("row %d : sumOfStandardValue = %d", startY, sumOfStandardValue);
 
-		//double gap = 0;
-		//int series = 0;
-		//int rotationTimes = 0;
+		double gapDown = 0, gapUp = 0;
+		double checkWeight = 1.5;
+		// + y 방향 탐색
+		while (true) {
+			int series = 0;
+			int rotationTimes = 0;
+			for (int y = startY; y < height; y += 1, gapDown += 1.0) {
+				int sumOfPixelValues = 0;
+				for (int x = startX; x <= endX; x++) {
+					sumOfPixelValues += inversedImage.at<uchar>(y, x);
+				}
+				if (sumOfPixelValues >= sumOfStandardValue * checkWeight) {
+					series++;
+					if (series == 3) {
+						//PLOGI.printf("end_row1 %d : sumOfPixelValues = %d, gap : %lf", y, sumOfPixelValues, gapDown);
+						series = 0;
+						break;
+					}
+				}
 
-		//// + y 방향 탐색
-		//for (int y = startY; y < height; y += 1, gap += 1.0) {
-		//	int sumOfPixelValues = 0;
-		//	for (int x = startX; x <= endX; x++) {
-		//		sumOfPixelValues += inversedImage.at<uchar>(y, x);
-		//	}
+				if (y == height - 1) {
+					rotationTimes++;
+					if (rotationTimes >= 2) {
+						rotationTimes = 0;
+						break;
+					}
+					y = 0;
+				}
+			}
+			if (gapDown < 50) {
+				int y = startY + (int)gapDown > height - 1 ? startY + (int)gapDown - height : startY + (int)gapDown;
 
-		//	PLOGI.printf("row %d : sumOfPixelValues = %d", y, sumOfPixelValues);
+				//PLOGI.printf("end1");
+				//cv::line(tempImage, cv::Point(0, y), cv::Point(tempImage.cols - 1, y), cv::Scalar(0, 255, 0), 1);
+				//cv::line(tempImage, cv::Point(0, startY), cv::Point(tempImage.cols - 1, startY), cv::Scalar(0, 0, 255), 1);
+				break;
+			}
+			gapDown = 0;
+			checkWeight -= 0.1; // 가중치 감소
+		}
 
-		//	if (sumOfPixelValues >= sumOfStandardValue * 1.5) {
-		//		series++;
-		//		if (series == 3) {
-		//			PLOGI.printf("end_row1 %d : sumOfPixelValues = %d", y, sumOfPixelValues);
-		//			series = 0;
-		//			break;
-		//		}
-		//	}
+		// - y 방향 탐색
+		checkWeight = 1.5;
+		while (true) {
+			int series = 0;
+			int rotationTimes = 0;
+			for (int y = startY; y >= 0; y -= 1, gapUp += 1.0) {
+				int sumOfPixelValues = 0;
+				for (int x = startX; x <= endX; x++) {
+					sumOfPixelValues += inversedImage.at<uchar>(y, x);
+				}
 
-		//	if (y == height - 1) {
-		//		rotationTimes++;
-		//		if (rotationTimes >= 2) {
-		//			rotationTimes = 0;
-		//			break;
-		//		}
-		//		y = 0;
-		//	}
-		//}
+				if (sumOfPixelValues >= sumOfStandardValue * checkWeight) {
+					series++;
+					if (series == 3) {
+						//PLOGI.printf("end_row2 %d : sumOfPixelValues = %d, gap : %lf", y, sumOfPixelValues, gapUp);
+						break;
+					}
+				}
 
-		//// - y 방향 탐색
-		//for (int y = startY; y >= 0; y -= 1, gap += 1.0) {
-		//	int sumOfPixelValues = 0;
-		//	for (int x = startX; x <= endX; x++) {
-		//		sumOfPixelValues += inversedImage.at<uchar>(y, x);
-		//	}
+				if (y == 0) {
+					rotationTimes++;
+					if (rotationTimes >= 2) {
+						rotationTimes = 0;
+						break;
+					}
+					y = height - 1;
+				}
+			}
+			if (gapUp < 50) {
+				int y = startY - (int)gapUp < 0 ? startY - (int)gapUp + height : startY - (int)gapUp;
 
-		//	PLOGI.printf("row %d : sumOfPixelValues = %d", y, sumOfPixelValues);
-
-		//	if (sumOfPixelValues >= sumOfStandardValue * 1.5) {
-		//		series++;
-		//		if (series == 3) {
-		//			PLOGI.printf("end_row2 %d : sumOfPixelValues = %d", y, sumOfPixelValues);
-		//			break;
-		//		}
-		//	}
-
-		//	if (y == 0) {
-		//		rotationTimes++;
-		//		if (rotationTimes >= 2) {
-		//			rotationTimes = 0;
-		//			break;
-		//		}
-		//		y = height - 1;
-		//	}
-		//}
-
-		double angle = 360.0 / m_nHeight * 45;
+				//PLOGI.printf("end2");
+				//cv::line(tempImage, cv::Point(0, y), cv::Point(tempImage.cols - 1, y), cv::Scalar(0, 255, 0), 1);
+				break;
+			}
+			gapUp = 0;
+			checkWeight -= 0.1; // 가중치 감소
+		}
+		//cv::imwrite("guidewire" + std::to_string(whatNumberYouAre) + ".png", tempImage);
+		//PLOGI.printf("start_Guidewire_Shadow_calc, frameNum = %d", whatNumberYouAre);
+		
+		double angle = (360.0 * (gapDown + gapUp)/2) / (double)inversedImage.rows;
 
 		if (angle >= 20.0 || angle <= 10.0) { // Error 값 처리
 			angle = 15.0; // Normal 값으로 Set
 		}
 
 		double tmp_theta = angle * CV_PI / 180;
+		//PLOGI.printf("angle = %lf, theta = %lf", angle, tmp_theta);
 		theta.push_back(tmp_theta);
 	}
 }
