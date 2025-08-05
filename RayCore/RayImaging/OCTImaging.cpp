@@ -512,14 +512,36 @@ void COCTImaging::findSheath(cv::Mat img) {
 	//m_nSheathPosition = maxY;
 	*/
 
+	/*
 	// way7
-	cv::Mat circularizedImage;
-	CircularizeImage(img, circularizedImage);
+	cv::Mat image, circularizedImage;
+	if (img.type() == CV_32FC1)
+		img.convertTo(image, CV_8UC1, 255);
+	else
+		image = img.clone();
+	CircularizeImage(image, circularizedImage);
 	m_nImageForCalib = circularizedImage.clone();
 
 	m_nSheathPosition = 0;
 
 	cv::imwrite("circularizedImage" + std::to_string(num) + ".tif", circularizedImage);
+	*/
+	
+	
+	// way8
+	cv::Mat circularizedImage;
+	CircularizeImage(img, circularizedImage);
+	int cropSize = 600;
+	int centerX = circularizedImage.cols / 2, centerY = circularizedImage.rows / 2;
+	int startX = centerX - cropSize / 2, startY = centerY - cropSize / 2;
+	cv::Mat croppedImage = circularizedImage(cv::Rect(startX, startY, cropSize, cropSize));
+	double minVal, maxVal;
+	cv::minMaxLoc(croppedImage, &minVal, &maxVal);
+	PLOGI.printf("type: %d, max: %lf", croppedImage.type(), maxVal);
+	m_nImageForCalib = croppedImage.clone();
+	//cv::imwrite("circularizedImage" + std::to_string(num) + ".tif", croppedImage);
+
+	m_nSheathPosition = 0;
 	
 
 	//m_nSheathSearchRange = 300; /*1mm 오차 범위 설정*/
