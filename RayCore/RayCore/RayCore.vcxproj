@@ -121,6 +121,7 @@
       </PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>..\Utility;..\lib\include;..\extern\opencv\include;..\extern\ATS\include;..\extern\ipp\include;..\extern\libusb\include\libusb-1.0;..\extern\libtiff\include</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
+      <DisableSpecificWarnings>6385;6386;6001</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -150,6 +151,7 @@ xcopy "$(TargetDir)RayCore.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" 
       </PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>..\Utility;..\lib\include;..\extern\opencv\include;..\extern\ATS\include;..\extern\ipp\include;..\extern\libusb\include\libusb-1.0;..\extern\libtiff\include</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
+      <DisableSpecificWarnings>6385;6386;6001</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

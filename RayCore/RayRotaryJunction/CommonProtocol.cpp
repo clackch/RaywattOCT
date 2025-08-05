@@ -18,8 +18,7 @@ bool ICommonProtocol::sliceUntilSTX(int index)
 
 	m_vPacket.clear();
 	if (findSTX) {
-		m_vPacket.resize(vPacket.size());
-		std::copy(vPacket.begin(), vPacket.end(), m_vPacket.begin());
+		m_vPacket.assign(vPacket.begin(), vPacket.end());
 	}
 
 	return findSTX;

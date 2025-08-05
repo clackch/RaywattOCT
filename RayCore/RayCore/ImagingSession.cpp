@@ -104,6 +104,17 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 	CConfiguration& config = CConfiguration::GetInstance();
 	COCTImaging* pImaging = nullptr;
 
+	if (pData == nullptr) {
+		PLOGI.printf("pData is null");
+		return nullptr;
+	}
+
+	if (setting.nBufferSize > 1024 * 1024) {
+		PLOGI.printf("BufferSize is too big : %d", setting.nBufferSize);
+		return nullptr;
+	}
+
+	// codesonar suppr C++-resource-leaknew
 	CCalibration* calibration = new CCalibration(setting.nAScan, setting.nFFTLength);
 	if (pData != nullptr && pData->GetExtraData(OCTHeader::ExtraData::Dispersion) != nullptr)
 	{
@@ -117,20 +128,14 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 	}
 
 	USHORT* background = nullptr;
-	if (pData != nullptr && pData->GetExtraData(OCTHeader::ExtraData::Background) != nullptr) 
-	{
-		PLOGI.printf("Read background from .oct file.");
-		if (setting.nBufferSize > 1024 * 1024) {
-			PLOGI.printf("BufferSize is too big : %d", setting.nBufferSize);
-			return nullptr;
-		}
-		background = new USHORT[setting.nBufferSize];
-		memcpy(background, pData->GetExtraData(OCTHeader::ExtraData::Background), sizeof(USHORT) * setting.nBufferSize);
-	}
-	else 
-	{
+	auto rawBg = pData->GetExtraData(OCTHeader::ExtraData::Background);
+	if (rawBg == nullptr) {
 		PLOGI.printf("Read background from .dat file.");
 		background = readBackground("BACKGROUND.bin", setting);
+	}
+	else {
+		background = new USHORT[setting.nBufferSize];
+		memcpy(background, rawBg, sizeof(USHORT) * setting.nBufferSize);
 	}
 
 	PLOGI.printf("Create Imaging - %d x %d (type: %d)", setting.nAScan, setting.nBScan, type);
@@ -149,14 +154,15 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 	case ImagingType::TIFFImaging:
 		pImaging = new CTIFFImaging(setting, msg);
 		((CTIFFImaging*)pImaging)->Initialize();
+		delete calibration;
 		break;
 	default:
+		delete calibration;
 		return nullptr;
 	}
 
 	pImaging->SetColor(true);
 	pImaging->SetMeasurementSetting(config.measurement);
-
 	return pImaging;
 }
 
@@ -405,6 +411,7 @@ int CImagingSession::GetZOffset(int nFrame) {
  }
 
 CImagingSession* CImagingSession::createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type) {
+	// codesonar suppr C resource-leak
 	CImagingSession* pSession = new CImagingSession(pMsg, nSession, deleteData);
 
 	pSession->m_imagingType = type;
@@ -529,6 +536,11 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 			nFrame--;
 			Sleep(DELAY_FOR_WAIT_PROCESS);
 			continue;
+		}
+
+		if (pImaging == nullptr) {
+			PLOGI.printf("plmaging is not initailized");
+			return ERROR;
 		}
 
 		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset(nFrame));
@@ -752,6 +764,7 @@ UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 		nNumOfSamples > 0 &&
 		nImageSize <= SIZE_MAX / nNumOfSamples)
 	{
+		// codesonar suppr C integer-overflow-mul
 		size_t totalSize = nImageSize * nNumOfSamples;
 		pSession->m_pVolumeData = new char[totalSize];
 	}

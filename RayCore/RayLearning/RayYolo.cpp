@@ -12,6 +12,7 @@ CRayYolo::~CRayYolo() {
 
 void CRayYolo::Initialize(bool useGPU){
 	if (m_hDll) {
+		// codesonar suppr C dangerous-function-cast
 		SAFE_LOAD_DLL_FUNC(InitializeSegment, pInitializeSegment);
 		SAFE_LOAD_DLL_FUNC(InitializeDetect, pInitializeDetect);
 		SAFE_LOAD_DLL_FUNC(GetSegmentObjects, pGetSegmentObjects);

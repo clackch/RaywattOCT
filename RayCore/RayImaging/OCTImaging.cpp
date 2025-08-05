@@ -729,10 +729,6 @@ void COCTImaging::adaptive_compensation()
 	logarithmic_contrast_stretching(result_img);
 	result_img.convertTo(result_img, CV_8U, INTENSITY_THRESHOLD);
 
-	if (m_setting.applyGammaCorrection) {
-		adaptive_gamma_correction(result_img, INTENSITY_THRESHOLD);
-	}
-
 	if (m_setting.applySharpness) {
 		sharpening(result_img);
 	}
@@ -747,37 +743,6 @@ void COCTImaging::min_max_normalization(const cv::Mat& img, cv::Mat& normalized_
 	normalized_img = (img - min_val) / (max_val - min_val);
 }
 
-void COCTImaging::linear_contrast_stretching(cv::Mat& img, float lower_percentile, float upper_percentile)
-{
-	// 1. 1D 벡터로 변환 없이 퍼센타일 계산
-	cv::Mat img_reshaped = img.reshape(1, img.rows * img.cols);  // 1D로 변환
-	std::vector<float> img_values;
-	img_values.assign((float*)img_reshaped.datastart, (float*)img_reshaped.dataend);
-
-	// 2. 벡터 정렬
-	std::sort(img_values.begin(), img_values.end());
-
-	// 3. 퍼센타일 값 계산
-	int total_elements = img_values.size();
-	int lower_idx = static_cast<int>(lower_percentile / 100.0 * total_elements);
-	int upper_idx = static_cast<int>(upper_percentile / 100.0 * total_elements);
-
-	float lower_bound = img_values[lower_idx];
-	float upper_bound = img_values[upper_idx];
-
-	// 4. OpenMP 병렬 처리로 클리핑 및 정규화
-#pragma omp parallel for
-	for (int i = 0; i < img.rows; ++i) {
-		float* img_ptr = img.ptr<float>(i);  // 한 번에 한 row의 데이터에 접근
-		for (int j = 0; j < img.cols; ++j) {
-			// 클리핑
-			img_ptr[j] = std::min(std::max(img_ptr[j], lower_bound), upper_bound);
-			// 0-1로 정규화
-			img_ptr[j] = (img_ptr[j] - lower_bound) / (upper_bound - lower_bound + 1e-8);
-		}
-	}
-}
-
 void COCTImaging::logarithmic_contrast_stretching(cv::Mat& img, float lower_percentile, float upper_percentile)
 {
 	// 1. 1D 벡터로 변환하여 퍼센타일 계산
@@ -790,8 +755,17 @@ void COCTImaging::logarithmic_contrast_stretching(cv::Mat& img, float lower_perc
 
 	// 2. 퍼센타일 값 계산
 	int total_elements = img_values.size();
+
+	if (total_elements == 0) {
+		PLOGI.printf("Image is NULL");
+		return;
+	}
 	int lower_idx = static_cast<int>(lower_percentile / 100.0 * total_elements);
 	int upper_idx = static_cast<int>(upper_percentile / 100.0 * total_elements);
+	
+	if (lower_idx > upper_idx) {
+		std::swap(lower_idx, upper_idx);
+	}
 
 	// 전체를 정렬하지 않고 표준 정규분포 상 표준 편차가 +-3(99%)인 값의 index만 추출
 	std::nth_element(img_values.begin(), img_values.begin() + lower_idx, img_values.end());
@@ -846,36 +820,6 @@ std::vector<int> COCTImaging::find_outliers(const std::vector<int>& y_values) {
 	return outlier_indices;
 }
 
-void COCTImaging::adaptive_gamma_correction(cv::Mat& img, int maxIntensity) {
-	bool AGCWD_apply = false;
-	std::vector<double> pdf_i;
-
-	get_PDF_array(img, pdf_i, AGCWD_apply);
-
-	if (AGCWD_apply) {
-		get_CDF_array(pdf_i, cdf_i);
-	}
-
-	double max_intensity = maxIntensity;
-	double calculated_max_intensity = *std::max_element(img.begin<uchar>(), img.end<uchar>());
-	if (calculated_max_intensity > 0) {
-		max_intensity = calculated_max_intensity;
-	}
-
-	cv::Mat output_image = img.clone();
-	for (int y = 0; y < img.rows; y++) {
-		for (int x = 0; x < img.cols; x++) {
-			int intensity = img.at<uchar>(y, x);
-			double intensity_ratio = intensity / max_intensity;
-			double new_intensity = max_intensity * std::pow(intensity_ratio, 1 - cdf_i[intensity]);
-
-			new_intensity = new_intensity > maxIntensity ? maxIntensity : (new_intensity < 0 ? 0 : new_intensity);
-			output_image.at<uchar>(y, x) = static_cast<uchar>(new_intensity);
-		}
-	}
-	img = output_image;
-}
-
 void COCTImaging::sharpening(cv::Mat& img) {
 	cv::Mat origin = img.clone();
 	origin.convertTo(origin, CV_32F);
@@ -903,7 +847,8 @@ void COCTImaging::sharpening(cv::Mat& img) {
 
 void COCTImaging::get_PDF_array(cv::Mat& img, std::vector<double>& pdf_i, bool& AGCWD_apply) {
 	int number_of_pixels = img.rows * img.cols;
-	pdf_i.assign(256, static_cast<double>(0));
+	// codesonar suppr C read-past-null-terminator
+	pdf_i.assign(256, 0.0);
 
 	// Histogram 계산
 	for (int y = 0; y < img.rows; y++) {
@@ -1143,6 +1088,7 @@ void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f>
 	radius.clear();
 
 	std::vector<cv::Point> edgePoints; // GuideWire에서 sheath 중심에 가장 가까운 점
+	// codesonar suppr C buffer-underrun
 	std::vector<double> theta;
 
 	cv::Mat grayImage;
