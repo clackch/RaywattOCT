@@ -116,7 +116,7 @@ namespace RaywattApp.ViewModels.Admin
                 Dictionary<string, object> popupParameter = new Dictionary<string, object>();
                 popupParameter["title"] = _l10n["Information"];
                 popupParameter["message"] = _l10n["A new user has been added"] + "\n\n" + "Password : " + TemporaryPassword;
-                var popupResult = _dialogService.OpenDialog(new AlertDialogControl(), popupParameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                _dialogService.OpenDialog(new AlertDialogControl(), popupParameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.UserListPage));
             }

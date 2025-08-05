@@ -106,7 +106,7 @@ namespace RaywattApp.ViewModels.Admin
                 Dictionary<string, object> popupParameter = new Dictionary<string, object>();
                 popupParameter["title"] = _l10n["Information"];
                 popupParameter["message"] = _l10n["Password initialized"] + "\n\n" + "Password : " + TemporaryPassword;
-                var popupResult = _dialogService.OpenDialog(new AlertDialogControl(), popupParameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                _dialogService.OpenDialog(new AlertDialogControl(), popupParameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.UserListPage));
             }
@@ -165,7 +165,7 @@ namespace RaywattApp.ViewModels.Admin
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = User.Id = User.Id.Trim();
 
-            if (!this.userId.Equals(User.Id))
+            if (!this.userId.Equals(User.Id, StringComparison.Ordinal))
             {
                 int nCnt = _sqlManager.CountUser(sqlParameters);
 
