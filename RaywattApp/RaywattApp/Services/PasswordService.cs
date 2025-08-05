@@ -8,6 +8,7 @@ using RaywattApp.Models;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -21,12 +22,18 @@ namespace RaywattApp.Services
         private readonly IDialogService _dialogService;
         private readonly SqlManager _sqlManager;
 
-        protected readonly DynamicResource _l10n;
+        private readonly DynamicResource _l10n;
         private int _passwordExpiryDays = 90;
         private int _maxPasswordRetryCount = 5;
         private TimeSpan _passwordRetryLockDuration = TimeSpan.FromSeconds(30);
 
-        static private int _currentPasswordRetryCount = 0;
+        private static int _currentPasswordRetryCount;
+
+        public static int CurrentPasswordRetryCount
+        {
+            get => _currentPasswordRetryCount;
+            set => _currentPasswordRetryCount = value;
+        }
 
         public int PasswordExpiryDays
         {
@@ -34,10 +41,11 @@ namespace RaywattApp.Services
         }
 
 
-        public void ResetPasswordCount()
+        public static void ResetPasswordCount()
         {
             _log.Debug("ResetPasswordCount");
-            _currentPasswordRetryCount = 0;
+
+            PasswordService._currentPasswordRetryCount = 0;
         }
 
         public PasswordService(IDialogService dialogService, SqlManager sqlManager)
@@ -56,22 +64,22 @@ namespace RaywattApp.Services
         {
             _log.Debug("IsPasswordConfirmed");
 
-            if (!beforePassword.Equals(inputPassword))
+            if (!beforePassword.Equals(inputPassword, StringComparison.Ordinal))
             {
-                ShowAlert(_l10n["Information"], string.Format("{0} password and {1} password do not match.\r\nRe-enter passwords.", message1, message2));
+                ShowAlert(_l10n["Information"], string.Format(CultureInfo.CurrentCulture, "{0} password and {1} password do not match.\r\nRe-enter passwords.", message1, message2));
                 return false;
             }
 
             return true;
         }
 
-        public bool IsPasswordCorrect(string beforePassword, string inputPassword, string message = "")
+        public bool IsPasswordCorrect(string beforePassword, string inputPassword, string message)
         {
             _log.Debug("IsPasswordCorrect");
 
-            if (!beforePassword.Equals(inputPassword))
+            if (!beforePassword.Equals(inputPassword, StringComparison.Ordinal))
             {
-                ShowAlert(_l10n["Information"], string.Format("{0} password is incorrect.", message));
+                ShowAlert(_l10n["Information"], string.Format(CultureInfo.CurrentCulture, "{0} password is incorrect.", message));
                 return false;
             }
 
@@ -80,23 +88,25 @@ namespace RaywattApp.Services
 
         public bool CheckLoginWithRetryCount(string id, string inputPassword)
         {
-            _currentPasswordRetryCount++;
-
-            _log.Debug("CheckLoginWithRetryCount " + _currentPasswordRetryCount);
+            _log.Debug("CheckLoginWithRetryCount " + PasswordService._currentPasswordRetryCount);
 
             string password = GetAccount(id)?.Password ?? string.Empty;
 
             if (password != inputPassword || password == string.Empty)
             {
-                if (_currentPasswordRetryCount >= _maxPasswordRetryCount + 1)
+                if (PasswordService._currentPasswordRetryCount >= _maxPasswordRetryCount + 1)
                 {
-                    ShowTimerAlert(_l10n["Information"], "Login temporarily disabled.\r\nPlease try again in {0} seconds.", false, _passwordRetryLockDuration);
+                    ShowTimerAlert(_l10n["Information"], "Login temporarily disabled.\r\nPlease try again in {0}.", false, _passwordRetryLockDuration);
                     WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
                     ResetPasswordCount();
                     return false;
                 }
 
-                string alertMessage = string.Format("The user ID or password\r\nentered is incorrect.\r\nPlease try again. {0}/{1}", _currentPasswordRetryCount, _maxPasswordRetryCount);
+                string alertMessage = string.Format( CultureInfo.CurrentCulture,
+                                                    "The user ID or password entered is incorrect.\r\nPlease try again. {0}/{1}",
+                                                    PasswordService._currentPasswordRetryCount,
+                                                    _maxPasswordRetryCount);
+
                 ShowAlert(_l10n["Information"], alertMessage);
 
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
@@ -110,9 +120,9 @@ namespace RaywattApp.Services
         {
             _log.Debug("IsNotSamePassword");
 
-            if (beforePassword.Equals(inputPassword))
+            if (beforePassword.Equals(inputPassword, StringComparison.Ordinal))
             {
-                ShowAlert(_l10n["Information"], string.Format("{0} password and {1} password cannot be the same.", message1, message2));
+                ShowAlert(_l10n["Information"], string.Format(CultureInfo.CurrentCulture, "{0} password and {1} password cannot be the same.", message1, message2));
                 return false;
             }
 
@@ -159,9 +169,12 @@ namespace RaywattApp.Services
             return null;
         }
 
-        public string MessagePasswordChangedSuccessfully()
+        public string MessagePasswordChangedSuccessfully
         {
-            return "Password changed successfully.";
+            get
+            {
+               return  "Password changed successfully.";
+            }
         }
 
         public void ShowAlert(string title, string message)
@@ -199,7 +212,7 @@ namespace RaywattApp.Services
         }
 
 
-        public bool UpdatePasswordReset(string id, string password, string before_passowrd)
+        public bool UpdatePasswordReset(string id, string password, string beforePassowrd)
         {
             _log.Debug("UpdatePasswordReset");
 
@@ -207,7 +220,7 @@ namespace RaywattApp.Services
             {
                 ["id"] = id,
                 ["password"] = password,
-                ["before_password"] = before_passowrd,
+                ["before_password"] = beforePassowrd,
                 ["reset"] = false,
             };
 

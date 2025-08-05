@@ -12,15 +12,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 using System.Windows.Input;
 
 namespace RaywattApp.Services
 {
-    public class IdleMonitorService
+    public class IdleMonitorService : IDisposable
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(IdleMonitorService));
-        protected readonly DynamicResource _l10n;
+        private readonly DynamicResource _l10n;
 
         private IDialogService? _dialogService;
         private AngioManager? _angioManager;
@@ -33,11 +32,13 @@ namespace RaywattApp.Services
         private TimeSpan _totalIdleLimit = TimeSpan.FromMinutes(60);
         private TimeSpan _preAlertLimit = TimeSpan.FromMinutes(5);
 
-        private bool _isPreAlertShown = false;
-        private bool _isLogoutPopupShown = false;
-        private bool _isUserInputDetected = false;
+        private bool _isPreAlertShown;
+        private bool _isLogoutPopupShown;
+        private bool _isUserInputDetected;
 
-        private CancellationTokenSource _cts = new CancellationTokenSource();
+        private bool _disposed;
+
+        private CancellationTokenSource _cts;
 
         List<string> _skipPages = new List<string>()
         {
@@ -50,12 +51,11 @@ namespace RaywattApp.Services
             typeof(FileCopyDialogViewModel),
         };
 
-        public TimeSpan TotalIdleLimit { private get => _totalIdleLimit; set => _totalIdleLimit = value; }
-        public TimeSpan PreAlertLimit { private get => _preAlertLimit; set => _preAlertLimit = value; }
-
         public IdleMonitorService(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager, IPasswordService passwordService)
         {
             _log.Debug("IdleMonitorService");
+
+            _cts = new CancellationTokenSource();
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
@@ -64,6 +64,18 @@ namespace RaywattApp.Services
             _l10n = (DynamicResource)App.Current.Resources["L10N"];
 
             Init();
+        }
+
+        public void Dispose()
+        {
+            _log.Debug("Dispose");
+
+            if (_disposed) return;
+
+            _cts.Dispose();
+            _disposed = true;
+
+            GC.SuppressFinalize(this);
         }
 
         private void Init()
@@ -202,7 +214,7 @@ namespace RaywattApp.Services
 
             System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
-                _passwordService.ShowTimerAlert(_l10n["Information"], "No activity detected.\r\nLogging out in {0} seconds.", true, _totalIdleLimit - _preAlertLimit);
+                _passwordService.ShowTimerAlert(_l10n["Information"], "No activity detected.\r\nLogging out in {0}.", true, _totalIdleLimit - _preAlertLimit);
                 _isPreAlertShown = false;
                 _log.Debug($"Pre Alert Popup closed");
             }));
@@ -244,6 +256,8 @@ namespace RaywattApp.Services
         }
         private void RestartIdleLoop()
         {
+            _log.Debug("RestartIdleLoop");
+            _cts.Dispose();
             _cts = new CancellationTokenSource();
             StartIdleMonitorLoop();
         }

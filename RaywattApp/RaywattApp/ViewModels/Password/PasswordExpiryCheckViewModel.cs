@@ -10,15 +10,16 @@ using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Windows.Input;
 using System.Windows.Navigation;
 
 namespace RaywattApp.ViewModels.Password
 {
-    partial class PasswordExpiryCheckViewModel : ViewModelBase
+    internal sealed partial class PasswordExpiryCheckViewModel : ViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(PasswordExpiryCheckViewModel));
-        protected readonly DynamicResource _l10n;
+        private readonly DynamicResource _l10n;
 
         [ObservableProperty]
         private string _currentPassword = string.Empty;
@@ -58,7 +59,7 @@ namespace RaywattApp.ViewModels.Password
             _l10n = (DynamicResource)App.Current.Resources["L10N"];
 
             _passwordService = passwordService;
-            _chageLaterContent = string.Format(_l10n["MSG_ChangeLaterContent"], _passwordService.PasswordExpiryDays);
+            _chageLaterContent = string.Format(CultureInfo.CurrentCulture, _l10n["MSG_ChangeLaterContent"], _passwordService.PasswordExpiryDays);
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -68,8 +69,8 @@ namespace RaywattApp.ViewModels.Password
             if (navigatedEventArgs is NavigationEventArgs navArgs && navArgs.ExtraData is Dictionary<string, object> data)
             {
                 _user = data["user"] as User ?? new User();
-                _loginPassword = _user.Password;
-                _loginId = _user.Id;
+                _loginPassword = _user?.Password ?? string.Empty;
+                _loginId = _user?.Id ?? string.Empty;
             }
         }
 
@@ -111,7 +112,7 @@ namespace RaywattApp.ViewModels.Password
         {
             _log.Debug("OnOk");
 
-            if (CurrentPassword == string.Empty | NewPassword == string.Empty | ConfirmPassword == string.Empty)
+            if (CurrentPassword == string.Empty || NewPassword == string.Empty || ConfirmPassword == string.Empty)
             {
                 InputPasswordClear();
                 _passwordService.ShowAlert(_l10n["Information"], "Password entry is required");
@@ -169,7 +170,7 @@ namespace RaywattApp.ViewModels.Password
 
             _passwordService.UpdatePasswordReset(_loginId, ConfirmPassword, _loginPassword);
 
-            _passwordService.ShowAlert(_l10n["Information"], _passwordService.MessagePasswordChangedSuccessfully());
+            _passwordService.ShowAlert(_l10n["Information"], _passwordService.MessagePasswordChangedSuccessfully);
 
             return true;
         }

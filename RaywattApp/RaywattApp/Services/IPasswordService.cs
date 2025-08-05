@@ -6,7 +6,8 @@ namespace RaywattApp.Services
     public interface IPasswordService
     {
         int PasswordExpiryDays { get; }
-        void ResetPasswordCount();
+        static void ResetPasswordCount() => PasswordService.ResetPasswordCount();
+
         bool CheckLoginWithRetryCount(string id, string inputPassword);
 
         /// <summary>
@@ -14,7 +15,7 @@ namespace RaywattApp.Services
         /// </summary>
         bool IsPasswordConfirmed(string beforePassword, string inputPassword, string message1, string message2);
 
-        bool IsPasswordCorrect(string actualPassword, string inputPassword, string message = "");
+        bool IsPasswordCorrect(string beforePassword, string inputPassword, string message);
 
         /// <summary>
         /// Checks if the input password does not match the existing password
@@ -22,7 +23,7 @@ namespace RaywattApp.Services
         bool IsNotSamePassword(string beforePassword, string inputPassword, string message1, string message2);
 
         User? GetAccount(string id);
-        
+
         /// <summary>
         /// Validates the password and returns an error message if it does not meet the criteria
         /// </summary>
@@ -38,8 +39,8 @@ namespace RaywattApp.Services
         /// <summary>
         /// Updates the password for a user, resetting it if necessary
         /// </summary>
-        bool UpdatePasswordReset(string id, string password, string before_passowrd);
+        bool UpdatePasswordReset(string id, string password, string beforePassowrd);
 
-        string MessagePasswordChangedSuccessfully();
+        string  MessagePasswordChangedSuccessfully { get; }
     }
 }

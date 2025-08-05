@@ -3,11 +3,12 @@ using log4net;
 using RaywattApp.Common.Dialog;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Windows.Threading;
 
 namespace RaywattApp.ViewModels.Dialog
 {
-    partial class AlertTimerDialogViewModel : DialogViewModelBase
+    internal sealed partial class AlertTimerDialogViewModel : DialogViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(AlertDialogViewModel));
 
@@ -29,16 +30,22 @@ namespace RaywattApp.ViewModels.Dialog
         {
             _log.Debug("SetParameter");
 
-            Dictionary<string, object> data = (Dictionary<string, object>)parameter;
+            var data = parameter as Dictionary<string, object>;
+
+            if (data == null)
+            {
+                _log.Debug("SetParameter: Parameter is null.");
+                return;
+            }
 
             Title = data["title"]?.ToString();
             _message = data["message"]?.ToString();
 
             _remainingTime = data["wait_seconds"] is TimeSpan ts ? ts : TimeSpan.FromSeconds(0);
 
-            if (data.TryGetValue("show_button", out var okButtonVisibleObj) && okButtonVisibleObj is bool isVisibility)
+            if (data.TryGetValue("show_button", out var obj))
             {
-                OkButtonVisibility = isVisibility;
+                OkButtonVisibility = obj is bool b ? b : false;
             }
 
             if (data.TryGetValue("error", out var errorObj) && errorObj is bool error)
@@ -101,14 +108,14 @@ namespace RaywattApp.ViewModels.Dialog
             int minutes = _remainingTime.Minutes;
             int seconds = _remainingTime.Seconds;
 
-            string timeMessage = string.Empty;
+            string timeMessage;
 
             if (_remainingTime.TotalMinutes >= 1)
                 timeMessage = $"{minutes} minutes {seconds} seconds";
             else
                 timeMessage = $"{seconds} seconds";
 
-            Message = string.Format(_message, timeMessage);
+            Message = string.Format(CultureInfo.CurrentCulture, _message, timeMessage);
 
             OnPropertyChanged(nameof(Message));
         }

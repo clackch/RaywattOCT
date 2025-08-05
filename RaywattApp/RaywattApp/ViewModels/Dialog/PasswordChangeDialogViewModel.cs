@@ -22,9 +22,6 @@ namespace RaywattApp.ViewModels.Dialog
         [ObservableProperty]
         private string _confirmPassword = string.Empty;
 
-        private string _loginPassword = string.Empty;
-        private string _loginID = string.Empty;
-
         private ICommand _cancelCommand;
         public ICommand CancelCommand
         {
@@ -41,7 +38,7 @@ namespace RaywattApp.ViewModels.Dialog
 
         public PasswordChangeDialogViewModel(IPasswordService passwordService)
         {
-            _log.Info("PasswordChangeDialogViewModel");
+            _log.Debug("PasswordChangeDialogViewModel");
 
             _passwordService = passwordService;
         }
@@ -63,7 +60,7 @@ namespace RaywattApp.ViewModels.Dialog
 
         private void OnCancel(IDialogWindow dialog)
         {
-            _log.Info("OnCancel");
+            _log.Debug("OnCancel");
 
             DialogResults dialogResults = new();
             dialogResults.DialogAnswer = DialogResults.Answer.No;
@@ -73,9 +70,9 @@ namespace RaywattApp.ViewModels.Dialog
 
         private void OnOk(IDialogWindow dialog)
         {
-            _log.Info("OnOk");
+            _log.Debug("OnOk");
 
-            if (CurrentPassword == string.Empty | NewPassword == string.Empty | ConfirmPassword == string.Empty)
+            if (CurrentPassword == string.Empty || NewPassword == string.Empty || ConfirmPassword == string.Empty)
             {
                 InputPasswordClear();
                 _passwordService.ShowAlert(_l10n["Information"], "Password entry is required");
@@ -102,7 +99,7 @@ namespace RaywattApp.ViewModels.Dialog
 
         private void InputPasswordClear()
         {
-            _log.Info("InputPasswordClear");
+            _log.Debug("InputPasswordClear");
 
             CurrentPassword = string.Empty;
             NewPassword = string.Empty;
@@ -111,18 +108,18 @@ namespace RaywattApp.ViewModels.Dialog
 
         private bool ExecuteChangePassword()
         {
-            _log.Info("ExecuteChangePassword");
+            _log.Debug("ExecuteChangePassword");
 
-            _loginID = ViewModelBase.DeviceStatus.LoginID;
+            string loginID = ViewModelBase.DeviceStatus.LoginID;
+            string loginPassword = _passwordService.GetAccount(loginID)!.Password;
 
-            _loginPassword = _passwordService.GetAccount(_loginID)!.Password;
-            if (_loginPassword == string.Empty)
+            if (loginPassword == string.Empty)
             {
                 _passwordService.ShowAlert(_l10n["Information"], "Current password not found. Please contact support.");
                 return false;
             }
 
-            if (!_passwordService.IsPasswordCorrect(_loginPassword, CurrentPassword, "Current")) return false;
+            if (!_passwordService.IsPasswordCorrect(loginPassword, CurrentPassword, "Current")) return false;
 
             if (!_passwordService.IsNotSamePassword(CurrentPassword, NewPassword, "Current", "New")) return false;
 
@@ -134,9 +131,9 @@ namespace RaywattApp.ViewModels.Dialog
                 return false;
             }
 
-            _passwordService.UpdatePasswordReset(_loginID, ConfirmPassword, _loginPassword);
+            _passwordService.UpdatePasswordReset(loginID, ConfirmPassword, loginPassword);
 
-            _passwordService.ShowAlert(_l10n["Information"], _passwordService.MessagePasswordChangedSuccessfully());
+            _passwordService.ShowAlert(_l10n["Information"], _passwordService.MessagePasswordChangedSuccessfully);
 
             return true;
         }

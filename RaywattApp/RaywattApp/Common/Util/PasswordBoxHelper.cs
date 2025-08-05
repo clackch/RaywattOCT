@@ -83,8 +83,10 @@ namespace RaywattApp.Common.Util
             if (e.DataObject.GetDataPresent(DataFormats.Text))
             {
                 string text = (string)e.DataObject.GetData(DataFormats.Text);
-                if (text.Contains(" "))
+                if (text.Contains(' '))
+                {
                     e.CancelCommand();
+                }
             }
             else
             {

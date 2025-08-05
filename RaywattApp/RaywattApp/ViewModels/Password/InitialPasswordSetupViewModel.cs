@@ -13,7 +13,7 @@ using System.Windows.Navigation;
 
 namespace RaywattApp.ViewModels.Password
 {
-    partial class InitialPasswordSetupViewModel : ViewModelBase
+    internal sealed  partial class InitialPasswordSetupViewModel : ViewModelBase
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(InitialPasswordSetupViewModel));
 
@@ -60,8 +60,8 @@ namespace RaywattApp.ViewModels.Password
             if (navigatedEventArgs is NavigationEventArgs navArgs && navArgs.ExtraData is Dictionary<string, object> data)
             {
                 _user = data["user"] as User ?? new User();
-                _loginId = _user.Id;
-                _loginPassword = _user.Password;
+                _loginId = _user?.Id ?? string.Empty;
+                _loginPassword = _user?.Password ?? string.Empty;
 
                 if (string.IsNullOrEmpty(_loginId) || string.IsNullOrEmpty(_loginPassword))
                 {
@@ -102,7 +102,7 @@ namespace RaywattApp.ViewModels.Password
 
             _passwordService.UpdatePasswordReset(_loginId, ConfirmPassword, _loginPassword);
 
-            _passwordService.ShowAlert(_l10n["Information"], _passwordService.MessagePasswordChangedSuccessfully());
+            _passwordService.ShowAlert(_l10n["Information"], _passwordService.MessagePasswordChangedSuccessfully);
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["login_step"] = LoginStep.CheckPasswordExpiry;

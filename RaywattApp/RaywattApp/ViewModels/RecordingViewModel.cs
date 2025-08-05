@@ -128,7 +128,7 @@ namespace RaywattApp.ViewModels
                 return;
             }
 
-            if (!isCathRoomSelected | !isAngioConnected)
+            if (!isCathRoomSelected || !isAngioConnected)
             {
                 IsDeviceConnectedMessage = true;
                 return;

@@ -115,6 +115,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("AttemptLogin");
 
+            PasswordService.CurrentPasswordRetryCount++;
             if (!_passwordService.CheckLoginWithRetryCount(Id.Text, Password))
             {
                 return;
@@ -124,7 +125,7 @@ namespace RaywattApp.ViewModels
 
             _user = _passwordService.GetAccount(DeviceStatus.LoginID);
             
-            _passwordService.ResetPasswordCount();
+            IPasswordService.ResetPasswordCount();
 
             ExecuteLoginStep(LoginStep.CheckInitialPasswordReset);
         }
