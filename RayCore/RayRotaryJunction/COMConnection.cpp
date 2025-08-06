@@ -40,10 +40,10 @@ int CCOMConnection::Write(unsigned char* buffer, int size)
 {
 	if (m_pPort == nullptr || !m_pPort->IsOpen()) return 0;
 	if (buffer == nullptr) return 0;
-	bool result = true;
+	
 	BYTE* copied = new BYTE[size];
 	std::memcpy(copied, buffer, size);
-	m_pWriteManager->addTask([=]() {
+	bool result = m_pWriteManager->addTask([=]() {
 		m_pPort->WriteByte(copied, size);
 		delete[] copied;
 		});

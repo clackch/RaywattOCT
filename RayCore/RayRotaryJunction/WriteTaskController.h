@@ -15,8 +15,8 @@ public:
     ~WriteTaskController();
 
     void start();
-    void addTask(std::function<void()> task);
     void stop();
+    bool addTask(std::function<void()> task);
     int getTaskNum();
 
     WriteTaskController(const WriteTaskController&) = delete;

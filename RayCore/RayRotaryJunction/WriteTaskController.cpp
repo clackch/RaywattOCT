@@ -14,10 +14,11 @@ void WriteTaskController::start() {
     workerThread = std::thread(&WriteTaskController::worker, this);
 }
 
-void WriteTaskController::addTask(std::function<void()> task) {
+bool WriteTaskController::addTask(std::function<void()> task) {
     //printf("[in add] : %d\n", taskQueue.unsafe_size());
     taskQueue.push(task);
     cv.notify_one();
+    return true;
 }
 
 void WriteTaskController::stop() {
