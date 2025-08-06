@@ -106,6 +106,7 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
         config.bldcMotor.velocityPullback = value;
         break;
     case RayProperty::PullbackDistance:
+        config.stepMotor.pullbackDistance = value;
         break;
     case RayProperty::PullbackSpeed:
         config.stepMotor.pullbackSpeed = value;
