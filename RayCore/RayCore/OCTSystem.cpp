@@ -264,7 +264,7 @@ RayError COCTSystem::DisconnectDevices() {
 */
 RayError COCTSystem::AutoCalibration() {
 	if (m_curState == RayScannerState::Default || m_curState == RayScannerState::Review) {
-		//To-Do: check Catheter
+		if (m_pRJController->GetState() != eRJState::Loaded) return RayError::RotaryJunctionError;
 
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 
@@ -283,6 +283,7 @@ RayError COCTSystem::ManualCalibration(bool forward) {
 	if (m_curState == RayScannerState::Default) {
 		if (m_pLaserModule->IsConnected() == false) return RayError::DeviceNotConnected;
 		if (m_pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) return RayError::DeviceBusy;
+		if (m_pRJController->GetState() == eRJState::Error) return RayError::RotaryJunctionError;
 
 		m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_DEFAULT * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
 		m_pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, (forward ? DELAYLINE_FORWARD_POSITION * CConfiguration::GetInstance().laserModule.delayLineSMSteps : DELAYLINE_BACKWARD_POSITION * CConfiguration::GetInstance().laserModule.delayLineSMSteps));
@@ -333,6 +334,7 @@ RayError COCTSystem::ReadyPullback()
 */
 RayError COCTSystem::PullbackScan(char *strFilePath) {
 	if (m_curState == RayScannerState::Default) {
+		if (m_pRJController->GetState() == eRJState::Error) return RayError::RotaryJunctionError;
 		m_strFilePath = CUtility::StringToWstring(strFilePath);
 
 		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Scanning);
@@ -493,6 +495,7 @@ RayError COCTSystem::StartLiveView()
 {
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
+		if (m_pRJController->GetState() == eRJState::Error) return RayError::RotaryJunctionError;
 		m_pImagingLiveView->Start();
 
 		CConfiguration& config = CConfiguration::GetInstance();
@@ -515,6 +518,7 @@ RayError COCTSystem::StopLiveView()
 {
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
+		if (m_pRJController->GetState() == eRJState::Error) return RayError::RotaryJunctionError;
 		m_pImagingLiveView->Stop();
 		Sleep(500);
 
@@ -2684,7 +2688,10 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 		break;
 	case eRJState::Error:
 		if (m_pThreadRotaryJunction != nullptr) m_pThreadRotaryJunction->isRun = false;
+		if (m_pLaserModule != nullptr) m_pLaserModule->SetVLD(0);
 		laserOnOff(false);
+
+		postMessage(WM_NOTIFY_ERROR_OCCURED, (WPARAM)RayError::RotaryJunctionError);
 		break;
 	}
 

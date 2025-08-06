@@ -605,7 +605,7 @@ namespace RaywattApp.ViewModels
                     case RayError.CatheterNotValid:
                         CatheterFailReceiver();
                         break;
-                    case RayError.RotaryJunctionError:
+                    case RayError.HomingFailed:
                         DeviceStatus.CatheterStatus = Constants.CatheterStatusFailed;
                         break;
                     default:

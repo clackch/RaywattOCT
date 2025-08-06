@@ -18,6 +18,7 @@ namespace RaywattOCT
             WrongState,
             WrongSession,
             InvalidFunctionCall,
+            HomingFailed,
             RotaryJunctionError
         };
 

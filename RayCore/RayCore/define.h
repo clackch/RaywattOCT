@@ -21,6 +21,7 @@ enum class RayError {
 	WrongState,
 	WrongSession,
 	InvalidFunctionCall,
+	HomingFailed,
 	RotaryJunctionError,
 };
 
