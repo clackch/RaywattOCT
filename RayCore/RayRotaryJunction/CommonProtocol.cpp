@@ -37,17 +37,17 @@ bool ICommonProtocol::parseSerialPacket() {
 				{
 					BYTE length = m_vPacket[LENGTH_IDX];
 					if (idxETX != (length - 1)) continue;
-
 					BYTE checksum = calcChecksum(&m_vPacket[0], length - 2);
 					if (checksum == m_vPacket[length - 2]) {
 						handlePacket();
-						sliceUntilSTX(idxETX);
+						findSTX = sliceUntilSTX(idxETX);
 					}
 					else {
-						sliceUntilSTX(1);
+						findSTX = sliceUntilSTX(1);
 					}
 
-					break;
+					if(!findSTX)
+						break;
 				}
 			}
 		}
@@ -68,6 +68,8 @@ void ICommonProtocol::getSerialPacket(eFID fid, int dataSize, BYTE* packet, int&
 	packet[KEY_IDX] = 0;
 	packet[packetLength - 1] = m_etx;
 }
+
+
 BYTE ICommonProtocol::calcChecksum(BYTE* packet, int length) {
 	unsigned int crc = 0x00;
 	for (int i = 1; i < length; i++)

@@ -2,8 +2,14 @@
 #include "SerialPort.h"
 #include "Utility.h"
 
+WriteTaskController* CCOMConnection::m_pWriteManager;
+
 CCOMConnection::CCOMConnection() {
 	m_pPort = new CSerialPort();
+	if (m_pWriteManager == nullptr) {
+		m_pWriteManager = new WriteTaskController(10);
+		m_pWriteManager->start();
+	}
 }
 CCOMConnection::~CCOMConnection() {
 	if (m_pPort != nullptr) {
@@ -27,22 +33,29 @@ void CCOMConnection::Disconnect() {
 	if (m_pPort->IsOpen()) {
 		m_pPort->ClosePort();
 	}
+	m_pWriteManager->stop();
 }
 
 int CCOMConnection::Write(unsigned char* buffer, int size) 
 {
 	if (m_pPort == nullptr || !m_pPort->IsOpen()) return 0;
 	if (buffer == nullptr) return 0;
-
-	bool result = m_pPort->WriteByte(buffer, size);
 	
+	BYTE* copied = new BYTE[size];
+	std::memcpy(copied, buffer, size);
+	bool result = m_pWriteManager->addTask([=]() {
+		m_pPort->WriteByte(copied, size);
+		delete[] copied;
+		});
+
+	//PLOGI.printf("tasknum : %d", m_pWriteManager->getTaskNum());
 	return (result) ? size : 0;
 }
-int CCOMConnection::Read(unsigned char* buffer) 
+
+int CCOMConnection::Read(unsigned char* buffer, int size)
 {
 	if (m_pPort == nullptr || !m_pPort->IsOpen()) return 0;
 	if (buffer == nullptr) return 0;
-
-	int nRead = m_pPort->ReadByte(buffer, sizeof(buffer));
+	int nRead = m_pPort->ReadByte(buffer, size);
 	return nRead;
 }

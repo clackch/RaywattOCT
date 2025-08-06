@@ -42,9 +42,9 @@ bool CSerialPort::ConfigurePort(DWORD BaudRate, BYTE ByteSize, DWORD fParity,
 	m_dcb.fAbortOnError = false; // true; // za_serial.c ¿¡¼­ false
 	m_dcb.fOutxCtsFlow = false;  
 	m_dcb.fOutxDsrFlow = false;  
-	m_dcb.fDtrControl = DTR_CONTROL_DISABLE;  
+	m_dcb.fDtrControl = DTR_CONTROL_ENABLE;  
 	m_dcb.fDsrSensitivity = false;  
-	m_dcb.fRtsControl = RTS_CONTROL_DISABLE;
+	m_dcb.fRtsControl = RTS_CONTROL_ENABLE;
 	m_bPortReady = SetCommState(m_hComm, &m_dcb);   
 	if (m_bPortReady == 0)   
 	{   
@@ -119,7 +119,8 @@ bool CSerialPort::ReadByte(BYTE &resp) {
 int CSerialPort::ReadByte(BYTE* &resp, UINT size) {  
 	DWORD dwBytesTransferred = 0;    
 	if (ReadFile(m_hComm, resp, size, &dwBytesTransferred, 0)) 
-	{      
+	{
+		PurgeComm(m_hComm, PURGE_RXCLEAR);
 		return dwBytesTransferred;
 	}     
 	return 0;

@@ -2070,6 +2070,30 @@ UINT COCTSystem::threadCleanRotaryJunction(LPVOID param)
 }
 
 /*
+* RFIDValidating
+*/
+UINT COCTSystem::threadRFIDValidation(LPVOID param) {
+	COCTSystem* pSystem = (COCTSystem*)param;
+	CConfiguration& config = CConfiguration::GetInstance();
+	CRJController* pRJController = pSystem->m_pRJController;
+	RFID_ValidType isValid = RFID_ValidType::WAITING;
+	while (isValid == WAITING) {
+		isValid = pRJController->isValidRFID();
+		Sleep(100);
+		if (!pSystem->m_pThreadRotaryJunction->isRun) {
+			return NOERROR;
+		}
+	}
+	pRJController->UpdateState(eRJState::Validating);
+	
+	while (pSystem->m_pThreadRotaryJunction->isRun) {
+		Sleep(DELAY_FOR_STOP_THREAD);
+	}
+
+	return NOERROR;
+}
+
+/*
 * createColorImaging
 */
 bool COCTSystem::checkConnection() {
@@ -2154,8 +2178,19 @@ int COCTSystem::connectRotaryJunction() {
 
 	bool result = true;
 
+	if (!m_pRJController->IsConnected()) {
+		result &= m_pRJController->Connect(config.bldcMotor.port);
+
+		if (result) {
+			m_pRJController->StartControl();
+			m_pRJController->UpdateState(eRJState::Initializing);
+		}
+		else {
+			PLOGI.printf("Failed to connect to Rotary Junction");
+		}
+	}
 	if (!m_pLaserModule->IsConnected()) {
-		result = m_pLaserModule->Connect(config.laserModule.port);
+		result &= m_pLaserModule->Connect(config.laserModule.port);
 		if (result) {
 			m_pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_DEFAULT);
 			m_pLaserModule->SetVLD(0);
@@ -2199,18 +2234,6 @@ int COCTSystem::connectRotaryJunction() {
 		else
 		{
 			PLOGE.printf("Failed to connect to laser module");
-		}
-	}
-
-	if (!m_pRJController->IsConnected()) {
-		result &= m_pRJController->Connect(config.bldcMotor.port);
-
-		if (result) {
-			m_pRJController->StartControl();
-			m_pRJController->UpdateState(eRJState::Initializing);
-		}
-		else {
-			PLOGI.printf("Failed to connect to Rotary Junction");
 		}
 	}
 
@@ -2633,23 +2656,31 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 		break;
 	case eRJState::Validating:
 	{
-		BYTE RFIDInfo[MAX_PATH];
-		UINT nRFIDLength = m_pRJController->GetRFIDInfo(RFIDInfo);
+		RFID_ValidType isValid = m_pRJController->isValidRFID();
 
 #if ENABLE_RFID
-		if (nRFIDLength != 0) 
-#endif
+		if (isValid == RFID_ValidType::VALID)
 		{
+			if(isValidating)
+				CUtility::StopThread(m_pThreadRotaryJunction);
+			isValidating = false;
 			// To-Do: Validation
-			bool isValid = true;
-			
-			if (isValid) {
-				m_pRJController->UpdateState(eRJState::Loading);
-			}
-			else {
-				m_pRJController->UpdateState(eRJState::Error);
+			//영상 validation 스레드 실행할 것
+			PLOGI.printf("validation true");
+		}
+		else if(isValid == RFID_ValidType::INVALID){
+			if (isValidating)
+				CUtility::StopThread(m_pThreadRotaryJunction);
+			isValidating = false;
+			PLOGI.printf("validation false");
+			m_pRJController->UpdateState(eRJState::Error);
+		}
+		else {
+			if (CUtility::StartThread(threadRFIDValidation, m_pThreadRotaryJunction, this)) {
+				isValidating = true;
 			}
 		}
+#endif
 		break;
 	}
 	case eRJState::Loading:
