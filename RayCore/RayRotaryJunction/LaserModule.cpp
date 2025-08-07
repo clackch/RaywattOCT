@@ -230,7 +230,7 @@ UINT CLaserModule::threadReadPacket(LPVOID param) {
 	int offset = 0;
 
 	while (pRJController->m_pThread->isRun) {
-		int readSize = pRJController->m_pConnection->Read(recvBuf + offset);
+		int readSize = pRJController->m_pConnection->Read(recvBuf + offset, sizeof(recvBuf)/sizeof(*recvBuf)-offset);
 		if (readSize > 0) {
 			pRJController->addPacket(recvBuf, readSize);
 			pRJController->parseSerialPacket();
