@@ -58,8 +58,13 @@ bool CLaserModule::ReadPosition() {
 
 	BYTE serialPacket[MAX_PATH];
 
-	int packetLength;
+	int packetLength = 0;
 	getSerialPacket(eFID::FID_SM_GET_STATE, 0, serialPacket, packetLength);
+
+	if (packetLength < 2) {
+		PLOGI.printf("packetLength too small");
+		return false;
+	}
 
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
@@ -161,7 +166,6 @@ int CLaserModule::MoveRelative(eStepMotorIndex idxMotor, int nOffset) {
 	int index = (int)idxMotor - 1;
 	int actualPosition = m_nActualPosition[index];
 
-	int nLastTargetPos = m_nStepPosition[index];
 	int nPosition = actualPosition + nOffset;
 
 	Move(idxMotor, nPosition);
@@ -290,7 +294,6 @@ void CLaserModule::parseAutoReportPacket(BYTE* packet, int size) {
 	memcpy(&m_nVOA, packet + offset, sizeof(unsigned short));
 	offset += sizeof(unsigned short) * 2;	// voa output (2byte), voa input (2byte)
 	memcpy(&m_nVLD, packet + offset, sizeof(unsigned short));
-	offset += sizeof(unsigned short) * 2;	// vld output (2byte), vld input (2byte)
 }
 void CLaserModule::parseSMPacket(BYTE* packet, int size) {
 	int offset = 0;

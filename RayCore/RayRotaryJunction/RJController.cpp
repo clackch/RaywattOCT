@@ -946,9 +946,14 @@ bool CRJController::writeMotor(BYTE* packet, int size) {
 	if (!m_initMotor) return false;
 	
 	BYTE serialPacket[MAX_PATH];
-	int packetLength;
+	int packetLength = 0;
 	getSerialPacket(eFID::FID_BLDC_PASS, size, serialPacket, packetLength);
 	memcpy(serialPacket + DATA_IDX, packet, size);
+
+	if (packetLength < 2) {
+		PLOGI.printf("PacketLength is too small");
+		return 0;
+	}
 
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;

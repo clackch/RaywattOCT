@@ -64,6 +64,10 @@ CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSess
 	{
 		pReader = new CDataReader();
 		OCTHeader header = pReader->ReadHeader(CUtility::StringToWstring(strFilePath));
+		if (header.width == 0 || header.height == 0) {
+			PLOGI.printf("The OCT file header is abnormal");
+			return nullptr;
+		}
 		setting.Set(header.width, header.height);
 		nNumOfSamples = pReader->Initialize(CUtility::StringToWstring(strFilePath), setting.nBufferSize);
 	}
@@ -100,6 +104,7 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 	CConfiguration& config = CConfiguration::GetInstance();
 	COCTImaging* pImaging = nullptr;
 
+	// codesonar suppr C++-resource-leaknew
 	CCalibration* calibration = new CCalibration(setting.nAScan, setting.nFFTLength);
 	if (pData != nullptr && pData->GetExtraData(OCTHeader::ExtraData::Dispersion) != nullptr)
 	{
@@ -113,13 +118,17 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 	}
 
 	USHORT* background = nullptr;
-	if (pData != nullptr && pData->GetExtraData(OCTHeader::ExtraData::Background) != nullptr) 
+	if (pData != nullptr && pData->GetExtraData(OCTHeader::ExtraData::Background) != nullptr)
 	{
 		PLOGI.printf("Read background from .oct file.");
+		if (setting.nBufferSize > 1024 * 1024) {
+			PLOGI.printf("BufferSize is too big : %d", setting.nBufferSize);
+			return nullptr;
+		}
 		background = new USHORT[setting.nBufferSize];
 		memcpy(background, pData->GetExtraData(OCTHeader::ExtraData::Background), sizeof(USHORT) * setting.nBufferSize);
 	}
-	else 
+	else
 	{
 		PLOGI.printf("Read background from .dat file.");
 		background = readBackground("BACKGROUND.bin", setting);
@@ -141,14 +150,15 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 	case ImagingType::TIFFImaging:
 		pImaging = new CTIFFImaging(setting, msg);
 		((CTIFFImaging*)pImaging)->Initialize();
+		delete calibration;
 		break;
 	default:
+		delete calibration;
 		return nullptr;
 	}
 
 	pImaging->SetColor(true);
 	pImaging->SetMeasurementSetting(config.measurement);
-
 	return pImaging;
 }
 
@@ -358,8 +368,16 @@ bool CImagingSession::LoadZOffset(const char* strDataFilePath) {
 		PLOGI.printf("ZOffset file loaded: %s", strZOffsetFilePath.c_str());
 		for (int i = 0; i < nNumOfSamples; i++) {
 			int offset = 0;
-			fscanf(fp, "%d,", &offset);
-			//PLOGI.printf("%d", offset);
+			int ret = fscanf(fp, "%d,", &offset);
+
+			if (ret != 1) {
+				if (ret == EOF) {
+					PLOGI.printf("fscanf failed or reached EOF");
+				}
+			}
+			else {
+				PLOGI.printf("fscanf: expected 1 item, got %d\n", ret);
+			}
 
 			m_vZOffset.push_back(offset);
 		}
@@ -389,11 +407,17 @@ int CImagingSession::GetZOffset(int nFrame) {
  }
 
 CImagingSession* CImagingSession::createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type) {
+	// codesonar suppr C resource-leak
 	CImagingSession* pSession = new CImagingSession(pMsg, nSession, deleteData);
 
 	pSession->m_imagingType = type;
 	pSession->m_pDataManager = pData;
 	pSession->m_pImaging = CreateColorImaging(pMsg, setting, pData, type);
+
+	if (pSession->m_pImaging == nullptr) {
+		PLOGI.printf("ImagingSession is not initialized");
+		return nullptr;
+	}
 	pSession->m_pImaging->SetSession(nSession);
 
 	return pSession;
@@ -438,6 +462,10 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 	CCutViewManager* pCutView = pSession->m_pCutView;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 	cv::Mat imgCircle, imgZOffset;
+
+	if (pImaging == nullptr) {
+		return ERROR;
+	}
 
 	PLOGI.printf("Session #%d update cutview - %d frames", pSession->m_nSession, nNumOfSamples);
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadUpdateCutView->isRun; nFrame++) {
@@ -504,6 +532,11 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 			nFrame--;
 			Sleep(DELAY_FOR_WAIT_PROCESS);
 			continue;
+		}
+
+		if (pImaging == nullptr) {
+			PLOGI.printf("plmaging is not initailized");
+			return ERROR;
 		}
 
 		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset(nFrame));
@@ -702,17 +735,39 @@ UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 	// prepare imaging (without message)
 	COCTImaging* pImaging = CreateColorImaging(nullptr, pSession->m_pImaging->GetSetting(), pDataManager, pSession->GetImagingType());
 
+	if (pImaging == nullptr) {
+		PLOGI.printf("pImaging is not initialized");
+		return ERROR;
+	}
+
 	CConfiguration& config = CConfiguration::GetInstance();
-	const int nNumOfSamples = pDataManager->GetNumOfSamples();
-	const int nDiameter = config.volume.size;
-	const int nImageSize = nDiameter * nDiameter;
+	const size_t nNumOfSamples = pDataManager->GetNumOfSamples();
+	const size_t nDiameter = config.volume.size;
+	const size_t nImageSize = nDiameter * nDiameter;
 	cv::Mat imgCircle, imgResize, imgZOffset;
 
 	if (pSession->m_pVolumeData != nullptr)
 	{
 		delete[] pSession->m_pVolumeData;
 	}
-	pSession->m_pVolumeData = new char[nImageSize * nNumOfSamples];
+
+	if (nImageSize >= 600 * 600 || nNumOfSamples > 1600) {
+		PLOGI.printf("Volume Data Size too big : config.volume.size = %d, nNumOfSamples = %d", nDiameter, nNumOfSamples);
+		return ERROR;
+	}
+
+	if (nImageSize > 0 &&
+		nNumOfSamples > 0 &&
+		nImageSize <= SIZE_MAX / nNumOfSamples)
+	{
+		// codesonar suppr C integer-overflow-mul
+		size_t totalSize = nImageSize * nNumOfSamples;
+		pSession->m_pVolumeData = new char[totalSize];
+	}
+	else {
+		PLOGE.printf("Requested memory too large or invalid input");
+		return ERROR;
+	}
 
 	PLOGI.printf("Session #%d volume generation start - %d frames", pSession->m_nSession, nNumOfSamples);
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadVolumeGeneration->isRun; nFrame++) {
@@ -744,10 +799,30 @@ USHORT* CImagingSession::readBackground(const char* strBackgroundFile, IImaging:
 	if (strBackgroundFile == nullptr) return nullptr;
 	
 	FILE* fp = fopen(strBackgroundFile, "rb");
-	if (fp == nullptr) return nullptr;
+	if (fp == nullptr) {
+		return nullptr;
+	}
+
+	if (setting.nBufferSize > 1024 * 1024 * 100) {
+		PLOGI.printf("BufferSize is too big : %d", setting.nBufferSize);
+		fclose(fp);
+		return nullptr;
+	}
 
 	USHORT* pBackground = new USHORT[setting.nBufferSize];
-	fread(pBackground, sizeof(USHORT), setting.nBufferSize, fp);
+	size_t size = fread(pBackground, sizeof(USHORT), setting.nBufferSize, fp);
+
+	if (size != setting.nBufferSize) {
+		if (feof(fp)) {
+			PLOGI.printf("Warning: Reached end of file prematurely");
+		}
+		else if (ferror(fp)) {
+			PLOGI.printf("Error reading file");
+		}
+		else {
+			PLOGI.printf("Unknown fread issue");
+		}
+	}
 
 	fclose(fp);
 

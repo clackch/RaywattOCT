@@ -31,23 +31,38 @@ CLabImaging::~CLabImaging() {
 void CLabImaging::Initialize(CCalibration* calibration, USHORT* backgroundData) {
 	COCTImaging::Initialize(calibration);
 
-	const int nAScan = m_setting.nAScan;
-	const int nBScan = m_setting.nBScan;
-	const int nBufferSize = m_setting.nBufferSize;
-	const int nOutputLength = m_setting.nOutputLength;
+	const size_t nAScan = m_setting.nAScan;
+	const size_t nBScan = m_setting.nBScan;
+	const size_t nOutputLength = m_setting.nOutputLength;
+
+	size_t allocSize = static_cast<size_t>(nOutputLength);
+
+	if (nBScan > 1024 * 10 || nOutputLength > 1024 * 10) {
+		PLOGI.printf("Bscan = %d, OutputLength = %d. One of them is too big", m_setting.nBScan, m_setting.nOutputLength);
+		return;
+	}
+	allocSize *= static_cast<size_t>(nBScan);
 
 	this->backgroundData = backgroundData;
-	this->backgroundFFT = new float[nOutputLength * nBScan];
-	this->backgroundSubtracted = new float[nOutputLength * nBScan];
-	this->logData = new float[nOutputLength * nBScan];
+	this->backgroundFFT = new float[allocSize];
+	this->backgroundSubtracted = new float[allocSize];
+	this->logData = new float[allocSize];
 
 	generateBackground((Ipp16u*)backgroundData);
 	fftProcessing(fringes32f);
 
 	ippsCopy_32f(fFFTResult, backgroundFFT, nOutputLength * nBScan);
 
-	scopeData = new USHORT[nAScan * 2];
-	scopeFFTData = new USHORT[nOutputLength * 2];
+	allocSize = static_cast<size_t>(nAScan) * 2;
+
+	if (allocSize > 1024 * 10) {
+		PLOGI.printf("nAScan = %d, Ascan value is too big", m_setting.nAScan);
+		return;
+	}
+
+	scopeData = new USHORT[allocSize];
+	allocSize = static_cast<size_t>(nOutputLength) * 2;
+	scopeFFTData = new USHORT[allocSize];
 
 	imageRectangle.create(nOutputLength, nBScan, CV_8UC3);
 
@@ -122,10 +137,15 @@ void CLabImaging::subtractBackground(T* fringes, T* background, T* dst, int size
 }
 
 void CLabImaging::generateScopeData(Ipp32f* output, Ipp16u* scope) {
-	const int nFFTLength = m_setting.nFFTLength;
 	const int nOutputLength = m_setting.nOutputLength;
+
+	if (nOutputLength > 1024 * 10) {
+		PLOGI.printf("nOutputLength is too big");
+		return;
+	}
+
 	Ipp32f* temp = new Ipp32f[nOutputLength];
-	
+
 	ippsSubC_32f(output, m_setting.lowLevel, temp, nOutputLength);
 	ippsMulC_32f_I(USHRT_MAX / m_setting.highLevel, temp, nOutputLength);
 	ippsConvert_32f16u_Sfs(temp, scope, nOutputLength, ippRndNear, 0);

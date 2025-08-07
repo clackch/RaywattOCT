@@ -53,37 +53,39 @@ class IDataManager
 {
 protected:
 	int m_nNumOfSamples;
-	std::map<OCTHeader::ExtraData, void *> mapExtraData;
+	std::map<OCTHeader::ExtraData, std::vector<uint8_t>> mapExtraData;
+
 public:
 	IDataManager() { m_nNumOfSamples = 0; }
 	virtual ~IDataManager() {
-		std::map<OCTHeader::ExtraData, void*>::iterator it = mapExtraData.begin();
-		while (it != mapExtraData.end())
-		{
-			delete[] it->second;
-			it++;
-		}
 		mapExtraData.clear();
 	}
 
-	int GetNumOfSamples() { return m_nNumOfSamples; }
+	int GetNumOfSamples() const { return m_nNumOfSamples; }
+
 	virtual char* GetSample(int nIndex) = 0;
 	virtual void AddFrame(void* pFrame) = 0;
 
-	void AddExtraData(OCTHeader::ExtraData extraData, void* pData, int nSize) { 
-		std::map<OCTHeader::ExtraData, void*>::iterator it = mapExtraData.find(extraData);
-		if (it != mapExtraData.end()) {
-			delete[] it->second;
-			mapExtraData.erase(it);
+	void AddExtraData(OCTHeader::ExtraData extraData, void* pData, int nSize) {
+		if (nSize <= 0 || pData == nullptr) {
+			PLOGI.printf("Invalid ExtraData input (nullptr or size <= 0)");
+			return;
 		}
-		void* pCopyData = new char[nSize];
-		memcpy(pCopyData, pData, nSize);
-		mapExtraData.insert(std::make_pair(extraData, pCopyData));
+		if (nSize > 1024 * 1024 * 1024 * 2) { // 2GB 이상 방어
+			PLOGI.printf("Allocation Size too big");
+			return;
+		}
+
+		std::vector<uint8_t> vecData(reinterpret_cast<uint8_t*>(pData),
+			reinterpret_cast<uint8_t*>(pData) + nSize);
+		mapExtraData[extraData] = std::move(vecData);
 	}
-	void* GetExtraData(OCTHeader::ExtraData extraData) {
-		std::map<OCTHeader::ExtraData, void*>::iterator it = mapExtraData.find(extraData);
+
+	// raw pointer가 필요하다면 const-cast
+	uint8_t* GetExtraData(OCTHeader::ExtraData extraData) {
+		auto it = mapExtraData.find(extraData);
 		if (it != mapExtraData.end()) {
-			return it->second;
+			return it->second.data();
 		}
 		return nullptr;
 	}

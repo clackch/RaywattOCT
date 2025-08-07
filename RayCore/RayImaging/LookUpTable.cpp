@@ -18,13 +18,20 @@ CLookUpTable& CLookUpTable::GetInstance() {
 * return: Size of LUT list or zero if loading from file is failed.
 */
 int CLookUpTable::Load(const char* strLUTPath, bool isTest) {
-	std::vector<cv::Vec3b> lut;
-
 	FILE* fpLUT = fopen(strLUTPath, "r");
 	if (fpLUT) {
-		char strBuffer[MAX_PATH];
+		char tempBuffer[256] = { 0 };
+		std::string strBuffer;
 		bool bStartLUT = false;
-		while (fscanf(fpLUT, "%s", strBuffer) != EOF) {
+		std::vector<cv::Vec3b> lut;
+
+		while (fgets(tempBuffer, sizeof(tempBuffer), fpLUT)) {
+			tempBuffer[sizeof(tempBuffer) - 1] = '\0';
+			strBuffer = std::string(tempBuffer);
+			if (!strBuffer.empty() && strBuffer.back() == '\n') {
+				strBuffer.pop_back();
+			}
+
 			if (strBuffer[0] == '0') {
 				bStartLUT = true;
 			}
@@ -34,24 +41,35 @@ int CLookUpTable::Load(const char* strLUTPath, bool isTest) {
 				std::string token;
 				cv::Vec3b color;
 
-				std::getline(buffer, token, ',');	// index
+				std::getline(buffer, token, ',');  // index
 				for (int i = 0; i < 3; i++) {
-					std::getline(buffer, token, ',');
-					color.val[i] = atoi(token.c_str());
+					if (!std::getline(buffer, token, ',')) break;
+
+					int value = std::stoi(token);
+
+					if (value < 0 || value > 255) {
+						PLOGI.printf("Warning: LUT value out of uchar range (%d)\n", value);
+						value = 0;
+					}
+					color[i] = static_cast<uchar>(value);
 				}
 				lut.push_back(color);
 			}
 		}
+
+		fclose(fpLUT);
+
 		if (lut.size() == 256 && !isTest) {
 			m_vLUT.push_back(lut);
-			return m_vLUT.size();
+			return static_cast<int>(m_vLUT.size());
 		}
 		else {
 			m_vLUT.at(3) = lut;
-			return m_vLUT.size();
+			return static_cast<int>(m_vLUT.size());
 		}
 	}
-	
+	return 0;
+
 	return 0;
 }
 

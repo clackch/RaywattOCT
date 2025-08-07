@@ -29,6 +29,11 @@ int CTIFFReader::Initialize(const char* strDataFilePath)
 	TIFFGetField(m_pTif, TIFFTAG_IMAGELENGTH, &m_nHeight);
 	TIFFGetField(m_pTif, TIFFTAG_SAMPLESPERPIXEL, &m_nChannels);
 
+	if (m_nNumOfSamples > 1024 * 10) {
+		PLOGI.printf("m_nNumOfSamples is too big : m_nNumOfSamples = %d", m_nNumOfSamples); 
+		return 0;
+	}
+
 	m_nDataSize = m_nWidth * m_nHeight;
 	m_pReadSamples = new char* [m_nNumOfSamples];
 	for (int i = 0; i < m_nNumOfSamples; i++)
@@ -60,7 +65,7 @@ bool CTIFFReader::readFrame(int nIndex)
 	if (m_pReadSamples[nIndex] == NULL) {
 		m_pReadSamples[nIndex] = new char[m_nDataSize * sizeof(char)];
 
-		int revertedIndex = (m_nNumOfSamples - nIndex - 1);
+		//int revertedIndex = (m_nNumOfSamples - nIndex - 1);
 		TIFFSetDirectory(m_pTif, nIndex);
 
 		for (int y = 0; y < m_nHeight; y++) {

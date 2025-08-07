@@ -15,7 +15,7 @@ void COCTMeasurement::CalculateAxialResolution(USHORT* fftData, UINT nLength, Se
 			nPeakValue = fftData[i];
 		}
 	}
-	unsigned short nFWHM = nPeakValue - 3000;	// 3000 : 3db
+	unsigned short nFWHM = std::max(0, nPeakValue - 3000);;	// 3000 : 3db
 
 	// find left 3db
 	int nLeftIndex = 0;
@@ -69,6 +69,11 @@ void COCTMeasurement::CalculateNoisePower(USHORT* fftData, UINT nLength, Setting
 		nCount++;
 	}
 
-	nNoisePower = nSum / nCount;
+	if (nCount > 0) {
+		nNoisePower = nSum / nCount;
+	}
+	else {
+		nNoisePower = nSum;
+	}
 }
 

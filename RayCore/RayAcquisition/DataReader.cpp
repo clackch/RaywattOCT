@@ -30,6 +30,11 @@ int CDataReader::Initialize(tstring strDataFilePath, int nDataSize) {
 	if (nFileSize <= 0) return 0;
 
 	m_nNumOfSamples = ((nFileSize - m_nHeaderSize) / (m_nDataSize * sizeof(unsigned short)));
+
+	if (std::abs(m_nNumOfSamples) > 1024 * 1024 * 1024) {
+		return 0;
+		PLOGI.printf("m_nNumOfSamples is too big : %d", m_nNumOfSamples);
+	}
 	m_pReadSamples = new char* [m_nNumOfSamples];
 	for (int i = 0; i < m_nNumOfSamples; i++) {
 		m_pReadSamples[i] = NULL;
@@ -59,7 +64,7 @@ char* CDataReader::GetSample(int nIndex) {
 
 OCTHeader CDataReader::ReadHeader(tstring strFilePath)
 {
-	OCTHeader header;
+	OCTHeader header = {};
 	bool success = false;
 	
 	m_nHeaderSize = 0;
@@ -81,14 +86,30 @@ OCTHeader CDataReader::ReadHeader(tstring strFilePath)
 		result &= ReadFile(hFile, &header.channels, sizeof(OCTHeader::Channels), &dwBytesRead, NULL);
 		result &= ReadFile(hFile, &header.extraData, sizeof(OCTHeader::ExtraData), &dwBytesRead, NULL);
 
+		if (!result) {
+			PLOGE.printf("Header read failed.");
+			CloseHandle(hFile);
+			return header;
+		}
+
+		if (header.width > 1024 * 10 || header.height > 1024 * 10) {
+			PLOGI.printf("FIle Header data is too big : width : %d, height : %d", header.width, header.height);
+			header.width = 0;
+			header.height = 0;
+			CloseHandle(hFile);
+			return header;
+		}
+
 		if (result && flag == OCTHeader::Bit::SoF)
 		{
-			m_nHeaderSize += OCTHeader::Size();
+			m_nHeaderSize += OCTHeader::Size(); // 11
+			
 			if (header.extraData & (UCHAR)OCTHeader::ExtraData::Dispersion)
 			{
 				int nSize = header.width * 2 * sizeof(int);
 				if (readExtraData(hFile, OCTHeader::ExtraData::Dispersion, nSize)) {
 					m_nHeaderSize += nSize;
+					PLOGI.printf("Disperion ExtraData Size = %d", nSize);
 				}
 			}
 			if (header.extraData & (UCHAR)OCTHeader::ExtraData::Background)
@@ -96,13 +117,20 @@ OCTHeader CDataReader::ReadHeader(tstring strFilePath)
 				int nSize = header.width * header.height * sizeof(USHORT);
 				if (readExtraData(hFile, OCTHeader::ExtraData::Background, nSize)) {
 					m_nHeaderSize += nSize;
+					PLOGI.printf("Background ExtraData Size = %d", nSize);
 				}
 			}
 
 			long long offset = header.width * header.height * header.frames * (int)header.dataType * (int)header.channels;
 			long offsetL = 0xFFFFFFFF & offset;
 			long offsetH = 0xFFFFFFFF & (offset >> 32);
-			SetFilePointer(hFile, offsetL, &offsetH, FILE_CURRENT);
+			DWORD newPos = SetFilePointer(hFile, offsetL, &offsetH, FILE_CURRENT);
+			if (newPos != INVALID_SET_FILE_POINTER) {
+				DWORD err = GetLastError();
+				if (err != NO_ERROR) {
+					PLOGI.printf("SetFilePointer failed. Error : %lu", err);
+				}
+			}
 
 			result &= ReadFile(hFile, &flag, sizeof(OCTHeader::Bit), &dwBytesRead, NULL);
 
@@ -147,13 +175,25 @@ bool CDataReader::readFrame(int nIndex) {
 
 	if (nIndex < 0 || nIndex >= m_nNumOfSamples) return false;
 
+	if (m_nDataSize > 1024 * 1024 * 10) {
+		PLOGI.printf("Data size is too big : %d", m_nDataSize);
+		return false;
+	}
+
 	if (m_pReadSamples[nIndex] == NULL) {
 		m_pReadSamples[nIndex] = new char[m_nDataSize * sizeof(unsigned short)];
 
 		long long offset = m_nHeaderSize + m_nDataSize * sizeof(unsigned short) * nIndex;
 		long offsetL = 0xFFFFFFFF & offset;
 		long offsetH = 0xFFFFFFFF & (offset >> 32);
-		SetFilePointer(m_hFile, offsetL, &offsetH, FILE_BEGIN);
+		DWORD newPos = SetFilePointer(m_hFile, offsetL, &offsetH, FILE_BEGIN);
+		if (newPos != INVALID_SET_FILE_POINTER) {
+			DWORD err = GetLastError();
+			if (err != NO_ERROR) {
+				PLOGI.printf("SetFilePointer failed. Error : %lu", err);
+			}
+		}
+
 		result = ReadFile(m_hFile, m_pReadSamples[nIndex], m_nDataSize * sizeof(unsigned short), &dwBytesRead, NULL);
 	}
 
@@ -161,12 +201,19 @@ bool CDataReader::readFrame(int nIndex) {
 }
 bool CDataReader::readExtraData(HANDLE hFile, OCTHeader::ExtraData extraData, int nSize) {
 	DWORD dwBytesRead = 0;
-	void* pData = new char[nSize];
+
+	size_t size = static_cast<size_t>(nSize);
+
+	void* pData = new char[size];
 	
-	BOOL result = ReadFile(hFile, pData, nSize, &dwBytesRead, NULL);
+	BOOL result = ReadFile(hFile, pData, size, &dwBytesRead, NULL);
 	if (result)
 	{
-		AddExtraData(extraData, pData, nSize);
+		PLOGI.printf("Success Reading Extra Data");
+		AddExtraData(extraData, pData, size);
+	}
+	else {
+		PLOGI.printf("Fail Reading Extra Data");
 	}
 
 	delete[] pData;

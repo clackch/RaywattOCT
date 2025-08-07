@@ -34,7 +34,6 @@ bool CSerialPort::ConfigurePort(DWORD BaudRate, BYTE ByteSize, DWORD fParity,
 	m_dcb.Parity = Parity;  
 	m_dcb.StopBits = StopBits;
 	m_dcb.fBinary = true;   
-	m_dcb.fDsrSensitivity = false;
 	m_dcb.fParity = fParity;   
 	m_dcb.fOutX = false;   
 	m_dcb.fInX = false;  
