@@ -805,15 +805,21 @@ namespace RaywattApp.Common.Angio
         {
             _log.Debug("StartSoketCheck");
 
-            isSocketAlive = true;
-            isSocketConnected.Start();
+            if (isSocketConnected != null)
+            {
+                isSocketAlive = true;
+                isSocketConnected.Start();
+            }
         }
         public void StopSoketCheck()
         {
             _log.Debug("StopSoketCheck");
 
-            isSocketAlive = false;
-            isSocketConnected.Join();
+            if (isSocketConnected != null)
+            {
+                isSocketAlive = false;
+                isSocketConnected.Join();
+            }
         }
         public void ReadyToSaveAngioThread(PatientCase patientCase)
         {

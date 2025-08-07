@@ -104,16 +104,6 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 	CConfiguration& config = CConfiguration::GetInstance();
 	COCTImaging* pImaging = nullptr;
 
-	if (pData == nullptr) {
-		PLOGI.printf("pData is null");
-		return nullptr;
-	}
-
-	if (setting.nBufferSize > 1024 * 1024) {
-		PLOGI.printf("BufferSize is too big : %d", setting.nBufferSize);
-		return nullptr;
-	}
-
 	// codesonar suppr C++-resource-leaknew
 	CCalibration* calibration = new CCalibration(setting.nAScan, setting.nFFTLength);
 	if (pData != nullptr && pData->GetExtraData(OCTHeader::ExtraData::Dispersion) != nullptr)
@@ -128,14 +118,20 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 	}
 
 	USHORT* background = nullptr;
-	auto rawBg = pData->GetExtraData(OCTHeader::ExtraData::Background);
-	if (rawBg == nullptr) {
+	if (pData != nullptr && pData->GetExtraData(OCTHeader::ExtraData::Background) != nullptr)
+	{
+		PLOGI.printf("Read background from .oct file.");
+		if (setting.nBufferSize > 1024 * 1024) {
+			PLOGI.printf("BufferSize is too big : %d", setting.nBufferSize);
+			return nullptr;
+		}
+		background = new USHORT[setting.nBufferSize];
+		memcpy(background, pData->GetExtraData(OCTHeader::ExtraData::Background), sizeof(USHORT) * setting.nBufferSize);
+	}
+	else
+	{
 		PLOGI.printf("Read background from .dat file.");
 		background = readBackground("BACKGROUND.bin", setting);
-	}
-	else {
-		background = new USHORT[setting.nBufferSize];
-		memcpy(background, rawBg, sizeof(USHORT) * setting.nBufferSize);
 	}
 
 	PLOGI.printf("Create Imaging - %d x %d (type: %d)", setting.nAScan, setting.nBScan, type);
