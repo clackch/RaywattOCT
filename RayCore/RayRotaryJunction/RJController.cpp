@@ -557,16 +557,7 @@ void CRJController::updateState() {
 		break;
 	case eRJState::Connected:
 		if (m_bLimitSwitch) {
-#if ENABLE_RFID
-			RFIDProtocol::initState(false);
-			ReadRFID();
 			m_nextState = eRJState::Validating;
-#else
-			m_nextState = eRJState::Validating;
-#endif
-		}
-		else {
-			m_nextState = eRJState::Disconnected;
 		}
 		break;
 	case eRJState::Validating:
@@ -585,6 +576,11 @@ void CRJController::updateState() {
 		}
 		if (m_bButton[0]) {
 			m_nextState = eRJState::Unloading;
+		}
+
+		if (isFirstTime) {
+			ReadRFID();
+			isFirstTime = false;
 		}
 		break;
 	case eRJState::Unloading:

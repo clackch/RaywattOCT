@@ -2120,7 +2120,7 @@ UINT COCTSystem::threadRFIDValidation(LPVOID param) {
 			return NOERROR;
 		}
 	}
-	pRJController->UpdateState(eRJState::Validating);
+	pSystem->postMessage(WM_UPDATE_RJ_STATE, (WPARAM)eRJState::Loaded);
 	
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -2272,7 +2272,6 @@ int COCTSystem::connectRotaryJunction() {
 			PLOGE.printf("Failed to connect to laser module");
 		}
 	}
-
 	return (result) ? NOERROR : E_FAIL;
 }
 
@@ -2700,36 +2699,11 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 		break;
 	case eRJState::Validating:
 	{
-		RFID_ValidType isValid = m_pRJController->isValidRFID();
-
-#if ENABLE_RFID
-		if (isValid == RFID_ValidType::VALID)
-		{
-			if(isValidating)
-				CUtility::StopThread(m_pThreadRotaryJunction);
-			isValidating = false;
-			// To-Do: Validation
-			//영상 validation 스레드 실행할 것
-			PLOGI.printf("validation true");
-		}
-		else if(isValid == RFID_ValidType::INVALID){
-			if (isValidating)
-				CUtility::StopThread(m_pThreadRotaryJunction);
-			isValidating = false;
-			PLOGI.printf("validation false");
-			m_pRJController->UpdateState(eRJState::Error);
-		}
-		else {
-			if (CUtility::StartThread(threadRFIDValidation, m_pThreadRotaryJunction, this)) {
-				isValidating = true;
-			}
-		}
-#endif
 		break;
 	}
 	case eRJState::Loading:
 	{
-		CConfiguration &config = CConfiguration::GetInstance();
+		CConfiguration& config = CConfiguration::GetInstance();
 		if (config.catheter.manualLoad) {
 			CUtility::StartThread(threadManualLoadCatheter, m_pThreadRotaryJunction, this);
 		}
@@ -2741,6 +2715,38 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 	case eRJState::WaitManualLoad:
 		break;
 	case eRJState::Loaded:
+	{
+		if (!isValidating) {
+			RFIDProtocol::initState(false);
+		}
+
+		RFID_ValidType isValid = m_pRJController->isValidRFID();
+
+#if ENABLE_RFID
+		if (isValid == RFID_ValidType::VALID)
+		{
+			if (isValidating)
+				CUtility::StopThread(m_pThreadRotaryJunction);
+			isValidating = false;
+			// To-Do: Validation
+			//영상 validation 스레드 실행할 것
+			PLOGI.printf("validation true");
+		}
+		else if (isValid == RFID_ValidType::INVALID) {
+			if (isValidating)
+				CUtility::StopThread(m_pThreadRotaryJunction);
+			isValidating = false;
+			PLOGI.printf("validation false");
+			m_pRJController->UpdateState(eRJState::Error);
+		}
+		else {
+			CUtility::StopThread(m_pThreadRotaryJunction);
+			if (CUtility::StartThread(threadRFIDValidation, m_pThreadRotaryJunction, this)) {
+				isValidating = true;
+			}
+		}
+#endif
+	}
 		break;
 	case eRJState::Unloading:
 	{

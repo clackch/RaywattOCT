@@ -81,6 +81,7 @@ private:
 	bool m_bPhotoSensor[6];
 	bool m_bButton[2];	// 0: UNLOCK, 1: STOP
 	bool m_bLimitSwitch;
+	bool isFirstTime = true;
 
 	uint8_t m_nRFIDLength;
 	uint8_t m_nRFIDUsageCount;
