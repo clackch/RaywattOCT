@@ -53,11 +53,6 @@ protected:
 
 	// using in Gen_8bit_Image
 
-	//삭제
-	/*Ipp32f* fBuffer_Window;
-	Ipp32fc* fcBuffer_FFT;
-	Ipp32fc* fcBuffer_IFFT;*/
-
 	Ipp32f* fFFTResult;
 	Ipp32f* fOutput;
 	IppsFFTSpec_R_32f* fftSpecFirst;	// first FFT

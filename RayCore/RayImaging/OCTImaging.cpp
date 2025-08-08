@@ -51,11 +51,6 @@ COCTImaging::COCTImaging(Setting setting, CMessageService* pMsg) {
 	fringes32f = nullptr;
 	fringes32fAverage = nullptr;
 
-	//삭제
-	/*fBuffer_Window = nullptr;
-	fcBuffer_FFT = nullptr;
-	fcBuffer_IFFT = nullptr;*/
-
 	fFFTResult = nullptr;
 	fOutput = nullptr;
 
@@ -244,20 +239,10 @@ void COCTImaging::allocateMemory() {
 	imageCircle.create(nCircleSize, nCircleSize, CV_8UC3);
 	imageResultWithoutCompensation.create(nBScan, nOutputLength, CV_8UC1);
 
-	//삭제
-	/*fBuffer_Window = ippsMalloc_32f(nFFTLength);
-	fcBuffer_FFT = ippsMalloc_32fc(nFFTLength);
-	fcBuffer_IFFT = ippsMalloc_32fc(nFFTLength);*/
 	fFFTResult = ippsMalloc_32f(nOutputLength * nBScan);
 	fOutput = ippsMalloc_32f(nOutputLength * nBScan);
 
 	// Prepare FFT
-	//삭지
-	/*ippsFFTInitAlloc_R_32f(&fftSpecFirst, nFFTOrder, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
-	ippsFFTInitAlloc_C_32fc(&ifftSpec, nFFTOrder, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
-	ippsFFTInitAlloc_C_32fc(&fftSpecSecond, nFFTOrder - 1, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);*/
-	
-	//추가
 	CFFTSpecFactory& factory = CFFTSpecFactory::Instance();
 	fftSpecFirst = factory.GetSpecR(nFFTOrder, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
 	fftFirstWorkBufSize = factory.GetBufferR(fftSpecFirst);
@@ -277,17 +262,8 @@ void COCTImaging::releaseMemory() {
 	imageCircle.release();
 	imageResultWithoutCompensation.release();
 
-	//삭제
-	/*ippsRelease((void*&)fBuffer_Window);
-	ippsRelease((void*&)fcBuffer_FFT);
-	ippsRelease((void*&)fcBuffer_IFFT);*/
 	ippsRelease((void*&)fFFTResult);
 	ippsRelease((void*&)fOutput);
-
-	//삭제
-	/*if (fftSpecFirst) { ippsFFTFree_R_32f(fftSpecFirst); fftSpecFirst = nullptr; }
-	if (ifftSpec) { ippsFFTFree_C_32fc(ifftSpec); ifftSpec = nullptr; }
-	if (fftSpecSecond) { ippsFFTFree_C_32fc(fftSpecSecond); fftSpecSecond = nullptr; }*/
 }
 void COCTImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale) {
 	int circOffset = 0;
@@ -400,7 +376,6 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f) {
 		#pragma omp parallel for
 		for (int i = 0; i < nBScan; i++)
 		{
-			//추가
 			int tid = omp_get_thread_num();
 			auto& ctx = threadContexts[tid];
 			{
@@ -412,7 +387,6 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f) {
 				ippsMul_32f_I(calibration->window, ctx.fBuffer_Window, nFFTLength);
 
 				// 3. First FFT
-				//변경 ippsFFTFwd_RToPerm_32f_I(fBuffer_Window, fftSpecFirst, nullptr); 
 				ippsFFTFwd_RToPerm_32f_I(ctx.fBuffer_Window, fftSpecFirst, ctx.fftWorkBufFirst); // http://software.intel.com/sites/products/documentation/hpc/ipp/ipps/ipps_ch7/ch7_packed_formats.html#Perm
 				ippsConjPerm_32fc(ctx.fBuffer_Window, ctx.fcBuffer_FFT, nFFTLength);
 
@@ -421,7 +395,6 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f) {
 				ippsCopy_32fc(ctx.fcBuffer_FFT, ctx.fcBuffer_IFFT, nOutputLength);
 
 				// 5. Inverse FFT
-				//변경 ippsFFTInv_CToC_32fc_I(fcBuffer_IFFT, ifftSpec, nullptr);
 				ippsFFTInv_CToC_32fc_I(ctx.fcBuffer_IFFT, ifftSpec, ctx.fftWorkBufIFFT);
 
 				// 6. Interpolation
@@ -435,14 +408,11 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f) {
 				ippsMul_32fc_I((Ipp32fc*)calibration->dispersion, ctx.fcBuffer_FFT, nAScan / 2);
 
 				// 8. FFT Again
-				//변경 ippsFFTFwd_CToC_32fc_I(fcBuffer_FFT, fftSpecSecond, nullptr);
 				ippsFFTFwd_CToC_32fc_I(ctx.fcBuffer_FFT, fftSpecSecond, ctx.fftWorkBufSecond);
 
 				// 9. Extract Magnitude
 				ippsPowerSpectr_32fc(ctx.fcBuffer_FFT, fFFTResult + i * nOutputLength, nOutputLength);
 			}
-			//추가
-			
 		}
 	} // end parallel region
 
