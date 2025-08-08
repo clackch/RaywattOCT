@@ -15,6 +15,15 @@ class CCalibration;
 class CThread;
 class CMessageService;
 
+struct FFTThreadContext {
+	Ipp32f* fBuffer_Window = nullptr;
+	Ipp32fc* fcBuffer_FFT = nullptr;
+	Ipp32fc* fcBuffer_IFFT = nullptr;
+	Ipp8u* fftWorkBufFirst = nullptr;
+	Ipp8u* fftWorkBufIFFT = nullptr;
+	Ipp8u* fftWorkBufSecond = nullptr;
+};
+
 class COCTImaging : public IImaging
 {
 protected:
@@ -43,13 +52,20 @@ protected:
 	Ipp32f* fringes32fAverage;
 
 	// using in Gen_8bit_Image
-	Ipp32f* fBuffer_Window;
+
+	//삭제
+	/*Ipp32f* fBuffer_Window;
 	Ipp32fc* fcBuffer_FFT;
-	Ipp32fc* fcBuffer_IFFT;
+	Ipp32fc* fcBuffer_IFFT;*/
+
 	Ipp32f* fFFTResult;
 	Ipp32f* fOutput;
 	IppsFFTSpec_R_32f* fftSpecFirst;	// first FFT
 	IppsFFTSpec_C_32fc* ifftSpec, * fftSpecSecond;	// Inverse, second FFT
+
+	int fftFirstWorkBufSize;
+	int fftIFFTWorkBufSize;
+	int fftSecondWorkBufSize;
 
 	bool m_bInvert;
 	bool m_bColor;
