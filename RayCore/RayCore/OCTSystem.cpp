@@ -2220,6 +2220,7 @@ int COCTSystem::connectRotaryJunction() {
 		if (result) {
 			m_pRJController->StartControl();
 			m_pRJController->UpdateState(eRJState::Initializing);
+			PLOGI.printf("Success to connect to Rotary Junction");
 		}
 		else {
 			PLOGI.printf("Failed to connect to Rotary Junction");
