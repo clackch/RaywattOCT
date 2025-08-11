@@ -1,22 +1,35 @@
-/* /////////////////////////////////////////////////////////////////////////////
-//
-//                  INTEL CORPORATION PROPRIETARY INFORMATION
-//     This software is supplied under the terms of a license agreement or
-//     nondisclosure agreement with Intel Corporation and may not be copied
-//     or disclosed except in accordance with the terms of that agreement.
-//          Copyright(c) 2001-2011 Intel Corporation. All Rights Reserved.
-//
-//     Purpose: Describes the IPP version
-//
+/* 
+// Copyright 2001 Intel Corporation All Rights Reserved.
+// 
+// 
+// This software and the related documents are Intel copyrighted materials, and your use of them is governed by
+// the express license under which they were provided to you ('License'). Unless the License provides otherwise,
+// you may not use, modify, copy, publish, distribute, disclose or transmit this software or the related
+// documents without Intel's prior written permission.
+// This software and the related documents are provided as is, with no express or implied warranties, other than
+// those that are expressly stated in the License.
+// 
 */
-#if !defined( __IPPVERSION_H__ )
-#define __IPPVERSION_H__
 
-#define IPP_VERSION_MAJOR 7
-#define IPP_VERSION_MINOR 0
-#define IPP_VERSION_BUILD 205
+/* 
+//              Intel(R) Integrated Performance Primitives (Intel(R) IPP)
+//              Purpose: Describes the Intel(R) IPP version
+// 
+// 
+*/
 
-#define IPP_VERSION_STR "7.0"
 
-#endif /* __IPPVERSION_H__ */
-/* ////////////////////////////// End of file /////////////////////////////// */
+#if !defined( IPPVERSION_H__ )
+#define IPPVERSION_H__
+
+#define IPP_VERSION_MAJOR  2022
+#define IPP_VERSION_MINOR  2
+#define IPP_VERSION_UPDATE 0
+
+#define IPP_VERSION_STR "2022.2.0"
+
+// Major and minor interface version
+#define IPP_INTERFACE_VERSION_MAJOR 11
+#define IPP_INTERFACE_VERSION_MINOR 2
+
+#endif /* IPPVERSION_H__ */
