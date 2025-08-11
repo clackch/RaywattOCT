@@ -1,37 +1,38 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using log4net;
+using Newtonsoft.Json;
+using OpenCvSharp;
+using OpenCvSharp.WpfExtensions;
+using RaywattApp.Common.Angio;
+using RaywattApp.Common.Annotation.Models;
+using RaywattApp.Common.Annotation.Util;
 using RaywattApp.Common.Bases;
+using RaywattApp.Common.Dialog;
+using RaywattApp.Common.Messages;
+using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Services;
-using System.Collections.Generic;
-using System;
-using System.Windows.Input;
-using System.Windows.Navigation;
-using RaywattApp.Common.Dialog;
-using static RaywattOCT.RayCoreWrapper;
-using RaywattApp.Common.Annotation.Models;
-using System.Windows;
-using Newtonsoft.Json;
-using System.Collections.ObjectModel;
-using CommunityToolkit.Mvvm.Messaging;
-using RaywattApp.Common.Messages;
-using Point = System.Windows.Point;
-using System.Linq;
-using OpenCvSharp;
-using RaywattApp.Common.Util;
-using System.Threading;
-using RaywattApp.Common.Annotation.Util;
-using System.Runtime.InteropServices;
-using System.Windows.Media.Imaging;
 using RaywattApp.Views.Dialog;
-using System.IO;
-using System.Windows.Media;
-using RaywattApp.Common.Angio;
-using System.Xml;
-using System.Windows.Controls;
-using OpenCvSharp.WpfExtensions;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Xml;
+using System.Xml.Linq;
+using static RaywattOCT.RayCoreWrapper;
+using Point = System.Windows.Point;
 
 namespace RaywattApp.ViewModels
 {
@@ -2025,6 +2026,15 @@ namespace RaywattApp.ViewModels
 
             for (int i = 0; i < imageCount; i++)
             {
+                Mat temp = new Mat();
+                Cv2.BilateralFilter(frames[i], temp, 9, 10, 150);
+                frames[i] = temp;
+                Cv2.ImWrite("bilateral" + (i + 1).ToString() + ".tif", frames[i]);
+
+                Console.WriteLine(frames[i].Type());   // 예: CV_8UC1, CV_8UC3 등
+                Console.WriteLine(frames[i].Channels()); // 1(흑백), 3(컬러)
+                Console.WriteLine(frames[i].Depth());
+                //Cv2.ImWrite("origin" + (i + 1).ToString() + ".tif", frames[i]);
                 Mat gradX = new Mat();
                 Mat gradY = new Mat();
                 Cv2.Sobel(frames[i], gradX, MatType.CV_64F, 1, 0, ksize: 3);
@@ -2033,18 +2043,31 @@ namespace RaywattApp.ViewModels
                 Cv2.Magnitude(gradX, gradY, grad);
                 Mat edge = new Mat();
                 grad.ConvertTo(edge, frames[i].Type());
-                //Cv2.ImWrite("edge" + (i + 1).ToString() + ".png", edge);
+                Cv2.ImWrite("edge" + (i + 1).ToString() + ".tif", edge);
 
-                Cv2.EqualizeHist(frames[i], frames[i]);
-                //Cv2.ImWrite("HE" + (i + 1).ToString() + ".png", frames[i]);// Histogram Equalization
+                /*Mat temp = new Mat();
+                Cv2.BilateralFilter(frames[i], temp, 9, 10, 150);
+                frames[i] = temp;
+                Cv2.ImWrite("bilateral" + (i + 1).ToString() + ".tif", frames[i]);*/
+
+                //Cv2.EqualizeHist(frames[i], frames[i]);
+
+                var clahe = Cv2.CreateCLAHE(clipLimit: 2.0, tileGridSize: new OpenCvSharp.Size(8, 8));
+                //clahe.Apply(frames[i], frames[i]);
+                Cv2.ImWrite("HE" + (i + 1).ToString() + ".tif", frames[i]);// Histogram Equalization
 
                 frames[i] = frames[i] - edge/2;
-                //Cv2.ImWrite("real" + (i + 1).ToString() + ".png", frames[i]);
+                Cv2.ImWrite("sharpened" + (i + 1).ToString() + ".tif", frames[i]);
+
+                temp = new Mat();
+                Cv2.BilateralFilter(frames[i], temp, 9, 20, 150);
+                frames[i] = temp;
+                Cv2.ImWrite("bilateral" + (i + 1).ToString() + ".tif", frames[i]);
             }
 
-            int thresholdOfNow = 10;    // 현재 프레임이 해당 값보다 작으면 혈관, 크면 혈관이 아닌 걸로 판정
-            int thresholdOfOther = 0;  // 앞, 뒤 프레임이 해당 값보다 작으면 현재 프레임이 혈관이 아니라고 판정된 상태에도 혈관으로 판정
-            int thresholdCut = 30;      // 앞, 뒤 프레임이 해당 값보다 크면 현재 프레임이 혈관이라고 판정된 상태에도 혈관이 아니라고 판정
+            int thresholdOfNow = 80;    // 현재 프레임이 해당 값보다 작으면 혈관, 크면 혈관이 아닌 걸로 판정
+            int thresholdOfOther = 20;  // 앞, 뒤 프레임이 해당 값보다 작으면 현재 프레임이 혈관이 아니라고 판정된 상태에도 혈관으로 판정
+            int thresholdCut = 120;      // 앞, 뒤 프레임이 해당 값보다 크면 현재 프레임이 혈관이라고 판정된 상태에도 혈관이 아니라고 판정
 
             for (int i = 0; i < imageCount; i++)
             {
@@ -2162,7 +2185,7 @@ namespace RaywattApp.ViewModels
                 var kernel = Cv2.GetStructuringElement(MorphShapes.Ellipse, new OpenCvSharp.Size(3, 3));
 
                 Cv2.MorphologyEx(nowimage, morphedImage, MorphTypes.Close, kernel, iterations: 4);
-                //Cv2.ImWrite("nowimage" + frameNum.ToString() + ".png", morphedImage);
+                Cv2.ImWrite("morphedImage" + frameNum.ToString() + ".tif", morphedImage);
 
                 Mat skeleton = Skeletonize(morphedImage);
 
@@ -2171,7 +2194,7 @@ namespace RaywattApp.ViewModels
                 PatientCase.AngioFrame.DijkstraHeap.Add(new DijkstraHeap(imageData, frames[i].Rows, frames[i].Cols));
                 frameNum++;
 
-                //Cv2.ImWrite("check" + frameNum.ToString() + ".png", skeleton);
+                Cv2.ImWrite("check" + frameNum.ToString() + ".tif", skeleton);
             }
         }
 
@@ -2312,13 +2335,13 @@ namespace RaywattApp.ViewModels
 
         private Mat Skeletonize(Mat img)
         {
-            Mat skel = Mat.Zeros(img.Size(), MatType.CV_8UC1);
+            /*Mat skel = Mat.Zeros(img.Size(), MatType.CV_8UC1);
             Mat temp = new Mat();
             Mat eroded = new Mat();
             Mat current = img.Clone();
             int i = 0;
 
-            var element = Cv2.GetStructuringElement(MorphShapes.Cross, new OpenCvSharp.Size(3, 3));
+            var element = Cv2.GetStructuringElement(MorphShapes.Cross, new OpenCvSharp.Size(3,3));
 
             bool done;
             do
@@ -2329,13 +2352,120 @@ namespace RaywattApp.ViewModels
                 Cv2.Subtract(current, temp, temp);
                 Cv2.BitwiseOr(skel, temp, skel);
                 eroded.CopyTo(current);
+                //Cv2.ImWrite("erode" + i.ToString() + ".tif", eroded);
+                //Cv2.ImWrite("dilate" + i.ToString() + ".tif", skel);
 
                 if (i == 100) break; // 검은 화면의 경우 무한반복 탈출
                 done = (Cv2.CountNonZero(current) == 0);
 
             } while (!done);
 
-            return skel;
+            return skel;*/
+
+            Mat thinned = img.Clone();
+            thinned /= 255; // 0, 1 값으로 변환
+
+            Mat prev = new Mat(thinned.Size(), MatType.CV_8UC1, Scalar.All(0));
+            Mat diff = new Mat();
+
+            do
+            {
+                // Step 1
+                Mat marker = new Mat(thinned.Size(), MatType.CV_8UC1, Scalar.All(0));
+                for (int y = 1; y < thinned.Rows - 1; y++)
+                {
+                    for (int x = 1; x < thinned.Cols - 1; x++)
+                    {
+                        byte p1 = thinned.At<byte>(y, x);
+                        if (p1 != 1)
+                            continue;
+
+                        // 8이웃 픽셀
+                        byte p2 = thinned.At<byte>(y - 1, x);
+                        byte p3 = thinned.At<byte>(y - 1, x + 1);
+                        byte p4 = thinned.At<byte>(y, x + 1);
+                        byte p5 = thinned.At<byte>(y + 1, x + 1);
+                        byte p6 = thinned.At<byte>(y + 1, x);
+                        byte p7 = thinned.At<byte>(y + 1, x - 1);
+                        byte p8 = thinned.At<byte>(y, x - 1);
+                        byte p9 = thinned.At<byte>(y - 1, x - 1);
+
+                        int A = ((p2 == 0 && p3 == 1) ? 1 : 0) +
+                        ((p3 == 0 && p4 == 1) ? 1 : 0) +
+                        ((p4 == 0 && p5 == 1) ? 1 : 0) +
+                        ((p5 == 0 && p6 == 1) ? 1 : 0) +
+                        ((p6 == 0 && p7 == 1) ? 1 : 0) +
+                        ((p7 == 0 && p8 == 1) ? 1 : 0) +
+                        ((p8 == 0 && p9 == 1) ? 1 : 0) +
+                        ((p9 == 0 && p2 == 1) ? 1 : 0);
+
+                        int B = p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9;
+
+                        if (
+                            (B >= 2 && B <= 6) &&
+                            (A == 1) &&
+                            (p2 * p4 * p6 == 0) &&
+                            (p4 * p6 * p8 == 0)
+                            )
+                        {
+                            marker.Set<byte>(y, x, 1);
+                        }
+                    }
+                }
+
+                thinned -= marker;
+
+                // Step 2
+                marker = new Mat(thinned.Size(), MatType.CV_8UC1, Scalar.All(0));
+                for (int y = 1; y < thinned.Rows - 1; y++)
+                {
+                    for (int x = 1; x < thinned.Cols - 1; x++)
+                    {
+                        byte p1 = thinned.At<byte>(y, x);
+                        if (p1 != 1)
+                            continue;
+
+                        // 8이웃 픽셀
+                        byte p2 = thinned.At<byte>(y - 1, x);
+                        byte p3 = thinned.At<byte>(y - 1, x + 1);
+                        byte p4 = thinned.At<byte>(y, x + 1);
+                        byte p5 = thinned.At<byte>(y + 1, x + 1);
+                        byte p6 = thinned.At<byte>(y + 1, x);
+                        byte p7 = thinned.At<byte>(y + 1, x - 1);
+                        byte p8 = thinned.At<byte>(y, x - 1);
+                        byte p9 = thinned.At<byte>(y - 1, x - 1);
+
+                        int A = ((p2 == 0 && p3 == 1) ? 1 : 0) +
+                        ((p3 == 0 && p4 == 1) ? 1 : 0) +
+                        ((p4 == 0 && p5 == 1) ? 1 : 0) +
+                        ((p5 == 0 && p6 == 1) ? 1 : 0) +
+                        ((p6 == 0 && p7 == 1) ? 1 : 0) +
+                        ((p7 == 0 && p8 == 1) ? 1 : 0) +
+                        ((p8 == 0 && p9 == 1) ? 1 : 0) +
+                        ((p9 == 0 && p2 == 1) ? 1 : 0);
+
+                        int B = p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9;
+
+                        if (
+                            (B >= 2 && B <= 6) &&
+                            (A == 1) &&
+                            (p2 * p4 * p8 == 0) &&
+                            (p2 * p6 * p8 == 0)
+                            )
+                        {
+                            marker.Set<byte>(y, x, 1);
+                        }
+                    }
+                }
+
+                thinned -= marker;
+
+                Cv2.Absdiff(thinned, prev, diff);
+                thinned.CopyTo(prev);
+
+            } while (Cv2.CountNonZero(diff) > 0);
+
+            return thinned * 255; // 0, 255 값으로 변환
         }
 
         #endregion
