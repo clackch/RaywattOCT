@@ -2213,6 +2213,19 @@ int COCTSystem::connectRotaryJunction() {
 	CConfiguration& config = CConfiguration::GetInstance();
 
 	bool result = true;
+
+	if (!m_pRJController->IsConnected()) {
+		result = m_pRJController->Connect(config.bldcMotor.port);
+
+		if (result) {
+			m_pRJController->StartControl();
+			m_pRJController->UpdateState(eRJState::Initializing);
+		}
+		else {
+			PLOGI.printf("Failed to connect to Rotary Junction");
+		}
+	}
+
 	if (!m_pLaserModule->IsConnected()) {
 		result = m_pLaserModule->Connect(config.laserModule.port);
 		if (result) {
@@ -2258,18 +2271,6 @@ int COCTSystem::connectRotaryJunction() {
 		else
 		{
 			PLOGE.printf("Failed to connect to laser module");
-		}
-	}
-
-	if (!m_pRJController->IsConnected()) {
-		result = m_pRJController->Connect(config.bldcMotor.port);
-
-		if (result) {
-			m_pRJController->StartControl();
-			m_pRJController->UpdateState(eRJState::Initializing);
-		}
-		else {
-			PLOGI.printf("Failed to connect to Rotary Junction");
 		}
 	}
 
