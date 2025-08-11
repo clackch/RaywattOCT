@@ -391,9 +391,12 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             Ellipse marker = new Ellipse();
             marker.Style = (Style)this.Resources["StyleTrackEllipse"];
 
-            int pathIndex = markerIndex + (int)markerDrawInterval >= path.Count ? path.Count - 1 : 
-                markerIndex + (int)markerDrawInterval < 0 ? 0 : markerIndex + (int)markerDrawInterval;
-            
+            //int pathIndex = markerIndex + (int)markerDrawInterval >= path.Count ? path.Count - 1 : 
+            //    markerIndex + (int)markerDrawInterval < 0 ? 0 : markerIndex + (int)markerDrawInterval;
+
+            int pathIndex = markerIndex - (int)markerDrawInterval;
+            pathIndex = pathIndex < 0 ? 0 : pathIndex >= path.Count ? path.Count - 1 : pathIndex;
+
             Canvas.SetLeft(marker, path[pathIndex].X - marker.Width / 2);
             Canvas.SetTop(marker, path[pathIndex].Y - marker.Height / 2);
 
