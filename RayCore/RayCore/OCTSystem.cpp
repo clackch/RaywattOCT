@@ -1819,6 +1819,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 }
 */
 
+
 // way8
 UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
@@ -1951,6 +1952,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 
 	return NOERROR;
 }
+
 
 /*
 * threadPullbackScan
@@ -2643,7 +2645,8 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 		{
 		case CatheterState::FindingSheath: //
 		{
-			/* // way1 ~ way6
+			/*
+			// way1 ~ way6
 			int nSheathPosition = m_pImagingRealtime->GetSheathPosition();
 			int nDelayLinePos = m_pLaserModule->GetPosition(eStepMotorIndex::DelayLine);
 			m_vCalibrationInfo.push_back(std::make_pair(nSheathPosition, nDelayLinePos));
@@ -2653,7 +2656,7 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 			/*
 			// way7
 			int nSheathPosition = m_pImagingRealtime->GetSheathPosition();
-			cv::Mat circularImage = m_pImagingRealtime->GetAutoCalibImage();
+			cv::Mat circularImage = m_pImagingRealtime->GetImageForCalib();
 			int nDelayLinePos = m_pLaserModule->GetPosition(eStepMotorIndex::DelayLine);
 			m_vAutoCalibrationInfo.push_back(std::make_pair(circularImage, nDelayLinePos));
 			//PLOGI.printf("FindingSheath - %d, %d", nSheathPosition, nDelayLinePos);
@@ -2662,10 +2665,11 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 			
 			// way8
 			int nSheathPosition = m_pImagingRealtime->GetSheathPosition();
-			cv::Mat circularImage = m_pImagingRealtime->GetAutoCalibImage();
+			cv::Mat circularImage = m_pImagingRealtime->GetImageForCalib();
 			int nDelayLinePos = m_pLaserModule->GetPosition(eStepMotorIndex::DelayLine);
 			m_vAutoCalibrationInfo.push_back(std::make_pair(circularImage, nDelayLinePos));
 			PLOGI.printf("FindingSheath - %d", nDelayLinePos);
+
 		}
 			break;
 		case CatheterState::FindingPeak:

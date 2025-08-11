@@ -459,7 +459,8 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 int num = 0;
 void COCTImaging::findSheath(cv::Mat img) {
 	num++;
-	/* // way1~way6
+	/*
+	// way1~way6
 	cv::Mat edgeX, edgeY;
 	cv::Sobel(img, edgeX, CV_32F, 1, 0, 3);
 	cv::Sobel(img, edgeY, CV_32F, 0, 1, 3);
@@ -486,27 +487,27 @@ void COCTImaging::findSheath(cv::Mat img) {
 		}
 	}
 
-	// way1~way3
+	//// way1~way3
 	//cv::imwrite("edgeX" + std::to_string(num) + ".tif", absEdgeX);
 	//cv::imwrite("edgeY" + std::to_string(num) + ".tif", absEdgeY);
 	//cv::imwrite("edgeMagnitude" + std::to_string(num) + ".tif", absEdgeMagnitude);
 	//PLOGI.printf("Edge X: %d, Y: %d, Magnitude: %d", totalX, totalY, totalMagnitude);
-	// way1
+	//// way1
 	//m_nSheathPosition = totalMagnitude;
-	// way2
+	//// way2
 	//m_nSheathPosition = totalX;
-	// way3 
+	//// way3 
 	//m_nSheathPosition = totalY;
 
 	
-	// way4~way6
+	//// way4~way6
 	//cv::imwrite("edgeX" + std::to_string(num) + ".tif", edgeX);
 	//cv::imwrite("edgeY" + std::to_string(num) + ".tif", edgeY);
 	//cv::imwrite("edgeMagnitude" + std::to_string(num) + ".tif", edgeMagnitude);
 	//PLOGI.printf("Edge X: %f, Y: %f, Magnitude: %f", maxX, maxY, maxMagnitude);
-	// way4
+	//// way4
 	//m_nSheathPosition = maxMagnitude;
-	// way5
+	//// way5
 	//m_nSheathPosition = maxX;
 	// way6
 	//m_nSheathPosition = maxY;
