@@ -381,7 +381,6 @@ RayError COCTSystem::PullbackScan(char *strFilePath) {
 RayError COCTSystem::LoadCatheter() {
 	if (m_curState == RayScannerState::Default || m_curState == RayScannerState::Review) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
-
 		if (controlRotaryJunction(eRJState::Loading) == NOERROR) {
 			return RayError::OK;
 		}
@@ -1703,6 +1702,10 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pRJController->StopMotor();
 
 	// 5. Homing
+
+	BYTE* uidRFID = new BYTE[CUSTOM_UID_LENGTH + HARDWARE_UID_LENGTH];
+	pRJController->IncreaseRFIDUsage(pRJController->GetRFIDUID(uidRFID), uidRFID);
+
 	pRJController->changeSMProfileToLoadUnload();
 	Sleep(2000);
 	int bldcHomingSpeed = config.bldcMotor.velocityLiveView / 2;
@@ -1796,7 +1799,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	if (pSystem->m_pThreadRotaryJunction->isRun) {
 		pSystem->m_bFirstLoad = true;
 		pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::LoadCatheter);
-		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loaded);
+		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loading);
 	}
 	else {
 		pSystem->postMessage(WM_NOTIFY_ERROR_OCCURED, (WPARAM)RayError::CatheterNotValid);
@@ -2052,7 +2055,7 @@ UINT COCTSystem::threadManualLoadCatheter(LPVOID param)
 	}
 
 	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::LoadCatheter);
-	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loaded);
+	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loading);
 
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -2120,7 +2123,7 @@ UINT COCTSystem::threadRFIDValidation(LPVOID param) {
 			return NOERROR;
 		}
 	}
-	pSystem->postMessage(WM_UPDATE_RJ_STATE, (WPARAM)eRJState::Loaded);
+	pSystem->postMessage(WM_UPDATE_RJ_STATE, (WPARAM)eRJState::Validating);
 	
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -2656,7 +2659,7 @@ LRESULT COCTSystem::OnMsgUpdateCatheterState(WPARAM wParam, LPARAM lParam) {
 		PLOGI.printf("Catheter - Unloaded.");
 		postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::UnloadCatheter);
 		break;
-	case CatheterState::Loaded:
+	case CatheterState::Loading:
 		PLOGI.printf("Catheter - Loaded.");
 		CUtility::StartThread(threadValidateCatheter, m_pThreadRotaryJunction, this);
 		break;
@@ -2699,6 +2702,29 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 		break;
 	case eRJState::Validating:
 	{
+		PLOGI.printf("RFID VALIDATION start");
+		RFID_ValidType isValid = m_pRJController->isValidRFID();
+
+#if ENABLE_RFID
+		CUtility::StopThread(m_pThreadRotaryJunction);
+		if (isValid == RFID_ValidType::VALID)
+		{
+			isValidating = false;
+			PLOGI.printf("validation true");
+
+			m_pRJController->UpdateState(eRJState::Loading);
+		}
+		else if (isValid == RFID_ValidType::INVALID) {
+			isValidating = false;
+			PLOGI.printf("validation false");
+			m_pRJController->UpdateState(eRJState::Error);
+		}
+		else {
+			if (CUtility::StartThread(threadRFIDValidation, m_pThreadRotaryJunction, this)) {
+				isValidating = true;
+			}
+		}
+#endif
 		break;
 	}
 	case eRJState::Loading:
@@ -2715,38 +2741,6 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 	case eRJState::WaitManualLoad:
 		break;
 	case eRJState::Loaded:
-	{
-		if (!isValidating) {
-			RFIDProtocol::initState(false);
-		}
-
-		RFID_ValidType isValid = m_pRJController->isValidRFID();
-
-#if ENABLE_RFID
-		if (isValid == RFID_ValidType::VALID)
-		{
-			if (isValidating)
-				CUtility::StopThread(m_pThreadRotaryJunction);
-			isValidating = false;
-			// To-Do: Validation
-			//영상 validation 스레드 실행할 것
-			PLOGI.printf("validation true");
-		}
-		else if (isValid == RFID_ValidType::INVALID) {
-			if (isValidating)
-				CUtility::StopThread(m_pThreadRotaryJunction);
-			isValidating = false;
-			PLOGI.printf("validation false");
-			m_pRJController->UpdateState(eRJState::Error);
-		}
-		else {
-			CUtility::StopThread(m_pThreadRotaryJunction);
-			if (CUtility::StartThread(threadRFIDValidation, m_pThreadRotaryJunction, this)) {
-				isValidating = true;
-			}
-		}
-#endif
-	}
 		break;
 	case eRJState::Unloading:
 	{

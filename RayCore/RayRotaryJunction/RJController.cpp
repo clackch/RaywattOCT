@@ -423,11 +423,14 @@ bool CRJController::GetRFIDStep() {
 }
 
 
-UINT CRJController::GetRFIDInfo(BYTE* pRFIDInfo) {
-	if (pRFIDInfo == nullptr) return 0;
-	if (m_nRFIDLength == 0) return 0;
-	memcpy(pRFIDInfo, m_RFID, m_nRFIDLength);
-	return m_nRFIDLength;
+UINT CRJController::GetRFIDUID(BYTE* pRFIDUID) {
+	if (pRFIDUID == nullptr) return 0;
+	RFIDProtocol::SRFIDState rfidState;
+	RFIDProtocol::getCurRFIDData(&rfidState);
+	if (sizeof(rfidState.aCustomUID)/sizeof(BYTE) + sizeof(rfidState.aHardwareUID) / sizeof(BYTE) != CUSTOM_UID_LENGTH+HARDWARE_UID_LENGTH) return 0;
+	memcpy(pRFIDUID, rfidState.aHardwareUID, HARDWARE_UID_LENGTH);
+	memcpy(pRFIDUID+HARDWARE_UID_LENGTH, rfidState.aCustomUID, CUSTOM_UID_LENGTH);
+	return CUSTOM_UID_LENGTH + HARDWARE_UID_LENGTH;
 }
 int CRJController::ConvertMMtoStep(UINT mm) {
 	return floor((float)mm / (float)PULLBACK_MOTOR_RESOLUTION * (float)MOTOR_CONTROL_RESOLUTION);
@@ -558,6 +561,8 @@ void CRJController::updateState() {
 	case eRJState::Connected:
 		if (m_bLimitSwitch) {
 			m_nextState = eRJState::Validating;
+			RFIDProtocol::initState(false);
+			ReadRFID();
 		}
 		break;
 	case eRJState::Validating:
@@ -576,11 +581,6 @@ void CRJController::updateState() {
 		}
 		if (m_bButton[0]) {
 			m_nextState = eRJState::Unloading;
-		}
-
-		if (isFirstTime) {
-			ReadRFID();
-			isFirstTime = false;
 		}
 		break;
 	case eRJState::Unloading:
@@ -620,12 +620,14 @@ RFID_ValidType CRJController::isValidRFID() {
 	RFIDProtocol::SRFIDState rfidState;
 	RFIDProtocol::getCurRFIDData(&rfidState);
 	if (rfidState.aCNT >= RFID_MAX_COUNT) {
+		PLOGI.printf("RFID Invalid : exceed of usage");
 		return RFID_ValidType::INVALID;
 	}
 	bool isNoData = true;
 
 	size_t arrayLength = sizeof(rfidState.aMANU) / sizeof(rfidState.aMANU[0]);
 	if (arrayLength != RFID_MANUFACTURER_LEN) {
+		PLOGI.printf("RFID Invalid : mismatch of manufacturer");
 		return RFID_ValidType::INVALID;
 	}
 	for (int i = 0; i < RFID_MANUFACTURER_LEN; i++) {
@@ -639,6 +641,7 @@ RFID_ValidType CRJController::isValidRFID() {
 	}
 	for (size_t i = 0; i < arrayLength; ++i) {
 		if (rfidState.aMANU[i] != static_cast<unsigned int>(RFID_MANUFACTURER[i])) {
+			PLOGI.printf("RFID Invalid : mismatch of manufacturer");
 			return RFID_ValidType::INVALID;
 		}
 	}
@@ -653,10 +656,19 @@ void CRJController::updateStateManualMode() {
 		}
 		break;
 	case eRJState::Disconnected:
+		if (m_bLimitSwitch) {
+			m_nextState = eRJState::Connected;
+		}
 		break;
 	case eRJState::Connected:
+		if (m_bLimitSwitch) {
+			m_nextState = eRJState::Validating;
+			RFIDProtocol::initState(false);
+			ReadRFID();
+		}
 		break;
 	case eRJState::Validating:
+		if (!m_bLimitSwitch) m_nextState = eRJState::Disconnected;
 		break;
 	case eRJState::Loading:
 		if (m_bButton[1]) {

@@ -29,7 +29,7 @@ class COCTSystem : public CMessageService
 private:
 	enum class CatheterState {
 		Unloaded = 0,
-		Loaded,
+		Loading,
 		Enable,
 		FindingSheath,
 		FindingPeak,
