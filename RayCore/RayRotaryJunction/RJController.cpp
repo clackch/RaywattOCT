@@ -865,7 +865,7 @@ void CRJController::handlePacket() {
 		//PLOGI.printf("\tButton: %02d %02d %02d\n", m_bButton[0], m_bButton[1], m_bLimitSwitch);
 	}
 	else {
-		if (m_vPacket[REPLY_RESULT_IDX] != 11) {
+		if (m_vPacket[REPLY_RESULT_IDX] != static_cast<BYTE>(eCOMM_RJ::COMM_UNTAG_ERR)) {
 			if (isTagging == false) //PLOGI.printf("tag start\n");
 			isTagging = true;
 		}
@@ -874,7 +874,7 @@ void CRJController::handlePacket() {
 			isTagging = false;
 			return;
 		}
-		if (m_vPacket[REPLY_RESULT_IDX] == 12) {
+		if (m_vPacket[REPLY_RESULT_IDX] == static_cast<BYTE>(eCOMM_RJ::COMM_KEY_ERR)) {
 			if (fid != eFID::FID_RFID_GET_KEY) {
 				if (!RFIDProtocol::getFindingKeyStatus()) {
 					RFIDProtocol::setFindingKeyStatus(true);
