@@ -371,51 +371,52 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f) {
 	// To-Do : enable openmp, check shared variables
 	omp_set_dynamic(numDynamic);
 	omp_set_num_threads(numThreads);
-	//#pragma omp parallel
+	//#pragma omp parallel	
+	#pragma omp parallel for
+	for (int i = 0; i < nBScan; i++)
 	{
-		//#pragma omp for firstprivate(fBuffer_Window,fBuffer_BackgroundFringes,fcBuffer_FFT,fcBuffer_IFFT,j)
-#pragma omp parallel for
-		for (int i = 0; i < nBScan; i++)
+		int tid = omp_get_thread_num();
+		auto& ctx = threadContexts[tid];
 		{
-			int tid = omp_get_thread_num();
-			auto& ctx = threadContexts[tid];
-			{
-				// 1. Background Subtract
-				ippsCopy_32f(fringes32f + i * nAScan, ctx.fBuffer_Window, nAScan);
-				ippsSub_32f_I(fringes32fAverage, ctx.fBuffer_Window, nAScan);  // I의 의미:자기 자신에 이처리를 해서, 결과를 얻는다.
+			// 0. Buffer Initialize
+			ippsZero_32f(ctx.fBuffer_Window, nFFTLength);
+			ippsZero_32fc(ctx.fcBuffer_FFT, nFFTLength);
 
-				// 2. Apply Window
-				ippsMul_32f_I(calibration->window, ctx.fBuffer_Window, nFFTLength);
+			// 1. Background Subtract
+			ippsCopy_32f(fringes32f + i * nAScan, ctx.fBuffer_Window, nAScan);
+			ippsSub_32f_I(fringes32fAverage, ctx.fBuffer_Window, nAScan);  // I의 의미:자기 자신에 이처리를 해서, 결과를 얻는다.
 
-				// 3. First FFT
-				ippsFFTFwd_RToPerm_32f_I(ctx.fBuffer_Window, fftSpecFirst, ctx.fftWorkBufFirst); // http://software.intel.com/sites/products/documentation/hpc/ipp/ipps/ipps_ch7/ch7_packed_formats.html#Perm
-				ippsConjPerm_32fc(ctx.fBuffer_Window, ctx.fcBuffer_FFT, nFFTLength);
+			// 2. Apply Window
+			ippsMul_32f_I(calibration->window, ctx.fBuffer_Window, nFFTLength);
 
-				// 4. Zero Pad & Reorder (1 | 2 | 0 | 0)
-				ippsZero_32fc(ctx.fcBuffer_IFFT, nFFTLength);
-				ippsCopy_32fc(ctx.fcBuffer_FFT, ctx.fcBuffer_IFFT, nOutputLength);
+			// 3. First FFT
+			ippsFFTFwd_RToPerm_32f_I(ctx.fBuffer_Window, fftSpecFirst, ctx.fftWorkBufFirst); // http://software.intel.com/sites/products/documentation/hpc/ipp/ipps/ipps_ch7/ch7_packed_formats.html#Perm
+			ippsConjPerm_32fc(ctx.fBuffer_Window, ctx.fcBuffer_FFT, nFFTLength);
 
-				// 5. Inverse FFT
-				ippsFFTInv_CToC_32fc_I(ctx.fcBuffer_IFFT, ifftSpec, ctx.fftWorkBufIFFT);
+			// 4. Zero Pad & Reorder (1 | 2 | 0 | 0)
+			ippsZero_32fc(ctx.fcBuffer_IFFT, nFFTLength);
+			ippsCopy_32fc(ctx.fcBuffer_FFT, ctx.fcBuffer_IFFT, nOutputLength);
 
-				// 6. Interpolation
-				ippsZero_32fc(ctx.fcBuffer_FFT, nOutputLength);
-				for (int j = 0; j < nAScan / 2; j++) {
-					ctx.fcBuffer_FFT[j].re = (calibration->weightMap[j] * ctx.fcBuffer_IFFT[calibration->indexMap[j]].re + (1.0f - calibration->weightMap[j]) * ctx.fcBuffer_IFFT[calibration->indexMap[j] + 1].re);
-					ctx.fcBuffer_FFT[j].im = (calibration->weightMap[j] * ctx.fcBuffer_IFFT[calibration->indexMap[j]].im + (1.0f - calibration->weightMap[j]) * ctx.fcBuffer_IFFT[calibration->indexMap[j] + 1].im);
-				}
+			// 5. Inverse FFT
+			ippsFFTInv_CToC_32fc_I(ctx.fcBuffer_IFFT, ifftSpec, ctx.fftWorkBufIFFT);
 
-				// 7. Numerical Dispersion Compensation
-				ippsMul_32fc_I((Ipp32fc*)calibration->dispersion, ctx.fcBuffer_FFT, nAScan / 2);
-
-				// 8. FFT Again
-				ippsFFTFwd_CToC_32fc_I(ctx.fcBuffer_FFT, fftSpecSecond, ctx.fftWorkBufSecond);
-
-				// 9. Extract Magnitude
-				ippsPowerSpectr_32fc(ctx.fcBuffer_FFT, fFFTResult + i * nOutputLength, nOutputLength);
+			// 6. Interpolation
+			ippsZero_32fc(ctx.fcBuffer_FFT, nOutputLength);
+			for (int j = 0; j < nAScan / 2; j++) {
+				ctx.fcBuffer_FFT[j].re = (calibration->weightMap[j] * ctx.fcBuffer_IFFT[calibration->indexMap[j]].re + (1.0f - calibration->weightMap[j]) * ctx.fcBuffer_IFFT[calibration->indexMap[j] + 1].re);
+				ctx.fcBuffer_FFT[j].im = (calibration->weightMap[j] * ctx.fcBuffer_IFFT[calibration->indexMap[j]].im + (1.0f - calibration->weightMap[j]) * ctx.fcBuffer_IFFT[calibration->indexMap[j] + 1].im);
 			}
+
+			// 7. Numerical Dispersion Compensation
+			ippsMul_32fc_I((Ipp32fc*)calibration->dispersion, ctx.fcBuffer_FFT, nAScan / 2);
+
+			// 8. FFT Again
+			ippsFFTFwd_CToC_32fc_I(ctx.fcBuffer_FFT, fftSpecSecond, ctx.fftWorkBufSecond);
+
+			// 9. Extract Magnitude
+			ippsPowerSpectr_32fc(ctx.fcBuffer_FFT, fFFTResult + i * nOutputLength, nOutputLength);
 		}
-	} // end parallel region
+	}
 
 	for (int t = 0; t < numThreads; ++t) {
 		auto& ctx = threadContexts[t];
