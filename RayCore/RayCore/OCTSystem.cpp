@@ -2231,7 +2231,7 @@ int COCTSystem::connectRotaryJunction() {
 	}
 
 	if (!m_pLaserModule->IsConnected()) {
-		result = m_pLaserModule->Connect(config.laserModule.port);
+		result &= m_pLaserModule->Connect(config.laserModule.port);
 		if (result) {
 			m_pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_DEFAULT);
 			m_pLaserModule->SetVLD(0);
