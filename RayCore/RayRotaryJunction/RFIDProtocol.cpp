@@ -283,6 +283,7 @@ void RFIDProtocol::initState(bool needLoadKey) {
 	aRFIDState.aCNT = 0;
 	aRFIDState.aStep = 0;
 	aRFIDState.findingKey = false;
+	aRFIDState.errorState = UNANSWERED;
 
 	if(needLoadKey)
 		RFIDKeyController::loadFirstKey(aRFIDState.aKeyA);
@@ -312,6 +313,15 @@ bool RFIDProtocol::getFindingKeyStatus() {
 void RFIDProtocol::setFindingKeyStatus(bool status) {
 	std::lock_guard<std::mutex> lock(mtx);
 	aRFIDState.findingKey = status;
+}
+bool RFIDProtocol::getRFIDErrorState() {
+	std::lock_guard<std::mutex> lock(mtx);
+	return aRFIDState.errorState;
+}
+void RFIDProtocol::setRFIDErrorState(RFIDProtocol::RFIDErrorState status) {
+	std::lock_guard<std::mutex> lock(mtx);
+	aRFIDState.errorState = status;
+	PLOGI.printf("RFIDErrorState: %d", status);
 }
 
 RFIDMessageData::Data* RFIDProtocol::getRecentMessageData(eFID fid){
@@ -355,5 +365,6 @@ void RFIDProtocol::getCurRFIDData(RFIDProtocol::SRFIDState* txState) {
 	txState->aStep = aRFIDState.aStep;
 	txState->aCNT = aRFIDState.aCNT;
 	txState->findingKey = aRFIDState.findingKey;
+	txState->errorState = aRFIDState.errorState;
 	return;
 }
