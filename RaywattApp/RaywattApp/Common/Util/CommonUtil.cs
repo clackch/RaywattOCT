@@ -1669,110 +1669,101 @@ namespace RaywattApp.Common.Util
         {
             if (contourList == null) return;
 
-            int frameSize = sizeBuffer.Width * sizeBuffer.Height;
+            double sx = (double)sizeBuffer.Width / sizeContour.Width;
+            double sy = (double)sizeBuffer.Height / sizeContour.Height;
+
             for (int i = 0; i < contourList.Count; i++)
             {
-                Mat imgLumen = new Mat(sizeContour, MatType.CV_8UC1);
-                Mat imgResize = new Mat(sizeBuffer, MatType.CV_8UC1);
-                List<List<Point>> contours = new List<List<Point>>();
-                List<Point> contour = new List<Point>();
-                foreach (System.Windows.Point point in contourList[i].Points)
+                using var img = WrapSliceAsMat(buffer, i, sizeBuffer);
+                img.SetTo(Scalar.Black);
+
+                if (contourList[i].Points == null || contourList[i].Points.Count == 0) continue;
+
+                var scaled = new List<Point>(contourList[i].Points.Count);
+                foreach (var p in contourList[i].Points)
                 {
-                    contour.Add(new OpenCvSharp.Point(point.X, point.Y));
-                }
-                if (contour.Count > 0)
-                {
-                    contours.Add(contour);
+                    scaled.Add(new Point((int)Math.Round(p.X * sx), (int)Math.Round(p.Y * sy)));
                 }
 
-                imgLumen.SetTo(Scalar.Black);
-                if (contours.Count > 0)
-                {
-                    Cv2.DrawContours(imgLumen, contours, -1, Scalar.White, -1);
-                }
-                Cv2.Resize(imgLumen, imgResize, imgResize.Size());
-                Cv2.Blur(imgResize, imgResize, new Size(13, 13) /* 필터 크기 */, new Point(-1, -1) /* 필터 중심*/);
-
-                Buffer.MemoryCopy((void*)imgResize.Data, (void*)(IntPtr.Add(buffer, i * frameSize)), frameSize, frameSize);
+                Cv2.FillPoly(img, new[] { scaled.ToArray() }, Scalar.White);
+                Cv2.GaussianBlur(img, img, new Size(5,5), 1.0);
             }
         }
         unsafe public static void StentsToMemory(List<LumenStent>? stentList, Size sizeContour, IntPtr buffer, Size sizeBuffer)
         {
             if (stentList == null) return;
 
-            int frameSize = sizeBuffer.Width * sizeBuffer.Height;
+            double sx = (double)sizeBuffer.Width / sizeContour.Width;
+            double sy = (double)sizeBuffer.Height / sizeContour.Height;
+            int rx = 5;
+            int ry = 5;
+
             for (int i = 0; i < stentList.Count; i++)
             {
-                Mat imgLumen = new Mat(sizeContour, MatType.CV_8UC1);
-                Mat imgResize = new Mat(sizeBuffer, MatType.CV_8UC1);
-                Point[][] contours;
-                List<Point> contour = new List<Point>();
+                if (stentList[i].Points == null || !stentList[i].IsStent) continue;
 
-                if (stentList[i].Points == null || !stentList[i].IsStent)
-                    continue;
+                using var img = WrapSliceAsMat(buffer, i, sizeBuffer);
+                img.SetTo(Scalar.Black);
 
-                imgLumen.SetTo(Scalar.Black);
-
-                foreach (System.Windows.Point point in stentList[i].Points)
+                foreach (var p in stentList[i].Points)
                 {
-                    //TODO - 실제 스텐트 두께에 맞춰서 Size( , )를 설정해 주어야 함.
-                    imgLumen.Ellipse(new OpenCvSharp.Point(point.X, point.Y), new Size(5, 5), 0, 0, 360, Scalar.White, 1);
+                    var q = new Point((int)Math.Round(p.X * sx), (int)Math.Round(p.Y * sy));
+                    var r = new Size((int)Math.Round(rx * sx), (int)Math.Round(ry * sy));
+                    img.Ellipse(q, r, 0, 0, 360, Scalar.White, -1);
                 }
 
-                Mat binary = new Mat();
-                Cv2.Threshold(imgLumen, binary, 128, 255, ThresholdTypes.Binary);
-
-                Cv2.FindContours(binary, out contours, out HierarchyIndex[] hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
-
-                Cv2.DrawContours(imgLumen, contours, -1, Scalar.White, 1);
-
-                Cv2.Resize(imgLumen, imgResize, imgResize.Size());
-                Cv2.Blur(imgResize, imgResize, new Size(7, 7) /* 필터 크기 */, new Point(-1, -1) /* 필터 중심*/);
-                Buffer.MemoryCopy((void*)imgResize.Data, (void*)(IntPtr.Add(buffer, i * frameSize)), frameSize, frameSize);
+                 Cv2.GaussianBlur(img, img, new Size(3,3), 0.8);
             }
         }
 
         unsafe public static void GuideWireToMemory(List<LumenGuidewire>? guidewireList, Size sizeContour, IntPtr buffer, Size sizeBuffer, double radius)
         {
-            if (guidewireList == null) return;
+            if (guidewireList == null)
+            {
+                _log.Debug("GuideWireList is empty");
+                return;
+            }
 
-            int frameSize = sizeBuffer.Width * sizeBuffer.Height;
+            double sx = (double)sizeBuffer.Width / sizeContour.Width;
+            double sy = (double)sizeBuffer.Height / sizeContour.Height;
 
-            OpenCvSharp.Point prevPoint = new OpenCvSharp.Point(0, 0);
             for (int i = 0; i < guidewireList.Count; i++)
             {
-                Mat imgLumen = new Mat(sizeContour, MatType.CV_8UC1);
-                Mat imgResize = new Mat(sizeBuffer, MatType.CV_8UC1);
-                Point[][] contours;
-                List<Point> contour = new List<Point>();
+                using var img = WrapSliceAsMat(buffer, i, sizeBuffer);
+                img.SetTo(Scalar.Black);
 
-                imgLumen.SetTo(Scalar.Black);
+                if (guidewireList[i].Points == null || guidewireList[i].Points.Count == 0) continue;
 
-                if (guidewireList[i].Points == null)
-                    continue;
-                 
-                foreach (System.Windows.Point point in guidewireList[i].Points)
+                var prev = new Point(int.MinValue, int.MinValue);
+
+                foreach (var pt in guidewireList[i].Points)
                 {
-                    OpenCvSharp.Point currentPoint = new OpenCvSharp.Point();
-                    if (point.X == 0 || point.Y == 0)
-                    {
-                        currentPoint.X = prevPoint.X;
-                        currentPoint.Y = prevPoint.Y;
-                    }
-                    else
-                    {
-                        currentPoint.X = (int)point.X;
-                        currentPoint.Y = (int)point.Y;
-                    }
-                    //TODO - 실제 Guidewire 반지름에 맞춰서 Size( , )를 설정해 주어야 함.
-                    imgLumen.Ellipse(currentPoint, new Size(radius, radius), 0, 0, 360, Scalar.White, -1);
+                    var cur = (pt.X == 0 || pt.Y == 0) && prev.X != int.MinValue
+                        ? prev
+                        : new Point((int)Math.Round(pt.X * sx), (int)Math.Round(pt.Y * sy));
 
-                    prevPoint = currentPoint;
+                    int r = (int)Math.Round(radius * (sx + sy) * 0.5);
+                    if (r < 1) r = 1;
+
+                    if (prev.X != int.MinValue)
+                    {
+                        Cv2.Line(img, prev, cur, Scalar.White, Math.Max(1, r * 2));
+                    }
+
+                    Cv2.Circle(img, cur, r, Scalar.White, -1);
+
+                    prev = cur;
                 }
-                Cv2.Resize(imgLumen, imgResize, imgResize.Size());
-                Buffer.MemoryCopy((void*)imgResize.Data, (void*)(IntPtr.Add(buffer, i * frameSize)), frameSize, frameSize);
             }
         }
+
+        static Mat WrapSliceAsMat(IntPtr buffer, int i, Size sizeBuffer)
+        {
+            int frameSize = sizeBuffer.Width * sizeBuffer.Height;
+            IntPtr dst = IntPtr.Add(buffer, i * frameSize);
+            return new Mat(sizeBuffer.Height, sizeBuffer.Width, MatType.CV_8UC1, dst);
+        }
+
         private static System.Windows.Point StrToPoint(string str)
         {
             string[] temp = str.Split(",");
