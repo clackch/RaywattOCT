@@ -459,7 +459,7 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 int num = 0;
 void COCTImaging::findSheath(cv::Mat img) {
 	num++;
-	/*
+	
 	// way1~way6
 	cv::Mat edgeX, edgeY;
 	cv::Sobel(img, edgeX, CV_32F, 1, 0, 3);
@@ -491,9 +491,13 @@ void COCTImaging::findSheath(cv::Mat img) {
 	//cv::imwrite("edgeX" + std::to_string(num) + ".tif", absEdgeX);
 	//cv::imwrite("edgeY" + std::to_string(num) + ".tif", absEdgeY);
 	//cv::imwrite("edgeMagnitude" + std::to_string(num) + ".tif", absEdgeMagnitude);
-	//PLOGI.printf("Edge X: %d, Y: %d, Magnitude: %d", totalX, totalY, totalMagnitude);
-	//// way1
-	//m_nSheathPosition = totalMagnitude;
+	/*cv::Mat circularizedImage;
+	CircularizeImage(img, circularizedImage);
+	cv::imwrite("circularizedImage" + std::to_string(num) + ".tif", circularizedImage);
+
+	PLOGI.printf("Edge X: %d, Y: %d, Magnitude: %d", totalX, totalY, totalMagnitude);*/
+	// way1
+	m_nSheathPosition = totalMagnitude;
 	//// way2
 	//m_nSheathPosition = totalX;
 	//// way3 
@@ -509,9 +513,10 @@ void COCTImaging::findSheath(cv::Mat img) {
 	//m_nSheathPosition = maxMagnitude;
 	//// way5
 	//m_nSheathPosition = maxX;
-	// way6
+	////way4_2
+	//m_nSheathPosition = maxY < maxX ? 1 : 0;
+	//// way6
 	//m_nSheathPosition = maxY;
-	*/
 
 	/*
 	// way7
@@ -522,13 +527,11 @@ void COCTImaging::findSheath(cv::Mat img) {
 		image = img.clone();
 	CircularizeImage(image, circularizedImage);
 	m_nImageForCalib = circularizedImage.clone();
-
 	m_nSheathPosition = 0;
-
 	cv::imwrite("circularizedImage" + std::to_string(num) + ".tif", circularizedImage);
 	*/
 	
-	
+	/*
 	// way8
 	cv::Mat circularizedImage;
 	CircularizeImage(img, circularizedImage);
@@ -540,10 +543,10 @@ void COCTImaging::findSheath(cv::Mat img) {
 	cv::minMaxLoc(croppedImage, &minVal, &maxVal);
 	PLOGI.printf("type: %d, max: %lf", croppedImage.type(), maxVal);
 	m_nImageForCalib = croppedImage.clone();
-	//cv::imwrite("circularizedImage" + std::to_string(num) + ".tif", croppedImage);
+	cv::imwrite("circularizedImage" + std::to_string(num) + ".tif", croppedImage);
 
 	m_nSheathPosition = 0;
-	
+*/
 
 	//m_nSheathSearchRange = 300; /*1mm 오차 범위 설정*/
 	//double maxMinusEdge = 0.3;
