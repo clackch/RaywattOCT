@@ -42,6 +42,14 @@ public:
 class RFIDProtocol
 {
 public:
+	enum RFIDErrorState {
+		OK,
+		WAITING_KEYANSWER,
+		NOTAG,
+		NOMATCHKEY,
+		UNANSWERED,
+		ETCERROR
+	};
 	struct SRFIDState {
 		uint8_t aHardwareUID[HARDWARE_UID_LENGTH];
 		uint8_t aCustomUID[CUSTOM_UID_LENGTH];
@@ -51,6 +59,7 @@ public:
 		int aCNT;
 		int aStep;
 		bool findingKey = false;
+		RFIDErrorState errorState = UNANSWERED;
 	};
 private:
 	static int AddDataToPacket(BYTE* packet, BYTE* data, int len);
@@ -81,6 +90,8 @@ public:
 	static void printStateData(SRFIDState stateData);
 	static bool getFindingKeyStatus();
 	static void setFindingKeyStatus(bool status);
+	static bool getRFIDErrorState();
+	static void setRFIDErrorState(RFIDErrorState status);
 	static RFIDMessageData::Data* getMessageData(eFID fid);
 	static void deleteMessageData(eFID fid);
 	static void addFailedFID(eFID fid);

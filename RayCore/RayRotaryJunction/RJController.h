@@ -6,8 +6,6 @@
 #include "WriteTaskController.h"
 #include <vector>
 #include <iomanip>
-
-
 #define ENABLE_RFID		true
 
 // position: step, speed: step/s
@@ -57,6 +55,12 @@ enum RFID_ValidType
 	INVALID,
 	WAITING
 };
+enum RFID_AnswerType
+{
+	FAILED,
+	ANSWERED,
+	PROCEEDING
+};
 
 class CMessageService;
 class CRJController
@@ -87,8 +91,6 @@ private:
 	BYTE m_RFID[MAX_PATH];
 	BYTE m_byManufacturerId[MAX_PATH];
 	CThread* m_pThreadRFIDTag;
-
-	bool isTagging;
 
 	bool m_bManualMode;	// Manual Load Catheter
 
@@ -133,6 +135,8 @@ public:
 	UINT GetRFIDUID(BYTE* pRFIDUID);
 	bool GetPhotoSensorOnOff(int index) { return m_bPhotoSensor[index]; }
 	RFID_ValidType isValidRFID();
+	RFID_AnswerType checkAnswerRFID(RFIDProtocol::SRFIDState state);
+	static DWORD WINAPI checkKeyFinding(LPVOID);
 
 	int ConvertMMtoStep(UINT mm);
 	void SetManualMode(bool on) { m_bManualMode = on; }

@@ -616,9 +616,52 @@ void CRJController::updateState() {
 	}
 }
 
+DWORD WINAPI CRJController::checkKeyFinding(LPVOID) {
+	RFIDProtocol::SRFIDState rfidState;
+	do {
+		RFIDProtocol::getCurRFIDData(&rfidState);
+	} while (rfidState.errorState == RFIDProtocol::WAITING_KEYANSWER);
+	return 0;
+}
+
+RFID_AnswerType CRJController::checkAnswerRFID(RFIDProtocol::SRFIDState rfidState) {
+	if (rfidState.errorState == RFIDProtocol::NOTAG) {
+		PLOGI.printf("RFID Invalid : inexistence of tag");
+		return RFID_AnswerType::FAILED;
+	}
+	if (rfidState.errorState == RFIDProtocol::NOMATCHKEY) {
+		PLOGI.printf("RFID Invalid : no match key");
+		return RFID_AnswerType::FAILED;
+	}
+	else if (rfidState.errorState == RFIDProtocol::WAITING_KEYANSWER) {
+		HANDLE hThread = CreateThread(nullptr, 0, checkKeyFinding, nullptr, 0, nullptr);
+		if(hThread == 0) return RFID_AnswerType::FAILED;
+
+		DWORD result = WaitForSingleObject(hThread, 10000);
+		if (result == WAIT_TIMEOUT) {
+			RFIDProtocol::setRFIDErrorState(RFIDProtocol::NOMATCHKEY);
+			WaitForSingleObject(hThread, INFINITE); 
+			return RFID_AnswerType::FAILED;
+		}
+	}
+	else if (rfidState.errorState == RFIDProtocol::UNANSWERED) {
+		return RFID_AnswerType::PROCEEDING;
+	}
+	else if (rfidState.errorState != RFIDProtocol::OK) {
+		PLOGI.printf("RFID Invalid : undefined error");
+		return RFID_AnswerType::FAILED;
+	}
+	return RFID_AnswerType::ANSWERED;
+}
+
 RFID_ValidType CRJController::isValidRFID() {
 	RFIDProtocol::SRFIDState rfidState;
 	RFIDProtocol::getCurRFIDData(&rfidState);
+
+	RFID_AnswerType check = checkAnswerRFID(rfidState);
+	if(check == RFID_AnswerType::FAILED) return RFID_ValidType::INVALID;
+	if(check == RFID_AnswerType::PROCEEDING) return RFID_ValidType::WAITING;
+
 	if (rfidState.aCNT >= RFID_MAX_COUNT) {
 		PLOGI.printf("RFID Invalid : exceed of usage");
 		return RFID_ValidType::INVALID;
@@ -839,7 +882,7 @@ void CRJController::RxPacketRFIDGetState(BYTE* buff, RFID_ReadType type)
 		idx += STEP_LEN;
 	}
 
-	if (isTagging) {
+	if (RFIDProtocol::getRFIDErrorState() != RFIDProtocol::NOTAG) {
 		RFIDProtocol::printState();
 	}
 }
@@ -851,7 +894,7 @@ void CRJController::handlePacket() {
 	char strTime[MAX_PATH];
 	CUtility::GetCurTime(strTime);
 
-	if (fid < eFID::FID_RFID_GET_STATE) {
+	if (fid < eFID::FID_RFID_GET_STATE || fid == eFID::FID_SM_ENABLE || fid == eFID::FID_SM_DISABLE ) {
 		// photo sensor state
 		for (int i = 0; i < 6; i++) {
 			m_bPhotoSensor[i] = m_vPacket[PHOTO_IDX] & (0x1 << i);
@@ -865,13 +908,8 @@ void CRJController::handlePacket() {
 		//PLOGI.printf("\tButton: %02d %02d %02d\n", m_bButton[0], m_bButton[1], m_bLimitSwitch);
 	}
 	else {
-		if (m_vPacket[REPLY_RESULT_IDX] != static_cast<BYTE>(eCOMM_RJ::COMM_UNTAG_ERR)) {
-			if (isTagging == false) //PLOGI.printf("tag start\n");
-			isTagging = true;
-		}
-		else {
-			if (isTagging == true) //PLOGI.printf("tag end\n");
-			isTagging = false;
+		if (m_vPacket[REPLY_RESULT_IDX] == static_cast<BYTE>(eCOMM_RJ::COMM_UNTAG_ERR)) {
+			RFIDProtocol::setRFIDErrorState(RFIDProtocol::NOTAG);
 			return;
 		}
 		if (m_vPacket[REPLY_RESULT_IDX] == static_cast<BYTE>(eCOMM_RJ::COMM_KEY_ERR)) {
@@ -885,6 +923,10 @@ void CRJController::handlePacket() {
 					RFIDProtocol::addFailedFID(fid);
 				}
 			}
+			return;
+		}
+		if (m_vPacket[REPLY_RESULT_IDX] == static_cast<BYTE>(eCOMM_RJ::COMM_READ_ERR)) {
+			RFIDProtocol::setRFIDErrorState(RFIDProtocol::ETCERROR);
 			return;
 		}
 	}
@@ -929,6 +971,8 @@ void CRJController::handlePacket() {
 		break;
 	}
 
+	if (fid >= eFID::FID_RFID_GET_STATE && fid != eFID::FID_SM_ENABLE && fid != eFID::FID_SM_DISABLE)
+		RFIDProtocol::setRFIDErrorState(RFIDProtocol::OK);
 	m_bReadInitStatus = true;
 }
 
@@ -947,6 +991,9 @@ void CRJController::findCorrectKey() {
 
 		int written = m_pConnection->Write(serialPacket, packetLength);
 		Sleep(10);
+	}
+	if (RFIDProtocol::getRFIDErrorState() == RFIDProtocol::UNANSWERED) {
+		RFIDProtocol::setRFIDErrorState(RFIDProtocol::WAITING_KEYANSWER);
 	}
 }
 
