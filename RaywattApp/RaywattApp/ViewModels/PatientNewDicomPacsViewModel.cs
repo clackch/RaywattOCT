@@ -35,9 +35,6 @@ namespace RaywattApp.ViewModels
         private TextValidator _searchPatientId = new TextValidator();
 
         [ObservableProperty]
-        private string _searchPatientName = "";
-
-        [ObservableProperty]
         private ObservableCollection<Patient> _patients = new ObservableCollection<Patient>();
 
         [ObservableProperty]
@@ -267,14 +264,13 @@ namespace RaywattApp.ViewModels
 
             Patients.Clear();
 
-            if (string.IsNullOrEmpty(SearchPatientId.Text) && string.IsNullOrEmpty(SearchPatientName))
+            if (string.IsNullOrEmpty(SearchPatientId.Text))
             {
-                SearchPatientId.Msg = "Please enter the value to search for.";
+                SearchPatientId.Msg = "Please enter the value.";
                 return;
             }
 
-            string patientIdParam = string.IsNullOrEmpty(SearchPatientId.Text) ? "*" : "*" + SearchPatientId.Text.Trim() + "*";
-            string patientNameParam = string.IsNullOrEmpty(SearchPatientName) ? "*" : "*" + SearchPatientName.Trim() + "*";
+            string patientIdParam = SearchPatientId.Text.Trim();
 
             IsChecking = true;
             RayExportWrapper.DicomNetRWError res = await Task.Run(() => (RayExportWrapper.DicomNetRWError)RayExportWrapper.Echo(dicomClient));
@@ -301,7 +297,7 @@ namespace RaywattApp.ViewModels
 
             int count = 0;
             IsChecking = true;
-            dicomPatients = await Task.Run(() => (RayExportWrapper.FindPatients(dicomClient, patientIdParam, patientNameParam, out count)));
+            dicomPatients = await Task.Run(() => (RayExportWrapper.FindPatients(dicomClient, patientIdParam, "*" /* PatientName */, out count)));
             IsChecking = false;
 
             if (dicomPatients != IntPtr.Zero)
