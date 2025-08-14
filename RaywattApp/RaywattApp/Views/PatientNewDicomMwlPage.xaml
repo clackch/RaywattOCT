@@ -48,9 +48,9 @@
                 <StackPanel Grid.Column="2">
                     <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Procedure Start Date], Source={StaticResource L10N}}"/>
                     <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                        <DatePicker Style="{DynamicResource DatePickerValidator}" behaviors:DatePickerPopupOffsetBehavior.AutoVerticalOffset="True" Tag="{Binding [Enter Date], Source={StaticResource L10N}}" SelectedDate="{Binding SpsStartDateFrom}" ToolTip="{Binding SpsMsg}" Width="190" Height="54"/>
+                        <DatePicker Style="{DynamicResource DatePickerValidator}" behaviors:DatePickerPopupOffsetBehavior.AutoVerticalOffset="True" behaviors:DatePickerPopupOffsetBehavior.AutoHorizontalOffset="True" Tag="{Binding [Enter Date], Source={StaticResource L10N}}" SelectedDate="{Binding SpsStartDateFrom}" ToolTip="{Binding SpsMsg}" Width="190" Height="54"/>
                         <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="~" Margin="6,0,6,0" VerticalAlignment="Center"/>
-                        <DatePicker Style="{DynamicResource DatePickerValidator}" behaviors:DatePickerPopupOffsetBehavior.AutoVerticalOffset="True" Tag="{Binding [Enter Date], Source={StaticResource L10N}}" SelectedDate="{Binding SpsStartDateTo}" ToolTip="{Binding SpsMsg}" Width="190" Height="54"/>
+                        <DatePicker Style="{DynamicResource DatePickerValidator}" behaviors:DatePickerPopupOffsetBehavior.AutoVerticalOffset="True" behaviors:DatePickerPopupOffsetBehavior.AutoHorizontalOffset="True" Tag="{Binding [Enter Date], Source={StaticResource L10N}}" SelectedDate="{Binding SpsStartDateTo}" ToolTip="{Binding SpsMsg}" Width="190" Height="54"/>
                         <Button Style="{StaticResource OutlinedBtnType4-Large}" Command="{Binding SearchCommand}" Content="{Binding [Search], Source={StaticResource L10N}}" Width="92" Height="54" Margin="12,0,0,0"/>
                     </StackPanel>
                 </StackPanel>
