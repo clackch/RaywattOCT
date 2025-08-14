@@ -7,6 +7,7 @@
       xmlns:const="clr-namespace:RaywattApp.Common.Bases"
       xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+      xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
       Background="{DynamicResource GrayscaleGray8Brush}"
@@ -23,17 +24,39 @@
             <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Margin="75,20,0,19" Content="{Binding [Add Patient], Source={StaticResource L10N}}"/>
         </Grid>
 
-        <StackPanel Grid.Row="1" Margin="60,61,60,54">
+        <StackPanel Grid.Row="1" Margin="60,64,60,54">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="960"/>
-                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="216"/>
+                    <ColumnDefinition Width="506"/>
                 </Grid.ColumnDefinitions>
-                <Label Grid.Column="0" Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [DICOM Worklist (MWL)], Source={StaticResource L10N}}" Margin="2,0,0,0" VerticalAlignment="Center"/>
-                <Button Grid.Column="1" Style="{StaticResource OutlinedBtnType4-Large}" Command="{Binding SearchCommand}" Content="{Binding [Search], Source={StaticResource L10N}}" Width="200" Height="42"/>
+                
+                <StackPanel Grid.Column="0">
+                    <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [DICOM Worklist (MWL)], Source={StaticResource L10N}}" VerticalAlignment="Top"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,20,0,0" >
+                        <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Server], Source={StaticResource L10N}}" Margin="2,0,0,0"/>
+                        <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding SelectedDicomServer.AeTitle}" Margin="20,0,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1">
+                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Patient ID*], Source={StaticResource L10N}}"/>
+                    <TextBox Style="{DynamicResource TextBoxValidator}" Text="{Binding SearchPatientId.Text, UpdateSourceTrigger=PropertyChanged}" ToolTip="{Binding SearchPatientId.Msg}" Width="200" Height="54" HorizontalAlignment="Left" Margin="0,6,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Procedure Start Date], Source={StaticResource L10N}}"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                        <DatePicker Style="{DynamicResource DatePickerValidator}" behaviors:DatePickerPopupOffsetBehavior.AutoVerticalOffset="True" Tag="{Binding [Enter Date], Source={StaticResource L10N}}" SelectedDate="{Binding SpsStartDateFrom}" ToolTip="{Binding SpsMsg}" Width="190" Height="54"/>
+                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="~" Margin="6,0,6,0" VerticalAlignment="Center"/>
+                        <DatePicker Style="{DynamicResource DatePickerValidator}" behaviors:DatePickerPopupOffsetBehavior.AutoVerticalOffset="True" Tag="{Binding [Enter Date], Source={StaticResource L10N}}" SelectedDate="{Binding SpsStartDateTo}" ToolTip="{Binding SpsMsg}" Width="190" Height="54"/>
+                        <Button Style="{StaticResource OutlinedBtnType4-Large}" Command="{Binding SearchCommand}" Content="{Binding [Search], Source={StaticResource L10N}}" Width="92" Height="54" Margin="12,0,0,0"/>
+                    </StackPanel>
+                </StackPanel>
             </Grid>
             
-            <DataGrid Height="674" Name="worklists" ItemsSource="{Binding Worklists}" SelectedItem="{Binding SelectedWorklist}" Style="{StaticResource DataGridBasic}" RowStyle="{StaticResource DataGridRowDialog}" SelectionMode="Single" Margin="0,23,0,0">
+            <DataGrid Height="640" Name="worklists" ItemsSource="{Binding Worklists}" SelectedItem="{Binding SelectedWorklist}" Style="{StaticResource DataGridBasic}" RowStyle="{StaticResource DataGridRowDialog}" SelectionMode="Single" Margin="0,16,0,0">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">
                         <i:InvokeCommandAction Command="{Binding SelectionChangedCommand}" CommandParameter="{Binding ElementName=worklists, Path=SelectedItem}"/>
