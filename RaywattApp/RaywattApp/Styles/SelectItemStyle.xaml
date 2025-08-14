@@ -503,10 +503,6 @@
                                 </Grid>
                             </Grid>
                         </Border>
-                        <StackPanel Grid.Row="1" x:Name="validator" Orientation="Horizontal" Visibility="Collapsed" Margin="0,4,0,0">
-                            <Label Content="* " Foreground="{DynamicResource AdditionalColor3Brush}" FontSize="12"/>
-                            <Label Content="{TemplateBinding ToolTip}" Foreground="{DynamicResource AdditionalColor3Brush}" FontSize="12"/>
-                        </StackPanel>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsDropDownOpen" Value="True">
@@ -519,7 +515,6 @@
                         </Trigger>
                         <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self},Path=ToolTip, Converter={StaticResource NotEmptyStringToEnableConverter}}" Value="True">
                             <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AdditionalColor3Brush}"/>
-                            <Setter TargetName="validator" Property="Visibility" Value="Visible"/>
                         </DataTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

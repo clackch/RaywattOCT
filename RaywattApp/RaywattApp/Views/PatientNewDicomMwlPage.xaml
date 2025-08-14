@@ -42,21 +42,46 @@
 
                 <StackPanel Grid.Column="1">
                     <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Patient ID*], Source={StaticResource L10N}}"/>
-                    <TextBox Style="{DynamicResource TextBoxValidator}" Text="{Binding SearchPatientId.Text, UpdateSourceTrigger=PropertyChanged}" ToolTip="{Binding SearchPatientId.Msg}" Width="200" Height="54" HorizontalAlignment="Left" Margin="0,6,0,0"/>
+                    <TextBox Style="{DynamicResource TextBoxValidator}" Text="{Binding SearchPatientId.Text, UpdateSourceTrigger=PropertyChanged}" ToolTip="{Binding SearchPatientId.Msg}" Width="200" Height="72" HorizontalAlignment="Left" Margin="0,6,0,0"/>
                 </StackPanel>
 
                 <StackPanel Grid.Column="2">
                     <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Procedure Start Date], Source={StaticResource L10N}}"/>
                     <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                        <DatePicker Style="{DynamicResource DatePickerValidator}" behaviors:DatePickerPopupOffsetBehavior.AutoVerticalOffset="True" behaviors:DatePickerPopupOffsetBehavior.AutoHorizontalOffset="True" Tag="{Binding [Enter Date], Source={StaticResource L10N}}" SelectedDate="{Binding SpsStartDateFrom}" ToolTip="{Binding SpsMsg}" Width="190" Height="54"/>
-                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="~" Margin="6,0,6,0" VerticalAlignment="Center"/>
-                        <DatePicker Style="{DynamicResource DatePickerValidator}" behaviors:DatePickerPopupOffsetBehavior.AutoVerticalOffset="True" behaviors:DatePickerPopupOffsetBehavior.AutoHorizontalOffset="True" Tag="{Binding [Enter Date], Source={StaticResource L10N}}" SelectedDate="{Binding SpsStartDateTo}" ToolTip="{Binding SpsMsg}" Width="190" Height="54"/>
-                        <Button Style="{StaticResource OutlinedBtnType4-Large}" Command="{Binding SearchCommand}" Content="{Binding [Search], Source={StaticResource L10N}}" Width="92" Height="54" Margin="12,0,0,0"/>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="54"/>
+                                <RowDefinition Height="18"/>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                <DatePicker Style="{DynamicResource DatePickerValidator}" behaviors:DatePickerPopupOffsetBehavior.AutoVerticalOffset="True" behaviors:DatePickerPopupOffsetBehavior.AutoHorizontalOffset="True" Tag="{Binding [Enter Date], Source={StaticResource L10N}}" SelectedDate="{Binding SpsStartDateFrom, UpdateSourceTrigger=PropertyChanged}" ToolTip="{Binding SpsMsg}" Width="190" Height="54" HorizontalAlignment="Left"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="~" Margin="6,19,6,0" VerticalAlignment="Top"/>
+                                <DatePicker Style="{DynamicResource DatePickerValidator}" behaviors:DatePickerPopupOffsetBehavior.AutoVerticalOffset="True" behaviors:DatePickerPopupOffsetBehavior.AutoHorizontalOffset="True" Tag="{Binding [Enter Date], Source={StaticResource L10N}}" SelectedDate="{Binding SpsStartDateTo, UpdateSourceTrigger=PropertyChanged}" ToolTip="{Binding SpsMsg}" Width="190" Height="54" VerticalAlignment="Top"/>
+                                <Button Style="{StaticResource OutlinedBtnType4-Large}" Command="{Binding SearchCommand}" Content="{Binding [Search], Source={StaticResource L10N}}" Width="92" Height="54" Margin="12,0,0,0" VerticalAlignment="Top"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,4,0,0">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SpsMsg, Converter={StaticResource NotEmptyStringToEnableConverter}}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <TextBlock Text="* " Foreground="{DynamicResource AdditionalColor3Brush}" FontSize="12"/>
+                                <TextBlock Text="{Binding SpsMsg}" Foreground="{DynamicResource AdditionalColor3Brush}" FontSize="12"/>
+                            </StackPanel>
+                        </Grid>
+
                     </StackPanel>
                 </StackPanel>
             </Grid>
             
-            <DataGrid Height="640" Name="worklists" ItemsSource="{Binding Worklists}" SelectedItem="{Binding SelectedWorklist}" Style="{StaticResource DataGridBasic}" RowStyle="{StaticResource DataGridRowDialog}" SelectionMode="Single" Margin="0,16,0,0">
+            <DataGrid Height="629" Name="worklists" ItemsSource="{Binding Worklists}" SelectedItem="{Binding SelectedWorklist}" Style="{StaticResource DataGridBasic}" RowStyle="{StaticResource DataGridRowDialog}" SelectionMode="Single" Margin="0,10,0,0">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">
                         <i:InvokeCommandAction Command="{Binding SelectionChangedCommand}" CommandParameter="{Binding ElementName=worklists, Path=SelectedItem}"/>

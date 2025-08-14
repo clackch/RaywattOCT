@@ -147,7 +147,6 @@ namespace RaywattApp
             services.AddTransient(typeof(DicomServerDialogViewModel));
             services.AddTransient(typeof(NewPatientDialogViewModel));
             services.AddTransient(typeof(DicomPacsDialogViewModel));
-            services.AddTransient(typeof(MwlSearchDialogViewModel));
             services.AddTransient(typeof(PasswordChangeDialogViewModel));
             services.AddTransient(typeof(EditInstituteDialogViewModel));
 
