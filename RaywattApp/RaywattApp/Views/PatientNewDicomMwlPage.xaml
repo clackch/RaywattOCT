@@ -42,7 +42,11 @@
 
                 <StackPanel Grid.Column="1">
                     <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Patient ID*], Source={StaticResource L10N}}"/>
-                    <TextBox Style="{DynamicResource TextBoxValidator}" Text="{Binding SearchPatientId.Text, UpdateSourceTrigger=PropertyChanged}" ToolTip="{Binding SearchPatientId.Msg}" Width="200" Height="72" HorizontalAlignment="Left" Margin="0,6,0,0"/>
+                    <TextBox Style="{DynamicResource TextBoxValidator}" Text="{Binding SearchPatientId.Text, UpdateSourceTrigger=PropertyChanged}" ToolTip="{Binding SearchPatientId.Msg}" Width="200" Height="72" HorizontalAlignment="Left" Margin="0,6,0,0">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Enter" Command="{Binding SearchCommand}" />
+                        </TextBox.InputBindings>
+                    </TextBox>
                 </StackPanel>
 
                 <StackPanel Grid.Column="2">
