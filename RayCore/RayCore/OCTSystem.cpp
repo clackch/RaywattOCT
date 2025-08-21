@@ -1633,6 +1633,8 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pullbackTime = (pullbackTime <= 0) ? config.stepMotor.noPullbackTime * 1000 : pullbackTime;
 	PLOGI.printf("Pullback start - %dmm, %dmm/s - %dmsec", config.stepMotor.pullbackDistance, config.stepMotor.pullbackSpeed, pullbackTime);
 
+	int pullbackType = pSystem->GetPullbackType(config.stepMotor.pullbackDistance, config.stepMotor.pullbackSpeed);
+
 	// 1. Start Recording OCT
 	CDataWriter* pDataWriter = new CDataWriter();
 	pDataWriter->Initialize(settingPullback.nBufferSize * sizeof(USHORT));
@@ -1642,6 +1644,8 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 		pDataWriter->AddExtraData(OCTHeader::ExtraData::Background, 
 			((CLabImaging*)pSystem->m_pImagingPullback)->GetBackground(), settingPullback.nBufferSize * sizeof(USHORT));
 	}
+	pDataWriter->SetNumOfMaximumFrames(pullbackTime * 400);
+	pDataWriter->SetPullbackType(pullbackType);
 	pDataWriter->StartRecording();
 	pSystem->m_pAcqDevice->SetWriter(pDataWriter);
 
@@ -2542,6 +2546,29 @@ std::vector<std::vector<std::string>> COCTSystem::readLoadSequence()
 	}
 
 	return loadCommands;
+}
+
+int COCTSystem::GetPullbackType(int pullbackSpeed, int pullbackDistance) {
+	if (pullbackDistance == 60) {
+		switch (pullbackSpeed)
+		{
+		case 20:
+			return 1;
+		case 60:
+			return 3;
+		default:
+			return 5;
+		}
+	}
+	else {
+		switch (pullbackSpeed)
+		{
+		case 40:
+			return 2;
+		default:
+			return 4;
+		}
+	}
 }
 
 /*

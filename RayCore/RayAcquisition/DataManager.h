@@ -53,8 +53,18 @@ class IDataManager
 {
 protected:
 	int m_nNumOfSamples;
+	int m_nNumOfMaximumFrames;
+	int m_nPullbackType;
 	std::map<OCTHeader::ExtraData, void *> mapExtraData;
 public:
+	enum class PullbackType {
+		HISH_20_60 = 1,  // Speed_Distance
+		HILO_40_100,
+		STSH_60_60,
+		STLO_100_100,
+		FAST_120_60
+	};
+
 	IDataManager() { m_nNumOfSamples = 0; }
 	virtual ~IDataManager() {
 		std::map<OCTHeader::ExtraData, void*>::iterator it = mapExtraData.begin();
@@ -67,6 +77,10 @@ public:
 	}
 
 	int GetNumOfSamples() { return m_nNumOfSamples; }
+	int GetNumOfMaximumFrames() { return m_nNumOfMaximumFrames; }
+	int GetPullbackType() { return m_nPullbackType; }
+	int SetNumOfMaximumFrames(int numOfMaximumFrames) { m_nNumOfMaximumFrames = numOfMaximumFrames; }
+	int SetPullbackType(int PullbackType) { m_nPullbackType = PullbackType; }
 	virtual char* GetSample(int nIndex) = 0;
 	virtual void AddFrame(void* pFrame) = 0;
 

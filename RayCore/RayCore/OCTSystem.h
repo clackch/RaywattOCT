@@ -183,6 +183,7 @@ public:
 	bool IsTestMode() { return m_isTestMode; }
 	void SetPullbackStartTime(double value) { m_fPullbackStartTime = value; }
 	double GetPullbackStartTime() { return m_fPullbackStartTime; }
+	int GetPullbackType(int pullbackSpeed, int pullbackDistance);
 
 private:
 	// Main Thread
