@@ -543,7 +543,8 @@ int num = 0;
 void COCTImaging::findSheath(cv::Mat img) {
 	num++;
 	
-	// way1~way6
+	auto start = std::chrono::high_resolution_clock::now();
+	
 	cv::Mat edgeX, edgeY;
 	cv::Sobel(img, edgeX, CV_32F, 1, 0, 3);
 	cv::Sobel(img, edgeY, CV_32F, 0, 1, 3);
@@ -557,16 +558,11 @@ void COCTImaging::findSheath(cv::Mat img) {
 	cv::convertScaleAbs(edgeMagnitude, absEdgeMagnitude);
 
 	int totalX = 0, totalY = 0, totalMagnitude = 0;
-	float maxX = 0, maxY = 0, maxMagnitude = 0;
 	for (int y = 0; y < img.rows; y++) {
 		for (int x = 0; x < img.cols; x++) {
 			totalX += absEdgeX.at<uchar>(y, x);
 			totalY += absEdgeY.at<uchar>(y, x);
 			totalMagnitude += absEdgeMagnitude.at<uchar>(y, x);
-
-			if (maxX < edgeX.at<float>(y, x)) maxX = edgeX.at<float>(y, x);
-			if (maxY < edgeY.at<float>(y, x)) maxY = edgeY.at<float>(y, x);
-			if (maxMagnitude < edgeMagnitude.at<float>(y, x)) maxMagnitude = edgeMagnitude.at<float>(y, x);
 		}
 	}
 
@@ -577,133 +573,12 @@ void COCTImaging::findSheath(cv::Mat img) {
 	/*cv::Mat circularizedImage;
 	CircularizeImage(img, circularizedImage);
 	cv::imwrite("circularizedImage" + std::to_string(num) + ".tif", circularizedImage);
-
-	PLOGI.printf("Edge X: %d, Y: %d, Magnitude: %d", totalX, totalY, totalMagnitude);*/
-	// way1
-	m_nSheathPosition = totalMagnitude;
-	//// way2
-	//m_nSheathPosition = totalX;
-	//// way3 
-	//m_nSheathPosition = totalY;
-
-	
-	//// way4~way6
-	//cv::imwrite("edgeX" + std::to_string(num) + ".tif", edgeX);
-	//cv::imwrite("edgeY" + std::to_string(num) + ".tif", edgeY);
-	//cv::imwrite("edgeMagnitude" + std::to_string(num) + ".tif", edgeMagnitude);
-	//PLOGI.printf("Edge X: %f, Y: %f, Magnitude: %f", maxX, maxY, maxMagnitude);
-	//// way4
-	//m_nSheathPosition = maxMagnitude;
-	//// way5
-	//m_nSheathPosition = maxX;
-	////way4_2
-	//m_nSheathPosition = maxY < maxX ? 1 : 0;
-	//// way6
-	//m_nSheathPosition = maxY;
-
-	/*
-	// way7
-	cv::Mat image, circularizedImage;
-	if (img.type() == CV_32FC1)
-		img.convertTo(image, CV_8UC1, 255);
-	else
-		image = img.clone();
-	CircularizeImage(image, circularizedImage);
-	m_nImageForCalib = circularizedImage.clone();
-	m_nSheathPosition = 0;
-	cv::imwrite("circularizedImage" + std::to_string(num) + ".tif", circularizedImage);
 	*/
-	
-	/*
-	// way8
-	cv::Mat circularizedImage;
-	CircularizeImage(img, circularizedImage);
-	int cropSize = 600;
-	int centerX = circularizedImage.cols / 2, centerY = circularizedImage.rows / 2;
-	int startX = centerX - cropSize / 2, startY = centerY - cropSize / 2;
-	cv::Mat croppedImage = circularizedImage(cv::Rect(startX, startY, cropSize, cropSize));
-	double minVal, maxVal;
-	cv::minMaxLoc(croppedImage, &minVal, &maxVal);
-	PLOGI.printf("type: %d, max: %lf", croppedImage.type(), maxVal);
-	m_nImageForCalib = croppedImage.clone();
-	cv::imwrite("circularizedImage" + std::to_string(num) + ".tif", croppedImage);
 
-	m_nSheathPosition = 0;
-*/
-
-	//m_nSheathSearchRange = 300; /*1mm 오차 범위 설정*/
-	//double maxMinusEdge = 0.3;
-	//double pointStandard = 0.1;
-	//int closeness = 10;
-	//int maxDiffIndex = 44, minDiffIndex = 33;
-	//cv::Mat image, checkError;
-	//if (img.type() == CV_32FC1)
-	//	img.convertTo(checkError, CV_8UC1, 255);
-	//else
-	//	checkError = img.clone();
-	//checkError = checkError(cv::Range(0, m_nSheathSearchRange), cv::Range::all());
-	//
-	//img.convertTo(img, CV_32F, 1 / 255.f);
-	//cv::rotate(img, image, cv::ROTATE_90_COUNTERCLOCKWISE);
-	//cv::resize(image, image, cv::Size(image.cols, image.rows));
-
-	////horizontal line formed 노이즈 제거
-	//cv::Mat edge_image;
-	//cv::Sobel(image, edge_image, CV_64F, 1 /*dx*/, 0 /*dy*/, 3 /*kernel size*/, 1, 0, cv::BORDER_CONSTANT);
-	//cv::Mat temp = image.clone();
-	//for (int i = 0; i < m_nSheathSearchRange; i++) for (int j = 0; j < temp.cols; j++) {
-	//	temp.at<float>(i, j) -= (maxMinusEdge - edge_image.at<float>(i, j));
-	//}
-
-	//// 행마다의 일정 밝기 이상의 픽셀 계수, 가장 많은 행 2개 저장
-	//std::vector<int> pixelNum(m_nSheathSearchRange);
-	//int maxIndex[2] = { 0, 0 };
-
-	//for (int i = 0; i < m_nSheathSearchRange; i++) {
-	//	int tmp = 0;
-	//	for (int j = 0; j < image.cols; j++) {
-	//		if (temp.at<float>(i, j) >= pointStandard)
-	//			tmp++;
-	//		pixelNum[i] = tmp;
-	//		if (i == 0) continue;
-	//		else if (pixelNum[maxIndex[0]] < pixelNum[i]) {
-	//			maxIndex[0] = i;
-	//		}
-	//	}
-	//}
-
-	//for (int i = 0; i < m_nSheathSearchRange; i++) {
-	//	if (i == 0 || std::abs(maxIndex[0] - i) <= closeness) continue;
-	//	else if (pixelNum[maxIndex[1]] < pixelNum[i]) {
-	//		maxIndex[1] = i;
-	//	}
-	//}
-
-	//int diff = abs(maxIndex[0] - maxIndex[1]);
-	//if (diff < minDiffIndex || diff > maxDiffIndex) {
-	//	m_nSheathPosition = 0;
-	//}
-	//else {
-	//	int checkRange = 5;
-	//	int errorThreshold = 200 * checkError.cols;
-	//	int startIndex = maxIndex[0] - checkRange >= 0 ? maxIndex[0] - checkRange : 0;
-	//	int roiHeight = std::min(checkRange * 2, checkError.rows - startIndex);
-	//	int errorSum = 0;
-	//	cv::Mat roi = checkError(cv::Rect(0, startIndex, checkError.cols, roiHeight));
-
-	//	for (int i = 0; i < roi.rows; i++) {
-	//		for (int j = 0; j < roi.cols; j++) {
-	//			errorSum += roi.at<char>(i, j);
-	//		}
-	//	}
-
-	//	if (errorSum < errorThreshold) {
-	//		m_nSheathPosition = 0;
-	//	}
-	//	else {
-	//		m_nSheathPosition = std::max(maxIndex[0], maxIndex[1]) + m_delayLineMovingDirection * 2;
-	//	}
-	//}
+	PLOGI.printf("check the time - Magnitude: %d", totalMagnitude);
+	m_nSheathPosition = totalMagnitude;
+	auto end = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double, std::milli> elapsed = end - start;
 }
 
 cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {
@@ -797,13 +672,23 @@ UINT COCTImaging::threadRender(LPVOID param) {
 	CMessageService* pMsg = pImaging->m_msg;
 
 	while(pImaging->m_pThread->isRun) {
+		auto startTime = std::chrono::high_resolution_clock::now();
 		pImaging->m_waitForFringes = true;
 		CUtility::SuspendThread(pImaging->m_pThread);
 		pImaging->m_waitForFringes = false;
 
+		auto imageProcessingStart = std::chrono::high_resolution_clock::now();
 		if (pImaging->m_pThread->isRun) {
+			auto processStart = std::chrono::high_resolution_clock::now();
 			pImaging->Process((char *)pImaging->m_pFringesBuffer);
+			auto processEnd = std::chrono::high_resolution_clock::now();
+			auto postProcessStart = std::chrono::high_resolution_clock::now();
 			pImaging->PostProcess(pImaging->GetProcessedImage());
+			auto postProcessEnd = std::chrono::high_resolution_clock::now();
+
+			PLOGI.printf("process time: %.2f ms, postProcess time: %.2f ms", 
+				std::chrono::duration<double, std::milli>(processEnd - processStart).count(),
+				std::chrono::duration<double, std::milli>(postProcessEnd - postProcessStart).count());
 			// To-Do
 			// double buffering 필요?
 			// Invert, coloring 을 View (Dialog) 쪽으로 뺄 수 없을까?
@@ -813,6 +698,10 @@ UINT COCTImaging::threadRender(LPVOID param) {
 				pMsg->postMessage(WM_PROCESS_CROSSSECTION, pImaging->GetSession(), nFrameInfo);
 			}
 		}
+		auto endTime = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double, std::milli> elapsed = endTime - startTime;
+		std::chrono::duration<double, std::milli> elapsed_1 = endTime - imageProcessingStart;
+		PLOGI.printf("render time: %.2f ms, imageProcessTime : %.2f ms", elapsed.count(), elapsed_1.count());
 	}
 
 	return NOERROR;

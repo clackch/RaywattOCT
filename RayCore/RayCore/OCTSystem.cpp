@@ -1534,8 +1534,6 @@ UINT COCTSystem::threadInitializeRotaryJunction(LPVOID param) {
 * threadAutoCalibration
 */
 
-
-// way1 ~ way6
 UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CLaserModule* pLaserModule = pSystem->m_pLaserModule;
@@ -1551,14 +1549,6 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		pSystem->m_vCalibrationInfo.clear();
 		// 초기화
 		pSystem->m_cathState = CatheterState::FindingSheath;
-		
-		//// 1-1. Move Delay-line & Find Sheath
-		//pSystem->m_pImagingLiveView->SetDelayLineMovingDirection(-1);
-		//nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, -1000 * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
-		//pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
-		//pSystem->m_pImagingLiveView->SetDelayLineMovingDirection(1);
-		//nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, 2000 * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
-		//pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
 		pSystem->m_pImagingLiveView->SetDelayLineMovingDirection(1);
 		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, 5000 * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
@@ -1570,82 +1560,114 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		int nMinDiff = INT_MAX;
 		int nZOffset = 0;
 
-		// sheath position을 기준으로, 가장 가까운 zOffset을 찾는다.
-		//for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
-		//	int nDiff = abs(nSheathPosition - pSystem->m_vCalibrationInfo.at(i).first);
-		//	if (nMinDiff > nDiff) {
-		//		nMinDiff = nDiff;
-		//		nZOffset = pSystem->m_vCalibrationInfo.at(i).second;
-		//		PLOGI.printf("nDiff: %d, Calibrated zOffset: %d", nDiff, nZOffset);
-		//	}
-		//}
-
 		// way1
-		std::sort(pSystem->m_vCalibrationInfo.begin(), pSystem->m_vCalibrationInfo.end(),
-			[](const std::pair<int, int>& a, const std::pair<int, int>& b) {
-				if(a.first == b.first)
-					return a.second < b.second;
-				return a.first < b.first;
-			});
-		nZOffset = pSystem->m_vCalibrationInfo.front().second;
+		int minVal = INT_MAX, maxVal = 0, Loc = startPosition;
+		for(int i=0; i < pSystem->m_vCalibrationInfo.size(); i++) {
+			if (pSystem->m_vCalibrationInfo.at(i).first < minVal) {
+				minVal = pSystem->m_vCalibrationInfo.at(i).first;
+				Loc = pSystem->m_vCalibrationInfo.at(i).second;
+			}
+			if( pSystem->m_vCalibrationInfo.at(i).first > maxVal) {
+				maxVal = pSystem->m_vCalibrationInfo.at(i).first;
+			}
+		}
+		PLOGI.printf("first calibration. checkPosition : %d, checkValue : %d", Loc, minVal);
+		
+		// way2
+		/*
+		nZOffset = Loc - 3000;
+		pLaserModule->Move(eStepMotorIndex::DelayLine, nZOffset);
+		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
+		pSystem->m_vCalibrationInfo.clear();
+
+		pLaserModule->Set(eStepMotorIndex::DelayLine, (CM_SM_SPEED_AUTO/8) / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, -250 * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
+
+		maxVal = 0;
+		int decreaseCount = 0, beforeVal = 0;
+		for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
+			if (decreaseCount >= 2) break;
+			if (pSystem->m_vCalibrationInfo.at(i).first > maxVal) {
+				maxVal = pSystem->m_vCalibrationInfo.at(i).first;
+				Loc = pSystem->m_vCalibrationInfo.at(i).second;
+				decreaseCount = 0;
+			}
+			else {
+				decreaseCount++;
+			}
+			beforeVal = pSystem->m_vCalibrationInfo.at(i).first;
+		}
+
+		nZOffset = Loc + 200;
+		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
 		//PLOGI.printf("totalEdge: %d, Calibrated zOffset: %d", pSystem->m_vCalibrationInfo.front().first, nZOffset);
 		if (pSystem->m_vCalibrationInfo.front().first * 2 >= pSystem->m_vCalibrationInfo.back().first) {
 			PLOGI.printf("Calibration might be failed. Total edge is not enough. startPosition : %d", startPosition);
 			//nZOffset = startPosition + 2900;
 		}
 		else {
-			PLOGI.printf("well calibrated. nowPosition : %d", nZOffset - 2900);
+			PLOGI.printf("well calibrated. nowPosition : %d", nZOffset);
 			PLOGI.printf("startPosition : %d", startPosition); 
 		}
 
-		//// way4_1
-		//int loopStandard = 5;
-		//int checkContinuity = 0;
-		//int prevEdgeX = 0;
-		//for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
-		//	if(prevEdgeX == pSystem->m_vCalibrationInfo.at(i).first) {
-		//		checkContinuity++;
-		//	}
-		//	else {
-		//		checkContinuity = 0;
-		//	}
-		//	prevEdgeX = pSystem->m_vCalibrationInfo.at(i).first;
-		//	if(checkContinuity == loopStandard) {
-		//		nZOffset = pSystem->m_vCalibrationInfo.at(i).second;
-		//		PLOGI.printf("MaxEdgeX : %d, Calibrated zOffset: %d", prevEdgeX,  nZOffset);
-		//		break;
-		//	}
-		//}
-		//if(checkContinuity < loopStandard) {
-		//	PLOGI.printf("Calibration might be failed.", nZOffset);
-		//}
-
-		////way4_2
-		//int loopStandard = 5;
-		//int checkContinuity = 0;
-		//for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
-		//	if (pSystem->m_vCalibrationInfo.at(i).first == 1) {
-		//		checkContinuity++;
-		//	}
-		//	else {
-		//		checkContinuity = 0;
-		//	}
-		//	if (checkContinuity == loopStandard) {
-		//		nZOffset = pSystem->m_vCalibrationInfo.at(i).second;
-		//		PLOGI.printf("Calibrated zOffset: %d, Frame : %d", nZOffset, i);
-		//		break;
-		//	}
-		//}
-		//if (checkContinuity < loopStandard) {
-		//	PLOGI.printf("Calibration might be failed.", nZOffset);
-		//}
-
 		// 1-3. Move to calibrated position
-		nZOffset = nZOffset - 2900;
+		nZOffset = nZOffset;
 		nTargetPos = nZOffset;
 		pLaserModule->Move(eStepMotorIndex::DelayLine, nZOffset);
 		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
+		*/
 
+		nZOffset = Loc + 150;
+		pLaserModule->Move(eStepMotorIndex::DelayLine, nZOffset);
+		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
+		pSystem->m_vCalibrationInfo.clear();
+
+		PLOGI.printf("second calibration start");
+
+		/*
+		pLaserModule->Set(eStepMotorIndex::DelayLine, (CM_SM_SPEED_AUTO / 8) / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, -300 * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
+
+		pLaserModule->Set(eStepMotorIndex::DelayLine, (CM_SM_SPEED_AUTO) / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, -500 * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
+
+		pLaserModule->Set(eStepMotorIndex::DelayLine, (CM_SM_SPEED_AUTO / 8) / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, -300 * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
+		*/
+		nZOffset = Loc + 250;
+		pLaserModule->Set(eStepMotorIndex::DelayLine, (CM_SM_SPEED_AUTO / 4) / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, -1200 * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
+
+		minVal = INT_MAX;
+		for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
+			if (pSystem->m_vCalibrationInfo.at(i).first < minVal) {
+				minVal = pSystem->m_vCalibrationInfo.at(i).first;
+				Loc = pSystem->m_vCalibrationInfo.at(i).second;
+			}
+		}
+		PLOGI.printf("second calibration. checkPosition : %d, checkValue : %d", Loc, minVal);
+		nZOffset = Loc - 2700;
+		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+		//PLOGI.printf("totalEdge: %d, Calibrated zOffset: %d", pSystem->m_vCalibrationInfo.front().first, nZOffset);
+		if (pSystem->m_vCalibrationInfo.front().first * 2 >= pSystem->m_vCalibrationInfo.back().first) {
+			PLOGI.printf("Calibration might be failed. Total edge is not enough. startPosition : %d", startPosition);
+			//nZOffset = startPosition + 2900;
+		}
+		else {
+			PLOGI.printf("well calibrated. nowPosition : %d", nZOffset);
+			PLOGI.printf("startPosition : %d", startPosition);
+		}
+
+		// 1-3. Move to calibrated position
+		nZOffset = nZOffset;
+		nTargetPos = nZOffset;
+		pLaserModule->Move(eStepMotorIndex::DelayLine, nZOffset);
+		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 #if 1
 		// 2. Start Finding Peak
 		pSystem->m_vCalibrationInfo.clear();
@@ -1686,338 +1708,6 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 
 	return NOERROR;
 }
-
-
-/*
-// way7
-UINT COCTSystem::threadAutoCalibration(LPVOID param) {
-	COCTSystem* pSystem = (COCTSystem*)param;
-	CLaserModule* pLaserModule = pSystem->m_pLaserModule;
-	int nTargetPos = 0;
-
-	if (pLaserModule != nullptr && pLaserModule->IsConnected())
-	{
-		// 0. Speed Up
-		pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_AUTO);
-		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
-
-		// 1. Start Finding Sheath
-		pSystem->m_vAutoCalibrationInfo.clear();
-		// 초기화
-		pSystem->m_cathState = CatheterState::FindingSheath;
-
-		// 1-1. Move Delay-line & Find Sheath
-		pSystem->m_pImagingLiveView->SetDelayLineMovingDirection(-1);
-		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, -1000 * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
-		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
-
-		int sectionNum = 5; // 구간 수
-		int checkStep = pSystem->m_vAutoCalibrationInfo.size() * 2;	// 0~-1000까지가 m_vCalibrationInfo.size()이므로 두 배
-		PLOGI.printf("checkStep: %d, sectionNum: %d", checkStep, sectionNum);
-		pSystem->m_vAutoCalibrationInfo.clear();	// -1000부터 1000까지의 이미지 정보 저장을 위해 초기화
-
-		pSystem->m_pImagingLiveView->SetDelayLineMovingDirection(1);
-		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, 2000 * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
-		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
-
-		PLOGI.printf("m_vAutoCalibrationInfo size: %d", pSystem->m_vAutoCalibrationInfo.size());
-
-		// 1-2. Find Z-Offset Position
-		const int nSheathPosition = CConfiguration::GetInstance().measurement.nSheathPosition;
-		double nMinDiff = std::numeric_limits<double>::max();
-		int nZOffset = 0;
-
-		int checkStart = 0;
-		int bestFrameIndex = checkStart;
-		int EnoughStep = 100; // 한 구간의 step 수가 충분히 작다고 판단되는 기준
-		while (checkStep > EnoughStep) {
-			checkStep /= sectionNum * 2;
-			for (int i = checkStep + checkStart; i < checkStart + checkStep * (sectionNum * 2 - 1) - 1; i += checkStep) {
-				cv::Mat diff = pSystem->m_vAutoCalibrationInfo.at(i).first - pSystem->m_vAutoCalibrationInfo.at(i + checkStep - 1).first;
-				double tmpDiff = cv::norm(diff, cv::NORM_L1);
-				PLOGI.printf("i: %d, tmpDiff: %f", i, tmpDiff);
-				if (nMinDiff > tmpDiff) {
-					nMinDiff = tmpDiff;
-					bestFrameIndex = i;
-				}
-			}
-			checkStart = bestFrameIndex;
-		} // 시간 축소용 코드
-
-		map<int, std::pair<double, int>> diffInfo;
-		try {
-			for (int i = checkStart; i < checkStart + checkStep * (sectionNum * 2 - 1) - 1; i++) {
-				cv::Mat diff = pSystem->m_vAutoCalibrationInfo.at(i).first - pSystem->m_vAutoCalibrationInfo.at(i + 1).first;
-				double tmpDiff = cv::norm(diff);
-				PLOGI.printf("i: %d, tmpDiff: %f", i, tmpDiff);
-				diffInfo.insert({ i, std::make_pair(tmpDiff, pSystem->m_vAutoCalibrationInfo.at(i).second) });
-				if (nMinDiff > tmpDiff) {
-					nMinDiff = tmpDiff;
-					bestFrameIndex = i;
-				}
-			}
-		}catch (const std::out_of_range& e) {
-			PLOGE.printf("Out of range error: %s", e.what());
-		}
-		PLOGI.printf("bestFrameIndex: %d, nMinDiff: %f", bestFrameIndex, nMinDiff);
-
-		// 이렇게 찾은 위치는 아직 정확하지 않음. 얘와 비슷한 diff를 가지면서도 이상적인 sheath와 가장 가까운 checkStart를 찾아야 함.
-		nZOffset = pSystem->m_vAutoCalibrationInfo.at(bestFrameIndex).second + nSheathPosition;
-
-		// 1-3. Move to calibrated position
-		nTargetPos = nZOffset;
-		pLaserModule->Move(eStepMotorIndex::DelayLine, nZOffset);
-		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
-
-		// 1-4. 2차 확인
-		int minusLoc = 0, plusLoc = 0;
-		int minusCheck = 0, plusCheck = 0;
-		bool stopMinus = false, stopPlus = false;
-		while(minusCheck < 3 && plusCheck < 3) {
-			// -1
-			if(!stopMinus){
-				minusLoc++;
-				auto diffIndexNow = diffInfo.find(bestFrameIndex - minusLoc);
-				auto diffIndexBefore = diffInfo.find(bestFrameIndex - minusLoc - 1);
-				if (diffIndexBefore != diffInfo.end()) {
-					if (diffIndexNow->second.first < diffIndexBefore->second.first) {
-						minusCheck++;
-					}
-					else {
-						minusCheck = 0;
-					}
-				}
-				else {
-					if (bestFrameIndex - minusLoc - 1 >= 0) {
-						cv::Mat diff = pSystem->m_vAutoCalibrationInfo.at(bestFrameIndex - minusLoc - 1).first - pSystem->m_vAutoCalibrationInfo.at(bestFrameIndex - minusLoc).first;
-						double tmpDiff = cv::norm(diff);
-						diffInfo.insert({ bestFrameIndex - minusLoc - 1, std::make_pair(tmpDiff, pSystem->m_vAutoCalibrationInfo.at(bestFrameIndex - minusLoc - 1).second) });
-					}
-					else {
-						stopMinus = true;
-					}
-				}
-				if (minusCheck == 3) stopMinus = true;
-			}
-
-			// +1
-			if(!stopPlus){
-				plusLoc++;
-				auto diffIndexNow = diffInfo.find(bestFrameIndex + plusLoc);
-				auto diffIndexAfter = diffInfo.find(bestFrameIndex + plusLoc + 1);
-				if (diffIndexAfter != diffInfo.end()) {
-					if (diffIndexNow->second.first < diffIndexAfter->second.first) {
-						plusCheck++;
-					}
-					else {
-						plusCheck = 0;
-					}
-				}
-				else {
-					if (bestFrameIndex + plusLoc + 1 < pSystem->m_vAutoCalibrationInfo.size()) {
-						cv::Mat diff = pSystem->m_vAutoCalibrationInfo.at(bestFrameIndex + plusLoc).first - pSystem->m_vAutoCalibrationInfo.at(bestFrameIndex + plusLoc + 1).first;
-						double tmpDiff = cv::norm(diff);
-						diffInfo.insert({ bestFrameIndex + plusLoc, std::make_pair(tmpDiff, pSystem->m_vAutoCalibrationInfo.at(bestFrameIndex + plusLoc).second) });
-					}
-					else {
-						stopPlus = true;
-					}
-				}
-				if (plusCheck == 3) stopPlus = true;
-			}
-		}
-		// 1-5. Move to final calibrated position
-		minusLoc -= minusCheck;
-		plusLoc -= plusCheck;
-		int centerLoc = bestFrameIndex + (plusLoc - minusLoc) / 2;
-
-		nZOffset = pSystem->m_vAutoCalibrationInfo.at(centerLoc).second;
-		pLaserModule->Move(eStepMotorIndex::DelayLine, nZOffset);
-		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
-
-		nZOffset += nSheathPosition; // 최종적으로 sheath 위치를 더해줘야 함.
-		pLaserModule->Current(eStepMotorIndex::DelayLine, nZOffset);
-		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
-
-#if 1
-		// 2. Start Finding Peak
-		pSystem->m_vCalibrationInfo.clear();
-		pSystem->m_cathState = CatheterState::FindingPeak;
-
-		// 2-1. Move Polarization-control & Find Peak
-		nTargetPos = pLaserModule->Move(eStepMotorIndex::Polarization, 0);
-		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
-
-		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::Polarization, 3240);
-		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
-
-		// 2-2. Find Max Peak
-		int nMaxPeak = INT_MIN;
-		int nMaxPeakPos = 0;
-		for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
-			if (nMaxPeak < pSystem->m_vCalibrationInfo.at(i).first) {
-				nMaxPeak = pSystem->m_vCalibrationInfo.at(i).first;
-				nMaxPeakPos = pSystem->m_vCalibrationInfo.at(i).second;
-			}
-		}
-
-		// 2-3. Move to calibrated position
-		nTargetPos = nMaxPeakPos;
-		pLaserModule->Move(eStepMotorIndex::Polarization, nTargetPos);
-		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
-#endif
-		// 3. Default Speed
-		pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_DEFAULT);
-	}
-
-	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Calibrated);
-	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::AutoCalibration);
-
-	while (pSystem->m_pThreadRotaryJunction->isRun) {
-		Sleep(DELAY_FOR_STOP_THREAD);
-	}
-
-	return NOERROR;
-}
-*/
-
-/*
-// way8
-UINT COCTSystem::threadAutoCalibration(LPVOID param) {
-	COCTSystem* pSystem = (COCTSystem*)param;
-	CLaserModule* pLaserModule = pSystem->m_pLaserModule;
-	int nTargetPos = 0;
-
-	if (pLaserModule != nullptr && pLaserModule->IsConnected())
-	{
-		// 0. Speed Up
-		pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_AUTO);
-		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
-
-		// 1. Start Finding Sheath
-		pSystem->m_vAutoCalibrationInfo.clear();
-		// 초기화
-		pSystem->m_cathState = CatheterState::FindingSheath;
-
-		// 1-1. Move Delay-line & Find Sheath
-		pSystem->m_pImagingLiveView->SetDelayLineMovingDirection(1);
-		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, 4000 * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
-		// 아래로 가는 방향이 +, sheath가 확대되는 방향
-		// 4000 step = 약 3 mm
-		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
-
-		PLOGI.printf("m_vAutoCalibrationInfo size: %d", pSystem->m_vAutoCalibrationInfo.size());
-
-		// 1-2. Find Z-Offset Position
-		const int nSheathPosition = CConfiguration::GetInstance().measurement.nSheathPosition;
-		double nMinDiff = std::numeric_limits<double>::max();
-		int nZOffset = pSystem->m_vAutoCalibrationInfo.at(0).second;
-
-		std::vector<std::pair<cv::Vec3f, int>> circleFrame;
-		for(int i = 0; i < pSystem->m_vAutoCalibrationInfo.size(); i++) {
-			std::vector<cv::Vec3f> circles;
-			cv::Mat img = pSystem->m_vAutoCalibrationInfo.at(i).first.clone();
-			cv::imwrite("circularizedImage" + std::to_string(i) + ".tif", img);
-			PLOGI.printf("i: %d, HoughCircleStart", i);
-			try {
-				cv::HoughCircles(img, circles, cv::HOUGH_GRADIENT, 1, 100, 200, 30, 230, 250);
-			}
-			catch (const cv::Exception& e) {
-				PLOGE.printf("HoughCircles exception: %s", e.what());
-				PLOGE.printf("step = X: type = % d, channels = % d, rows = % d, cols = % d, empty = % d", img.type(), img.channels(), img.rows, img.cols, img.empty());
-				continue;
-			}
-			//cv::HoughCircles(pSystem->m_vAutoCalibrationInfo.at(i).first, circles, cv::HOUGH_GRADIENT, 1, 100, 200, 30, 230, 250);
-			PLOGI.printf("i: %d, HoughCircleDone", i);
-			if (circles.empty()) {
-				continue;
-			}
-			circleFrame.push_back(std::make_pair(circles.front(), pSystem->m_vAutoCalibrationInfo.at(i).second));
-		}
-
-		if(circleFrame.empty()) {
-			PLOGE.printf("No sheath found in auto calibration.");
-		}
-
-		int decreaseCount = 0;
-		for(int i = 0; i < circleFrame.size() - 1; i++) {
-			// cv::Vec3f: (x, y, radius)
-			if( circleFrame.at(i + 1).first[2] < circleFrame.at(i).first[2]) {
-				// radius가 너무 작으면 sheath가 아니라고 판단
-				decreaseCount++;
-				if(decreaseCount >= 3) {
-					// 3번 연속으로 radius가 작아지면 sheath가 아니라고 판단
-					PLOGI.printf("Sheath is decreasing.");
-					break;
-				}
-			}
-			else {
-				decreaseCount = 0;
-			}
-		}
-
-		// 이렇게 찾은 위치는 아직 정확하지 않음. 얘와 비슷한 diff를 가지면서도 이상적인 sheath와 가장 가까운 checkStart를 찾아야 함.
-		if(decreaseCount < 3 && !circleFrame.empty()) {
-				nZOffset = circleFrame.back().second;
-				PLOGI.printf("Sheath found at zOffset: %d", nZOffset);
-				cv::Mat img = pSystem->m_vAutoCalibrationInfo.at(circleFrame.back().second).first.clone();
-				cv::circle(img, cv::Point(circleFrame.back().first[0], circleFrame.back().first[1]), circleFrame.back().first[2], cv::Scalar(255, 0, 0), 2);
-				cv::imwrite("circularizedImageSheath.tif", img);
-		}
-
-		PLOGI.printf("1");
-		// 1-3. Move to calibrated position
-		nTargetPos = nZOffset;
-		pLaserModule->Move(eStepMotorIndex::DelayLine, nZOffset);
-		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
-
-#if 1
-		PLOGI.printf("2");
-		// 2. Start Finding Peak
-		pSystem->m_vCalibrationInfo.clear();
-		pSystem->m_cathState = CatheterState::FindingPeak;
-
-		PLOGI.printf("3");
-		// 2-1. Move Polarization-control & Find Peak
-		nTargetPos = pLaserModule->Move(eStepMotorIndex::Polarization, 0);
-		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
-
-		PLOGI.printf("4");
-		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::Polarization, 3240);
-		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
-
-		PLOGI.printf("5");
-		// 2-2. Find Max Peak
-		int nMaxPeak = INT_MIN;
-		int nMaxPeakPos = 0;
-		for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
-			if (nMaxPeak < pSystem->m_vCalibrationInfo.at(i).first) {
-				nMaxPeak = pSystem->m_vCalibrationInfo.at(i).first;
-				nMaxPeakPos = pSystem->m_vCalibrationInfo.at(i).second;
-			}
-		}
-
-		PLOGI.printf("6");
-		// 2-3. Move to calibrated position
-		nTargetPos = nMaxPeakPos;
-		pLaserModule->Move(eStepMotorIndex::Polarization, nTargetPos);
-		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
-#endif
-		PLOGI.printf("7");
-		// 3. Default Speed
-		pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_DEFAULT);
-	}
-
-	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Calibrated);
-	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::AutoCalibration);
-
-	while (pSystem->m_pThreadRotaryJunction->isRun) {
-		Sleep(DELAY_FOR_STOP_THREAD);
-	}
-
-	return NOERROR;
-}
-*/
 
 /*
 * threadPullbackScan
@@ -2715,7 +2405,7 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 			int nSheathPosition = m_pImagingRealtime->GetSheathPosition();
 			int nDelayLinePos = m_pLaserModule->GetPosition(eStepMotorIndex::DelayLine);
 			m_vCalibrationInfo.push_back(std::make_pair(nSheathPosition, nDelayLinePos));
-			//PLOGI.printf("FindingSheath - %d, %d", nSheathPosition, nDelayLinePos);
+			PLOGI.printf("FindingSheath - %d, %d", nSheathPosition, nDelayLinePos);
 
 
 			/*
