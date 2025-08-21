@@ -354,6 +354,7 @@ namespace RaywattApp.ViewModels
             string searchSpsStartDateTo = SpsStartDateTo.HasValue ? SpsStartDateTo.Value.ToString("yyyyMMdd") : "99991231";
 
             dicomWorklists = await Task.Run(() => RayExportWrapper.FindWorklist(dicomClient, searchPatientName, "*" /* PatientName */, "*" /* AccessionNumber */, "OCT", "*" /* ScheduledStationAe */, searchSpsStartDateFrom, searchSpsStartDateTo, "*" /* ProcedureId */, out count));
+            _log.Debug($"FindWorklist : PatientId = {searchPatientName}, SpsStartDate = {searchSpsStartDateFrom}-{searchSpsStartDateTo}, ResultCount = {count}");
             IsChecking = false;
 
             if (dicomWorklists != IntPtr.Zero)

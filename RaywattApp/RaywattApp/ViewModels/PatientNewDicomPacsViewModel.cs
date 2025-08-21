@@ -298,6 +298,7 @@ namespace RaywattApp.ViewModels
             int count = 0;
             IsChecking = true;
             dicomPatients = await Task.Run(() => (RayExportWrapper.FindPatients(dicomClient, patientIdParam, "*" /* PatientName */, out count)));
+            _log.Debug($"FindPatient : PatientId = {patientIdParam}, ResultCount = {count}");
             IsChecking = false;
 
             if (dicomPatients != IntPtr.Zero)
