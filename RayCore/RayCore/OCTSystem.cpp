@@ -2342,33 +2342,12 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 
 		switch (m_cathState)
 		{
-		case CatheterState::FindingSheath: //
+		case CatheterState::FindingSheath:
 		{
-			
-			// way1 ~ way6
 			int nSheathPosition = m_pImagingRealtime->GetSheathPosition();
 			int nDelayLinePos = m_pLaserModule->GetPosition(eStepMotorIndex::DelayLine);
 			m_vCalibrationInfo.push_back(std::make_pair(nSheathPosition, nDelayLinePos));
-			PLOGI.printf("FindingSheath - %d, %d", nSheathPosition, nDelayLinePos);
-
-
-			/*
-			// way7
-			int nSheathPosition = m_pImagingRealtime->GetSheathPosition();
-			cv::Mat circularImage = m_pImagingRealtime->GetImageForCalib();
-			int nDelayLinePos = m_pLaserModule->GetPosition(eStepMotorIndex::DelayLine);
-			m_vAutoCalibrationInfo.push_back(std::make_pair(circularImage, nDelayLinePos));
-			PLOGI.printf("FindingSheath_insertCircleImage - %d, %d frame", nDelayLinePos, m_vAutoCalibrationInfo.size());
-			*/
-
-			/*
-			// way8
-			int nSheathPosition = m_pImagingRealtime->GetSheathPosition();
-			cv::Mat circularImage = m_pImagingRealtime->GetImageForCalib();
-			int nDelayLinePos = m_pLaserModule->GetPosition(eStepMotorIndex::DelayLine);
-			m_vAutoCalibrationInfo.push_back(std::make_pair(circularImage, nDelayLinePos));
-			PLOGI.printf("FindingSheath_insertCircleImage - %d, %d frame", nDelayLinePos, m_vAutoCalibrationInfo.size());
-			*/
+			//PLOGI.printf("FindingSheath - %d, %d", nSheathPosition, nDelayLinePos);
 		}
 			break;
 		case CatheterState::FindingPeak:
