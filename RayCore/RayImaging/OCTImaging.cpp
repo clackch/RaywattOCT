@@ -539,10 +539,7 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 	}
 }
 
-int num = 0;
 void COCTImaging::findSheath(cv::Mat img) {
-	num++;
-	
 	auto start = std::chrono::high_resolution_clock::now();
 	
 	cv::Mat edgeX, edgeY;
@@ -565,20 +562,8 @@ void COCTImaging::findSheath(cv::Mat img) {
 			totalMagnitude += absEdgeMagnitude.at<uchar>(y, x);
 		}
 	}
-
-	//// way1~way3
-	//cv::imwrite("edgeX" + std::to_string(num) + ".tif", absEdgeX);
-	//cv::imwrite("edgeY" + std::to_string(num) + ".tif", absEdgeY);
-	//cv::imwrite("edgeMagnitude" + std::to_string(num) + ".tif", absEdgeMagnitude);
-	/*cv::Mat circularizedImage;
-	CircularizeImage(img, circularizedImage);
-	cv::imwrite("circularizedImage" + std::to_string(num) + ".tif", circularizedImage);
-	*/
-
-	PLOGI.printf("check the time - Magnitude: %d", totalMagnitude);
+	//PLOGI.printf("check the time - Magnitude: %d", totalMagnitude);
 	m_nSheathPosition = totalMagnitude;
-	auto end = std::chrono::high_resolution_clock::now();
-	std::chrono::duration<double, std::milli> elapsed = end - start;
 }
 
 cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {
