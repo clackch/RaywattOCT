@@ -109,7 +109,8 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 	else 
 	{
 		PLOGI.printf("Read dispersion from .dat file.");
-		calibration->Initialize(_T("CALIBRATION.DAT"));
+		tstring strCalibPath = config.configPath + _T("\\CALIBRATION.DAT");
+		calibration->Initialize(strCalibPath);
 	}
 
 	USHORT* background = nullptr;
@@ -122,7 +123,11 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 	else 
 	{
 		PLOGI.printf("Read background from .dat file.");
-		background = readBackground("BACKGROUND.bin", setting);
+		tstring strBackgroundPath = config.configPath + _T("\\BACKGROUND.bin");
+
+		char strPath[MAX_PATH];
+		WideCharToMultiByte(CP_ACP, 0, strBackgroundPath.c_str(), strBackgroundPath.length(), strPath, MAX_PATH, nullptr, nullptr);
+		background = readBackground(strPath, setting);
 	}
 
 	PLOGI.printf("Create Imaging - %d x %d (type: %d)", setting.nAScan, setting.nBScan, type);

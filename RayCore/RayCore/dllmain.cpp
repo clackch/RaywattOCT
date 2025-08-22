@@ -227,6 +227,9 @@ _declspec(dllexport) RayError RayStartLumenDetection() {
     return octSystem.StartLumenDetection();
 }
 
+_declspec(dllexport) RayError RaySetConfigPath(char* strPath) {
+    return octSystem.SetConfigPath(strPath);
+}
 _declspec(dllexport) RayError RayOpenImage(char* strFilePath, double imageResolution, double zOffset) {
     return octSystem.OpenImage(strFilePath, imageResolution, zOffset);
 }

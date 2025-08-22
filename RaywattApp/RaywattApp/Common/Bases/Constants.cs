@@ -254,6 +254,8 @@ namespace RaywattApp.Common.Bases
         //Data File Root Path (OCT raw files) - ※ Patient Folder (DataRootPath + Patient ID)
         public const string DataRootPath = SystemRootPath + "\\Raywatt\\DataSave";
 
+        public const string ConfigPath = SystemRootPath + "\\Raywatt\\System\\config";
+
         //Log Folder
         public const string LogFolderPath = SystemRootPath + "\\Raywatt\\log";
         public const string LogExtension = "*.log";

@@ -17,6 +17,11 @@ CConfiguration& CConfiguration::GetInstance() {
 	return pInstance;
 }
 
+void CConfiguration::SetPath(tstring configPath)
+{
+	this->configPath = configPath;
+}
+
 void CConfiguration::Initialize(tstring configFile)
 {
 	TCHAR sIniValueString[MAX_PATH] = _T("");

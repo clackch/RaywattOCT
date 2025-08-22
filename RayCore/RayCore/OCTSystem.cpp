@@ -690,6 +690,18 @@ RayError COCTSystem::StartLumenDetection() {
 	return RayError::WrongState;
 }
 
+RayError COCTSystem::SetConfigPath(char* strPath) {
+	CConfiguration& config = CConfiguration::GetInstance();
+
+	if (strPath == nullptr || !CUtility::IsExist(strPath, false)) {
+		PLOGI.printf("%s is not exist", ((strPath == nullptr) ? "{empty path}" : strPath));
+		return RayError::InvalidArgument;
+	}
+	config.SetPath(CUtility::StringToWstring(strPath));
+
+	return RayError::OK;
+}
+
 /*
 * OpenImage
 */

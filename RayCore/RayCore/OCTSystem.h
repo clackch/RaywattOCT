@@ -132,6 +132,7 @@ public:
 	RayError UnregisterDetectionCallback();
 	void* GetVolumeData(void* pLumenContours = nullptr);
 	RayError StartLumenDetection();
+	RayError SetConfigPath(char* strPath);
 	RayError OpenImage(char* strFilePath, double imageResolution, double zOffset);
 	RayError CloseImage();
 	void* GetImageData(int nFrame);

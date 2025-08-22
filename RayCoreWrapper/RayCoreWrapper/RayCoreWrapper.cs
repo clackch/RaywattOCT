@@ -200,6 +200,8 @@ namespace RaywattOCT
         [DllImport("RayCore.dll")]
         public static extern int RayStartLumenDetection();
         [DllImport("RayCore.dll")]
+        public static extern int RaySetConfigPath(string filePath);
+        [DllImport("RayCore.dll")]
         public static extern int RayOpenImage(string filePath, double imageResolution, double zOffset);
         [DllImport("RayCore.dll")]
         public static extern int RayCloseImage();
