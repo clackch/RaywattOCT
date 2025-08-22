@@ -41,8 +41,6 @@ namespace RaywattOCT
             ImageChannels,
             ImageDepth,
             ImageResolution,
-            ImageThreshold,
-            ImageRoi,
             ImageCompensation,
             ImageCompensationControlWindow,
             FieldOfView,
@@ -55,7 +53,11 @@ namespace RaywattOCT
             SheathDiameter,
             TestMode,
             ZOffset,
-            PullbackStartTime
+            PullbackStartTime,
+            AutoPullback,
+            LumenThresholdMin,
+            LumenThresholdMax,
+            ShowLumenGuide
         }
 
         public enum RayCallbackRequest : int

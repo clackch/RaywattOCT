@@ -461,6 +461,162 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 
 	return NOERROR;
 }
+
+// ===================== 분류 로직 =====================
+inline AreaResult classify_by_area_only(const std::vector<cv::Point>& contour, const cv::Size& frameSize, const AreaParams& P = AreaParams{}){
+	AreaResult R;
+	R.center = cv::Point2f(frameSize.width / 2.f, frameSize.height / 2.f);
+	R.Rfov = 0.5 * std::min(frameSize.width, frameSize.height);
+	R.fovArea = CV_PI * R.Rfov * R.Rfov;
+
+	if (contour.size() < 3 || R.fovArea <= 0.0) {
+		R.decision = AreaDecision::Invalid;
+		return R;
+	}
+
+	R.contourArea = std::abs(cv::contourArea(contour));
+	R.areaFrac = (R.fovArea > 1e-9) ? (R.contourArea / R.fovArea) : 0.0;
+
+	// 순서: 작은 면적(=sheath) 우선, 다음 큰 면적
+	if (R.areaFrac <= std::max(0.0, P.sheathAreaFracMax)) {
+		R.decision = AreaDecision::ExcludeSheath;
+	}
+	else if (R.areaFrac >= std::min(1.0, P.areaFracMax)) {
+		R.decision = AreaDecision::ExcludeTooLarge;
+	}
+	else {
+		R.decision = AreaDecision::Accept;
+	}
+	return R;
+}
+
+// 면적 비율(f) ↔ 반지름: π r^2 = f * π Rfov^2  ⇒  r = Rfov * sqrt(f)
+static inline int radius_from_frac(double Rfov, double frac) {
+	frac = std::max(0.0, std::min(1.0, frac));
+	return (int)std::round(Rfov * std::sqrt(frac));
+}
+
+// ===================== 시각화 =====================
+inline void draw_area_thresholds_and_contour(cv::Mat& imgBgr, const std::vector<cv::Point>& contour, const AreaParams& P, const AreaResult& R){
+	if (imgBgr.empty()) return;
+	if (imgBgr.channels() == 1) cv::cvtColor(imgBgr, imgBgr, cv::COLOR_GRAY2BGR);
+
+	// 1) FOV 원(회색 점선 느낌)
+	cv::circle(imgBgr, R.center, (int)std::round(R.Rfov), cv::Scalar(160, 160, 160), 1, cv::LINE_AA);
+
+	// 2) 임계 원들
+	const int rSheath = radius_from_frac(R.Rfov, P.sheathAreaFracMax);
+	const int rMax = radius_from_frac(R.Rfov, P.areaFracMax);
+
+	if (rSheath > 0)
+		cv::circle(imgBgr, R.center, rSheath, cv::Scalar(255, 0, 0), 2, cv::LINE_AA); // 작은 면적 한계
+
+	if (rMax > 0)
+		cv::circle(imgBgr, R.center, rMax, cv::Scalar(255, 0, 0), 2, cv::LINE_AA); // 큰 면적 한계
+
+	// 3) 컨투어 (분류별 색)
+	cv::Scalar col =
+		(R.decision == AreaDecision::ExcludeSheath) ? cv::Scalar(0, 255, 255) :   // 노랑-초록
+		(R.decision == AreaDecision::ExcludeTooLarge) ? cv::Scalar(0, 0, 255) :   // 빨강
+		(R.decision == AreaDecision::Accept) ? cv::Scalar(0, 255, 0) :   // 초록
+		cv::Scalar(255, 255, 255);  // 흰색(Invalid)
+
+	if (!contour.empty()) {
+		std::vector<std::vector<cv::Point>> cs{ contour };
+		cv::drawContours(imgBgr, cs, 0, col, 2, cv::LINE_AA);
+	}
+}
+
+int CImagingSession::IsLumenNormal(cv::Mat image, std::vector<cv::Point> contour, double lumenThresholdMin, double lumenThresholdMax, bool showLumenGuide){
+	AreaParams ap;
+	ap.sheathAreaFracMax = lumenThresholdMin;
+	ap.areaFracMax = lumenThresholdMax;
+
+	AreaResult result = classify_by_area_only(contour, image.size(), ap);
+	
+	if(showLumenGuide)
+		draw_area_thresholds_and_contour(image, contour, ap, result);
+
+	if (result.decision == AreaDecision::Accept)
+		return 1;
+	else
+		return 0;
+}
+
+std::vector<cv::Point> CImagingSession::GetValidLumenContour(const cv::Mat& imageResultWithoutCompensation, int imgSize, const cv::Mat& centerMask, const cv::Ptr<cv::CLAHE>& clahe, IRayLearning* learning, COCTImaging* pImaging){
+	cv::Mat enhancedImage;
+	clahe->apply(imageResultWithoutCompensation, enhancedImage);
+	pImaging->CircularizeImage(enhancedImage, enhancedImage);
+	cv::cvtColor(enhancedImage, enhancedImage, cv::COLOR_GRAY2BGR);
+
+	cv::Mat contourImage = learning->FindLumen(enhancedImage);
+
+	std::vector<std::vector<cv::Point>> vContours;
+	cv::findContours(contourImage, vContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+	std::vector<cv::Point> validContour;
+
+	if (vContours.size() > 0) {
+		cv::Mat andResult;
+		cv::Mat xorResult;
+
+		// find contour which contains center point
+		int idx = 0;
+		for (int i = 0; i < (int)vContours.size(); i++) {
+			cv::Mat curContour = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+			cv::drawContours(curContour, vContours, i, cv::Scalar(255), cv::FILLED);
+
+			cv::bitwise_and(centerMask, curContour, andResult);
+			cv::bitwise_xor(centerMask, andResult, xorResult);
+
+			if (cv::countNonZero(xorResult) == 0) {
+				validContour = vContours[i];
+				idx = i;
+				break;
+			}
+		}
+
+		if (!validContour.empty()) {
+			// removal of the outer part of the circle (OCT cross-section)
+			cv::Mat mask1 = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+			cv::Point center(imgSize / 2, imgSize / 2);
+			cv::circle(mask1, center, imgSize / 2, cv::Scalar(255), cv::FILLED);
+
+			cv::Mat mask2 = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+			cv::drawContours(mask2, vContours, idx, cv::Scalar(255), cv::FILLED);
+
+			cv::Mat andResult2, xorResult2;
+			cv::bitwise_and(mask2, mask1, andResult2);
+			cv::bitwise_xor(mask2, andResult2, xorResult2);
+			bool isCompletelyContained = cv::countNonZero(xorResult2) == 0;
+
+			vContours.clear();
+			if (!isCompletelyContained) {
+				std::vector<std::vector<cv::Point>> vCircle;
+				cv::findContours(andResult2, vCircle, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+				if (vCircle.size() > 0) {
+					// find contour which contains center point
+					for (int i = 0; i < (int)vCircle.size(); i++) {
+						cv::Mat curContour = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+						cv::drawContours(curContour, vCircle, i, cv::Scalar(255), cv::FILLED);
+
+						cv::bitwise_and(centerMask, curContour, andResult);
+						cv::bitwise_xor(centerMask, andResult, xorResult);
+
+						if (cv::countNonZero(xorResult) == 0) {
+							validContour = vCircle[i];
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return validContour;
+}
+
 UINT CImagingSession::threadDetectObject(LPVOID param) {
 	PLOGI.printf("threadDetectObject start\n");
 	CImagingSession* pSession = (CImagingSession*)param;
@@ -511,102 +667,23 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		cv::cvtColor(circleImage, circleImage, cv::COLOR_GRAY2BGR);
 
 		//lumen
-		clahe->apply(imgZOffset, enhancedImage);
-		pImaging->CircularizeImage(enhancedImage, enhancedImage);
-		cv::cvtColor(enhancedImage, enhancedImage, cv::COLOR_GRAY2BGR);
-		cv::Mat contourImage = learning->FindLumen(enhancedImage);
-		std::vector<std::vector<cv::Point>> vContours;
-		cv::findContours(contourImage, vContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+		std::vector<cv::Point> validContour = pSession->GetValidLumenContour(imgZOffset, imgSize, centerMask, clahe, learning, pImaging);
 
-		if (vContours.size() == 0) {
+		std::vector<std::vector<cv::Point>> vContours;
+		if (!validContour.empty()) {
+			vContours.push_back(validContour);
+			pImaging->SetLumenContourOffset(validContour);
+		}
+		else {
 			vContours.clear();
 			vContours.push_back(vEmptyLumen);
 			pImaging->SetLumenContourOffset(vEmptyLumen);
 		}
-		else {
-			std::vector<cv::Point> validContour;
-			cv::Mat andResult;
-			cv::Mat xorResult;
 
-			//find contour which contains center point
-			int idx = -1;
-			for (int i = 0; i < vContours.size(); i++) {
-				cv::Mat curContour = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
-				cv::drawContours(curContour, vContours, i, cv::Scalar(255), cv::FILLED);
-				/*cv::Mat aa;
-				cv::cvtColor(curContour, aa, cv::COLOR_GRAY2BGR);
-				string check = "contour Image" + std::to_string(a) + ".png";
-				cv::imwrite(check, aa);*/
-
-				cv::bitwise_and(centerMask, curContour, andResult);
-				cv::bitwise_xor(centerMask, andResult, xorResult);
-
-				if (cv::countNonZero(xorResult) == 0) {
-					validContour = vContours[i];
-					idx = i;
-					break;
-				}
-			}
-
-			if (idx != -1) {
-				//removal of the outer part of the circle(OCT cross-section)
-				cv::Mat mask1 = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
-				cv::Point center(imgSize / 2, imgSize / 2);
-				cv::circle(mask1, center, imgSize / 2, cv::Scalar(255), cv::FILLED);
-
-				cv::Mat mask2 = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
-				cv::drawContours(mask2, vContours, idx, cv::Scalar(255), cv::FILLED);
-
-				cv::bitwise_and(mask2, mask1, andResult);
-				cv::bitwise_xor(mask2, andResult, xorResult);
-				bool isCompletelyContained = cv::countNonZero(xorResult) == 0;
-
-				vContours.clear();
-				if (isCompletelyContained) {
-					vContours.push_back(validContour);
-					pImaging->SetLumenContourOffset(validContour);
-				}
-				else {
-					std::vector<std::vector<cv::Point>> vCircle;
-					cv::findContours(andResult, vCircle, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-
-					if (vCircle.size() == 0) {
-						vContours.push_back(vEmptyLumen);
-						pImaging->SetLumenContourOffset(vEmptyLumen);
-					}
-					else {
-						//find contour which contains center point
-						idx = -1;
-						for (int i = 0; i < vCircle.size(); i++) {
-							cv::Mat curContour = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
-							cv::drawContours(curContour, vCircle, i, cv::Scalar(255), cv::FILLED);
-
-							cv::bitwise_and(centerMask, curContour, andResult);
-							cv::bitwise_xor(centerMask, andResult, xorResult);
-
-							if (cv::countNonZero(xorResult) == 0) {
-								validContour = vCircle[i];
-								idx = i;
-								break;
-							}
-						}
-
-						if (idx != -1) {
-							vContours.push_back(validContour);
-							pImaging->SetLumenContourOffset(validContour);
-						}
-						else {
-							vContours.push_back(vEmptyLumen);
-							pImaging->SetLumenContourOffset(vEmptyLumen);
-						}
-					}
-				}
-			}
-			else {
-				vContours.clear();
-				vContours.push_back(vEmptyLumen);
-				pImaging->SetLumenContourOffset(vEmptyLumen);
-			}
+		//Test
+		if (false) {//!validContour.empty()) {
+			pSession->IsLumenNormal(circleImage, validContour, 0.01, 0.30, true);
+			cv::imwrite(cv::format("./test/%06d.png", nFrame), circleImage);
 		}
 
 		std::vector<cv::Mat> vLumens;

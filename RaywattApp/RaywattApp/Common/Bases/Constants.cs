@@ -383,7 +383,7 @@ namespace RaywattApp.Common.Bases
         public const double CrossSectionFfrSize = 344;
 
         //Recording
-        public const int TransientTime = 100;
+        public const int TransientTime = 2000;
         public const int StartTime = 10;
         public const double SmallCrossSectionSize = 318;
 
@@ -458,6 +458,8 @@ namespace RaywattApp.Common.Bases
 
         //Field of View
         public const double DefaultFoV = 10.0f;
+        public const double MaximumFoV = 7.0;
+        public const double MinimumFoV = 5.0;
 
         //Image Resolution
         public const double ImageResolution = DefaultFoV / 1024;
