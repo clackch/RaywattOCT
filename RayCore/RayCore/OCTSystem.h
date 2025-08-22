@@ -78,9 +78,11 @@ private:
 	RayScannerState m_curState;
 	CatheterState m_cathState;
 
-	// Auto Pullback (Flushing Detection)
-	double m_fReferenceIntensity[4];
-	double m_fCurrentIntensity[4];
+	// Auto Pullback
+	bool m_bAutoPullbackOnOff;
+	double m_fLumenThresholdMin;
+	double m_fLumenThresholdMax;
+	bool m_bShowLumenGuide;
 
 	//Property
 	double m_fBrightness;
@@ -88,10 +90,8 @@ private:
 	double m_fDegree;
 	double m_fColormap;
 	cv::Scalar m_backgroundColor;	// for longitude image
-	double m_fImageThreshold = 99.99;
 	bool m_bImageCompensation = true;
 	bool m_bImageCompensationControlWindow;
-	double m_fImageRoi = 2.f;
 	double m_fFieldOfView;
 	bool m_isTestMode;
 	double m_fPullbackStartTime; // XXX.XXX sec
@@ -169,10 +169,6 @@ public:
 	UINT GetLongitudeImageHeight();
 	UINT GetLongitudeImageChannels();
 	RayError SetSheathDiameter(double value);
-	double GetImageThreshold();
-	RayError SetImageThreshold(double value);
-	double GetImageRoi();
-	RayError SetImageRoi(double value);
 	bool GetImageCompensation();
 	RayError SetImageCompensation(bool value);
 	RayError SetImageCompensationControlWindow(bool value);
@@ -183,6 +179,14 @@ public:
 	bool IsTestMode() { return m_isTestMode; }
 	void SetPullbackStartTime(double value) { m_fPullbackStartTime = value; }
 	double GetPullbackStartTime() { return m_fPullbackStartTime; }
+	double GetAutoPullback();
+	RayError SetAutoPullback(double value);
+	double GetLumenThresholdMin();
+	RayError SetLumenThresholdMin(double value);
+	double GetLumenThresholdMax();
+	RayError SetLumenThresholdMax(double value);
+	double GetShowLumenGuide();
+	RayError SetShowLumenGuide(double value);
 
 private:
 	// Main Thread
@@ -218,7 +222,6 @@ private:
 	void laserOnOff(bool isOn);
 	bool waitForStepMotors(bool& runFlag, bool log = false);
 	bool waitForStepMotors(eStepMotorIndex idxMotor, bool& runFlag);
-	void calculateIntensity(cv::Mat image);
 	std::vector<std::vector<std::string>> readLoadSequence();
 	void autoCalibrationInit(LPVOID param);
 

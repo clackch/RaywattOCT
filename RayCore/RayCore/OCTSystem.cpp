@@ -1147,42 +1147,6 @@ RayError COCTSystem::SetSheathDiameter(double value)
 }
 
 /*
-* GetImageThreshold
-*/
-double COCTSystem::GetImageThreshold()
-{
-	return m_fImageThreshold;
-}
-
-/*
-* SetImageThreshold
-*/
-RayError COCTSystem::SetImageThreshold(double value)
-{
-	m_fImageThreshold = value;
-
-	return RayError::OK;
-}
-
-/*
-* GetImageRoi
-*/
-double COCTSystem::GetImageRoi()
-{
-	return m_fImageRoi;
-}
-
-/*
-* SetImageRoi
-*/
-RayError COCTSystem::SetImageRoi(double value)
-{
-	m_fImageRoi = value;
-
-	return RayError::OK;
-}
-
-/*
 * GetImageCompensation
 */
 bool COCTSystem::GetImageCompensation()
@@ -1248,6 +1212,78 @@ RayError COCTSystem::SetZOffset(double value)
 			m_reviewSession[SESSION_REVIEW]->SetZOffset((int)value);
 		}
 	}
+
+	return RayError::OK;
+}
+
+/*
+* GetAutoPullback
+*/
+double COCTSystem::GetAutoPullback()
+{
+	return m_bAutoPullbackOnOff;
+}
+
+/*
+* SetAutoPullback
+*/
+RayError COCTSystem::SetAutoPullback(double value)
+{
+	m_bAutoPullbackOnOff = (bool)value;
+
+	return RayError::OK;
+}
+
+/*
+* GetLumenThresholdMin
+*/
+double COCTSystem::GetLumenThresholdMin()
+{
+	return m_fLumenThresholdMin;
+}
+
+/*
+* SetLumenThresholdMin
+*/
+RayError COCTSystem::SetLumenThresholdMin(double value)
+{
+	m_fLumenThresholdMin = value;
+
+	return RayError::OK;
+}
+
+/*
+* GetLumenThresholdMax
+*/
+double COCTSystem::GetLumenThresholdMax()
+{
+	return m_fLumenThresholdMax;
+}
+
+/*
+* SetLumenThresholdMax
+*/
+RayError COCTSystem::SetLumenThresholdMax(double value)
+{
+	m_fLumenThresholdMax = value;
+
+	return RayError::OK;
+}
+
+/*
+* GetShowLumenGuide
+*/
+double COCTSystem::GetShowLumenGuide()
+{
+	return m_bShowLumenGuide;
+}
+
+/*
+* SetShowLumenGuide
+*/
+RayError COCTSystem::SetShowLumenGuide(double value)
+{
+	m_bShowLumenGuide = (bool)value;
 
 	return RayError::OK;
 }
@@ -2287,7 +2323,7 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 	int nSession = wParam;
 	int nFrameInfo = lParam;	// 0 if real time frame
 	bool isRealTime = (nFrameInfo == 0);
-	double intensity = 0.0;
+	double isCleared = 0.0;
 
 	if (m_curState == RayScannerState::Review) {
 		if (isRealTime) return NOERROR;
@@ -2300,12 +2336,23 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 		if (isRealTime == false) return NOERROR;
 		image = m_pImagingRealtime->GetCircleImage();
 
-		//calculate intensity - m_fImageThreshold/m_fImageRoi
-		calculateIntensity(image);
-		for (int i = 0; i < 4; i++) {
-			intensity += m_fCurrentIntensity[i];
+		if (m_bAutoPullbackOnOff) {
+			//Lumen Detect
+			IRayLearning* learning = IRayLearning::GetInstance();
+			cv::Mat enhancedImage;
+			int imgSize = 1024;
+			cv::Point center(imgSize / 2, imgSize / 2);
+			//center point mask
+			cv::Mat centerMask = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
+			cv::circle(centerMask, center, 1, cv::Scalar(255), cv::FILLED);
+			cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(3.5, cv::Size(4, 4));
+			
+			std::vector<cv::Point> validContour = m_openedSession->GetValidLumenContour(m_pImagingRealtime->GetWithoutCompensationImage(), imgSize, centerMask, clahe, learning, m_pImagingRealtime);
+
+			if (!validContour.empty()) {
+				isCleared = m_openedSession->IsLumenNormal(image, validContour, m_fLumenThresholdMin, m_fLumenThresholdMax, m_bShowLumenGuide);
+			}
 		}
-		intensity /= 4.f;
 
 		switch (m_cathState)
 		{
@@ -2336,11 +2383,10 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 		}
 	}
 
-	if (m_cbCrossSection != nullptr) m_cbCrossSection(nSession, image.data, image.cols, image.rows, image.channels(), nFrameInfo, intensity);
+	if (m_cbCrossSection != nullptr) m_cbCrossSection(nSession, image.data, image.cols, image.rows, image.channels(), nFrameInfo, isCleared);
 
 	return NOERROR;
 }
-
 /*
 * OnMsgProcessCutView
 */
@@ -2460,56 +2506,6 @@ bool COCTSystem::waitForStepMotors(eStepMotorIndex idxMotor, bool& runFlag) {
 	}
 
 	return m_pLaserModule->IsMoving(idxMotor);
-}
-void COCTSystem::calculateIntensity(cv::Mat image) {
-	CConfiguration& config = CConfiguration::GetInstance();
-	double sheathRadius = config.measurement.fSheathRadius * 2;
-	double resolution = (config.measurement.fAxialResolutionScale / 1000.f) * 2;
-	double radius = sheathRadius / resolution;	// sheath radius as pixel scale
-
-	cv::Mat imgGray, imgRoi;
-	cv::cvtColor(image, imgGray, cv::COLOR_BGR2GRAY);
-
-	// find circle (sheath)
-	std::vector<cv::Vec3f> circles;
-	circles.push_back(cv::Vec3f(imgGray.cols / 2, imgGray.rows / 2, radius));
-	//cv::HoughCircles(imgGray, circles, cv::HOUGH_GRADIENT, 2, imgGray.rows / 4, 200, 100, 10, 50);	
-
-	// make ROI
-	cv::Mat imgMask = cv::Mat::zeros(imgGray.rows, imgGray.cols, CV_8UC1);
-	cv::Point center;
-	int roiSize = 0;
-	if (circles.size() > 0)
-	{
-		cv::Vec3f c = circles[0];
-		center.x = c[0];
-		center.y = c[1];
-		radius = c[2];
-		roiSize = radius * m_fImageRoi;
-
-		circle(imgMask, center, roiSize, cv::Scalar(255, 255, 255), -1);
-		circle(imgMask, center, radius, cv::Scalar(0, 0, 0), -1);
-	}
-	cv::copyTo(imgGray, imgRoi, imgMask);
-
-	// divide quadrants & calculate intensity
-	cv::Rect quadrants[4];
-	quadrants[0].x = center.x - roiSize;
-	quadrants[0].y = center.y - roiSize;
-	quadrants[1].x = center.x;
-	quadrants[1].y = center.y - roiSize;
-	quadrants[2].x = center.x - roiSize;
-	quadrants[2].y = center.y;
-	quadrants[3].x = center.x;
-	quadrants[3].y = center.y;
-
-	for (int i = 0; i < 4; i++) {
-		quadrants[i].width = roiSize;
-		quadrants[i].height = roiSize;
-
-		cv::Mat quad = imgRoi(quadrants[i]);
-		m_fCurrentIntensity[i] = cv::mean(quad).val[0];
-	}
 }
 std::vector<std::vector<std::string>> COCTSystem::readLoadSequence()
 {
