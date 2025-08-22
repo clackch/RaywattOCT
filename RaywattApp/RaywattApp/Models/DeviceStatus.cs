@@ -76,7 +76,19 @@ namespace RaywattApp.Models
         private CathRoom _selectedCathRoom;
 
         [ObservableProperty]
-        private double _imageIntensity;
+        private bool _autoPullbackOnOff;
+
+        [ObservableProperty]
+        private bool _autoPullbackModel; //Detection Model - true: Lumen, false: Flush
+
+        [ObservableProperty]
+        private bool _autoPullbackIsImageCleared;
+
+        [ObservableProperty]
+        private int _autoPullbackTriggerCandidate;
+
+        [ObservableProperty]
+        private int _autoPullbackTriggerCount;
 
         [ObservableProperty]
         private bool _enhancedLUT;
