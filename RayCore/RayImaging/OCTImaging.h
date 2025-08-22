@@ -15,6 +15,12 @@ class CCalibration;
 class CThread;
 class CMessageService;
 
+struct FFTThreadContext {
+	Ipp32f* fBuffer_Window = nullptr;
+	Ipp32fc* fcBuffer_FFT = nullptr;
+	Ipp32fc* fcBuffer_IFFT = nullptr;
+};
+
 class COCTImaging : public IImaging
 {
 protected:
