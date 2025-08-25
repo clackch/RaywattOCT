@@ -267,7 +267,7 @@ namespace RaywattApp.ViewModels
 
             if (string.IsNullOrEmpty(SearchPatientId.Text))
             {
-                SearchPatientId.Msg = "Please enter the value.";
+                SearchPatientId.Msg = _l10n["Enter ID"].ToString();
                 return;
             }
 
