@@ -27,6 +27,10 @@ namespace RaywattApp.Common.Behaviors
             AssociatedObject.Navigating += AssociatedObject_Navigating;
             //Navigation 종료
             AssociatedObject.Navigated += AssociatedObject_Navigated;
+
+            // Navigation 실패/취소 감지
+            AssociatedObject.NavigationFailed += AssociatedObject_NavigationFailed;
+            AssociatedObject.NavigationStopped += AssociatedObject_NavigationStopped;
         }
 
         /// <summary>
@@ -61,12 +65,27 @@ namespace RaywattApp.Common.Behaviors
             }
         }
 
+        // 네비게이션 실패/취소 감지
+        private void AssociatedObject_NavigationFailed(object sender, NavigationFailedEventArgs e)
+        {
+            _log.Error($"Navigation Failed: {e.Uri}, Exception: {e.Exception}");
+        }
+
+        private void AssociatedObject_NavigationStopped(object sender, NavigationEventArgs e)
+        {
+            _log.Debug($"Navigation Stopped: {e.Uri}");
+            _log.Debug($"Current Content: {AssociatedObject.Content?.GetType()?.Name}");
+        }
+
         protected override void OnDetaching()
         {
             _log.Debug("OnDetaching");
 
             AssociatedObject.Navigating -= AssociatedObject_Navigating;
             AssociatedObject.Navigated -= AssociatedObject_Navigated;
+
+            AssociatedObject.NavigationFailed -= AssociatedObject_NavigationFailed;
+            AssociatedObject.NavigationStopped -= AssociatedObject_NavigationStopped;
         }
 
         public string Navigation
