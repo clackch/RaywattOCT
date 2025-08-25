@@ -12,10 +12,11 @@ CRayYolo::~CRayYolo() {
 
 void CRayYolo::Initialize(bool useGPU){
 	if (m_hDll) {
-		InitializeSegment = (pInitializeSegment)GetProcAddress(m_hDll, "InitializeSegment");
-		InitializeDetect = (pInitializeDetect)GetProcAddress(m_hDll, "InitializeDetect");
-		GetSegmentObjects = (pGetSegmentObjects)GetProcAddress(m_hDll, "GetSegmentObjects");
-		GetDetectObjects = (pGetDetectObjects)GetProcAddress(m_hDll, "GetDetectObjects");
+		// codesonar suppr C dangerous-function-cast
+		SAFE_LOAD_DLL_FUNC(InitializeSegment, pInitializeSegment);
+		SAFE_LOAD_DLL_FUNC(InitializeDetect, pInitializeDetect);
+		SAFE_LOAD_DLL_FUNC(GetSegmentObjects, pGetSegmentObjects);
+		SAFE_LOAD_DLL_FUNC(GetDetectObjects, pGetDetectObjects);
 
 		m_yoloSegment = InitializeSegment();
 		m_yoloDetect = InitializeDetect();

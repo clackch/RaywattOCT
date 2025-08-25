@@ -135,7 +135,6 @@ protected:
 
 	void adaptive_compensation();
 	void min_max_normalization(const cv::Mat& img, cv::Mat& normalized_img, double& min_val, double& max_val);
-	void linear_contrast_stretching(cv::Mat& img, float lower_percentile = 1.0f, float upper_percentile = 99.0f);
 	void logarithmic_contrast_stretching(cv::Mat& img, float lower_percentile = 1.0f, float upper_percentile = 99.0f);
 	double euclidean_distance(cv::Point2f pt1, cv::Point2f pt2);
 	std::vector<int> find_outliers(const std::vector<int>& y_values);
@@ -147,7 +146,6 @@ protected:
 	void GetCircularizeTransformPoint(cv::Point src, cv::Point& dst);
 	void GetAcuteAngleToXAxis(cv::Vec2d vector1, cv::Vec2d vector2, double& angle);
 
-	void adaptive_gamma_correction(cv::Mat& img, int maxIntensity);
 	void get_PDF_array(cv::Mat& img, std::vector<double>& pdf_i, bool& AGCWD_apply);
 	void get_CDF_array(std::vector<double> pdf_i, std::vector<double>& cdf_i);
 
