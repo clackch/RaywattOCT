@@ -198,7 +198,7 @@ namespace RaywattApp.Common.Angio
 
             while (!isBoardInited)
             {
-                Thread.Sleep(500);
+                Thread.Sleep(3000);
             }
 
             if (boardConnection)
