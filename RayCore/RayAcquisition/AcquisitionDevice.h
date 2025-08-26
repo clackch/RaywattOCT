@@ -47,9 +47,7 @@ public:
 	int StopAcquisition();
 
 	double GetFPS() { return m_fps; }
-
-	static bool isAccelDecelProfileRange(int nCurFrame);
-
+	
 protected:
 	virtual int start() = 0;
 	virtual int stop() = 0;

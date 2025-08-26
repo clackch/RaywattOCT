@@ -1644,8 +1644,6 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 		pDataWriter->AddExtraData(OCTHeader::ExtraData::Background, 
 			((CLabImaging*)pSystem->m_pImagingPullback)->GetBackground(), settingPullback.nBufferSize * sizeof(USHORT));
 	}
-	pDataWriter->SetNumOfMaximumFrames(pullbackTime * 400);
-	pDataWriter->SetPullbackType(pullbackType);
 	pDataWriter->StartRecording();
 	pSystem->m_pAcqDevice->SetWriter(pDataWriter);
 
@@ -1692,6 +1690,9 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_STANDBY_OFF);
 
 	PLOGI.printf("Pullback done.");
+	pDataWriter->SetSMProfile(config.stepMotor.SMPullbackProfile);
+	pDataWriter->ReadAccelDecelPofileParameter();
+	pDataWriter->CutPullbackLength(pullbackType);
 	CImagingSession* pSession = CImagingSession::CreateSession(pSystem, SESSION_REVIEW, settingPullback, pDataWriter);
 	pSystem->postPriorMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
 	pSystem->postPriorMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
@@ -2553,20 +2554,20 @@ int COCTSystem::GetPullbackType(int pullbackSpeed, int pullbackDistance) {
 		switch (pullbackSpeed)
 		{
 		case 20:
-			return 1;
+			return 0;
 		case 60:
-			return 3;
+			return 2;
 		default:
-			return 5;
+			return 4;
 		}
 	}
 	else {
 		switch (pullbackSpeed)
 		{
 		case 40:
-			return 2;
+			return 1;
 		default:
-			return 4;
+			return 3;
 		}
 	}
 }

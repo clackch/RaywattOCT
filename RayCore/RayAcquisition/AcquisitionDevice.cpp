@@ -46,10 +46,6 @@ UINT IAcquisitionDevice::threadAcquire(LPVOID param) {
 			pImaging->SetFrameInfo(nCurFrame, nTotalFrame);
 		}
 
-		if (isAccelDecelProfileRange(nCurFrame)) {
-
-		}
-
 		else if (pDevice->m_pWriter != NULL) {
 			pDevice->m_pWriter->AddFrame(pBuffer);
 		}
@@ -57,8 +53,4 @@ UINT IAcquisitionDevice::threadAcquire(LPVOID param) {
 
 	pDevice->stop();
 	return NOERROR;
-}
-
-bool IAcquisitionDevice::isAccelDecelProfileRange(int nCurFrame) {
-
 }

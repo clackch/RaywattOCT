@@ -13,6 +13,23 @@ private:
 	bool m_isRecording;
 	HANDLE m_hRecordingFile;
 
+	enum class PullbackType {
+		HISH_20_60 = 0,  // Speed_Distance
+		HILO_40_100,
+		STSH_60_60,
+		STLO_100_100,
+		FAST_120_60
+	};
+
+	typedef struct PullbackImageSkipParameters {
+		double a, b, c;
+		double threshold;
+		int frameNum;
+	}PISP; 
+	
+	PISP m_pisp[2][5];
+	std::vector<int, bool> skipIdx;
+	int m_SMProfile;
 public:
 	CDataWriter();
 	virtual ~CDataWriter();
@@ -29,6 +46,11 @@ public:
 	bool WriteFrame(int nFrame);
 	void WriteEOF();
 	void StopSave();
+	
+	void CutPullbackLength(int pullbackType);
+	void ReadAccelDecelPofileParameter();
+	void SkipFrames(int stopRecordedFrames, int maximumFrames, int pullbackType, int rotationRatio);
+	void SetSMProfile(int SMProfile) { m_SMProfile = SMProfile; }
 
 	virtual char* GetSample(int nFrame);
 	virtual void AddFrame(void* pFrame);
