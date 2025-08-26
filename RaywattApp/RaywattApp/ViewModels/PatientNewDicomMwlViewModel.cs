@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Navigation;
@@ -315,6 +316,12 @@ namespace RaywattApp.ViewModels
             if (string.IsNullOrEmpty(SearchPatientId.Text))
             {
                 SearchPatientId.Msg = _l10n["Enter ID"].ToString();
+                return;
+            }
+
+            if (Regex.IsMatch(SearchPatientId.Text, @"[\*\?]"))
+            {
+                SearchPatientId.Msg = _l10n["Patient ID cannot contain * or ?."].ToString();
                 return;
             }
 
