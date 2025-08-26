@@ -1568,6 +1568,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		// way1
 		int minVal = INT_MAX, maxVal = 0, Loc = startPosition;
 		for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
+			if (pSystem->m_vCalibrationInfo.at(i).first == -1) continue;
 			if (pSystem->m_vCalibrationInfo.at(i).first < minVal) {
 				minVal = pSystem->m_vCalibrationInfo.at(i).first;
 				Loc = pSystem->m_vCalibrationInfo.at(i).second;
@@ -1602,6 +1603,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		minVal = INT_MAX;
 		for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
 			if (pSystem->m_vCalibrationInfo.at(i).first < minVal) {
+				if (pSystem->m_vCalibrationInfo.at(i).first == -1) continue;
 				minVal = pSystem->m_vCalibrationInfo.at(i).first;
 				Loc = pSystem->m_vCalibrationInfo.at(i).second;
 			}
@@ -2353,8 +2355,15 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 		{
 			int nSheathPosition = m_pImagingRealtime->GetSheathPosition();
 			int nDelayLinePos = m_pLaserModule->GetPosition(eStepMotorIndex::DelayLine);
-			m_vCalibrationInfo.push_back(std::make_pair(nSheathPosition, nDelayLinePos));
-			PLOGI.printf("FindingSheath - %d, %d", nSheathPosition, nDelayLinePos);
+			m_vCalibrationInfo.push_back(std::make_pair(-1, nDelayLinePos));
+			if (m_vCalibrationInfo[m_vCalibrationInfo.size() - 2].first == -1) {
+				m_vCalibrationInfo[m_vCalibrationInfo.size() - 2].first = nSheathPosition;
+			}
+			else {
+				if(m_vCalibrationInfo.back().first == -1)
+					m_vCalibrationInfo.back().first = nSheathPosition;
+			}
+			//m_vCalibrationInfo.push_back(std::make_pair(nSheathPosition, nDelayLinePos));
 		}
 			break;
 		case CatheterState::FindingPeak:
