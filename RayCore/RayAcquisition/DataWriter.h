@@ -28,7 +28,7 @@ private:
 	}PISP; 
 	
 	PISP m_pisp[2][5];
-	std::vector<int, bool> skipIdx;
+	std::map<int, bool> skipIdx;
 	int m_SMProfile;
 public:
 	CDataWriter();

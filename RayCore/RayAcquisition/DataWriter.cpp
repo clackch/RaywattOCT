@@ -1,7 +1,7 @@
 #include "Config.h"
 #include "DataWriter.h"
 #include "Utility.h"
-#include "fstream"
+#include <fstream>
 
 CDataWriter::CDataWriter() {
 	m_pRecordBuffer = NULL;
@@ -50,7 +50,7 @@ void CDataWriter::StartSave(tstring strFilePath) {
 		FILE_FLAG_SEQUENTIAL_SCAN, NULL);
 }
 void CDataWriter::WriteHeader(OCTHeader::Type type, OCTHeader::DataType dataType, OCTHeader::Channels ch, int width, int height, UCHAR extraData) {
-	std::vector<char> vHeader = createHeader(type, dataType, ch, width, height, m_nNumOfSamples, extraData);
+	std::vector<char> vHeader = createHeader(type, dataType, ch, width, height, m_nNumOfKeepSamples, extraData);
 
 	DWORD dwBytesWrote = 0;
 	WriteFile(m_hRecordingFile, vHeader.data(), vHeader.size(), &dwBytesWrote, NULL);
@@ -60,17 +60,22 @@ void CDataWriter::WriteExtraData(void* pExtraData, long nSize) {
 	WriteFile(m_hRecordingFile, pExtraData, nSize, &dwBytesWrote, NULL);
 }
 bool CDataWriter::WriteFrame(int nFrame) {
-	char* pBuffer = (char *) GetSample(nFrame);
-	if (pBuffer == NULL) return false;
+	if (skipIdx[nFrame]) {
+		char* pBuffer = (char*)GetSample(nFrame);
+		if (pBuffer == NULL) return false;
 
-	DWORD dwBytesWrote = 0;
-	if (!WriteFile(m_hRecordingFile, pBuffer, m_nElementSize, &dwBytesWrote, NULL))
-	{
-		printf("Failed to write acquisition data to file: (LastError = 0x%08X)\n", GetLastError());
+		DWORD dwBytesWrote = 0;
+		if (!WriteFile(m_hRecordingFile, pBuffer, m_nElementSize, &dwBytesWrote, NULL))
+		{
+			printf("Failed to write acquisition data to file: (LastError = 0x%08X)\n", GetLastError());
+			return false;
+		}
+
+		return true;
+	}
+	else {
 		return false;
 	}
-
-	return true;
 }
 void CDataWriter::WriteEOF() {
 	OCTHeader::Bit flag = OCTHeader::Bit::EoF;
@@ -252,6 +257,8 @@ void CDataWriter::SkipFrames(int stopRecordedFrames, int maximumFrames, int pull
 		skipIdx[i] = keep; // true=keep, false=skip
 	}
 	m_nNumOfKeepSamples = m_nNumOfSamples - numOfKeeps;
+
+	PLOGI.printf("m_nNumOfKeepSamples = %d, m_nNumOfSamples = %d, gap = %d", numOfKeeps);
 }
 
 void CDataWriter::ReadAccelDecelPofileParameter()

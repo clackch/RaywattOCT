@@ -56,7 +56,7 @@ protected:
 	int m_nNumOfKeepSamples;
 	std::map<OCTHeader::ExtraData, void *> mapExtraData;
 public:
-	IDataManager() { m_nNumOfSamples = 0; }
+	IDataManager() { m_nNumOfSamples = 0; m_nNumOfKeepSamples = 0; }
 	virtual ~IDataManager() {
 		std::map<OCTHeader::ExtraData, void*>::iterator it = mapExtraData.begin();
 		while (it != mapExtraData.end())
