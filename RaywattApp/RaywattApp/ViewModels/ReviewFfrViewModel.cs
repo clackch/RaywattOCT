@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -85,7 +86,23 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ReviewFfrViewModel");
 
+            Initialize();
+
+            ffrCalculatingTimer.Interval = TimeSpan.FromMilliseconds(3000);
+            ffrCalculatingTimer.Tick += new EventHandler(FfrCalculatingTimer);
+            opacityFadeOutTimer.Interval = TimeSpan.FromMilliseconds(50);
+            opacityFadeOutTimer.Tick += new EventHandler(OpacityFadeOutTimer);
+            opacityFadeInTimer.Interval = TimeSpan.FromMilliseconds(50);
+            opacityFadeInTimer.Tick += new EventHandler(OpacityFadeInTimer);
+        }
+
+        public void Initialize()
+        {
+            _log.Debug("Initialize");
+
             Constants.CurrentPage = Constants.ReviewFfrPage;
+
+            DeviceStatus.IsExecutedAIFFR = false;
 
             Section = new Section();
             Section.Proximal.IsVisible = Visibility.Visible;
@@ -97,13 +114,6 @@ namespace RaywattApp.ViewModels
             ZIndex = 0;
 
             sess = new InferenceSession(modelPath);
-
-            ffrCalculatingTimer.Interval = TimeSpan.FromMilliseconds(3000);
-            ffrCalculatingTimer.Tick += new EventHandler(FfrCalculatingTimer);
-            opacityFadeOutTimer.Interval = TimeSpan.FromMilliseconds(50);
-            opacityFadeOutTimer.Tick += new EventHandler(OpacityFadeOutTimer);
-            opacityFadeInTimer.Interval = TimeSpan.FromMilliseconds(50);
-            opacityFadeInTimer.Tick += new EventHandler(OpacityFadeInTimer);
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -120,7 +130,14 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
-                ReviewStatus.CurrentPage = Constants.ReviewFfrPage;
+                
+                if(PatientCase.FfrFeature.Result > 0)
+                {
+                    FfrResult = PatientCase.FfrFeature.Result;
+                    BtnFfrEnabled = false;
+                    VisibilityResult = Visibility.Visible;
+                    OpacityResult = 1;
+                }
 
                 Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
 
@@ -149,12 +166,28 @@ namespace RaywattApp.ViewModels
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
 
+            if (navigationEventArgs is NavigatingCancelEventArgs args)
+            {
+                string uriString = args.Uri?.ToString() ?? string.Empty;
+
+                bool isReviewPage =
+                    uriString == Constants.Review3dPage ||
+                    uriString == Constants.ReviewPage;
+
+                if (!isReviewPage)
+                {
+                    Initialize();
+                }
+            }
+
             Save();
         }
 
         private void FfrPredict()
         {
             _log.Debug("FfrPredict");
+
+            DeviceStatus.IsExecutedAIFFR = true;
 
             FfrResult = 0;
             OpacityResult = 0.0;
@@ -166,12 +199,15 @@ namespace RaywattApp.ViewModels
             DeviceStatus.IsFfrCalculated = false;
             ZIndex = 1;
 
-            ffrCalculatingTimer.Start();            
+            ffrCalculatingTimer.Start();
         }
 
         private void FfrSetting()
         {
             _log.Debug("FfrSetting");
+
+            Initialize(); // FFR Setting Page에서 다시 돌아가면서 초기화
+            PatientCase.FfrFeature = null;
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
@@ -185,7 +221,7 @@ namespace RaywattApp.ViewModels
         {
             int vesselType = 0;
 
-            switch (PatientCase.FfrFeature.VesselType)
+            switch (PatientCase.FfrFeature.VesselTypeGroup)
             {
                 case "$002":
                     vesselType = 0;
@@ -224,6 +260,7 @@ namespace RaywattApp.ViewModels
             using (IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results = sess.Run(inputs))
             {
                 FfrResult = Math.Round(results[0].AsEnumerable<float>().ToArray()[0], 2);
+                PatientCase.FfrFeature.Result = FfrResult;
             }
         }
 

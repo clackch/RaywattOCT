@@ -278,6 +278,8 @@ namespace RaywattApp.Common.Bases
         //Data File Root Path (OCT raw files) - ※ Patient Folder (DataRootPath + Patient ID)
         public const string DataRootPath = SystemRootPath + "\\Raywatt\\DataSave";
 
+        public const string ConfigPath = SystemRootPath + "\\Raywatt\\System\\config";
+
         //Log Folder
         public const string LogFolderPath = SystemRootPath + "\\Raywatt\\log";
         public const string LogExtension = "*.log";
@@ -407,7 +409,7 @@ namespace RaywattApp.Common.Bases
         public const double CrossSectionFfrSize = 344;
 
         //Recording
-        public const int TransientTime = 100;
+        public const int TransientTime = 2000;
         public const int StartTime = 10;
         public const double SmallCrossSectionSize = 318;
 
@@ -420,10 +422,12 @@ namespace RaywattApp.Common.Bases
         public const string MeasureDeleteAll = "DeleteAll";  //Delete All
         public const string MeasureAddArea = "AddArea";  //Add Area
         public const string MeasureAddLength = "AddLength";  //Add Length
+        public const string MeasureAddAngle = "AddAngle";  //Add Length
         public const string MeasureAddText = "AddText";  //Add Text
         public const string MeasureErasePoint = "ErasePoint";  //Erase Point
         public const string MeasureDeleteArea = "GridDeleteArea";  //(Grid) Delete Area
         public const string MeasureDisableLength = "DisableLength";  //Disable Length
+        public const string MeasureDisableAngle = "DisableAngle";  //Disable Length
         public const string MeasureDisableText = "DisableText";  //Disable Text
         public const string MeasureDisableErase = "DisableErase";  //Disable Erase
         public const string MeasureZoomIn = "ZoomIn";  //ZoomIn
@@ -460,6 +464,7 @@ namespace RaywattApp.Common.Bases
         public const int MeasureCmdLength = 2;
         public const int MeasureCmdText = 3;
         public const int MeasureCmdErase = 4;
+        public const int MeasureCmdAngle = 5;
 
         //Lumen Contour Command
         public const string LumenContourZoomIn = "ZoomIn";
@@ -479,6 +484,8 @@ namespace RaywattApp.Common.Bases
 
         //Field of View
         public const double DefaultFoV = 10.0f;
+        public const double MaximumFoV = 7.0;
+        public const double MinimumFoV = 5.0;
 
         //Image Resolution
         public const double ImageResolution = DefaultFoV / 1024;

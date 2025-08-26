@@ -383,6 +383,9 @@ namespace RaywattApp.ViewModels
             {
                 // To-Do: Error
                 _log.Error("numOfFrames < (int)RayError.OK");
+                _log.Error("patientCase.ImageFullPath : " + patientCase.ImageFullPath);
+
+                return;
             }
             else
             {

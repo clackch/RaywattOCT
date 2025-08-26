@@ -55,7 +55,7 @@ namespace RaywattApp.Common.Annotation
 
         public static readonly DependencyProperty LModeTextGeometriesProperty =
             DependencyProperty.Register("LModeTextGeometries", typeof(List<TextGeometry>), typeof(DrawLmodeUtil), new PropertyMetadata(null));
-
+        
         public int CommandType
         {
             get { return (int)GetValue(CommandTypeProperty); }
@@ -127,7 +127,7 @@ namespace RaywattApp.Common.Annotation
 
             if (drawLmodeUtil.textGeometries == null)
                 drawLmodeUtil.textGeometries = drawLmodeUtil.LModeTextGeometries;
-
+            
             if (drawLmodeUtil.Zoom == null)
                 drawLmodeUtil.Zoom = new Zoom(Constants.OCTImageSize);
 
@@ -148,6 +148,9 @@ namespace RaywattApp.Common.Annotation
                     drawLmodeUtil.ErasePoint(command[1]);
                     break;
                 case Constants.MeasureDisableLength:
+                    drawLmodeUtil.DisableCommand();
+                    break;
+                case Constants.MeasureDisableAngle:
                     drawLmodeUtil.DisableCommand();
                     break;
                 case Constants.MeasureDisableText:

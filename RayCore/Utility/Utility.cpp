@@ -98,3 +98,15 @@ std::string CUtility::GetFileExtension(const std::string path)
 	size_t offset = path.find_last_of('.');
 	return path.substr(offset + 1, path.length() - offset - 1);
 }
+bool CUtility::IsExist(std::string path, bool isFile)
+{
+	if (_access(path.c_str(), 0) == 0) {
+		if (isFile) return true;
+
+		struct _stat info;
+		if (_stat(path.c_str(), &info) == 0 && (info.st_mode & _S_IFDIR)) {
+			return true; // directory
+		}
+	}
+	return false;
+}

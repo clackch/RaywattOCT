@@ -172,6 +172,7 @@ CREATE TABLE IF NOT EXISTS rv_schema.patient_case_annotation
     lumen_stent text COLLATE pg_catalog."default",
     lumen_guidewire text COLLATE pg_catalog."default",	
 	ffr_plaque text COLLATE pg_catalog."default",	
+    ffr_value text COLLATE pg_catalog."default",	
     co_registration text COLLATE pg_catalog."default",
 	create_date timestamp without time zone,
     update_date timestamp without time zone,

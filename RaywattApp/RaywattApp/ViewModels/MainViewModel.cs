@@ -72,38 +72,78 @@ namespace RaywattApp.ViewModels
         private bool _isImageAnalysisTest = false;
 
         [ObservableProperty]
-        private bool _isImageAnalysisToggle = false;
+        private string _autoPullbackModel;
 
-        private string _imageThreshold;
-        public string ImageThreshold
+        [ObservableProperty]
+        private bool _autoPullbackOnOff;
+
+        [ObservableProperty]
+        private bool _autoPullbackShowLumenGuide;
+
+        private string _autoPullbackLumenThresholdMin;
+        public string AutoPullbackLumenThresholdMin
         {
-            get { return _imageThreshold; }
+            get { return _autoPullbackLumenThresholdMin; }
             set
             {
-                if(value.Length <= 6)
+                if (value.Length <= 2)
                 {
-                    if (!CommonUtil.ValidateRealNumber(value))
+                    if (!CommonUtil.ValidateNumber(value))
                         return;
 
-                    _imageThreshold = value;
-                    OnPropertyChanged(nameof(ImageThreshold));
+                    _autoPullbackLumenThresholdMin = value;
+                    OnPropertyChanged(nameof(AutoPullbackLumenThresholdMin));
                 }
             }
         }
 
-        private string _imageRoi;
-        public string ImageRoi
+        private string _autoPullbackLumenThresholdMax;
+        public string AutoPullbackLumenThresholdMax
         {
-            get { return _imageRoi; }
+            get { return _autoPullbackLumenThresholdMax; }
             set
             {
-                if (value.Length <= 6)
+                if (value.Length <= 2)
                 {
-                    if (!CommonUtil.ValidateRealNumber(value))
+                    if (!CommonUtil.ValidateNumber(value))
                         return;
 
-                    _imageRoi = value;
-                    OnPropertyChanged(nameof(ImageRoi));
+                    _autoPullbackLumenThresholdMax = value;
+                    OnPropertyChanged(nameof(AutoPullbackLumenThresholdMax));
+                }
+            }
+        }
+
+        private string _autoPullbackTriggerCandidate;
+        public string AutoPullbackTriggerCandidate
+        {
+            get { return _autoPullbackTriggerCandidate; }
+            set
+            {
+                if (value.Length <= 3)
+                {
+                    if (!CommonUtil.ValidateNumber(value))
+                        return;
+
+                    _autoPullbackTriggerCandidate = value;
+                    OnPropertyChanged(nameof(AutoPullbackTriggerCandidate));
+                }
+            }
+        }
+
+        private string _autoPullbackTriggerCount; //0은 Pullback 기능 정지, 1부터 임계치 설정 (Flushing 여부 판단은 DeviceStatus.AutoPullbackOnOff)
+        public string AutoPullbackTriggerCount
+        {
+            get { return _autoPullbackTriggerCount; }
+            set
+            {
+                if (value.Length <= 3)
+                {
+                    if (!CommonUtil.ValidateNumber(value))
+                        return;
+
+                    _autoPullbackTriggerCount = value;
+                    OnPropertyChanged(nameof(AutoPullbackTriggerCount));
                 }
             }
         }
@@ -190,13 +230,6 @@ namespace RaywattApp.ViewModels
         }
 
         //Test
-        private ICommand _imageAnalysisToggle;
-        public ICommand ImageAnalysisToggleCommmand
-        {
-            get { return this._imageAnalysisToggle ?? (this._imageAnalysisToggle = new RelayCommand(ImageAnalysisToggle)); }
-        }
-
-        //Test
         private ICommand _imageAnalysisReload;
         public ICommand ImageAnalysisReloadCommmand
         {
@@ -208,6 +241,12 @@ namespace RaywattApp.ViewModels
         public ICommand ImageAnalysisApplyCommmand
         {
             get { return this._imageAnalysisApply ?? (this._imageAnalysisApply = new RelayCommand(ImageAnalysisApply)); }
+        }
+
+        private ICommand _modelSwitch;
+        public ICommand ModelSwitchCommmand
+        {
+            get { return this._modelSwitch ?? (this._modelSwitch = new RelayCommand<string>(ModelSwitch)); }
         }
 
         // to avoid garbage collection
@@ -294,6 +333,14 @@ namespace RaywattApp.ViewModels
             }
 
             DeviceStatus.PowerOffMsg = _l10n["Shutting down"];
+
+            //Auto Pullback Initial Setting
+            AutoPullbackLumenThresholdMin = "2";
+            AutoPullbackLumenThresholdMax = "50";
+            AutoPullbackTriggerCandidate = "3";
+            AutoPullbackTriggerCount = "3";
+            AutoPullbackModel = "Lumen";
+            ImageAnalysisApply();
         }
 
         private void OnNavigationMessage(object recipient, NavigationMessage message)
@@ -580,34 +627,69 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private void ImageAnalysisToggle()
-        {
-            _log.Debug("ImageAnalysisToggle");
-
-            IsImageAnalysisToggle = !IsImageAnalysisToggle;
-        }
-
         private void ImageAnalysisReload()
         {
             _log.Debug("ImageAnalysisReload");
 
-            ImageThreshold = RayGetProperty(Property.ImageThreshold).ToString();
-            ImageRoi = RayGetProperty(Property.ImageRoi).ToString();
+            AutoPullbackOnOff = DeviceStatus.AutoPullbackOnOff;
+            if (DeviceStatus.AutoPullbackModel)
+            {
+                AutoPullbackModel = "Lumen";
+            }
+            else
+            {
+                AutoPullbackModel = "Flush";
+            }
+            AutoPullbackShowLumenGuide = (RayGetProperty(Property.ShowLumenGuide) == 1.0) ? true : false;
+            AutoPullbackLumenThresholdMin = (RayGetProperty(Property.LumenThresholdMin) * 100).ToString();
+            AutoPullbackLumenThresholdMax = (RayGetProperty(Property.LumenThresholdMax) * 100).ToString();
+            AutoPullbackTriggerCandidate = DeviceStatus.AutoPullbackTriggerCandidate.ToString();
+            AutoPullbackTriggerCount = DeviceStatus.AutoPullbackTriggerCount.ToString();
         }
         
         private void ImageAnalysisApply()
         {
             _log.Debug("ImageAnalysisApply");
 
-            RayError result = (RayError)RaySetProperty(Property.ImageThreshold, Double.Parse(ImageThreshold));
-            if (result != RayError.OK)
+            if (String.IsNullOrWhiteSpace(AutoPullbackLumenThresholdMin))
+                AutoPullbackLumenThresholdMin = "0";
+            if (String.IsNullOrWhiteSpace(AutoPullbackLumenThresholdMax))
+                AutoPullbackLumenThresholdMax = "0";
+            if (String.IsNullOrWhiteSpace(AutoPullbackTriggerCandidate))
+                AutoPullbackTriggerCandidate = "0";
+            if (String.IsNullOrWhiteSpace(AutoPullbackTriggerCount))
+                AutoPullbackTriggerCount = "0";
+
+            DeviceStatus.AutoPullbackOnOff = AutoPullbackOnOff;
+            if ("Lumen".Equals(AutoPullbackModel))
             {
-                _log.Error("RaySetProperty Error");
+                RaySetProperty(Property.AutoPullback, AutoPullbackOnOff ? 1.0 : 0.0);
+                DeviceStatus.AutoPullbackModel = true;
             }
-            result = (RayError)RaySetProperty(Property.ImageRoi, Double.Parse(ImageRoi));
-            if (result != RayError.OK)
+            else
             {
-                _log.Error("RaySetProperty Error");
+                RaySetProperty(Property.AutoPullback, 0.0);
+                DeviceStatus.AutoPullbackModel = false;
+            }
+             
+            RaySetProperty(Property.ShowLumenGuide, AutoPullbackShowLumenGuide ? 1.0 : 0.0);
+            RaySetProperty(Property.LumenThresholdMin, double.Parse(AutoPullbackLumenThresholdMin) / 100);
+            RaySetProperty(Property.LumenThresholdMax, double.Parse(AutoPullbackLumenThresholdMax) / 100);
+            DeviceStatus.AutoPullbackTriggerCandidate = int.Parse(AutoPullbackTriggerCandidate);
+            DeviceStatus.AutoPullbackTriggerCount = int.Parse(AutoPullbackTriggerCount);
+        }
+
+        private void ModelSwitch(string model)
+        {
+            _log.Debug("ModelSwitch : " + model);
+
+            if ("LUMEN".Equals(model))
+            {
+                AutoPullbackModel = "Lumen";
+            }
+            else
+            {
+                AutoPullbackModel = "Flush";
             }
         }
 
@@ -666,6 +748,12 @@ namespace RaywattApp.ViewModels
                 switch (error)
                 {
                     case RayError.CatheterNotValid:
+                        CatheterFailReceiver();
+                        break;
+                    case RayError.HomingFailed:
+                        DeviceStatus.CatheterStatus = Constants.CatheterStatusFailed;
+                        break;
+                    case RayError.RotaryJunctionError:
                         CatheterFailReceiver();
                         break;
                     default:

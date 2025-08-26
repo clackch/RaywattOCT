@@ -14,14 +14,19 @@
             <Grid Height="12"/>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
                 <component:IconToggleButton Style="{DynamicResource IconToggleButton}" Icon="area" Click="area_Add" IsChecked="{Binding IsAreaOn, ElementName=UserControl}"/>
-                <Grid Width="6"/>
+                <Grid Width="6"/>                
                 <component:IconToggleButton Style="{DynamicResource IconToggleButton}" Icon="length" Click="length_Add" IsChecked="{Binding IsLengthOn, ElementName=UserControl}"/>
                 <Grid Width="6"/>
+
+                <component:IconToggleButton Style="{DynamicResource IconToggleButton}" Icon="angle" Click="angle_Add" IsChecked="{Binding IsAngleOn, ElementName=UserControl}"/>
+                <Grid Width="6"/>
+
                 <component:IconToggleButton Style="{DynamicResource IconToggleButton}" Icon="text" Click="text_Add" IsChecked="{Binding IsTextOn, ElementName=UserControl}"/>
                 <Grid Width="6"/>
                 <component:IconToggleButton Style="{DynamicResource IconToggleButton}" Icon="erase" Click="erase_point" IsChecked="{Binding IsEraseOn, ElementName=UserControl}"/>
                 <Grid Width="6"/>
                 <component:IconButton Style="{DynamicResource IconButton}" Icon="deleteAll" Click="delete_All"/>
+
             </StackPanel>
         </StackPanel>
     </Grid>

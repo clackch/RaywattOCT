@@ -145,6 +145,7 @@ namespace RaywattApp.ViewModels
 
             RayError result = (RayError)RayInitSystem();
 
+            result |= (RayError)RaySetConfigPath(Constants.ConfigPath);
             result |= (RayError)RayStartSystem();
 
             if (result == RayError.OK)

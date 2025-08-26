@@ -40,7 +40,8 @@ extern "C" {
 	_declspec(dllexport) double RayGetProperty(RayProperty prop);
 	_declspec(dllexport) void* RayGetVolumeData(void* pLumenContours);
 	_declspec(dllexport) RayError RayStartLumenDetection();
-
+	
+	_declspec(dllexport) RayError RaySetConfigPath(char* strPath);
 	_declspec(dllexport) RayError RayOpenImage(char* strFilePath, double imageResolution, double zOffset);
 	_declspec(dllexport) RayError RayCloseImage();
 	_declspec(dllexport) void *RayGetImageData(int nFrame);

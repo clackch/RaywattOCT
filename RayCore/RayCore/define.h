@@ -21,6 +21,7 @@ enum class RayError {
 	WrongState,
 	WrongSession,
 	InvalidFunctionCall,
+	HomingFailed,
 	RotaryJunctionError,
 };
 
@@ -42,8 +43,6 @@ enum class RayProperty {
 	ImageChannels,
 	ImageDepth,
 	ImageResolution,
-	ImageThreshold,
-	ImageRoi,
 	ImageCompensation,
 	ImageCompensationControlWindow,
 	FieldOfView,
@@ -56,7 +55,11 @@ enum class RayProperty {
 	SheathDiameter,
 	TestMode,
 	ZOffset,
-	PullbackStartTime
+	PullbackStartTime,
+	AutoPullback,
+	LumenThresholdMin,
+	LumenThresholdMax,
+	ShowLumenGuide
 };
 
 enum class RayCallbackRequest {

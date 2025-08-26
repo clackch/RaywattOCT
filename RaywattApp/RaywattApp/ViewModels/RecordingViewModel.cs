@@ -50,6 +50,9 @@ namespace RaywattApp.ViewModels
         private int _startTime;
 
         [ObservableProperty]
+        private string _autoPullbackMsg;
+
+        [ObservableProperty]
         private Zoom _zoom = new Zoom();
 
         [ObservableProperty]
@@ -84,6 +87,18 @@ namespace RaywattApp.ViewModels
             get { return this._startCommand ?? (this._startCommand = new RelayCommand(Start)); }
         }
 
+        private ICommand _cmdManualZoomIn;
+        public ICommand CmdManualZoomIn
+        {
+            get { return _cmdManualZoomIn ?? (this._cmdManualZoomIn = new RelayCommand<bool>(ManualZoomIn)); }
+        }
+
+        private ICommand _cmdAutoCalibration;
+        public ICommand CmdAutoCalibration
+        {
+            get { return _cmdAutoCalibration ?? (this._cmdAutoCalibration = new RelayCommand(AutoCalibration)); }
+        }
+
         public RecordingViewModel(SqlManager sqlManager, AngioManager angioManager)
         {
             _log.Debug("RecordingViewModel");
@@ -97,6 +112,7 @@ namespace RaywattApp.ViewModels
             IsReady = true;
             IsStart = true;
             IsCancel = true;
+            AutoPullbackMsg = _l10n["Pullback starts automatically."];
 
             timer.Interval = TimeSpan.FromMilliseconds(1000);
             timer.Tick += new EventHandler(StartTimer);
@@ -108,9 +124,6 @@ namespace RaywattApp.ViewModels
 
             DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current = 0;
             DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total = 0;
-
-            // Instant start 방지
-            //Thread.Sleep(1000);
 
             _angioManager.OnAngioAvailabilityChanged = UpdateAngioAvailabilityUI;
         }
@@ -182,6 +195,7 @@ namespace RaywattApp.ViewModels
                 {
                     _log.Error("RayStopLiveView Error");
                 }
+                DeviceStatus.AutoPullbackOnOff = false;
             }
         }
 
@@ -234,6 +248,15 @@ namespace RaywattApp.ViewModels
             StartTime = Constants.StartTime;
             timer.Start();
 
+            if (PatientCase.PullbackTrigger.Equals("AUTO"))
+            {
+                DeviceStatus.AutoPullbackOnOff = true;
+                if(DeviceStatus.AutoPullbackModel)
+                    RaySetProperty(Property.AutoPullback, 1.0);
+            }                
+            else
+                DeviceStatus.AutoPullbackOnOff = false;
+
             readyTimer.Stop();
         }
 
@@ -253,6 +276,9 @@ namespace RaywattApp.ViewModels
                 IsReady = true;
                 IsStart = true;
                 IsCancel = true;
+                DeviceStatus.AutoPullbackOnOff = false;
+                if (DeviceStatus.AutoPullbackModel)
+                    RaySetProperty(Property.AutoPullback, 0.0);
                 (ReadyCommand as RelayCommand).NotifyCanExecuteChanged();
                 timer.Stop();
             }
@@ -267,6 +293,7 @@ namespace RaywattApp.ViewModels
 
             IsStart = false;
             IsCancel = false;
+            AutoPullbackMsg = _l10n["Pullback has started."];
 
             PatientCase.Image = generateFileName("oct");
             DeviceStatus.IsSaveRawDataDone = false;
@@ -288,6 +315,13 @@ namespace RaywattApp.ViewModels
             }
 
             threadWaitPullbackDone.Start();
+        }
+
+        protected override void AutoPullbackStart()
+        {
+            _log.Debug("AutoPullbackStart");
+
+            Start();
         }
 
         private void threadFuncWaitPullbackDone()
@@ -350,6 +384,19 @@ namespace RaywattApp.ViewModels
             AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(_angioManager.ImgAngio);
 
             return true;
+        }
+
+        private void ManualZoomIn(bool zoomIn)
+        {
+            _log.Debug("ManualZoomIn : " + ((zoomIn) ? "IN" : "OUT"));
+
+            RayManualCalibration(zoomIn);
+        }
+
+        private void AutoCalibration()
+        {
+            RayAutoCalibration();
+            DeviceStatus.CanExecuteCalibration = false;
         }
     }
 }

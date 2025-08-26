@@ -215,7 +215,7 @@ namespace RaywattApp.ViewModels
 
         private void ThreadSaveLumenContour()
         {
-            CalcStentApposition();
+            ResetModifiedFrames();
 
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
@@ -233,12 +233,13 @@ namespace RaywattApp.ViewModels
             RaySetProperty(Property.LongitudeDegree, PatientCase.IndicatorDegree);
         }
 
-        private void CalcStentApposition()
+        private void ResetModifiedFrames()
         {
             ModifiedFrames = ModifiedFrames.Distinct().ToList();
 
             foreach (int i in ModifiedFrames)
             {
+                //Stent Apposition
                 Point[][] lumenContours = CommonUtil.GetLumenContours(PatientCase.LumenContours[i].Points);
 
                 if (lumenContours != null && PatientCase.LumenStents[i].AppositionLength != null)
@@ -249,6 +250,9 @@ namespace RaywattApp.ViewModels
                         PatientCase.LumenStents[i].AppositionLength.Add(CommonUtil.GetAppositionLength(lumenContours, new Point(PatientCase.LumenStents[i].Points[row].X, PatientCase.LumenStents[i].Points[row].Y)));
                     }
                 }
+
+                //Sidebranch
+                PatientCase.LumenSidebranches[i].IsCalcOverlapping = false;
             }
         }
 

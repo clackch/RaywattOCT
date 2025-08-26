@@ -80,18 +80,19 @@ namespace RaywattApp.Services
                 SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, gender
                 , physician_id, rv_schema.fn_physician(physician_id) physician_name
                 , create_date, update_date
-                , rv_schema.fn_lastcase(id) last_case, rv_schema.fn_displayLastcase(id) display_last_case
-                FROM rv_schema.patient
+                , COALESCE(TO_CHAR((SELECT create_date FROM rv_schema.patient_case WHERE patient_id = p.id ORDER BY create_date DESC LIMIT 1), 'YYYY-MM-DD HH24:MI:SS'), '') AS last_case
+                , rv_schema.fn_displayLastcase(id) display_last_case
+                FROM rv_schema.patient p
                 WHERE id LIKE @id OR lastname LIKE @lastname OR firstname LIKE @firstname
                 ";
 
             //SelectPatientListByCase
             _query["SelectPatientListByCase"] = @$"
                 SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, gender, FALSE is_checked, create_date, update_date
-                , rv_schema.fn_lastcase(id) last_case
+                , COALESCE(TO_CHAR((SELECT create_date FROM rv_schema.patient_case WHERE patient_id = p.id ORDER BY create_date DESC LIMIT 1), 'YYYY-MM-DD HH24:MI:SS'), '') AS last_case
                 FROM rv_schema.patient p
                 WHERE (SELECT count(*) FROM rv_schema.patient_case WHERE patient_id = p.id) > 0
-                ORDER BY id
+                ORDER BY last_case DESC
                 ";
 
             //SelectPatient
@@ -229,9 +230,9 @@ namespace RaywattApp.Services
                 WHERE id = @id
                 ";
 
-            //SelectPatientCaseFfrPlaque
-            _query["SelectPatientCaseFfrPlaque"] = @$"
-                SELECT ffr_plaque return_string
+            //SelectPatientCaseFfr
+            _query["SelectPatientCaseFfr"] = @$"
+                SELECT ffr_plaque return_string, ffr_value return_string2
                 FROM rv_schema.patient_case_annotation
                 WHERE id = @id
                 ";
@@ -429,10 +430,10 @@ namespace RaywattApp.Services
                 WHERE id = @id
                 ";
 
-            //UpdatePatientCaseFfrPlaque
-            _query["UpdatePatientCaseFfrPlaque"] = @$"
+            //UpdatePatientCaseFfr
+            _query["UpdatePatientCaseFfr"] = @$"
                 UPDATE rv_schema.patient_case_annotation
-                SET ffr_plaque=@ffr_plaque
+                SET ffr_plaque=@ffr_plaque, ffr_value=@ffr_value
                 WHERE id = @id
                 ";
 

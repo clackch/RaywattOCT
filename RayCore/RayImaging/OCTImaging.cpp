@@ -489,79 +489,30 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 }
 
 void COCTImaging::findSheath(cv::Mat img) {
-	m_nSheathSearchRange = 300; /*1mm 오차 범위 설정*/
-	double maxMinusEdge = 0.3;
-	double pointStandard = 0.1;
-	int closeness = 10;
-	int maxDiffIndex = 44, minDiffIndex = 33;
-	cv::Mat image, checkError;
-	if (img.type() == CV_32FC1)
-		img.convertTo(checkError, CV_8UC1, 255);
-	else
-		checkError = img.clone();
-	checkError = checkError(cv::Range(0, m_nSheathSearchRange), cv::Range::all());
-	
-	img.convertTo(img, CV_32F, 1 / 255.f);
-	cv::rotate(img, image, cv::ROTATE_90_COUNTERCLOCKWISE);
-	cv::resize(image, image, cv::Size(image.cols, image.rows));
+	auto start = std::chrono::high_resolution_clock::now();
 
-	//horizontal line formed 노이즈 제거
-	cv::Mat edge_image;
-	cv::Sobel(image, edge_image, CV_64F, 1 /*dx*/, 0 /*dy*/, 3 /*kernel size*/, 1, 0, cv::BORDER_CONSTANT);
-	cv::Mat temp = image.clone();
-	for (int i = 0; i < m_nSheathSearchRange; i++) for (int j = 0; j < temp.cols; j++) {
-		temp.at<float>(i, j) -= (maxMinusEdge - edge_image.at<float>(i, j));
-	}
+	cv::Mat edgeX, edgeY;
+	cv::Sobel(img, edgeX, CV_32F, 1, 0, 3);
+	cv::Sobel(img, edgeY, CV_32F, 0, 1, 3);
 
-	// 행마다의 일정 밝기 이상의 픽셀 계수, 가장 많은 행 2개 저장
-	std::vector<int> pixelNum(m_nSheathSearchRange);
-	int maxIndex[2] = { 0, 0 };
+	cv::Mat absEdgeX, absEdgeY;
+	cv::convertScaleAbs(edgeX, absEdgeX);
+	cv::convertScaleAbs(edgeY, absEdgeY);
 
-	for (int i = 0; i < m_nSheathSearchRange; i++) {
-		int tmp = 0;
-		for (int j = 0; j < image.cols; j++) {
-			if (temp.at<float>(i, j) >= pointStandard)
-				tmp++;
-			pixelNum[i] = tmp;
-			if (i == 0) continue;
-			else if (pixelNum[maxIndex[0]] < pixelNum[i]) {
-				maxIndex[0] = i;
-			}
+	cv::Mat edgeMagnitude, absEdgeMagnitude;
+	cv::magnitude(edgeX, edgeY, edgeMagnitude);
+	cv::convertScaleAbs(edgeMagnitude, absEdgeMagnitude);
+
+	int totalX = 0, totalY = 0, totalMagnitude = 0;
+	for (int y = 0; y < img.rows; y++) {
+		for (int x = 0; x < img.cols; x++) {
+			totalX += absEdgeX.at<uchar>(y, x);
+			totalY += absEdgeY.at<uchar>(y, x);
+			totalMagnitude += absEdgeMagnitude.at<uchar>(y, x);
 		}
 	}
-
-	for (int i = 0; i < m_nSheathSearchRange; i++) {
-		if (i == 0 || std::abs(maxIndex[0] - i) <= closeness) continue;
-		else if (pixelNum[maxIndex[1]] < pixelNum[i]) {
-			maxIndex[1] = i;
-		}
-	}
-
-	int diff = abs(maxIndex[0] - maxIndex[1]);
-	if (diff < minDiffIndex || diff > maxDiffIndex) {
-		m_nSheathPosition = 0;
-	}
-	else {
-		int checkRange = 5;
-		int errorThreshold = 200 * checkError.cols;
-		int startIndex = maxIndex[0] - checkRange >= 0 ? maxIndex[0] - checkRange : 0;
-		int roiHeight = std::min(checkRange * 2, checkError.rows - startIndex);
-		int errorSum = 0;
-		cv::Mat roi = checkError(cv::Rect(0, startIndex, checkError.cols, roiHeight));
-
-		for (int i = 0; i < roi.rows; i++) {
-			for (int j = 0; j < roi.cols; j++) {
-				errorSum += roi.at<char>(i, j);
-			}
-		}
-
-		if (errorSum < errorThreshold) {
-			m_nSheathPosition = 0;
-		}
-		else {
-			m_nSheathPosition = std::max(maxIndex[0], maxIndex[1]) + m_delayLineMovingDirection * 2;
-		}
-	}
+	//PLOGI.printf("check the time - Magnitude: %d", totalMagnitude);
+	m_nSheathPosition = totalMagnitude;
 }
 
 cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {
@@ -632,20 +583,29 @@ void COCTImaging::drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color)
 
 cv::Mat COCTImaging::getFoVImage(cv::Mat image, double fov) {
 	cv::Rect roi;
-	roi.width = (int)(floor(round(fov * 1000.f / m_setting.distPerPixel))) * 2;
+	roi.width = (int)(floor(round(fov * 1000.f / m_setting.distPerPixel))) / 2;
 	roi.height = roi.width;
 	roi.x = (image.cols - roi.width) / 2;
 	roi.y = (image.rows - roi.height) / 2;
 
-	if (roi.x < 0 || roi.y < 0 ||
-		roi.width <= 0 || roi.height <= 0 ||
-		roi.x + roi.width > image.cols ||
-		roi.y + roi.height > image.rows) {
-		return image.clone();
-	}
-
 	cv::Mat imgROI;
-	cv::resize(image(roi), imgROI, cv::Size(image.cols, image.rows));
+	if (roi.width > image.cols ||
+		roi.height > image.rows) {
+		cv::Mat imgFov;
+		cv::Rect fovRoi;
+
+		fovRoi.x = abs(roi.x);
+		fovRoi.y = abs(roi.y);
+		fovRoi.width = image.cols;
+		fovRoi.height = image.rows;
+
+		imgFov.create(cv::Size(roi.width, roi.height), image.type());
+		image.copyTo(imgFov(fovRoi));
+		cv::resize(imgFov, imgROI, cv::Size(image.cols, image.rows));
+	}
+	else {
+		cv::resize(image(roi), imgROI, cv::Size(image.cols, image.rows));
+	}
 
 	return imgROI;
 }

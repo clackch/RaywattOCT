@@ -117,12 +117,6 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
     case RayProperty::SheathDiameter:
         octSystem.SetSheathDiameter(value);
         break;
-    case RayProperty::ImageThreshold:
-        octSystem.SetImageThreshold(value);
-        break;
-    case RayProperty::ImageRoi:
-        octSystem.SetImageRoi(value);
-        break;
     case RayProperty::ImageCompensation:
         octSystem.SetImageCompensation(value);
         break;
@@ -140,6 +134,18 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
         break;
     case RayProperty::PullbackStartTime:
         octSystem.SetPullbackStartTime(value);
+        break;
+    case RayProperty::AutoPullback:
+        octSystem.SetAutoPullback(value);
+        break;
+    case RayProperty::LumenThresholdMin:
+        octSystem.SetLumenThresholdMin(value);
+        break;
+    case RayProperty::LumenThresholdMax:
+        octSystem.SetLumenThresholdMax(value);
+        break;
+    case RayProperty::ShowLumenGuide:
+        octSystem.SetShowLumenGuide(value);
         break;
     default:
         return RayError::InvalidArgument;
@@ -196,10 +202,6 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return config.stepMotor.pullbackSpeed;
     case RayProperty::SheathDiameter:
         return config.measurement.fSheathRadius * 2;
-    case RayProperty::ImageThreshold:
-        return octSystem.GetImageThreshold();
-    case RayProperty::ImageRoi:
-        return octSystem.GetImageRoi();
     case RayProperty::ImageCompensation:
         return octSystem.GetImageCompensation();
     case RayProperty::FieldOfView:
@@ -208,6 +210,14 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return (double) octSystem.IsTestMode();
     case RayProperty::PullbackStartTime:
         return octSystem.GetPullbackStartTime();
+    case RayProperty::AutoPullback:
+        return octSystem.GetAutoPullback();
+    case RayProperty::LumenThresholdMin:
+        return octSystem.GetLumenThresholdMin();
+    case RayProperty::LumenThresholdMax:
+        return octSystem.GetLumenThresholdMax();
+    case RayProperty::ShowLumenGuide:
+        return octSystem.GetShowLumenGuide();
     default:
         return (int)RayError::InvalidArgument;
     }
@@ -220,6 +230,9 @@ _declspec(dllexport) RayError RayStartLumenDetection() {
     return octSystem.StartLumenDetection();
 }
 
+_declspec(dllexport) RayError RaySetConfigPath(char* strPath) {
+    return octSystem.SetConfigPath(strPath);
+}
 _declspec(dllexport) RayError RayOpenImage(char* strFilePath, double imageResolution, double zOffset) {
     return octSystem.OpenImage(strFilePath, imageResolution, zOffset);
 }

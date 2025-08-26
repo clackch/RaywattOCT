@@ -17,7 +17,9 @@ namespace RaywattOCT
             InvalidArgument,
             WrongState,
             WrongSession,
-            InvalidFunctionCall
+            InvalidFunctionCall,
+            HomingFailed,
+            RotaryJunctionError
         };
 
         public enum Property : int
@@ -39,8 +41,6 @@ namespace RaywattOCT
             ImageChannels,
             ImageDepth,
             ImageResolution,
-            ImageThreshold,
-            ImageRoi,
             ImageCompensation,
             ImageCompensationControlWindow,
             FieldOfView,
@@ -53,7 +53,11 @@ namespace RaywattOCT
             SheathDiameter,
             TestMode,
             ZOffset,
-            PullbackStartTime
+            PullbackStartTime,
+            AutoPullback,
+            LumenThresholdMin,
+            LumenThresholdMax,
+            ShowLumenGuide
         }
 
         public enum RayCallbackRequest : int
@@ -191,6 +195,8 @@ namespace RaywattOCT
         public static extern IntPtr RayGetVolumeData(IntPtr lumenContours);
         [DllImport("RayCore.dll")]
         public static extern int RayStartLumenDetection();
+        [DllImport("RayCore.dll")]
+        public static extern int RaySetConfigPath(string filePath);
         [DllImport("RayCore.dll")]
         public static extern int RayOpenImage(string filePath, double imageResolution, double zOffset);
         [DllImport("RayCore.dll")]
