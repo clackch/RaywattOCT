@@ -279,13 +279,20 @@ void TCPSocket::ChpFilePacketProcess(FrameGrabber& fg) {
 	fg.chpFileName = string(tmpRecvBuffer + 4, packetLen - 6);
 
 	ERRTYPE e;
-	if (fg.chpFileName.substr(0, 6) == "setup\\") {
+
+	bool isAngioSetup = fg.chpFileName.substr(0, 6) == "setup\\";
+
+	if (isAngioSetup)
+	{
+		// angio setup file path
 		e = fg.ReadFormatFile((char*)(fg.chpFilePath + fg.chpFileName).c_str());
-		PLOGI.printf("Chp File Name: %s", (fg.chpFilePath + fg.chpFileName).c_str());
+		PLOGI.printf("[Angio Setup] Chp File Name: %s", (fg.chpFilePath + fg.chpFileName).c_str());
 	}
-	else {
-		e = fg.ReadFormatFile((char*)(fg.chpFilePath + "app\\" + fg.chpFileName).c_str());
-		PLOGI.printf("Chp File Name: %s", (fg.chpFilePath + "app\\" + fg.chpFileName).c_str());
+	else
+	{
+		// raywattapp file path
+		e = fg.ReadFormatFile((char*)(fg.chpFilePath + "setup\\" + fg.chpFileName).c_str());
+		PLOGI.printf("[RaywattApp] Chp File Name: %s", (fg.chpFilePath + "setup\\" + fg.chpFileName).c_str());
 	}
 
 	if (e) {
