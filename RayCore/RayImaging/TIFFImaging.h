@@ -5,7 +5,6 @@ class CTIFFImaging : public COCTImaging
 {
 private:
 	cv::Mat imageConvert;	// role of OCTImaging::imageResult
-	std::chrono::system_clock::time_point m_start, m_end;
 	cv::Mat imageOrigin;
 	cv::Mat imageMask;
 	std::vector<cv::Point> inversedContourYPoints;

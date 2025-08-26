@@ -1,12 +1,11 @@
-﻿using Newtonsoft.Json.Linq;
-using RaywattApp.Common.Bases;
+﻿using RaywattApp.Common.Bases;
 using System;
 using System.Globalization;
 using System.Windows.Data;
 
 namespace RaywattApp.Common.Converters
 {
-    internal class CrossSectionScaleMultiConverter : IMultiValueConverter
+    public class CrossSectionScaleMultiConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {

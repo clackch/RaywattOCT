@@ -3,11 +3,11 @@ using System.Windows.Controls.Primitives;
 
 namespace RaywattApp.Views.Component
 {
-    internal class IconToggleButton : ToggleButton, SvgComponentBase
+    public class IconToggleButton : ToggleButton, SvgComponentBase
     {
         private const string resPath = "/res/icon/";
 
-        public static DependencyProperty IconProperty = DependencyProperty.Register("Icon", typeof(string), typeof(IconToggleButton), new PropertyMetadata(null, SvgComponentBase.OnIconPropertyChanged));
+        public static readonly DependencyProperty IconProperty = DependencyProperty.Register("Icon", typeof(string), typeof(IconToggleButton), new PropertyMetadata(null, SvgComponentBase.OnIconPropertyChanged));
         public string Icon { get => (string)GetValue(IconProperty); set => SetValue(IconProperty, value); }
 
         public void InitializeIconPath(string iconName)

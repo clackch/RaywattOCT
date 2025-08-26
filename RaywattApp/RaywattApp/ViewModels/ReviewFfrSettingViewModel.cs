@@ -189,7 +189,11 @@ namespace RaywattApp.ViewModels
 
                 CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault);
 
-                RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+                RayError result = (RayError)RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
                 SetCrossSectionBackground(RaySession.Review, Constants.CardBackgroundColor);
                                 
                 ShowLumenProfile();
@@ -408,7 +412,7 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private string ConvertMeasurementsToJson(List<Measurement> param)
+        private static string ConvertMeasurementsToJson(List<Measurement> param)
         {
             List<Measurement> measurements = new List<Measurement>();
 
@@ -603,7 +607,7 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        public void Window_ManipulationStarting(ManipulationStartingEventArgs e)
+        public static void Window_ManipulationStarting(ManipulationStartingEventArgs e)
         {
             _log.Debug("Manipulation Starting");
             e.Handled = true;
@@ -614,7 +618,7 @@ namespace RaywattApp.ViewModels
             ReviewStatus.ZoomFfr.Window_ManipulationDelta(e);
         }
 
-        public void Window_ManipulationCompleted(ManipulationCompletedEventArgs e)
+        public static void Window_ManipulationCompleted(ManipulationCompletedEventArgs e)
         {
             _log.Debug("Manipulation Completed");
             e.Handled = true;

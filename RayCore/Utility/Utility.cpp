@@ -29,24 +29,29 @@ void CUtility::StopThread(CThread *&pThread) {
 void CUtility::ResumeThread(CThread* pThread) {
 	if (pThread == nullptr) return;
 
+	PLOGI.printf("Thread Resumed");
+	std::lock_guard<std::mutex> lock(pThread->mMutex);
+	pThread->shouldResume = true;
+
 	pThread->sEvent.notify_one();
 }
 void CUtility::SuspendThread(CThread* pThread) {
 	if (pThread == nullptr) return;
 
-	{
-		std::unique_lock<std::mutex> lock(pThread->mMutex);
-		pThread->sEvent.wait(lock);
-	}
+	PLOGI.printf("Thread Suspended");
+	std::unique_lock<std::mutex> lock(pThread->mMutex);
+	pThread->sEvent.wait(lock, [&]() { return pThread->shouldResume; });
+	pThread->shouldResume = false;
 }
+
 
 std::vector<tstring> CUtility::findSerialPort() {
 	std::vector<tstring> vComPort;
 	HKEY hKey;
 	RegOpenKey(HKEY_LOCAL_MACHINE, TEXT("HARDWARE\\DEVICEMAP\\SERIALCOMM"), &hKey);
 
-	wchar_t szData[20];
-	wchar_t szName[100];
+	wchar_t szData[20] = {};
+	wchar_t szName[100] = {};
 	DWORD dwSize = 100;
 	DWORD dwSize2 = 20;
 	DWORD dwType = REG_SZ;
@@ -74,7 +79,13 @@ void CUtility::GetCurTime(char* strTime) {
 	ltime = timebuffer.time;
 	msec = timebuffer.millitm;
 	now = localtime(&ltime);
-	sprintf(strTime, "%d:%d:%d:%d", now->tm_hour, now->tm_min, now->tm_sec, msec);
+
+	if (now == nullptr) {
+		PLOGI.printf("Getting localTime Error");
+	}
+	else {
+		sprintf(strTime, "%d:%d:%d:%d", now->tm_hour, now->tm_min, now->tm_sec, msec);
+	}
 }
 std::wstring CUtility::StringToWstring(const std::string& var)
 {

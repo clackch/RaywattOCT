@@ -4,11 +4,11 @@ using System.Windows.Data;
 
 namespace RaywattApp.Common.Converters
 {
-    internal class BoolToEnableConverter : IValueConverter
+    public class BoolToEnableConverter : IValueConverter
     {
         public bool TrueValue { get; set; } = true;
 
-        public bool FalseValue { get; set; } = false;
+        public bool FalseValue { get; set; }
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

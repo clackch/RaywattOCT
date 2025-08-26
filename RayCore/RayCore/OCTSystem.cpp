@@ -14,50 +14,28 @@
 #include "ImagingSession.h"
 #include "LaserModule.h"
 #include "LookUpTable.h"
+#include <fstream>
 
 /*
 * COCTSystem
 */
 COCTSystem::COCTSystem() {
+
 	m_callback = nullptr;
 	m_cbCrossSection = nullptr;
 	m_cbLongitude = nullptr;
-	m_cbObjectDetection = nullptr;
+	m_cbObjectDetection = nullptr;	
 
-	m_pThreadService = nullptr;
-	m_pThreadSaveRaw = nullptr;
-	m_pThreadRotaryJunction = nullptr;
+	m_isTestMode = false;
 
-	m_pImagingRealtime = nullptr;
-	m_pImagingPullback = nullptr;
-	m_pImagingLiveView = nullptr;
-
-	m_pDataWriter = nullptr;
-
-	m_pVolume = nullptr;
-
-	m_pAcqDevice = nullptr;	
-
-	m_curSession = SESSION_UNKNOWN;
-	for (int i = 0; i < MAX_SESSION_NUM; i++) {
-		m_reviewSession[i] = nullptr;
-	}
-	m_openedSession = nullptr;
 	InitializeCriticalSection(&m_csSession);
 
-	m_pRJController = new CRJController();
-	m_pRJController->SetMessage(this);
-	m_pLaserModule = new CLaserModule();
+	CConfiguration& config = CConfiguration::GetInstance();
+	if (!config.IsInit()) {
+		config.Initialize(_T(".\\raycore.ini"));
+	}
 
-	m_prevState = RayScannerState::Initial;
-	m_curState = RayScannerState::Initial;
-	m_cathState = CatheterState::Unloaded;
-
-	//Property
-	m_fBrightness = 0.0f;
-	m_fContrast = 0.5f;
-	m_fDegree = 90;
-	m_isTestMode = false;
+	SetLogger(config.logRootPath);
 }
 
 /*
@@ -74,11 +52,27 @@ void COCTSystem::SetLogger(TCHAR* logRootPath) {
 	tm t;
 	errno_t err = localtime_s(&t, &timer);
 
-	char rootPath[MAX_PATH];
+	if (err != 0) {
+		PLOGI.printf("localtime_s failed with error code: %d", err);
+	}
+
+	char rootPath[MAX_PATH] = "";
 	WideCharToMultiByte(CP_ACP, 0, logRootPath, MAX_PATH, rootPath, MAX_PATH, nullptr, nullptr);
 
-	char logFile[_MAX_PATH];
-	sprintf(logFile, "%s\\core_%d-%02d-%02d.log", rootPath, (t.tm_year + 1900), (t.tm_mon + 1), t.tm_mday);
+	char logFile[_MAX_PATH] = "";
+	errno_t rc = sprintf_s(        
+		logFile,                   
+		sizeof(logFile),           
+		"%s\\core_%04d-%02d-%02d.log",
+		rootPath,
+		t.tm_year + 1900,
+		t.tm_mon + 1,
+		t.tm_mday
+	);
+	if (rc < 0) {
+		PLOGI.printf("Fail to create log file: %d\n", rc);
+	}
+
 	printf("plog::init - %s\n", logFile);
 
 #ifdef DEBUG
@@ -86,6 +80,47 @@ void COCTSystem::SetLogger(TCHAR* logRootPath) {
 #else
 	plog::init(plog::info, logFile);
 #endif
+}
+
+/*
+* Init
+*/
+RayError COCTSystem::Init() {
+
+	m_pThreadService = nullptr;
+	m_pThreadSaveRaw = nullptr;
+	m_pThreadRotaryJunction = nullptr;
+
+	m_pImagingRealtime = nullptr;
+	m_pImagingPullback = nullptr;
+	m_pImagingLiveView = nullptr;
+
+	m_pDataWriter = nullptr;
+
+	m_pVolume = nullptr;
+
+	m_pAcqDevice = nullptr;
+
+	m_curSession = SESSION_UNKNOWN;
+	for (int i = 0; i < MAX_SESSION_NUM; i++) {
+		m_reviewSession[i] = nullptr;
+	}
+	m_openedSession = nullptr;
+
+	m_pRJController = new CRJController();
+	m_pRJController->SetMessage(this);
+	m_pLaserModule = new CLaserModule();
+
+	m_prevState = RayScannerState::Initial;
+	m_curState = RayScannerState::Initial;
+	m_cathState = CatheterState::Unloaded;
+
+	//Property
+	m_fBrightness = 0.0f;
+	m_fContrast = 0.5f;
+	m_fDegree = 90;
+
+	return RayError::OK;
 }
 
 /*
@@ -102,14 +137,16 @@ RayError COCTSystem::Start() {
 	m_fBrightness = config.imaging.brightness;
 	m_fContrast = config.imaging.contrast;
 
-	SetLogger(config.logRootPath);
-
 	CUtility::StartThread(threadService, m_pThreadService, this);
 
 	IImaging::Setting settingPullback = config.imaging;
 	settingPullback.Set(settingPullback.nAScan, floor((double)config.acquisition.nLaserSpeed / ((double)config.bldcMotor.velocityPullback / 60.f)));
 	PLOGI.printf("Pullback setting: LaserSpeed=%ld, Velocity=%ldrpm, NumOfAlines=%ld", config.acquisition.nLaserSpeed, config.bldcMotor.velocityPullback, settingPullback.nBScan);
 	m_pImagingPullback = CImagingSession::CreateColorImaging(this, settingPullback, nullptr, ImagingType::Default);
+	if (!m_pImagingPullback) {
+		PLOGI.printf("Failed to create imaging pullback");
+		return RayError::WrongSession;
+	}
 	m_pImagingPullback->SetSession(SESSION_REALTIME);
 	m_pImagingPullback->Start();
 
@@ -117,6 +154,10 @@ RayError COCTSystem::Start() {
 	settingLiveView.Set(settingLiveView.nAScan, floor((double)config.acquisition.nLaserSpeed / ((double)config.bldcMotor.velocityLiveView / 60.f)));
 	PLOGI.printf("Pullback setting: LaserSpeed=%ld, Velocity=%ldrpm, NumOfAlines=%ld", config.acquisition.nLaserSpeed, config.bldcMotor.velocityLiveView, settingLiveView.nBScan);
 	m_pImagingLiveView = CImagingSession::CreateColorImaging(this, settingLiveView, nullptr, ImagingType::Default);
+	if (!m_pImagingLiveView) {
+		PLOGI.printf("Failed to create Imaging LiveView");
+		return RayError::WrongSession;
+	}
 	m_pImagingLiveView->SetSession(SESSION_REALTIME);
 	m_pImagingLiveView->Start();
 
@@ -210,6 +251,12 @@ RayError COCTSystem::ConnectDevices() {
 
 		// Connect to COM Interface first time
 		CLaserController* pLaser = CLaserController::GetInstance();
+
+		if (pLaser == nullptr) {
+			PLOGI.printf("Laser is not initialized");
+			return RayError::DeviceNotConnected;
+		}
+
 		pLaser->LaserOnOff(true);
 
 		result |= connectAcqDevice();
@@ -1772,6 +1819,10 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 
 	PLOGI.printf("Pullback done.");
 	CImagingSession* pSession = CImagingSession::CreateSession(pSystem, SESSION_REVIEW, settingPullback, pDataWriter);
+
+	if (pSession == nullptr) {
+		return ERROR;
+	}
 	pSystem->postPriorMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
 	pSystem->postPriorMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
 	pSystem->postPriorMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::Pullback);
@@ -1832,6 +1883,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 			else if (command == "BLDC") {
 				int velocity = std::stoi(commands[1]);
 				int delay = std::stoi(commands[2]);
+				delay = std::max(0, delay); // 음수 방지
 
 				pRJController->PerformRun(velocity);
 				Sleep(delay);
@@ -2316,6 +2368,11 @@ int COCTSystem::disconnectRotaryJunction() {
 
 	PLOGI.printf("Laser Off");
 	CLaserController* pLaser = CLaserController::GetInstance();
+	if (pLaser == nullptr) {
+		PLOGI.printf("pLaser is not initialized");
+		return false;
+	}
+
 	pLaser->LaserOnOff(false);
 	
 	if (m_pRJController->IsConnected()) {
@@ -2462,7 +2519,6 @@ LRESULT COCTSystem::OnMsgProcessCutView(WPARAM wParam, LPARAM lParam) {
 * OnMsgProcessDetection
 */
 LRESULT COCTSystem::OnMsgProcessDetection(WPARAM wParam, LPARAM lParam) {
-	UINT nSession = wParam;
 	UINT nFrame = lParam;
 
 	if (m_cbObjectDetection != nullptr) m_cbObjectDetection(nFrame);
@@ -2529,8 +2585,12 @@ void COCTSystem::redrawCutView() {
 	}
 }
 void COCTSystem::laserOnOff(bool isOn) {
-	CConfiguration& config = CConfiguration::GetInstance();
 	CLaserController* pLaser = CLaserController::GetInstance();
+
+	if (pLaser == nullptr) {
+		PLOGI.printf("Laser is not initialized");
+		return;
+	}
 
 	pLaser->LaserOnOff(isOn);
 }

@@ -7,10 +7,10 @@ namespace RaywattApp.Views.Component
     {
         private const string resPath = "/res/indicator/";
 
-        public static DependencyProperty IconProperty = DependencyProperty.Register("Icon", typeof(string), typeof(IndicatorImage), new PropertyMetadata(null, SvgComponentBase.OnIconPropertyChanged));
+        public static readonly DependencyProperty IconProperty = DependencyProperty.Register("Icon", typeof(string), typeof(IndicatorImage), new PropertyMetadata(null, SvgComponentBase.OnIconPropertyChanged));
         public string Icon { get => (string)GetValue(IconProperty); set => SetValue(IconProperty, value); }
 
-        public static DependencyProperty IsCapturedProperty = DependencyProperty.Register("IsCaptured", typeof(bool), typeof(IndicatorImage));
+        public static readonly DependencyProperty IsCapturedProperty = DependencyProperty.Register("IsCaptured", typeof(bool), typeof(IndicatorImage));
         public bool IsCaptured { get => (bool)GetValue(IsCapturedProperty); set => SetValue(IsCapturedProperty, value); }
 
         public void InitializeIconPath(string iconName)

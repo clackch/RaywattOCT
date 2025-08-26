@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Runtime.InteropServices;
 using static RaywattOCT.RayCoreWrapper;
+using static RaywattOCT.Ray3DWrapper;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Size = OpenCvSharp.Size;
@@ -40,12 +41,17 @@ namespace RaywattApp.Common.Util
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(CommonUtil));
 
-        public static bool isVTIFileSave = false;
+        private static bool _isVTIFileSave;
+
+        public static bool IsVTIFileSave
+        {
+            get => _isVTIFileSave;
+            set => _isVTIFileSave = value;
+        }
 
         public static bool ValidateText(string input)
         {
-            var regex = new Regex(@"^[a-zA-Z0-9ㄱ-ㅎ가-힣\s,.]+$");
-
+            var regex = new Regex(@"^[a-zA-Z0-9ㄱ-ㅎ가-힣\s,.-]+$");
             if (input.Length == 0)
                 return true;
 
@@ -338,7 +344,11 @@ namespace RaywattApp.Common.Util
 
         public static async Task<Mat> ConvertImage(string filePath, double imageResolution, int zOffset, double degree, List<Mat> convertedImages, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
         {
-            RayOpenImage(filePath, imageResolution, zOffset);
+            RayError result = (RayError)RayOpenImage(filePath, imageResolution, zOffset);
+            if (result != RayError.OK)
+            {
+                _log.Error("RayOpenImage Error");
+            }
 
             int numOfFrames = (int)RayGetProperty(Property.ImageDepth);
             int width = (int)RayGetProperty(Property.ImageWidth);
@@ -367,7 +377,11 @@ namespace RaywattApp.Common.Util
             IntPtr data = RayGetLongitudeData(degree);
             Mat imgLongitude = CommonUtil.ByteMemoryToCvMat(data, width, height, channels);
 
-            RayCloseImage();
+            result = (RayError)RayCloseImage();
+            if (result != RayError.OK)
+            {
+                _log.Error("RayCloseImage Error");
+            }
 
             return imgLongitude;
         }
@@ -1013,9 +1027,9 @@ namespace RaywattApp.Common.Util
 
                 while (total_read < from.Length)
                 {
-                    int read = await from.ReadAsync(buffer, 0, buffer_size);
+                    int read = await from.ReadAsync(buffer.AsMemory(0, buffer_size));
 
-                    await to.WriteAsync(buffer, 0, read);
+                    await to.WriteAsync(buffer.AsMemory(0, read));
 
                     total_read += read;
 
@@ -1219,13 +1233,13 @@ namespace RaywattApp.Common.Util
             return textBlock.DesiredSize;
         }
 
-        public static void Exit(DeviceStatus? deviceStatus = null, AngioManager? angioManager = null, bool isShutdown = false)
+        public static void Exit(DeviceStatus? deviceStatus = null, AngioManager? angioManager = null, bool isShutdown = false, bool isAdmin = false)
         {
             if (deviceStatus != null)
             {
                 deviceStatus.IsPowerOff = true;
-
                 deviceStatus.IsPaused = true;
+
                 while (!deviceStatus.CanExit)
                 {
                     Thread.Sleep(50);
@@ -1237,7 +1251,7 @@ namespace RaywattApp.Common.Util
 
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
 
-            Thread threadReadyPullback = new Thread(() => ThreadExit(deviceStatus, isShutdown));
+            Thread threadReadyPullback = new Thread(() => ThreadExit(deviceStatus, isShutdown, isAdmin));
             threadReadyPullback.Start();
         }
         private static void ForceShutdown()
@@ -1258,25 +1272,52 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        private static void ThreadExit(DeviceStatus? deviceStatus, bool isShutdown)
+        private static void ThreadExit(DeviceStatus? deviceStatus, bool isShutdown, bool isAdmin)
         {
-            RayDisconnectDevices();
-            RayStopSystem();            
+            if (!isAdmin)
+            {
+                RayError result;
 
+                result = (RayError)RayDisconnectDevices();
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayDisconnectDevices Error");
+                }
+
+                result = (RayError)RayStopSystem();
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayStopSystem Error");
+                }
+
+                result = (RayError)ODSOCT_DeleteDll();
+                if (result != RayError.OK)
+                {
+                    _log.Error("ODSOCT_DeleteDll Error");
+                }
+
+                deviceStatus.IsServiceStarted = false;
+                deviceStatus.IsDeviceConnected = false;
+            }
+            
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
-                System.Windows.Application.Current.MainWindow.Close();
-
                 if (deviceStatus == null)
                 {
-                    ForceShutdown();
+                    System.Windows.Application.Current.MainWindow.Close();
+                    Win32Helper.Shutdown();
                 }
-                else if (!CommonUtil.IsTestMode(deviceStatus.TestMode, "Power"))
+                else if (isShutdown)
                 {
-                    if (isShutdown)
-                        ForceShutdown();
-                    else
-                        Win32Helper.LogOff();
+                    System.Windows.Application.Current.MainWindow.Close();
+
+                    if (!CommonUtil.IsTestMode(deviceStatus.TestMode, "Power"))
+                        Win32Helper.Shutdown();
+                }
+                else
+                {
+                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
+                    deviceStatus.IsPowerOff = false;
                 }
             });
         }
@@ -1286,7 +1327,7 @@ namespace RaywattApp.Common.Util
             StringBuilder sb = new StringBuilder();
             StringWriter sw = new StringWriter(sb);
 
-            using (JsonWriter writer = new JsonTextWriter(sw))
+            using (JsonTextWriter writer = new JsonTextWriter(sw))
             {
                 string strPoint;
 
@@ -1581,7 +1622,7 @@ namespace RaywattApp.Common.Util
             StringBuilder sb = new StringBuilder();
             StringWriter sw = new StringWriter(sb);
 
-            using (JsonWriter writer = new JsonTextWriter(sw))
+            using (JsonTextWriter writer = new JsonTextWriter(sw))
             {
                 writer.WriteStartArray();
 
@@ -2281,32 +2322,36 @@ namespace RaywattApp.Common.Util
             if (colorCode == null)
                 return;
 
+            RayError result = RayError.OK;
+
             if ("GRGR".Equals(colorCode))
             {
-                RaySetProperty(Property.Colormap, 0);
+                result = (RayError)RaySetProperty(Property.Colormap, 0);
             }
             else if ("GRAY".Equals(colorCode))
             {
-                RaySetProperty(Property.Colormap, 1);
+                result = (RayError)RaySetProperty(Property.Colormap, 1);
             }
             else if ("ORNG".Equals(colorCode))
             {
-                RaySetProperty(Property.Colormap, 2);
+                result = (RayError)RaySetProperty(Property.Colormap, 2);
+            }
+
+            if (result != RayError.OK)
+            {
+                _log.Error("RaySetProperty SetColormap Error");
             }
         }
 
         public static bool IsTestMode(Dictionary<string, bool> testMode, string key)
         {
-            if (!testMode.ContainsKey(key))
-                return false;
-
-            return testMode[key];
+            return testMode.TryGetValue(key, out var result) && result;
         }
 
         public static void ReadAngioParams(PatientCase patientCase)
         {
             string file = patientCase.Image;
-            string paramsFile = file.Substring(0, file.Length - 3) + "params";
+            string paramsFile = string.Concat(file.AsSpan(0, file.Length - 3), "params");
 
             string directory = Path.Combine(Constants.DataRootPath, patientCase.PatientId);
             string paramsPath = Path.Combine(directory, paramsFile);
@@ -2325,7 +2370,7 @@ namespace RaywattApp.Common.Util
         public static void ReadAngioImages(PatientCase patientCase, List<Mat>? angioFrames = null)
         {
             string file = patientCase.Image;
-            string angioFile = file.Substring(0, file.Length - 3) + "angioframes";
+            string angioFile = string.Concat(file.AsSpan(0, file.Length - 3), "angioframes");
 
             string directory = Path.Combine(Constants.DataRootPath, patientCase.PatientId);
             string angioPath = Path.Combine(directory, angioFile);
@@ -2737,6 +2782,24 @@ namespace RaywattApp.Common.Util
                     return true;
             }
             return false;
+        }
+      
+        public static string GenerateRandomPassword(int length = 8)
+        {
+            char[] PasswordChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()".ToCharArray();
+        
+            var password = new StringBuilder();
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                byte[] buffer = new byte[sizeof(uint)];
+                for (int i = 0; i < length; i++)
+                {
+                    rng.GetBytes(buffer);
+                    uint num = BitConverter.ToUInt32(buffer, 0);
+                    password.Append(PasswordChars[num % PasswordChars.Length]);
+                }
+            }
+            return password.ToString();
         }
 
     }

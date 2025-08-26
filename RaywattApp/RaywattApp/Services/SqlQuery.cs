@@ -97,7 +97,7 @@ namespace RaywattApp.Services
 
             //SelectPatient
             _query["SelectPatient"] =  @$"
-                SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, gender, create_date, update_date
+                SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name, birthdate, gender, physician_id, create_date, update_date
                 FROM rv_schema.patient
                 WHERE LOWER(id) = LOWER(@id)
                 ";
@@ -265,6 +265,40 @@ namespace RaywattApp.Services
                 WHERE server_type = @server_type
                 ORDER BY ae_title
                 ";
+
+            //SelectDicomServerExcludeId
+            _query["SelectDicomServerExcludeId"] = @$"
+                SELECT id, ae_title, hostname, specify_ip_address, ip_address, port, tls_yn, server_type, comment, ca_file_path, create_date, update_date
+                FROM rv_schema.dicom_server
+                WHERE id != @id
+                ORDER BY ae_title
+                ";
+                  
+            //SelectUserList
+            _query["SelectUserList"] = @$"
+                SELECT id
+                , CASE 
+	                WHEN password_reset = true THEN password ELSE '********'
+                END AS password
+                , comment, admin, password_changed_at, password_reset, terms_agreed_at, create_date, update_date
+	                FROM rv_schema.user
+                WHERE admin IS NOT true
+                ORDER BY id
+                ";
+
+            //SelectAdmin
+            _query["SelectAdmin"] = @$"
+                SELECT id, admin, password, comment, password_changed_at, password_reset, terms_agreed_at, create_date, update_date
+                FROM rv_schema.user
+                WHERE LOWER(id) = LOWER(@id) AND admin IS true
+                ";
+
+            //SelectUser
+            _query["SelectUser"] = @$"
+                SELECT id, admin, password, comment, password_changed_at, password_reset, terms_agreed_at, create_date, update_date
+                FROM rv_schema.user
+                WHERE LOWER(id) = LOWER(@id)
+                ";
         }
 
         private static void SetInsertQuery()
@@ -321,6 +355,12 @@ namespace RaywattApp.Services
                 , @ip_address, @port, @tls_yn, @server_type, @comment, @ca_file_path
 	            , now(), now())
                 ";
+
+            //InsertUser
+            _query["InsertUser"] = @$"
+                INSERT INTO rv_schema.user(id, password, comment, password_reset, create_date, update_date)
+                VALUES (@id, @password, @comment, true, now(), now())
+                ";
         }
 
         private static void SetUpdateQuery()
@@ -369,18 +409,18 @@ namespace RaywattApp.Services
                 WHERE id=@id
                 ";
 
-            //UpdatePatientCaseAnnotationLumenContour
-            _query["UpdatePatientCaseAnnotationLumenContour"] = @$"
-                UPDATE rv_schema.patient_case_annotation
-                SET lumen_contour=@lumen_contour, lumen_stent=@lumen_stent
-                WHERE id = @id
-                ";
-
             //UpdatePatientCaseId
             _query["UpdatePatientCaseId"] = @$"
                 UPDATE rv_schema.patient_case
                 SET id = REGEXP_REPLACE(id, @originId, @id)
                 WHERE patient_id = @id;
+                ";
+
+            //UpdatePatientCaseAnnotationLumenContour
+            _query["UpdatePatientCaseAnnotationLumenContour"] = @$"
+                UPDATE rv_schema.patient_case_annotation
+                SET lumen_contour=@lumen_contour, lumen_stent=@lumen_stent
+                WHERE id = @id
                 ";
 
             //UpdatePatientCaseAnnotationWithoutLumenContour
@@ -421,6 +461,33 @@ namespace RaywattApp.Services
                 , ip_address=@ip_address, port=@port, tls_yn=@tls_yn, server_type=@server_type, comment=@comment, ca_file_path=@ca_file_path, update_date=now()
                 WHERE id=@id
                 ";
+
+            //UpdateUser
+            _query["UpdateTermsAgreedDateUser"] = @$"
+                UPDATE rv_schema.user
+                SET terms_agreed_at=now(), update_date=now()
+                WHERE id=@id
+                ";
+
+            // UpdatePasswordReset
+            _query["UpdatePasswordReset"] = @$"
+                UPDATE rv_schema.user
+                SET password_reset=@reset, password=@password, password_changed_at=now(), update_date=now()
+                WHERE id=@id AND password=@before_password
+            ";
+
+            _query["UpdateUser"] = @$"
+                UPDATE rv_schema.user
+                SET id=@newId, comment=@comment, update_date=now()
+                WHERE id=@id
+                ";
+
+            //ResetPasswordUser
+            _query["ResetPasswordUser"] = @$"
+                UPDATE rv_schema.user
+                SET password=@password, password_reset=true, update_date=now()
+                WHERE id=@id
+                ";
         }
 
         private static void SetDeleteQuery()
@@ -448,6 +515,12 @@ namespace RaywattApp.Services
             //DeleteDicomServer
             _query["DeleteDicomServer"] = @$"
                 DELETE FROM rv_schema.dicom_server
+                WHERE id=@id
+                ";
+
+            //DeleteUser
+            _query["DeleteUser"] = @$"
+                DELETE FROM rv_schema.user
                 WHERE id=@id
                 ";
         }

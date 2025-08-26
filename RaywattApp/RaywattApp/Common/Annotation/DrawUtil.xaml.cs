@@ -26,7 +26,7 @@ namespace RaywattApp.Common.Annotation
 
         private bool isErasing;
 
-        private bool init = false;
+        private bool init;
 
         private Brush[] brushes = { Brushes.Red, Brushes.Orange, Brushes.YellowGreen, Brushes.Green, Brushes.Blue, Brushes.Navy, Brushes.Purple };
         private double ellipseWidth;

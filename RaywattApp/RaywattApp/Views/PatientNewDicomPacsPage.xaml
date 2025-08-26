@@ -25,7 +25,7 @@
 
         <StackPanel Grid.Row="1" Margin="60,60,60,54">
             <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Select Patient], Source={StaticResource L10N}}"/>
-            <Grid Margin="0,29,0,0">
+            <Grid Margin="0,26,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="90"/>
                     <ColumnDefinition Width="380"/>
@@ -33,13 +33,13 @@
                     <ColumnDefinition Width="380"/>
                     <ColumnDefinition Width="190"/>
                 </Grid.ColumnDefinitions>
-                <Label Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Patient ID], Source={StaticResource L10N}}" VerticalAlignment="Center"/>
-                <TextBox Grid.Column="1" Style="{DynamicResource TextBoxBase}" Text="{Binding SearchPatientId}" Width="360" HorizontalAlignment="Left" Height="54"/>
-                <Label Grid.Column="2" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Patient Name], Source={StaticResource L10N}}" VerticalAlignment="Center"/>
-                <TextBox Grid.Column="3" Style="{DynamicResource TextBoxBase}" Text="{Binding SearchPatientName}" Width="360" HorizontalAlignment="Left" Height="54"/>
-                <Button Grid.Column="4" Style="{StaticResource OutlinedBtnType4-Large}" Command="{Binding SearchCommand}" Content="{Binding [Search], Source={StaticResource L10N}}" Width="190" Height="54"/>
+                <Label Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Patient ID], Source={StaticResource L10N}}" VerticalAlignment="Top" Margin="0,18,0,0"/>
+                <TextBox Grid.Column="1" Style="{DynamicResource TextBoxValidator}" Text="{Binding SearchPatientId.Text, UpdateSourceTrigger=PropertyChanged}" ToolTip="{Binding SearchPatientId.Msg}" Width="360" HorizontalAlignment="Left"  VerticalAlignment="Top"/>
+                <Label Grid.Column="2" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Patient Name], Source={StaticResource L10N}}" VerticalAlignment="Top" Margin="0,18,0,0"/>
+                <TextBox Grid.Column="3" Style="{DynamicResource TextBoxBase}" Text="{Binding SearchPatientName}" Width="360" HorizontalAlignment="Left" Height="54" VerticalAlignment="Top"/>
+                <Button Grid.Column="4" Style="{StaticResource OutlinedBtnType4-Large}" Command="{Binding SearchCommand}" Content="{Binding [Search], Source={StaticResource L10N}}" Width="190" Height="54" VerticalAlignment="Top"/>
             </Grid>
-            <DataGrid Height="595" Name="patients" ItemsSource="{Binding Patients}" SelectedItem="{Binding SelectedPatient}" Style="{StaticResource DataGridBasic}" RowStyle="{StaticResource DataGridRowDialog}" SelectionMode="Single" Margin="0,24,0,0">
+            <DataGrid Height="595" Name="patients" ItemsSource="{Binding Patients}" SelectedItem="{Binding SelectedPatient}" Style="{StaticResource DataGridBasic}" RowStyle="{StaticResource DataGridRowDialog}" SelectionMode="Single" Margin="0,9,0,0">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">
                         <i:InvokeCommandAction Command="{Binding SelectionChangedCommand}" CommandParameter="{Binding ElementName=patients, Path=SelectedItem}"/>

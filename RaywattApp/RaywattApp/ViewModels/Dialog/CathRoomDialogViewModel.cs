@@ -53,7 +53,7 @@ namespace RaywattApp.ViewModels.Dialog
         {
             App.Current.Dispatcher.Invoke(() =>
             {
-                if (!ViewModelBase._deviceStatus.IsAngioConnected && !Application.Current.Windows.OfType<Window>().Any(w => w.Content is AlertDialogControl))//ViewModelBase._deviceStatus.IsErrorDialogClosed)
+                if (!ViewModelBase.DeviceStatus.IsAngioConnected && !Application.Current.Windows.OfType<Window>().Any(w => w.Content is AlertDialogControl))//ViewModelBase._deviceStatus.IsErrorDialogClosed)
                 {
                     var targetWindow = Application.Current.Windows.OfType<Window>().SingleOrDefault(w => w.DataContext is CathRoomDialogViewModel) as IDialogWindow;
                     AnswerNo(targetWindow);
@@ -83,7 +83,7 @@ namespace RaywattApp.ViewModels.Dialog
             if (SelectedCathRoom.Id == -1) // CHP not Selected
             {
                 _log.Debug("CathRoom not Selected");
-                ViewModelBase._deviceStatus.IsAngioInitialized = false;
+                ViewModelBase.DeviceStatus.IsAngioInitialized = false;
                 _angioManager.IsChpFileChangeSuccess = 0;
                 _angioManager.isChpFileConnected = 0;
                 _angioManager.SendCommandPacket(CommandType.FGStopped);

@@ -5,6 +5,7 @@
 #include "MessageService.h"
 #include "opencv2/opencv.hpp"
 #include <omp.h>
+#include "FFTSpecFactory.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -50,9 +51,6 @@ COCTImaging::COCTImaging(Setting setting, CMessageService* pMsg) {
 	fringes32f = nullptr;
 	fringes32fAverage = nullptr;
 
-	fBuffer_Window = nullptr;
-	fcBuffer_FFT = nullptr;
-	fcBuffer_IFFT = nullptr;
 	fFFTResult = nullptr;
 	fOutput = nullptr;
 
@@ -231,7 +229,6 @@ void COCTImaging::allocateMemory() {
 	const int nFFTOrder = m_setting.nFFTOrder;
 	const int nFFTLength = m_setting.nFFTLength;
 	const int nOutputLength = m_setting.nOutputLength;
-	const int nBufferSize = m_setting.nBufferSize;
 	const int nCircleSize = m_setting.nCircleSize;
 
 	fringes32f = ippsMalloc_32f(nAScan * nBScan);
@@ -242,16 +239,19 @@ void COCTImaging::allocateMemory() {
 	imageCircle.create(nCircleSize, nCircleSize, CV_8UC3);
 	imageResultWithoutCompensation.create(nBScan, nOutputLength, CV_8UC1);
 
-	fBuffer_Window = ippsMalloc_32f(nFFTLength);
-	fcBuffer_FFT = ippsMalloc_32fc(nFFTLength);
-	fcBuffer_IFFT = ippsMalloc_32fc(nFFTLength);
 	fFFTResult = ippsMalloc_32f(nOutputLength * nBScan);
 	fOutput = ippsMalloc_32f(nOutputLength * nBScan);
 
 	// Prepare FFT
-	ippsFFTInitAlloc_R_32f(&fftSpecFirst, nFFTOrder, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
-	ippsFFTInitAlloc_C_32fc(&ifftSpec, nFFTOrder, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
-	ippsFFTInitAlloc_C_32fc(&fftSpecSecond, nFFTOrder - 1, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
+	CFFTSpecFactory& factory = CFFTSpecFactory::Instance();
+	fftSpecFirst = factory.GetSpecR(nFFTOrder, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
+	fftFirstWorkBufSize = factory.GetBufferR(fftSpecFirst);
+
+	ifftSpec = factory.GetSpecC(nFFTOrder, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
+	fftIFFTWorkBufSize = factory.GetBufferC(ifftSpec);
+
+	fftSpecSecond = factory.GetSpecC(nFFTOrder - 1, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
+	fftSecondWorkBufSize = factory.GetBufferC(fftSpecSecond);
 }
 void COCTImaging::releaseMemory() {
 	if (fringes32f) { ippsFree(fringes32f); fringes32f = nullptr; }
@@ -262,15 +262,8 @@ void COCTImaging::releaseMemory() {
 	imageCircle.release();
 	imageResultWithoutCompensation.release();
 
-	ippsRelease((void*&)fBuffer_Window);
-	ippsRelease((void*&)fcBuffer_FFT);
-	ippsRelease((void*&)fcBuffer_IFFT);
 	ippsRelease((void*&)fFFTResult);
 	ippsRelease((void*&)fOutput);
-
-	if (fftSpecFirst) { ippsFFTFree_R_32f(fftSpecFirst); fftSpecFirst = nullptr; }
-	if (ifftSpec) { ippsFFTFree_C_32fc(ifftSpec); ifftSpec = nullptr; }
-	if (fftSpecSecond) { ippsFFTFree_C_32fc(fftSpecSecond); fftSpecSecond = nullptr; }
 }
 void COCTImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale) {
 	int circOffset = 0;
@@ -352,6 +345,27 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f) {
 	const int nFFTLength = m_setting.nFFTLength;
 	const int nOutputLength = m_setting.nOutputLength;
 
+	std::vector<FFTThreadContext> threadContexts(numThreads);
+	
+	// 스레드별 FFTSpec 및 버퍼 할당 및 초기화
+	for (int t = 0; t < numThreads; ++t) {
+		auto& ctx = threadContexts[t];
+
+		// Window buffer
+		ctx.fBuffer_Window = ippsMalloc_32f(nFFTLength);
+		ippsZero_32f(ctx.fBuffer_Window, nFFTLength);
+
+		// FFT buffers
+		ctx.fcBuffer_FFT = ippsMalloc_32fc(nFFTLength);
+		ippsZero_32fc(ctx.fcBuffer_FFT, nFFTLength);
+		ctx.fcBuffer_IFFT = ippsMalloc_32fc(nFFTLength);
+
+		// Work buffers
+		ctx.fftWorkBufFirst = ippsMalloc_8u(fftFirstWorkBufSize);
+		ctx.fftWorkBufIFFT = ippsMalloc_8u(fftIFFTWorkBufSize);
+		ctx.fftWorkBufSecond = ippsMalloc_8u(fftSecondWorkBufSize);
+	}
+
 	// Process Frame
 	// To-Do : enable openmp, check shared variables
 	omp_set_dynamic(numDynamic);
@@ -359,47 +373,60 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f) {
 	//#pragma omp parallel
 	{
 		//#pragma omp for firstprivate(fBuffer_Window,fBuffer_BackgroundFringes,fcBuffer_FFT,fcBuffer_IFFT,j)
+		#pragma omp parallel for
 		for (int i = 0; i < nBScan; i++)
 		{
+			int tid = omp_get_thread_num();
+			auto& ctx = threadContexts[tid];
 			{
 				// 1. Background Subtract
-				ippsCopy_32f(fringes32f + i * nAScan, fBuffer_Window, nAScan);
-				ippsSub_32f_I(fringes32fAverage, fBuffer_Window, nAScan);  // I의 의미:자기 자신에 이처리를 해서, 결과를 얻는다.
+				ippsCopy_32f(fringes32f + i * nAScan, ctx.fBuffer_Window, nAScan);
+				ippsSub_32f_I(fringes32fAverage, ctx.fBuffer_Window, nAScan);  // I의 의미:자기 자신에 이처리를 해서, 결과를 얻는다.
 
 				// 2. Apply Window
-				ippsMul_32f_I(calibration->window, fBuffer_Window, nFFTLength);
+				ippsMul_32f_I(calibration->window, ctx.fBuffer_Window, nFFTLength);
 
 				// 3. First FFT
-				ippsFFTFwd_RToPerm_32f_I(fBuffer_Window, fftSpecFirst, nullptr); // http://software.intel.com/sites/products/documentation/hpc/ipp/ipps/ipps_ch7/ch7_packed_formats.html#Perm
-				ippsConjPerm_32fc(fBuffer_Window, fcBuffer_FFT, nFFTLength);
+				ippsFFTFwd_RToPerm_32f_I(ctx.fBuffer_Window, fftSpecFirst, ctx.fftWorkBufFirst); // http://software.intel.com/sites/products/documentation/hpc/ipp/ipps/ipps_ch7/ch7_packed_formats.html#Perm
+				ippsConjPerm_32fc(ctx.fBuffer_Window, ctx.fcBuffer_FFT, nFFTLength);
 
 				// 4. Zero Pad & Reorder (1 | 2 | 0 | 0)
-				ippsZero_32fc(fcBuffer_IFFT, nFFTLength);
-				ippsCopy_32fc(fcBuffer_FFT, fcBuffer_IFFT, nOutputLength);
+				ippsZero_32fc(ctx.fcBuffer_IFFT, nFFTLength);
+				ippsCopy_32fc(ctx.fcBuffer_FFT, ctx.fcBuffer_IFFT, nOutputLength);
 
 				// 5. Inverse FFT
-				ippsFFTInv_CToC_32fc_I(fcBuffer_IFFT, ifftSpec, nullptr);
+				ippsFFTInv_CToC_32fc_I(ctx.fcBuffer_IFFT, ifftSpec, ctx.fftWorkBufIFFT);
 
 				// 6. Interpolation
-				ippsZero_32fc(fcBuffer_FFT, nOutputLength);
+				ippsZero_32fc(ctx.fcBuffer_FFT, nOutputLength);
 				for (int j = 0; j < nAScan / 2; j++) {
-					fcBuffer_FFT[j].re = (calibration->weightMap[j] * fcBuffer_IFFT[calibration->indexMap[j]].re + (1.0f - calibration->weightMap[j]) * fcBuffer_IFFT[calibration->indexMap[j] + 1].re);
-					fcBuffer_FFT[j].im = (calibration->weightMap[j] * fcBuffer_IFFT[calibration->indexMap[j]].im + (1.0f - calibration->weightMap[j]) * fcBuffer_IFFT[calibration->indexMap[j] + 1].im);
+					ctx.fcBuffer_FFT[j].re = (calibration->weightMap[j] * ctx.fcBuffer_IFFT[calibration->indexMap[j]].re + (1.0f - calibration->weightMap[j]) * ctx.fcBuffer_IFFT[calibration->indexMap[j] + 1].re);
+					ctx.fcBuffer_FFT[j].im = (calibration->weightMap[j] * ctx.fcBuffer_IFFT[calibration->indexMap[j]].im + (1.0f - calibration->weightMap[j]) * ctx.fcBuffer_IFFT[calibration->indexMap[j] + 1].im);
 				}
 
 				// 7. Numerical Dispersion Compensation
-				ippsMul_32fc_I((Ipp32fc*)calibration->dispersion, fcBuffer_FFT, nAScan / 2);
+				ippsMul_32fc_I((Ipp32fc*)calibration->dispersion, ctx.fcBuffer_FFT, nAScan / 2);
 
 				// 8. FFT Again
-				ippsFFTFwd_CToC_32fc_I(fcBuffer_FFT, fftSpecSecond, nullptr);
+				ippsFFTFwd_CToC_32fc_I(ctx.fcBuffer_FFT, fftSpecSecond, ctx.fftWorkBufSecond);
 
 				// 9. Extract Magnitude
-				ippsPowerSpectr_32fc(fcBuffer_FFT, fFFTResult + i * nOutputLength, nOutputLength);
+				ippsPowerSpectr_32fc(ctx.fcBuffer_FFT, fFFTResult + i * nOutputLength, nOutputLength);
 			}
 		}
 	} // end parallel region
 
+	for (int t = 0; t < numThreads; ++t) {
+		auto& ctx = threadContexts[t];
+		ippsFree(ctx.fBuffer_Window);
+		ippsFree(ctx.fcBuffer_FFT);
+		ippsFree(ctx.fcBuffer_IFFT);
+		ippsFree(ctx.fftWorkBufFirst);
+		ippsFree(ctx.fftWorkBufIFFT);
+		ippsFree(ctx.fftWorkBufSecond);
+	}
 }
+
 void COCTImaging::computeLogarithm(Ipp32f* src, Ipp32f* dst) {
 	const int nBScan = m_setting.nBScan;
 	const int nOutputLength = m_setting.nOutputLength;
@@ -414,6 +441,11 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 	const int nOutputLength = m_setting.nOutputLength;
 	const int minPeakHeight = 1500.f;
 	const int distBetweenLayer = 24;
+
+	if (nOutputLength > 1024 * 10) {
+		PLOGI.printf("nOutputLength is too big");
+		return;
+	}
 
 	Ipp32f* fScope = new Ipp32f[nOutputLength];
 	std::vector<int> sheathPoints;
@@ -673,6 +705,10 @@ void COCTImaging::adaptive_compensation()
 				}
 			}
 			else {
+				if (stop_cumsum == 0) {
+					stop_cumsum = 1;
+					PLOGI.printf("the value cannot be divided by zero");
+				}
 				result_img.at<float>(z, x) = I_n.at<float>(z) / stop_cumsum;
 			}
 		}
@@ -680,10 +716,6 @@ void COCTImaging::adaptive_compensation()
 	// Linear contrast stretching
 	logarithmic_contrast_stretching(result_img);
 	result_img.convertTo(result_img, CV_8U, INTENSITY_THRESHOLD);
-
-	if (m_setting.applyGammaCorrection) {
-		adaptive_gamma_correction(result_img, INTENSITY_THRESHOLD);
-	}
 
 	if (m_setting.applySharpness) {
 		sharpening(result_img);
@@ -699,48 +731,29 @@ void COCTImaging::min_max_normalization(const cv::Mat& img, cv::Mat& normalized_
 	normalized_img = (img - min_val) / (max_val - min_val);
 }
 
-void COCTImaging::linear_contrast_stretching(cv::Mat& img, float lower_percentile, float upper_percentile)
-{
-	// 1. 1D 벡터로 변환 없이 퍼센타일 계산
-	cv::Mat img_reshaped = img.reshape(1, img.rows * img.cols);  // 1D로 변환
-	std::vector<float> img_values;
-	img_values.assign((float*)img_reshaped.datastart, (float*)img_reshaped.dataend);
-
-	// 2. 벡터 정렬
-	std::sort(img_values.begin(), img_values.end());
-
-	// 3. 퍼센타일 값 계산
-	int total_elements = img_values.size();
-	int lower_idx = static_cast<int>(lower_percentile / 100.0 * total_elements);
-	int upper_idx = static_cast<int>(upper_percentile / 100.0 * total_elements);
-
-	float lower_bound = img_values[lower_idx];
-	float upper_bound = img_values[upper_idx];
-
-	// 4. OpenMP 병렬 처리로 클리핑 및 정규화
-#pragma omp parallel for
-	for (int i = 0; i < img.rows; ++i) {
-		float* img_ptr = img.ptr<float>(i);  // 한 번에 한 row의 데이터에 접근
-		for (int j = 0; j < img.cols; ++j) {
-			// 클리핑
-			img_ptr[j] = std::min(std::max(img_ptr[j], lower_bound), upper_bound);
-			// 0-1로 정규화
-			img_ptr[j] = (img_ptr[j] - lower_bound) / (upper_bound - lower_bound + 1e-8);
-		}
-	}
-}
-
 void COCTImaging::logarithmic_contrast_stretching(cv::Mat& img, float lower_percentile, float upper_percentile)
 {
 	// 1. 1D 벡터로 변환하여 퍼센타일 계산
 	cv::Mat img_reshaped = img.reshape(1, img.rows * img.cols);  // 1D로 변환
 	std::vector<float> img_values;
-	img_values.assign((float*)img_reshaped.datastart, (float*)img_reshaped.dataend);
+	if (!img_reshaped.empty()) {
+		float* ptr = img_reshaped.ptr<float>(0);
+		img_values.assign(ptr, ptr + img_reshaped.total());
+	}
 
 	// 2. 퍼센타일 값 계산
 	int total_elements = img_values.size();
+
+	if (total_elements == 0) {
+		PLOGI.printf("Image is NULL");
+		return;
+	}
 	int lower_idx = static_cast<int>(lower_percentile / 100.0 * total_elements);
 	int upper_idx = static_cast<int>(upper_percentile / 100.0 * total_elements);
+	
+	if (lower_idx > upper_idx) {
+		std::swap(lower_idx, upper_idx);
+	}
 
 	// 전체를 정렬하지 않고 표준 정규분포 상 표준 편차가 +-3(99%)인 값의 index만 추출
 	std::nth_element(img_values.begin(), img_values.begin() + lower_idx, img_values.end());
@@ -795,36 +808,6 @@ std::vector<int> COCTImaging::find_outliers(const std::vector<int>& y_values) {
 	return outlier_indices;
 }
 
-void COCTImaging::adaptive_gamma_correction(cv::Mat& img, int maxIntensity) {
-	bool AGCWD_apply = false;
-	std::vector<double> pdf_i;
-
-	get_PDF_array(img, pdf_i, AGCWD_apply);
-
-	if (AGCWD_apply) {
-		get_CDF_array(pdf_i, cdf_i);
-	}
-
-	double max_intensity = maxIntensity;
-	double calculated_max_intensity = *std::max_element(img.begin<uchar>(), img.end<uchar>());
-	if (calculated_max_intensity > 0) {
-		max_intensity = calculated_max_intensity;
-	}
-
-	cv::Mat output_image = img.clone();
-	for (int y = 0; y < img.rows; y++) {
-		for (int x = 0; x < img.cols; x++) {
-			int intensity = img.at<uchar>(y, x);
-			double intensity_ratio = intensity / max_intensity;
-			double new_intensity = max_intensity * std::pow(intensity_ratio, 1 - cdf_i[intensity]);
-
-			new_intensity = new_intensity > maxIntensity ? maxIntensity : (new_intensity < 0 ? 0 : new_intensity);
-			output_image.at<uchar>(y, x) = static_cast<uchar>(new_intensity);
-		}
-	}
-	img = output_image;
-}
-
 void COCTImaging::sharpening(cv::Mat& img) {
 	cv::Mat origin = img.clone();
 	origin.convertTo(origin, CV_32F);
@@ -852,7 +835,8 @@ void COCTImaging::sharpening(cv::Mat& img) {
 
 void COCTImaging::get_PDF_array(cv::Mat& img, std::vector<double>& pdf_i, bool& AGCWD_apply) {
 	int number_of_pixels = img.rows * img.cols;
-	pdf_i.assign(256, 0);
+	// codesonar suppr C read-past-null-terminator
+	pdf_i.assign(256, 0.0);
 
 	// Histogram 계산
 	for (int y = 0; y < img.rows; y++) {
@@ -900,9 +884,19 @@ void COCTImaging::get_CDF_array(std::vector<double> pdf_i, std::vector<double>& 
 	// cumulative distribution function (CDF) 계산
 	double pdf_sum = std::accumulate(pdfw_i.begin(), pdfw_i.end(), 0.0);
 	double cumulative = 0.0;
-	for (int i = 0; i < 256; i++) {
-		cumulative += pdfw_i[i] / pdf_sum;
-		cdf_i[i] = cumulative;
+
+	if (pdf_sum > 0) {
+		for (int i = 0; i < 256; i++) {
+			cumulative += pdfw_i[i] / pdf_sum;
+			cdf_i[i] = cumulative;
+		}
+	}
+	else {
+		PLOGI.printf("pdf_sum value is zero. zero should not be used to divide any value");
+		for (int i = 0; i < 256; i++) {
+			cumulative += pdfw_i[i];
+			cdf_i[i] = cumulative;
+		}
 	}
 }
 
@@ -1045,6 +1039,12 @@ void COCTImaging::SetLumenContourOffset(std::vector<cv::Point> lumenContour) {
 				count++;
 			}
 		}
+
+		if (count == 0) {
+			count = 1;
+			PLOGI.printf("the value cannot be divided by zero");
+		}
+
 		int avgX = (int)(sumOfx / count);
 		if (avgX >= 0 && avgX < width) {
 			inversedContourYPoints.push_back(cv::Point(avgX, y));
@@ -1076,6 +1076,7 @@ void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f>
 	radius.clear();
 
 	std::vector<cv::Point> edgePoints; // GuideWire에서 sheath 중심에 가장 가까운 점
+	// codesonar suppr C buffer-underrun
 	std::vector<double> theta;
 
 	cv::Mat grayImage;
@@ -1237,8 +1238,8 @@ void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv
 }
 
 void COCTImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<cv::Point> edgePoints, std::vector<double>& theta) {
-	int height = m_nHeight;
-	int width = m_nWidth;
+	/*int height = m_nHeight;
+	int width = m_nWidth;*/
 	theta.clear();
 	static int myint = 0;
 

@@ -32,7 +32,7 @@ namespace RaywattApp.ViewModels
         private PrevStatus _prevStatus;
 
         [ObservableProperty]
-        private string _searchPatientId = "";
+        private TextValidator _searchPatientId = new TextValidator();
 
         [ObservableProperty]
         private string _searchPatientName = "";
@@ -130,6 +130,15 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("NewRecording");
 
+            if (!ValidateSelectedPatient(SelectedPatient.HasFirstname))
+            {
+                Dictionary<string, object> param = new Dictionary<string, object>();
+                param["title"] = _l10n["Information"];
+                param["message"] = _l10n["Invalid format for patient information."];
+                _dialogService.OpenDialog(new ConfirmDialogControl(), param, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                return;
+            }
+
             bool isExist = false;
             if (!Validate(out isExist))
                 return;
@@ -153,6 +162,17 @@ namespace RaywattApp.ViewModels
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientDetailPage) { Parameter = parameter });
         }
 
+        private bool ValidateSelectedPatient(bool hasFirstname)
+        {
+            if (SelectedPatient.Id == null || SelectedPatient.Birthdate == null || SelectedPatient.Gender == null || SelectedPatient.Lastname == null)
+                return false;
+
+            if (hasFirstname && SelectedPatient.Firstname == string.Empty)
+                return false;
+
+            return true;
+        }
+
         private bool Validate(out bool isExist)
         {
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
@@ -166,7 +186,7 @@ namespace RaywattApp.ViewModels
 
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["Patient information with the same ID already exists. Update with the selected details?"];
+                parameter["message"] = _l10n["$MSG026"];
                 var result = _dialogService.OpenDialog(new ConfirmDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
                 if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
@@ -247,9 +267,15 @@ namespace RaywattApp.ViewModels
 
             Patients.Clear();
 
-            if (string.IsNullOrEmpty(SearchPatientId.Trim()) && string.IsNullOrEmpty(SearchPatientName.Trim()))
+            if (string.IsNullOrEmpty(SearchPatientId.Text) && string.IsNullOrEmpty(SearchPatientName))
+            {
+                SearchPatientId.Msg = "Please enter the value to search for.";
                 return;
-            
+            }
+
+            string patientIdParam = string.IsNullOrEmpty(SearchPatientId.Text) ? "*" : "*" + SearchPatientId.Text.Trim() + "*";
+            string patientNameParam = string.IsNullOrEmpty(SearchPatientName) ? "*" : "*" + SearchPatientName.Trim() + "*";
+
             IsChecking = true;
             RayExportWrapper.DicomNetRWError res = await Task.Run(() => (RayExportWrapper.DicomNetRWError)RayExportWrapper.Echo(dicomClient));
             _log.DebugFormat("Echo : {0}", res);
@@ -275,7 +301,7 @@ namespace RaywattApp.ViewModels
 
             int count = 0;
             IsChecking = true;
-            dicomPatients = await Task.Run(() => (RayExportWrapper.FindPatients(dicomClient, SearchPatientId, SearchPatientName, out count)));
+            dicomPatients = await Task.Run(() => (RayExportWrapper.FindPatients(dicomClient, patientIdParam, patientNameParam, out count)));
             IsChecking = false;
 
             if (dicomPatients != IntPtr.Zero)
@@ -292,6 +318,7 @@ namespace RaywattApp.ViewModels
                     CommonUtil.ParseDicomName(dicomPatient.PatientName, out lastname, out firstname);
                     patient.Lastname = lastname;
                     patient.Firstname = firstname;
+                    patient.HasFirstname = firstname != string.Empty ? true : false;
                     patient.Name = dicomPatient.PatientName;
                     patient.Gender = dicomPatient.PatientSex;
                     DateTime birthdate;
@@ -307,7 +334,7 @@ namespace RaywattApp.ViewModels
                     current += Marshal.SizeOf<DicomPatient>();
                 }
             }
-            RayExportWrapper.FreePatients(dicomPatients);
+            RayExportWrapper.FreeMemory(dicomPatients);
         }
 
         private bool CanNext()

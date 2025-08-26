@@ -25,11 +25,11 @@ protected:
 
 public:
 	CMotorController();
-	virtual ~CMotorController();
+	~CMotorController();
 
 	bool IsConnected() { return m_initMotor; }
 	virtual bool Connect(void* param = nullptr);
-	virtual void Disconnect();
+	void Disconnect();
 
 	bool SetModeOfOperation(char mode);
 	bool SwitchOn();
@@ -49,13 +49,13 @@ protected:
 	bool parsePacket(BYTE* packet, int size);
 };
 
-class CMotorControllerStub
-	: public CMotorController
-{
-public:
-	CMotorControllerStub(){}
-	virtual ~CMotorControllerStub() {}
-
-	virtual bool PerformRun(int& nVelocity) { m_isRun = true; return true; }
-	virtual bool StopMotor() { m_isRun = false; return true; }
-};
+//class CMotorControllerStub
+//	: public CMotorController
+//{
+//public:
+//	CMotorControllerStub(){}
+//	virtual ~CMotorControllerStub() {}
+//
+//	virtual bool PerformRun(int& nVelocity) { m_isRun = true; return true; }
+//	virtual bool StopMotor() { m_isRun = false; return true; }
+//};

@@ -4,7 +4,7 @@ using System.Windows.Data;
 
 namespace RaywattApp.Common.Converters
 {
-    internal class GroupNameConverter : IValueConverter
+    public class GroupNameConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

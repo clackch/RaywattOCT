@@ -1,12 +1,11 @@
-﻿using RaywattApp.Common.Bases;
-using System;
+﻿using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
 namespace RaywattApp.Common.Converters
 {
-    internal class GridLengthConverter : IMultiValueConverter
+    public class GridLengthConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {

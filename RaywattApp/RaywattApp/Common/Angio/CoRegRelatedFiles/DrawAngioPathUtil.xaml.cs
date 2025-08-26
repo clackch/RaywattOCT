@@ -167,14 +167,15 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
         private List<DijkstraHeap> localDijkstraHeap;
         private List<CoRegistration> localCoRegistrations;
         private int angioImageTotalNum;
-        private bool isMoved = false, isDrawing = true;
+        private bool isMoved;
+        private bool isDrawing = true;
         private int trackPointNum;
         private Image coregiCursor_cross;
         private Image coregiCursor_no_cross;
         private List<Superpixel> superpixelList;
-        private double markerDrawInterval = 0;
-        private int prevOCTFrameNum = 0;
-        private int prevAngioFrameNum = 0;
+        private double markerDrawInterval;
+        private int prevOCTFrameNum;
+        private int prevAngioFrameNum;
         private int angioPlayDirection = 1;
 
         public DrawAngioPathUtil()
@@ -411,7 +412,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             this.canvas.Children.Add(outerMarker);
         }
 
-        private int GetPathInterval(string pullbackType)
+        private static int GetPathInterval(string pullbackType)
         {
             double pathInterval = Constants.pathInterval;
             switch (pullbackType)
@@ -590,7 +591,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
         {
             SplineCurve splineCurve = new SplineCurve();
             List<Point> curvePointFs = splineCurve.GetSplinePoints(points, points.Count() * 2/* Spline 곡선을 점 몇개로 표현할 지 설정*/);
-
+            
             foreach (Point curvexy in curvePointFs)
             {
                 localDijkstraHeap[frameIndex].line[lineIndex].Add(curvexy);
@@ -601,8 +602,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
         // Bezier
         void AddBezierCurvePoints(List<Point> points, int frameIndex, int totalDistance, int lineIndex)
         {
-            BezierCurve bezierCurve = new BezierCurve();
-            List<Point> curvePointFs = bezierCurve.GenerateBezierCurve(points[0], points[1], points[2], points[3], totalDistance/* Bezier 곡선을 점 몇개로 표현할 지 설정*/);
+            List<Point> curvePointFs = BezierCurve.GenerateBezierCurve(points[0], points[1], points[2], points[3], totalDistance/* Bezier 곡선을 점 몇개로 표현할 지 설정*/);
             foreach (Point curvexy in curvePointFs)
             {
                 localDijkstraHeap[frameIndex].line[lineIndex].Add(curvexy);
@@ -886,7 +886,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                                     labelList.Add(label);
                                 }
 
-                                if (!labelToPointsMap.ContainsKey(label))
+                                if (!labelToPointsMap.TryGetValue(label, out _))
                                 {
                                     labelToPointsMap[label] = new List<Point>();
                                 }
@@ -1236,7 +1236,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             }
         }
 
-        private int MinMax(int threshold, int value)
+        private static int MinMax(int threshold, int value)
         {
             if (value > threshold)
             {
@@ -1249,7 +1249,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             return value;
         }
 
-        private Mat GetGradientMagnitude(Mat roi)
+        private static Mat GetGradientMagnitude(Mat roi)
         {
             Mat sobelX = roi.Clone();
             Mat sobelY = roi.Clone();
@@ -1534,7 +1534,8 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 
                     rectangle.Opacity = 1.0; //visible
                     string numberPart = rectangle.Name.Substring(rectangle.Name.Length - 3);
-                    int.TryParse(numberPart, out int index);
+                    if (!int.TryParse(numberPart, out int index))
+                        index = 0;
 
                     float x = (float)(Canvas.GetLeft(rectangle) + rectangle.Width / 2);
                     float y = (float)(Canvas.GetTop(rectangle) + rectangle.Height / 2);

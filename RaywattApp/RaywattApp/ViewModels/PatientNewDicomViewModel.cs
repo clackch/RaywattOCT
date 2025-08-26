@@ -93,11 +93,11 @@ namespace RaywattApp.ViewModels
             {
                 Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
                 PrevStatus = (PrevStatus)data["prevStatus"];
-                if (data.ContainsKey("selectedDicomServer"))
+                if (data.TryGetValue("selectedDicomServer", out var serverObj) && serverObj is DicomServer temp)
                 {
-                    DicomServer temp = (DicomServer)data["selectedDicomServer"];
                     SelectedDicomServer = DicomServers.FirstOrDefault(x => x.Id == temp.Id);
                 }
+
             }
         }
 
@@ -130,7 +130,12 @@ namespace RaywattApp.ViewModels
             parameter["prevStatus"] = PrevStatus;
             parameter["localHostAeTitle"] = LocalHostAeTitle;
             parameter["selectedDicomServer"] = SelectedDicomServer;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientNewDicomPacsPage) { Parameter = parameter });
+
+            if (SelectedDicomServer.ServerType == "PACS")
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientNewDicomPacsPage) { Parameter = parameter });
+
+            if (SelectedDicomServer.ServerType == "MWL")
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientNewDicomMwlPage) { Parameter = parameter });
         }
 
         private async Task<bool> ConnectionTest()

@@ -9,6 +9,7 @@
 extern "C" {
 	_declspec(dllexport) RayError RayStartSystem();
 	_declspec(dllexport) RayError RayStopSystem();
+	_declspec(dllexport) RayError RayInitSystem();
 	_declspec(dllexport) RayError RayRegisterCallback(FunctionPtr cb);
 	_declspec(dllexport) RayError RayUnregisterCallback();
 	_declspec(dllexport) RayError RayConnectDevices();

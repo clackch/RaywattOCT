@@ -132,9 +132,9 @@ namespace RaywattApp.ViewModels
                 Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
                 PrevStatus = (PrevStatus)data["prevStatus"];
 
-                if (data.ContainsKey("physician"))
+                if (data.TryGetValue("physician", out var physicianObj) && physicianObj is Physician physician)
                 {
-                    Physician = (Physician)data["physician"];
+                    Physician = physician;
                     IsNew = false;
                     SetDefault(Physician);
                 }

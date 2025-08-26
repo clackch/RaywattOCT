@@ -70,6 +70,8 @@ namespace RaywattApp.ViewModels.Dialog
 
         private bool usePeerVerification = true;
 
+        private string previousServerType = "";
+
         private ICommand _updateHostnameCommand;
         public ICommand UpdateHostnameCommand
         {
@@ -108,6 +110,7 @@ namespace RaywattApp.ViewModels.Dialog
                 AeTitle.Text = DicomServer.AeTitle;
                 Port.Text = DicomServer.Port;
                 Hostname = DicomServer.Hostname;
+                previousServerType = DicomServer.ServerType;
 
                 IsNew = false;
             }
@@ -125,8 +128,11 @@ namespace RaywattApp.ViewModels.Dialog
             if (!res)
                 return;
 
-            //DB Save
-            Save();
+            if (IsNew && (!CanSaveNewDicomServer() || !SaveNew()))
+                return;
+
+            if (!IsNew && !SaveEdit())
+                return;
 
             RayExportWrapper.DestroyDcmClient(dicomClient);
 
@@ -183,19 +189,13 @@ namespace RaywattApp.ViewModels.Dialog
 
             if (res != RayExportWrapper.DicomNetRWError.Normal)
             {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["title"] = _l10n["Information"];
-                parameter["message"] = CommonUtil.GetDicomResultMessage(res);
-                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.DicomServerDialogWidth, Constants.DicomServerDialogHeight);
+                ShowAlertDialog(CommonUtil.GetDicomResultMessage(res));
                 return false;
             }
 
             if(serverType == RayExportWrapper.ServerType.UNKNOWN)
             {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["Unknown server type. Please verify the configuration for PACS or MWL."];
-                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.DicomServerDialogWidth, Constants.DicomServerDialogHeight);
+                ShowAlertDialog("Unknown server type. Please verify the configuration for PACS or MWL.");
                 return false;
             }
 
@@ -203,56 +203,138 @@ namespace RaywattApp.ViewModels.Dialog
             DicomServer.ServerType = serverType.ToString();
             DicomServer.CaFilePath = IntPtr.Zero != caFilePathPtr ? Marshal.PtrToStringAnsi(caFilePathPtr) : string.Empty;
             if (caFilePathPtr != IntPtr.Zero)
-                Marshal.FreeCoTaskMem(caFilePathPtr);
+                RayExportWrapper.FreeMemory(caFilePathPtr);
 
             return true;
         }
 
-        private void Save()
+        private bool CanSaveNewDicomServer()
+        {
+            var existingServers = _sqlManager.SelectDicomServer().Where(x => x.AeTitle == DicomServer.AeTitle && x.IpAddress == DicomServer.IpAddress && x.Port == DicomServer.Port).ToList();
+
+            if (existingServers.Count() == 0)
+                return true;
+
+            if (existingServers.Count() >= 2)
+            {
+                AeTitle.Msg = "The DICOM server already exists.";
+                return false;
+            }
+
+            else if (existingServers.First().ServerType == DicomServer.ServerType)
+            {
+                AeTitle.Msg = "The DICOM server already exists.";
+                return false;
+            }
+
+            else if (DicomServer.ServerType == "BOTH")
+            {
+                if (existingServers.First().ServerType == "PACS")
+                    DicomServer.ServerType = "MWL";
+                else if (existingServers.First().ServerType == "MWL")
+                    DicomServer.ServerType = "PACS";
+                else
+                {
+                    ShowAlertDialog("The existing server type is incorrect. Please remove the existing server information to avoid conflicts.");
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private bool SaveNew()
+        {
+            bool isBoth = DicomServer.ServerType == "BOTH";
+            string[] serverTypes = isBoth ? new[] { "PACS", "MWL" } : new[] { DicomServer.ServerType };
+
+            foreach (var serverType in serverTypes)
+            {
+                Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+                sqlParameters["ae_title"] = AeTitle.Text.Trim();
+                sqlParameters["hostname"] = DicomServer.SpecifyIpAddress ? "" : string.IsNullOrEmpty(Hostname) ? "" : Hostname.Trim();
+                sqlParameters["specify_ip_address"] = DicomServer.SpecifyIpAddress;
+                sqlParameters["ip_address"] = IpAddress.GetIpAddress();
+                sqlParameters["port"] = Port.Text;
+                sqlParameters["tls_yn"] = DicomServer.TlsYn;
+                sqlParameters["server_type"] = serverType;
+                sqlParameters["comment"] = DicomServer.Comment;
+                sqlParameters["ca_file_path"] = DicomServer.CaFilePath;
+
+                int res = _sqlManager.InsertDicomServer(sqlParameters);
+
+                if (res != 1)
+                {
+                    _log.Error(IsNew ? "Insert Error" : "Update Error");
+                    ShowAlertDialog("Failed to connect to the server.");
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private bool SaveEdit()
         {
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["server_type"] = DicomServer.ServerType;
+
+            if (DicomServer.ServerType != previousServerType)
+            {
+                if (DicomServer.ServerType == "BOTH")
+                    DicomServer.ServerType = previousServerType;
+                else
+                {
+                    ShowAlertDialog("The server type doesn't match your existing configuration. Please remove the existing server information to avoid conflicts.");
+                    return false;
+                }
+            }
+
+            Dictionary<string, object> validateSqlParameters = new Dictionary<string, object>();
+            validateSqlParameters["id"] = DicomServer.Id;
+            IList<DicomServer> DicomServers = _sqlManager.SelectDicomServer(validateSqlParameters);
+
+            if (DicomServers.Any(x => x.AeTitle == DicomServer.AeTitle && x.IpAddress == DicomServer.IpAddress && x.Port == DicomServer.Port && x.ServerType == DicomServer.ServerType))
+            {
+                AeTitle.Msg = "The DICOM server already exists.";
+                return false;
+            }
+
             sqlParameters["ae_title"] = AeTitle.Text.Trim();
             sqlParameters["hostname"] = DicomServer.SpecifyIpAddress ? "" : string.IsNullOrEmpty(Hostname) ? "" : Hostname.Trim();
             sqlParameters["specify_ip_address"] = DicomServer.SpecifyIpAddress;
             sqlParameters["ip_address"] = IpAddress.GetIpAddress();
             sqlParameters["port"] = Port.Text;
             sqlParameters["tls_yn"] = DicomServer.TlsYn;
-            sqlParameters["server_type"] = DicomServer.ServerType;
             sqlParameters["comment"] = DicomServer.Comment;
             sqlParameters["ca_file_path"] = DicomServer.CaFilePath;
+            sqlParameters["id"] = DicomServer.Id;
+            sqlParameters["server_type"] = previousServerType;
 
-            int res = 0;
-
-            if (IsNew)
-            {
-                res = _sqlManager.InsertDicomServer(sqlParameters);
-            }
-            else
-            {
-                sqlParameters["id"] = DicomServer.Id;
-                res = _sqlManager.UpdateDicomServer(sqlParameters);
-            }
+            int res = _sqlManager.UpdateDicomServer(sqlParameters);
 
             if (res != 1)
             {
-                _log.Error(IsNew ? "Insert Error" : "Update Error");
+                _log.Error("Update Error");
+                ShowAlertDialog("Failed to connect to the server.");
+                return false;
             }
+            return true;
         }
 
         private async Task SetIpAddressAsync()
         {           
             try
             {
-                Hostname = Hostname.Trim();
-
-                if (Hostname.Equals(OrgHostname))
-                {
-                    return;
-                }
-
                 if (string.IsNullOrEmpty(Hostname))
                 {
                     IpAddress.SetIpAddress("...");
+                    return;
+                }
+
+                Hostname = Hostname.Trim();
+                
+                if (Hostname.Equals(OrgHostname))
+                {
                     return;
                 }
 
@@ -291,7 +373,7 @@ namespace RaywattApp.ViewModels.Dialog
             }
         }
 
-        private bool IsValidIPAddress(string ipAddress)
+        private static bool IsValidIPAddress(string ipAddress)
         {
             if (!IPAddress.TryParse(ipAddress, out IPAddress ip))
                 return false;
@@ -331,6 +413,15 @@ namespace RaywattApp.ViewModels.Dialog
                 dialogResults.DialogAnswer = DialogResults.Answer.Yes;
                 CloseDialogWithResult(dialog, dialogResults);
             }
+        }
+
+        private void ShowAlertDialog(string message)
+        {
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["title"] = _l10n["Information"];
+            parameter["message"] = _l10n[message];
+
+            _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.DicomServerDialogWidth, Constants.DicomServerDialogHeight);
         }
     }
 }

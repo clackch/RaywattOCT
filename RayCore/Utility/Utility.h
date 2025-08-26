@@ -15,10 +15,12 @@ public:
 	std::mutex mMutex;
 	std::condition_variable sEvent;
 	bool isRun;
+	bool shouldResume;
 
 public:
 	CThread(THREADPROC threadFunc, LPVOID param) : thread(threadFunc, param) {
 		isRun = true;
+		shouldResume = false;
 	}
 
 	virtual ~CThread() {}

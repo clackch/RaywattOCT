@@ -127,12 +127,6 @@ namespace RaywattOCT
             }
         };
 
-        public static string ConfigFilePath = "./raycore.ini";
-        public static double BrightnessMin = 0.0f;
-        public static double BrightnessMax = 100.0f;
-        public static double ContrastMin = 0.5f;
-        public static double ContrastMax = 3.0f;
-
         public delegate void CallbackFunction(int request, int response, int param);
         public delegate void CallbackFunctionWithImage(int session, IntPtr data, int width, int height, int channel, int frameInfo, double intensity);
         public delegate void CallbackFunctionForDetection(int frame);
@@ -141,6 +135,8 @@ namespace RaywattOCT
         public static extern int RayStartSystem();
         [DllImport("RayCore.dll")]
         public static extern int RayStopSystem();
+        [DllImport("RayCore.dll")]
+        public static extern int RayInitSystem();
         [DllImport("RayCore.dll")]
         public static extern int RayRegisterCallback(IntPtr cb);
         [DllImport("RayCore.dll")]

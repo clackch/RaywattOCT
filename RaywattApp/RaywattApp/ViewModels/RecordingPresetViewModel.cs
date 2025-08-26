@@ -136,6 +136,7 @@ namespace RaywattApp.ViewModels
                         CurrentLocation = new KeyValuePair<string, string>(PatientCase.Location, loctValue);
                     }
                 }
+
                 else
                 {
                     Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
@@ -170,6 +171,11 @@ namespace RaywattApp.ViewModels
                     CurrentProcedure = new KeyValuePair<string, string>("$001", CodeDefinition.Codes["PROC"]["$001"]);
                     CurrentVessel = new KeyValuePair<string, string>("$000", CodeDefinition.Codes["VESS"]["$000"]);
                     CurrentLocation = new KeyValuePair<string, string>("$000", CodeDefinition.Codes["LOCT"]["$000"]);
+                }
+
+                if (data.ContainsKey("accessionNumber"))
+                {
+                    this.PatientCase.AccessionNumber = (string)data["accessionNumber"];
                 }
 
                 SelectedFlushMedia = PatientCase.FlushMedia;
@@ -251,7 +257,11 @@ namespace RaywattApp.ViewModels
                 double sheathType = 2.6;
                 if (PatientCase.AccessionNumber.Equals("1.7"))
                     sheathType = 1.7;
-                RaySetProperty(Property.SheathDiameter, sheathType);
+                RayError result = (RayError)RaySetProperty(Property.SheathDiameter, sheathType);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
                 PatientCase.SheathDiameter = RayGetProperty(Property.SheathDiameter);
 
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });

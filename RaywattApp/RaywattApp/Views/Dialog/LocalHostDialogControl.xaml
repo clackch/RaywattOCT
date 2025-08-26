@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RaywattApp.Views.Dialog"
              xmlns:const="clr-namespace:RaywattApp.Common.Bases"
+             xmlns:component="clr-namespace:RaywattApp.Views.Component"
              mc:Ignorable="d" 
              Width="{Binding DialogWidth}" Height="{Binding DialogHeight}">
 
@@ -57,82 +58,27 @@
                     <Label Grid.Row="0" Grid.Column="2" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [IP Address], Source={StaticResource L10N}}" Margin="0,20,0,0"/>
                     <Grid Grid.Row="1" Grid.Column="2">
                         <Border Height="54" CornerRadius="8" BorderBrush="{DynamicResource GrayscaleGray5Brush}" BorderThickness="1" VerticalAlignment="Top"/>
-                        <Grid Visibility="{Binding LocalHost.IsManual, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <TextBox Style="{DynamicResource TextBoxValidator}" MaxLength="50" ToolTip="{Binding IpAddress.Msg}" Width="390" HorizontalAlignment="Left" IsEnabled="False"/>
-                            <StackPanel Orientation="Horizontal" Margin="20,0,0,0" VerticalAlignment="Top">
-                                <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding IpAddress.Octet1, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="." Height="38" VerticalAlignment="Top" VerticalContentAlignment="Bottom"/>
-                                <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding IpAddress.Octet2, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="." Height="38" VerticalAlignment="Top" VerticalContentAlignment="Bottom"/>
-                                <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding IpAddress.Octet3, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="." Height="38" VerticalAlignment="Top" VerticalContentAlignment="Bottom"/>
-                                <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding IpAddress.Octet4, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                            </StackPanel>
-                        </Grid>
+                        <component:IpAddressInputControl Visibility="{Binding LocalHost.IsManual, Converter={StaticResource BoolToVisibilityConverter}}" IpAddress="{Binding IpAddress}" ToolTip="{Binding IpAddress.Msg}"/>
                     </Grid>
                     <Label Grid.Row="2" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Subnet Mask], Source={StaticResource L10N}}" Margin="0,2,0,0"/>
                     <Grid Grid.Row="3" Grid.Column="0">
                         <Border Height="54" CornerRadius="8" BorderBrush="{DynamicResource GrayscaleGray5Brush}" BorderThickness="1" VerticalAlignment="Top"/>
-                        <Grid Visibility="{Binding LocalHost.IsManual, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <TextBox Style="{DynamicResource TextBoxValidator}" MaxLength="50" ToolTip="{Binding SubnetMask.Msg}" Width="390" HorizontalAlignment="Left" IsEnabled="False"/>
-                            <StackPanel Orientation="Horizontal" Margin="20,0,0,0" VerticalAlignment="Top">
-                                <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding SubnetMask.Octet1, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="." Height="38" VerticalAlignment="Top" VerticalContentAlignment="Bottom"/>
-                                <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding SubnetMask.Octet2, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="." Height="38" VerticalAlignment="Top" VerticalContentAlignment="Bottom"/>
-                                <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding SubnetMask.Octet3, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="." Height="38" VerticalAlignment="Top" VerticalContentAlignment="Bottom"/>
-                                <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding SubnetMask.Octet4, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                            </StackPanel>
-                        </Grid>
+                        <component:IpAddressInputControl Visibility="{Binding LocalHost.IsManual, Converter={StaticResource BoolToVisibilityConverter}}" SubnetMask="{Binding SubnetMask}" ToolTip="{Binding SubnetMask.Msg}"/>
                     </Grid>
                     <Label Grid.Row="2" Grid.Column="2" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Default Gateway], Source={StaticResource L10N}}" Margin="0,2,0,0"/>
                     <Grid Grid.Row="3" Grid.Column="2">
                         <Border Height="54" CornerRadius="8" BorderBrush="{DynamicResource GrayscaleGray5Brush}" BorderThickness="1" VerticalAlignment="Top"/>
-                        <Grid Visibility="{Binding LocalHost.IsManual, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <TextBox Style="{DynamicResource TextBoxValidator}" MaxLength="50" ToolTip="{Binding DefaultGateway.Msg}" Width="390" HorizontalAlignment="Left" IsEnabled="False"/>
-                            <StackPanel Grid.Row="3" Grid.Column="2" Orientation="Horizontal" Margin="20,0,0,0" VerticalAlignment="Top">
-                                <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding DefaultGateway.Octet1, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="." Height="38" VerticalAlignment="Top" VerticalContentAlignment="Bottom"/>
-                                <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding DefaultGateway.Octet2, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="." Height="38" VerticalAlignment="Top" VerticalContentAlignment="Bottom"/>
-                                <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding DefaultGateway.Octet3, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="." Height="38" VerticalAlignment="Top" VerticalContentAlignment="Bottom"/>
-                                <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding DefaultGateway.Octet4, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                            </StackPanel>
-                        </Grid>
+                        <component:IpAddressInputControl Visibility="{Binding LocalHost.IsManual, Converter={StaticResource BoolToVisibilityConverter}}" IpAddress="{Binding DefaultGateway}" ToolTip="{Binding DefaultGateway.Msg}"/>
                     </Grid>
                     <Label Grid.Row="4" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Preferred DNS Server], Source={StaticResource L10N}}" Margin="0,2,0,0"/>
                     <Grid Grid.Row="5" Grid.Column="0">
                         <Border Height="54" CornerRadius="8" BorderBrush="{DynamicResource GrayscaleGray5Brush}" BorderThickness="1" VerticalAlignment="Top"/>
-                        <Grid Visibility="{Binding LocalHost.IsManual, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <TextBox Style="{DynamicResource TextBoxValidator}" MaxLength="50" ToolTip="{Binding PreferredDnsServer.Msg}" Width="390" HorizontalAlignment="Left" IsEnabled="False"/>
-                            <StackPanel Grid.Row="5" Grid.Column="0" Orientation="Horizontal" Margin="20,0,0,0" VerticalAlignment="Top">
-                                <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding PreferredDnsServer.Octet1, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="." Height="38" VerticalAlignment="Top" VerticalContentAlignment="Bottom"/>
-                                <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding PreferredDnsServer.Octet2, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="." Height="38" VerticalAlignment="Top" VerticalContentAlignment="Bottom"/>
-                                <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding PreferredDnsServer.Octet3, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="." Height="38" VerticalAlignment="Top" VerticalContentAlignment="Bottom"/>
-                                <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding PreferredDnsServer.Octet4, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                            </StackPanel>
-                        </Grid>
+                        <component:IpAddressInputControl Visibility="{Binding LocalHost.IsManual, Converter={StaticResource BoolToVisibilityConverter}}" IpAddress="{Binding PreferredDnsServer}" ToolTip="{Binding PreferredDnsServer.Msg}"/>
                     </Grid>
                     <Label Grid.Row="4" Grid.Column="2" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Alternate DNS Server], Source={StaticResource L10N}}" Margin="0,2,0,0"/>
                     <Grid Grid.Row="5" Grid.Column="2">
                         <Border Height="54" CornerRadius="8" BorderBrush="{DynamicResource GrayscaleGray5Brush}" BorderThickness="1" VerticalAlignment="Top"/>
-                        <Grid Visibility="{Binding LocalHost.IsManual, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <TextBox Style="{DynamicResource TextBoxValidator}" MaxLength="50" ToolTip="{Binding AlternateDnsServer.Msg}" Width="390" HorizontalAlignment="Left" IsEnabled="False"/>
-                            <StackPanel Grid.Row="5" Grid.Column="2" Orientation="Horizontal" Margin="20,0,0,0" VerticalAlignment="Top">
-                                <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding AlternateDnsServer.Octet1, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="." Height="38" VerticalAlignment="Top" VerticalContentAlignment="Bottom"/>
-                                <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding AlternateDnsServer.Octet2, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="." Height="38" VerticalAlignment="Top" VerticalContentAlignment="Bottom"/>
-                                <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding AlternateDnsServer.Octet3, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="." Height="38" VerticalAlignment="Top" VerticalContentAlignment="Bottom"/>
-                                <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding AlternateDnsServer.Octet4, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                            </StackPanel>
-                        </Grid>
+                        <component:IpAddressInputControl Visibility="{Binding LocalHost.IsManual, Converter={StaticResource BoolToVisibilityConverter}}" IpAddress="{Binding AlternateDnsServer}" ToolTip="{Binding AlternateDnsServer.Msg}"/>
                     </Grid>
                 </Grid>
             </Grid>

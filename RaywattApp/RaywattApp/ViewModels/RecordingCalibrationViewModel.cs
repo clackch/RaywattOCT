@@ -30,7 +30,7 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private Zoom _zoom = new Zoom();
 
-        private bool isMoveLiveView = false;
+        private bool isMoveLiveView;
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
@@ -89,8 +89,14 @@ namespace RaywattApp.ViewModels
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
 
-            if(!this.isMoveLiveView)
-                RayStopLiveView();
+            if (!this.isMoveLiveView)
+            {
+                RayError result = (RayError)RayStopLiveView();
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayStopLiveView Error");
+                }
+            }
         }
 
         private void Back()
@@ -109,12 +115,23 @@ namespace RaywattApp.ViewModels
         private void ManualZoomIn(bool zoomIn)
         {
             _log.Debug("ManualZoomIn : " + ((zoomIn) ? "IN" : "OUT"));
-            
-            RayManualCalibration(zoomIn);
+
+            RayError result = (RayError)RayManualCalibration(zoomIn);
+            if (result != RayError.OK)
+            {
+                _log.Error("RayManualCalibration Error");
+            }
         }
 
-        private void AutoCalibration() {
-            RayAutoCalibration();
+        private void AutoCalibration() 
+        {
+            _log.Debug("AutoCalibration");
+
+            RayError result = (RayError)RayAutoCalibration();
+            if (result != RayError.OK)
+            {
+                _log.Error("RayAutoCalibration Error");
+            }
             DeviceStatus.CanExecuteCalibration = false;
         }
 

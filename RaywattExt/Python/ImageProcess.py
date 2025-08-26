@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
 import multiprocessing
 import win32file
-import shutil
+#import shutil
 
 # CPU 코어 수를 기반으로 max_workers 설정
 def get_max_workers():
@@ -91,8 +91,17 @@ def move_file_with_progress(source_path, destination_path, buffer_size=1024 * 10
         # 복사 완료 후 원본 삭제
         os.remove(source_path)
 
+    except FileNotFoundError as e:
+        send_progress_to_csharp(f"_error_ Source file not found: {e}")
+    except PermissionError as e:
+        send_progress_to_csharp(f"_error_ Permission error: {e}")
+    except OSError as e:
+        send_progress_to_csharp(f"_error_ OS error: {e}")
+        # 복사가 실패한 경우, 복사된 파일 삭제
+        if os.path.exists(destination_path):
+            os.remove(destination_path)
     except Exception as e:
-        send_progress_to_csharp(f"_error_ Error occurred: {e}")
+        send_progress_to_csharp(f"_error_ Unexpected error: {e}")
         # 복사가 실패한 경우, 복사된 파일 삭제
         if os.path.exists(destination_path):
             os.remove(destination_path)

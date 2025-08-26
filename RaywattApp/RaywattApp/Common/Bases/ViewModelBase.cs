@@ -11,8 +11,13 @@ namespace RaywattApp.Common.Bases
     {
         protected readonly DynamicResource _l10n;
 
-        [ObservableProperty]
-        public static DeviceStatus _deviceStatus = new DeviceStatus();
+        private static DeviceStatus _deviceStatus = new DeviceStatus();
+
+        public static DeviceStatus DeviceStatus
+        {
+            get => _deviceStatus;
+            set => _deviceStatus = value;
+        }
 
         public ViewModelBase()
         {
