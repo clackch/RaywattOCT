@@ -61,6 +61,7 @@ namespace RaywattApp.Common.Bases
         public const string SettingAboutPage = "Views/Setting/SettingAboutPage.xaml";
         public const string SettingLogPage = "Views/Setting/SettingLogPage.xaml";
         public const string SettingTermsConditionsPage = "Views/Setting/SettingTermsConditionsPage.xaml";
+        public const string SettingTermsConditionsPage_RV200 = "Views/Setting/SettingTermsConditionsPage_RV200.xaml";
         public const string SettingMaintenancePage = "Views/Setting/SettingMaintenancePage.xaml";
         public const string SettingDicomPage = "Views/Setting/SettingDicomPage.xaml";
         public const string SettingPasswordChangePage = "Views/Setting/SettingPasswordChangePage.xaml";

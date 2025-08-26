@@ -1249,11 +1249,15 @@ namespace RaywattApp.Common.Util
             if (angioManager != null)
                 angioManager.CloseAngioManager();
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
+            if (CommonUtil.IsRV200())
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoadingPage));
+            else
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
 
             Thread threadReadyPullback = new Thread(() => ThreadExit(deviceStatus, isShutdown, isAdmin));
             threadReadyPullback.Start();
         }
+
         private static void ForceShutdown()
         {
             try
@@ -1290,14 +1294,17 @@ namespace RaywattApp.Common.Util
                     _log.Error("RayStopSystem Error");
                 }
 
-                result = (RayError)ODSOCT_DeleteDll();
-                if (result != RayError.OK)
+                int ray3DResult = ODSOCT_DeleteDll();
+                if (ray3DResult != 0)
                 {
                     _log.Error("ODSOCT_DeleteDll Error");
                 }
 
-                deviceStatus.IsServiceStarted = false;
-                deviceStatus.IsDeviceConnected = false;
+                if(deviceStatus != null)
+                {
+                    deviceStatus.IsServiceStarted = false;
+                    deviceStatus.IsDeviceConnected = false;
+                }
             }
             
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
@@ -1305,19 +1312,28 @@ namespace RaywattApp.Common.Util
                 if (deviceStatus == null)
                 {
                     System.Windows.Application.Current.MainWindow.Close();
-                    Win32Helper.Shutdown();
+                    ForceShutdown();
                 }
                 else if (isShutdown)
                 {
                     System.Windows.Application.Current.MainWindow.Close();
 
                     if (!CommonUtil.IsTestMode(deviceStatus.TestMode, "Power"))
-                        Win32Helper.Shutdown();
+                        ForceShutdown();
                 }
                 else
                 {
-                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
-                    deviceStatus.IsPowerOff = false;
+                    if (CommonUtil.IsRV200())
+                    {
+                        System.Windows.Application.Current.MainWindow.Close();
+                        
+                        if (!CommonUtil.IsTestMode(deviceStatus.TestMode, "Power"))
+                            Win32Helper.LogOff();
+                    }
+                    else
+                    {
+                        deviceStatus.IsPowerOff = false;
+                    }
                 }
             });
         }
@@ -2800,6 +2816,14 @@ namespace RaywattApp.Common.Util
                 }
             }
             return password.ToString();
+        }
+
+        public static bool IsRV200()
+        {
+            if ("RV200".Equals(System.Configuration.ConfigurationManager.AppSettings.Get("ModelVersion")))
+                return true;
+            else
+                return false;
         }
 
     }

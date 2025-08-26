@@ -270,7 +270,10 @@ namespace RaywattApp.ViewModels
             codeDefinition.GetCode();
 
             //시작 페이지 설정
-            NavigationSource = Constants.OutsetLoginPage;
+            if(CommonUtil.IsRV200())
+                NavigationSource = Constants.OutsetLoadingPage;
+            else
+                NavigationSource = Constants.OutsetLoginPage;
 
             //네비게이션 메시지 수신 등록
             WeakReferenceMessenger.Default.Register<NavigationMessage>(this, OnNavigationMessage);

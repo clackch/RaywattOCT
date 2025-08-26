@@ -112,6 +112,7 @@ namespace RaywattApp
             services.AddTransient(typeof(SettingAboutViewModel));
             services.AddTransient(typeof(SettingLogViewModel));
             services.AddTransient(typeof(SettingTermsConditionsViewModel));
+            services.AddTransient(typeof(SettingTermsConditionsViewModel_RV200));
             services.AddTransient(typeof(SettingMaintenanceViewModel));
             services.AddTransient(typeof(SettingDicomViewModel));
             services.AddTransient(typeof(SettingPasswordChangeViewModel));
@@ -137,7 +138,8 @@ namespace RaywattApp
             services.AddTransient(typeof(FileCopyDialogViewModel));
             services.AddTransient(typeof(FileAlternateIdDialogViewModel));
             services.AddTransient(typeof(FileExportDialogViewModel));
-            services.AddTransient(typeof(TermsConditionsDialogViewModel));
+            services.AddTransient(typeof(TermsConditionsDialogViewModel)); 
+            services.AddTransient(typeof(TermsConditionsDialogViewModel_RV200)); 
             services.AddTransient(typeof(Review3dViewMenuViewModel));
             services.AddTransient(typeof(Review3dPatientMenuViewModel));
             services.AddTransient(typeof(PowerOffDialogViewModel));

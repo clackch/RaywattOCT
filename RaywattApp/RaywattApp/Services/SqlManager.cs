@@ -135,8 +135,7 @@ namespace RaywattApp.Services
             else
             {
                 commandText = SqlQuery.GetQuery("SelectPatient");
-            }
-            
+            }           
 
             return _databaseService.GetDatas<Patient>(commandText, sqlParameters);
         }
