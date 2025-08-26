@@ -123,6 +123,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("OnNavigating");
 
             RayExportWrapper.DestroyDcmClient(dicomClient);
+            dicomClient = IntPtr.Zero;
         }
 
         private void Back()

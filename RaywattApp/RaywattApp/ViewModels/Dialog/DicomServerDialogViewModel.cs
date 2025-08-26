@@ -135,6 +135,7 @@ namespace RaywattApp.ViewModels.Dialog
                 return;
 
             RayExportWrapper.DestroyDcmClient(dicomClient);
+            dicomClient = IntPtr.Zero;
 
             DialogResults dialogResults = new();
             dialogResults.DialogAnswer = DialogResults.Answer.Yes;
