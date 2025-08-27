@@ -342,6 +342,7 @@ void CRJController::updateState() {
 	switch (m_state) {
 	case eRJState::Initializing:
 		if (m_bLimitSwitch) {
+			PLOGI.printf("Error occured: eRJState::Initializing - limitSwitch On");
 			m_nextState = eRJState::Error;
 		}
 		break;
@@ -352,6 +353,7 @@ void CRJController::updateState() {
 		break;
 	case eRJState::Cleaning:
 		if (m_bLimitSwitch || m_bButton[1]) {
+			PLOGI.printf("Error occured: eRJState::Cleaning - limitSwitch(%d), stopButton(%d)", m_bLimitSwitch, m_bButton[0]);
 			m_nextState = eRJState::Error;
 		}
 		break;
@@ -376,12 +378,13 @@ void CRJController::updateState() {
 		break;
 	case eRJState::Loading:
 		if (m_bButton[1] || !m_bLimitSwitch) {
+			PLOGI.printf("Error occured: eRJState::Loading - limitSwitch(%d), stopButton(%d)", m_bLimitSwitch, m_bButton[0]);
 			m_nextState = eRJState::Error;
 		}
 		break;
 	case eRJState::Loaded:
 		if (!m_bLimitSwitch || m_bButton[1]) {
-			PLOGI.printf("Error occured: limitSwitch(%d), stopButton(%d)", m_bLimitSwitch, m_bButton[0]);
+			PLOGI.printf("Error occured: eRJState::Loaded - limitSwitch(%d), stopButton(%d)", m_bLimitSwitch, m_bButton[0]);
 			Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 			m_nextState = eRJState::Error;
 		}
@@ -391,6 +394,7 @@ void CRJController::updateState() {
 		break;
 	case eRJState::Unloading:
 		if (m_bButton[1]) {
+			PLOGI.printf("Error occured: eRJState::Unloading - stopButton On");
 			m_nextState = eRJState::Error;
 		}
 		break;
@@ -400,6 +404,7 @@ void CRJController::updateState() {
 		}
 		
 		if (m_bPhotoSensor[3] == 0) {
+			PLOGI.printf("Error occured: eRJState::Unloaded - photoSensor #4 Off");
 			m_nextState = eRJState::Error;
 		}
 		break;
