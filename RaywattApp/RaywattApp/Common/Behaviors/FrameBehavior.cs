@@ -1,10 +1,11 @@
-﻿using Microsoft.Xaml.Behaviors;
-using System;
-using System.Windows.Controls;
-using System.Windows;
-using System.Windows.Navigation;
+﻿using log4net;
+using Microsoft.Xaml.Behaviors;
 using RaywattApp.Common.Bases;
-using log4net;
+using System;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Navigation;
 
 namespace RaywattApp.Common.Behaviors
 {
@@ -19,6 +20,10 @@ namespace RaywattApp.Common.Behaviors
         /// </summary>
         private bool _isWork;
 
+        private CommandBinding? _browseBackBinding;
+        private CommandBinding? _browseForwardBinding;
+        private CommandBinding? _refreshBinding;
+
         protected override void OnAttached()
         {
             _log.Debug("OnAttached");
@@ -27,6 +32,24 @@ namespace RaywattApp.Common.Behaviors
             AssociatedObject.Navigating += AssociatedObject_Navigating;
             //Navigation 종료
             AssociatedObject.Navigated += AssociatedObject_Navigated;
+
+            // Navigation 실패/취소 감지
+            AssociatedObject.NavigationFailed += AssociatedObject_NavigationFailed;
+            AssociatedObject.NavigationStopped += AssociatedObject_NavigationStopped;
+            
+            SetupNavigationBlocking();
+        }
+
+        private void SetupNavigationBlocking()
+        {
+            // 뒤로가기, 앞으로가기, 새로고침 명령을 가로채서 아무것도 하지 않도록 설정
+            _browseBackBinding = new CommandBinding(NavigationCommands.BrowseBack, BlockNavigationCommand);
+            _browseForwardBinding = new CommandBinding(NavigationCommands.BrowseForward, BlockNavigationCommand);
+            _refreshBinding = new CommandBinding(NavigationCommands.Refresh, BlockNavigationCommand);
+
+            AssociatedObject.CommandBindings.Add(_browseBackBinding);
+            AssociatedObject.CommandBindings.Add(_browseForwardBinding);
+            AssociatedObject.CommandBindings.Add(_refreshBinding);
         }
 
         /// <summary>
@@ -61,12 +84,45 @@ namespace RaywattApp.Common.Behaviors
             }
         }
 
+        /// <summary>
+        /// Navigation 실패 이벤트 핸들러
+        /// </summary>
+        private void AssociatedObject_NavigationFailed(object sender, NavigationFailedEventArgs e)
+        {
+            _log.Error($"Navigation Failed: {e.Uri}, Exception: {e.Exception}");
+        }
+
+        /// <summary>
+        /// Navigation 중지 이벤트 핸들러
+        /// </summary>
+        private void AssociatedObject_NavigationStopped(object sender, NavigationEventArgs e)
+        {
+            _log.Debug($"Navigation Stopped: {e.Uri}");
+            _log.Debug($"Current Content: {AssociatedObject.Content?.GetType()?.Name}");
+        }
+
+        /// <summary>
+        /// 내비게이션 명령을 차단하는 이벤트 핸들러
+        /// </summary>
+        private void BlockNavigationCommand(object sender, ExecutedRoutedEventArgs e)
+        {
+            _log.Debug($"Navigation command blocked: {((RoutedUICommand)e.Command).Name}");
+            e.Handled = true;
+        }
+
         protected override void OnDetaching()
         {
             _log.Debug("OnDetaching");
 
             AssociatedObject.Navigating -= AssociatedObject_Navigating;
             AssociatedObject.Navigated -= AssociatedObject_Navigated;
+
+            AssociatedObject.NavigationFailed -= AssociatedObject_NavigationFailed;
+            AssociatedObject.NavigationStopped -= AssociatedObject_NavigationStopped;
+
+            AssociatedObject.CommandBindings.Remove(_browseBackBinding);
+            AssociatedObject.CommandBindings.Remove(_browseForwardBinding);
+            AssociatedObject.CommandBindings.Remove(_refreshBinding);
         }
 
         public string Navigation

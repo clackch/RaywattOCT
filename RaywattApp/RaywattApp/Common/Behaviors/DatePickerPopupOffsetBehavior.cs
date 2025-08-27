@@ -14,6 +14,14 @@ namespace RaywattApp.Common.Behaviors
                 typeof(DatePickerPopupOffsetBehavior),
                 new PropertyMetadata(false, OnAutoVerticalOffsetChanged));
 
+        public static readonly DependencyProperty AutoHorizontalOffsetProperty =
+            DependencyProperty.RegisterAttached(
+                "AutoHorizontalOffsetProperty",
+                typeof(bool),
+                typeof(DatePickerPopupOffsetBehavior),
+                new PropertyMetadata(false, OnAutoHorizontalOffsetChanged));
+
+
         public static bool GetAutoVerticalOffset(DependencyObject obj)
         {
             return (bool)obj.GetValue(AutoVerticalOffsetProperty);
@@ -22,6 +30,15 @@ namespace RaywattApp.Common.Behaviors
         public static void SetAutoVerticalOffset(DependencyObject obj, bool value)
         {
             obj.SetValue(AutoVerticalOffsetProperty, value);
+        }
+        public static bool GetAutoHorizontalOffset(DependencyObject obj)
+        {
+            return (bool)obj.GetValue(AutoHorizontalOffsetProperty);
+        }
+
+        public static void SetAutoHorizontalOffset(DependencyObject obj, bool value)
+        {
+            obj.SetValue(AutoHorizontalOffsetProperty, value);
         }
 
         private static void OnAutoVerticalOffsetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -61,6 +78,44 @@ namespace RaywattApp.Common.Behaviors
                                     {
                                         popup.VerticalOffset = 6;
                                         popup.Placement = PlacementMode.Bottom;
+                                    }
+                                }
+                                child.LayoutUpdated += Handler;
+                            }
+                        };
+                    }
+                };
+            }
+        }
+
+        private static void OnAutoHorizontalOffsetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is DatePicker datePicker && (bool)e.NewValue)
+            {
+                datePicker.Loaded += (s, args) =>
+                {
+                    var popup = FindPopup(datePicker);
+                    if (popup != null)
+                    {
+                        popup.Opened += (ps, pa) =>
+                        {
+                            if (popup.Child is FrameworkElement child)
+                            {
+                                void Handler(object? sender, EventArgs e)
+                                {
+                                    child.LayoutUpdated -= Handler;
+                                    try
+                                    {
+                                        double datePickerWidth = datePicker.ActualWidth;
+                                        double popupWidth = child.ActualWidth;
+
+                                        double horizontalOffset = (datePickerWidth - popupWidth) / 2;
+
+                                        popup.HorizontalOffset = horizontalOffset;
+                                    }
+                                    catch (InvalidOperationException)
+                                    {
+                                        popup.HorizontalOffset = -1; // default
                                     }
                                 }
                                 child.LayoutUpdated += Handler;

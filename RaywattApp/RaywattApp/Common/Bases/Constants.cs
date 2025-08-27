@@ -120,8 +120,6 @@ namespace RaywattApp.Common.Bases
         public const double NewPatientDialogHeight = 269;
         public const double DicomPacsDialogWidth = 860;
         public const double DicomPacsDialogHeight = 606;
-        public const double MwlSearchDialogWidth = 960;
-        public const double MwlSearchDialogHeight = 683;
         public const double EditInstituteDialogWidth = 472;
         public const double EditInstituteDialogHeight = 380;
         public const double PasswordChangeDialogWidth = 472;

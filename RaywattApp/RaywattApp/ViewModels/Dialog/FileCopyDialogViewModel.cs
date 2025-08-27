@@ -368,6 +368,7 @@ namespace RaywattApp.ViewModels.Dialog
                 }
 
                 RayExportWrapper.DestroyDcmClient(dicomClient);
+                dicomClient = IntPtr.Zero;
 
                 CommonUtil.DeleteFolder(Constants.DicomTempFolderPath);
 

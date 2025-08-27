@@ -1,19 +1,23 @@
-﻿using System.Collections.Generic;
-using System.Windows.Navigation;
-using System;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
+using RayCoreWrapper;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
+using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Services;
-using CommunityToolkit.Mvvm.Input;
-using System.Windows.Input;
 using RaywattApp.Views.Dialog;
-using RaywattApp.Common.Util;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using System.Windows.Navigation;
 
 namespace RaywattApp.ViewModels
 {
@@ -46,8 +50,20 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private bool _isChecking = false;
 
+        [ObservableProperty]
+        private TextValidator _searchPatientId = new TextValidator();
+
+        [ObservableProperty]
+        private DateTime? _spsStartDateFrom;
+
+        [ObservableProperty]
+        private DateTime? _spsStartDateTo;
+
+        [ObservableProperty]
+        private string _spsMsg;
+
         private IntPtr dicomClient;
-        private IntPtr dicomPatients;
+        private IntPtr dicomWorklists;
 
         private ICommand _backCommand;
         public ICommand BackCommand
@@ -64,7 +80,7 @@ namespace RaywattApp.ViewModels
         private ICommand _searchCommand;
         public ICommand SearchCommand
         {
-            get { return this._searchCommand ?? (this._searchCommand = new RelayCommand(Search)); }
+            get { return this._searchCommand ?? (this._searchCommand = new RelayCommand(async () => await Search())); }
         }
 
         private ICommand _selectionChangedCommand;
@@ -81,6 +97,8 @@ namespace RaywattApp.ViewModels
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
+
+            dicomClient = RayExportWrapper.CreateDcmClient();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -95,12 +113,18 @@ namespace RaywattApp.ViewModels
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 LocalHostAeTitle = (string)data["localHostAeTitle"];
                 SelectedDicomServer = (DicomServer)data["selectedDicomServer"];
+
+                bool usePeerVerification = CommonUtil.IsTestMode(DeviceStatus.TestMode, "CertIgnore") == true ? false : true;
+                RayExportWrapper.DicomNetRWError res = (RayExportWrapper.DicomNetRWError)RayExportWrapper.Initialize(dicomClient, LocalHostAeTitle, SelectedDicomServer.IpAddress, int.Parse(SelectedDicomServer.Port), SelectedDicomServer.AeTitle, SelectedDicomServer.TlsYn, usePeerVerification, SelectedDicomServer.CaFilePath);
             }
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
             _log.Debug("OnNavigating");
+
+            RayExportWrapper.DestroyDcmClient(dicomClient);
+            dicomClient = IntPtr.Zero;
         }
 
         private void Back()
@@ -283,27 +307,77 @@ namespace RaywattApp.ViewModels
             return true;
         }
 
-        private void Search()
+        private async Task Search()
         {
             _log.Debug("Search");
 
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["localHostAeTitle"] = LocalHostAeTitle;
-            parameter["dicomServer"] = SelectedDicomServer;
-            parameter["deviceStatus"] = DeviceStatus;
+            Worklists.Clear();
 
-            var result = _dialogService.OpenDialog(new MwlSearchDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-            
-            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
+            if (string.IsNullOrEmpty(SearchPatientId.Text))
             {
-                List<DicomWorklist> worklists = (List<DicomWorklist>)result.DialogReturn;
+                SearchPatientId.Msg = _l10n["Enter ID"].ToString();
+                return;
+            }
 
-                Worklists.Clear();
-                foreach (var worklist in worklists)
+            if (Regex.IsMatch(SearchPatientId.Text, @"[\*\?]"))
+            {
+                SearchPatientId.Msg = _l10n["Patient ID cannot contain * or ?."].ToString();
+                return;
+            }
+
+            if (SpsStartDateFrom?.Date > SpsStartDateTo?.Date)
+            {
+                SpsMsg = _l10n["$MSG025"].ToString();
+                return;
+            }
+
+            IsChecking = true;
+
+            RayExportWrapper.DicomNetRWError res = await Task.Run(() => (RayExportWrapper.DicomNetRWError)RayExportWrapper.Echo(dicomClient));
+            _log.DebugFormat("Echo : {0}", res);
+            IsChecking = false;
+
+            if (res == RayExportWrapper.DicomNetRWError.NoConnection || res == RayExportWrapper.DicomNetRWError.EchoFail)
+            {
+                IsChecking = true;
+                bool usePeerVerification = CommonUtil.IsTestMode(DeviceStatus.TestMode, "CertIgnore") == true ? false : true;
+                res = await Task.Run(() => (RayExportWrapper.DicomNetRWError)RayExportWrapper.Initialize(dicomClient, LocalHostAeTitle, SelectedDicomServer.IpAddress, int.Parse(SelectedDicomServer.Port), SelectedDicomServer.AeTitle, SelectedDicomServer.TlsYn, usePeerVerification, SelectedDicomServer.CaFilePath));
+                _log.DebugFormat("Initialize : {0}", res);
+                IsChecking = false;
+
+                if (res != RayExportWrapper.DicomNetRWError.Normal)
                 {
-                    Worklists.Add(worklist);
+                    Dictionary<string, object> parameter = new Dictionary<string, object>();
+                    parameter["title"] = _l10n["Information"];
+                    parameter["message"] = CommonUtil.GetDicomResultMessage(res);
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                    return;
                 }
             }
+
+            int count = 0;
+
+            string searchPatientName = SearchPatientId.Text.Trim();
+            string searchSpsStartDateFrom = SpsStartDateFrom.HasValue ? SpsStartDateFrom.Value.ToString("yyyyMMdd") : "00010101";
+            string searchSpsStartDateTo = SpsStartDateTo.HasValue ? SpsStartDateTo.Value.ToString("yyyyMMdd") : "99991231";
+
+            dicomWorklists = await Task.Run(() => RayExportWrapper.FindWorklist(dicomClient, searchPatientName, "*" /* PatientName */, "*" /* AccessionNumber */, "OCT", "*" /* ScheduledStationAe */, searchSpsStartDateFrom, searchSpsStartDateTo, "*" /* ProcedureId */, out count));
+            _log.Debug($"FindWorklist : PatientId = {searchPatientName}, SpsStartDate = {searchSpsStartDateFrom}-{searchSpsStartDateTo}, ResultCount = {count}");
+            IsChecking = false;
+
+            if (dicomWorklists != IntPtr.Zero)
+            {
+                IntPtr current = dicomWorklists;
+
+                for (int i = 0; i < count; i++)
+                {
+                    var dicomWorklist = Marshal.PtrToStructure<DicomWorklist>(current);
+                    Worklists.Add(dicomWorklist);
+
+                    current += Marshal.SizeOf<DicomWorklist>();
+                }
+            }
+            RayExportWrapper.FreeMemory(dicomWorklists);
         }
 
         private bool CanNext()
@@ -330,6 +404,12 @@ namespace RaywattApp.ViewModels
             PrevStatus.ListPageSize = 10;
             PrevStatus.ListPageGroup = 1;
             PrevStatus.ListPageNumber = 0;
+        }
+
+        partial void OnSpsStartDateFromChanged(DateTime? value)
+        {
+            if (SpsStartDateFrom?.Date <= SpsStartDateTo?.Date)
+                SpsMsg = "";
         }
     }
 }

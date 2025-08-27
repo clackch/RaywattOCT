@@ -89,6 +89,7 @@ namespace RaywattApp.ViewModels.File
             base.OnNavigating(sender, navigationEventArgs);
 
             RayExportWrapper.DestroyDcmClient(dicomClient);
+            dicomClient = IntPtr.Zero;
         }
 
         private void SetCondition()
@@ -162,6 +163,7 @@ namespace RaywattApp.ViewModels.File
             var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter, Constants.FileExportDialogWidth, Constants.FileExportDialogHeight);
 
             RayExportWrapper.DestroyDcmClient(dicomClient);
+            dicomClient = IntPtr.Zero;
 
             Close();
         }

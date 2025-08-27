@@ -1,22 +1,23 @@
-﻿using System.Collections.Generic;
-using System.Windows.Navigation;
-using System;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
+using RayCoreWrapper;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
+using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Services;
-using CommunityToolkit.Mvvm.Input;
-using System.Windows.Input;
 using RaywattApp.Views.Dialog;
-using RaywattApp.Common.Util;
-using RayCoreWrapper;
-using System.Runtime.InteropServices;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Input;
+using System.Windows.Navigation;
 
 namespace RaywattApp.ViewModels
 {
@@ -33,9 +34,6 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private TextValidator _searchPatientId = new TextValidator();
-
-        [ObservableProperty]
-        private string _searchPatientName = "";
 
         [ObservableProperty]
         private ObservableCollection<Patient> _patients = new ObservableCollection<Patient>();
@@ -114,6 +112,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("OnNavigating");
 
             RayExportWrapper.DestroyDcmClient(dicomClient);
+            dicomClient = IntPtr.Zero;
         }
 
         private void Back()
@@ -267,14 +266,19 @@ namespace RaywattApp.ViewModels
 
             Patients.Clear();
 
-            if (string.IsNullOrEmpty(SearchPatientId.Text) && string.IsNullOrEmpty(SearchPatientName))
+            if (string.IsNullOrEmpty(SearchPatientId.Text))
             {
-                SearchPatientId.Msg = "Please enter the value to search for.";
+                SearchPatientId.Msg = _l10n["Enter ID"].ToString();
                 return;
             }
 
-            string patientIdParam = string.IsNullOrEmpty(SearchPatientId.Text) ? "*" : "*" + SearchPatientId.Text.Trim() + "*";
-            string patientNameParam = string.IsNullOrEmpty(SearchPatientName) ? "*" : "*" + SearchPatientName.Trim() + "*";
+            if (Regex.IsMatch(SearchPatientId.Text, @"[\*\?]"))
+            {
+                SearchPatientId.Msg = _l10n["Patient ID cannot contain * or ?."].ToString();
+                return;
+            }
+
+            string patientIdParam = SearchPatientId.Text.Trim();
 
             IsChecking = true;
             RayExportWrapper.DicomNetRWError res = await Task.Run(() => (RayExportWrapper.DicomNetRWError)RayExportWrapper.Echo(dicomClient));
@@ -301,7 +305,8 @@ namespace RaywattApp.ViewModels
 
             int count = 0;
             IsChecking = true;
-            dicomPatients = await Task.Run(() => (RayExportWrapper.FindPatients(dicomClient, patientIdParam, patientNameParam, out count)));
+            dicomPatients = await Task.Run(() => (RayExportWrapper.FindPatients(dicomClient, patientIdParam, "*" /* PatientName */, out count)));
+            _log.Debug($"FindPatient : PatientId = {patientIdParam}, ResultCount = {count}");
             IsChecking = false;
 
             if (dicomPatients != IntPtr.Zero)
