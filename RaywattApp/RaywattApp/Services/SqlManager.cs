@@ -135,8 +135,7 @@ namespace RaywattApp.Services
             else
             {
                 commandText = SqlQuery.GetQuery("SelectPatient");
-            }
-            
+            }           
 
             return _databaseService.GetDatas<Patient>(commandText, sqlParameters);
         }
@@ -398,20 +397,20 @@ namespace RaywattApp.Services
             return _databaseService.InsertData(commandText, sqlParameters);
         }
 
-        public IList<StringModel> SelectPatientCaseFfrPlaque(Dictionary<string, Object> sqlParameters)
+        public IList<StringModel> SelectPatientCaseFfr(Dictionary<string, Object> sqlParameters)
         {
-            _log.Debug("SelectPatientCaseFfrPlaque");
+            _log.Debug("SelectPatientCaseFfr");
 
-            string commandText = SqlQuery.GetQuery("SelectPatientCaseFfrPlaque");
+            string commandText = SqlQuery.GetQuery("SelectPatientCaseFfr");
 
             return _databaseService.GetDatas<StringModel>(commandText, sqlParameters);
         }
 
-        public int UpdatePatientCaseFfrPlaque(Dictionary<string, Object> sqlParameters)
+        public int UpdatePatientCaseFfr(Dictionary<string, Object> sqlParameters)
         {
-            _log.Debug("UpdatePatientCaseFfrPlaque");
+            _log.Debug("UpdatePatientCaseFfr");
 
-            string commandText = SqlQuery.GetQuery("UpdatePatientCaseFfrPlaque");
+            string commandText = SqlQuery.GetQuery("UpdatePatientCaseFfr");
 
             return _databaseService.InsertData(commandText, sqlParameters);
         }

@@ -126,7 +126,8 @@ void CDataWriter::StopSave() {
 char* CDataWriter::GetSample(int nFrame) {
 	if (nFrame >= m_nNumOfSamples) return NULL;
 
-	unsigned long long ulOffset = (m_nNumOfSamples - nFrame - 1) * (unsigned long long) m_nElementSize;	// Get Sample from Proximal to Distal
+	//unsigned long long ulOffset = (m_nNumOfSamples - nFrame - 1) * (unsigned long long) m_nElementSize;	// Get Sample from Proximal to Distal
+	unsigned long long ulOffset = (nFrame) * (unsigned long long) m_nElementSize;	// Get Sample from Distal to Proximal
 	return (m_pRecordBuffer + ulOffset);
 }
 

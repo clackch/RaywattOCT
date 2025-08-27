@@ -501,10 +501,7 @@ namespace RaywattApp.ViewModels.Dialog
             for (int i = 0; i < this.crossSections.Count; i++)
             {
                 Measurement measurement = new Measurement();
-                measurement.FrameNumber = i;
-                measurement.AreaGeometries = new ObservableCollection<AreaGeometry>();
-                measurement.LengthGeometries = new ObservableCollection<LengthGeometry>();
-                measurement.TextGeometries = new List<TextGeometry>();
+                measurement.FrameNumber = i;                
                 Measurements.Add(measurement);
             }
 

@@ -23,6 +23,9 @@
                 <DataTrigger Binding="{Binding CommandType, ElementName=UserControl}" Value="4">
                     <Setter Property="Cursor" Value="{StaticResource measureErase}"/>
                 </DataTrigger>
+                <DataTrigger Binding="{Binding CommandType, ElementName=UserControl}" Value="5">
+                    <Setter Property="Cursor" Value="{StaticResource measureAngle}"/>
+                </DataTrigger>
             </Style.Triggers>
         </Style>
         <Style TargetType="Path" x:Key="StylePath">
@@ -93,7 +96,7 @@
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="FontSize" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter=12}"/>
+            <Setter Property="FontSize" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter=20}"/>
         </Style>
         <Style TargetType="Label" x:Key="StyleLabelText">
             <Setter Property="Padding" Value="0"/>
@@ -101,7 +104,7 @@
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="FontSize" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter=12}"/>
+            <Setter Property="FontSize" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter=20}"/>
             <Style.Triggers>
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
@@ -151,7 +154,7 @@
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="MaxLength" Value="50"/>
             <Setter Property="Cursor" Value="{StaticResource iBeam}"/>
-            <Setter Property="FontSize" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter=12}"/>
+            <Setter Property="FontSize" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter=20}"/>
         </Style>
     </UserControl.Resources>
 

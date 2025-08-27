@@ -9,13 +9,16 @@ namespace RaywattApp.Common.Annotation.Models
         private int frameNumber;
         public int FrameNumber { get { return frameNumber; } set { frameNumber = value; } }
 
-        private ObservableCollection<AreaGeometry> areaGeometries;
+        private ObservableCollection<AreaGeometry> areaGeometries = new ObservableCollection<AreaGeometry>();
         public ObservableCollection<AreaGeometry> AreaGeometries { get { return areaGeometries; } set { areaGeometries = value; OnPropertyChanged(nameof(AreaGeometries)); } }
 
-        private ObservableCollection<LengthGeometry> lengthGeometries;
+        private ObservableCollection<LengthGeometry> lengthGeometries = new ObservableCollection<LengthGeometry>();
         public ObservableCollection<LengthGeometry> LengthGeometries { get { return lengthGeometries; } set { lengthGeometries = value; OnPropertyChanged(nameof(LengthGeometries)); } }
 
-        private List<TextGeometry> textGeometries;
+        private ObservableCollection<AngleGeometry> angleGeometries = new ObservableCollection<AngleGeometry>();
+        public ObservableCollection<AngleGeometry> AngleGeometries { get { return angleGeometries; } set { angleGeometries = value; OnPropertyChanged(nameof(AngleGeometries)); } }
+
+        private List<TextGeometry> textGeometries = new List<TextGeometry>();
         public List<TextGeometry> TextGeometries { get { return textGeometries; } set { textGeometries = value; OnPropertyChanged(nameof(TextGeometries)); } }
     }
 }

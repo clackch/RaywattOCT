@@ -59,10 +59,18 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("OnNavigated");
 
-            if (navigatedEventArgs is not NavigationEventArgs navArgs || navArgs.ExtraData is not Dictionary<string, object> data)
+            if (navigatedEventArgs is not NavigationEventArgs navArgs)
                 return;
 
-            InitializeSystem();
+            if (CommonUtil.IsRV200())
+            {
+                if(TermsAndConditionCheck())
+                    InitializeSystem();
+            }
+            else
+            {
+                InitializeSystem();
+            }
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -145,6 +153,7 @@ namespace RaywattApp.ViewModels
 
             RayError result = (RayError)RayInitSystem();
 
+            result |= (RayError)RaySetConfigPath(Constants.ConfigPath);
             result |= (RayError)RayStartSystem();
 
             if (result == RayError.OK)
@@ -188,6 +197,35 @@ namespace RaywattApp.ViewModels
             timer.Tick += ProgressTest;
             timer.Interval = TimeSpan.FromMilliseconds(25);
             timer.Start();
+        }
+
+        private bool TermsAndConditionCheck()
+        {
+            _log.Debug("TermsAndConditionCheck");
+
+            // Terms and Contidions 확인
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "Terms&Cond";
+            IList<Configuration> tnCs = _sqlManager.SelectConfiguration(sqlParameters);
+            if (tnCs != null || tnCs.Count == 1)
+            {
+                if ("N".Equals(tnCs[0].Value))
+                {
+                    Dictionary<string, object> parameter = new Dictionary<string, object>();
+                    parameter["tnC"] = tnCs[0];
+                    var result = _dialogService.OpenDialog(new TermsConditionsControl_RV200(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                    if (result != null && result.DialogAnswer == DialogResults.Answer.No)
+                    {
+                        DeviceStatus.PowerOffMsg = _l10n["Switching user"];
+                        CommonUtil.Exit(DeviceStatus, _angioManager, false, true);
+
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
 
     }

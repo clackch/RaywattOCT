@@ -33,6 +33,7 @@ using FFMpegCore;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using RayCoreWrapper;
+using System.Diagnostics;
 
 namespace RaywattApp.Common.Util
 {
@@ -678,21 +679,30 @@ namespace RaywattApp.Common.Util
             //Side Branch
             if (lumenSidebranch.Points != null && lumenSidebranch.Points.Count > 0)
             {
-                int sbThickness = 5;
-                if (lumenArea / 2 < sbThickness)
-                    sbThickness = lumenArea / 2 - 1;
-
-                if (curFrame >= frameProximal && curFrame <= frameDistal)
+                if (!lumenSidebranch.IsCalcOverlapping)
                 {
-                    Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - sbThickness), new Point(position, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0xe4, 0xe4, 0xe4));
-                    if (!isEdge)
-                        Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - sbThickness), new Point(position + 1, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0xe4, 0xe4, 0xe4));
+                    lumenSidebranch.IsOverlapping = IsTargetPolygonOverlapping(lumenSidebranch.Points, lumenContour.Points);
+                    lumenSidebranch.IsCalcOverlapping = true;
                 }
-                else
+
+                if (lumenSidebranch.IsOverlapping)
                 {
-                    Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - sbThickness), new Point(position, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0x7d, 0x7d, 0x7d));
-                    if (!isEdge)
-                        Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - sbThickness), new Point(position + 1, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0x7d, 0x7d, 0x7d));
+                    int sbThickness = 5;
+                    if (lumenArea / 2 < sbThickness)
+                        sbThickness = lumenArea / 2 - 1;
+
+                    if (curFrame >= frameProximal && curFrame <= frameDistal)
+                    {
+                        Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - sbThickness), new Point(position, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0xe4, 0xe4, 0xe4));
+                        if (!isEdge)
+                            Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - sbThickness), new Point(position + 1, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0xe4, 0xe4, 0xe4));
+                    }
+                    else
+                    {
+                        Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - sbThickness), new Point(position, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0x7d, 0x7d, 0x7d));
+                        if (!isEdge)
+                            Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - sbThickness), new Point(position + 1, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0x7d, 0x7d, 0x7d));
+                    }
                 }
             }
 
@@ -1239,10 +1249,31 @@ namespace RaywattApp.Common.Util
             if (angioManager != null)
                 angioManager.CloseAngioManager();
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
+            if (CommonUtil.IsRV200())
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoadingPage));
+            else
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
 
             Thread threadReadyPullback = new Thread(() => ThreadExit(deviceStatus, isShutdown, isAdmin));
             threadReadyPullback.Start();
+        }
+
+        private static void ForceShutdown()
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "shutdown",
+                    Arguments = "/s /f /t 0",
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                });
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"ForceShutdown Error: {ex.Message}");
+            }
         }
 
         private static void ThreadExit(DeviceStatus? deviceStatus, bool isShutdown, bool isAdmin)
@@ -1263,14 +1294,17 @@ namespace RaywattApp.Common.Util
                     _log.Error("RayStopSystem Error");
                 }
 
-                result = (RayError)ODSOCT_DeleteDll();
-                if (result != RayError.OK)
+                int ray3DResult = ODSOCT_DeleteDll();
+                if (ray3DResult != 0)
                 {
                     _log.Error("ODSOCT_DeleteDll Error");
                 }
 
-                deviceStatus.IsServiceStarted = false;
-                deviceStatus.IsDeviceConnected = false;
+                if(deviceStatus != null)
+                {
+                    deviceStatus.IsServiceStarted = false;
+                    deviceStatus.IsDeviceConnected = false;
+                }
             }
             
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
@@ -1278,19 +1312,28 @@ namespace RaywattApp.Common.Util
                 if (deviceStatus == null)
                 {
                     System.Windows.Application.Current.MainWindow.Close();
-                    Win32Helper.Shutdown();
+                    ForceShutdown();
                 }
                 else if (isShutdown)
                 {
                     System.Windows.Application.Current.MainWindow.Close();
 
                     if (!CommonUtil.IsTestMode(deviceStatus.TestMode, "Power"))
-                        Win32Helper.Shutdown();
+                        ForceShutdown();
                 }
                 else
                 {
-                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
-                    deviceStatus.IsPowerOff = false;
+                    if (CommonUtil.IsRV200())
+                    {
+                        System.Windows.Application.Current.MainWindow.Close();
+                        
+                        if (!CommonUtil.IsTestMode(deviceStatus.TestMode, "Power"))
+                            Win32Helper.LogOff();
+                    }
+                    else
+                    {
+                        deviceStatus.IsPowerOff = false;
+                    }
                 }
             });
         }
@@ -2715,6 +2758,48 @@ namespace RaywattApp.Common.Util
             }
         }
 
+        // List<Point> → PathGeometry 변환
+        public static PathGeometry CreatePolygonGeometry(List<System.Windows.Point> points)
+        {
+            var figure = new PathFigure
+            {
+                StartPoint = points[0],
+                IsClosed = true,
+                IsFilled = true
+            };
+
+            for (int i = 1; i < points.Count; i++)
+            {
+                figure.Segments.Add(new LineSegment(points[i], true));
+            }
+
+            return new PathGeometry(new[] { figure });
+        }
+
+        // 두 도형이 겹치는지 확인
+        public static bool ArePolygonsOverlapping(List<System.Windows.Point> polygon1, List<System.Windows.Point> polygon2)
+        {
+            if (polygon1 == null || polygon1.Count < 3 || polygon2 == null || polygon2.Count < 3)
+                return false;
+
+            var geom1 = CreatePolygonGeometry(polygon1);
+            var geom2 = CreatePolygonGeometry(polygon2);
+
+            var intersect = Geometry.Combine(geom1, geom2, GeometryCombineMode.Intersect, null);
+            return !intersect.IsEmpty();
+        }
+
+        // 여러 도형 중 하나라도 겹치는지 확인
+        public static bool IsTargetPolygonOverlapping(List<List<System.Windows.Point>> polygons, List<System.Windows.Point> targetPolygon)
+        {
+            foreach (var polygon in polygons)
+            {
+                if (ArePolygonsOverlapping(polygon, targetPolygon))
+                    return true;
+            }
+            return false;
+        }
+      
         public static string GenerateRandomPassword(int length = 8)
         {
             char[] PasswordChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()".ToCharArray();
@@ -2731,6 +2816,14 @@ namespace RaywattApp.Common.Util
                 }
             }
             return password.ToString();
+        }
+
+        public static bool IsRV200()
+        {
+            if ("RV200".Equals(System.Configuration.ConfigurationManager.AppSettings.Get("ModelVersion")))
+                return true;
+            else
+                return false;
         }
 
     }

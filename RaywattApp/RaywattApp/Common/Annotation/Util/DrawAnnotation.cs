@@ -49,7 +49,6 @@ namespace RaywattApp.Common.Annotation.Util
                     DrawLengthGeometry(context, length, xScale, yScale);
                 }
             }
-
             if (measurement.TextGeometries != null)
             {
                 foreach (TextGeometry text in measurement.TextGeometries)
@@ -95,7 +94,6 @@ namespace RaywattApp.Common.Annotation.Util
 
             DrawLengthLabel(context, length.FirstPoint, length.SecondPoint, GetLabelText(length.Length), xScale, yScale);
         }
-
         public static void DrawTextGeometry(DrawingContext context, TextGeometry text, double xScale, double yScale)
         {
             Rect rect = DrawText(context, text.TextPoint, text.Text, xScale, yScale);

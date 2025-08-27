@@ -236,6 +236,11 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Next");
 
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = Patient;
+            parameter["patientCase"] = PatientCase;
+            parameter["prevStatus"] = PrevStatus;
+
             PatientCase.FlushMedia = SelectedFlushMedia;
             PatientCase.PullbackType = SelectedPullbackType;
             PatientCase.PullbackLength = PbLength + "0";
@@ -243,21 +248,24 @@ namespace RaywattApp.ViewModels
             PatientCase.Vessel = CurrentVessel.Key;
             PatientCase.Location = CurrentLocation.Key;
 
-            double sheathType = 2.6;
-            if (PatientCase.AccessionNumber.Equals("1.7"))
-                sheathType = 1.7;
-            RayError result = (RayError)RaySetProperty(Property.SheathDiameter, sheathType);
-            if (result != RayError.OK)
+            if (DeviceStatus.CatheterStatus == Constants.CatheterStatusFailed)
             {
-                _log.Error("RaySetProperty Error");
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingCatheterFailPage) { Parameter = parameter });
             }
-            PatientCase.SheathDiameter = RayGetProperty(Property.SheathDiameter);
+            else
+            {
+                double sheathType = 2.6;
+                if (PatientCase.AccessionNumber.Equals("1.7"))
+                    sheathType = 1.7;
+                RayError result = (RayError)RaySetProperty(Property.SheathDiameter, sheathType);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
+                PatientCase.SheathDiameter = RayGetProperty(Property.SheathDiameter);
 
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["patient"] = Patient;
-            parameter["patientCase"] = PatientCase;
-            parameter["prevStatus"] = PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
+            }
         }
     }
 }

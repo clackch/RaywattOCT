@@ -13,6 +13,9 @@ namespace RaywattApp.Models
         private string _vesselType;
 
         [ObservableProperty]
+        private string _vesselTypeGroup;
+
+        [ObservableProperty]
         private string _actualVesselType;
 
         [ObservableProperty]
@@ -38,6 +41,9 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private bool _isPlaqueAreaValid;
+
+        [ObservableProperty]
+        private double _result;
 
         [ObservableProperty]
         private List<Measurement> _plaqueAreaList;

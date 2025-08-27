@@ -59,5 +59,6 @@ public:
 	static void GetCurTime(char* strTime);
 	static std::wstring StringToWstring(const std::string& var);
 	static std::string GetFileExtension(const std::string path);
+	static bool IsExist(std::string path, bool isFile);
 };
 

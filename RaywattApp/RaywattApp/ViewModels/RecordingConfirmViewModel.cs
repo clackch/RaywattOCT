@@ -116,7 +116,15 @@ namespace RaywattApp.ViewModels
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
             parameter["patientCase"] = PatientCase;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
+
+            if (DeviceStatus.CatheterStatus == Constants.CatheterStatusFailed)
+            {
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingCatheterFailPage) { Parameter = parameter });
+            }
+            else
+            {
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
+            }                
         }
 
         private void Confirm()

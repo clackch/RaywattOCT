@@ -8,5 +8,11 @@ namespace RaywattApp.Common.Annotation.Models
     {
         [ObservableProperty]
         private List<List<Point>>? points;
+
+        [ObservableProperty]
+        private bool isCalcOverlapping = false;
+
+        [ObservableProperty]
+        private bool isOverlapping = false;
     }
 }

@@ -17,6 +17,11 @@ CConfiguration& CConfiguration::GetInstance() {
 	return pInstance;
 }
 
+void CConfiguration::SetPath(tstring configPath)
+{
+	this->configPath = configPath;
+}
+
 void CConfiguration::Initialize(tstring configFile)
 {
 	TCHAR sIniValueString[MAX_PATH] = _T("");
@@ -90,6 +95,7 @@ void CConfiguration::Initialize(tstring configFile)
 	this->catheter.manualLoad = ::GetPrivateProfileInt(_T("Catheter"), _T("ManualLoad"), 0, configFilePath.c_str());
 	this->catheter.length = ::GetPrivateProfileInt(_T("Catheter"), _T("Length1.7"), -45000, configFilePath.c_str());
 	this->catheter.catheterValidationOnOff = ::GetPrivateProfileInt(_T("Catheter"), _T("CatheterValidationOnOff"), 0, configFilePath.c_str());
+	this->catheter.catheterAutoCalibrationOnOff = ::GetPrivateProfileInt(_T("Catheter"), _T("CatheterAutoCalibrationOnOff"), 0, configFilePath.c_str());
 
 	// [Volume]
 	this->volume.size = ::GetPrivateProfileInt(_T("Volume"), _T("Size"), 500, configFilePath.c_str());
