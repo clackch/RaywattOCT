@@ -91,7 +91,7 @@ namespace RaywattApp.ViewModels.Dialog
             }
             else
             {
-                _angioManager.SendChpFilePacket(SelectedCathRoom.AppChp);
+                _angioManager.SendChpFilePacket(SelectedCathRoom.SetupChp);
 
                 while (_angioManager.IsChpFileChangeSuccess == 0)
                 {

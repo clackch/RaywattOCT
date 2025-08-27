@@ -64,7 +64,7 @@ bool Repository::InitCropRegion(FrameGrabber& fg)
 {
     if (!conn) return false;
 
-    std::string query = "SELECT rect_left, rect_top, rect_right, rect_bottom ""FROM rv_schema.cath_room WHERE app_chp = '" + std::string(fg.chpFileName.c_str()) + "';";
+    std::string query = "SELECT rect_left, rect_top, rect_right, rect_bottom ""FROM rv_schema.cath_room WHERE setup_chp = '" + std::string(fg.chpFileName.c_str()) + "';";
     short cropWidth, cropHeight;
 
     PGresult* res = PQexec(conn, query.c_str());
