@@ -678,81 +678,116 @@ UINT COCTImaging::threadRender(LPVOID param) {
 
 void COCTImaging::adaptive_compensation()
 {
-
 	if (!bCompensated || m_setting.applyCompensation == 0)
 		return;
 
-	// Rotate the image
-	cv::Mat rotated_img;
-	cv::rotate(imageResult, rotated_img, cv::ROTATE_90_COUNTERCLOCKWISE);
-	rotated_img.convertTo(rotated_img, CV_32F);
+	// 0) 설정값 확정 (원 로직 유지)
+	EXPONENTIAL_FACTOR = (EXPONENTIAL_FACTOR <= -1.0f) ? m_setting.exponentialFactor : EXPONENTIAL_FACTOR;
+	BRIGHTNESS_CONTROL = (BRIGHTNESS_CONTROL <= -1.0f) ? m_setting.brightnessControl : BRIGHTNESS_CONTROL;
+	ENERGY_THRESHOLD = (ENERGY_THRESHOLD <= -1.0f) ? m_setting.energyThreshold : ENERGY_THRESHOLD;
+	INTENSITY_THRESHOLD = (INTENSITY_THRESHOLD <= -1) ? m_setting.intensityThreshold : INTENSITY_THRESHOLD;
 
-	rotated_img(cv::Range(rotated_img.rows - 60, rotated_img.rows), cv::Range::all()).setTo(cv::Scalar(0));
+	// 1) 회전 + 32F 변환
+	cv::Mat rotated;
+	cv::rotate(imageResult, rotated, cv::ROTATE_90_COUNTERCLOCKWISE);
+	rotated.convertTo(rotated, CV_32F);
 
-	int rows = rotated_img.rows;
-	int cols = rotated_img.cols;
+	// 2) 하단 60행 0으로 (원 코드와 동일)
+	const int rows = rotated.rows;
+	const int cols = rotated.cols;
+	if (rows > 0) {
+		const int pad = std::min(60, rows);
+		rotated.rowRange(rows - pad, rows).setTo(0);
+	}
 
-	cv::Mat energy_all = cv::Mat::zeros(rotated_img.size(), CV_32F);
-	cv::Mat result_img = cv::Mat::zeros(rotated_img.size(), CV_32F);
+	// 3) 결과 버퍼
+	cv::Mat result_img = cv::Mat::zeros(rotated.size(), CV_32F);
 
-	std::vector<int> stop_rows(cols, 0);
-	
-	EXPONENTIAL_FACTOR = EXPONENTIAL_FACTOR <= -1.00f ? m_setting.exponentialFactor : EXPONENTIAL_FACTOR;
-	BRIGHTNESS_CONTROL = BRIGHTNESS_CONTROL <= -1.00f ? m_setting.brightnessControl : BRIGHTNESS_CONTROL;
-	ENERGY_THRESHOLD = ENERGY_THRESHOLD <= -1.00f ? m_setting.energyThreshold : ENERGY_THRESHOLD;
-	INTENSITY_THRESHOLD = INTENSITY_THRESHOLD <= -1 ? m_setting.intensityThreshold : INTENSITY_THRESHOLD;
-	// Compute energy using cumulative sum (with OpenMP)
-#pragma omp parallel for
-	for (int x = 0; x < cols; ++x) {
-		cv::Mat I_n = rotated_img.col(x).clone(); // clone() 사용으로 독립적인 메모리
+	// 4) 상수 사전 계산
+	const float denom10 = static_cast<float>(std::pow(10.0f, static_cast<float>(ENERGY_THRESHOLD)));
+	const int   tail = std::min(60, rows);                    // 0 패딩 영역 크기
+	const float EPS = 1e-6f;
+	const float tailConst = static_cast<float>(std::pow(EPS, EXPONENTIAL_FACTOR)); // pow(0+eps, k)
 
-		// 자연 로그 계산 후 지수 연산 적용
-		cv::Mat log_img, exp_img;
-		cv::log(I_n + 1e-6, log_img);  // 1e-6을 추가해 로그 계산에서 0을 피함
-		cv::exp(EXPONENTIAL_FACTOR * log_img, exp_img);  // EXPONENTIAL_FACTOR 적용 후 exp 사용
-		I_n = exp_img.clone();  // 결과 저장
+	// 5) A: OpenCV 내부 스레딩 비활성화 (중첩 스레딩 방지)
+	const int prev_cv_threads = cv::getNumThreads();
+	cv::setNumThreads(1);
 
-		// 누적 합 계산
-		std::vector<float> cumulativeSum(rows, 0.0f);
-		cumulativeSum[rows - 1] = I_n.at<float>(rows - 1);
-		for (int i = rows - 2; i >= 0; --i) {
-			cumulativeSum[i] = cumulativeSum[i + 1] + I_n.at<float>(i);
-		}
+	// 행 단위 stride(요소 단위)
+	const size_t stepRot = rotated.step1(); // float 요소 단위
+	const size_t stepRes = result_img.step1();
 
-		// 에너지 계산
-		for (int z = 0; z < rows; ++z) {
-			float sum_val = cumulativeSum[z];
-			energy_all.at<float>(z, x) = sum_val * sum_val;
+	// 6) B: 전치 없이 열을 스레드 로컬 1D 버퍼로 모아 add+pow(2패스) 수행
+#pragma omp parallel
+	{
+		std::vector<float> col(rows), csum(rows);
 
-			if (sum_val < energy_all.at<float>(0, x) / std::pow(10.0, ENERGY_THRESHOLD)) {
-				stop_rows[x] = z;
+#pragma omp for schedule(static)
+		for (int x = 0; x < cols; ++x)
+		{
+			// 6-1) 열 → 연속 버퍼로 모으기 (gather)
+			const float* baseIn = rotated.ptr<float>(0);
+			for (int r = 0; r < rows; ++r)
+				col[r] = baseIn[r * stepRot + x];
 
-				break;
+			// === 6-2) add + pow 로 2패스 축소 + 하단 60행 스킵 ===
+			if (tail > 0) {
+				// 하단 60행은 입력이 0 → pow(0+eps, k)로 동일 상수
+				for (int r = rows - tail; r < rows; ++r)
+					col[r] = tailConst;
 			}
-		}
+			if (rows > tail) {
+				// 나머지 구간만 연산 (연속 메모리)
+				cv::Mat headMat(rows - tail, 1, CV_32F, col.data());            // 상단 구간 뷰
+				cv::add(headMat, cv::Scalar(EPS), headMat);                      // add
+				cv::pow(headMat, static_cast<double>(EXPONENTIAL_FACTOR), headMat); // pow
+			}
 
-		double stop_cumsum = 0;
+			// 6-3) 누적합(아래→위)
+			if (rows > 0) {
+				csum[rows - 1] = col[rows - 1];
+				for (int i = rows - 2; i >= 0; --i)
+					csum[i] = csum[i + 1] + col[i];
+			}
 
-		// 결과 계산
-		for (int z = 0; z < rows; ++z) {
-			float sum_val = cumulativeSum[z];
-			// threshold_row를 기준으로 보정 적용
-			if (z <= stop_rows[x]) {
-				float sum_val_pow = std::exp(BRIGHTNESS_CONTROL * std::log(sum_val)) * 2;
-				if (sum_val != 0) {
-					result_img.at<float>(z, x) = I_n.at<float>(z) / sum_val_pow;
-					stop_cumsum = sum_val_pow;
+			// 6-4) 임계 탐색 (energy_all(0,x) == csum[0]^2 와 동치)
+			const float totalE = (rows > 0) ? (csum[0] * csum[0]) : 0.0f;
+			const float thresh = (denom10 != 0.0f) ? (totalE / denom10) : std::numeric_limits<float>::infinity();
+
+			int stop_row = rows - 1;
+			for (int z = 0; z < rows; ++z) {
+				if (csum[z] < thresh) { stop_row = z; break; }
+			}
+
+			// 6-5) 출력 계산 (원 로직/식 동일)
+			double stop_cumsum = 0.0;
+			float* baseOut = result_img.ptr<float>(0);
+
+			for (int z = 0; z <= stop_row; ++z)
+			{
+				const float sv = csum[z];
+				if (sv != 0.0f)
+				{
+					const float denom = std::exp(BRIGHTNESS_CONTROL * std::log(sv)) * 2.0f;
+					baseOut[z * stepRes + x] = col[z] / denom;
+					stop_cumsum = denom;
+				}
+				else
+				{
+					baseOut[z * stepRes + x] = 0.0f;
 				}
 			}
-			else {
-				if (stop_cumsum == 0) {
-					stop_cumsum = 1;
-					PLOGI.printf("the value cannot be divided by zero");
-				}
-				result_img.at<float>(z, x) = I_n.at<float>(z) / stop_cumsum;
+			for (int z = stop_row + 1; z < rows; ++z)
+			{
+				baseOut[z * stepRes + x] =
+					(stop_cumsum != 0.0) ? (col[z] / static_cast<float>(stop_cumsum)) : 0.0f;
 			}
 		}
 	}
+
+	// 7) OpenCV 스레딩 복원
+	cv::setNumThreads(prev_cv_threads);
+
 	// Linear contrast stretching
 	logarithmic_contrast_stretching(result_img);
 	result_img.convertTo(result_img, CV_8U, INTENSITY_THRESHOLD);
@@ -773,49 +808,114 @@ void COCTImaging::min_max_normalization(const cv::Mat& img, cv::Mat& normalized_
 
 void COCTImaging::logarithmic_contrast_stretching(cv::Mat& img, float lower_percentile, float upper_percentile)
 {
-	// 1. 1D 벡터로 변환하여 퍼센타일 계산
-	cv::Mat img_reshaped = img.reshape(1, img.rows * img.cols);  // 1D로 변환
-	std::vector<float> img_values;
-	if (!img_reshaped.empty()) {
-		float* ptr = img_reshaped.ptr<float>(0);
-		img_values.assign(ptr, ptr + img_reshaped.total());
+	CV_Assert(img.type() == CV_32F);
+	const int rows = img.rows;
+	const int cols = img.cols;
+	const size_t N = static_cast<size_t>(rows) * static_cast<size_t>(cols);
+	if (N == 0) return;
+
+	// 0) min/max 1패스 (스레드별 로컬 → 병합) : 스트리밍
+	int nt = 1;
+#ifdef _OPENMP
+	nt = std::max(1, omp_get_max_threads());
+#endif
+	std::vector<float> tmin(nt, FLT_MAX), tmax(nt, -FLT_MAX);
+
+#pragma omp parallel for schedule(static)
+	for (int i = 0; i < rows; ++i) {
+#ifdef _OPENMP
+		const int tid = omp_get_thread_num();
+#else
+		const int tid = 0;
+#endif
+		const float* p = img.ptr<float>(i);
+		float lmin = tmin[tid], lmax = tmax[tid];
+		for (int j = 0; j < cols; ++j) {
+			float v = p[j];
+			if (v < lmin) lmin = v;
+			if (v > lmax) lmax = v;
+		}
+		tmin[tid] = lmin;
+		tmax[tid] = lmax;
+	}
+	float vmin = FLT_MAX, vmax = -FLT_MAX;
+	for (int t = 0; t < nt; ++t) {
+		if (tmin[t] < vmin) vmin = tmin[t];
+		if (tmax[t] > vmax) vmax = tmax[t];
+	}
+	if (!(vmax > vmin)) { img.setTo(0); return; }
+
+	// 1) 히스토그램 기반 퍼센타일
+	constexpr int BINS = 4096;
+	const float eps = 1e-8f;
+	const float invWidth = (BINS - 1) / (vmax - vmin + eps);
+
+	std::vector<std::vector<uint32_t>> localH(nt, std::vector<uint32_t>(BINS, 0u));
+
+#pragma omp parallel for schedule(static)
+	for (int i = 0; i < rows; ++i) {
+#ifdef _OPENMP
+		const int tid = omp_get_thread_num();
+#else
+		const int tid = 0;
+#endif
+		auto& hist = localH[tid];
+		const float* p = img.ptr<float>(i);
+		for (int j = 0; j < cols; ++j) {
+			int bin = (int)((p[j] - vmin) * invWidth + 0.5f);
+			if (bin < 0) bin = 0;
+			else if (bin >= BINS) bin = BINS - 1;
+			hist[bin]++;
+		}
 	}
 
-	// 2. 퍼센타일 값 계산
-	int total_elements = img_values.size();
-
-	if (total_elements == 0) {
-		PLOGI.printf("Image is NULL");
-		return;
-	}
-	int lower_idx = static_cast<int>(lower_percentile / 100.0 * total_elements);
-	int upper_idx = static_cast<int>(upper_percentile / 100.0 * total_elements);
-	
-	if (lower_idx > upper_idx) {
-		std::swap(lower_idx, upper_idx);
+	std::vector<uint32_t> hist(BINS, 0u);
+	for (int t = 0; t < nt; ++t) {
+		const auto& h = localH[t];
+		for (int b = 0; b < BINS; ++b) hist[b] += h[b];
 	}
 
-	// 전체를 정렬하지 않고 표준 정규분포 상 표준 편차가 +-3(99%)인 값의 index만 추출
-	std::nth_element(img_values.begin(), img_values.begin() + lower_idx, img_values.end());
-	float lower_bound = img_values[lower_idx];
+	// 누적합으로 퍼센타일 bin 찾기 + bin 내부 보간
+	const size_t kL = (size_t)std::round(lower_percentile * 0.01f * (N - 1));
+	const size_t kU = (size_t)std::round(upper_percentile * 0.01f * (N - 1));
 
-	std::nth_element(img_values.begin(), img_values.begin() + upper_idx, img_values.end());
-	float upper_bound = img_values[upper_idx] * 1.5;
+	auto bin_to_value = [&](int bin, float frac)->float {
+		const float binWidth = (vmax - vmin) / (float)BINS;
+		const float start = vmin + bin * binWidth;
+		return start + frac * binWidth;
+		};
 
+	auto quantile_from_hist = [&](size_t k)->float {
+		size_t cum = 0;
+		for (int b = 0; b < BINS; ++b) {
+			uint32_t cnt = hist[b];
+			if (cum + cnt > k) {
+				float inside = (float)(k - cum) / (float)cnt;
+				return bin_to_value(b, inside);
+			}
+			cum += cnt;
+		}
+		return vmax;
+		};
 
-	// 3. OpenMP 병렬 처리로 로그 변환 및 정규화
-#pragma omp parallel for
-	for (int i = 0; i < img.rows; ++i) {
-		float* img_ptr = img.ptr<float>(i);  // 한 번에 한 row의 데이터에 접근
-		for (int j = 0; j < img.cols; ++j) {
-			// 4. 클리핑: 퍼센타일에 맞게 값 클리핑
-			img_ptr[j] = std::min(std::max(img_ptr[j], lower_bound), upper_bound);
+	const float lower_bound = quantile_from_hist(kL);
+	float upper_bound = quantile_from_hist(kU) * 1.5f;
 
-			// 5. 로그 변환: 클리핑된 값을 기반으로 로그 변환
-			img_ptr[j] = std::log1p(img_ptr[j] - lower_bound + 1e-8);  // log(1 + x) 계산 (offset 추가)
+	// 2) 정규화 상수 사전계산
+	float range = upper_bound - lower_bound;
+	if (range < eps) range = eps;
+	const float denom = 1.0f / (log1pf(range) + eps); // log1p(range)
 
-			// 6. 0-1로 정규화: 로그 변환 후 결과를 0-1 범위로 맞춤
-			img_ptr[j] = (img_ptr[j] - std::log1p(0)) / (std::log1p(upper_bound - lower_bound) + 1e-8);
+	// 3) 한 패스 변환
+#pragma omp parallel for schedule(static)
+	for (int i = 0; i < rows; ++i) {
+		float* p = img.ptr<float>(i);
+		for (int j = 0; j < cols; ++j) {
+			float v = p[j] - lower_bound;              // shift
+			if (v < 0.0f) v = 0.0f;                    // clamp low
+			else if (v > range) v = range;             // clamp high
+			v = log1pf(v + eps) * denom;               // log1p + normalize
+			p[j] = v;
 		}
 	}
 }
