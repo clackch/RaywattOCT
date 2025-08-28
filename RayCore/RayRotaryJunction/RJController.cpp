@@ -1017,7 +1017,6 @@ bool CRJController::writeMotor(BYTE* packet, int size) {
 		return 0;
 	}
 
-	PLOGI.printf("motor packetLength : %d", packetLength);
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
 

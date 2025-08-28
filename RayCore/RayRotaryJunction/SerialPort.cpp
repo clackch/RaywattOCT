@@ -16,7 +16,6 @@ bool CSerialPort::OpenPort(tstring portname) {
 		0);    
 
 	m_isOpen = (m_hComm != INVALID_HANDLE_VALUE) ? true : false;
-	m_portName = portname;
 	return m_isOpen;
 }  
 

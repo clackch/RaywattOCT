@@ -1501,18 +1501,15 @@ UINT COCTSystem::threadInitializeRotaryJunction(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CRJController* pRJController = pSystem->m_pRJController;
 	CConfiguration& config = CConfiguration::GetInstance();
-	PLOGI.printf("initialize start");
 	pRJController->SetModeOfOperation(MOTOR_DATA_MODE_VELOCITY);
 	pRJController->SwitchOff();
 	pRJController->SwitchOn();
 	pRJController->SetManualMode(config.catheter.manualLoad);
 	pRJController->Set(eStepMotorIndex::Both, STEP_MOTOR_SPEED_DEFAULT);
-	PLOGI.printf("set something");
 
 	while (pSystem->m_pThreadRotaryJunction->isRun && !pRJController->InitialStatusReceived()) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
-	PLOGI.printf("InitialStatus Received");
 
 	PLOGI.printf("photoSensor %d %d %d %d %d %d", pRJController->GetPhotoSensorOnOff(0), pRJController->GetPhotoSensorOnOff(1), pRJController->GetPhotoSensorOnOff(2)
 		, pRJController->GetPhotoSensorOnOff(3), pRJController->GetPhotoSensorOnOff(4), pRJController->GetPhotoSensorOnOff(5));
@@ -1824,19 +1821,6 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	CLaserModule* pLaserModule = pSystem->m_pLaserModule;
 
 	PLOGI.printf("Unload catheter");
-
-	/*pSystem->postPriorMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
-	pSystem->m_pRJController->UpdateState(eRJState::Unloaded);
-
-	while (pSystem->m_pThreadRotaryJunction->isRun) {
-		Sleep(DELAY_FOR_STOP_THREAD);
-	}
-
-	pRJController->DisableStepMotors();
-
-	PLOGI.printf("Unload catheter done.");
-
-	return NOERROR;*/
 
 	pSystem->postPriorMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterUnloading);
 

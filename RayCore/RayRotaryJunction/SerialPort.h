@@ -6,7 +6,6 @@ public:
 	CSerialPort();     
 	~CSerialPort(); 
 private:  
-	tstring m_portName;
 	bool	m_isOpen;
 	HANDLE  m_hComm;    
 	DCB     m_dcb;     
@@ -21,7 +20,6 @@ private:
 	
 public:     
 	bool IsOpen() { return m_isOpen; }
-	tstring getPortName() { return m_portName; }
 	bool OpenPort(tstring portname);
 	void ClosePort();     
 	bool ReadByte(BYTE &resp);     

@@ -341,12 +341,7 @@ void CLaserModule::handlePacket() {
 	for (int i = 0; i < 6; i++) {
 		m_bPhotoSensor[i] = m_vPacket[PHOTO_IDX] & (0x1 << i);
 	}
-	PLOGI.printf("[%d] something ansered. in LSM", fid);
-	std::stringstream strStream;
-	for (int i = 0; i < length; i++) {
-		strStream << std::uppercase << std::hex << static_cast<int>(m_vPacket[i]) << " ";
-	}
-	PLOGI.printf("print : %s", strStream.str().c_str());
+
 	switch (fid) {
 	case eFID::FID_AUTO_REPORT:
 		parseAutoReportPacket(&m_vPacket[DATA_IDX], dataLength);
