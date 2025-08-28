@@ -650,7 +650,7 @@ namespace RaywattApp.Common.Annotation
             {
                 Polygon polygon = new Polygon();
                 polygon.Style = (Style)this.Resources["StylePolygon"];
-                foreach (Point point in pointList.GetRange(0, pointList.Count - 1))
+                foreach (Point point in pointList.GetRange(0, pointList.Count))
                 {
                     polygon.Points.Add(point);
                 }
