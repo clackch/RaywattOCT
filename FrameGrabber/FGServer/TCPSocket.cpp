@@ -289,9 +289,18 @@ void TCPSocket::ChpFilePacketProcess(FrameGrabber& fg) {
 	}
 	else
 	{
-		// raywattapp file path
-		e = fg.ReadFormatFile((char*)(fg.chpFilePath + "setup\\" + fg.chpFileName).c_str());
-		PLOGI.printf("[RaywattApp] Chp File Name: %s", (fg.chpFilePath + "setup\\" + fg.chpFileName).c_str());
+		std::string fileName = fg.chpFileName;
+
+		size_t extPos = fileName.rfind(".chp");
+		if (extPos != std::string::npos) {
+			size_t lastUnderscore = fileName.rfind('_', extPos);
+			if (lastUnderscore != std::string::npos) {
+				fileName.erase(lastUnderscore, extPos - lastUnderscore);
+			}
+		}
+
+		e = fg.ReadFormatFile((char*)(fg.chpFilePath + "setup\\" + fileName).c_str());
+		PLOGI.printf("[RaywattApp] Chp File Name: %s", (fg.chpFilePath + "setup\\" + fileName).c_str());
 	}
 
 	if (e) {

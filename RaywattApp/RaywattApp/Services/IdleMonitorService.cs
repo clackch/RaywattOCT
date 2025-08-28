@@ -6,7 +6,6 @@ using RaywattApp.Common.Localization;
 using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.ViewModels.Dialog;
-using RaywattApp.Views.Admin;
 using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
@@ -97,11 +96,11 @@ namespace RaywattApp.Services
 
                 if (key == "TotalTime")
                 {
-                    _totalIdleLimit = TimeSpan.FromSeconds(Convert.ToDouble(time.Value));
+                    _totalIdleLimit = TimeSpan.FromMinutes(Convert.ToDouble(time.Value));
                 }
                 else if (key == "PreTime")
                 {
-                    _preAlertLimit = TimeSpan.FromSeconds(Convert.ToDouble(time.Value));
+                    _preAlertLimit = TimeSpan.FromMinutes(Convert.ToDouble(time.Value));
                 }
             }
         }
