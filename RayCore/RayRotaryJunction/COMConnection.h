@@ -7,7 +7,7 @@ class CCOMConnection : public IConnection
 {
 private:
 	CSerialPort* m_pPort;
-	static WriteTaskController* m_pWriteManager;
+	WriteTaskController* m_pWriteManager;
 
 public:
 	CCOMConnection();
@@ -17,6 +17,6 @@ public:
 	virtual void Disconnect();
 
 	virtual int Write(unsigned char* buffer, int size);
-	virtual int Read(unsigned char* buffer, int size);
+	virtual int Read(unsigned char* buffer);
 };
 

@@ -1501,16 +1501,18 @@ UINT COCTSystem::threadInitializeRotaryJunction(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CRJController* pRJController = pSystem->m_pRJController;
 	CConfiguration& config = CConfiguration::GetInstance();
-
+	PLOGI.printf("initialize start");
 	pRJController->SetModeOfOperation(MOTOR_DATA_MODE_VELOCITY);
 	pRJController->SwitchOff();
 	pRJController->SwitchOn();
 	pRJController->SetManualMode(config.catheter.manualLoad);
 	pRJController->Set(eStepMotorIndex::Both, STEP_MOTOR_SPEED_DEFAULT);
+	PLOGI.printf("set something");
 
 	while (pSystem->m_pThreadRotaryJunction->isRun && !pRJController->InitialStatusReceived()) {
 		Sleep(DELAY_FOR_STOP_THREAD);
 	}
+	PLOGI.printf("InitialStatus Received");
 
 	PLOGI.printf("photoSensor %d %d %d %d %d %d", pRJController->GetPhotoSensorOnOff(0), pRJController->GetPhotoSensorOnOff(1), pRJController->GetPhotoSensorOnOff(2)
 		, pRJController->GetPhotoSensorOnOff(3), pRJController->GetPhotoSensorOnOff(4), pRJController->GetPhotoSensorOnOff(5));
@@ -1749,6 +1751,11 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	CRJController* pRJController = pSystem->m_pRJController;
 	CLaserModule* pLaserModule = pSystem->m_pLaserModule;
+	/*pSystem->m_bFirstLoad = true;
+	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::LoadCatheter);
+	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loading);
+
+	return NOERROR;*/
 
 	std::vector<std::vector<std::string>> loadCommands = pSystem->readLoadSequence();
 
@@ -1822,6 +1829,19 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 	CLaserModule* pLaserModule = pSystem->m_pLaserModule;
 
 	PLOGI.printf("Unload catheter");
+
+	/*pSystem->postPriorMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Unloaded);
+	pSystem->m_pRJController->UpdateState(eRJState::Unloaded);
+
+	while (pSystem->m_pThreadRotaryJunction->isRun) {
+		Sleep(DELAY_FOR_STOP_THREAD);
+	}
+
+	pRJController->DisableStepMotors();
+
+	PLOGI.printf("Unload catheter done.");
+
+	return NOERROR;*/
 
 	pSystem->postPriorMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterUnloading);
 
@@ -2217,21 +2237,8 @@ int COCTSystem::connectRotaryJunction() {
 
 	bool result = true;
 
-	if (!m_pRJController->IsConnected()) {
-		result = m_pRJController->Connect(config.bldcMotor.port);
-
-		if (result) {
-			m_pRJController->StartControl();
-			m_pRJController->UpdateState(eRJState::Initializing);
-			PLOGI.printf("Success to connect to Rotary Junction");
-		}
-		else {
-			PLOGI.printf("Failed to connect to Rotary Junction");
-		}
-	}
-
 	if (!m_pLaserModule->IsConnected()) {
-		result &= m_pLaserModule->Connect(config.laserModule.port);
+		result = m_pLaserModule->Connect(config.laserModule.port);
 		if (result) {
 			m_pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_DEFAULT);
 			m_pLaserModule->SetVLD(0);
@@ -2275,6 +2282,19 @@ int COCTSystem::connectRotaryJunction() {
 		else
 		{
 			PLOGE.printf("Failed to connect to laser module");
+		}
+	}
+
+	if (!m_pRJController->IsConnected()) {
+		result &= m_pRJController->Connect(config.bldcMotor.port);
+
+		if (result) {
+			m_pRJController->StartControl();
+			m_pRJController->UpdateState(eRJState::Initializing);
+			PLOGI.printf("Success to connect to Rotary Junction");
+		}
+		else {
+			PLOGI.printf("Failed to connect to Rotary Junction");
 		}
 	}
 
@@ -2706,9 +2726,9 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 	case eRJState::Validating:
 	{
 		PLOGI.printf("RFID VALIDATION start");
-		RFID_ValidType isValid = m_pRJController->isValidRFID();
 
 #if ENABLE_RFID
+		RFID_ValidType isValid = m_pRJController->isValidRFID();
 		CUtility::StopThread(m_pThreadRotaryJunction);
 		if (isValid == RFID_ValidType::VALID)
 		{
@@ -2727,6 +2747,8 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 				isValidating = true;
 			}
 		}
+#else
+		m_pRJController->UpdateState(eRJState::Loading);
 #endif
 		break;
 	}

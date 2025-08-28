@@ -74,13 +74,13 @@ int CUSBConnection::Write(unsigned char* buffer, int size)
 
 	return writeSize;
 }
-int CUSBConnection::Read(unsigned char* buffer, int size)
+int CUSBConnection::Read(unsigned char* buffer)
 {
 	if (m_hUsbHandle == nullptr) return 0;
 	if (buffer == nullptr) return 0;
 
 	int nRead = 0;
-	int err = libusb_bulk_transfer(m_hUsbHandle, USB_ENDPOINT_IN, buffer, size, &nRead, USB_TIMEOUT);
+	int err = libusb_bulk_transfer(m_hUsbHandle, USB_ENDPOINT_IN, buffer, sizeof(buffer), &nRead, USB_TIMEOUT);
 
 	if (err != 0) {
 		PLOGI.printf("USB Read Error : %d", err);

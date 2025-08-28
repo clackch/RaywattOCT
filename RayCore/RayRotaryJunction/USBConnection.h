@@ -20,7 +20,7 @@ public:
 	virtual void Disconnect();
 
 	virtual int Write(unsigned char* buffer, int size);
-	virtual int Read(unsigned char* buffer, int size);
+	virtual int Read(unsigned char* buffer);
 
 private:
 	bool checkUsbDescription(libusb_device* dev);

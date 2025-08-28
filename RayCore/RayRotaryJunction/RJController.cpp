@@ -522,7 +522,7 @@ UINT CRJController::threadReadPacket(LPVOID param) {
 	int offset = 0;
 
 	while (pRJController->m_pThread->isRun) {
-		int readSize = pRJController->m_pConnection->Read(recvBuf + offset, sizeof(recvBuf) / sizeof(*recvBuf) - offset);
+		int readSize = pRJController->m_pConnection->Read(recvBuf + offset);
 		if (readSize > 0) {
 			pRJController->addPacket(recvBuf, readSize);
 			pRJController->parseSerialPacket();
@@ -561,8 +561,11 @@ void CRJController::updateState() {
 	case eRJState::Connected:
 		if (m_bLimitSwitch) {
 			m_nextState = eRJState::Validating;
-			RFIDProtocol::initState(false);
-			ReadRFID();
+			//RFIDProtocol::initState(false);
+			//ReadRFID();
+		}
+		else {
+			m_nextState = eRJState::Disconnected;
 		}
 		break;
 	case eRJState::Validating:
@@ -657,7 +660,7 @@ RFID_AnswerType CRJController::checkAnswerRFID(RFIDProtocol::SRFIDState rfidStat
 RFID_ValidType CRJController::isValidRFID() {
 	RFIDProtocol::SRFIDState rfidState;
 	RFIDProtocol::getCurRFIDData(&rfidState);
-
+	//if(rfidState.errorState == RFIDProtocol::NOTAG) return RFID_ValidType::VALID;
 	RFID_AnswerType check = checkAnswerRFID(rfidState);
 	if(check == RFID_AnswerType::FAILED) return RFID_ValidType::INVALID;
 	if(check == RFID_AnswerType::PROCEEDING) return RFID_ValidType::WAITING;
@@ -835,7 +838,7 @@ void CRJController::parseSMPacket(BYTE* packet, int size) {
 		for (int j = 0; j < 4; j++) {
 			curPos |= (packet[offset + j] << (j * 8));
 		}
-		//PLOGI.printf("StepMotor #%d (%s): %d", i, ((m_isSMMoving[i]) ? "Moving" : "Stop"), curPos);
+		PLOGI.printf("StepMotor #%d (%s): %d", i, ((m_isSMMoving[i]) ? "Moving" : "Stop"), curPos);
 		offset += 12;	// current pos (4byte), target pos (4byte), current speed (4byte)
 	}
 }
@@ -893,6 +896,12 @@ void CRJController::handlePacket() {
 	eFID fid = (eFID) m_vPacket[FID_IDX];
 	char strTime[MAX_PATH];
 	CUtility::GetCurTime(strTime);
+	PLOGI.printf("[%d] something ansered. in RJC", fid);
+	std::stringstream strStream;
+	for (int i = 0; i < length; i++) {
+		strStream << std::uppercase << std::hex << static_cast<int>(m_vPacket[i]) << " ";
+	}
+	PLOGI.printf("print : %s", strStream.str().c_str());
 
 	if (fid < eFID::FID_RFID_GET_STATE || fid == eFID::FID_SM_ENABLE || fid == eFID::FID_SM_DISABLE ) {
 		// photo sensor state
@@ -1010,6 +1019,7 @@ bool CRJController::writeMotor(BYTE* packet, int size) {
 		return 0;
 	}
 
+	PLOGI.printf("motor packetLength : %d", packetLength);
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
 

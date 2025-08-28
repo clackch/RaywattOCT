@@ -9,5 +9,5 @@ public:
 	virtual void Disconnect() = 0;
 
 	virtual int Write(unsigned char* buffer, int size) = 0;
-	virtual int Read(unsigned char* buffer, int size) = 0;
+	virtual int Read(unsigned char* buffer) = 0;
 };

@@ -10,8 +10,9 @@ WriteTaskController::~WriteTaskController() {
 }
 
 void WriteTaskController::start() {
-    running = true;
-    workerThread = std::thread(&WriteTaskController::worker, this);
+    taskQueue.clear();
+    /*running = true;
+    workerThread = std::thread(&WriteTaskController::worker, this);*/
 }
 
 bool WriteTaskController::addTask(std::function<void()> task) {
@@ -26,6 +27,7 @@ void WriteTaskController::stop() {
         std::lock_guard<std::mutex> lock(queueMutex);
         running = false;
     }
+    taskQueue.clear();
     cv.notify_all();  
     if (workerThread.joinable())
         workerThread.join();

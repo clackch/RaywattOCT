@@ -133,7 +133,7 @@ UINT CMotorController::threadReadMotor(LPVOID pParam) {
 	int offset = 0;
 
 	while (pMotorController->m_pThread->isRun) {
-		int readSize = pMotorController->m_pConnection->Read(recvBuf + offset, sizeof(recvBuf) / sizeof(*recvBuf) - offset);
+		int readSize = pMotorController->m_pConnection->Read(recvBuf + offset);
 		if (readSize > 0) {
 			int totalSize = offset + readSize;
 			if (pMotorController->parsePacket(recvBuf, totalSize)) {

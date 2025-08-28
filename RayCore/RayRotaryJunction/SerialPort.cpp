@@ -16,7 +16,7 @@ bool CSerialPort::OpenPort(tstring portname) {
 		0);    
 
 	m_isOpen = (m_hComm != INVALID_HANDLE_VALUE) ? true : false;
-
+	m_portName = portname;
 	return m_isOpen;
 }  
 
@@ -119,7 +119,6 @@ int CSerialPort::ReadByte(BYTE* &resp, UINT size) {
 	DWORD dwBytesTransferred = 0;    
 	if (ReadFile(m_hComm, resp, size, &dwBytesTransferred, 0)) 
 	{
-		PurgeComm(m_hComm, PURGE_RXCLEAR);
 		return dwBytesTransferred;
 	}     
 	return 0;
