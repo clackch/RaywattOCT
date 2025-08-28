@@ -11,8 +11,8 @@ WriteTaskController::~WriteTaskController() {
 
 void WriteTaskController::start() {
     taskQueue.clear();
-    /*running = true;
-    workerThread = std::thread(&WriteTaskController::worker, this);*/
+    running = true;
+    workerThread = std::thread(&WriteTaskController::worker, this);
 }
 
 bool WriteTaskController::addTask(std::function<void()> task) {
