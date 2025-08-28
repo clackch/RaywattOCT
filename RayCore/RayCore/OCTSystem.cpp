@@ -1751,11 +1751,6 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	CRJController* pRJController = pSystem->m_pRJController;
 	CLaserModule* pLaserModule = pSystem->m_pLaserModule;
-	/*pSystem->m_bFirstLoad = true;
-	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::LoadCatheter);
-	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loading);
-
-	return NOERROR;*/
 
 	std::vector<std::vector<std::string>> loadCommands = pSystem->readLoadSequence();
 
@@ -2143,12 +2138,16 @@ UINT COCTSystem::threadRFIDValidation(LPVOID param) {
 			return NOERROR;
 		}
 	}
-	pSystem->postMessage(WM_UPDATE_RJ_STATE, (WPARAM)eRJState::Validating);
-	
-	while (pSystem->m_pThreadRotaryJunction->isRun) {
-		Sleep(DELAY_FOR_STOP_THREAD);
+	if (isValid == RFID_ValidType::VALID)
+	{
+		PLOGI.printf("validation true");
+		pRJController->UpdateState(eRJState::Loading);
 	}
-
+	else if (isValid == RFID_ValidType::INVALID) {
+		PLOGI.printf("validation false");
+		pRJController->UpdateState(eRJState::Error);
+	}
+	
 	return NOERROR;
 }
 
@@ -2728,23 +2727,21 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 		PLOGI.printf("RFID VALIDATION start");
 
 #if ENABLE_RFID
+		RFIDProtocol::initState(false);
+		m_pRJController->ReadRFID();
 		RFID_ValidType isValid = m_pRJController->isValidRFID();
 		CUtility::StopThread(m_pThreadRotaryJunction);
 		if (isValid == RFID_ValidType::VALID)
 		{
-			isValidating = false;
 			PLOGI.printf("validation true");
-
 			m_pRJController->UpdateState(eRJState::Loading);
 		}
 		else if (isValid == RFID_ValidType::INVALID) {
-			isValidating = false;
 			PLOGI.printf("validation false");
 			m_pRJController->UpdateState(eRJState::Error);
 		}
 		else {
 			if (CUtility::StartThread(threadRFIDValidation, m_pThreadRotaryJunction, this)) {
-				isValidating = true;
 			}
 		}
 #else
@@ -2755,6 +2752,7 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 	case eRJState::Loading:
 	{
 		CConfiguration& config = CConfiguration::GetInstance();
+		CUtility::StopThread(m_pThreadRotaryJunction);
 		if (config.catheter.manualLoad) {
 			CUtility::StartThread(threadManualLoadCatheter, m_pThreadRotaryJunction, this);
 		}

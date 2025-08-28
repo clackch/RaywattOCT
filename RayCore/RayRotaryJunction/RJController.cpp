@@ -561,8 +561,6 @@ void CRJController::updateState() {
 	case eRJState::Connected:
 		if (m_bLimitSwitch) {
 			m_nextState = eRJState::Validating;
-			//RFIDProtocol::initState(false);
-			//ReadRFID();
 		}
 		else {
 			m_nextState = eRJState::Disconnected;
