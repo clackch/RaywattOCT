@@ -432,6 +432,13 @@ UINT CRJController::GetRFIDUID(BYTE* pRFIDUID) {
 	memcpy(pRFIDUID+HARDWARE_UID_LENGTH, rfidState.aCustomUID, CUSTOM_UID_LENGTH);
 	return CUSTOM_UID_LENGTH + HARDWARE_UID_LENGTH;
 }
+
+int CRJController::GetRFIDCountCurrentState() {
+	RFIDProtocol::SRFIDState rfidState;
+	RFIDProtocol::getCurRFIDData(&rfidState);
+	return rfidState.aCNT;
+}
+
 int CRJController::ConvertMMtoStep(UINT mm) {
 	return floor((float)mm / (float)PULLBACK_MOTOR_RESOLUTION * (float)MOTOR_CONTROL_RESOLUTION);
 }

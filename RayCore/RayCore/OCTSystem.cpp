@@ -1729,7 +1729,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pSession->StartObjectDetection();
 
 	// In case of Homing failed
-	if (pRJController->GetPhotoSensorOnOff(0) == false) {
+	if (pRJController->GetPhotoSensorOnOff(0) == false || pRJController->GetRFIDCountCurrentState()>=5) {
 		pRJController->UpdateState(eRJState::Error);
 	}
 

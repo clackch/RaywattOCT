@@ -132,7 +132,8 @@ public:
 	bool GetIsTagging();
 	void findCorrectKey();
 
-	UINT GetRFIDUID(BYTE* pRFIDUID);
+	UINT GetRFIDUID(BYTE* pRFIDUID); 
+	int GetRFIDCountCurrentState();
 	bool GetPhotoSensorOnOff(int index) { return m_bPhotoSensor[index]; }
 	RFID_ValidType isValidRFID();
 	RFID_AnswerType checkAnswerRFID(RFIDProtocol::SRFIDState state);
