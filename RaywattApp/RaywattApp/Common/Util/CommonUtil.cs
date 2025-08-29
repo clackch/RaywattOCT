@@ -1249,10 +1249,7 @@ namespace RaywattApp.Common.Util
             if (angioManager != null)
                 angioManager.CloseAngioManager();
 
-            if (CommonUtil.IsRV200())
-                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoadingPage));
-            else
-                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
 
             Thread threadReadyPullback = new Thread(() => ThreadExit(deviceStatus, isShutdown, isAdmin));
             threadReadyPullback.Start();
