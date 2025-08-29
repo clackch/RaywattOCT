@@ -4,6 +4,10 @@
 
 CCOMConnection::CCOMConnection() {
 	m_pPort = new CSerialPort();
+	if (m_pWriteManager == nullptr) {
+		m_pWriteManager = new WriteTaskController(1);
+		m_pWriteManager->start();
+	}
 }
 CCOMConnection::~CCOMConnection() {
 	if (m_pPort != nullptr) {
@@ -24,6 +28,9 @@ bool CCOMConnection::Connect(void* param) {
 }
 
 void CCOMConnection::Disconnect() {
+	if (m_pWriteManager != nullptr) {
+		m_pWriteManager->stop();
+	}
 	if (m_pPort->IsOpen()) {
 		m_pPort->ClosePort();
 	}
@@ -33,16 +40,21 @@ int CCOMConnection::Write(unsigned char* buffer, int size)
 {
 	if (m_pPort == nullptr || !m_pPort->IsOpen()) return 0;
 	if (buffer == nullptr) return 0;
-
-	bool result = m_pPort->WriteByte(buffer, size);
 	
-	return (result) ? size : 0;
+	BYTE* copied = new BYTE[size];
+	std::memcpy(copied, buffer, size);
+	bool result = m_pWriteManager->addTask([=]() {
+		m_pPort->WriteByte(copied, size);
+		delete[] copied;
+		});
+
+	return result ? size : 0;
 }
-int CCOMConnection::Read(unsigned char* buffer) 
+
+int CCOMConnection::Read(unsigned char* buffer)
 {
 	if (m_pPort == nullptr || !m_pPort->IsOpen()) return 0;
 	if (buffer == nullptr) return 0;
-
 	int nRead = m_pPort->ReadByte(buffer, sizeof(buffer));
 	return nRead;
 }

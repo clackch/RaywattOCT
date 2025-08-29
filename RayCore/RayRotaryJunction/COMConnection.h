@@ -1,11 +1,13 @@
 #pragma once
 #include "Connection.h"
+#include "WriteTaskController.h"
 
 class CSerialPort;
 class CCOMConnection : public IConnection
 {
 private:
 	CSerialPort* m_pPort;
+	WriteTaskController* m_pWriteManager;
 
 public:
 	CCOMConnection();
