@@ -34,9 +34,9 @@ namespace RaywattApp.ViewModels
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
-        private bool isStartRecording = false;
+        private bool isStartRecording;
 
-        private bool isMoveCalibration = false;
+        private bool isMoveCalibration;
 
         [ObservableProperty]
         private Patient _patient;
@@ -72,14 +72,32 @@ namespace RaywattApp.ViewModels
         public int Brightness
         {
             get { return _brightness; }
-            set { _brightness = value; OnPropertyChanged(nameof(Brightness)); RaySetProperty(Property.Brightness, value); }
+            set 
+            { 
+                _brightness = value; 
+                OnPropertyChanged(nameof(Brightness));
+                RayError result = (RayError)RaySetProperty(Property.Brightness, value);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
+            }
         }
 
         private int _contrast;
         public int Contrast
         {
             get { return _contrast; }
-            set { _contrast = value; OnPropertyChanged(nameof(Contrast)); RaySetProperty(Property.Contrast, value); }
+            set 
+            { 
+                _contrast = value; 
+                OnPropertyChanged(nameof(Contrast));
+                RayError result = (RayError)RaySetProperty(Property.Contrast, value);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
+            }
         }
 
         private double _fieldOfView;
@@ -156,7 +174,7 @@ namespace RaywattApp.ViewModels
             }
             else
             {
-                _angioManager.ImgAngio = _angioManager.ShowNoSignal();
+                _angioManager.ImgAngio = AngioManager.ShowNoSignal();
                 IsExpandButtonVisible = false;
             }
         }
@@ -191,7 +209,11 @@ namespace RaywattApp.ViewModels
                     }
                 }
 
-                RayShowCalibrationGuide(true);
+                RayError result = (RayError)RayShowCalibrationGuide(true);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayShowCalibrationGuide Error");
+                }
 
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
@@ -209,23 +231,31 @@ namespace RaywattApp.ViewModels
                     PbSpeed = temp[1];
                     PbTime = temp[2];
                 }
-                RaySetProperty(Property.PullbackDistance, Double.Parse(PbLength));
-                RaySetProperty(Property.PullbackSpeed, Double.Parse(PbSpeed));
+                result = (RayError)RaySetProperty(Property.PullbackDistance, Double.Parse(PbLength));
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
+                result = (RayError)RaySetProperty(Property.PullbackSpeed, Double.Parse(PbSpeed));
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
 
-                if (!ViewModelBase._deviceStatus.IsAngioInitialized && DeviceStatus.IsAngioConnected && (DeviceStatus.SelectedCathRoom == null || DeviceStatus.SelectedCathRoom.Id != -1))
+                if (!ViewModelBase.DeviceStatus.IsAngioInitialized && DeviceStatus.IsAngioConnected && (DeviceStatus.SelectedCathRoom == null || DeviceStatus.SelectedCathRoom.Id != -1))
                 {
                     _angioManager.SelectCathRoom();
                 }
             }
 
 
-            if (ViewModelBase._deviceStatus.IsAngioInitialized && !_angioManager.ReadyToRecv)
+            if (ViewModelBase.DeviceStatus.IsAngioInitialized && !_angioManager.ReadyToRecv)
             {
                 _angioManager.SendCommandPacket(CommandType.FGStarted);
                 _angioManager.ToggleLive(true);
             }
             _angioManager.ReadyToRecv = true;
-            _angioManager.ImgAngio = _angioManager.ShowNoSignal();
+            _angioManager.ImgAngio = AngioManager.ShowNoSignal();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -244,8 +274,14 @@ namespace RaywattApp.ViewModels
                 _angioManager.ToggleLive(false);
             }
 
-            if (!this.isStartRecording && !this.isMoveCalibration)
-                RayStopLiveView();
+            if(!this.isStartRecording && !this.isMoveCalibration)
+            {
+                RayError result = (RayError)RayStopLiveView();
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayStopLiveView Error");
+                }
+            }
         }
 
         private void Back()
@@ -259,13 +295,23 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ChangeViewMode : " + DeviceStatus.IsLiveView);
 
+            RayError result;
+
             if (DeviceStatus.IsLiveView)
             {
-                RayStartLiveView();
+                result = (RayError)RayStartLiveView();
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayStartLiveView Error");
+                }
             }
             else
             {
-                RayStopLiveView();
+                result = (RayError)RayStopLiveView();
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayStopLiveView Error");
+                }
             }
         }
 
@@ -289,7 +335,11 @@ namespace RaywattApp.ViewModels
 
             if (!DeviceStatus.IsLiveView)
             {
-                RayStartLiveView();
+                RayError result = (RayError)RayStartLiveView();
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayStartLiveView Error");
+                }
             }
 
             leaveToPage(Constants.RecordingPage);

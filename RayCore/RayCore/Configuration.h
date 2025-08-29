@@ -43,6 +43,7 @@ public:
 		bool manualLoad;
 		int length;			// 2.6fr -> 1.6fr
 		bool catheterValidationOnOff;
+		bool catheterAutoCalibrationOnOff;
 	};
 
 	class Volume {
@@ -60,6 +61,7 @@ private:
 public:
 	bool isInit;
 	tstring configFilePath;
+	tstring configPath;
 
 	IAcquisitionDevice::Setting acquisition;
 	IImaging::Setting imaging;
@@ -73,7 +75,8 @@ public:
 	int shutterSerial;
 public:
 	static CConfiguration& GetInstance();
-
+	
+	void SetPath(tstring configPath);
 	bool IsInit(){ return isInit; }
 	void Initialize(tstring configFile);
 

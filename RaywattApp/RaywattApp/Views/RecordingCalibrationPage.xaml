@@ -56,7 +56,7 @@
                             <StackPanel Width="10"/>
                             <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="calibrationZoomOut" Width="42" Height="42" Command="{Binding CmdManualZoomIn}" CommandParameter="{StaticResource FalseValue}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}"/>
                             <StackPanel Width="10"/>
-                            <Button Style="{StaticResource OutlinedBtnType3-Large}" Width="174" Command="{Binding CmdAutoCalibration}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}" Content="{Binding [Auto Calibration], Source={StaticResource L10N}}"/>
+                            <Button Style="{StaticResource OutlinedBtnType1-Large}" Width="174" Command="{Binding CmdAutoCalibration}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}" Content="{Binding [Auto Calibration], Source={StaticResource L10N}}"/>
                         </StackPanel>
                     </Grid>
                     <Separator Grid.Row="2" Background="{DynamicResource GrayscaleGray5Brush}"/>

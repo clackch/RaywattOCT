@@ -4,6 +4,7 @@ using OpenCvSharp;
 using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media.Imaging;
@@ -76,7 +77,13 @@ namespace RaywattApp.Common.Bases
         [ObservableProperty]
         private int _frameNumberForInit;
 
+        private readonly Queue<bool> autoPullbackTriggerCandidateQueue = new Queue<bool>();
+
+        private int autoPullbackTriggerCount;
+
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
+
+        private BloodClearingInferencer bloodClearingInferencer;
 
         // to avoid garbage collection
         private CallbackFunctionWithImage cbCrossSection;
@@ -94,6 +101,9 @@ namespace RaywattApp.Common.Bases
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.PlaybackInterval);
             timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
+
+            bloodClearingInferencer = new BloodClearingInferencer();
+            
         }
 
         /// <summary>
@@ -105,7 +115,11 @@ namespace RaywattApp.Common.Bases
             {
                 Playback();
             }
-            RayUnregisterImageCallback();
+            RayError result = (RayError)RayUnregisterImageCallback();
+            if (result != RayError.OK) 
+            {
+                _log.Error("RayUnregisterImageCallback Error");
+            }
         }
 
         /// <summary>
@@ -113,16 +127,21 @@ namespace RaywattApp.Common.Bases
         /// </summary>
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
-            RayRegisterImageCallback(
+            RayError result = (RayError)RayRegisterImageCallback(
                 Marshal.GetFunctionPointerForDelegate(CBCrossSection),
                 Marshal.GetFunctionPointerForDelegate(CBLongitude));
+            if (result != RayError.OK)
+            {
+                _log.Error("RayRegisterImageCallback Error");
+            }
         }
 
-        private void OnRecvCrossSection(int session, IntPtr data, int width, int height, int ch, int frameInfo, double intensity)
+        private void OnRecvCrossSection(int session, IntPtr data, int width, int height, int ch, int frameInfo, double isCleared)
         {
             Mat imgRecv = CommonUtil.ByteMemoryToCvMat(data, width, height, ch);
             imgCrossSection[session] = imgRecv;
-            DeviceStatus.ImageIntensity = intensity;
+
+            AutoPullback(imgRecv, isCleared == 1.0 ? true : false);
         }
 
         private void OnRecvLongitude(int session, IntPtr data, int width, int height, int ch, int frameInfo, double intensity)
@@ -200,7 +219,7 @@ namespace RaywattApp.Common.Bases
             SheathIndicatorAngio = CommonUtil.DrawSheathIndicator((int)Constants.CrossSectionAngio, sheathDiameter);
         }
 
-        private Mat GenerateMask(Mat image)
+        private static Mat GenerateMask(Mat image)
         {
             Mat mask = image.EmptyClone();
             Point center = new Point(mask.Width / 2, mask.Height / 2);
@@ -268,6 +287,9 @@ namespace RaywattApp.Common.Bases
             DeviceStatus.ReviewImageInfo imageInfo = DeviceStatus.ReviewImageInfos[(int)session];
             Mat img = CommonUtil.ByteMemoryToCvMat(data, imageInfo.Width, imageInfo.Height, imageInfo.Channels);
 
+            //Test
+            AutoPullback(img);
+
             imgCrossSection[(int)session] = img;
             DeviceStatus.ReviewImageInfos[(int)session].Current = nFrame;
 
@@ -293,6 +315,56 @@ namespace RaywattApp.Common.Bases
         protected virtual void UpdateCrossSectionImage() { }
 
         protected virtual void UpdateLumenProfile() { }
+
+        protected virtual void AutoPullbackStart() { }
+
+        private void AutoPullback(Mat img, bool isCleared = false)
+        {
+            if (!DeviceStatus.AutoPullbackOnOff)
+                return;
+
+            if (DeviceStatus.AutoPullbackModel)//Lumen Detection Model
+            {
+                _log.Debug($"[Lumen Detection Model - Blood Flushing] Label: {isCleared} / Trigger Count: {this.autoPullbackTriggerCount}");
+
+                DeviceStatus.AutoPullbackIsImageCleared = isCleared;
+            }
+            else//Flush Detection Model
+            {
+                var (flushIsCleared, logits, ms) = bloodClearingInferencer.Predict(img);
+
+                _log.Debug($"[Flush Detection Model- Blood Flushing] Label: {flushIsCleared} / Time: {ms:F2} ms / Logits: {string.Join(", ", logits)} / Trigger Count: {this.autoPullbackTriggerCount}");
+
+                DeviceStatus.AutoPullbackIsImageCleared = (flushIsCleared == 1) ? true : false;
+            }
+
+            if (DeviceStatus.AutoPullbackTriggerCount == 0)
+                return;
+
+            this.autoPullbackTriggerCandidateQueue.Enqueue(DeviceStatus.AutoPullbackIsImageCleared);
+            if (DeviceStatus.AutoPullbackIsImageCleared)
+                this.autoPullbackTriggerCount++;
+
+            if(this.autoPullbackTriggerCandidateQueue.Count > DeviceStatus.AutoPullbackTriggerCandidate)
+            {
+                bool removed = this.autoPullbackTriggerCandidateQueue.Dequeue();
+                if (removed)
+                    this.autoPullbackTriggerCount--;
+            }
+
+            if(this.autoPullbackTriggerCount >= DeviceStatus.AutoPullbackTriggerCount)
+            {
+                _log.Debug("AutoPullback Start");
+
+                RaySetProperty(Property.AutoPullback, 0.0);
+                DeviceStatus.AutoPullbackOnOff = false;
+                DeviceStatus.AutoPullbackIsImageCleared = false;
+                this.autoPullbackTriggerCount = 0;
+                this.autoPullbackTriggerCandidateQueue.Clear();
+
+                AutoPullbackStart();
+            }          
+        }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {

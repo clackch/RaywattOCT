@@ -559,7 +559,7 @@
                             </RectangleGeometry.Rect>
                         </RectangleGeometry>
                     </Grid.Clip>
-                    <Grid>
+                    <Grid Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}">
                         <annotation:DrawUtil Zoom="{Binding ReviewStatus.Zoom}" IsDrawOn="{Binding ReviewStatus.IsMeasurementOn}" MeasureUIElements="{Binding PatientCase.MeasureUIElements}" Measurements="{Binding Measurements}" IsMeasureInit="{Binding ReviewStatus.IsMeasureInit}" FrameNumberForInit="{Binding FrameNumberForInit}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" CommandOff="{Binding MeasurementCommandOff, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEditOn="True" Visibility="Collapsed">
                             <annotation:DrawUtil.RenderTransform>
                                 <TransformGroup>
@@ -698,14 +698,14 @@
                                             </StackPanel>
                                         </Grid>
                                         <Grid Grid.Row="7" Margin="0,0,0,0" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
-                                            <component:ButtonUnableComponent Grid.Row="1" Style="{StaticResource OutlinedBtnType1-Medium}" Height="26" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding CoRegistrationCommand}" Content="{Binding [Co-Registration], Source={StaticResource L10N}}" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}" IsImageProcessingDone="{Binding ReviewStatus.IsImageProcessingDone}">
+                                            <component:ButtonUnableComponent Grid.Row="1" Style="{StaticResource OutlinedBtnType1-Medium}" Height="26" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding CoRegistrationCommand}" Content="{Binding [Co-Registration], Source={StaticResource L10N}}" IsFirst="{Binding DeviceStatus.IsSaveRawDataDone}" IsSecond="{Binding DeviceStatus.IsLumenLoaded}" IsThird="{Binding DeviceStatus.IsLumenSaved}" IsFourth="{Binding DeviceStatus.IsOCTImagingDone}" IsFifth="{Binding ReviewStatus.IsImageProcessingDone}">
                                                 <component:ButtonUnableComponent.IsEnabled>
                                                     <MultiBinding Converter="{StaticResource ComponentUnableConverter}">
-                                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
-                                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
-                                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
-                                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
-                                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsImageProcessingDone"/>
+                                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFirst"/>
+                                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSecond"/>
+                                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsThird"/>
+                                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFourth"/>
+                                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFifth"/>
                                                     </MultiBinding>
                                                 </component:ButtonUnableComponent.IsEnabled>
                                             </component:ButtonUnableComponent>
@@ -734,7 +734,7 @@
                                                 <Label Grid.Row="2" Grid.Column="0" Content="{Binding [Contrast], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleGray4Brush}" Style="{DynamicResource Pretendard-Medium-12}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                                 <Slider Grid.Row="2" Grid.Column="1" Style="{DynamicResource SliderSimpleTooltip}" Value="{Binding Contrast}" Maximum="100" Minimum="0" TickFrequency="1" IsSnapToTickEnabled="True" LargeChange="1" SmallChange="1" VerticalAlignment="Center" IsEnabled="{Binding DeviceStatus.IsOCTImagingDone}"/>
                                                 <Label Grid.Row="3" Grid.Column="0" Content="{Binding [Field of View], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleGray4Brush}" Style="{DynamicResource Pretendard-Medium-12}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <Slider Grid.Row="3" Grid.Column="1" Style="{DynamicResource SliderSimpleTooltip}" Value="{Binding FieldOfView}" Maximum="10.0" Minimum="5.0" TickFrequency="1.0" IsSnapToTickEnabled="True" LargeChange="1.0" SmallChange="1.0" VerticalAlignment="Center" IsEnabled="{Binding DeviceStatus.IsOCTImagingDone}"/>
+                                                <Slider Grid.Row="3" Grid.Column="1" Style="{DynamicResource SliderSimpleTooltip}" Value="{Binding FieldOfView}" Maximum="{x:Static const:Constants.MaximumFoV}" Minimum="{x:Static const:Constants.MinimumFoV}" TickFrequency="1.0" IsSnapToTickEnabled="True" LargeChange="1.0" SmallChange="1.0" VerticalAlignment="Center" IsEnabled="{Binding DeviceStatus.IsOCTImagingDone}"/>
                                             </Grid>
                                         </StackPanel>
                                         <Grid Grid.Row="9" Margin="0,12,0,0" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -1311,12 +1311,12 @@
 
                         <StackPanel Grid.Column="0" Orientation="Vertical">
                             <StackPanel Height="76"/>
-                            <Label Content="P" Style="{DynamicResource Pretendard-Semibold-20}" HorizontalAlignment="Center" Foreground="#fcfcfc" Opacity="0.5"/>
+                            <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" HorizontalAlignment="Center" Foreground="#fcfcfc" Opacity="0.5"/>
                         </StackPanel>
                         <Grid Grid.Column="2">
                             <StackPanel Orientation="Vertical">
                                 <StackPanel Height="76"/>
-                                <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" HorizontalAlignment="Center" Foreground="#fcfcfc" Opacity="0.5"/>
+                                <Label Content="P" Style="{DynamicResource Pretendard-Semibold-20}" HorizontalAlignment="Center" Foreground="#fcfcfc" Opacity="0.5"/>
                             </StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>

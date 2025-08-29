@@ -1,25 +1,28 @@
-/* /////////////////////////////////////////////////////////////////////////////
-//
-//                  INTEL CORPORATION PROPRIETARY INFORMATION
-//     This software is supplied under the terms of a license agreement or
-//     nondisclosure agreement with Intel Corporation and may not be copied
-//     or disclosed except in accordance with the terms of that agreement.
-//          Copyright(c) 2002-2011 Intel Corporation. All Rights Reserved.
-//
-//              Intel(R) Integrated Performance Primitives
-//                          Vector Math (ippVM)
-//
+/* 
+// Copyright 2002 Intel Corporation All Rights Reserved.
+// 
+// 
+// This software and the related documents are Intel copyrighted materials, and your use of them is governed by
+// the express license under which they were provided to you ('License'). Unless the License provides otherwise,
+// you may not use, modify, copy, publish, distribute, disclose or transmit this software or the related
+// documents without Intel's prior written permission.
+// This software and the related documents are provided as is, with no express or implied warranties, other than
+// those that are expressly stated in the License.
+// 
 */
 
-#if !defined( __IPPVM_H__ ) || defined( _OWN_BLDPCS )
-#define __IPPVM_H__
+/* 
+//               Intel(R) Integrated Performance Primitives (Intel(R) IPP)
+//               Vector Math (ippVM)
+// 
+// 
+*/
 
-#if defined (_WIN32_WCE) && defined (_M_IX86) && defined (__stdcall)
-  #define _IPP_STDCALL_CDECL
-  #undef __stdcall
-#endif
 
-#ifndef __IPPDEFS_H__
+#if !defined( IPPVM_H__ ) || defined( _OWN_BLDPCS )
+#define IPPVM_H__
+
+#ifndef IPPDEFS_H__
   #include "ippdefs.h"
 #endif
 
@@ -27,16 +30,19 @@
 extern "C" {
 #endif
 
-#if !defined( _IPP_NO_DEFAULT_LIB )
-  #if defined( _IPP_PARALLEL_DYNAMIC )
-    #pragma comment( lib, "ippvm" )
-    #pragma comment( lib, "ippcore" )
-  #elif defined( _IPP_PARALLEL_STATIC )
-    #pragma comment( lib, "ippvm_t" )
-    #pragma comment( lib, "ippcore_t" )
+#if !defined( IPP_NO_DEFAULT_LIB )
+  #if defined( _IPP_SEQUENTIAL_DYNAMIC )
+    #pragma comment( lib, __FILE__ "/../../../lib/ippvm" )
+    #pragma comment( lib, __FILE__ "/../../../lib/ippcore" )
   #elif defined( _IPP_SEQUENTIAL_STATIC )
-    #pragma comment( lib, "ippvm_l" )
-    #pragma comment( lib, "ippcore_l" )
+    #pragma comment( lib, __FILE__ "/../../../lib/ippvmmt" )
+    #pragma comment( lib, __FILE__ "/../../../lib/ippcoremt" )
+  #elif defined( _IPP_PARALLEL_DYNAMIC )
+    #pragma comment( lib, __FILE__ "/../../../lib/threaded/ippvm" )
+    #pragma comment( lib, __FILE__ "/../../../lib/threaded/ippcore" )
+  #elif defined( _IPP_PARALLEL_STATIC )
+    #pragma comment( lib, __FILE__ "/../../../lib/threaded/ippvmmt" )
+    #pragma comment( lib, __FILE__ "/../../../lib/threaded/ippcoremt" )
   #endif
 #endif
 
@@ -536,15 +542,11 @@ IPPAPI( IppStatus, ippsNearbyInt_64f, (const Ipp64f a[],Ipp64f r[],Ipp32s n))
 IPPAPI( IppStatus, ippsModf_32f, (const Ipp32f a[],Ipp32f r1[],Ipp32f r2[],Ipp32s n))
 IPPAPI( IppStatus, ippsModf_64f, (const Ipp64f a[],Ipp64f r1[],Ipp64f r2[],Ipp32s n))
 
+IPPAPI( IppStatus, ippsFrac_32f, (const Ipp32f a[],Ipp32f r[],Ipp32s n))
+IPPAPI( IppStatus, ippsFrac_64f, (const Ipp64f a[],Ipp64f r[],Ipp32s n))
+
 #ifdef __cplusplus
 }
 #endif
 
-#if defined (_IPP_STDCALL_CDECL)
-  #undef  _IPP_STDCALL_CDECL
-  #define __stdcall __cdecl
-#endif
-
-#endif /* __IPPVM_H__ */
-/* ////////////////////////////// End of file /////////////////////////////// */
-
+#endif /* IPPVM_H__ */

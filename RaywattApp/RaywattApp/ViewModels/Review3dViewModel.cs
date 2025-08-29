@@ -17,6 +17,7 @@ using static RaywattOCT.Ray3DWrapper;
 using System.Runtime.InteropServices;
 using RaywattApp.Common.Util;
 using System.Threading;
+using SharpDX;
 
 namespace RaywattApp.ViewModels
 {
@@ -25,7 +26,7 @@ namespace RaywattApp.ViewModels
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(Review3dViewModel));
 
-        private bool _isRendering = false;
+        private bool _isRendering;
         public bool IsRendering
         { 
             get { return _isRendering; }
@@ -78,8 +79,16 @@ namespace RaywattApp.ViewModels
                 OnPropertyChanged(nameof(IsPtoD));
 
                 ray3DStatus.IsPtoD = value;
-                ODSOCT_MoveCameraPosition(0, !value);
-                ODSOCT_Render();
+                int ray3DResult = ODSOCT_MoveCameraPosition(0, !value);
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_MoveCameraPosition Error");
+                }
+                ray3DResult = ODSOCT_Render();
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_Render Error");
+                }
             }
         }
 
@@ -93,12 +102,24 @@ namespace RaywattApp.ViewModels
             set 
             { 
                 degree = value; 
-                OnPropertyChanged(nameof(Degree)); 
-                RaySetProperty(Property.LongitudeDegree, degree);
+                OnPropertyChanged(nameof(Degree));
+                RayError result = (RayError)RaySetProperty(Property.LongitudeDegree, degree);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
 
                 CameraDegree = degree + 90;
-                ODSOCT_RotateAngle((float)CameraDegree);
-                ODSOCT_Render();
+                int ray3DResult = ODSOCT_RotateAngle((float)CameraDegree);
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_RotateAngle Error");
+                }
+                ray3DResult = ODSOCT_Render();
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_Render Error");
+                }
             }
         }
 
@@ -200,7 +221,11 @@ namespace RaywattApp.ViewModels
             base.OnNavigated(sender, navigatedEventArgs);
             _log.Debug("OnNavigated");
 
-            ODSOCT_SetRenderMode(true);
+            int ray3DResult = ODSOCT_SetRenderMode(true);
+            if (ray3DResult == 0)
+            {
+                _log.Error("ODSOCT_SetRenderMode Error");
+            }
 
             var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
 
@@ -215,8 +240,16 @@ namespace RaywattApp.ViewModels
 
                 Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
 
-                RaySetSession(RaySession.Review);
-                RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+                RayError result = (RayError)RaySetSession(RaySession.Review);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetSession Error");
+                }
+                result = (RayError)RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
 
                 Degree = PatientCase.IndicatorDegree;
@@ -253,7 +286,11 @@ namespace RaywattApp.ViewModels
 
             Save();
             TurnOffAll3DActors();
-            ODSOCT_HideAllWindows();
+            int ray3DResult = ODSOCT_HideAllWindows();
+            if (ray3DResult == 0)
+            {
+                _log.Error("ODSOCT_HideAllWindows Error");
+            }
         }
 
         protected override void Save()
@@ -310,6 +347,8 @@ namespace RaywattApp.ViewModels
 
         private void threadFuncInitialize()
         {
+            int ray3DResult;
+
             if (ReviewStatus.IsLumenEdited)
             {
                 int diameter = (int)RayGetProperty(Property.VolumeWidth);
@@ -323,44 +362,88 @@ namespace RaywattApp.ViewModels
                 
                 if (CommonUtil.IsPostCase(PatientCase.Procedure))
                 {
-                    ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(System.IntPtr.Zero), diameter, diameter, depth, 1, 1, zVal);
+                    ray3DResult = ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(System.IntPtr.Zero), diameter, diameter, depth, 1, 1, zVal);
+                    if (ray3DResult == 0)
+                    {
+                        _log.Error("ODSOCT_InputData Error");
+                    }
 
-                    if (CommonUtil.isVTIFileSave)
+                    if (CommonUtil.IsVTIFileSave)
                     {
                         _log.Debug("VTIFileSave");
-                        ODSOCT_Export3DVTIFile(RayGetVolumeData(System.IntPtr.Zero), "test");
+                        ray3DResult = ODSOCT_Export3DVTIFile(RayGetVolumeData(System.IntPtr.Zero), "test");
+                        if (ray3DResult == 0)
+                        {
+                            _log.Error("ODSOCT_Export3DVTIFile Error");
+                        }
                     }
                 }
                 else
                 {
-                    ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(buffer), diameter, diameter, depth, 1, 1, zVal);
-                    if (CommonUtil.isVTIFileSave)
+                    ray3DResult = ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(buffer), diameter, diameter, depth, 1, 1, zVal);
+                    if (ray3DResult == 0)
+                    {
+                        _log.Error("ODSOCT_InputData Error");
+                    }
+                    if (CommonUtil.IsVTIFileSave)
                     {
                         _log.Debug("VTIFileSave");
-                        ODSOCT_Export3DVTIFile(RayGetVolumeData(buffer), "test");
+                        ray3DResult = ODSOCT_Export3DVTIFile(RayGetVolumeData(buffer), "test");
+                        if (ray3DResult == 0)
+                        {
+                            _log.Error("ODSOCT_Export3DVTIFile Error");
+                        }
                     }
                 }
 
-                ODSOCT_InputSurfaceParameter(Ray3DObject.Lumen, 10, 50, ".\\data\\lumen_tex.jpg");
-                ODSOCT_InputData(Ray3DObject.Lumen, buffer, diameter, diameter, depth, 1, 1, zVal);
+                ray3DResult = ODSOCT_InputSurfaceParameter(Ray3DObject.Lumen, 10, 50, ".\\data\\lumen_tex.jpg");
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_InputSurfaceParameter Error");
+                }
+                ray3DResult = ODSOCT_InputData(Ray3DObject.Lumen, buffer, diameter, diameter, depth, 1, 1, zVal);
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_InputData Error");
+                }
 
                 buffer = Marshal.AllocHGlobal(diameter * diameter * depth);
                 CommonUtil.GuideWireToMemory(PatientCase.LumenGuidewires,
                 new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize),
                 buffer,
                 new OpenCvSharp.Size(diameter, diameter), PatientCase.GuidewireRadius);
-                ODSOCT_InputSurfaceParameter(Ray3DObject.GuideWire, 10, 15, ".\\data\\guidewire_tex.jpg");
-                ODSOCT_InputData(Ray3DObject.GuideWire, buffer, diameter, diameter, depth, 1, 1, zVal);
+                ray3DResult = ODSOCT_InputSurfaceParameter(Ray3DObject.GuideWire, 10, 15, ".\\data\\guidewire_tex.jpg");
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_InputSurfaceParameter Error");
+                }
+                ray3DResult = ODSOCT_InputData(Ray3DObject.GuideWire, buffer, diameter, diameter, depth, 1, 1, zVal);
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_InputData Error");
+                }
 
                 buffer = Marshal.AllocHGlobal(diameter * diameter * depth);
                 CommonUtil.StentsToMemory(PatientCase.LumenStents,
                     new OpenCvSharp.Size(Constants.OCTImageSize, Constants.OCTImageSize),
                     buffer,
                     new OpenCvSharp.Size(diameter, diameter));
-                ODSOCT_InputSurfaceParameter(Ray3DObject.Stent, 10, 15, ".\\data\\stent_tex.jpg");
-                ODSOCT_InputData(Ray3DObject.Stent, buffer, diameter, diameter, depth, 1, 1, zVal);
+                ray3DResult = ODSOCT_InputSurfaceParameter(Ray3DObject.Stent, 10, 15, ".\\data\\stent_tex.jpg");
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_InputSurfaceParameter Error");
+                }
+                ray3DResult = ODSOCT_InputData(Ray3DObject.Stent, buffer, diameter, diameter, depth, 1, 1, zVal);
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_InputData Error");
+                }
 
-                ODSOCT_ProcessingDatas();
+                ray3DResult = ODSOCT_ProcessingDatas();
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_ProcessingDatas Error");
+                }
                 if (isFirstRendering)
                 {
                     bugTestFunc();
@@ -371,7 +454,11 @@ namespace RaywattApp.ViewModels
                 ReviewStatus.IsLumenEdited = false;
             }
 
-            ODSOCT_UpdateColorTable((int)RayGetProperty(Property.Colormap));
+            ray3DResult = ODSOCT_UpdateColorTable((int)RayGetProperty(Property.Colormap));
+            if (ray3DResult == 0)
+            {
+                _log.Error("ODSOCT_UpdateColorTable Error");
+            }
 
             timerShowData.Interval = TimeSpan.FromMilliseconds(MinWaitingDelay);
             timerShowData.Tick += new EventHandler(timerFuncShowData);
@@ -382,18 +469,33 @@ namespace RaywattApp.ViewModels
         { 
             if (timerShowData.IsEnabled)
                 timerShowData.Stop();
-            
-            ODSOCT_RotateAngle((float)CameraDegree);
-            ODSOCT_MoveToFrame(DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
+
+            int ray3DResult = ODSOCT_RotateAngle((float)CameraDegree);
+            if (ray3DResult == 0)
+            {
+                _log.Error("ODSOCT_RotateAngle Error");
+            }
+            ray3DResult = ODSOCT_MoveToFrame(DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
+            if (ray3DResult == 0)
+            {
+                _log.Error("ODSOCT_MoveToFrame Error");
+            }
             for (Ray3DObject obj = Ray3DObject.Tissue; obj < Ray3DObject.Count; obj++)
             {
                 ray3DStatus.ShowObject(obj, ray3DStatus.ObjectVisibility[(int)obj]);
             }
-            ODSOCT_ShowAllWindows();
+            ray3DResult = ODSOCT_ShowAllWindows();
+            if (ray3DResult == 0)
+            {
+                _log.Error("ODSOCT_ShowAllWindows Error");
+            }
 
             IsCutViewOn = ray3DStatus.CutViewOn;
-            ODSOCT_Render();
-            _log.Debug("TimerFunc Call");
+            ray3DResult = ODSOCT_Render();
+            if (ray3DResult == 0)
+            {
+                _log.Error("ODSOCT_Render Error");
+            }
 
             if (!IsRendering)
             {
@@ -412,16 +514,28 @@ namespace RaywattApp.ViewModels
             IndicatorLongitude.CenterX = curPosition;
         }
 
-        private void changeCutVisibility(bool isCutView)
+        private static void changeCutVisibility(bool isCutView)
         {
-            ODSOCT_CutViewOn(isCutView);
-            ODSOCT_Render();
+            int ray3DResult = ODSOCT_CutViewOn(isCutView);
+            if (ray3DResult == 0)
+            {
+                _log.Error("ODSOCT_CutViewOn Error");
+            }
+            ray3DResult = ODSOCT_Render();
+            if (ray3DResult == 0)
+            {
+                _log.Error("ODSOCT_Render Error");
+            }
         }
 
-        private void change3DIndicatorVisibility(bool show)
+        private static void change3DIndicatorVisibility(bool show)
         {
-            ray3DStatus.ShowIndicator(show);
-            ODSOCT_Render();
+            Ray3DStatus.ShowIndicator(show);
+            int ray3DResult = ODSOCT_Render();
+            if (ray3DResult == 0)
+            {
+                _log.Error("ODSOCT_Render Error");
+            }
         }
 
         private void RotateIndicator(object param)
@@ -565,9 +679,17 @@ namespace RaywattApp.ViewModels
             _log.Debug("zoomFactor = " + ray3DStatus.ZoomFactor);
             if (ray3DStatus.ZoomFactor < Constants.Zoom3DScaleMax)
             {
-                ODSOCT_CutViewZoom(1);
+                int ray3DResult = ODSOCT_CutViewZoom(1);
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_CutViewZoom Error");
+                }
                 ray3DStatus.ZoomFactor += 1;
-                ODSOCT_Render();
+                ray3DResult = ODSOCT_Render();
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_Render Error");
+                }
             }
         }
 
@@ -576,9 +698,17 @@ namespace RaywattApp.ViewModels
             _log.Debug("zoomFactor = " + ray3DStatus.ZoomFactor);
             if (ray3DStatus.ZoomFactor > - Constants.Zoom3DScaleMax)
             {
-                ODSOCT_CutViewZoom(-1);
+                int ray3DResult = ODSOCT_CutViewZoom(-1);
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_CutViewZoom Error");
+                }
                 ray3DStatus.ZoomFactor -= 1;
-                ODSOCT_Render();
+                ray3DResult = ODSOCT_Render();
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_Render Error");
+                }
             }
         }
 
@@ -587,17 +717,19 @@ namespace RaywattApp.ViewModels
         {
             Dictionary<string, Object> data = (Dictionary<string, Object>)result;
 
-            if (data.ContainsKey("reviewStatus"))
+            if (data.TryGetValue("reviewStatus", out var reviewStatusObj) && reviewStatusObj is ReviewStatus reviewStatus)
             {
-                ReviewStatus = (ReviewStatus)data["reviewStatus"];
+                ReviewStatus = reviewStatus;
             }
-            if (data.ContainsKey("patient"))
+
+            if (data.TryGetValue("patient", out var patientObj) && patientObj is Patient patient)
             {
-                Patient = (Patient)data["patient"];
+                Patient = patient;
             }
-            if (data.ContainsKey("patientCase"))
+
+            if (data.TryGetValue("patientCase", out var patientCaseObj) && patientCaseObj is PatientCase patientCase)
             {
-                PatientCase = (PatientCase)data["patientCase"];
+                PatientCase = patientCase;
             }
         }
 
@@ -611,12 +743,20 @@ namespace RaywattApp.ViewModels
                 curPosition *= (longitudeFrameInfo.totalFrame - 1);
                 curPosition = Math.Round(curPosition);
                 MoveToFrame(RaySession.Review, (int)curPosition);
-                ODSOCT_MoveToFrame((int)curPosition);
-                ODSOCT_Render();
+                int ray3DResult = ODSOCT_MoveToFrame((int)curPosition);
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_MoveToFrame Error");
+                }
+                ray3DResult = ODSOCT_Render();
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_Render Error");
+                }
             }
         }
 
-        private void TurnOffAll3DActors()
+        private static void TurnOffAll3DActors()
         {
             change3DIndicatorVisibility(false);
             for (Ray3DObject obj = Ray3DObject.Tissue; obj < Ray3DObject.Count; obj++)
@@ -624,7 +764,11 @@ namespace RaywattApp.ViewModels
                 if (ray3DStatus.ObjectVisibility[(int)obj] != Ray3DObjectMode.Hide)
                     ray3DStatus.ShowObject(obj, Ray3DObjectMode.Hide, true);
             }
-            ODSOCT_Render();
+            int ray3DResult = ODSOCT_Render();
+            if (ray3DResult == 0)
+            {
+                _log.Error("ODSOCT_Render Error");
+            }
         }
 
         private void bugTestFunc()
@@ -639,13 +783,20 @@ namespace RaywattApp.ViewModels
                 buffer,
                 new OpenCvSharp.Size(diameter, diameter));
 
+            int ray3DResult;
+
             if (CommonUtil.IsPostCase(PatientCase.Procedure))
             {
-                ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(System.IntPtr.Zero), diameter, diameter, depth, 1, 1, zVal);
+                ray3DResult = ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(System.IntPtr.Zero), diameter, diameter, depth, 1, 1, zVal);
             }
             else
             {
-                ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(buffer), diameter, diameter, depth, 1, 1, zVal);
+                ray3DResult = ODSOCT_InputData(Ray3DObject.Tissue, RayGetVolumeData(buffer), diameter, diameter, depth, 1, 1, zVal);
+            }
+
+            if (ray3DResult == 0)
+            {
+                _log.Error("ODSOCT_InputData Error");
             }
         }
     }

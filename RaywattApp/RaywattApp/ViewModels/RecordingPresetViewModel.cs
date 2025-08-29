@@ -117,16 +117,26 @@ namespace RaywattApp.ViewModels
                 this.Patient = (Patient)data["patient"];
                 this.PrevStatus = (PrevStatus)data["prevStatus"];
 
-                if (data.ContainsKey("patientCase"))
+                if (data.TryGetValue("patientCase", out var patientCaseObj) && patientCaseObj is PatientCase caseData)
                 {
-                    PatientCase = (PatientCase)data["patientCase"];
-                    if (CodeDefinition.Codes["PROC"].ContainsKey(PatientCase.Procedure))
-                        CurrentProcedure = new KeyValuePair<string, string>(PatientCase.Procedure, CodeDefinition.Codes["PROC"][PatientCase.Procedure]);
-                    if (CodeDefinition.Codes["VESS"].ContainsKey(PatientCase.Vessel))
-                        CurrentVessel = new KeyValuePair<string, string>(PatientCase.Vessel, CodeDefinition.Codes["VESS"][PatientCase.Vessel]);
-                    if (CodeDefinition.Codes["LOCT"].ContainsKey(PatientCase.Location))
-                        CurrentLocation = new KeyValuePair<string, string>(PatientCase.Location, CodeDefinition.Codes["LOCT"][PatientCase.Location]);
+                    PatientCase = caseData;
+
+                    if (CodeDefinition.Codes.TryGetValue("PROC", out var procDict) && procDict.TryGetValue(PatientCase.Procedure, out var procValue))
+                    {
+                        CurrentProcedure = new KeyValuePair<string, string>(PatientCase.Procedure, procValue);
+                    }
+
+                    if (CodeDefinition.Codes.TryGetValue("VESS", out var vessDict) && vessDict.TryGetValue(PatientCase.Vessel, out var vessValue))
+                    {
+                        CurrentVessel = new KeyValuePair<string, string>(PatientCase.Vessel, vessValue);
+                    }
+
+                    if (CodeDefinition.Codes.TryGetValue("LOCT", out var loctDict) && loctDict.TryGetValue(PatientCase.Location, out var loctValue))
+                    {
+                        CurrentLocation = new KeyValuePair<string, string>(PatientCase.Location, loctValue);
+                    }
                 }
+
                 else
                 {
                     Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
@@ -161,6 +171,11 @@ namespace RaywattApp.ViewModels
                     CurrentProcedure = new KeyValuePair<string, string>("$001", CodeDefinition.Codes["PROC"]["$001"]);
                     CurrentVessel = new KeyValuePair<string, string>("$000", CodeDefinition.Codes["VESS"]["$000"]);
                     CurrentLocation = new KeyValuePair<string, string>("$000", CodeDefinition.Codes["LOCT"]["$000"]);
+                }
+
+                if (data.TryGetValue("accessionNumber", out var value))
+                {
+                    this.PatientCase.AccessionNumber = (string)value;
                 }
 
                 SelectedFlushMedia = PatientCase.FlushMedia;
@@ -221,6 +236,11 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Next");
 
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = Patient;
+            parameter["patientCase"] = PatientCase;
+            parameter["prevStatus"] = PrevStatus;
+
             PatientCase.FlushMedia = SelectedFlushMedia;
             PatientCase.PullbackType = SelectedPullbackType;
             PatientCase.PullbackLength = PbLength + "0";
@@ -228,17 +248,24 @@ namespace RaywattApp.ViewModels
             PatientCase.Vessel = CurrentVessel.Key;
             PatientCase.Location = CurrentLocation.Key;
 
-            double sheathType = 2.6;
-            if (PatientCase.AccessionNumber.Equals("1.7"))
-                sheathType = 1.7;
-            RaySetProperty(Property.SheathDiameter, sheathType);
-            PatientCase.SheathDiameter = RayGetProperty(Property.SheathDiameter);
+            if (DeviceStatus.CatheterStatus == Constants.CatheterStatusFailed)
+            {
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingCatheterFailPage) { Parameter = parameter });
+            }
+            else
+            {
+                double sheathType = 2.6;
+                if (PatientCase.AccessionNumber.Equals("1.7"))
+                    sheathType = 1.7;
+                RayError result = (RayError)RaySetProperty(Property.SheathDiameter, sheathType);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
+                PatientCase.SheathDiameter = RayGetProperty(Property.SheathDiameter);
 
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["patient"] = Patient;
-            parameter["patientCase"] = PatientCase;
-            parameter["prevStatus"] = PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
+            }
         }
     }
 }

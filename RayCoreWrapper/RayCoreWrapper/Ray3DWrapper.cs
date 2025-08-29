@@ -41,7 +41,7 @@ namespace RaywattOCT
                 set { _isFirstRendering = value; }
             }
 
-            private int _zoomFactor = 0;
+            private int _zoomFactor;
             public int ZoomFactor
             {
                 get { return _zoomFactor; }
@@ -71,7 +71,7 @@ namespace RaywattOCT
                 return (ObjectVisibility[(int)obj] != Ray3DObjectMode.Hide);
             }
 
-            public int ShowIndicator(bool show)
+            public static int ShowIndicator(bool show)
             {
 
                 int sum = ODSOCT_ShowIndicatorCutView(show);
@@ -87,7 +87,8 @@ namespace RaywattOCT
             set { _ray3DStatus = value; }
         }
 
-        public static int MinWaitingDelay = 50;
+        public static readonly int MinWaitingDelay = 50;
+
         public enum Ray3DObject : int
         {
             Unknown = 0,

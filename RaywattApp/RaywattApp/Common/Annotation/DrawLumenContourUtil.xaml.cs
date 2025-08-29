@@ -267,7 +267,7 @@ namespace RaywattApp.Common.Annotation
                 foreach(LumenContour lumenContour in drawUtil.LumenContours)
                 {
                     Stack<LumenContourHistory> stack = new Stack<LumenContourHistory>();
-                    stack.Push(drawUtil.CopyLumenContourToHistory(lumenContour));
+                    stack.Push(CopyLumenContourToHistory(lumenContour));
                     drawUtil.lumenContourHistory.Add(stack);
                 }
 
@@ -650,7 +650,7 @@ namespace RaywattApp.Common.Annotation
             {
                 Polygon polygon = new Polygon();
                 polygon.Style = (Style)this.Resources["StylePolygon"];
-                foreach (Point point in pointList.GetRange(0, pointList.Count - 1))
+                foreach (Point point in pointList.GetRange(0, pointList.Count))
                 {
                     polygon.Points.Add(point);
                 }
@@ -818,7 +818,7 @@ namespace RaywattApp.Common.Annotation
             return true;
         }
 
-        private PathGeometry GetPathGeometry(List<Point> points)
+        private static PathGeometry GetPathGeometry(List<Point> points)
         {
             _log.Debug("GetPathGeometry");
 
@@ -1020,7 +1020,7 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
-        private LumenContourHistory CopyLumenContourToHistory(LumenContour lumenContour)
+        private static LumenContourHistory CopyLumenContourToHistory(LumenContour lumenContour)
         {
             LumenContourHistory lumenContourHistory = new LumenContourHistory();
             lumenContourHistory.points = lumenContour.Points;

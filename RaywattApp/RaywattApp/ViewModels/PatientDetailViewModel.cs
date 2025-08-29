@@ -371,7 +371,11 @@ namespace RaywattApp.ViewModels
             if (patientCase == null)
                 return;
 
-            RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+            RayError result = (RayError)RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+            if (result != RayError.OK)
+            {
+                _log.Error("RaySetProperty Error");
+            }
             CommonUtil.SetColormap(patientCase.Colormap);
             int numOfFrames = RayStartReview(patientCase.ImageFullPath, patientCase.ImageResolution, patientCase.ZOffset);
 
@@ -379,6 +383,9 @@ namespace RaywattApp.ViewModels
             {
                 // To-Do: Error
                 _log.Error("numOfFrames < (int)RayError.OK");
+                _log.Error("patientCase.ImageFullPath : " + patientCase.ImageFullPath);
+
+                return;
             }
             else
             {

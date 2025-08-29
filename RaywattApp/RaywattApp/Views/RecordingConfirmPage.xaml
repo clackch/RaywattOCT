@@ -129,10 +129,10 @@
                             <RowDefinition Height="20"/>
                         </Grid.RowDefinitions>
                         <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5,0,0,0">
-                            <Label Content="P" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" Opacity="0.5"/>
+                            <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" Opacity="0.5"/>
                         </StackPanel>
                         <StackPanel Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,5,0">
-                            <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" Opacity="0.5"/>
+                            <Label Content="P" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" Opacity="0.5"/>
                         </StackPanel>
                         <Border Grid.Row="0" Grid.Column="1" CornerRadius="8,8,0,0" Background="{DynamicResource GrayscaleGray7Brush}">
                             <Grid>

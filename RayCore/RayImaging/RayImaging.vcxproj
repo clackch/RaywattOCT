@@ -162,6 +162,7 @@ xcopy "$(ProjectDir)*.h" "$(TargetDir)include\" /y /d</Command>
     <ClInclude Include="..\Utility\Config.h" />
     <ClInclude Include="..\Utility\MessageService.h" />
     <ClInclude Include="..\Utility\Utility.h" />
+    <ClInclude Include="FFTSpecFactory.h" />
     <ClInclude Include="LabImaging.h" />
     <ClInclude Include="Calibration.h" />
     <ClInclude Include="Imaging.h" />
@@ -173,6 +174,7 @@ xcopy "$(ProjectDir)*.h" "$(TargetDir)include\" /y /d</Command>
   <ItemGroup>
     <ClCompile Include="..\Utility\MessageService.cpp" />
     <ClCompile Include="..\Utility\Utility.cpp" />
+    <ClCompile Include="FFTSpecFactory.cpp" />
     <ClCompile Include="LabImaging.cpp" />
     <ClCompile Include="Calibration.cpp" />
     <ClCompile Include="LookUpTable.cpp" />

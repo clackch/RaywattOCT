@@ -47,6 +47,14 @@ namespace RaywattApp.Common.Annotation
 
         private static readonly DependencyProperty IsLengthOnProperty =
             DependencyProperty.Register("IsLengthOn", typeof(bool), typeof(DrawCommandUtil), new PropertyMetadata(default(bool)));
+         
+        public bool IsAngleOn
+        {
+            get { return (bool)GetValue(IsAngleOnProperty); }
+            set { this.SetValue(IsAngleOnProperty, value); }
+        }
+        private static readonly DependencyProperty IsAngleOnProperty =
+            DependencyProperty.Register("IsAngleOn", typeof(bool), typeof(DrawCommandUtil), new PropertyMetadata(default(bool)));
 
         public bool IsTextOn
         {
@@ -77,48 +85,55 @@ namespace RaywattApp.Common.Annotation
             if (drawCommandUtil == null || drawCommandUtil.CommandOff == false)
                 return;
 
-            drawCommandUtil.DisableCommand(false, false, false, false);
+            drawCommandUtil.DisableCommand(false, false, false, false, false);
 
             drawCommandUtil.CommandOff = false;
         }
 
         private void area_Add(object sender, RoutedEventArgs e)
         {
-            DisableCommand(true, false, false, false);
+            DisableCommand(true, false, false, false, false);
             OutCommand = Constants.MeasureAddArea + "|" + IsAreaOn;
         }
 
         private void length_Add(object sender, RoutedEventArgs e)
         {
-            DisableCommand(false, true, false, false);
+            DisableCommand(false, true, false, false, false);
             OutCommand = Constants.MeasureAddLength + "|" + IsLengthOn;
+        }
+        private void angle_Add(object sender, RoutedEventArgs e)
+        {
+            DisableCommand(false, false, false, false, true);
+            OutCommand = Constants.MeasureAddAngle + "|" + IsAngleOn;
         }
 
         private void text_Add(object sender, RoutedEventArgs e)
         {
-            DisableCommand(false, false, true, false);
+            DisableCommand(false, false, true, false, false);
             OutCommand = Constants.MeasureAddText + "|" + IsTextOn;
         }
 
         private void erase_point(object sender, RoutedEventArgs e)
         {
-            DisableCommand(false, false, false, true);
+            DisableCommand(false, false, false, true, false);
             OutCommand = Constants.MeasureErasePoint + "|" + IsEraseOn;
         }
 
         private void delete_All(object sender, RoutedEventArgs e)
         {
-            DisableCommand(false, false, false, false);
+            DisableCommand(false, false, false, false, false);
             OutCommand = Constants.MeasureDeleteAll;
         }
 
-        private void DisableCommand(bool isAreaOn, bool isLengthOn, bool isTextOn, bool isEraseOn)
+        private void DisableCommand(bool isAreaOn, bool isLengthOn, bool isTextOn, bool isEraseOn, bool isAngleOn)
         {
             if(!isAreaOn)
                 IsAreaOn = false;
             if(!isLengthOn)
                 IsLengthOn = false;
-            if(!isTextOn)
+            if (!isAngleOn)
+                IsAngleOn = false;
+            if (!isTextOn)
                 IsTextOn = false;
             if(!isEraseOn)
                 IsEraseOn = false;

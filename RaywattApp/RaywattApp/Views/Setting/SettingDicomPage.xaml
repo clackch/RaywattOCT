@@ -51,17 +51,17 @@
                 <StackPanel Height="8"/>
                 <Border CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}">
                     <Grid>
-                        <DataGrid Height="312" Name="dicomServers" ItemsSource="{Binding DicomServers}" Style="{StaticResource DataGridDialogSmall}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialogSmall}">
+                        <DataGrid Height="312" Name="dicomServers" ItemsSource="{Binding DicomServers}" Style="{StaticResource DataGridDialogSmall}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialogSmall}" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
                             <DataGrid.InputBindings>
                                 <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding DicomServerEditCommand}" CommandParameter="{Binding ElementName=dicomServers, Path=CurrentItem}"/>
                             </DataGrid.InputBindings>
                             <DataGrid.Columns>
-                                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding AeTitle}" Header="{Binding [AE Title], Source={StaticResource L10N}}"/>
-                                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Hostname}" Header="{Binding [Hostname], Source={StaticResource L10N}}" />
-                                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding IpAddress}" Header="{Binding [IP], Source={StaticResource L10N}}" />
-                                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="0.8*" Binding="{Binding Port}" Header="{Binding [Port], Source={StaticResource L10N}}" />
-                                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="0.7*" Binding="{Binding ServerType}" Header="{Binding [Server Type], Source={StaticResource L10N}}" />
-                                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}" />
+                                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" MinWidth="100" Binding="{Binding AeTitle}" Header="{Binding [AE Title], Source={StaticResource L10N}}"/>
+                                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" MinWidth="100" Binding="{Binding Hostname}" Header="{Binding [Hostname], Source={StaticResource L10N}}" />
+                                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" MinWidth="80" Binding="{Binding IpAddress}" Header="{Binding [IP], Source={StaticResource L10N}}" />
+                                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" MinWidth="80" Binding="{Binding Port}" Header="{Binding [Port], Source={StaticResource L10N}}" />
+                                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" MinWidth="70" Binding="{Binding ServerType}" Header="{Binding [Server Type], Source={StaticResource L10N}}" />
+                                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" MinWidth="100" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}" />
                             </DataGrid.Columns>
                         </DataGrid>
                     </Grid>
