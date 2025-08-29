@@ -609,7 +609,8 @@ void CRJController::updateState() {
 		if (!m_isInit) {
 			if (!m_bLimitSwitch) m_nextState = eRJState::Initializing;
 		}
-		else if (m_bButton[0]) {
+		else if (m_bButton[0] || GetRFIDCountCurrentState() >= 5) {
+			RFIDProtocol::initState(false);
 			m_nextState = eRJState::Unloading;
 		}
 		break;
