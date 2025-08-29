@@ -68,6 +68,8 @@ COCTImaging::COCTImaging(Setting setting, CMessageService* pMsg) {
 	m_nTotalFrame = 0;
 
 	m_nSheathPosition = 0;
+	m_nSheathRowPosition = 0;
+	num = 0;
 
 	clahe = cv::createCLAHE(0.02, cv::Size(8, 8));
 }
@@ -477,8 +479,11 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 	}
 }
 
+int num_image = 0;
 void COCTImaging::findSheath(cv::Mat img) {
+	num_image++;
 	auto start = std::chrono::high_resolution_clock::now();
+	PLOGI.printf("change totalMagnitude : %d", num);
 
 	cv::Mat edgeX, edgeY;
 	cv::Sobel(img, edgeX, CV_32F, 1, 0, 3);
@@ -492,15 +497,64 @@ void COCTImaging::findSheath(cv::Mat img) {
 	cv::magnitude(edgeX, edgeY, edgeMagnitude);
 	cv::convertScaleAbs(edgeMagnitude, absEdgeMagnitude);
 
-	int totalX = 0, totalY = 0, totalMagnitude = 0;
+	int totalMagnitude = 0;
 	for (int y = 0; y < img.rows; y++) {
 		for (int x = 0; x < img.cols; x++) {
-			totalX += absEdgeX.at<uchar>(y, x);
-			totalY += absEdgeY.at<uchar>(y, x);
 			totalMagnitude += absEdgeMagnitude.at<uchar>(y, x);
 		}
 	}
+
+	PLOGI.printf("type : %d", img.type());
+
+	cv::Mat tmp = img.clone();
+	cv::Mat check = img.clone();
+	if (tmp.type() != CV_32F) tmp.convertTo(tmp, CV_32F, 1/255.0);
+
+	cv::Sobel(tmp, edgeX, CV_32F, 1, 0, 3);
+	cv::Sobel(tmp, edgeY, CV_32F, 0, 1, 3);
+
+	for(int y=0; y < tmp.rows; y++) {
+		for(int x=0; x < tmp.cols; x++) {
+			//PLOGI.printf("edgeX : %f, edgeY : %f", edgeX.at<float>(y, x), edgeY.at<float>(y, x));
+			tmp.at<float>(y, x) *= 3 * edgeX.at<float>(y, x) * edgeX.at<float>(y, x);
+			if (tmp.at<float>(y, x) < 1.0) tmp.at<float>(y, x) = 0;
+			tmp.at<float>(y, x) *= 3 * edgeY.at<float>(y, x);
+			//PLOGI.printf("tmp : %f", tmp.at<float>(y, x));
+		}
+	}
+	cv::rotate(tmp, tmp, cv::ROTATE_90_COUNTERCLOCKWISE);
+	for (int y = tmp.rows/2; y < tmp.rows; y++) {
+		int pixelNum = 0;
+		float maxTmp = 0.0f;
+		for(int x = 0; x < tmp.cols; x++) {
+			if(maxTmp < tmp.at<float>(y, x))
+				maxTmp = tmp.at<float>(y, x);
+			if (tmp.at<float>(y, x) >= 1.0) {
+				pixelNum++;
+			}
+			else
+				tmp.at<float>(y, x) = 0;
+		}
+		PLOGI.printf("y : %d, pixelNum : %d, maxTmp : %f", y, pixelNum, maxTmp);
+		if(pixelNum > 200) {
+			m_nSheathRowPosition = tmp.rows - y;
+			for(int x = 0; x < tmp.cols; x++) {
+				tmp.at<float>(y, x) = 1.0;
+			}
+			break;
+		}
+	}
+	PLOGI.printf("what row : %d", m_nSheathRowPosition);
+
+	tmp.convertTo(tmp, CV_8U, 255.0);
+	//cv::imwrite("check" + std::to_string(num_image) + ".tif", tmp);
+	//cv::imwrite("origin" + std::to_string(num_image) + ".tif", check);
+	/*cv::Mat circularized;
+	CircularizeImage(img, circularized);
+	cv::imwrite("circularizedImage" + std::to_string(num_image) + ".tif", circularized);*/
+
 	//PLOGI.printf("check the time - Magnitude: %d", totalMagnitude);
+
 	m_nSheathPosition = totalMagnitude;
 }
 
@@ -609,10 +663,12 @@ UINT COCTImaging::threadRender(LPVOID param) {
 		pImaging->m_waitForFringes = false;
 
 		if (pImaging->m_pThread->isRun) {
+			pImaging->num++;
 			if (pMsg != nullptr) {
 				int nFrameInfo = (pImaging->m_nCurFrame << 16) | (pImaging->m_nTotalFrame);
 				pMsg->postMessage(WM_PROCESS_CROSSSECTION, pImaging->GetSession(), nFrameInfo);
 			}
+			PLOGI.printf("startRender %d", pImaging->num);
 			pImaging->Process((char *)pImaging->m_pFringesBuffer);
 			pImaging->PostProcess(pImaging->GetProcessedImage());
 			// To-Do

@@ -65,10 +65,14 @@ protected:
 	int m_nTotalFrame;
 
 	int m_nSheathPosition;
+	int m_nSheathRowPosition;
 	int m_nSheathSearchRange;
 	int m_nZOffset;
 
 	int m_delayLineMovingDirection = 1;
+
+	int m_nSheathLocNow;
+	int num;
 
 	cv::Ptr<cv::CLAHE> clahe;
 public:
@@ -114,6 +118,8 @@ public:
 	void GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& centerPoints, std::vector<float>& radius);
 
 	int GetSheathPosition() { return m_nSheathPosition; }
+	int GetSheathRowPosition() { return m_nSheathRowPosition; }
+	int GetTempNum() { return num; }
 	void SetZOffset(int nOffset) { m_nZOffset = nOffset; }
 	void SetDelayLineMovingDirection(int direction) { m_delayLineMovingDirection = direction; }
 
