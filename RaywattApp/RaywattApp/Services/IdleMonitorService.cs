@@ -231,7 +231,18 @@ namespace RaywattApp.Services
         }
         private void ShowLoginScreen()
         {
-            CommonUtil.Exit(ViewModelBase.DeviceStatus, _angioManager);
+            const string adminPagePath = "Views/Admin";
+            bool isAdminPage = Constants.CurrentPage.Contains(adminPagePath);
+
+            if (isAdminPage)
+            {
+                CommonUtil.Exit(ViewModelBase.DeviceStatus, _angioManager, false, true);
+            }
+            else
+            {
+                CommonUtil.Exit(ViewModelBase.DeviceStatus, _angioManager);
+            }
+
         }
         private void ShowLogoutPopup()
         {

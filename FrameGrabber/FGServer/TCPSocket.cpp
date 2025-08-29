@@ -40,7 +40,7 @@ TCPSocket::TCPSocket() {
 	catch (const std::exception& ex) {
 		PLOGI.printf("Exception occurred: %s", ex.what());
 		if (serverSocket != INVALID_SOCKET)
-			closesocket(serverSocket);  
+			closesocket(serverSocket);
 		throw;
 	}
 }
@@ -65,7 +65,7 @@ void TCPSocket::SetCommandPacket(char commandType) {
 }
 
 void TCPSocket::SetImagePacketHeader(FrameGrabber& fg) {
-	imagePacketSize = IMAGE_HEADER_SIZE + repo.GetCropRegion().height * repo.GetCropRegion().width* fg.wBitsPerPixel / 8 + IMAGE_TAIL_SIZE;
+	imagePacketSize = IMAGE_HEADER_SIZE + repo.GetCropRegion().height * repo.GetCropRegion().width * fg.wBitsPerPixel / 8 + IMAGE_TAIL_SIZE;
 	fg.sc.pRecvBuf = (uchar*)malloc(imagePacketSize - IMAGE_HEADER_SIZE - IMAGE_TAIL_SIZE);
 	sendBuffer = new char[imagePacketSize];
 
@@ -134,7 +134,7 @@ void TCPSocket::ConnectClient(FrameGrabber& fg, int arg) {
 			receiveCmdThreadRunning = true;
 			checkClientThreadRunning = true;
 		}
-		this_thread::sleep_for(chrono::milliseconds(1000));
+		this_thread::sleep_for(chrono::milliseconds(10));
 	}
 }
 
@@ -278,13 +278,29 @@ void TCPSocket::ChpFilePacketProcess(FrameGrabber& fg) {
 	fg.chpFileName = string(tmpRecvBuffer + 4, packetLen - 6);
 
 	ERRTYPE e;
-	if (fg.chpFileName.substr(0, 6) == "setup\\") {
+
+	bool isAngioSetup = fg.chpFileName.substr(0, 6) == "setup\\";
+
+	if (isAngioSetup)
+	{
+		// angio setup file path
 		e = fg.ReadFormatFile((char*)(fg.chpFilePath + fg.chpFileName).c_str());
-		PLOGI.printf("Chp File Name: %s", (fg.chpFilePath + fg.chpFileName).c_str());
+		PLOGI.printf("[Angio Setup] Chp File Name: %s", (fg.chpFilePath + fg.chpFileName).c_str());
 	}
-	else {
-		e = fg.ReadFormatFile((char*)(fg.chpFilePath + "app\\" + fg.chpFileName).c_str());
-		PLOGI.printf("Chp File Name: %s", (fg.chpFilePath + "app\\" + fg.chpFileName).c_str());
+	else
+	{
+		std::string fileName = fg.chpFileName;
+
+		size_t extPos = fileName.rfind(".chp");
+		if (extPos != std::string::npos) {
+			size_t lastUnderscore = fileName.rfind('_', extPos);
+			if (lastUnderscore != std::string::npos) {
+				fileName.erase(lastUnderscore, extPos - lastUnderscore);
+			}
+		}
+
+		e = fg.ReadFormatFile((char*)(fg.chpFilePath + "setup\\" + fileName).c_str());
+		PLOGI.printf("[RaywattApp] Chp File Name: %s", (fg.chpFilePath + "setup\\" + fileName).c_str());
 	}
 
 	if (e) {
@@ -296,7 +312,7 @@ void TCPSocket::ChpFilePacketProcess(FrameGrabber& fg) {
 		PLOGI.printf("Success to read .chp file");
 		free(fg.sc.pRecvBuf);
 		fg.CreateFromFG();
-		repo.InitCropRegion(fg); 
+		repo.InitCropRegion(fg);
 		SetImagePacketHeader(fg);
 		SetCommandPacket(CommandType::FGSuccessChangeChp);
 		sendResult = send(clientSocket, commandBuffer, 5, 0);
@@ -313,57 +329,49 @@ void TCPSocket::ChpFilePacketProcess(FrameGrabber& fg) {
 
 }
 
-void TCPSocket::PortEventThread(FrameGrabber& fg) {
+
+void TCPSocket::PortEventThread(FrameGrabber& fg)
+{
+	HANDLE	hEvents[1];
+	fg.pIdeaInfo->hInfoEvent = CreateEvent(0, TRUE, FALSE, NULL);
+	hEvents[0] = fg.pIdeaInfo->hInfoEvent;
+
 	while (portEventThreadRunning)
 	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-		DWORD status = WaitForSingleObject(fg.pIdeaInfo->hInfoEvent, 100);
-		
-		switch (status)
+		switch (WaitForMultipleObjectsEx(1, hEvents, FALSE, 10, FALSE))
 		{
-			PLOGI.printf("PortEventThread called");
-
 			case WAIT_TIMEOUT:
 			{
-
-				PLOGI.printf("WAIT_TIMEOUT called");
-				break;
+				continue;
 			}
 
-			default:
+			case (WAIT_OBJECT_0):
 			{
 				ResetEvent(fg.pIdeaInfo->hInfoEvent);
-				fg.pIdeaInfo->bNewInfo = FALSE;
-				fg.m_bSyncValid = bHP_CSyncDetect(fg.m_BoardHandle);
-				//PLOGI.printf("Port Event...");
-				if (fg.m_bSyncValid && fg.portConnection != 1)
-				{
-					fg.portConnection = 1;
-					SetCommandPacket(CommandType::FGAngioConnected);
-					int sendResult = send(clientSocket, commandBuffer, 5, 0);
-					PLOGI.printf("Send Port Connected");
-				}
-				else if (!fg.m_bSyncValid && fg.portConnection != 0)
-				{
-					fg.portConnection = 0;
-					SetCommandPacket(CommandType::FGAngioDisconnected);
-					int sendResult = send(clientSocket, commandBuffer, 5, 0);
-					PLOGI.printf("Send Port Disconnected");
-				}
 
-				if (fg.pIdeaInfo)
+				switch (fg.pIdeaInfo->dwInfoCode)
 				{
-					//PLOGI.printf("fg.pIdealInfo true called");
-					HANDLE	hInfoEvent = fg.pIdeaInfo->hInfoEvent;
-					if (hInfoEvent)
+					case IDEA_INFO_SYNC:
 					{
-						// Must be done in this order to prevent a problem in the DLL thread.
-						fg.pIdeaInfo->hInfoEvent = 0;
-						CloseHandle(hInfoEvent);
-					}
+						fg.pIdeaInfo->bNewInfo = FALSE;
+						fg.m_bSyncValid = static_cast<bool>(fg.pIdeaInfo->dwInfoExtra);
 
+						if (fg.m_bSyncValid)
+						{
+							fg.portConnection = 1;
+							SetCommandPacket(CommandType::FGAngioConnected);
+							send(clientSocket, commandBuffer, 5, 0);
+							PLOGI.printf("Send Port Connected");
+						}
+						else
+						{
+							fg.portConnection = 0;
+							SetCommandPacket(CommandType::FGAngioDisconnected);
+							send(clientSocket, commandBuffer, 5, 0);
+							PLOGI.printf("Send Port Disconnected");
+						}
+					}
 				}
-				break;
 			}
 		}
 	}
@@ -433,40 +441,52 @@ long long TCPSocket::timeSelect() {
 }
 
 void TCPSocket::LiveFrame(FrameGrabber& fg) {
-	HDVID_HEADER* pVidHeader = nullptr; 
-	ERRTYPE bufferResult = eHD_GetStreamBuffer(fg.m_ImageHandle, &pVidHeader); // 이미지 버퍼헤더 가져오는 함수
+	HDVID_HEADER* pVidHeader = nullptr;
+	ERRTYPE bufferResult = eHD_GetStreamBuffer(fg.m_ImageHandle, &pVidHeader);
 	long long livetime = timeSelect();
+
 	if (bufferResult != 0 || pVidHeader == nullptr) {
-		retryCount++; 
+		retryCount++;
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
 		if (retryCount > 100) { // 이미지를 1초 이상 받아오지 못하는 경우 새로고침
 			RefreshLiveStream(fg);
 			retryCount = 0;
 		}
 		return;
 	}
-	std::this_thread::sleep_for(std::chrono::milliseconds(10));
-	//여기에서 Crop 기능을 추가해야하는데
+
 	int cropsize = repo.GetCropRegion().height * repo.GetCropRegion().width;
-	std::vector<unsigned char> croppedBuffer(cropsize * fg.wBitsPerPixel / 8);
+	int bytesPerPixel = fg.wBitsPerPixel / 8;
+
+	if (croppedBuffer.size() != cropsize * bytesPerPixel) {
+		croppedBuffer.resize(cropsize * bytesPerPixel);
+	}
+
 	if (repo.ApplyCrop(pVidHeader, fg, croppedBuffer));
 	else PLOGI.printf("[Crop] Failed to apply crop. Using full image.");
-	int offset = 7; 
+
+	int offset = 7;
 	memcpy(sendBuffer + offset, &livetime, sizeof(livetime));
 	offset += sizeof(livetime);
-	memcpy(sendBuffer + offset, croppedBuffer.data(), cropsize * fg.wBitsPerPixel / 8);
-	offset += cropsize * fg.wBitsPerPixel / 8;
-	checkSum = CalcCheckSum(sendBuffer, offset); 
-	memcpy(sendBuffer + offset, &checkSum, sizeof(checkSum)); 
-	offset += sizeof(checkSum); 
-	memcpy(sendBuffer + offset, &eof, sizeof(eof)); 
-	offset += sizeof(eof); 
+
+	memcpy(sendBuffer + offset, croppedBuffer.data(), cropsize * bytesPerPixel);
+	offset += cropsize * bytesPerPixel;
+
+	checkSum = CalcCheckSum(sendBuffer, offset);
+	memcpy(sendBuffer + offset, &checkSum, sizeof(checkSum));
+	offset += sizeof(checkSum);
+
+	memcpy(sendBuffer + offset, &eof, sizeof(eof));
+	offset += sizeof(eof);
+
 	int sendResult = send(clientSocket, sendBuffer, imagePacketSize, 0);
-	if (sendResult == SOCKET_ERROR) { 
-		PLOGI.printf("Failed to send data to client. Error code: %d", WSAGetLastError()); 
+	if (sendResult == SOCKET_ERROR) {
+		PLOGI.printf("Failed to send data to client. Error code: %d", WSAGetLastError());
 	}
-	eHD_ReleaseStreamBuffer(fg.m_ImageHandle, pVidHeader); //버퍼 할당 해제
-	retryCount = 0; 
+
+	eHD_ReleaseStreamBuffer(fg.m_ImageHandle, pVidHeader);
+	retryCount = 0;
 }
 
 void TCPSocket::StartLiveFrameThread(FrameGrabber& fg) {
@@ -484,24 +504,24 @@ void TCPSocket::StartLiveFrameThread(FrameGrabber& fg) {
 }
 
 void TCPSocket::StopLiveFrameThread(FrameGrabber& fg) {
-	if (liveFrameThreadRunning) { 
+	if (liveFrameThreadRunning) {
 		liveFrameThreadRunning = false;
 		ERRTYPE result = eHD_LiveStreamMode(fg.m_ImageHandle, LVM_STOP); // LiveMode_STOP
-		eHD_LiveStreamClose(fg.m_ImageHandle, &fg.m_LiveStreamInfo); 
-		if (liveFrameThreadHandle.joinable()) { 
-			liveFrameThreadHandle.join(); 
+		eHD_LiveStreamClose(fg.m_ImageHandle, &fg.m_LiveStreamInfo);
+		if (liveFrameThreadHandle.joinable()) {
+			liveFrameThreadHandle.join();
 		}
 		PLOGI.printf("LiveFrameThread stopped.");
 	}
 }
 
-void TCPSocket::LiveFrameThread(FrameGrabber& fg) {	
+void TCPSocket::LiveFrameThread(FrameGrabber& fg) {
 	while (liveFrameThreadRunning && isStarted && fg.portConnection) {
 		LiveFrame(fg);
 	}
 }
 
-void TCPSocket::RefreshLiveStream(FrameGrabber& fg) { 
+void TCPSocket::RefreshLiveStream(FrameGrabber& fg) {
 	ERRTYPE result = eHD_LiveStreamMode(fg.m_ImageHandle, LVM_STOP);
 	if (result != 0)return;
 	eHD_LiveStreamClose(fg.m_ImageHandle, &fg.m_LiveStreamInfo);
@@ -535,9 +555,9 @@ void TCPSocket::StopSnapFrameThread() {
 	}
 }
 
-void TCPSocket::SnapFrameThread(FrameGrabber& fg) { 
-	while (snapFrameThreadRunning && isStarted && fg.portConnection) { 
-		SnapFrame(fg); 
+void TCPSocket::SnapFrameThread(FrameGrabber& fg) {
+	while (snapFrameThreadRunning && isStarted && fg.portConnection) {
+		SnapFrame(fg);
 	}
 }
 
