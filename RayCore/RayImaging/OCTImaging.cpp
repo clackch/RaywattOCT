@@ -536,7 +536,7 @@ void COCTImaging::findSheath(cv::Mat img) {
 				tmp.at<float>(y, x) = 0;
 		}
 		PLOGI.printf("y : %d, pixelNum : %d, maxTmp : %f", y, pixelNum, maxTmp);
-		if(pixelNum > 200) {
+		if(pixelNum > 150) {
 			m_nSheathRowPosition = tmp.rows - y;
 			for(int x = 0; x < tmp.cols; x++) {
 				tmp.at<float>(y, x) = 1.0;
