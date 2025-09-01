@@ -114,6 +114,28 @@ namespace RaywattApp.ViewModels
             }
         }
 
+        private string _autoPullbackLumenSnrThreshold;
+        public string AutoPullbackLumenSnrThreshold
+        {
+            get { return _autoPullbackLumenSnrThreshold; }
+            set
+            {
+                if (value.Length <= 3)
+                {
+                    if (value.Contains("-"))
+                        return;
+
+                    if (!CommonUtil.ValidateRealNumber(value))
+                    {
+                        value = "";
+                    }
+
+                    _autoPullbackLumenSnrThreshold = value;
+                    OnPropertyChanged(nameof(AutoPullbackLumenSnrThreshold));
+                }
+            }
+        }
+
         private string _autoPullbackTriggerCandidate;
         public string AutoPullbackTriggerCandidate
         {
@@ -340,6 +362,7 @@ namespace RaywattApp.ViewModels
             //Auto Pullback Initial Setting
             AutoPullbackLumenThresholdMin = "2";
             AutoPullbackLumenThresholdMax = "50";
+            AutoPullbackLumenSnrThreshold = "1.0";
             AutoPullbackTriggerCandidate = "3";
             AutoPullbackTriggerCount = "3";
             AutoPullbackModel = "Lumen";
@@ -646,6 +669,7 @@ namespace RaywattApp.ViewModels
             AutoPullbackShowLumenGuide = (RayGetProperty(Property.ShowLumenGuide) == 1.0) ? true : false;
             AutoPullbackLumenThresholdMin = (RayGetProperty(Property.LumenThresholdMin) * 100).ToString();
             AutoPullbackLumenThresholdMax = (RayGetProperty(Property.LumenThresholdMax) * 100).ToString();
+            AutoPullbackLumenSnrThreshold = RayGetProperty(Property.LumenSnrThreshold).ToString();
             AutoPullbackTriggerCandidate = DeviceStatus.AutoPullbackTriggerCandidate.ToString();
             AutoPullbackTriggerCount = DeviceStatus.AutoPullbackTriggerCount.ToString();
         }
@@ -658,6 +682,8 @@ namespace RaywattApp.ViewModels
                 AutoPullbackLumenThresholdMin = "0";
             if (String.IsNullOrWhiteSpace(AutoPullbackLumenThresholdMax))
                 AutoPullbackLumenThresholdMax = "0";
+            if (String.IsNullOrWhiteSpace(AutoPullbackLumenSnrThreshold))
+                AutoPullbackLumenSnrThreshold = "0";
             if (String.IsNullOrWhiteSpace(AutoPullbackTriggerCandidate))
                 AutoPullbackTriggerCandidate = "0";
             if (String.IsNullOrWhiteSpace(AutoPullbackTriggerCount))
@@ -678,6 +704,7 @@ namespace RaywattApp.ViewModels
             RaySetProperty(Property.ShowLumenGuide, AutoPullbackShowLumenGuide ? 1.0 : 0.0);
             RaySetProperty(Property.LumenThresholdMin, double.Parse(AutoPullbackLumenThresholdMin) / 100);
             RaySetProperty(Property.LumenThresholdMax, double.Parse(AutoPullbackLumenThresholdMax) / 100);
+            RaySetProperty(Property.LumenSnrThreshold, double.Parse(AutoPullbackLumenSnrThreshold));
             DeviceStatus.AutoPullbackTriggerCandidate = int.Parse(AutoPullbackTriggerCandidate);
             DeviceStatus.AutoPullbackTriggerCount = int.Parse(AutoPullbackTriggerCount);
         }

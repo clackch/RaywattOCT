@@ -1352,6 +1352,24 @@ RayError COCTSystem::SetShowLumenGuide(double value)
 }
 
 /*
+* GetLumenSnrThreshold
+*/
+double COCTSystem::GetLumenSnrThreshold()
+{
+	return m_fLumenSrnThreshold;
+}
+
+/*
+* SetLumenSnrThreshold
+*/
+RayError COCTSystem::SetLumenSnrThreshold(double value)
+{
+	m_fLumenSrnThreshold = value;
+
+	return RayError::OK;
+}
+
+/*
 * threadService
 */
 UINT COCTSystem::threadService(LPVOID param) {
