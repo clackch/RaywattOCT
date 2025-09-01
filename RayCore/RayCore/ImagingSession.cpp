@@ -733,7 +733,7 @@ inline void draw_area_thresholds_and_contour(cv::Mat& imgBgr, const std::vector<
 	}
 }
 
-int CImagingSession::IsLumenNormal(cv::Mat image, std::vector<cv::Point> contour, double lumenThresholdMin, double lumenThresholdMax, bool showLumenGuide){
+int CImagingSession::IsLumenNormal(cv::Mat image, std::vector<cv::Point> contour, double lumenThresholdMin, double lumenThresholdMax, double lumenSnrThreshold, bool showLumenGuide){
 	AreaParams ap;
 	ap.sheathAreaFracMax = lumenThresholdMin;
 	ap.areaFracMax = lumenThresholdMax;
@@ -898,7 +898,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 
 		//Test
 		if (false) {//!validContour.empty()) {
-			pSession->IsLumenNormal(circleImage, validContour, 0.01, 0.30, true);
+			pSession->IsLumenNormal(circleImage, validContour, 0.01, 0.30, 1.0, true);
 			cv::imwrite(cv::format("./test/%06d.png", nFrame), circleImage);
 		}
 
