@@ -729,7 +729,7 @@ inline void draw_area_thresholds_and_contour(cv::Mat& imgBgr, const std::vector<
 
 	if (!contour.empty()) {
 		std::vector<std::vector<cv::Point>> cs{ contour };
-		cv::drawContours(imgBgr, cs, 0, col, 2, cv::LINE_AA);
+		cv::drawContours(imgBgr, cs, 0, col, 1, cv::LINE_AA);
 	}
 }
 
