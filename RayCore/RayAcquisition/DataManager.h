@@ -53,10 +53,9 @@ class IDataManager
 {
 protected:
 	int m_nNumOfSamples;
-	int m_nNumOfKeepSamples;
-	std::map<OCTHeader::ExtraData, void *> mapExtraData;
+	std::map<OCTHeader::ExtraData, void*> mapExtraData;
 public:
-	IDataManager() { m_nNumOfSamples = 0; m_nNumOfKeepSamples = 0; }
+	IDataManager() { m_nNumOfSamples = 0;}
 	virtual ~IDataManager() {
 		std::map<OCTHeader::ExtraData, void*>::iterator it = mapExtraData.begin();
 		while (it != mapExtraData.end())
@@ -71,7 +70,7 @@ public:
 	virtual char* GetSample(int nIndex) = 0;
 	virtual void AddFrame(void* pFrame) = 0;
 
-	void AddExtraData(OCTHeader::ExtraData extraData, void* pData, int nSize) { 
+	void AddExtraData(OCTHeader::ExtraData extraData, void* pData, int nSize) {
 		std::map<OCTHeader::ExtraData, void*>::iterator it = mapExtraData.find(extraData);
 		if (it != mapExtraData.end()) {
 			delete[] it->second;

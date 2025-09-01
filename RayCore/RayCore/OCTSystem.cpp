@@ -14,6 +14,7 @@
 #include "ImagingSession.h"
 #include "LaserModule.h"
 #include "LookUpTable.h"
+#include "PullbackLengthManager.h"
 
 /*
 * COCTSystem
@@ -1427,7 +1428,7 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	tstring strSaveFilePath = pSystem->m_strFilePath;
 	CImagingSession* pSession = pSystem->m_reviewSession[SESSION_REALTIME];
-	CDataWriter* pDataWriter = (CDataWriter*)pSession->GetDataManager();
+	PullbackLengthManager* pDataWriter = (PullbackLengthManager*)pSession->GetDataManager();
 	COCTImaging* pImaging = pSession->GetImaging();
 	ImagingType type = pSession->GetImagingType();
 	const int nNumOfSamples = pDataWriter->GetNumOfSamples();
@@ -1634,9 +1635,10 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	PLOGI.printf("Pullback start - %dmm, %dmm/s - %dmsec", config.stepMotor.pullbackDistance, config.stepMotor.pullbackSpeed, pullbackTime);
 
 	int pullbackType = pSystem->GetPullbackType(config.stepMotor.pullbackDistance, config.stepMotor.pullbackSpeed);
+	PLOGI.printf("PullbackType = %d", pullbackType);
 
 	// 1. Start Recording OCT
-	CDataWriter* pDataWriter = new CDataWriter();
+	CDataWriter* pDataWriter = new PullbackLengthManager();
 	pDataWriter->Initialize(settingPullback.nBufferSize * sizeof(USHORT));
 	pDataWriter->AddExtraData(OCTHeader::ExtraData::Dispersion, pSystem->m_pImagingPullback->GetCalibrationData(), settingPullback.nAScan * 2 * sizeof(int));
 	if (ImagingType::Default == ImagingType::LabImaging)
@@ -1688,11 +1690,14 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pRJController->StopMotor();
 	pRJController->Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 	pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_STANDBY_OFF);
-
 	PLOGI.printf("Pullback done.");
-	pDataWriter->SetSMProfile(config.stepMotor.SMPullbackProfile);
-	pDataWriter->ReadAccelDecelPofileParameter();
-	pDataWriter->CutPullbackLength(pullbackType);
+
+	if (auto* mgr = dynamic_cast<PullbackLengthManager*>(pDataWriter)) {
+		PLOGI.printf("GetNumOfSamples() = %d", mgr->GetNumOfSamples());
+		mgr->SetSMProfile(config.stepMotor.SMPullbackProfile);
+		mgr->CutPullbackLength(pullbackType);
+	}
+
 	CImagingSession* pSession = CImagingSession::CreateSession(pSystem, SESSION_REVIEW, settingPullback, pDataWriter);
 	pSystem->postPriorMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
 	pSystem->postPriorMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
@@ -1827,6 +1832,8 @@ UINT COCTSystem::threadUnloadCatheter(LPVOID param) {
 			
 			pRJController->Current(eStepMotorIndex::Hub, HUB_MOTOR_POS_INITIAL);
 		}
+		PLOGI.printf("photoSensor %d %d %d %d %d %d", pRJController->GetPhotoSensorOnOff(0), pRJController->GetPhotoSensorOnOff(1), pRJController->GetPhotoSensorOnOff(2)
+				, pRJController->GetPhotoSensorOnOff(3), pRJController->GetPhotoSensorOnOff(4), pRJController->GetPhotoSensorOnOff(5));
 	}
 	else if (pSystem->m_isTestMode)
 	{
@@ -2549,24 +2556,23 @@ std::vector<std::vector<std::string>> COCTSystem::readLoadSequence()
 	return loadCommands;
 }
 
-int COCTSystem::GetPullbackType(int pullbackSpeed, int pullbackDistance) {
-	if (pullbackDistance == 60) {
-		switch (pullbackSpeed)
-		{
-		case 20:
+int COCTSystem::GetPullbackType(int pullbackDistance, int pullbackSpeed) {
+	if (pullbackDistance <= 61) {
+		if (pullbackSpeed <= 21) {
 			return 0;
-		case 60:
+		}
+		else if (pullbackSpeed <= 61) {
 			return 2;
-		default:
+		}
+		else {
 			return 4;
 		}
 	}
 	else {
-		switch (pullbackSpeed)
-		{
-		case 40:
+		if (pullbackSpeed <= 41) {
 			return 1;
-		default:
+		}
+		else {
 			return 3;
 		}
 	}

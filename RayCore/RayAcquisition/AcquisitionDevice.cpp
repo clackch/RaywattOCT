@@ -46,7 +46,7 @@ UINT IAcquisitionDevice::threadAcquire(LPVOID param) {
 			pImaging->SetFrameInfo(nCurFrame, nTotalFrame);
 		}
 
-		else if (pDevice->m_pWriter != NULL) {
+		if (pDevice->m_pWriter != NULL) {
 			pDevice->m_pWriter->AddFrame(pBuffer);
 		}
 	}
