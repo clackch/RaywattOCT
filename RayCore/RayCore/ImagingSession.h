@@ -5,6 +5,7 @@
 #include "Imaging.h"
 #include <opencv2/opencv.hpp>
 #include <map>
+#include <numeric>
 
 #define FILE_EXTENSION_RAW	"bin"
 #define FILE_EXTENSION_OCT	"oct"
@@ -16,30 +17,6 @@ enum class ImagingType
 	LabImaging,
 	TIFFImaging,
 	Default = LabImaging
-};
-
-// ===================== 설정/타입 =====================
-enum class AreaDecision {
-	Accept,         // 정상 처리
-	ExcludeSheath,  // 너무 작아 sheath로 제외
-	ExcludeTooLarge,// 너무 커서 제외
-	Invalid         // 컨투어가 유효하지 않음
-};
-
-struct AreaParams {
-	double sheathAreaFracMax = 0.004; // FOV 면적의 0.4% 이하면 sheath로 제외
-	double areaFracMax = 0.40;  // FOV 면적의 40% 이상이면 너무 큼 → 제외
-};
-
-struct AreaResult {
-	AreaDecision decision = AreaDecision::Invalid;
-
-	double contourArea = 0.0;   // px^2
-	double fovArea = 0.0;   // px^2 (π Rfov^2)
-	double areaFrac = 0.0;   // contourArea / fovArea
-
-	double Rfov = 0.0;   // FOV 반경 (min(W,H)/2)
-	cv::Point2f center;         // 이미지 중심 (FOV 중심)
 };
 
 class CMessageService;

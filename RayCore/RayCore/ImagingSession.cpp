@@ -495,6 +495,179 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 	return NOERROR;
 }
 
+// Lumen Validation
+enum class AreaDecision {
+	Accept,         // 정상 처리
+	ExcludeSheath,  // 너무 작아 sheath로 제외
+	ExcludeTooLarge,// 너무 커서 제외
+	Invalid         // 컨투어가 유효하지 않음
+};
+
+struct AreaParams {
+	double sheathAreaFracMax = 0.004; // FOV 면적의 0.4% 이하면 sheath로 제외
+	double areaFracMax = 0.40;  // FOV 면적의 40% 이상이면 너무 큼 → 제외
+	double minEdgeLenStraight = 8.0;   // ← 간선이 이 길이 이상이면 "직선 간선"
+};
+
+struct AreaResult {
+	AreaDecision decision = AreaDecision::Invalid;
+	double contourArea = 0.0;   // px^2
+	double fovArea = 0.0;   // px^2 (π Rfov^2)
+	double areaFrac = 0.0;   // contourArea / fovArea
+	double Rfov = 0.0;   // FOV 반경 (min(W,H)/2)
+	cv::Point2f center;         // 이미지 중심 (FOV 중심)
+};
+
+struct EdgePrefix {
+	int N{};
+	std::vector<double> seg;   // seg[i] = |c[i] -> c[i+1]|
+	std::vector<double> pref;  // 길이 2N+1, 원형을 2번 펼친 누적합
+	double P{};                // 둘레
+	explicit EdgePrefix(const std::vector<cv::Point>& c) {
+		N = (int)c.size();
+		if (N < 2) return;
+		seg.resize(N);
+		for (int i = 0; i < N; ++i) {
+			int j = (i + 1 == N) ? 0 : (i + 1);
+			double dx = double(c[j].x) - c[i].x;
+			double dy = double(c[j].y) - c[i].y;
+			seg[i] = std::hypot(dx, dy);
+		}
+		P = std::accumulate(seg.begin(), seg.end(), 0.0);
+		// 원형을 2배로 펼쳐서 누적합 구성
+		pref.resize(2 * N + 1, 0.0);
+		for (int k = 0; k < 2 * N; ++k) pref[k + 1] = pref[k] + seg[k % N];
+	}
+
+	// 정방향: 정점 i에서 거리 dist 만큼 진행한 끝 정점
+	int forwardVertex(int i, double dist) const {
+		int startEdge = i; // i에서 시작하는 엣지 인덱스
+		double target = pref[startEdge] + dist;
+		// [i+1, i+N] 범위에서 target 이상이 되는 첫 엣지 찾기
+		int e = int(std::lower_bound(pref.begin() + startEdge + 1,
+			pref.begin() + startEdge + N + 1,
+			target) - pref.begin());
+		return e % N; // 엣지 e의 끝 정점
+	}
+
+	// 역방향: 정점 i에서 뒤로 거리 dist 만큼 간 시작 정점
+	int backwardVertex(int i, double dist) const {
+		int curr = i + N; // 가운데 창으로 이동 (음수 인덱스 회피)
+		double target = pref[curr] - dist;
+		auto first = pref.begin() + (curr - N);
+		auto last = pref.begin() + curr;
+		auto it = std::upper_bound(first, last, target);
+		int e = int((it - pref.begin()) - 1);
+		return (e % N + N) % N;
+	}
+};
+
+template<typename T>
+static inline T clamp_val(T v, T lo, T hi) { return (v < lo) ? lo : (v > hi ? hi : v); }
+
+// --- Cubic Bezier (de Casteljau) ---
+static inline cv::Point2f bezier3(const cv::Point2f& P0, const cv::Point2f& P1, const cv::Point2f& P2, const cv::Point2f& P3, float u) {
+	cv::Point2f A = P0 + (P1 - P0) * u;
+	cv::Point2f B = P1 + (P2 - P1) * u;
+	cv::Point2f C = P2 + (P3 - P2) * u;
+	cv::Point2f D = A + (B - A) * u;
+	cv::Point2f E = B + (C - B) * u;
+	return D + (E - D) * u;
+}
+
+// 긴 엣지 런 제거 + “멀리 잡은 핸들”로 베지어 연결
+std::vector<cv::Point> reconstruct_RemoveLongRuns_WithFarBezier(const std::vector<cv::Point>& c, double minEdgeLen, int innerSamples = 3, double handleMinPx = 10.0, double handleFrac = 0.7) {
+	const int N = (int)c.size();
+	if (N < 4) return c;
+
+	// 0) 엣지 길이 및 누적합 준비 (한 번만)
+	EdgePrefix ep(c);
+	if (ep.N != N || ep.P <= 0.0) return c;
+
+	auto wrap = [&](int k) { k %= N; if (k < 0) k += N; return k; };
+
+	// 1) 긴 엣지 끝점 제거 플래그
+	std::vector<char> rm(N, 0);
+	for (int i = 0; i < N; ++i) {
+		int j = (i + 1 == N) ? 0 : (i + 1);
+		if (ep.seg[i] >= minEdgeLen) { rm[i] = 1; rm[j] = 1; }
+	}
+
+	// 2) 첫 유지점
+	int start = -1; for (int i = 0; i < N; ++i) if (!rm[i]) { start = i; break; }
+	if (start < 0) return {}; // 다 지워짐
+
+	std::vector<cv::Point> out; out.reserve(N);
+
+	int i = start;
+	auto push = [&](const cv::Point& p) {
+		if (out.empty() || out.back() != p) out.emplace_back(p);
+		};
+
+	do {
+		if (!rm[i]) {
+			push(c[i]);
+			int j = wrap(i + 1);
+			if (rm[j]) {
+				// run 끝 r 찾기
+				int k = j;
+				while (rm[k]) { k = wrap(k + 1); if (k == i) break; }
+				int r = k;
+				if (r == i) break;
+
+				// 핸들용 먼 점 A,D: prefix+이진탐색으로 O(log N)
+				cv::Point2f Bp((float)c[i].x, (float)c[i].y);
+				cv::Point2f Cp((float)c[r].x, (float)c[r].y);
+
+				double chord = cv::norm(Cp - Bp);
+				double target = std::max(handleMinPx, handleFrac * chord);
+
+				int idxA = ep.backwardVertex(i, target); // i에서 뒤로
+				int idxD = ep.forwardVertex(r, target); // r에서 앞으로
+
+				cv::Point2f A((float)c[idxA].x, (float)c[idxA].y);
+				cv::Point2f D((float)c[idxD].x, (float)c[idxD].y);
+
+				// Catmull-Rom 접선 → Bezier 핸들
+				cv::Point2f m0 = 0.5f * (Cp - A);
+				cv::Point2f m1 = 0.5f * (D - Bp);
+
+				// 핸들 길이를 chord의 [15%,80%]로 클램프
+				auto fitHandle = [&](cv::Point2f v) {
+					float L = (float)std::max(1e-3, chord);
+					float h = cv::norm(v);
+					const float lo = 0.15f, hi = 0.80f;
+					if (h < lo * L) v *= (lo * L / std::max(h, 1e-6f));
+					else if (h > hi * L) v *= (hi * L / h);
+					return v;
+					};
+				m0 = fitHandle(m0);
+				m1 = fitHandle(m1);
+
+				// Bezier P0..P3
+				const float hs = 1.f / 3.f;
+				cv::Point2f P0 = Bp, P1 = Bp + m0 * hs, P2 = Cp - m1 * hs, P3 = Cp;
+
+				// 내부 샘플 소수 삽입
+				int inner = clamp_val(innerSamples, 1, 12);
+				for (int s = 1; s <= inner; ++s) {
+					float u = float(s) / float(inner + 1);
+					cv::Point2f qf = bezier3(P0, P1, P2, P3, u);
+					cv::Point qi(cvRound(qf.x), cvRound(qf.y));
+					if (qi != out.back()) out.emplace_back(qi);
+				}
+
+				i = r; // run 건너뜀
+				continue;
+			}
+		}
+		i = wrap(i + 1);
+	} while (i != start);
+
+	if (!out.empty() && out.front() == out.back()) out.pop_back();
+	return out;
+}
+
 // ===================== 분류 로직 =====================
 inline AreaResult classify_by_area_only(const std::vector<cv::Point>& contour, const cv::Size& frameSize, const AreaParams& P = AreaParams{}){
 	AreaResult R;
@@ -576,7 +749,8 @@ int CImagingSession::IsLumenNormal(cv::Mat image, std::vector<cv::Point> contour
 		return 0;
 }
 
-std::vector<cv::Point> CImagingSession::GetValidLumenContour(const cv::Mat& imageResultWithoutCompensation, int imgSize, const cv::Mat& centerMask, const cv::Ptr<cv::CLAHE>& clahe, IRayLearning* learning, COCTImaging* pImaging){
+std::vector<cv::Point> CImagingSession::GetValidLumenContour(const cv::Mat& imageResultWithoutCompensation, int imgSize, const cv::Mat& centerMask, const cv::Ptr<cv::CLAHE>& clahe, IRayLearning* learning, COCTImaging* pImaging) {
+	CConfiguration& config = CConfiguration::GetInstance();
 	cv::Mat enhancedImage;
 	clahe->apply(imageResultWithoutCompensation, enhancedImage);
 	pImaging->CircularizeImage(enhancedImage, enhancedImage);
@@ -644,6 +818,10 @@ std::vector<cv::Point> CImagingSession::GetValidLumenContour(const cv::Mat& imag
 					}
 				}
 			}
+		}
+
+		if (!validContour.empty()) {
+			validContour = reconstruct_RemoveLongRuns_WithFarBezier(validContour, config.measurement.nSheathPosition / 2);
 		}
 	}
 
