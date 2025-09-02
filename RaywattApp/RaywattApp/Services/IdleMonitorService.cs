@@ -80,9 +80,12 @@ namespace RaywattApp.Services
 
         private void Init()
         {
-            StartIdleMonitorLoop();
-            RegisterUserActivityEvents();
-            ApplyLogoutTimeSettings();
+            if (!CommonUtil.IsRV200())
+            {
+                StartIdleMonitorLoop();
+                RegisterUserActivityEvents();
+                ApplyLogoutTimeSettings();
+            }
         }
         private void ApplyLogoutTimeSettings()
         {
