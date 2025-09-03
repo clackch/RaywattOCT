@@ -59,6 +59,7 @@ enum class RayProperty {
 	AutoPullback,
 	LumenThresholdMin,
 	LumenThresholdMax,
+	LumenSnrThreshold,
 	ShowLumenGuide
 };
 

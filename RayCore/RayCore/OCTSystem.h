@@ -82,6 +82,7 @@ private:
 	bool m_bAutoPullbackOnOff;
 	double m_fLumenThresholdMin;
 	double m_fLumenThresholdMax;
+	double m_fLumenSrnThreshold;
 	bool m_bShowLumenGuide;
 
 	//Property
@@ -190,6 +191,8 @@ public:
 	RayError SetLumenThresholdMax(double value);
 	double GetShowLumenGuide();
 	RayError SetShowLumenGuide(double value);
+	double GetLumenSnrThreshold();
+	RayError SetLumenSnrThreshold(double value);
 
 private:
 	// Main Thread

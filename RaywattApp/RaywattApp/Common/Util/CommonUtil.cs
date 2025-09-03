@@ -34,6 +34,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using RayCoreWrapper;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace RaywattApp.Common.Util
 {
@@ -80,12 +81,10 @@ namespace RaywattApp.Common.Util
 
         public static bool ValidateRealNumber(string input)
         {
-            var regex = new Regex(@"^[-+]?\d*\.?\d*$");
+            if (string.IsNullOrEmpty(input)) 
+                return false;
 
-            if (input.Length == 0)
-                return true;
-
-            return regex.IsMatch(input);
+            return double.TryParse(input, NumberStyles.Float | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out _);
         }
 
         public static Mat ByteMemoryToCvMat(IntPtr data, int width, int height, int ch)

@@ -144,6 +144,9 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
     case RayProperty::LumenThresholdMax:
         octSystem.SetLumenThresholdMax(value);
         break;
+    case RayProperty::LumenSnrThreshold:
+        octSystem.SetLumenSnrThreshold(value);
+        break;
     case RayProperty::ShowLumenGuide:
         octSystem.SetShowLumenGuide(value);
         break;
@@ -216,6 +219,8 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return octSystem.GetLumenThresholdMin();
     case RayProperty::LumenThresholdMax:
         return octSystem.GetLumenThresholdMax();
+    case RayProperty::LumenSnrThreshold:
+        return octSystem.GetLumenSnrThreshold();
     case RayProperty::ShowLumenGuide:
         return octSystem.GetShowLumenGuide();
     default:

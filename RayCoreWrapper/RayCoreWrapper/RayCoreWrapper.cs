@@ -57,6 +57,7 @@ namespace RaywattOCT
             AutoPullback,
             LumenThresholdMin,
             LumenThresholdMax,
+            LumenSnrThreshold,
             ShowLumenGuide
         }
 

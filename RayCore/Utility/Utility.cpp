@@ -29,7 +29,6 @@ void CUtility::StopThread(CThread *&pThread) {
 void CUtility::ResumeThread(CThread* pThread) {
 	if (pThread == nullptr) return;
 
-	PLOGI.printf("Thread Resumed");
 	std::lock_guard<std::mutex> lock(pThread->mMutex);
 	pThread->shouldResume = true;
 
@@ -38,7 +37,6 @@ void CUtility::ResumeThread(CThread* pThread) {
 void CUtility::SuspendThread(CThread* pThread) {
 	if (pThread == nullptr) return;
 
-	PLOGI.printf("Thread Suspended");
 	std::unique_lock<std::mutex> lock(pThread->mMutex);
 	pThread->sEvent.wait(lock, [&]() { return pThread->shouldResume; });
 	pThread->shouldResume = false;

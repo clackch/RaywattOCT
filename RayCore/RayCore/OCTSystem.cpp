@@ -1352,6 +1352,24 @@ RayError COCTSystem::SetShowLumenGuide(double value)
 }
 
 /*
+* GetLumenSnrThreshold
+*/
+double COCTSystem::GetLumenSnrThreshold()
+{
+	return m_fLumenSrnThreshold;
+}
+
+/*
+* SetLumenSnrThreshold
+*/
+RayError COCTSystem::SetLumenSnrThreshold(double value)
+{
+	m_fLumenSrnThreshold = value;
+
+	return RayError::OK;
+}
+
+/*
 * threadService
 */
 UINT COCTSystem::threadService(LPVOID param) {
@@ -2492,7 +2510,7 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 			std::vector<cv::Point> validContour = m_openedSession->GetValidLumenContour(m_pImagingRealtime->GetWithoutCompensationImage(), imgSize, centerMask, clahe, learning, m_pImagingRealtime);
 
 			if (!validContour.empty()) {
-				isCleared = m_openedSession->IsLumenNormal(image, validContour, m_fLumenThresholdMin, m_fLumenThresholdMax, m_bShowLumenGuide);
+				isCleared = m_openedSession->IsLumenNormal(image, validContour, m_fLumenThresholdMin, m_fLumenThresholdMax, m_fLumenSrnThreshold, m_bShowLumenGuide);
 			}
 		}
 

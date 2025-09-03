@@ -105,6 +105,11 @@
                     </StackPanel>
                     <StackPanel Width="5"/>
                     <StackPanel>
+                        <Label Content="SNR" Height="15" FontSize="9" VerticalContentAlignment="Center" Foreground="{DynamicResource GrayscaleWhiteBrush}"/>
+                        <TextBox Width="20" Text="{Binding AutoPullbackLumenSnrThreshold, UpdateSourceTrigger=PropertyChanged}" Height="15" FontSize="9" Foreground="{DynamicResource GrayscaleWhiteBrush}" Background="Transparent" BorderThickness="1" CaretBrush="{DynamicResource GrayscaleWhiteBrush}"/>
+                    </StackPanel>
+                    <StackPanel Width="5"/>
+                    <StackPanel>
                         <Label Content="Tot" Height="15" FontSize="9" VerticalContentAlignment="Center" Foreground="{DynamicResource GrayscaleWhiteBrush}"/>
                         <Label Content="Cnt" Height="15" FontSize="9" VerticalContentAlignment="Center" Foreground="{DynamicResource GrayscaleWhiteBrush}"/>
                     </StackPanel>
