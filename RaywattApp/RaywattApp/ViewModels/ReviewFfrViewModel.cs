@@ -102,8 +102,6 @@ namespace RaywattApp.ViewModels
 
             Constants.CurrentPage = Constants.ReviewFfrPage;
 
-            DeviceStatus.IsExecutedAIFFR = false;
-
             Section = new Section();
             Section.Proximal.IsVisible = Visibility.Visible;
             Section.Distal.IsVisible = Visibility.Visible;
@@ -186,8 +184,6 @@ namespace RaywattApp.ViewModels
         private void FfrPredict()
         {
             _log.Debug("FfrPredict");
-
-            DeviceStatus.IsExecutedAIFFR = true;
 
             FfrResult = 0;
             OpacityResult = 0.0;

@@ -323,9 +323,6 @@ namespace RaywattApp.ViewModels
                     FfrStep = Constants.FfrStep4;
                     break;
                 case Constants.FfrStep4:
-                    if (PatientCase.FfrFeature == null)
-                        PatientCase.FfrFeature = FfrFeature;
-                    PatientCase.FfrFeature.PlaqueAreaList = PlaqueAreaList;
                     IsEditOn = false;
                     IsDrawOn = true;
                     MeasurementCommand = Constants.MeasureReDraw;
