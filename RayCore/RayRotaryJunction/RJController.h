@@ -6,7 +6,7 @@
 #include "WriteTaskController.h"
 #include <vector>
 #include <iomanip>
-#define ENABLE_RFID		true
+#define ENABLE_RFID		false
 
 // position: step, speed: step/s
 #define PULLBACK_MAX_DISTANCE			100		/* mm */	

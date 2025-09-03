@@ -907,12 +907,10 @@ void CRJController::handlePacket() {
 	eFID fid = (eFID) m_vPacket[FID_IDX];
 	char strTime[MAX_PATH];
 	CUtility::GetCurTime(strTime);
-	PLOGI.printf("[%d] something ansered. in RJC", fid);
 	std::stringstream strStream;
 	for (int i = 0; i < length; i++) {
 		strStream << std::uppercase << std::hex << static_cast<int>(m_vPacket[i]) << " ";
 	}
-	PLOGI.printf("print : %s", strStream.str().c_str());
 
 	if (fid < eFID::FID_RFID_GET_STATE || fid == eFID::FID_SM_ENABLE || fid == eFID::FID_SM_DISABLE ) {
 		// photo sensor state
