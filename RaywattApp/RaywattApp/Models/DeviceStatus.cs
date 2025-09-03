@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Accord.Statistics.Distributions.Univariate;
+using CommunityToolkit.Mvvm.ComponentModel;
+using RaywattApp.Common.Enums;
 using System.Collections.Generic;
 using static RaywattOCT.RayCoreWrapper;
 
@@ -107,6 +109,10 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private ReviewImageInfo[] _reviewImageInfos = new ReviewImageInfo[2];
+
+        [ObservableProperty]
+        private LongitudeOrientation _longitudeOrientation;
+
         public DeviceStatus()
         {
             ReviewImageInfos[(int)RaySession.Review] = new ReviewImageInfo();

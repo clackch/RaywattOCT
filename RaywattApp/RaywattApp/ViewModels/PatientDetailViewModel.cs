@@ -405,7 +405,7 @@ namespace RaywattApp.ViewModels
             DeviceStatus.IsOCTImagingDone = false;
 
             // TODO: 정보를 받아서 표시 (Longitued Orientation)
-            var a = (RayError)RaySetProperty(Property.LongitudeOrientation, (double)0);
+            var __ = (RayError)RaySetProperty(Property.LongitudeOrientation, (double)DeviceStatus.LongitudeOrientation);
 
             Dictionary<string, Object> parameter = new Dictionary<string, Object>();
             parameter["patient"] = Patient;

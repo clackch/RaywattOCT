@@ -417,7 +417,7 @@ namespace RaywattApp.ViewModels
             base.OnNavigated(sender, navigatedEventArgs);
             _log.Debug("OnNavigated");
 
-            LongitudeOrientationChanged(LongitudeOrientation.ProximalToDistal);
+            LongitudeOrientationChanged();
 
             RayError result = (RayError)RayRegisterDetectionCallback(Marshal.GetFunctionPointerForDelegate(CBLumenContour));
             if (result != RayError.OK)
@@ -494,10 +494,10 @@ namespace RaywattApp.ViewModels
          */
         #region Initialize
 
-        private void LongitudeOrientationChanged(LongitudeOrientation value)
+        private void LongitudeOrientationChanged()
         {
-            _dPLeftLabel = value == LongitudeOrientation.ProximalToDistal ? "P" : "D";
-            _dPRightLabel = value == LongitudeOrientation.ProximalToDistal ? "D" : "P";
+            _dPLeftLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "P" : "D";
+            _dPRightLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "D" : "P";
         }
 
         private void SetAngioFrame()
