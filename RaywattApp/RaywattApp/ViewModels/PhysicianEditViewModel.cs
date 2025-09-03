@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
 using System.Windows.Navigation;
+using RaywattApp.Common.Enums;
 
 namespace RaywattApp.ViewModels
 {
@@ -91,6 +92,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private double _minAppositionThreshold;
 
+        [ObservableProperty]
+        private LongitudeOrientation longitudeOrientation = LongitudeOrientation.DistalToProximal;
+
         private ICommand _saveCommand;
         public ICommand SaveCommand
         {
@@ -114,7 +118,6 @@ namespace RaywattApp.ViewModels
             _log.Debug("PhysicianEditViewModel");
 
             Constants.CurrentPage = Constants.PhysicianEditPage;
-
             _sqlManager = sqlManager;
             _dialogService = dialogService;
 

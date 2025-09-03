@@ -49,6 +49,7 @@ enum class RayProperty {
 	LongitudeImageWidth,
 	LongitudeImageHeight,
 	LongitudeImageChannels,
+	LongitudeOrientation,
 	PullbackRPM,
 	PullbackDistance,
 	PullbackSpeed,

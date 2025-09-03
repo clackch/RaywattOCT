@@ -80,6 +80,8 @@ private:
 	int m_zOffset;
 	std::vector<int> m_vZOffset;
 
+	bool bLongitudeOrientation; // true: Distal->Proximal, false: Proximal->Distal
+
 private:
 	CImagingSession(CMessageService* pMsg, int nSession, bool deleteData = true);
 public:
@@ -129,6 +131,7 @@ public:
 
 	bool LoadZOffset(const char* strDataFilePath);
 	void SetZOffset(int zOffset) { m_zOffset = zOffset; }
+	void SetLongitudeOrientation(bool bLongitude) { bLongitudeOrientation = bLongitude; }
 	int GetZOffset() { return m_zOffset; }
 	int GetZOffset(int nFrame);
 

@@ -174,8 +174,9 @@ bool CDataReader::readFrame(int nIndex) {
 
 	const int N = m_nNumOfSamples;
 	if (nIndex < 0 || nIndex >= N) return false;
+	PLOGI.printf("[junghw] bLongitudeOrientation : %d / %d", bLongitudeOrientation, nIndex);
 
-	const int srcIndex = false ? (N - 1 - nIndex) : nIndex;
+	const int srcIndex = bLongitudeOrientation ? (N - 1 - nIndex) : nIndex;
 
 	const size_t bytes = static_cast<size_t>(m_nDataSize) * sizeof(unsigned short);
 	if (bytes > 1024ull * 1024ull * 10ull * sizeof(unsigned short)) {

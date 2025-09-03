@@ -1,24 +1,24 @@
-﻿using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
-using RaywattApp.Common.Messages;
-using RaywattApp.Services;
-using RaywattApp.Models;
-using System.Collections.Generic;
-using System.Windows.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
-using System;
-using System.Windows.Navigation;
-using RaywattApp.Common.Paging;
-using System.Windows.Controls;
-using RaywattApp.Views.Dialog;
 using RaywattApp.Common.Dialog;
-using static RaywattOCT.RayCoreWrapper;
-using System.Windows;
-using System.Threading;
-using RaywattOCT;
+using RaywattApp.Common.Enums;
+using RaywattApp.Common.Messages;
+using RaywattApp.Common.Paging;
 using RaywattApp.Common.Util;
+using RaywattApp.Models;
+using RaywattApp.Services;
+using RaywattApp.Views.Dialog;
+using RaywattOCT;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Navigation;
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
 {
@@ -403,6 +403,9 @@ namespace RaywattApp.ViewModels
             DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current = 0;
             DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total = 0;
             DeviceStatus.IsOCTImagingDone = false;
+
+            // TODO: 정보를 받아서 표시 (Longitued Orientation)
+            var a = (RayError)RaySetProperty(Property.LongitudeOrientation, (double)0);
 
             Dictionary<string, Object> parameter = new Dictionary<string, Object>();
             parameter["patient"] = Patient;
