@@ -193,6 +193,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("GoToReview1");
 
             RayError _ = (RayError)RayEndReview();
+            Thread.Sleep(300);
 
             _log.Debug("[junghw] GoToReview");
             CommonUtil.SetColormap(PatientCase.Colormap);

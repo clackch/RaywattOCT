@@ -1,34 +1,35 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using log4net;
+using Newtonsoft.Json;
+using OpenCvSharp;
+using RaywattApp.Common.Angio;
+using RaywattApp.Common.Annotation.Models;
+using RaywattApp.Common.Annotation.Util;
 using RaywattApp.Common.Bases;
+using RaywattApp.Common.Dialog;
+using RaywattApp.Common.Enums;
+using RaywattApp.Common.Messages;
+using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Services;
-using System.Collections.Generic;
-using System;
-using System.Windows.Input;
-using System.Windows.Navigation;
-using RaywattApp.Common.Dialog;
-using static RaywattOCT.RayCoreWrapper;
-using RaywattApp.Common.Annotation.Models;
-using System.Windows;
-using Newtonsoft.Json;
-using System.Collections.ObjectModel;
-using CommunityToolkit.Mvvm.Messaging;
-using RaywattApp.Common.Messages;
-using Point = System.Windows.Point;
-using System.Linq;
-using OpenCvSharp;
-using RaywattApp.Common.Util;
-using System.Threading;
-using RaywattApp.Common.Annotation.Util;
-using System.Runtime.InteropServices;
-using System.Windows.Media.Imaging;
 using RaywattApp.Views.Dialog;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
-using RaywattApp.Common.Angio;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Xml;
+using static RaywattOCT.RayCoreWrapper;
+using Point = System.Windows.Point;
 
 namespace RaywattApp.ViewModels
 {
@@ -105,6 +106,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private ImageSource _currentAngioImage;
 
+        [ObservableProperty]
+        private LongitudeOrientation longitudeOrientation;
+
         private int outFrameNumber;
         public int OutFrameNumber
         {
@@ -174,6 +178,13 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private Zoom _zoomAngio = new Zoom(Constants.CrossSectionAngio / Constants.OCTImageSize);
 
+        [ObservableProperty]
+        private string _dPLeftLabel;
+
+        [ObservableProperty]
+        private string _dPRightLabel;
+        
+
         private double _lModeIndicatorX;
         public double LModeIndicatorX
         {
@@ -237,6 +248,9 @@ namespace RaywattApp.ViewModels
                     IndicatorCrossSection.IsVisible = Visibility.Visible;
             }
         }
+
+
+
 
         private ICommand _cmdPlayback;
         public ICommand CmdPlayback
@@ -403,6 +417,8 @@ namespace RaywattApp.ViewModels
             base.OnNavigated(sender, navigatedEventArgs);
             _log.Debug("OnNavigated");
 
+            LongitudeOrientationChanged(LongitudeOrientation.ProximalToDistal);
+
             RayError result = (RayError)RayRegisterDetectionCallback(Marshal.GetFunctionPointerForDelegate(CBLumenContour));
             if (result != RayError.OK)
             {
@@ -477,6 +493,12 @@ namespace RaywattApp.ViewModels
          * Initialize
          */
         #region Initialize
+
+        private void LongitudeOrientationChanged(LongitudeOrientation value)
+        {
+            _dPLeftLabel = value == LongitudeOrientation.ProximalToDistal ? "P" : "D";
+            _dPRightLabel = value == LongitudeOrientation.ProximalToDistal ? "D" : "P";
+        }
 
         private void SetAngioFrame()
         {

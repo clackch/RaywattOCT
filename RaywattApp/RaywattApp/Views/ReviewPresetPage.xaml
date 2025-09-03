@@ -160,16 +160,16 @@
                                     HorizontalAlignment="Left">
                                 <StackPanel Orientation="Horizontal">
                                     <RadioButton    Content="{Binding [Distal → Proximal], Source={StaticResource L10N}}"
-                                                        IsChecked="{Binding LongitudeOrientation, 
-                                                                    Mode=TwoWay, 
-                                                                    Converter={StaticResource LongitudeOrienationConverter},
-                                                                    ConverterParameter={x:Static en:LongitudeOrientation.DistalToProximal}}"
-                                                                    Margin="0 0 30 0"/>
+                                                    IsChecked="{Binding LongitudeOrientation, 
+                                                    Mode=TwoWay, 
+                                                    Converter={StaticResource LongitudeOrienationConverter},
+                                                    ConverterParameter={x:Static en:LongitudeOrientation.DistalToProximal}}"
+                                                    Margin="0 0 30 0"/>
                                     <RadioButton    Content="{Binding [Proximal → Distal], Source={StaticResource L10N}}"
-                                                        IsChecked="{Binding LongitudeOrientation, 
-                                                                    Mode=TwoWay, 
-                                                                    Converter={StaticResource LongitudeOrienationConverter},
-                                                                    ConverterParameter={x:Static en:LongitudeOrientation.ProximalToDistal}}"/>
+                                                    IsChecked="{Binding LongitudeOrientation, 
+                                                    Mode=TwoWay, 
+                                                    Converter={StaticResource LongitudeOrienationConverter},
+                                                    ConverterParameter={x:Static en:LongitudeOrientation.ProximalToDistal}}"/>
                                 </StackPanel>
                             </Border>
                         </Grid>
