@@ -1,5 +1,10 @@
-﻿using System;
+﻿using log4net;
+using OpenCvSharp;
+using RaywattApp.Common.Bases;
+using RaywattApp.Models;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -7,11 +12,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using static RaywattOCT.RayCoreWrapper;
 using Point = System.Windows.Point;
-using RaywattApp.Common.Bases;
-using OpenCvSharp;
-using log4net;
-using System.Diagnostics;
 
 namespace RaywattApp.Common.Angio.CoRegRelatedFiles
 {
@@ -1075,6 +1077,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             });
         }
 
+
         private async Task PredictMarkers(List<CoRegistration> coRegistrations)
         {
             try
@@ -1085,33 +1088,63 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
                     return;
                 }
 
+                double pathInterval = Constants.pathInterval;
                 string pullbackType = "";
-                Application.Current.Dispatcher.Invoke(() => pullbackType = PullbackType);
-                double pathInterval = GetPathInterval(pullbackType);
-
-                int frameCount = coRegistrations.Count;
-
-                for (int i = 0; i < frameCount; i++)
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    var path = new List<Point>();
-                    foreach (var line in coRegistrations[i].Line)
-                        path.AddRange(line);
+                    pullbackType = PullbackType;
+                });
 
-                    if (path.Count == 0) continue;
+                pathInterval = GetPathInterval(pullbackType);
 
-                    double t = (frameCount <= 1) ? 0.0 : (double)i / (frameCount - 1);
+                int angioFrameNum = coRegistrations.Count;
 
-                    int lastIdx = path.Count - 1;
-                    int startIdx = lastIdx;
-                    int endIdx = 0;
-
-                    int targetIdx = (int)Math.Round(startIdx + (endIdx - startIdx) * t);
-
-                    if (targetIdx < 0) targetIdx = 0;
-                    if (targetIdx > lastIdx) targetIdx = lastIdx;
-
-                    coRegistrations[i].MarkerPoint = path[targetIdx];
+                List<Point> tmpPathStart = new List<Point>();
+                foreach (var line in coRegistrations[0].Line)
+                {
+                    tmpPathStart.AddRange(line);
                 }
+                coRegistrations[0].MarkerPoint = tmpPathStart.First();
+
+                List<Point> tmpPathEnd = new List<Point>();
+                foreach (var line in coRegistrations[angioFrameNum - 1].Line)
+                {
+                    tmpPathEnd.AddRange(line);
+                }
+                coRegistrations[angioFrameNum - 1].MarkerPoint = tmpPathEnd.Last();
+
+                for (int i = angioFrameNum - 1; i > 1; i--)
+                {
+                    Point prevMarkerPoint = coRegistrations[i].MarkerPoint;
+
+                    List<Point> currPath = new List<Point>();
+                    foreach (var line in coRegistrations[i].Line)
+                    {
+                        currPath.AddRange(line);
+                    }
+                    currPath.Reverse(); // Distal 쪽이 0번 인덱스로
+
+                    Point nextMarkerPoint = currPath[Math.Min(currPath.Count - 1, currPath.IndexOf(prevMarkerPoint) + (int)pathInterval)];
+
+                    List<Point> nextPath = new List<Point>();
+                    foreach (var line in coRegistrations[i - 1].Line)
+                    {
+                        nextPath.AddRange(line);
+                    }
+                    nextPath.Reverse();
+
+                    double minDistance = double.MaxValue;
+                    for (int j = 0; j < nextPath.Count; j++)
+                    {
+                        double tmp = GetDistance(nextPath[j], nextMarkerPoint);
+                        if (minDistance > tmp)
+                        {
+                            minDistance = tmp;
+                            coRegistrations[i - 1].MarkerPoint = nextPath[j];
+                        }
+                    }
+                }
+
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -1123,6 +1156,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
             catch (Exception ex)
             {
                 _log.Debug($"Error : {ex.Message}, Source : {ex.Source}");
+
             }
         }
 

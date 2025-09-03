@@ -1907,6 +1907,7 @@ namespace RaywattApp.ViewModels
 
             if (CurrentAngioFrameNumber < PatientCase.AngioFrame.AngioImage.Count)
             {
+                // TODO: junghw 여기에 Angio image 적용 됨 (test: CurrentAngioFrameNumber = 0 )
                 CurrentAngioImage = PatientCase.AngioFrame.AngioImage[CurrentAngioFrameNumber];
             }
         }
