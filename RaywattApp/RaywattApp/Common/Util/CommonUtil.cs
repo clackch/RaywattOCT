@@ -1291,7 +1291,7 @@ namespace RaywattApp.Common.Util
                 }
 
                 int ray3DResult = ODSOCT_DeleteDll();
-                if (ray3DResult != 0)
+                if (ray3DResult == 0)
                 {
                     _log.Error("ODSOCT_DeleteDll Error");
                 }
