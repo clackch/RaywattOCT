@@ -60,5 +60,6 @@ public:
 	static std::wstring StringToWstring(const std::string& var);
 	static std::string GetFileExtension(const std::string path);
 	static bool IsExist(std::string path, bool isFile);
+	static int GetPrivateProfileIntEx(LPCWSTR lpAppName, LPCWSTR lpKeyName, int nDefault, LPCWSTR lpFileName);
 };
 
