@@ -111,7 +111,8 @@ namespace RaywattApp.Models
         private ReviewImageInfo[] _reviewImageInfos = new ReviewImageInfo[2];
 
         [ObservableProperty]
-        private LongitudeOrientation _longitudeOrientation;
+        // TODO: junghw 추후 의사 정보로 default로 변환
+        private LongitudeOrientation _longitudeOrientation = LongitudeOrientation.DistalToProximal; // default
 
         public DeviceStatus()
         {

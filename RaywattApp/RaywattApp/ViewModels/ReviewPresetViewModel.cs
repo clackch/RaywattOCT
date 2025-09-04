@@ -80,7 +80,7 @@ namespace RaywattApp.ViewModels
         private double _minAppositionThreshold;
 
         [ObservableProperty]
-        private LongitudeOrientation _longitudeOrientation = LongitudeOrientation.DistalToProximal;
+        private LongitudeOrientation _longitudeOrientation;
 
         private double originAppositionThreshold;
 
@@ -117,6 +117,8 @@ namespace RaywattApp.ViewModels
             MinExpansionThreshold = Constants.MinExpansionThreshold;
             MaxAppositionThreshold = Constants.MaxAppositionThreshold;
             MinAppositionThreshold = Constants.MinAppositionThreshold;
+
+            LongitudeOrientation = DeviceStatus.LongitudeOrientation;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)

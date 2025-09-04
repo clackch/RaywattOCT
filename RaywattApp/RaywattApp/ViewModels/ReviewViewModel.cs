@@ -1903,11 +1903,22 @@ namespace RaywattApp.ViewModels
             int angioTotalFrameNum = PatientCase.AngioFrame.AngioFrameNum;
 
             double ratio = (double)angioTotalFrameNum / OctFrameLength * value;
-            CurrentAngioFrameNumber = (int)ratio;
+            int frameIndex = (int)ratio;
 
-            if (CurrentAngioFrameNumber < PatientCase.AngioFrame.AngioImage.Count)
+            bool longitudeOrientation = DeviceStatus.LongitudeOrientation == LongitudeOrientation.DistalToProximal ? true : false;
+
+            if (longitudeOrientation)
             {
-                // TODO: junghw 여기에 Angio image 적용 됨 (test: CurrentAngioFrameNumber = 0 )
+                CurrentAngioFrameNumber = angioTotalFrameNum - 1 - frameIndex;
+            }
+            else
+            {
+                CurrentAngioFrameNumber = frameIndex;
+            }
+
+            if (CurrentAngioFrameNumber >= 0 &&
+                CurrentAngioFrameNumber < PatientCase.AngioFrame.AngioImage.Count)
+            {
                 CurrentAngioImage = PatientCase.AngioFrame.AngioImage[CurrentAngioFrameNumber];
             }
         }
