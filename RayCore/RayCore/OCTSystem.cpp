@@ -1629,7 +1629,7 @@ UINT COCTSystem::threadInitializeRotaryJunction(LPVOID param) {
 		pRJController->Move(eStepMotorIndex::Pullback, pRJController->ConvertMMtoStep(PULLBACK_MAX_DISTANCE), false, 0x8 /* photo-sensor #4 */);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	}
-	pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
+	pRJController->Current(eStepMotorIndex::Pullback, config.stepMotor.unLoadDistance);
 
 	if (pRJController->GetState() == eRJState::Initializing) {
 		pRJController->UpdateState(eRJState::Disconnected);
@@ -1830,7 +1830,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	Sleep(2000);
 	int bldcHomingSpeed = config.bldcMotor.velocityLiveView / 2;
 	pRJController->PerformRun(bldcHomingSpeed);
-	pRJController->Set(eStepMotorIndex::Both, STEP_MOTOR_SPEED_DEFAULT / 2);
+	pRJController->Set(eStepMotorIndex::Both, STEP_MOTOR_SPEED_DEFAULT);
 	pRJController->Move(eStepMotorIndex::Both, 0);
 	pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	pRJController->StopMotor();
@@ -1882,7 +1882,8 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 
 	if (pRJController->IsConnected()) {
 		pRJController->changeSMProfileToLoadUnload();
-		pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
+		pRJController->Current(eStepMotorIndex::Pullback, config.stepMotor.unLoadDistance);
+		PLOGI.printf("unLoadDistance = %d", config.stepMotor.unLoadDistance);
 
 		for (const auto& commands : loadCommands) {
 			if (commands.size() != 3) {
@@ -2171,7 +2172,7 @@ UINT COCTSystem::threadManualLoadCatheter(LPVOID param)
 	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterLoading);
 
 	if (pRJController->IsConnected()) {
-		pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
+		pRJController->Current(eStepMotorIndex::Pullback, config.stepMotor.unLoadDistance);
 		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
 		pRJController->Move(eStepMotorIndex::Pullback, 0, false, 0x02 /* photo-sensor #2 */);
 		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
@@ -2203,7 +2204,7 @@ UINT COCTSystem::threadCleanRotaryJunction(LPVOID param)
 	PLOGI.printf("Clean rotary junction start.");
 
 	if (pRJController->IsConnected()) {
-		pRJController->Current(eStepMotorIndex::Pullback, PULLBACK_MOTOR_POS_INITIAL);
+		pRJController->Current(eStepMotorIndex::Pullback, config.stepMotor.unLoadDistance);
 		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
 		pRJController->Move(eStepMotorIndex::Pullback, 0, false, 0x02 /* photo-sensor #2 */);
 
