@@ -1,22 +1,22 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using log4net;
-using RaywattApp.Common.Bases;
-using RaywattApp.Models;
-using System;
-using System.Collections.Generic;
-using static RaywattOCT.RayCoreWrapper;
-using System.Windows.Navigation;
 using CommunityToolkit.Mvvm.Input;
-using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using log4net;
+using Newtonsoft.Json;
+using RaywattApp.Common.Annotation.Models;
+using RaywattApp.Common.Bases;
+using RaywattApp.Common.Enums;
 using RaywattApp.Common.Messages;
 using RaywattApp.Common.Util;
-using System.Windows;
-using RaywattApp.Common.Annotation.Models;
-using System.Collections.ObjectModel;
+using RaywattApp.Models;
 using RaywattApp.Services;
+using System;
+using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Navigation;
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
 {
@@ -67,6 +67,12 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private bool _isMlaEnabled;
+
+        [ObservableProperty]
+        private string _dPLeftLabel;
+
+        [ObservableProperty]
+        private string _dPRightLabel;
 
         private ICommand _zoomInCommand;
         public ICommand ZoomInCommand
@@ -149,6 +155,8 @@ namespace RaywattApp.ViewModels
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["classification"] = "VESS";
             VesselList = _sqlManager.SelectCode(sqlParameters);
+
+            LongitudeOrientationChanged();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -622,6 +630,12 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Manipulation Completed");
             e.Handled = true;
+        }
+
+        private void LongitudeOrientationChanged()
+        {
+            _dPLeftLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "P" : "D";
+            _dPRightLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "D" : "P";
         }
     }
 }

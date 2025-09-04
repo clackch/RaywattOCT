@@ -364,10 +364,17 @@
                                 <RowDefinition Height="20"/>
                             </Grid.RowDefinitions>
                             <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" Opacity="0.5"/>
+                                <Label Content="{Binding DPLeftLabel}" 
+                                       Style="{DynamicResource Pretendard-Semibold-20}" 
+                                       Foreground="{DynamicResource AdditionalColor7Brush}" 
+                                       Opacity="0.5"/>
                             </StackPanel>
                             <StackPanel Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Label Content="P" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" VerticalAlignment="Center" Opacity="0.5"/>
+                                <Label Content="{Binding DPRightLabel}"
+                                       Style="{DynamicResource Pretendard-Semibold-20}" 
+                                       Foreground="{DynamicResource AdditionalColor7Brush}" 
+                                       VerticalAlignment="Center" 
+                                       Opacity="0.5"/>
                             </StackPanel>
                             <Grid Grid.Row="0" Grid.Column="1" >
                                 <Image Source="{Binding LumenProfileImage}" Width="{x:Static const:Constants.LongitudeFfrWidth}" Height="{x:Static const:Constants.LongitudeFfrHeight}" Stretch="Fill">

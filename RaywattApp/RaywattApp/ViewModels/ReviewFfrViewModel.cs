@@ -6,6 +6,7 @@ using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
+using RaywattApp.Common.Enums;
 using RaywattApp.Common.Messages;
 using RaywattApp.Common.Util;
 using RaywattApp.Models;
@@ -14,7 +15,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -70,6 +70,12 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private Zoom _zoom = new Zoom(Constants.CrossSectionFfrSize);
 
+        [ObservableProperty]
+        private string _dPLeftLabel;
+
+        [ObservableProperty]
+        private string _dPRightLabel;
+
         private ICommand _ffrPredictCommand;
         public ICommand FfrPredictCommand
         {
@@ -94,6 +100,7 @@ namespace RaywattApp.ViewModels
             opacityFadeOutTimer.Tick += new EventHandler(OpacityFadeOutTimer);
             opacityFadeInTimer.Interval = TimeSpan.FromMilliseconds(50);
             opacityFadeInTimer.Tick += new EventHandler(OpacityFadeInTimer);
+
         }
 
         public void Initialize()
@@ -158,6 +165,7 @@ namespace RaywattApp.ViewModels
                 DrawCrossSectionImage();
 
                 ShowLumenProfile();
+                LongitudeOrientationChanged();
             }
         }
 
@@ -369,6 +377,11 @@ namespace RaywattApp.ViewModels
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
             if (nRows == 0)
                 _log.Error("Update Error");
+        }
+        private void LongitudeOrientationChanged()
+        {
+            _dPLeftLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "P" : "D";
+            _dPRightLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "D" : "P";
         }
     }
 }
