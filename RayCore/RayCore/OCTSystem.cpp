@@ -42,7 +42,8 @@ COCTSystem::COCTSystem() {
 * ~COCTSystem
 */
 COCTSystem::~COCTSystem() {
-	Stop();
+	if(m_bInit)
+		Stop();
 	DeleteCriticalSection(&m_csSession);
 }
 
@@ -119,6 +120,8 @@ RayError COCTSystem::Init() {
 	m_fBrightness = 0.0f;
 	m_fContrast = 0.5f;
 	m_fDegree = 90;
+
+	m_bInit = true;
 
 	return RayError::OK;
 }
