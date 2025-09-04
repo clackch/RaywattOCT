@@ -116,7 +116,6 @@ void CConfiguration::Initialize(tstring configFile)
 	// [Sharpness]
 	this->imaging.applySharpness = ::GetPrivateProfileInt(_T("Sharpness"), _T("ApplySharpness"), 0, configFilePath.c_str());
 
-
 	isInit = true;
 }
 
