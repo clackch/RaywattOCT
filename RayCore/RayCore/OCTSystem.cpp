@@ -1655,7 +1655,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 	int nTargetPos = 0;
 
 	//1차 탐색 후, 2차 탐색을 위해 이동할 거리
-	int nJumpStep = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("JumpStep"), 3600, _T(".\\raycore.ini"));
+	int nJumpStep = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("JumpStep"), 3600, _T(".\\raycore.ini")) * CConfiguration::GetInstance().laserModule.delayLineSMSteps;
 	//2차 탐색 범위 
 	int nSearchRange = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("SearchRange"), 1000, _T(".\\raycore.ini"));
 	//2차 탐색 시, 모터 속도 조절 값
@@ -1665,7 +1665,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 	{
 		// 0. Speed Up
 		pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_AUTO);
-		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO*2 / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
 
 		// 1. Start Finding Sheath
 		pSystem->m_vCalibrationInfo.clear();
@@ -2581,7 +2581,7 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 		{
 		case CatheterState::FindingSheath:
 		{
-			int nAdjLatency = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("AdjustLatencyValue"), 0, _T(".\\raycore.ini"));
+			int nAdjLatency = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("AdjustLatencyValue"), 100, _T(".\\raycore.ini")) * CConfiguration::GetInstance().laserModule.delayLineSMSteps;;
 			int nSheathPosition = m_pImagingRealtime->GetSheathPosition();
 			int nDelayLinePos = m_pLaserModule->GetPosition(eStepMotorIndex::DelayLine) - nAdjLatency;
 			m_vCalibrationInfo.push_back(std::make_pair(nSheathPosition, nDelayLinePos));
