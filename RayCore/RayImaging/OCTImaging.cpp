@@ -489,10 +489,6 @@ void COCTImaging::findSheath(cv::Mat img) {
 	cv::Sobel(img, edgeX, CV_32F, 1, 0, 3);
 	cv::Sobel(img, edgeY, CV_32F, 0, 1, 3);
 
-	cv::Mat absEdgeX, absEdgeY;
-	cv::convertScaleAbs(edgeX, absEdgeX);
-	cv::convertScaleAbs(edgeY, absEdgeY);
-
 	cv::Mat edgeMagnitude, absEdgeMagnitude;
 	cv::magnitude(edgeX, edgeY, edgeMagnitude);
 	cv::convertScaleAbs(edgeMagnitude, absEdgeMagnitude);
@@ -504,56 +500,57 @@ void COCTImaging::findSheath(cv::Mat img) {
 		}
 	}
 
-	PLOGI.printf("type : %d", img.type());
-
 	cv::Mat tmp = img.clone();
-	cv::Mat check = img.clone();
-	if (tmp.type() != CV_32F) tmp.convertTo(tmp, CV_32F, 1/255.0);
+	tmp.convertTo(tmp, CV_32F, 1 / 255.0);
+	cv::Mat region = tmp.colRange(0, tmp.cols / 2);
 
 	cv::Sobel(tmp, edgeX, CV_32F, 1, 0, 3);
 	cv::Sobel(tmp, edgeY, CV_32F, 0, 1, 3);
 
-	for(int y=0; y < tmp.rows; y++) {
-		for(int x=0; x < tmp.cols; x++) {
-			//PLOGI.printf("edgeX : %f, edgeY : %f", edgeX.at<float>(y, x), edgeY.at<float>(y, x));
-			tmp.at<float>(y, x) *= 3 * edgeX.at<float>(y, x) * edgeX.at<float>(y, x);
-			if (tmp.at<float>(y, x) < 1.0) tmp.at<float>(y, x) = 0;
-			tmp.at<float>(y, x) *= 3 * edgeY.at<float>(y, x);
-			//PLOGI.printf("tmp : %f", tmp.at<float>(y, x));
+	cv::Mat edge2X; cv::multiply(edgeX, edgeX, edge2X);
+	cv::multiply(tmp, 3.0f * edge2X, tmp);
+
+	cv::threshold(region, region, 1.0f - 1e-6f, 0.0, cv::THRESH_TOZERO);
+	cv::multiply(tmp, 0.4f, tmp);
+
+	cv::Mat check;
+	cv::compare(region, 1.0f, check, cv::CMP_GE);
+
+	cv::Mat colSum;
+	cv::reduce(check, colSum, 0, cv::REDUCE_SUM, CV_32S);
+
+	int foundX = -1;
+	int maxPixelNum = 0;
+	for (int i = region.cols - 1; i >= 0; --i) {
+		int pixelNum = colSum.at<int>(0, i) / 255;
+		int x = i;
+		if (i >= 70 && pixelNum > maxPixelNum) {
+			maxPixelNum = pixelNum;
+			foundX = x;
 		}
+		PLOGI.printf("x : %d, pixelNum : %d", x, pixelNum);
+
 	}
-	cv::rotate(tmp, tmp, cv::ROTATE_90_COUNTERCLOCKWISE);
-	for (int y = tmp.rows/2; y < tmp.rows; y++) {
-		int pixelNum = 0;
-		float maxTmp = 0.0f;
-		for(int x = 0; x < tmp.cols; x++) {
-			if(maxTmp < tmp.at<float>(y, x))
-				maxTmp = tmp.at<float>(y, x);
-			if (tmp.at<float>(y, x) >= 1.0) {
-				pixelNum++;
-			}
-			else
-				tmp.at<float>(y, x) = 0;
-		}
-		PLOGI.printf("y : %d, pixelNum : %d, maxTmp : %f", y, pixelNum, maxTmp);
-		if(pixelNum > 150) {
-			m_nSheathRowPosition = tmp.rows - y;
-			for(int x = 0; x < tmp.cols; x++) {
-				tmp.at<float>(y, x) = 1.0;
-			}
+
+	for (int i = foundX + 80; i >= 0; --i) {
+		int pixelNum = colSum.at<int>(0, i) / 255;
+		int x = i;
+		if (i >= 70 && pixelNum > maxPixelNum / 2) {
+			maxPixelNum = pixelNum;
+			foundX = x;
 			break;
 		}
 	}
+
+	if (foundX >= 0) {
+		m_nSheathRowPosition = foundX;
+		//tmp.col(foundX).setTo(1.0f); // 한 줄을 1.0으로
+	}
+
 	PLOGI.printf("what row : %d", m_nSheathRowPosition);
 
 	tmp.convertTo(tmp, CV_8U, 255.0);
 	//cv::imwrite("check" + std::to_string(num_image) + ".tif", tmp);
-	//cv::imwrite("origin" + std::to_string(num_image) + ".tif", check);
-	/*cv::Mat circularized;
-	CircularizeImage(img, circularized);
-	cv::imwrite("circularizedImage" + std::to_string(num_image) + ".tif", circularized);*/
-
-	//PLOGI.printf("check the time - Magnitude: %d", totalMagnitude);
 
 	m_nSheathPosition = totalMagnitude;
 }

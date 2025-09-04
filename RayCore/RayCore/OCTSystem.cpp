@@ -1548,7 +1548,9 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 	{
 		// 0. Speed Up
 		pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_AUTO);
-		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+		pLaserModule->Set(eStepMotorIndex::DelayLine, (CM_SM_SPEED_AUTO * 2) / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+
+		PLOGI.printf("Auto Calibration Start");
 
 		// 1. Start Finding Sheath
 		pSystem->m_vCalibrationInfo.clear();
@@ -1578,93 +1580,105 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			}
 		}
 
-		if ((minVal * 4) / 3 > maxVal) {
-			PLOGI.printf("Calibration might be failed. Total edge is Too high. startPosition : %d", startPosition);
+		pLaserModule->Set(eStepMotorIndex::DelayLine, (CM_SM_SPEED_AUTO * 3) / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+
+		if ((minVal * 6) / 5 > maxVal) {
+			PLOGI.printf("Calibration might be failed. Total minimum edge is Too high. startPosition : %d", startPosition);
+			pLaserModule->Move(eStepMotorIndex::DelayLine, startPosition);
 		}
 		else {
 			//PLOGI.printf("well calibrated. nowPosition : %d", nZOffset);
 			//PLOGI.printf("startPosition : %d", startPosition);
-		}
+			PLOGI.printf("first calibration. checkPosition : %d, checkValue : %d", Loc, minVal);
 
-		//PLOGI.printf("first calibration. checkPosition : %d, checkValue : %d", Loc, minVal);
+			nZOffset = Loc + 150;
+			pLaserModule->Move(eStepMotorIndex::DelayLine, nZOffset);
+			pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
-		nZOffset = Loc + 150;
-		pLaserModule->Set(eStepMotorIndex::DelayLine, (CM_SM_SPEED_AUTO * 3) / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
-		pLaserModule->Move(eStepMotorIndex::DelayLine, nZOffset);
-		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
-		pSystem->m_vCalibrationInfo.clear();
+			PLOGI.printf("second calibration start");
 
-		//PLOGI.printf("second calibration start");
+			pSystem->m_vCalibrationInfo.clear();
+			pLaserModule->Set(eStepMotorIndex::DelayLine, (CM_SM_SPEED_AUTO/4) / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+			nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, -1200 * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+			pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
-		pLaserModule->Set(eStepMotorIndex::DelayLine, (CM_SM_SPEED_AUTO / 4) / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
-		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, -1200 * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
-		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
-
-		minVal = INT_MAX;
-		for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
-			if (pSystem->m_vCalibrationInfo.at(i).first < minVal) {
-				if (pSystem->m_vCalibrationInfo.at(i).first == -1) continue;
-				minVal = pSystem->m_vCalibrationInfo.at(i).first;
-				Loc = pSystem->m_vCalibrationInfo.at(i).second;
+			minVal = INT_MAX;
+			vector<pair<int, int>> minList(1, { 0, minVal });
+			int decreasingCount = 0;
+			for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
+				if (pSystem->m_vCalibrationInfo.at(i).first < pSystem->m_vCalibrationInfo.at(minList.back().first).first) {
+					if (pSystem->m_vCalibrationInfo.at(i).first == -1) continue;
+					if (pSystem->m_vCalibrationInfo.at(i).first < minVal) 
+						minVal = pSystem->m_vCalibrationInfo.at(i).first;
+					Loc = pSystem->m_vCalibrationInfo.at(i).second;
+					minList.back() = { i, Loc };
+					decreasingCount++;
+				}
+				else {
+					if (pSystem->m_vCalibrationInfo.at(i).first * 0.95 < minVal
+						&& Loc - pSystem->m_vCalibrationInfo.at(i).second > 400) 
+						minList.push_back({ i, pSystem->m_vCalibrationInfo.at(i).second });
+				}
 			}
-		}
-		//PLOGI.printf("second calibration. checkPosition : %d, checkValue : %d", Loc, minVal);
 
-		/*
-		// 3차 확인
-		nZOffset = Loc - 100;
-		pLaserModule->Move(eStepMotorIndex::DelayLine, nZOffset);
-		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
-		pSystem->m_vCalibrationInfo.clear();
-
-		pLaserModule->Set(eStepMotorIndex::DelayLine, (CM_SM_SPEED_AUTO / 32) / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
-		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, 200 * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
-		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
-
-		minVal = INT_MAX;
-		for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
-			if (pSystem->m_vCalibrationInfo.at(i).first < minVal) {
-				if (pSystem->m_vCalibrationInfo.at(i).first == -1) continue;
-				minVal = pSystem->m_vCalibrationInfo.at(i).first;
-				Loc = pSystem->m_vCalibrationInfo.at(i).second;
+			if(minList.size() == 1) {
+				Loc = minList.at(0).second;
+				if (decreasingCount > pSystem->m_vCalibrationInfo.size() / 2)
+					Loc -= 500;
 			}
-		}
-		*/
-
-		PLOGI.printf("3rd start.");
-
-		pSystem->m_cathState = CatheterState::FindingMotorLoc;
-		nZOffset = Loc - 100;
-		pLaserModule->Set(eStepMotorIndex::DelayLine, (CM_SM_SPEED_AUTO * 3) / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
-		pLaserModule->Move(eStepMotorIndex::DelayLine, nZOffset);
-		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
-		pSystem->m_vCalibrationInfo.clear();
-
-		pLaserModule->Set(eStepMotorIndex::DelayLine, (CM_SM_SPEED_AUTO / 32) / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
-		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, 200 * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
-		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
-
-		int idealRowPos = 125;
-		int checkVal = 0;
-		for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
-			if (std::abs(pSystem->m_vCalibrationInfo.at(i).first - idealRowPos) < std::abs(checkVal - idealRowPos)) {
-				if (pSystem->m_vCalibrationInfo.at(i).first == -1) continue;
-				checkVal = pSystem->m_vCalibrationInfo.at(i).first;
-				Loc = pSystem->m_vCalibrationInfo.at(i).second;
+			else {
+				std::sort(minList.begin(), minList.end(), [](const pair<int, int>& a, const pair<int, int>& b) {
+					return a.second < b.second;
+					});
+				Loc = minList.at(0).second;
 			}
+
+			PLOGI.printf("second calibration. checkPosition : %d, checkValue : %d", Loc, minVal);
+
+			PLOGI.printf("3rd start.");
+
+			nZOffset = Loc - 50;
+			pLaserModule->Set(eStepMotorIndex::DelayLine, (CM_SM_SPEED_AUTO * 3) / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+			pLaserModule->Move(eStepMotorIndex::DelayLine, nZOffset);
+			pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
+
+			pSystem->m_cathState = CatheterState::FindingSheath3rd;
+
+			pSystem->m_vCalibrationInfo.clear();
+			pLaserModule->Set(eStepMotorIndex::DelayLine, (CM_SM_SPEED_AUTO / 32) / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+			nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, 100 * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+			pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
+
+			int idealRowPos = 125;
+			int checkVal = INT_MAX;
+			for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
+				int nowRow = pSystem->m_vCalibrationInfo.at(i).first;
+				if (std::abs(nowRow - idealRowPos) < std::abs(checkVal - idealRowPos)) {
+					if (nowRow == -1) continue;
+					checkVal = nowRow;
+					Loc = pSystem->m_vCalibrationInfo.at(i).second;
+				}
+			}
+			PLOGI.printf("3rd calibration. checkPosition : %d, checkValue : %d", Loc, checkVal);
+
+			Loc += (checkVal - idealRowPos) * 9;
+			/*if(abs(checkVal - idealRowPos) > 20)
+				Loc += (checkVal - idealRowPos) * 9;
+			else
+				Loc += (checkVal - idealRowPos) * 4;*/
+
+			nZOffset = Loc - 2700;
+			pLaserModule->Set(eStepMotorIndex::DelayLine, (CM_SM_SPEED_AUTO * 3) / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+			PLOGI.printf("calibration done. start position : %d, calibrated position : %d", startPosition, nZOffset);
+
+			// 1-3. Move to calibrated position
+			nZOffset = nZOffset - pSystem->autoCalibrationFranch;
+			nTargetPos = nZOffset;
+			pLaserModule->Move(eStepMotorIndex::DelayLine, nZOffset);
+			pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 		}
-		PLOGI.printf("3rd calibration. checkPosition : %d, checkValue : %d", Loc, checkVal);
-
-		nZOffset = Loc - 2700;
-		pLaserModule->Set(eStepMotorIndex::DelayLine, (CM_SM_SPEED_AUTO * 3) / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
-		PLOGI.printf("second calibration. start position : %d, calibrated position : %d", startPosition, nZOffset);
-
+		
 		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
-		// 1-3. Move to calibrated position
-		nZOffset = nZOffset - pSystem->autoCalibrationFranch;
-		nTargetPos = nZOffset;
-		pLaserModule->Move(eStepMotorIndex::DelayLine, nZOffset);
-		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 #if 1
 		// 2. Start Finding Peak
 		pSystem->m_vCalibrationInfo.clear();
@@ -2399,23 +2413,6 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 
 		switch (m_cathState)
 		{
-		case CatheterState::FindingMotorLoc:
-		{
-			int nSheathPosition = m_pImagingRealtime->GetSheathRowPosition();
-			int numTemp = m_pImagingRealtime->GetTempNum();
-			int nDelayLinePos = m_pLaserModule->GetPosition(eStepMotorIndex::DelayLine);
-			m_vCalibrationInfo.push_back(std::make_pair(-1, nDelayLinePos));
-			if (m_vCalibrationInfo[m_vCalibrationInfo.size() - 2].first == -1) {
-				m_vCalibrationInfo[m_vCalibrationInfo.size() - 2].first = nSheathPosition;
-			}
-			else {
-				if(m_vCalibrationInfo.back().first == -1)
-					m_vCalibrationInfo.back().first = nSheathPosition;
-			}
-			//m_vCalibrationInfo.push_back(std::make_pair(nSheathPosition, nDelayLinePos));
-			PLOGI.printf("FindingSheath3rd - %d, %d : %d", nSheathPosition, nDelayLinePos, numTemp);
-		}
-			break;
 		case CatheterState::FindingSheath:
 		{
 			int nSheathPosition = m_pImagingRealtime->GetSheathPosition();
@@ -2432,10 +2429,25 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 					PLOGI.printf("FindingSheath - %d, %d : %d", m_vCalibrationInfo.back().first, m_vCalibrationInfo.back().second, numTemp);
 				}
 			}
-			//m_vCalibrationInfo.push_back(std::make_pair(nSheathPosition, nDelayLinePos));
-			//PLOGI.printf("FindingSheath - %d, %d : %d", nSheathPosition, nDelayLinePos, numTemp);
 		}
-		break;
+			break;
+		case CatheterState::FindingSheath3rd:
+		{
+			int nSheathPosition = m_pImagingRealtime->GetSheathRowPosition();
+			int numTemp = m_pImagingRealtime->GetTempNum();
+			int nDelayLinePos = m_pLaserModule->GetPosition(eStepMotorIndex::DelayLine);
+			m_vCalibrationInfo.push_back(std::make_pair(-1, nDelayLinePos));
+			if (m_vCalibrationInfo[m_vCalibrationInfo.size() - 2].first == -1) {
+				m_vCalibrationInfo[m_vCalibrationInfo.size() - 2].first = nSheathPosition;
+			}
+			else {
+				if(m_vCalibrationInfo.back().first == -1)
+					m_vCalibrationInfo.back().first = nSheathPosition;
+			}
+			//m_vCalibrationInfo.push_back(std::make_pair(nSheathPosition, nDelayLinePos));
+			PLOGI.printf("FindingSheath3rd - %d, %d : %d", nSheathPosition, nDelayLinePos, numTemp);
+		}
+			break;
 		case CatheterState::FindingPeak:
 		{
 			COCTMeasurement measurement;

@@ -34,7 +34,7 @@ private:
 		FindingSheath,
 		FindingPeak,
 		Calibrated,
-		FindingMotorLoc
+		FindingSheath3rd
 	};
 
 	// Thread
