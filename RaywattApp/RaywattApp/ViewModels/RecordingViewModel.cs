@@ -323,7 +323,8 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("AutoPullbackStart");
 
-            Start();
+            if(!IsStep1)
+                Start();
         }
 
         private void threadFuncWaitPullbackDone()

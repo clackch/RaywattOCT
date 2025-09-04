@@ -1291,7 +1291,7 @@ namespace RaywattApp.Common.Util
                 }
 
                 int ray3DResult = ODSOCT_DeleteDll();
-                if (ray3DResult != 0)
+                if (ray3DResult == 0)
                 {
                     _log.Error("ODSOCT_DeleteDll Error");
                 }
@@ -1307,24 +1307,31 @@ namespace RaywattApp.Common.Util
             {
                 if (deviceStatus == null)
                 {
-                    System.Windows.Application.Current.MainWindow.Close();
                     ForceShutdown();
                 }
                 else if (isShutdown)
-                {
-                    System.Windows.Application.Current.MainWindow.Close();
-
-                    if (!CommonUtil.IsTestMode(deviceStatus.TestMode, "Power"))
+                {                    
+                    if (CommonUtil.IsTestMode(deviceStatus.TestMode, "Power"))
+                    {
+                        System.Windows.Application.Current.Shutdown();
+                    }
+                    else
+                    {
                         ForceShutdown();
+                    }
                 }
                 else
                 {
                     if (CommonUtil.IsRV200())
                     {
-                        System.Windows.Application.Current.MainWindow.Close();
-                        
-                        if (!CommonUtil.IsTestMode(deviceStatus.TestMode, "Power"))
+                        if (CommonUtil.IsTestMode(deviceStatus.TestMode, "Power"))
+                        {
+                            System.Windows.Application.Current.Shutdown();
+                        }
+                        else
+                        {
                             Win32Helper.LogOff();
+                        }                            
                     }
                     else
                     {

@@ -108,3 +108,21 @@ bool CUtility::IsExist(std::string path, bool isFile)
 	}
 	return false;
 }
+int CUtility::GetPrivateProfileIntEx(LPCWSTR lpAppName, LPCWSTR lpKeyName, int nDefault, LPCWSTR lpFileName)
+{
+	int value = GetPrivateProfileIntW(lpAppName, lpKeyName, nDefault, lpFileName);
+
+	// 키가 없으면 GetPrivateProfileIntW는 그냥 nDefault 반환
+	// 따라서 파일에 실제 기록이 되어 있는지 확인해야 함
+	wchar_t buffer[256];
+	DWORD len = GetPrivateProfileStringW(lpAppName, lpKeyName, L"", buffer, 256, lpFileName);
+
+	if (len == 0) {
+		// 키가 존재하지 않음 → 기본값을 ini에 기록
+		wchar_t defaultStr[32];
+		_snwprintf_s(defaultStr, 32, L"%d", nDefault);
+		WritePrivateProfileStringW(lpAppName, lpKeyName, defaultStr, lpFileName);
+	}
+
+	return value;
+}

@@ -78,6 +78,9 @@ private:
 	RayScannerState m_curState;
 	CatheterState m_cathState;
 
+	// Init
+	bool m_bInit;
+
 	// Auto Pullback
 	bool m_bAutoPullbackOnOff;
 	double m_fLumenThresholdMin;

@@ -24,6 +24,12 @@ struct FFTThreadContext {
 	Ipp8u* fftWorkBufSecond = nullptr;
 };
 
+enum class AutoCalibrationMathod {
+	Disable = 0,
+	FindingMinMagnitude,
+	FindingSheath
+};
+
 class COCTImaging : public IImaging
 {
 protected:
@@ -76,6 +82,8 @@ protected:
 	int m_delayLineMovingDirection = 1;
 
 	cv::Ptr<cv::CLAHE> clahe;
+
+	AutoCalibrationMathod m_FindingSheathMathod;
 public:
 	COCTImaging(Setting, CMessageService*);
 	virtual ~COCTImaging(void);
@@ -125,6 +133,9 @@ public:
 	static void SetImageCompensation(bool ImageCompensated);
 	static void SetImageCompensationControlWindow(bool ImageCompensationControlWindowOn, Setting setting);
 
+	void SetAutoCalibrationMathod(AutoCalibrationMathod mathod) { m_FindingSheathMathod = mathod; }
+	AutoCalibrationMathod GetAutoCalibrationMathod() { return m_FindingSheathMathod; }
+
 protected:
 	void allocateMemory();
 	void releaseMemory();
@@ -138,7 +149,8 @@ protected:
 	void computeLogarithm(Ipp32f* src, Ipp32f* dst);
 	void generateImage(Ipp32f* logaritihmData, bool bInvert);
 	void findSheath(Ipp32f* logaritihmData);
-	void findSheath(cv::Mat img);
+	void CalculateMagnitude(cv::Mat img);
+	void findSheath(cv::Mat input);
 	std::vector<double> normalize(const std::vector<double>& values, double scale = 1.0);
 	void drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color);
 	cv::Mat getFoVImage(cv::Mat image, double fov);
