@@ -665,6 +665,17 @@ namespace RaywattApp.ViewModels
                 Measurements.Add(measurement);
             }
             Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
+
+            //TODO: junghw
+            if (DeviceStatus.LongitudeOrientation != LongitudeOrientation.DistalToProximal)
+            {
+                LumenSidebranches.Reverse();
+                LumenStents.Reverse();
+                LumenGuidewires.Reverse();
+
+                LumenContours.Reverse();
+                if(GuideWireRadiusList != null) GuideWireRadiusList.Reverse();
+            }
         }
 
         private void AngioImageProcessing()
@@ -1359,6 +1370,17 @@ namespace RaywattApp.ViewModels
             }
             else
             {
+                //TODO: junghw
+                if (DeviceStatus.LongitudeOrientation != LongitudeOrientation.DistalToProximal)
+                {
+                    LumenSidebranches.Reverse();
+                    LumenStents.Reverse();
+                    LumenGuidewires.Reverse();
+
+                    LumenContours.Reverse();
+                    if (GuideWireRadiusList != null) GuideWireRadiusList.Reverse();
+                }
+
                 PatientCase.LumenContours = LumenContours;
                 PatientCase.LumenSidebranches = LumenSidebranches;
                 PatientCase.LumenStents = LumenStents;
