@@ -253,9 +253,11 @@ namespace RaywattApp.ViewModels
                 DeviceStatus.AutoPullbackOnOff = true;
                 if(DeviceStatus.AutoPullbackModel)
                     RaySetProperty(Property.AutoPullback, 1.0);
-            }                
+            }
             else
+            {
                 DeviceStatus.AutoPullbackOnOff = false;
+            }                
 
             readyTimer.Stop();
         }

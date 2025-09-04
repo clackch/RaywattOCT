@@ -154,15 +154,18 @@
                             <Grid Grid.Row="3" Visibility="{Binding PatientCase.PullbackTrigger, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=AUTO}">
                                 <Grid Visibility="{Binding DeviceStatus.AutoPullbackOnOff, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <Border CornerRadius="10" Background="{DynamicResource MainPrimaryColorBrush}" Margin="0,10,0,10" Visibility="{Binding DeviceStatus.AutoPullbackIsImageCleared, Converter={StaticResource BoolToVisibilityConverter}}">
-                                        <Label Style="{DynamicResource Pretendard-Bold-14}" Content="Blood Cleared" Foreground="{DynamicResource GrayscaleBlackBrush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        <Label Style="{DynamicResource Pretendard-Bold-14}" Content="{Binding [Blood Cleared], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleBlackBrush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                     </Border>
                                     <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray3Brush}" Margin="0,10,0,10" Visibility="{Binding DeviceStatus.AutoPullbackIsImageCleared, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                                        <Label Style="{DynamicResource Pretendard-Bold-14}" Content="Blood Present" Foreground="{DynamicResource GrayscaleBlackBrush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        <Label Style="{DynamicResource Pretendard-Bold-14}" Content="{Binding [Blood Present], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleBlackBrush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                     </Border>
                                 </Grid>
                                 <Grid Visibility="{Binding DeviceStatus.AutoPullbackOnOff, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                                    <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" Margin="0,10,0,10">
-                                        <Label Style="{DynamicResource Pretendard-Bold-14}" Content="Preparing Blood Flushing Detection" Foreground="{DynamicResource GrayscaleGray3Brush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" Margin="0,10,0,10" Visibility="{Binding DeviceStatus.IsPullbackDone, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <Label Style="{DynamicResource Pretendard-Bold-14}" Content="{Binding [Preparing Blood Flushing Detection], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleGray3Brush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border CornerRadius="10" Background="{DynamicResource MainPrimaryColorBrush}" Margin="0,10,0,10" Visibility="{Binding DeviceStatus.IsPullbackDone, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                        <Label Style="{DynamicResource Pretendard-Bold-14}" Content="{Binding [Pullback], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleBlackBrush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                     </Border>
                                 </Grid>
                             </Grid>
