@@ -16,7 +16,7 @@
       Background="{DynamicResource GrayscaleGray8Brush}"
       Title="OutsetLoginPage">
 
-    <Grid>
+    <Grid Visibility="{Binding ., Converter={StaticResource RV200ToVisibilityReverseConverter}}">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
             <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="power" Margin="0,9,12,9" Command="{Binding ExitCommand}"/>
         </StackPanel>
