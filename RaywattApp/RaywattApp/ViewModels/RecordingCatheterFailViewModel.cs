@@ -32,7 +32,7 @@ namespace RaywattApp.ViewModels
 
             Constants.CurrentPage = Constants.RecordingCatheterFailPage;
 
-            timer.Interval = TimeSpan.FromMilliseconds(10);
+            timer.Interval = TimeSpan.FromMilliseconds(100);
             timer.Tick += new EventHandler(CheckCatheterStatus);
             timer.Start();
         }
@@ -91,7 +91,7 @@ namespace RaywattApp.ViewModels
 
         private void CheckCatheterStatus(object sender, EventArgs e)
         {
-            if (DeviceStatus.CatheterStatus != Constants.CatheterStatusFailed && DeviceStatus.CatheterStatus == Constants.CatheterStatusUnloading)
+            if (DeviceStatus.CatheterStatus != Constants.CatheterStatusFailed && DeviceStatus.CatheterStatus != Constants.CatheterStatusUnloading)
             {
                 _log.Debug("CheckCatheterStatus: " + DeviceStatus.CatheterStatus);
                 Next();
