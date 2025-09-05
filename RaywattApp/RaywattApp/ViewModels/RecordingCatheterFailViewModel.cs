@@ -91,8 +91,11 @@ namespace RaywattApp.ViewModels
 
         private void CheckCatheterStatus(object sender, EventArgs e)
         {
-            if (DeviceStatus.CatheterStatus == Constants.CatheterStatusConnected)
+            if (DeviceStatus.CatheterStatus != Constants.CatheterStatusFailed && DeviceStatus.CatheterStatus == Constants.CatheterStatusUnloading)
+            {
+                _log.Debug("CheckCatheterStatus: " + DeviceStatus.CatheterStatus);
                 Next();
+            }                
         }
     }
 }
