@@ -1969,9 +1969,8 @@ namespace RaywattApp.ViewModels
                         AngioFrames.Add(paddedFrame);
                         PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(paddedFrame));
                     }
-
-                    AngioFrames.Reverse();
-                    PatientCase.AngioFrame.AngioImage.Reverse();
+                    //AngioFrames.Reverse();
+                    //PatientCase.AngioFrame.AngioImage.Reverse();
                     return;
                 }
                 else // PatientCaseList -> Review
@@ -2029,10 +2028,9 @@ namespace RaywattApp.ViewModels
                             AngioFrames.Add(paddedFrame);
                             PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(paddedFrame));
                         }
-
+                        PatientCase.AngioFrame.AngioImage.Reverse();
                         reader.Close();
                     }
-
                     AngioImageProcessing();
                 }
             }
