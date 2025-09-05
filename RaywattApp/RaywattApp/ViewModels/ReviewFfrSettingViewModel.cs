@@ -12,6 +12,7 @@ using RaywattApp.Models;
 using RaywattApp.Services;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -73,6 +74,22 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private string _dPRightLabel;
+
+        [ObservableProperty]
+        private double _frontLumenArea;
+
+        [ObservableProperty]
+        private double _afterLumenArea;
+
+        public double ProximalAreaByOrientation =>
+            DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal
+                ? Section.Proximal.DValue
+                : Section.Distal.DValue;
+
+        public double DistalAreaByOrientation =>
+            DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal
+                ? Section.Distal.DValue
+                : Section.Proximal.DValue;
 
         private ICommand _zoomInCommand;
         public ICommand ZoomInCommand
@@ -185,7 +202,7 @@ namespace RaywattApp.ViewModels
                     parameter["reviewStatus"] = ReviewStatus;
                     WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewFfrPage) { Parameter = parameter });
                     return;
-                }                    
+                }
                 FfrFeature.PlaqueArea = 0;
                 FfrFeature.PercentAreaStenosis = 0;
                 FfrFeature.IsPlaqueAreaValid = false;
@@ -203,7 +220,7 @@ namespace RaywattApp.ViewModels
                     _log.Error("RaySetProperty Error");
                 }
                 SetCrossSectionBackground(RaySession.Review, Constants.CardBackgroundColor);
-                                
+
                 ShowLumenProfile();
                 DrawCrossSection(GetMlaFrameNumber());
 
@@ -220,11 +237,11 @@ namespace RaywattApp.ViewModels
                         PlaqueAreaList = new List<Measurement>();
                     else
                         PlaqueAreaList = JsonConvert.DeserializeObject<List<Measurement>>(ffrPlaques[0].ReturnString);
-                    
+
                     for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
                     {
                         Measurement measurement = new Measurement();
-                        measurement.FrameNumber = i;                        
+                        measurement.FrameNumber = i;
                         PlaqueAreaList.Add(measurement);
                     }
                     PlaqueAreaList = PlaqueAreaList.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
@@ -246,7 +263,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ZoomIn");
 
-            if(ReviewStatus.ZoomFfr.ZoomIn() && (Constants.FfrStep4.Equals(FfrStep) || Constants.FfrStep5.Equals(FfrStep)))
+            if (ReviewStatus.ZoomFfr.ZoomIn() && (Constants.FfrStep4.Equals(FfrStep) || Constants.FfrStep5.Equals(FfrStep)))
                 MeasurementCommand = Constants.MeasureZoomIn;
         }
 
@@ -254,7 +271,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ZoomOut");
 
-            if(ReviewStatus.ZoomFfr.ZoomOut() && (Constants.FfrStep4.Equals(FfrStep) || Constants.FfrStep5.Equals(FfrStep)))
+            if (ReviewStatus.ZoomFfr.ZoomOut() && (Constants.FfrStep4.Equals(FfrStep) || Constants.FfrStep5.Equals(FfrStep)))
                 MeasurementCommand = Constants.MeasureZoomOut;
         }
 
@@ -380,7 +397,7 @@ namespace RaywattApp.ViewModels
 
         private void Confirm()
         {
-            _log.Debug("Confirm");            
+            _log.Debug("Confirm");
 
             double scaleArea = Constants.ImageResolution * Constants.ImageResolution;
 
@@ -465,7 +482,7 @@ namespace RaywattApp.ViewModels
             {
                 IsVesselTypeValid = true;
                 IsNextEnabled = true;
-            }                
+            }
         }
 
         private void ShowLumenProfile()
@@ -564,7 +581,7 @@ namespace RaywattApp.ViewModels
 
         private void RegenerateLumenProfile()
         {
-            int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeFfrWidth, Constants.SectionIndicatorMoveCenterWidth);            
+            int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeFfrWidth, Constants.SectionIndicatorMoveCenterWidth);
             int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeFfrWidth, Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth);
 
             imglumenProfile = null;
@@ -586,7 +603,7 @@ namespace RaywattApp.ViewModels
                     Section.VisibleMlaMld(false);
                     IsMlaEnabled = false;
                 }
-                    
+
             }
             else
             {
@@ -602,7 +619,7 @@ namespace RaywattApp.ViewModels
                 {
                     Section.VislbleMsaMinExp(false);
                     IsMlaEnabled = false;
-                }                    
+                }
             }
 
             if (FfrStep.Equals(Constants.FfrStep2))
@@ -636,6 +653,40 @@ namespace RaywattApp.ViewModels
         {
             _dPLeftLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "P" : "D";
             _dPRightLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "D" : "P";
+
+            SubscribeLumenAreaChangeEvents();
         }
+
+        private void SubscribeLumenAreaChangeEvents()
+        {
+            DeviceStatus.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(DeviceStatus.LongitudeOrientation))
+                {
+                    OnPropertyChanged(nameof(ProximalAreaByOrientation));
+                    OnPropertyChanged(nameof(DistalAreaByOrientation));
+                }
+            };
+
+            if (Section?.Proximal != null) Section.Proximal.PropertyChanged -= OnLumenNodeChanged;
+            if (Section?.Distal != null) Section.Distal.PropertyChanged -= OnLumenNodeChanged;
+
+            Section.Proximal.PropertyChanged += OnLumenNodeChanged;
+            Section.Distal.PropertyChanged += OnLumenNodeChanged;
+        }
+
+        private void OnLumenNodeChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Section.Proximal.DValue))
+            {
+                OnPropertyChanged(nameof(ProximalAreaByOrientation));
+            }
+
+            if(e.PropertyName == nameof(Section.Distal.DValue))
+            {
+                OnPropertyChanged(nameof(DistalAreaByOrientation));
+            }
+        }
+
     }
 }

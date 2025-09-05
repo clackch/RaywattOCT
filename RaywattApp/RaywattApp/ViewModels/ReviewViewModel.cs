@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Accord.Statistics.Distributions.Univariate;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
@@ -666,16 +667,7 @@ namespace RaywattApp.ViewModels
             }
             Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
 
-            //TODO: junghw
-            if (DeviceStatus.LongitudeOrientation != LongitudeOrientation.DistalToProximal)
-            {
-                LumenSidebranches.Reverse();
-                LumenStents.Reverse();
-                LumenGuidewires.Reverse();
-
-                LumenContours.Reverse();
-                if(GuideWireRadiusList != null) GuideWireRadiusList.Reverse();
-            }
+            AdjustLumenDataOrderByOrientation();
         }
 
         private void AngioImageProcessing()
@@ -1022,6 +1014,18 @@ namespace RaywattApp.ViewModels
             return filteredAverage;
         }
 
+        private void AdjustLumenDataOrderByOrientation()
+        {
+            //TODO: junghw
+            if (DeviceStatus.LongitudeOrientation != LongitudeOrientation.DistalToProximal)
+            {
+                if (GuideWireRadiusList != null) GuideWireRadiusList.Reverse();
+                if (LumenSidebranches != null) LumenSidebranches.Reverse();
+                if (LumenStents != null) LumenStents.Reverse();
+                if (LumenGuidewires != null) LumenGuidewires.Reverse();
+                if (LumenContours != null) LumenContours.Reverse();
+            }
+        }
         #endregion
 
         /*
@@ -1370,16 +1374,7 @@ namespace RaywattApp.ViewModels
             }
             else
             {
-                //TODO: junghw
-                if (DeviceStatus.LongitudeOrientation != LongitudeOrientation.DistalToProximal)
-                {
-                    LumenSidebranches.Reverse();
-                    LumenStents.Reverse();
-                    LumenGuidewires.Reverse();
-
-                    LumenContours.Reverse();
-                    if (GuideWireRadiusList != null) GuideWireRadiusList.Reverse();
-                }
+                AdjustLumenDataOrderByOrientation();
 
                 PatientCase.LumenContours = LumenContours;
                 PatientCase.LumenSidebranches = LumenSidebranches;
