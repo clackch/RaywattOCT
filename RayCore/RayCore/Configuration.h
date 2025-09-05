@@ -27,6 +27,7 @@ public:
 		int pullbackSpeed;
 		int noPullbackTime;
 		int unLoadDistance;
+		int homingSpeed;
 	};
 
 	class BLDCMotorSetting {
