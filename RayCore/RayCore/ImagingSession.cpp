@@ -752,7 +752,7 @@ static double median_of(std::vector<float> v) {
 		std::nth_element(v.begin(), v.begin() + mid, v.end());
 		const double m1 = v[mid];
 		if (n % 2 == 1) {
-			PLOGI.printf("[median_of] n=%d med=%.6f", (int)n, m1);
+			//PLOGI.printf("[median_of] n=%d med=%.6f", (int)n, m1);
 			return m1;
 		}
 		std::nth_element(v.begin(), v.begin() + mid - 1, v.end());
@@ -952,8 +952,7 @@ static bool ComputeLumenSNR(
 		}
 
 		const double snr = (mu_w - mu_l) / (sig_l + eps);
-		PLOGI.printf("[SNR] nL=%d nW=%d | mu_l=%.6f sig_l=%.6f mu_w=%.6f | SNR=%.6f",
-			(int)lumVals.size(), (int)wallVals.size(), mu_l, sig_l, mu_w, snr);
+		//PLOGI.printf("[SNR] nL=%d nW=%d | mu_l=%.6f sig_l=%.6f mu_w=%.6f | SNR=%.6f", (int)lumVals.size(), (int)wallVals.size(), mu_l, sig_l, mu_w, snr);
 
 		if (!std::isfinite(snr)) {
 			PLOGI.printf("[SNR] snr is not finite");
@@ -1021,6 +1020,11 @@ int CImagingSession::IsLumenNormal(cv::Mat image, std::vector<cv::Point> contour
 }
 
 std::vector<cv::Point> CImagingSession::GetValidLumenContour(const cv::Mat& imageResultWithoutCompensation, int imgSize, const cv::Mat& centerMask, const cv::Ptr<cv::CLAHE>& clahe, IRayLearning* learning, COCTImaging* pImaging) {
+	if (!imageResultWithoutCompensation.u) {
+		PLOGI.printf("imageResultWithoutCompensation.u == false");
+		return std::vector<cv::Point>();
+	}
+
 	CConfiguration& config = CConfiguration::GetInstance();
 	cv::Mat enhancedImage;
 	clahe->apply(imageResultWithoutCompensation, enhancedImage);
