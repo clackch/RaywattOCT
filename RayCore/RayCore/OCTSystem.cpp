@@ -1667,6 +1667,8 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 	CLaserModule* pLaserModule = pSystem->m_pLaserModule;
 	int nTargetPos = 0;
 
+	//1차 탐색 속도
+	int firstCheckVelocity = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("firstVel"), 2, _T(".\\raycore.ini"));
 	//1차 탐색 후, 2차 탐색을 위해 이동할 거리
 	int nJumpStep = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("JumpStep"), 3600, _T(".\\raycore.ini")) * CConfiguration::GetInstance().laserModule.delayLineSMSteps;
 	//2차 탐색 범위 
@@ -1678,7 +1680,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 	{
 		// 0. Speed Up
 		pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_AUTO);
-		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO*2 / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO * firstCheckVelocity / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
 
 		// 1. Start Finding Sheath
 		pSystem->m_vCalibrationInfo.clear();
