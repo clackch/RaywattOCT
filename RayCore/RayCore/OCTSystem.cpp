@@ -2597,7 +2597,6 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 		if (m_bAutoPullbackOnOff) {
 			//Lumen Detect
 			IRayLearning* learning = IRayLearning::GetInstance();
-			cv::Mat enhancedImage;
 			int imgSize = 1024;
 			cv::Point center(imgSize / 2, imgSize / 2);
 			//center point mask
