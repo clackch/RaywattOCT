@@ -46,6 +46,8 @@ namespace RaywattApp.ViewModels
 
         private bool isAdmin;
 
+        private bool isCatheterFailPopupOpened;
+
         [ObservableProperty]
         private string _navigationSource;
 
@@ -519,6 +521,12 @@ namespace RaywattApp.ViewModels
         private void CatheterFailReceiver()
         {
             _log.Debug("CatheterFailReceiver");
+
+            if (this.isCatheterFailPopupOpened)
+                return;
+
+            this.isCatheterFailPopupOpened = true;
+
             DeviceStatus.CatheterStatus = Constants.CatheterStatusFailed;//Fail Receive
 
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
@@ -536,6 +544,8 @@ namespace RaywattApp.ViewModels
                     parameter["patientCase"] = PatientCase;
                     parameter["prevStatus"] = PrevStatus;
                     WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingCatheterFailPage) { Parameter = parameter });
+
+                    this.isCatheterFailPopupOpened = false;
                 }
             });
         }
