@@ -189,7 +189,7 @@ bool CRJController::StartControl() {
 	if (!m_initMotor) return false;
 	if (m_pThreadState != nullptr) return true;
 
-	AutoStatePeriod(100);
+	AutoStatePeriod(50);
 	initSetting();
 	bool result = CUtility::StartThread(threadRJState, m_pThreadState, (LPVOID)this);
 	//result &= CUtility::StartThread(threadReadTag, m_pThreadRFIDTag, (LPVOID)this);
