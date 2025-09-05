@@ -1896,7 +1896,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	Sleep(2000);
 	int bldcHomingSpeed = config.bldcMotor.velocityLiveView / 2;
 	pRJController->PerformRun(bldcHomingSpeed);
-	pRJController->Set(eStepMotorIndex::Both, STEP_MOTOR_SPEED_DEFAULT);
+	pRJController->Set(eStepMotorIndex::Both, config.stepMotor.homingSpeed);
 	pRJController->Move(eStepMotorIndex::Both, 0);
 	pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
 	pRJController->StopMotor();
