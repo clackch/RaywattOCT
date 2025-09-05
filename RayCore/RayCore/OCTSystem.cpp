@@ -754,6 +754,7 @@ RayError COCTSystem::SetConfigPath(char* strPath) {
 * OpenImage
 */
 RayError COCTSystem::OpenImage(char* strFilePath, double imageResolution, double zOffset) {
+	PLOGI.printf("OpenImage");
 	CloseImage();
 
 	CImagingSession *pSession = CImagingSession::CreateSession(this, SESSION_UNKNOWN, strFilePath, imageResolution);
@@ -2604,10 +2605,10 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 			cv::circle(centerMask, center, 1, cv::Scalar(255), cv::FILLED);
 			cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(3.5, cv::Size(4, 4));
 			
-			std::vector<cv::Point> validContour = m_openedSession->GetValidLumenContour(m_pImagingRealtime->GetWithoutCompensationImage(), imgSize, centerMask, clahe, learning, m_pImagingRealtime);
+			std::vector<cv::Point> validContour = m_reviewSession[SESSION_REALTIME]->GetValidLumenContour(m_pImagingRealtime->GetWithoutCompensationImage(), imgSize, centerMask, clahe, learning, m_pImagingRealtime);
 
 			if (!validContour.empty()) {
-				isCleared = m_openedSession->IsLumenNormal(image, validContour, m_fLumenThresholdMin, m_fLumenThresholdMax, m_fLumenSrnThreshold, m_bShowLumenGuide);
+				isCleared = m_reviewSession[SESSION_REALTIME]->IsLumenNormal(image, validContour, m_fLumenThresholdMin, m_fLumenThresholdMax, m_fLumenSrnThreshold, m_bShowLumenGuide);
 			}
 		}
 
