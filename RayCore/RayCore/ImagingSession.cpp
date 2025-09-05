@@ -1021,6 +1021,11 @@ int CImagingSession::IsLumenNormal(cv::Mat image, std::vector<cv::Point> contour
 }
 
 std::vector<cv::Point> CImagingSession::GetValidLumenContour(const cv::Mat& imageResultWithoutCompensation, int imgSize, const cv::Mat& centerMask, const cv::Ptr<cv::CLAHE>& clahe, IRayLearning* learning, COCTImaging* pImaging) {
+	if (!imageResultWithoutCompensation.u) {
+		PLOGI.printf("imageResultWithoutCompensation.u == false");
+		return std::vector<cv::Point>();
+	}
+
 	CConfiguration& config = CConfiguration::GetInstance();
 	cv::Mat enhancedImage;
 	clahe->apply(imageResultWithoutCompensation, enhancedImage);
