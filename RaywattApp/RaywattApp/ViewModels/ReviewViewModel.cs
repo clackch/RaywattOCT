@@ -1969,10 +1969,8 @@ namespace RaywattApp.ViewModels
                         AngioFrames.Add(paddedFrame);
                         PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(paddedFrame));
                     }
-                    
-                    _log.Debug($"junghw: Recoding -> Review");
-                    AngioFrames.Reverse();
-                    PatientCase.AngioFrame.AngioImage.Reverse();
+                    //AngioFrames.Reverse();
+                    //PatientCase.AngioFrame.AngioImage.Reverse();
                     return;
                 }
                 else // PatientCaseList -> Review
@@ -2030,11 +2028,9 @@ namespace RaywattApp.ViewModels
                             AngioFrames.Add(paddedFrame);
                             PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(paddedFrame));
                         }
-                        _log.Debug($"junghw: PatientCaseList -> Review");
                         PatientCase.AngioFrame.AngioImage.Reverse();
                         reader.Close();
                     }
-
                     AngioImageProcessing();
                 }
             }
