@@ -1701,6 +1701,8 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		// way1
 		int minVal = INT_MAX, maxVal = 0, Loc = startPosition;
 		for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
+			if(pSystem->m_vCalibrationInfo.at(i).first <= 10)
+				continue;
 			if (pSystem->m_vCalibrationInfo.at(i).first < minVal) {
 				minVal = pSystem->m_vCalibrationInfo.at(i).first;
 				Loc = pSystem->m_vCalibrationInfo.at(i).second;
