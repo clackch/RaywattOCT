@@ -2596,7 +2596,6 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 
 		if (m_bAutoPullbackOnOff) {
 			//Lumen Detect
-			IRayLearning* learning = IRayLearning::GetInstance();
 			cv::Mat enhancedImage;
 			int imgSize = 1024;
 			cv::Point center(imgSize / 2, imgSize / 2);
@@ -2605,10 +2604,10 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 			cv::circle(centerMask, center, 1, cv::Scalar(255), cv::FILLED);
 			cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(3.5, cv::Size(4, 4));
 			
-			std::vector<cv::Point> validContour = m_reviewSession[SESSION_REALTIME]->GetValidLumenContour(m_pImagingRealtime->GetWithoutCompensationImage(), imgSize, centerMask, clahe, learning, m_pImagingRealtime);
+			std::vector<cv::Point> validContour = CImagingSession::GetValidLumenContour(m_pImagingRealtime->GetWithoutCompensationImage(), imgSize, centerMask, clahe, m_pImagingRealtime);
 
 			if (!validContour.empty()) {
-				isCleared = m_reviewSession[SESSION_REALTIME]->IsLumenNormal(image, validContour, m_fLumenThresholdMin, m_fLumenThresholdMax, m_fLumenSrnThreshold, m_bShowLumenGuide);
+				isCleared = CImagingSession::IsLumenNormal(image, validContour, m_fLumenThresholdMin, m_fLumenThresholdMax, m_fLumenSrnThreshold, m_bShowLumenGuide);
 			}
 		}
 
