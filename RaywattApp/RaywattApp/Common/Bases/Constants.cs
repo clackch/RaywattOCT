@@ -449,7 +449,7 @@ namespace RaywattApp.Common.Bases
         public const double AnnotationScale = 1.2;
 
         //Catheter Status
-        public const string CatheterStatusConnected = "Connected";
+        public const string CatheterStatusConnected = "Connected";//Catheter 연결되고, Micro Limit Switch가 On 상태
         public const string CatheterStatusLoading = "Loading";
         public const string CatheterStatusLoaded = "Loaded";
         public const string CatheterStatusEnable = "Enable";

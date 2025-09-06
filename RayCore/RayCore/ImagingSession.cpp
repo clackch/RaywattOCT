@@ -752,7 +752,7 @@ static double median_of(std::vector<float> v) {
 		std::nth_element(v.begin(), v.begin() + mid, v.end());
 		const double m1 = v[mid];
 		if (n % 2 == 1) {
-			PLOGI.printf("[median_of] n=%d med=%.6f", (int)n, m1);
+			//PLOGI.printf("[median_of] n=%d med=%.6f", (int)n, m1);
 			return m1;
 		}
 		std::nth_element(v.begin(), v.begin() + mid - 1, v.end());
@@ -952,8 +952,7 @@ static bool ComputeLumenSNR(
 		}
 
 		const double snr = (mu_w - mu_l) / (sig_l + eps);
-		PLOGI.printf("[SNR] nL=%d nW=%d | mu_l=%.6f sig_l=%.6f mu_w=%.6f | SNR=%.6f",
-			(int)lumVals.size(), (int)wallVals.size(), mu_l, sig_l, mu_w, snr);
+		//PLOGI.printf("[SNR] nL=%d nW=%d | mu_l=%.6f sig_l=%.6f mu_w=%.6f | SNR=%.6f", (int)lumVals.size(), (int)wallVals.size(), mu_l, sig_l, mu_w, snr);
 
 		if (!std::isfinite(snr)) {
 			PLOGI.printf("[SNR] snr is not finite");
@@ -1020,19 +1019,31 @@ int CImagingSession::IsLumenNormal(cv::Mat image, std::vector<cv::Point> contour
 	return (result.decision == AreaDecision::Accept) ? 1 : 0;
 }
 
-std::vector<cv::Point> CImagingSession::GetValidLumenContour(const cv::Mat& imageResultWithoutCompensation, int imgSize, const cv::Mat& centerMask, const cv::Ptr<cv::CLAHE>& clahe, IRayLearning* learning, COCTImaging* pImaging) {
+std::vector<cv::Point> CImagingSession::GetValidLumenContour(const cv::Mat& imageResultWithoutCompensation, int imgSize, const cv::Mat& centerMask, const cv::Ptr<cv::CLAHE>& clahe, COCTImaging* pImaging) {
+	if (!imageResultWithoutCompensation.u) {
+		PLOGI.printf("imageResultWithoutCompensation.u == false");
+		return std::vector<cv::Point>();
+	}
+
 	CConfiguration& config = CConfiguration::GetInstance();
 	cv::Mat enhancedImage;
-	clahe->apply(imageResultWithoutCompensation, enhancedImage);
-	pImaging->CircularizeImage(enhancedImage, enhancedImage);
-	cv::cvtColor(enhancedImage, enhancedImage, cv::COLOR_GRAY2BGR);
+	cv::Mat enhancedCircleImage;
+	cv::Mat enhancedCircleImageBGR;
 
-	cv::Mat contourImage = learning->FindLumen(enhancedImage);
+	clahe->apply(imageResultWithoutCompensation, enhancedImage);
+
+	pImaging->CircularizeImage(enhancedImage, enhancedCircleImage);
+
+	cv::cvtColor(enhancedCircleImage, enhancedCircleImageBGR, cv::COLOR_GRAY2BGR);
+
+	IRayLearning* learning = IRayLearning::GetInstance();
+	cv::Mat contourImage = learning->FindLumen(enhancedCircleImageBGR);
 
 	std::vector<std::vector<cv::Point>> vContours;
 	cv::findContours(contourImage, vContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
 	std::vector<cv::Point> validContour;
+	std::vector<std::vector<cv::Point>> vCircle;
 
 	if (vContours.size() > 0) {
 		cv::Mat andResult;
@@ -1070,7 +1081,6 @@ std::vector<cv::Point> CImagingSession::GetValidLumenContour(const cv::Mat& imag
 
 			vContours.clear();
 			if (!isCompletelyContained) {
-				std::vector<std::vector<cv::Point>> vCircle;
 				cv::findContours(andResult2, vCircle, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
 				if (vCircle.size() > 0) {
@@ -1154,7 +1164,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		cv::cvtColor(circleImage, circleImage, cv::COLOR_GRAY2BGR);
 
 		//lumen
-		std::vector<cv::Point> validContour = pSession->GetValidLumenContour(imgZOffset, imgSize, centerMask, clahe, learning, pImaging);
+		std::vector<cv::Point> validContour = CImagingSession::GetValidLumenContour(imgZOffset, imgSize, centerMask, clahe, pSession->m_pImaging);
 
 		std::vector<std::vector<cv::Point>> vContours;
 		if (!validContour.empty()) {
@@ -1169,7 +1179,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 
 		//Test
 		if (false) {//!validContour.empty()) {
-			pSession->IsLumenNormal(circleImage, validContour, 0.01, 0.30, 1.0, true);
+			CImagingSession::IsLumenNormal(circleImage, validContour, 0.01, 0.30, 1.0, true);
 			cv::imwrite(cv::format("./test/%06d.png", nFrame), circleImage);
 		}
 

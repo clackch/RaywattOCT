@@ -181,10 +181,11 @@ void COCTImaging::DoAsyncRender(char* fringes) {
 }
 void COCTImaging::CircularizeImage(cv::Mat& src, cv::Mat& dst)
 {
-	cv::remap(src, dst, matXMap, matYMap, cv::INTER_LINEAR);
+	cv::Mat imgFoVOrigin;
+	cv::remap(src, imgFoVOrigin, matXMap, matYMap, cv::INTER_LINEAR);
 
-	cv::Mat imgFoV = getFoVImage(dst, MAX_FIELD_OF_VIEW);
-	memcpy(dst.data, imgFoV.data, sizeof(char) * dst.cols * dst.rows * imgFoV.channels());
+	cv::Mat imgFoV = getFoVImage(imgFoVOrigin, MAX_FIELD_OF_VIEW);
+	imgFoV.copyTo(dst);
 }
 
 void COCTImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {
@@ -842,12 +843,10 @@ void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert){
 	imgLog *= (LUT_SCALE / m_setting.highLevel);
 	cv::threshold(imgLog, imgLog, LUT_SCALE, LUT_SCALE, cv::THRESH_TRUNC);
 	imgLog.convertTo(imageResult, CV_8UC1);
-
 	cv::convertScaleAbs(imageResult, imageResult, 1.f / 80.f * LUT_SCALE, 0);
-
 	cv::flip(imageResult, imageResult, 1);
 
-	imageResultWithoutCompensation = imageResult.clone();
+	imageResult.copyTo(imageResultWithoutCompensation);
 }
 
 void COCTImaging::drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color) {
