@@ -569,8 +569,8 @@ void COCTImaging::findSheath(cv::Mat input)
 	const double POWER_MAX = 12.0;
 
 	// ROI
-	const int POS_MIN = 75;
-	const int POS_MAX = 250;
+	const int POS_MIN = 50;
+	const int POS_MAX = 500;
 
 	// 1차 이진화(상단 ROI Top-K + 퍼센타일 바닥)
 	const int    FIRST_H_ROI_TOPK = 200; // ROI 내부 상단 높이
@@ -586,9 +586,9 @@ void COCTImaging::findSheath(cv::Mat input)
 	const double BOTTOM_ZERO_GAP_FRAC = 0.27;
 
 	// 후보 선택 규칙
-	const int THICK_MIN = 10;
+	const int THICK_MIN = 5;
 	const int THICK_MAX = 40;
-	const int ADJ_DIFF_MAX = 15;
+	const int ADJ_DIFF_MAX = THICK_MAX - THICK_MIN;;
 
 	// 2차 이진화(Top-K만 사용)
 	const int SECOND_TARGET_THICK_PX = (THICK_MAX+ THICK_MIN)/2 * 2; // 기본: 이전과 동일한 감도
