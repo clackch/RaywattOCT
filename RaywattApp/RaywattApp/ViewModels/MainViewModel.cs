@@ -360,6 +360,7 @@ namespace RaywattApp.ViewModels
             }
 
             DeviceStatus.PowerOffMsg = _l10n["Shutting down"];
+            DeviceStatus.CatheterStatus = Constants.CatheterStatusDisconnected;
 
             //Auto Pullback Initial Setting
             AutoPullbackLumenThresholdMin = "2";
