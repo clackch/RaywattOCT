@@ -181,11 +181,11 @@ void COCTImaging::DoAsyncRender(char* fringes) {
 }
 void COCTImaging::CircularizeImage(cv::Mat& src, cv::Mat& dst)
 {
-	cv::Mat imgFoVOrigin = dst.clone();
+	cv::Mat imgFoVOrigin;
 	cv::remap(src, imgFoVOrigin, matXMap, matYMap, cv::INTER_LINEAR);
 
 	cv::Mat imgFoV = getFoVImage(imgFoVOrigin, MAX_FIELD_OF_VIEW);
-	memcpy(dst.data, imgFoV.data, sizeof(char) * dst.cols * dst.rows * imgFoV.channels());
+	imgFoV.copyTo(dst);
 }
 
 void COCTImaging::InverseCircularizeImage(cv::Mat& src, cv::Mat& dst) {
