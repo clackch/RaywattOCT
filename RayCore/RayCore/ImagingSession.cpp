@@ -1031,6 +1031,8 @@ std::vector<cv::Point> CImagingSession::GetValidLumenContour(const cv::Mat& imag
 	cv::Mat enhancedCircleImageBGR;
 
 	clahe->apply(imageResultWithoutCompensation, enhancedImage);
+
+	enhancedCircleImage.create(pImaging->GetSetting().nCircleSize, pImaging->GetSetting().nCircleSize, CV_8UC1);
 	pImaging->CircularizeImage(enhancedImage, enhancedCircleImage);
 
 	cv::cvtColor(enhancedCircleImage, enhancedCircleImageBGR, cv::COLOR_GRAY2BGR);
