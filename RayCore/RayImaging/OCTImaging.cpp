@@ -845,9 +845,7 @@ void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert){
 	cv::convertScaleAbs(imageResult, imageResult, 1.f / 80.f * LUT_SCALE, 0);
 	cv::flip(imageResult, imageResult, 1);
 
-	imgLog.convertTo(imageResultWithoutCompensation, CV_8UC1);
-	cv::convertScaleAbs(imageResultWithoutCompensation, imageResultWithoutCompensation, 1.f / 80.f * LUT_SCALE, 0);
-	cv::flip(imageResultWithoutCompensation, imageResultWithoutCompensation, 1);
+	imageResult.copyTo(imageResultWithoutCompensation);
 }
 
 void COCTImaging::drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color) {
