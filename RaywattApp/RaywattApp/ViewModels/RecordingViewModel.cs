@@ -59,7 +59,6 @@ namespace RaywattApp.ViewModels
         private bool _isDeviceConnectedMessage = false;
 
         private Thread threadWaitPullbackDone;
-        private bool runWaitPullbackDone;
 
         private DispatcherTimer timer = new DispatcherTimer();
         private DispatcherTimer readyTimer = new DispatcherTimer();
@@ -329,13 +328,10 @@ namespace RaywattApp.ViewModels
 
         private void threadFuncWaitPullbackDone()
         {
-            runWaitPullbackDone = true;
-
-            while (runWaitPullbackDone && !DeviceStatus.IsPullbackDone)
+            while (!DeviceStatus.IsPullbackDone)
             {
                 Thread.Sleep((int)Constants.WaitForEventInterval);
             }
-            runWaitPullbackDone = false;
 
             this.isMoveConfirm = true;
 

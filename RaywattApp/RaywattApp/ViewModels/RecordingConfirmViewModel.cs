@@ -106,7 +106,6 @@ namespace RaywattApp.ViewModels
             DeviceStatus.IsSaveRawDataDone = true;
             DeviceStatus.IsLumenSaved = true;
             DeviceStatus.IsOCTImagingDone = true;
-            DeviceStatus.IsPullbackDone = false;
 
             _angioManager.threadOnRedoPullback = true;
             if (_angioManager.threadFuncSaveAngioFrames != null)
