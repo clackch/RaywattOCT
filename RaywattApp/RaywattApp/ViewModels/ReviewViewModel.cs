@@ -1466,12 +1466,12 @@ namespace RaywattApp.ViewModels
 
                 bool isSame = true;
 
-                if (ffrValue.DistalLumenArea != Section.Proximal.DValue) //P/D 위치 바꾸면서, FFR Value는 P/D 값은 반대로 들어가 있음
-                    isSame = false;
+                //if (ffrValue.DistalLumenArea != Section.Proximal.DValue) //P/D 위치 바꾸면서, FFR Value는 P/D 값은 반대로 들어가 있음
+                //    isSame = false;
                 if (ffrValue.MinimalLumenArea != Section.MlaValue.DValue)
                     isSame = false;
-                if (ffrValue.ProximalLumenArea != Section.Distal.DValue) //P/D 위치 바꾸면서, FFR Value는 P/D 값은 반대로 들어가 있음
-                    isSame = false;
+                //if (ffrValue.ProximalLumenArea != Section.Distal.DValue) //P/D 위치 바꾸면서, FFR Value는 P/D 값은 반대로 들어가 있음
+                //    isSame = false;
                 if (ffrValue.LesionLength != Section.LesionLength.DValue)
                     isSame = false;
                 if (ffrValue.VesselType != PatientCase.Vessel)

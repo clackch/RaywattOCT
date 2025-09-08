@@ -76,6 +76,19 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private string _dPRightLabel;
 
+        [ObservableProperty]
+        private string _distalLumenAreaLabel;
+
+        [ObservableProperty]
+        private string _proximalLumenAreaLabel;
+
+        [ObservableProperty]
+        private string _distalLumenLabel;
+
+        [ObservableProperty]
+        private string _proximalLumenLabel;
+
+
         private ICommand _ffrPredictCommand;
         public ICommand FfrPredictCommand
         {
@@ -382,6 +395,14 @@ namespace RaywattApp.ViewModels
         {
             _dPLeftLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "P" : "D";
             _dPRightLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "D" : "P";
+
+            // Area label
+            _distalLumenAreaLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "Proximal Lumen Area" : "Distal Lumen Area";
+            _proximalLumenAreaLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "Distal Lumen Area" : "Proximal Lumen Area";
+
+            // Lumen label
+            _distalLumenLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "Proximal" : "Distal";
+            _proximalLumenLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "Distal" : "Proximal";
         }
     }
 }
