@@ -53,10 +53,10 @@ class IDataManager
 {
 protected:
 	int m_nNumOfSamples;
-	std::map<OCTHeader::ExtraData, std::vector<uint8_t>> mapExtraData;
+	std::map<OCTHeader::ExtraData, void*> mapExtraData;
 
 public:
-	IDataManager() { m_nNumOfSamples = 0; }
+	IDataManager() { m_nNumOfSamples = 0;}
 	virtual ~IDataManager() {
 		mapExtraData.clear();
 	}
@@ -67,11 +67,15 @@ public:
 	virtual void AddFrame(void* pFrame) = 0;
 
 	void AddExtraData(OCTHeader::ExtraData extraData, void* pData, int nSize) {
+		std::map<OCTHeader::ExtraData, void*>::iterator it = mapExtraData.find(extraData);
+		if (it != mapExtraData.end()) {
+			delete[] it->second;
+			mapExtraData.erase(it);
 		if (nSize <= 0 || pData == nullptr) {
 			PLOGI.printf("Invalid ExtraData input (nullptr or size <= 0)");
 			return;
 		}
-		if (nSize > 1024 * 1024 * 1024 * 2) { // 2GB �̻� ���
+		if (nSize > 1024 * 1024 * 1024 * 2) { // 2GB ÀÌ»ó ¹æ¾î
 			PLOGI.printf("Allocation Size too big");
 			return;
 		}
@@ -81,7 +85,7 @@ public:
 		mapExtraData[extraData] = std::move(vecData);
 	}
 
-	// raw pointer�� �ʿ��ϴٸ� const-cast
+	// raw pointer°¡ ÇÊ¿äÇÏ´Ù¸é const-cast
 	uint8_t* GetExtraData(OCTHeader::ExtraData extraData) {
 		auto it = mapExtraData.find(extraData);
 		if (it != mapExtraData.end()) {

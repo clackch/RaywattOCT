@@ -590,7 +590,7 @@ void CRJController::updateState() {
 			Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 			m_nextState = eRJState::Error;
 		}
-		if (m_bButton[0]) {
+		if (/*m_bButton[0]*/false) {
 			m_nextState = eRJState::Unloading;
 		}
 		break;

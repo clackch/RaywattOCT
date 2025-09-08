@@ -1,6 +1,7 @@
 #include "Config.h"
 #include "DataWriter.h"
 #include "Utility.h"
+#include <fstream>
 
 CDataWriter::CDataWriter() {
 	m_pRecordBuffer = NULL;
@@ -84,7 +85,7 @@ void CDataWriter::WriteExtraData(void* pExtraData, long nSize) {
 	
 }
 bool CDataWriter::WriteFrame(int nFrame) {
-	char* pBuffer = (char *) GetSample(nFrame);
+	char* pBuffer = (char*)GetSample(nFrame);
 	if (pBuffer == NULL) return false;
 
 	DWORD dwBytesWrote = 0;
@@ -132,9 +133,18 @@ char* CDataWriter::GetSample(int nFrame) {
 }
 
 void CDataWriter::AddFrame(void* pFrame) {
-	if (m_isRecording == false) return;
-	if (m_nNumOfSamples >= m_nBufferSize) return;
-	if (pFrame == nullptr) return;
+	if (m_isRecording == false) {
+		PLOGI.printf("m_isRecording is False");
+		return;
+	}
+	if (m_nNumOfSamples >= m_nBufferSize) {
+		PLOGI.printf("m_nNumOfSamples is too big");
+		return;
+	}
+	if (pFrame == nullptr) {
+		PLOGI.printf("pFrame is Null");
+		return;
+	}
 
 	unsigned long long ulOffset = (unsigned long long) m_nNumOfSamples * (unsigned long long) m_nElementSize;
 	memcpy(m_pRecordBuffer + ulOffset, pFrame, m_nElementSize);

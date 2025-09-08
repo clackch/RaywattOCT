@@ -79,6 +79,7 @@ void CConfiguration::Initialize(tstring configFile)
 	this->stepMotor.pullbackDistance = ::GetPrivateProfileInt(_T("StepMotor"), _T("PullbackDistance"), 10, configFilePath.c_str());
 	this->stepMotor.pullbackSpeed = ::GetPrivateProfileInt(_T("StepMotor"), _T("PullbackSpeed"), 10, configFilePath.c_str());
 	this->stepMotor.noPullbackTime = ::GetPrivateProfileInt(_T("StepMotor"), _T("NoPullbackTime"), 3, configFilePath.c_str());
+	this->stepMotor.SMPullbackProfile = ::GetPrivateProfileInt(_T("StepMotor"), _T("SMPullbackProfile"), 0, configFilePath.c_str());
 	this->stepMotor.unLoadDistance = ::GetPrivateProfileInt(_T("StepMotor"), _T("UnLoadDistance"), 9650, configFilePath.c_str());
 	this->stepMotor.homingSpeed= ::GetPrivateProfileInt(_T("StepMotor"), _T("HomingSpeed"), 2362, configFilePath.c_str());
 	

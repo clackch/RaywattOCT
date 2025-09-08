@@ -789,7 +789,7 @@ namespace RaywattApp.ViewModels
                 switch (error)
                 {
                     case RayError.CatheterNotValid:
-                        CatheterFailReceiver();
+                        //CatheterFailReceiver();
                         break;
                     case RayError.HomingFailed:
                         DeviceStatus.CatheterStatus = Constants.CatheterStatusFailed;

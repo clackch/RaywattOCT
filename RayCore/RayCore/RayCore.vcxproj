@@ -177,6 +177,7 @@ xcopy "$(TargetDir)RayCore.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" 
     <ClInclude Include="ImagingSession.h" />
     <ClInclude Include="OCTSystem.h" />
     <ClInclude Include="import.h" />
+    <ClInclude Include="PullbackLengthManager.h" />
     <ClInclude Include="RaywattCore.h" />
   </ItemGroup>
   <ItemGroup>
@@ -185,6 +186,7 @@ xcopy "$(TargetDir)RayCore.dll" "$(ProjectDir)..\..\RaywattApp\RaywattApp\bin\" 
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="ImagingSession.cpp" />
     <ClCompile Include="OCTSystem.cpp" />
+    <ClCompile Include="PullbackLengthManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
