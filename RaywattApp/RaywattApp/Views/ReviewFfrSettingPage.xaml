@@ -413,8 +413,18 @@
                                         <Label Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource GrayscaleGray2Brush}" Content="{Binding [㎜], Source={StaticResource L10N}}"/>
                                     </StackPanel>
                                     <!-- Section Proximal -->
-                                    <Image Height="90" Width="28" Source="{svgc:SvgImage Source=/res/indicator/sectionProximalSmall.svg}" Canvas.Left="{Binding Section.Proximal.X}" Visibility="{Binding FfrStep, Converter={StaticResource RadioButtonVisibilityReverseConverter}, ConverterParameter={x:Static const:Constants.FfrStep2}}"/>
-                                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="sectionProximalSmallMove" IsCaptured="{Binding Section.Proximal.IsCaptured}" Stretch="None" Canvas.Left="{Binding Section.Proximal.X}" IsEnabled="{Binding Section.Proximal.IsEnabled}" Visibility="{Binding FfrStep, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FfrStep2}}">
+                                    <Image Height="90" 
+                                           Width="28" 
+                                           Source="{svgc:SvgImage Source=/res/indicator/sectionProximalSmall.svg}" 
+                                           Canvas.Left="{Binding Section.Proximal.X}" 
+                                           Visibility="{Binding FfrTargetStep, Converter={StaticResource RadioButtonVisibilityReverseConverter}, ConverterParameter={x:Static const:Constants.FfrStep2}}"/>
+                                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" 
+                                                              Icon="sectionProximalSmallMove" 
+                                                              IsCaptured="{Binding Section.Proximal.IsCaptured}" 
+                                                              Stretch="None" 
+                                                              Canvas.Left="{Binding Section.Proximal.X}" 
+                                                              IsEnabled="{Binding Section.Proximal.IsEnabled}" 
+                                                              Visibility="{Binding FfrTargetStep, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FfrStep2}}">
                                         <i:Interaction.Triggers>
                                             <i:EventTrigger EventName="PreviewMouseDown" >
                                                 <i:InvokeCommandAction Command="{Binding Section.Proximal.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
@@ -428,8 +438,18 @@
                                         </i:Interaction.Triggers>
                                     </component:IndicatorImage>
                                     <!-- Section Distal -->
-                                    <Image Height="90" Width="28" Source="{svgc:SvgImage Source=/res/indicator/sectionDistalSmall.svg}" Canvas.Left="{Binding Section.Distal.X}"  Visibility="{Binding FfrStep, Converter={StaticResource RadioButtonVisibilityReverseConverter}, ConverterParameter={x:Static const:Constants.FfrStep3}}"/>
-                                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="sectionDistalSmallMove" IsCaptured="{Binding Section.Distal.IsCaptured}" Stretch="None" Canvas.Left="{Binding Section.Distal.X}" IsEnabled="{Binding Section.Distal.IsEnabled}" Visibility="{Binding FfrStep, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FfrStep3}}">
+                                    <Image Height="90" 
+                                           Width="28" 
+                                           Source="{svgc:SvgImage Source=/res/indicator/sectionDistalSmall.svg}" 
+                                           Canvas.Left="{Binding Section.Distal.X}"  
+                                           Visibility="{Binding FfrTargetStep, Converter={StaticResource RadioButtonVisibilityReverseConverter}, ConverterParameter={x:Static const:Constants.FfrStep3}}"/>
+                                    <component:IndicatorImage Style="{DynamicResource IndicatorImage}" 
+                                                              Icon="sectionDistalSmallMove" 
+                                                              IsCaptured="{Binding Section.Distal.IsCaptured}" 
+                                                              Stretch="None" 
+                                                              Canvas.Left="{Binding Section.Distal.X}" 
+                                                              IsEnabled="{Binding Section.Distal.IsEnabled}" 
+                                                              Visibility="{Binding FfrTargetStep, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FfrStep3}}">
                                         <i:Interaction.Triggers>
                                             <i:EventTrigger EventName="PreviewMouseDown" >
                                                 <i:InvokeCommandAction Command="{Binding Section.Distal.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>

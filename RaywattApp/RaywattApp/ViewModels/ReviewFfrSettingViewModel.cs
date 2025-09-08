@@ -91,6 +91,9 @@ namespace RaywattApp.ViewModels
                 ? Section.Distal.DValue
                 : Section.Proximal.DValue;
 
+        [ObservableProperty]
+        public string _ffrTargetStep;
+
         private ICommand _zoomInCommand;
         public ICommand ZoomInCommand
         {
@@ -312,6 +315,7 @@ namespace RaywattApp.ViewModels
                 default:
                     break;
             }
+            MapFfrStepByOrientation();
         }
 
         private void Next()
@@ -361,6 +365,7 @@ namespace RaywattApp.ViewModels
                 default:
                     break;
             }
+            MapFfrStepByOrientation();
         }
 
         private void DrawCrossSection(int frameNumber)
@@ -682,11 +687,24 @@ namespace RaywattApp.ViewModels
                 OnPropertyChanged(nameof(ProximalAreaByOrientation));
             }
 
-            if(e.PropertyName == nameof(Section.Distal.DValue))
+            if (e.PropertyName == nameof(Section.Distal.DValue))
             {
                 OnPropertyChanged(nameof(DistalAreaByOrientation));
             }
         }
 
+        private void MapFfrStepByOrientation()
+        {
+            if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
+            {
+                if (FfrStep == Constants.FfrStep2) FfrTargetStep = Constants.FfrStep3;
+                else if (FfrStep == Constants.FfrStep3) FfrTargetStep = Constants.FfrStep2;
+                else FfrTargetStep = "";
+            }
+            else
+            {
+                FfrTargetStep = FfrStep;
+            }
+        }
     }
 }
