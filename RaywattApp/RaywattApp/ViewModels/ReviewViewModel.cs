@@ -211,9 +211,9 @@ namespace RaywattApp.ViewModels
         public double FieldOfView
         {
             get { return _fieldOfView; }
-            set 
-            { 
-                _fieldOfView = value; 
+            set
+            {
+                _fieldOfView = value;
                 OnPropertyChanged(nameof(FieldOfView));
 
                 this.convertedFoV = Constants.DefaultFoV / value;
@@ -390,7 +390,7 @@ namespace RaywattApp.ViewModels
 
             UpdateCrossSectionImage();
 
-            if(CommonUtil.IsTestMode(DeviceStatus.TestMode, "Sidebranch"))
+            if (CommonUtil.IsTestMode(DeviceStatus.TestMode, "Sidebranch"))
                 IsDrawLumenSideBranch = true;
         }
 
@@ -409,7 +409,7 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
-                
+
                 ReviewStatus.CurrentPage = Constants.ReviewPage;
 
                 FieldOfView = PatientCase.FieldOfView;
@@ -427,7 +427,7 @@ namespace RaywattApp.ViewModels
 
                 Degree = PatientCase.IndicatorDegree;
                 Brightness = PatientCase.Brightness;
-                Contrast = PatientCase.Contrast;                
+                Contrast = PatientCase.Contrast;
                 CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault);
                 CrossSectionAngioScale = (1 / Constants.ImageResolution) * (Constants.ZoomAngioCsScaleDefault);
 
@@ -490,7 +490,7 @@ namespace RaywattApp.ViewModels
                 threadReadAngioFrames.Start();
             }
         }
-        
+
         private void SetAnnotation()
         {
             string tempCrossSection = "[]", tempLongitude = "", tempBookmark = "[]";
@@ -553,7 +553,7 @@ namespace RaywattApp.ViewModels
                     threadMakeLumenProfile.Start();
 
                     //Sidebranch
-                    if(!String.IsNullOrEmpty(patientCaseAnnotations[0].LumenSidebranch))
+                    if (!String.IsNullOrEmpty(patientCaseAnnotations[0].LumenSidebranch))
                     {
                         LumenSidebranches = JsonConvert.DeserializeObject<List<LumenSidebranch>>(patientCaseAnnotations[0].LumenSidebranch);
                     }
@@ -568,7 +568,7 @@ namespace RaywattApp.ViewModels
                     }
 
                     //Stent
-                    if(!String.IsNullOrEmpty(patientCaseAnnotations[0].LumenStent))
+                    if (!String.IsNullOrEmpty(patientCaseAnnotations[0].LumenStent))
                     {
                         LumenStents = JsonConvert.DeserializeObject<List<LumenStent>>(patientCaseAnnotations[0].LumenStent);
                     }
@@ -580,17 +580,17 @@ namespace RaywattApp.ViewModels
                             LumenStent lumenStent = new LumenStent();
                             LumenStents.Add(lumenStent);
                         }
-                    }                    
+                    }
 
                     //Guidewire
-                    if(!String.IsNullOrEmpty(patientCaseAnnotations[0].LumenGuidewire))
+                    if (!String.IsNullOrEmpty(patientCaseAnnotations[0].LumenGuidewire))
                     {
                         LumenGuidewires = JsonConvert.DeserializeObject<List<LumenGuidewire>>(patientCaseAnnotations[0].LumenGuidewire);
-                        
+
                     }
                     else
                     {
-                        LumenGuidewires= new List<LumenGuidewire>();
+                        LumenGuidewires = new List<LumenGuidewire>();
                         for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
                         {
                             LumenGuidewire lumenGuidewire = new LumenGuidewire();
@@ -787,7 +787,7 @@ namespace RaywattApp.ViewModels
 
             //side branch
             int sbSize = RayGetNumOfSidebranchContourSize(frameInfo);
-            if(sbSize > 0)
+            if (sbSize > 0)
             {
                 LumenSidebranches[frameInfo].Points = new List<List<Point>>();
                 for (int i = 0; i < sbSize; i++)
@@ -813,7 +813,7 @@ namespace RaywattApp.ViewModels
 
             //stent
             int stentHeight = RayGetNumOfStentPoints(frameInfo);
-            if(stentHeight > 0)
+            if (stentHeight > 0)
             {
                 IntPtr contour = RayGetStentPoints(frameInfo);
                 if (contour == IntPtr.Zero) return;
@@ -854,7 +854,7 @@ namespace RaywattApp.ViewModels
                     for (int row = 0; row < mat.Rows; row++)
                     {
                         Vec2i point = mat.At<Vec2i>(0, row);
-                        if(point.Item0 < 0 || point.Item0 < 0)
+                        if (point.Item0 < 0 || point.Item0 < 0)
                         {
                             LumenGuidewires[frameInfo].Points.Add(new Point(0, 0));
                         }
@@ -939,7 +939,7 @@ namespace RaywattApp.ViewModels
 
         private double GetGuidewireAverageRadius()
         {
-            if(GuideWireRadiusList == null || !(GuideWireRadiusList.Any()))
+            if (GuideWireRadiusList == null || !(GuideWireRadiusList.Any()))
             {
                 return 0.0;
             }
@@ -966,11 +966,11 @@ namespace RaywattApp.ViewModels
                 return normalizedValue >= -2 && normalizedValue <= 2;
             }).ToList();
 
-            if(!filteredValues.Any())
+            if (!filteredValues.Any())
             {
                 return 0.0;
             }
-            
+
             double filteredAverage = filteredValues.Average();
 
             _log.Debug("Average Radius Value" + filteredAverage.ToString());
@@ -1013,7 +1013,7 @@ namespace RaywattApp.ViewModels
                 {
                     ReviewStatus.IsPlay = false;
                 }
-                
+
             }
         }
 
@@ -1197,7 +1197,7 @@ namespace RaywattApp.ViewModels
 
             ReviewStatus.ZoomAngioCs.ZoomOut();
 
-            if(CommonUtil.GetRoundScale(ReviewStatus.ZoomAngioCs.ScaleX) == CommonUtil.GetRoundScale(Constants.ZoomAngioCsScaleDefault * this.convertedFoV))
+            if (CommonUtil.GetRoundScale(ReviewStatus.ZoomAngioCs.ScaleX) == CommonUtil.GetRoundScale(Constants.ZoomAngioCsScaleDefault * this.convertedFoV))
             {
                 ReviewStatus.IsCalciumOnAngioCs = true;
                 ReviewStatus.IsSheathOnAngioCs = true;
@@ -1437,7 +1437,7 @@ namespace RaywattApp.ViewModels
         {
             if (DrawCrossSectionImage())
             {
-                DeviceStatus.ReviewImageInfo imageInfo = DeviceStatus.ReviewImageInfos[(int)RaySession.Review];                
+                DeviceStatus.ReviewImageInfo imageInfo = DeviceStatus.ReviewImageInfos[(int)RaySession.Review];
                 if (!IndicatorLongitude.IsCaptured) updateNavigator(imageInfo.Current, imageInfo.Total);
 
                 FrameNumber = imageInfo.Current;
@@ -1551,7 +1551,7 @@ namespace RaywattApp.ViewModels
             else
             {
                 int stentProximal = 0, stentDistal = 0;
-                if(CommonUtil.GetStentProximalDistal(LumenStents, out stentProximal, out stentDistal))
+                if (CommonUtil.GetStentProximalDistal(LumenStents, out stentProximal, out stentDistal))
                 {
                     int frameDiff = (int)(Constants.PostLesionLengthInitValue * ReviewStatus.NumberOfFrames * 10 / int.Parse(PatientCase.PullbackLength));
                     proximalIdx = stentProximal - frameDiff > 0 ? stentProximal - frameDiff : 0;
@@ -1564,9 +1564,9 @@ namespace RaywattApp.ViewModels
                 }
             }
 
-            if(proximalIdx >= 0)
+            if (proximalIdx >= 0)
                 Section.Proximal.X = CommonUtil.GetPositionFromFrame(proximalIdx, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveCenterWidth);
-            if(distalIdx >= 0)
+            if (distalIdx >= 0)
                 Section.Distal.X = CommonUtil.GetPositionFromFrame(distalIdx, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth);
 
             SetLumenProfileValue();
@@ -1849,7 +1849,7 @@ namespace RaywattApp.ViewModels
                     _log.Debug($"angio : Height = {angioFrameHeight}, Width = {angioFrameWidth}, Channel = {channels}");
 
                     Scale = angioFrameHeight > angioFrameWidth ? (float)Constants.AngioSize / angioFrameHeight : (float)Constants.AngioSize / angioFrameWidth;
-                    
+
                     if (Scale >= 1.0)
                     {
                         newHeight = (int)(angioFrameHeight / Scale);
@@ -1990,7 +1990,7 @@ namespace RaywattApp.ViewModels
 
             IList<PatientCaseAnnotation> annotations = _sqlManager.SelectCoRegistration(sqlParameters);
 
-            if(annotations != null && annotations.Count == 1 )
+            if (annotations != null && annotations.Count == 1)
             {
                 if (!string.IsNullOrEmpty(annotations[0].CoRegistration))
                 {
@@ -2009,6 +2009,7 @@ namespace RaywattApp.ViewModels
 
         private void ImageProcessing(List<Mat> frames)
         {
+            var timeCheck = new System.Diagnostics.Stopwatch();
             int frameNum = 0;
             int imageCount = frames.Count;
             List<List<byte>> statusList = new List<List<byte>>(imageCount);
@@ -2023,17 +2024,19 @@ namespace RaywattApp.ViewModels
             }
 
             OpticalFlow(frames, ref statusList, ref nextPoints, ref pastPoints);
+            _log.Debug("OpticalFlow time: " + timeCheck.Elapsed);
 
             for (int i = 0; i < imageCount; i++)
             {
+                timeCheck.Restart();
                 Mat temp = new Mat();
                 Cv2.BilateralFilter(frames[i], temp, 9, 10, 150);
                 frames[i] = temp;
                 Cv2.ImWrite("bilateral" + (i + 1).ToString() + ".tif", frames[i]);
 
-                Console.WriteLine(frames[i].Type());   // 예: CV_8UC1, CV_8UC3 등
-                Console.WriteLine(frames[i].Channels()); // 1(흑백), 3(컬러)
-                Console.WriteLine(frames[i].Depth());
+                _log.Debug(frames[i].Type());   // 예: CV_8UC1, CV_8UC3 등
+                _log.Debug(frames[i].Channels()); // 1(흑백), 3(컬러)
+                _log.Debug(frames[i].Depth());
                 //Cv2.ImWrite("origin" + (i + 1).ToString() + ".tif", frames[i]);
                 Mat gradX = new Mat();
                 Mat gradY = new Mat();
@@ -2056,13 +2059,14 @@ namespace RaywattApp.ViewModels
                 //clahe.Apply(frames[i], frames[i]);
                 Cv2.ImWrite("HE" + (i + 1).ToString() + ".tif", frames[i]);// Histogram Equalization
 
-                frames[i] = frames[i] - edge/2;
+                frames[i] = frames[i] - edge / 2;
                 Cv2.ImWrite("sharpened" + (i + 1).ToString() + ".tif", frames[i]);
 
                 temp = new Mat();
                 Cv2.BilateralFilter(frames[i], temp, 9, 20, 150);
                 frames[i] = temp;
                 Cv2.ImWrite("bilateral" + (i + 1).ToString() + ".tif", frames[i]);
+                _log.Debug("Preprocessing time for frame " + (i + 1).ToString() + ": " + timeCheck.Elapsed);
             }
 
             int thresholdOfNow = 80;    // 현재 프레임이 해당 값보다 작으면 혈관, 크면 혈관이 아닌 걸로 판정
@@ -2071,6 +2075,7 @@ namespace RaywattApp.ViewModels
 
             for (int i = 0; i < imageCount; i++)
             {
+                timeCheck.Restart();
                 Mat nowimage = new Mat();
                 nowimage.Create(frames[i].Rows, frames[i].Cols, frames[i].Depth(), frames[i].Type());
                 frames[i].CopyTo(nowimage);
@@ -2181,13 +2186,18 @@ namespace RaywattApp.ViewModels
                         }
                     }
                 }
+                _log.Debug("remove blood part for frame " + (i + 1).ToString() + ": " + timeCheck.Elapsed);
                 Mat morphedImage = new Mat();
                 var kernel = Cv2.GetStructuringElement(MorphShapes.Ellipse, new OpenCvSharp.Size(3, 3));
 
+                var timeCheck2 = new System.Diagnostics.Stopwatch();
                 Cv2.MorphologyEx(nowimage, morphedImage, MorphTypes.Close, kernel, iterations: 4);
                 Cv2.ImWrite("morphedImage" + frameNum.ToString() + ".tif", morphedImage);
+                _log.Debug("morphologyEx for frame " + (i + 1).ToString() + ": " + timeCheck2.Elapsed);
 
+                timeCheck2.Restart();
                 Mat skeleton = Skeletonize(morphedImage);
+                _log.Debug("skeletonize for frame " + (i + 1).ToString() + ": " + timeCheck2.Elapsed);
 
                 byte[] imageData = new byte[frames[i].Rows * frames[i].Cols * frames[i].ElemSize()];
                 Marshal.Copy(skeleton.Data, imageData, 0, imageData.Length);
@@ -2195,15 +2205,16 @@ namespace RaywattApp.ViewModels
                 frameNum++;
 
                 Cv2.ImWrite("check" + frameNum.ToString() + ".tif", skeleton);
+                _log.Debug("Total time for frame " + (i + 1).ToString() + ": " + timeCheck.Elapsed);
             }
         }
 
-        private void ThisPixelGoesWhere(int x, int y, int index, 
-            List<List<byte>> statusList, List<List<Point>> nextPoints, List<List<Point>> pastPoints, 
+        private void ThisPixelGoesWhere(int x, int y, int index,
+            List<List<byte>> statusList, List<List<Point>> nextPoints, List<List<Point>> pastPoints,
             out int nextX, out int nextY)
         {
             int mask_r = 40;
-            int validCount = 0;                                 
+            int validCount = 0;
             double total = 0.0;
 
             for (int j = 0; j < pastPoints[index].Count; j++)
@@ -2362,112 +2373,129 @@ namespace RaywattApp.ViewModels
 
             return skel;*/
 
-            Mat thinned = img.Clone();
-            thinned /= 255; // 0, 1 값으로 변환
+            // 0/255 단일채널 보장
+            Mat bin = img.Type() == MatType.CV_8UC1 ? img.Clone() : img.CvtColor(ColorConversionCodes.BGR2GRAY);
+            Cv2.Threshold(bin, bin, 0, 255, ThresholdTypes.Binary);
 
-            Mat prev = new Mat(thinned.Size(), MatType.CV_8UC1, Scalar.All(0));
-            Mat diff = new Mat();
+            // 0/1로 변환
+            Mat thinned = new Mat(); bin.ConvertTo(thinned, MatType.CV_8UC1, 1.0 / 255.0);
 
-            do
+            // 제로패딩 (경계 분기 제거)
+            Mat pad = new Mat(); Cv2.CopyMakeBorder(thinned, pad, 1, 1, 1, 1, BorderTypes.Constant, Scalar.All(0));
+
+            Mat prev = new Mat(pad.Size(), MatType.CV_8UC1, Scalar.All(0));
+            Mat diff = new Mat(pad.Size(), MatType.CV_8UC1);
+            Mat marker = new Mat(pad.Size(), MatType.CV_8UC1); // 재사용
+
+            int rows = pad.Rows, cols = pad.Cols;
+            long step = pad.Step();
+
+            // 빠른 접근용 포인터
+            unsafe
             {
-                // Step 1
-                Mat marker = new Mat(thinned.Size(), MatType.CV_8UC1, Scalar.All(0));
-                for (int y = 1; y < thinned.Rows - 1; y++)
+                byte* pData = (byte*)pad.Data;
+                byte* pPrev = (byte*)prev.Data;
+                byte* pMarker = (byte*)marker.Data;
+
+                bool changed;
+                do
                 {
-                    for (int x = 1; x < thinned.Cols - 1; x++)
+                    changed = false;
+
+                    // ----- Step 1 -----
+                    marker.SetTo(Scalar.All(0));
+                    for (int y = 1; y < rows - 1; y++)
                     {
-                        byte p1 = thinned.At<byte>(y, x);
-                        if (p1 != 1)
-                            continue;
+                        byte* r0 = pData + (y - 1) * step;
+                        byte* r1 = pData + (y + 0) * step;
+                        byte* r2 = pData + (y + 1) * step;
+                        byte* m1 = pMarker + y * step;
 
-                        // 8이웃 픽셀
-                        byte p2 = thinned.At<byte>(y - 1, x);
-                        byte p3 = thinned.At<byte>(y - 1, x + 1);
-                        byte p4 = thinned.At<byte>(y, x + 1);
-                        byte p5 = thinned.At<byte>(y + 1, x + 1);
-                        byte p6 = thinned.At<byte>(y + 1, x);
-                        byte p7 = thinned.At<byte>(y + 1, x - 1);
-                        byte p8 = thinned.At<byte>(y, x - 1);
-                        byte p9 = thinned.At<byte>(y - 1, x - 1);
-
-                        int A = ((p2 == 0 && p3 == 1) ? 1 : 0) +
-                        ((p3 == 0 && p4 == 1) ? 1 : 0) +
-                        ((p4 == 0 && p5 == 1) ? 1 : 0) +
-                        ((p5 == 0 && p6 == 1) ? 1 : 0) +
-                        ((p6 == 0 && p7 == 1) ? 1 : 0) +
-                        ((p7 == 0 && p8 == 1) ? 1 : 0) +
-                        ((p8 == 0 && p9 == 1) ? 1 : 0) +
-                        ((p9 == 0 && p2 == 1) ? 1 : 0);
-
-                        int B = p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9;
-
-                        if (
-                            (B >= 2 && B <= 6) &&
-                            (A == 1) &&
-                            (p2 * p4 * p6 == 0) &&
-                            (p4 * p6 * p8 == 0)
-                            )
+                        for (int x = 1; x < cols - 1; x++)
                         {
-                            marker.Set<byte>(y, x, 1);
+                            byte p1 = r1[x];
+                            if (p1 != 1) continue;
+
+                            // 8이웃 (0/1 가정)
+                            byte p2 = r0[x], p3 = r0[x + 1], p4 = r1[x + 1], p5 = r2[x + 1];
+                            byte p6 = r2[x], p7 = r2[x - 1], p8 = r1[x - 1], p9 = r0[x - 1];
+
+                            int B = p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9;
+                            if (B < 2 || B > 6) continue;
+
+                            // A: 0->1 전환 횟수
+                            int A =
+                                ((p2 == 0 && p3 == 1) ? 1 : 0) +
+                                ((p3 == 0 && p4 == 1) ? 1 : 0) +
+                                ((p4 == 0 && p5 == 1) ? 1 : 0) +
+                                ((p5 == 0 && p6 == 1) ? 1 : 0) +
+                                ((p6 == 0 && p7 == 1) ? 1 : 0) +
+                                ((p7 == 0 && p8 == 1) ? 1 : 0) +
+                                ((p8 == 0 && p9 == 1) ? 1 : 0) +
+                                ((p9 == 0 && p2 == 1) ? 1 : 0);
+
+                            if (A != 1) continue;
+                            if (p2 * p4 * p6 != 0) continue;
+                            if (p4 * p6 * p8 != 0) continue;
+
+                            m1[x] = 1;
                         }
                     }
-                }
+                    Cv2.Subtract(pad, marker, pad); // pad -= marker
 
-                thinned -= marker;
-
-                // Step 2
-                marker = new Mat(thinned.Size(), MatType.CV_8UC1, Scalar.All(0));
-                for (int y = 1; y < thinned.Rows - 1; y++)
-                {
-                    for (int x = 1; x < thinned.Cols - 1; x++)
+                    // ----- Step 2 -----
+                    marker.SetTo(Scalar.All(0));
+                    for (int y = 1; y < rows - 1; y++)
                     {
-                        byte p1 = thinned.At<byte>(y, x);
-                        if (p1 != 1)
-                            continue;
+                        byte* r0 = pData + (y - 1) * step;
+                        byte* r1 = pData + (y + 0) * step;
+                        byte* r2 = pData + (y + 1) * step;
+                        byte* m1 = pMarker + y * step;
 
-                        // 8이웃 픽셀
-                        byte p2 = thinned.At<byte>(y - 1, x);
-                        byte p3 = thinned.At<byte>(y - 1, x + 1);
-                        byte p4 = thinned.At<byte>(y, x + 1);
-                        byte p5 = thinned.At<byte>(y + 1, x + 1);
-                        byte p6 = thinned.At<byte>(y + 1, x);
-                        byte p7 = thinned.At<byte>(y + 1, x - 1);
-                        byte p8 = thinned.At<byte>(y, x - 1);
-                        byte p9 = thinned.At<byte>(y - 1, x - 1);
-
-                        int A = ((p2 == 0 && p3 == 1) ? 1 : 0) +
-                        ((p3 == 0 && p4 == 1) ? 1 : 0) +
-                        ((p4 == 0 && p5 == 1) ? 1 : 0) +
-                        ((p5 == 0 && p6 == 1) ? 1 : 0) +
-                        ((p6 == 0 && p7 == 1) ? 1 : 0) +
-                        ((p7 == 0 && p8 == 1) ? 1 : 0) +
-                        ((p8 == 0 && p9 == 1) ? 1 : 0) +
-                        ((p9 == 0 && p2 == 1) ? 1 : 0);
-
-                        int B = p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9;
-
-                        if (
-                            (B >= 2 && B <= 6) &&
-                            (A == 1) &&
-                            (p2 * p4 * p8 == 0) &&
-                            (p2 * p6 * p8 == 0)
-                            )
+                        for (int x = 1; x < cols - 1; x++)
                         {
-                            marker.Set<byte>(y, x, 1);
+                            byte p1 = r1[x];
+                            if (p1 != 1) continue;
+
+                            byte p2 = r0[x], p3 = r0[x + 1], p4 = r1[x + 1], p5 = r2[x + 1];
+                            byte p6 = r2[x], p7 = r2[x - 1], p8 = r1[x - 1], p9 = r0[x - 1];
+
+                            int B = p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9;
+                            if (B < 2 || B > 6) continue;
+
+                            int A =
+                                ((p2 == 0 && p3 == 1) ? 1 : 0) +
+                                ((p3 == 0 && p4 == 1) ? 1 : 0) +
+                                ((p4 == 0 && p5 == 1) ? 1 : 0) +
+                                ((p5 == 0 && p6 == 1) ? 1 : 0) +
+                                ((p6 == 0 && p7 == 1) ? 1 : 0) +
+                                ((p7 == 0 && p8 == 1) ? 1 : 0) +
+                                ((p8 == 0 && p9 == 1) ? 1 : 0) +
+                                ((p9 == 0 && p2 == 1) ? 1 : 0);
+
+                            if (A != 1) continue;
+                            if (p2 * p4 * p8 != 0) continue;
+                            if (p2 * p6 * p8 != 0) continue;
+
+                            m1[x] = 1;
                         }
                     }
-                }
+                    Cv2.Subtract(pad, marker, pad); // pad -= marker
 
-                thinned -= marker;
+                    // 변경 여부 확인(이전 프레임과 비교)
+                    Cv2.Absdiff(pad, prev, diff);
+                    pad.CopyTo(prev);
+                    if (Cv2.CountNonZero(diff) > 0) changed = true;
 
-                Cv2.Absdiff(thinned, prev, diff);
-                thinned.CopyTo(prev);
+                } while (changed);
 
-            } while (Cv2.CountNonZero(diff) > 0);
+                // 패딩 제거 + 0/255 복원
+                Mat result = new Mat(pad, new OpenCvSharp.Rect(1, 1, cols - 2, rows - 2));
+                result = result *255; // 0/1 -> 0/255
+                return result.Clone();
+            }
 
-            return thinned * 255; // 0, 255 값으로 변환
+            #endregion
         }
-
-        #endregion
     }
 }
