@@ -61,7 +61,7 @@ void CDataWriter::WriteHeader(OCTHeader::Type type, OCTHeader::DataType dataType
 	}
 
 	int err = WriteFile(m_hRecordingFile, vHeader.data(), vHeader.size(), &dwBytesWrote, NULL);
-	if (err != 0) {
+	if (err == 0) {
 		PLOGI.printf("Raw Data Writing Error : %d", err);
 	}
 }
@@ -79,7 +79,7 @@ void CDataWriter::WriteExtraData(void* pExtraData, long nSize) {
 	}
 
 	int err = WriteFile(m_hRecordingFile, pExtraData, nSize, &dwBytesWrote, NULL);
-	if (err != 0) {
+	if (err == 0) {
 		PLOGI.printf("Extra Data Writing Error : %d", err);
 	}
 	
@@ -113,7 +113,7 @@ void CDataWriter::WriteEOF() {
 	}
 
 	int err = WriteFile(m_hRecordingFile, &flag, sizeof(flag), &dwBytesWrote, NULL);
-	if (err != 0) {
+	if (err == 0) {
 		PLOGI.printf("End of File Data Writing Error : %d", err);
 	}
 }
