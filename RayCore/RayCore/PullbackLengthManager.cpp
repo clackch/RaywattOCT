@@ -24,19 +24,19 @@ void PullbackLengthManager::CutPullbackLength(int pullbackType) {
 
 	switch (pullbackType) {
 	case (int)PullbackType::HISH_20_60:
-		stopFrames = 7 /*실제 Recording 결과 값으로 튜닝*/ / rotationRatio;
+		stopFrames = 6 /*실제 Set Recording Value*/ / rotationRatio;
 		break;
 	case (int)PullbackType::HILO_40_100:
-		stopFrames = 27 / rotationRatio;
+		stopFrames = 18 / rotationRatio;
 		break;
 	case (int)PullbackType::STSH_60_60:
-		stopFrames = 19 / rotationRatio;
+		stopFrames = 18 / rotationRatio;
 		break;
 	case (int)PullbackType::STLO_100_100:
-		stopFrames = 27 / rotationRatio;
+		stopFrames = 18 / rotationRatio;
 		break;
 	case (int)PullbackType::FAST_120_60:
-		stopFrames = 31 / rotationRatio;
+		stopFrames = 25 / rotationRatio;
 		break;
 	}
 
@@ -57,7 +57,7 @@ void PullbackLengthManager::SkipFrames(int stopRecordedFrames, int pullbackType,
 
 		const int halfLen = std::max(0, frameNum);
 		const int accelStart = stopRecordedFrames / 2;
-		const int accelEnd = accelStart + halfLen; // accel 인덱스의 다음 위치
+		const int accelEnd = accelStart + halfLen; // Next Index of accel range
 		const int decelStart = m_nNumOfSamples - halfLen - stopRecordedFrames / 2;
 		const int decelEnd = m_nNumOfSamples - stopRecordedFrames / 2; // [decelStart, decelEnd)
 		PLOGI.printf("accelStart = %d, accelEnd = %d, decelStart = %d, decelEnd = %d",
@@ -66,10 +66,9 @@ void PullbackLengthManager::SkipFrames(int stopRecordedFrames, int pullbackType,
 		int numOfSkip = 0;
 		double acc = 0.0;
 
-		//고정 길이 마스크
 		std::vector<bool> keepMask(static_cast<size_t>(m_nNumOfSamples), false);
 
-		//시작/끝 정지 구간: skip(false)
+		// Start-end Ragne to skip(false)
 		for (int i = 0; i < stopRecordedFrames / 2 && i < m_nNumOfSamples; ++i) {
 			keepMask[i] = false;
 			++numOfSkip;
@@ -91,10 +90,10 @@ void PullbackLengthManager::SkipFrames(int stopRecordedFrames, int pullbackType,
 			if (pullbackType <= 2) {
 				double denom = x + B;
 				if (std::abs(denom) < 1e-12) denom = (denom >= 0.0 ? 1e-12 : -1e-12);
-				y = A / denom + C; // 유리함수
+				y = A / denom + C;
 			}
 			else {
-				y = A * std::pow(x, B) + C; // 멱감쇠
+				y = A * std::pow(x, B) + C;
 			}
 
 			acc += y;
@@ -113,7 +112,7 @@ void PullbackLengthManager::SkipFrames(int stopRecordedFrames, int pullbackType,
 			}
 		}
 
-		// 중간(정속) 구간: 전부 keep
+		// Stable Ragne to keep
 		const int midStart = std::max(accelEnd, 0);
 		const int midEnd = std::min(decelStart - 1, m_nNumOfSamples - 1);
 		if (midStart <= midEnd) {
@@ -122,20 +121,19 @@ void PullbackLengthManager::SkipFrames(int stopRecordedFrames, int pullbackType,
 			}
 		}
 
-		// 감속 구간: 가속 패턴 역순 적용
+		// Decel Range
 		for (int j = 0; j < halfLen; ++j) {
 			const int i = decelStart + j;
 			if (i < 0 || i >= m_nNumOfSamples) break;
 
 			const bool keep = (j < static_cast<int>(accelKeep.size()))
 				? accelKeep[halfLen - 1 - j]
-				: true; // 안전장치
+				: true;
 			keepMask[i] = keep;
 		}
 
 		PLOGI.printf("mask built. samples=%d, approx_gap=%d", m_nNumOfSamples, numOfSkip);
 
-		// 버퍼 압축
 		CompactByKeepMask(keepMask);
 	}
 	catch (const std::exception& e) {

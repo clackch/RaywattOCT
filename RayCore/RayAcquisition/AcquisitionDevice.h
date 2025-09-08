@@ -47,7 +47,7 @@ public:
 	int StopAcquisition();
 
 	double GetFPS() { return m_fps; }
-	
+
 protected:
 	virtual int start() = 0;
 	virtual int stop() = 0;

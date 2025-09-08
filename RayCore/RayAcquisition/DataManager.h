@@ -53,11 +53,14 @@ class IDataManager
 {
 protected:
 	int m_nNumOfSamples;
-	std::map<OCTHeader::ExtraData, void*> mapExtraData;
+	std::map<OCTHeader::ExtraData, uint8_t*> mapExtraData;
 
 public:
 	IDataManager() { m_nNumOfSamples = 0;}
 	virtual ~IDataManager() {
+		for (auto& kv : mapExtraData) {
+			delete[] kv.second;
+		}
 		mapExtraData.clear();
 	}
 
@@ -67,31 +70,32 @@ public:
 	virtual void AddFrame(void* pFrame) = 0;
 
 	void AddExtraData(OCTHeader::ExtraData extraData, void* pData, int nSize) {
-		std::map<OCTHeader::ExtraData, void*>::iterator it = mapExtraData.find(extraData);
+		auto it = mapExtraData.find(extraData);
 		if (it != mapExtraData.end()) {
 			delete[] it->second;
 			mapExtraData.erase(it);
+		}
 		if (nSize <= 0 || pData == nullptr) {
 			PLOGI.printf("Invalid ExtraData input (nullptr or size <= 0)");
 			return;
 		}
-		if (nSize > 1024 * 1024 * 1024 * 2) { // 2GB ÀÌ»ó ¹æ¾î
+		if (static_cast<size_t>(nSize) > (size_t(2) << 30)) {
 			PLOGI.printf("Allocation Size too big");
 			return;
 		}
 
-		std::vector<uint8_t> vecData(reinterpret_cast<uint8_t*>(pData),
-			reinterpret_cast<uint8_t*>(pData) + nSize);
-		mapExtraData[extraData] = std::move(vecData);
+		uint8_t* buf = new (std::nothrow) uint8_t[static_cast<size_t>(nSize)];
+		if (!buf) {
+			PLOGI.printf("Allocation failed");
+			return;
+		}
+		std::memcpy(buf, pData, static_cast<size_t>(nSize));
+		mapExtraData[extraData] = buf;
 	}
 
-	// raw pointer°¡ ÇÊ¿äÇÏ´Ù¸é const-cast
+	// raw pointer
 	uint8_t* GetExtraData(OCTHeader::ExtraData extraData) {
 		auto it = mapExtraData.find(extraData);
-		if (it != mapExtraData.end()) {
-			return it->second.data();
-		}
-		return nullptr;
+		return (it != mapExtraData.end()) ? it->second : nullptr;
 	}
 };
-
