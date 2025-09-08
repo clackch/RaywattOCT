@@ -1,12 +1,11 @@
-﻿using RaywattApp.Common.Bases;
-using System;
+﻿using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
 namespace RaywattApp.Common.Converters
 {
-    internal class LongitudeScaleColumnVisibilityConverter : IValueConverter
+    public class LongitudeScaleColumnVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

@@ -40,8 +40,12 @@
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [2D], Source={StaticResource L10N}}" IsChecked="True" IsEnabled="False"/>
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [3D], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.Review3dPage}" IsEnabled="{Binding ReviewStatus.IsNoPullback, Converter={StaticResource BoolToEnableReverseConverter}}"/>
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [Compare], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewComparePage}" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$002|$003}"/>
-                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrSettingPage}" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}"/>
-                    
+                    <StackPanel IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=AIFFR}">
+                        <StackPanel.Visibility>
+                            <Binding RelativeSource="{RelativeSource Self}" Path="IsEnabled" Converter="{StaticResource BoolToVisibilityConverter}"/>
+                        </StackPanel.Visibility>
+                        <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrSettingPage}" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}"/>
+                    </StackPanel>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                     <component:IconButton Style="{StaticResource IconButton}" Icon="editLumenContourSimple" Width="42" Height="42" Command="{Binding EditLumenContourCommand}"/>
@@ -734,7 +738,7 @@
                                                 <Label Grid.Row="2" Grid.Column="0" Content="{Binding [Contrast], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleGray4Brush}" Style="{DynamicResource Pretendard-Medium-12}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                                 <Slider Grid.Row="2" Grid.Column="1" Style="{DynamicResource SliderSimpleTooltip}" Value="{Binding Contrast}" Maximum="100" Minimum="0" TickFrequency="1" IsSnapToTickEnabled="True" LargeChange="1" SmallChange="1" VerticalAlignment="Center" IsEnabled="{Binding DeviceStatus.IsOCTImagingDone}"/>
                                                 <Label Grid.Row="3" Grid.Column="0" Content="{Binding [Field of View], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleGray4Brush}" Style="{DynamicResource Pretendard-Medium-12}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <Slider Grid.Row="3" Grid.Column="1" Style="{DynamicResource SliderSimpleTooltip}" Value="{Binding FieldOfView}" Maximum="7.0" Minimum="5.0" TickFrequency="1.0" IsSnapToTickEnabled="True" LargeChange="1.0" SmallChange="1.0" VerticalAlignment="Center" IsEnabled="{Binding DeviceStatus.IsOCTImagingDone}"/>
+                                                <Slider Grid.Row="3" Grid.Column="1" Style="{DynamicResource SliderSimpleTooltip}" Value="{Binding FieldOfView}" Maximum="{x:Static const:Constants.MaximumFoV}" Minimum="{x:Static const:Constants.MinimumFoV}" TickFrequency="1.0" IsSnapToTickEnabled="True" LargeChange="1.0" SmallChange="1.0" VerticalAlignment="Center" IsEnabled="{Binding DeviceStatus.IsOCTImagingDone}"/>
                                             </Grid>
                                         </StackPanel>
                                         <Grid Grid.Row="9" Margin="0,12,0,0" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}">

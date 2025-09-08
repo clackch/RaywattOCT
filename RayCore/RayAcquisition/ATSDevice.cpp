@@ -437,8 +437,13 @@ BOOL CATSDevice::configureAcquisition(HANDLE boardHandle) {
 
 	// Allocate memory for DMA buffers
 	if (m_pAcqBuffers == nullptr) {
-		m_pAcqBuffers = new U16 * [nAcqBufCount];
-		for (int bufferIndex = 0; (bufferIndex < nAcqBufCount) && success; bufferIndex++)
+		size_t count = static_cast<size_t>(nAcqBufCount);
+		if (count > (1024ULL * 1024 * 1024 * 2) / sizeof(U16)) {
+			return FALSE;
+		}
+
+		m_pAcqBuffers = new U16 * [count];
+		for (int bufferIndex = 0; (bufferIndex < count) && success; bufferIndex++)
 		{
 #ifdef _WIN32 // Allocate page aligned memory
 			m_pAcqBuffers[bufferIndex] =

@@ -7,7 +7,7 @@ namespace RaywattApp.Common.Angio
 {
     public class SplineCurve
     {
-        public List<Point> GetSplinePoints(List<Point> points, int segments)
+        public static List<Point> GetSplinePoints(List<Point> points, int segments)
         {
             int distanceLimit = 30; // 점 간격
 

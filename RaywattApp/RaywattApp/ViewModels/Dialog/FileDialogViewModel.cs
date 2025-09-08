@@ -45,8 +45,8 @@ namespace RaywattApp.ViewModels.Dialog
                 PopupNavigationSource = Constants.FileExportStep1Page;
                 FileExport fileExport = null;
 
-                if (data.ContainsKey("fileExport"))
-                    fileExport = (FileExport)data["fileExport"];
+                if (data.TryGetValue("fileExport", out var value) && value is FileExport fe)
+                    fileExport = fe;
 
                 if (fileExport == null)
                     fileExport = new();

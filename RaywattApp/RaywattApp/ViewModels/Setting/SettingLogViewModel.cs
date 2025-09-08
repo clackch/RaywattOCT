@@ -181,7 +181,7 @@ namespace RaywattApp.ViewModels.Setting
             GetLogFileList();
         }
 
-        private string MonthZeroPadding(string month)
+        private static string MonthZeroPadding(string month)
         {
             string result = month;
 

@@ -55,18 +55,8 @@
                 </Grid>
                 <CheckBox Grid.Row="4" Grid.Column="2" IsChecked="{Binding DicomServer.SpecifyIpAddress}" Content="{Binding [Specify IP Address], Source={StaticResource L10N}}" Margin="0,-7,0,0"/>
                 <Grid Grid.Row="5" Grid.Column="2">
-                    <Border Height="54" CornerRadius="8" BorderBrush="{DynamicResource GrayscaleGray5Brush}" BorderThickness="1" VerticalAlignment="Top"/>
                     <Grid>
-                        <TextBox Style="{DynamicResource TextBoxValidator}" MaxLength="50" ToolTip="{Binding IpAddress.Msg}" Width="390" HorizontalAlignment="Left" IsEnabled="False"/>
-                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0" VerticalAlignment="Top" IsEnabled="{Binding DicomServer.SpecifyIpAddress}">
-                            <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding IpAddress.Octet1, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="." Height="38" VerticalAlignment="Top" VerticalContentAlignment="Bottom"/>
-                            <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding IpAddress.Octet2, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="." Height="38" VerticalAlignment="Top" VerticalContentAlignment="Bottom"/>
-                            <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding IpAddress.Octet3, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="." Height="38" VerticalAlignment="Top" VerticalContentAlignment="Bottom"/>
-                            <TextBox Style="{DynamicResource TextBoxIpAddress}" Text="{Binding IpAddress.Octet4, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Bottom"/>
-                        </StackPanel>
+                        <component:IpAddressInputControl IsEnabled="{Binding DicomServer.SpecifyIpAddress}" IpAddress="{Binding IpAddress}" ToolTip="{Binding IpAddress.Msg}"/>
                     </Grid>
                 </Grid>
                 <Label Grid.Row="6" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Port], Source={StaticResource L10N}}"/>

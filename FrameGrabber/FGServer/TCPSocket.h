@@ -85,6 +85,7 @@ private:
 	int imagePacketSize;
 	bool Chp_selected;
 	int retryCount;
+	std::vector<unsigned char> croppedBuffer;
 	Repository repo;
 
 	// thread

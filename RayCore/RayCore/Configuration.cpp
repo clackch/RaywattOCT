@@ -17,6 +17,11 @@ CConfiguration& CConfiguration::GetInstance() {
 	return pInstance;
 }
 
+void CConfiguration::SetPath(tstring configPath)
+{
+	this->configPath = configPath;
+}
+
 void CConfiguration::Initialize(tstring configFile)
 {
 	TCHAR sIniValueString[MAX_PATH] = _T("");
@@ -33,8 +38,10 @@ void CConfiguration::Initialize(tstring configFile)
 	this->measurement.fSheathThicknessOnePointSeven = getPrivateProfileFloat(_T("Measurement"), _T("SheathThickness1.7"), 0.045, configFilePath.c_str());
 	this->measurement.fSheathThicknessTwoPointSix = getPrivateProfileFloat(_T("Measurement"), _T("SheathThickness2.6"), 0.1, configFilePath.c_str());	
 	this->measurement.fSheathRadius = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius"), 0.43, configFilePath.c_str());
-	this->measurement.nSheathPosition = measurement.fSheathRadius * 1000.f / measurement.fAxialResolutionScale;
-
+	if (measurement.fAxialResolutionScale > 0) {
+		this->measurement.nSheathPosition = measurement.fSheathRadius * 1000.f / measurement.fAxialResolutionScale;
+	}
+	
 	// [Imaging]
 	int nAScan = ::GetPrivateProfileInt(_T("Imaging"), _T("AScan"), 1920, configFilePath.c_str());
 	int nBScan = ::GetPrivateProfileInt(_T("Imaging"), _T("BScan"), 500, configFilePath.c_str());
@@ -73,6 +80,8 @@ void CConfiguration::Initialize(tstring configFile)
 	this->stepMotor.pullbackSpeed = ::GetPrivateProfileInt(_T("StepMotor"), _T("PullbackSpeed"), 10, configFilePath.c_str());
 	this->stepMotor.noPullbackTime = ::GetPrivateProfileInt(_T("StepMotor"), _T("NoPullbackTime"), 3, configFilePath.c_str());
 	this->stepMotor.SMPullbackProfile = ::GetPrivateProfileInt(_T("StepMotor"), _T("SMPullbackProfile"), 0, configFilePath.c_str());
+	this->stepMotor.unLoadDistance = ::GetPrivateProfileInt(_T("StepMotor"), _T("UnLoadDistance"), 9650, configFilePath.c_str());
+	this->stepMotor.homingSpeed= ::GetPrivateProfileInt(_T("StepMotor"), _T("HomingSpeed"), 2362, configFilePath.c_str());
 	
 	// [BLDCMotor]
 	::GetPrivateProfileString(_T("BLDCMotor"), _T("Port"), _T(""), this->bldcMotor.port, sizeof(this->bldcMotor.port), configFilePath.c_str());
@@ -109,7 +118,6 @@ void CConfiguration::Initialize(tstring configFile)
 
 	// [Sharpness]
 	this->imaging.applySharpness = ::GetPrivateProfileInt(_T("Sharpness"), _T("ApplySharpness"), 0, configFilePath.c_str());
-
 
 	isInit = true;
 }

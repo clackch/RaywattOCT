@@ -54,6 +54,15 @@
     <ClInclude Include="CommonProtocol.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="RFIDProtocol.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="RFIDKeyController.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="WriteTaskController.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LaserController.cpp">
@@ -84,6 +93,15 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="CommonProtocol.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="RFIDProtocol.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="RFIDKeyController.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="WriteTaskController.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

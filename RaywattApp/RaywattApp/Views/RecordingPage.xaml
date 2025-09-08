@@ -47,25 +47,32 @@
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0" Grid.RowSpan="2">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
+                            <ColumnDefinition Width="auto"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
                             <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Recording], Source={StaticResource L10N}}"/>
                         </StackPanel>
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" IsEnabled="{Binding IsReady}">
+                            <Border CornerRadius="6" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}" Background="Transparent">
+                                <StackPanel Orientation="Horizontal" Margin="10,0,10,0">
+                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Trigger], Source={StaticResource L10N}}" VerticalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0">
+                                        <StackPanel>
+                                            <RadioButton IsChecked="{Binding PatientCase.PullbackTrigger, Converter={StaticResource RadioButtonConverter}, ConverterParameter=MANL}" Content="{Binding [Manual], Source={StaticResource L10N}}" />
+                                        </StackPanel>
+                                        <StackPanel Margin="10,0,0,0">
+                                            <RadioButton IsChecked="{Binding PatientCase.PullbackTrigger, Converter={StaticResource RadioButtonConverter}, ConverterParameter=AUTO}" Content="{Binding [Auto], Source={StaticResource L10N}}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                            <StackPanel Width="30"/>
                             <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="calibrationZoomIn" Width="42" Height="42" Command="{Binding CmdManualZoomIn}" CommandParameter="{StaticResource TrueValue}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}"/>
                             <StackPanel Width="10"/>
                             <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="calibrationZoomOut" Width="42" Height="42" Command="{Binding CmdManualZoomIn}" CommandParameter="{StaticResource FalseValue}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}"/>
                             <StackPanel Width="10"/>
-                            <component:ButtonUnableComponent Style="{StaticResource OutlinedBtnType3-Large}" Width="174" Command="{Binding CmdAutoCalibration}" Content="{Binding [Auto Calibration], Source={StaticResource L10N}}" IsFirst="{Binding DeviceStatus.CanExecuteCalibration}" IsSecond="{Binding IsReady}">
-                                <component:ButtonUnableComponent.IsEnabled>
-                                    <MultiBinding Converter="{StaticResource ComponentUnableConverter}">
-                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFirst"/>
-                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSecond"/>
-                                    </MultiBinding>
-                                </component:ButtonUnableComponent.IsEnabled>
-                            </component:ButtonUnableComponent>
+                            <Button Style="{StaticResource OutlinedBtnType1-Large}" Width="174" Command="{Binding CmdAutoCalibration}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}" Content="{Binding [Auto Calibration], Source={StaticResource L10N}}"/>
                         </StackPanel>
                     </Grid>
                     <Separator Grid.Row="2" Background="{DynamicResource GrayscaleGray5Brush}"/>
@@ -144,6 +151,24 @@
                                     <Label Style="{DynamicResource Pretendard-Bold-24}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [Recording], Source={StaticResource L10N}}"/>
                                 </StackPanel>
                             </StackPanel>
+                            <Grid Grid.Row="3" Visibility="{Binding PatientCase.PullbackTrigger, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=AUTO}">
+                                <Grid Visibility="{Binding DeviceStatus.AutoPullbackOnOff, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <Border CornerRadius="10" Background="{DynamicResource MainPrimaryColorBrush}" Margin="0,10,0,10" Visibility="{Binding DeviceStatus.AutoPullbackIsImageCleared, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <Label Style="{DynamicResource Pretendard-Bold-14}" Content="{Binding [Blood Cleared], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleBlackBrush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray3Brush}" Margin="0,10,0,10" Visibility="{Binding DeviceStatus.AutoPullbackIsImageCleared, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                        <Label Style="{DynamicResource Pretendard-Bold-14}" Content="{Binding [Blood Present], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleBlackBrush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    </Border>
+                                </Grid>
+                                <Grid Visibility="{Binding DeviceStatus.AutoPullbackOnOff, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                    <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" Margin="0,10,0,10" Visibility="{Binding DeviceStatus.IsPullbackDone, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <Label Style="{DynamicResource Pretendard-Bold-14}" Content="{Binding [Preparing Blood Flushing Detection], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleGray3Brush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border CornerRadius="10" Background="{DynamicResource MainPrimaryColorBrush}" Margin="0,10,0,10" Visibility="{Binding DeviceStatus.IsPullbackDone, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                        <Label Style="{DynamicResource Pretendard-Bold-14}" Content="{Binding [Pullback], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleBlackBrush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    </Border>
+                                </Grid>
+                            </Grid>
                             <Border Grid.Row="4" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
                                 <Grid>
                                     <Image Source="{Binding AngioImage}" 
@@ -182,14 +207,21 @@
                                 </MultiBinding>
                             </component:ButtonUnableComponent.IsEnabled>
                         </component:ButtonUnableComponent>
-                        <component:ButtonUnableComponent Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding StartCommand}" Content="{Binding [Start], Source={StaticResource L10N}}" Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityReverseConverter}}" IsFirst="{Binding IsStart}" IsSecond="{Binding DeviceStatus.CanExecuteCalibration}">
-                            <component:ButtonUnableComponent.IsEnabled>
-                                <MultiBinding Converter="{StaticResource ComponentUnableConverter}">
-                                    <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFirst"/>
-                                    <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSecond"/>
-                                </MultiBinding>
-                            </component:ButtonUnableComponent.IsEnabled>
-                        </component:ButtonUnableComponent>
+                        <Grid Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                            <Grid Visibility="{Binding PatientCase.PullbackTrigger, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=MANL}">
+                                <component:ButtonUnableComponent Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding StartCommand}" Content="{Binding [Start], Source={StaticResource L10N}}" IsFirst="{Binding IsStart}" IsSecond="{Binding DeviceStatus.CanExecuteCalibration}">
+                                    <component:ButtonUnableComponent.IsEnabled>
+                                        <MultiBinding Converter="{StaticResource ComponentUnableConverter}">
+                                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFirst"/>
+                                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSecond"/>
+                                        </MultiBinding>
+                                    </component:ButtonUnableComponent.IsEnabled>
+                                </component:ButtonUnableComponent>
+                            </Grid>
+                            <Grid Visibility="{Binding PatientCase.PullbackTrigger, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=AUTO}">
+                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding AutoPullbackMsg}" Margin="0,10,0,0"/>
+                            </Grid>
+                        </Grid>
                     </Grid>
                 </Grid>
             </Border>

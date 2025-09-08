@@ -2,10 +2,13 @@
 #include "COMConnection.h"
 #include "Utility.h"
 #include "MessageService.h"
+#include "RFIDKeyController.h"
 
 CRJController::CRJController()
 	:ICommonProtocol(RJ_STX, RJ_ETX)
+	
 {
+	m_resendManager = new WriteTaskController(50);
 	m_pMsg = nullptr;
 	m_pThreadState = nullptr;
 	m_state = eRJState::None;
@@ -48,9 +51,9 @@ bool CRJController::Connect(void *param) {
 
 	m_pConnection = new CCOMConnection();
 	m_initMotor = m_pConnection->Connect(param);
+	m_resendManager->start();
 	if (m_initMotor) {
 		BOOL result = CUtility::StartThread(threadReadPacket, m_pThread, (LPVOID)this);
-
 		if (result == FALSE) {
 			Disconnect();
 			m_initMotor = false;
@@ -58,6 +61,7 @@ bool CRJController::Connect(void *param) {
 	}
 	displayLCD(eLCDImage::LCD_IMAGE_BOOTING);
 
+	RFIDProtocol::initState(true);
 	m_state = eRJState::Initializing;
 	m_nextState = eRJState::Initializing;
 
@@ -68,6 +72,7 @@ void CRJController::Disconnect() {
 	CMotorController::Disconnect();
 
 	CUtility::StopThread(m_pThreadState);
+	CUtility::StopThread(m_pThreadRFIDTag);
 	m_state = eRJState::Disconnected;
 }
 bool CRJController::IsMoving() {
@@ -187,6 +192,7 @@ bool CRJController::StartControl() {
 	AutoStatePeriod(50);
 	initSetting();
 	bool result = CUtility::StartThread(threadRJState, m_pThreadState, (LPVOID)this);
+	//result &= CUtility::StartThread(threadReadTag, m_pThreadRFIDTag, (LPVOID)this);
 
 	return result;
 }
@@ -248,7 +254,65 @@ bool CRJController::ReadRFID() {
 
 	BYTE serialPacket[MAX_PATH];
 	int packetLength;
-	getSerialPacket(eFID::FID_RFID_GET_STATE, 0, serialPacket, packetLength);
+	RFIDProtocol::setPacketByFID(eFID::FID_RFID_GET_STATE, serialPacket, packetLength);
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+	return (written == packetLength);
+}
+
+bool CRJController::GetIsTagging() {
+	if (!m_initMotor) return false;
+
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	RFIDProtocol::setPacketByFID(eFID::FID_RFID_TAGGING, serialPacket, packetLength);
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+	return (written == packetLength);
+}
+
+bool CRJController::IncreaseRFIDUsage(int uidSize, BYTE* UID) {
+	if (!m_initMotor) return false;
+	BYTE cnt = RFIDProtocol::getCount(UID, uidSize-CUSTOM_UID_LENGTH)+1;
+	if (cnt == 256) {
+		return false;
+	}
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	RFIDProtocol::setPacketByFID(eFID::FID_RFID_SET_USAGE, serialPacket, packetLength, uidSize, UID, 1, &cnt);
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+	
+	int written = m_pConnection->Write(serialPacket, packetLength);
+	return (written == packetLength);
+}
+bool CRJController::ResetRFIDUsage(int uidSize, BYTE* UID) {
+	if (!m_initMotor) return false;
+
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	RFIDProtocol::setPacketByFID(eFID::FID_RFID_USAGE_CLEAR, serialPacket, packetLength, uidSize, UID);
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+	
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	return (written == packetLength);
+}
+
+bool CRJController::ResetRFIDUID(int uidSize, BYTE* UID, int dataSize, BYTE* newUID) {
+	if (!m_initMotor) return false;
+	if (dataSize < CUSTOM_UID_LENGTH) return false;
+
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	RFIDProtocol::setPacketByFID(eFID::FID_RFID_SET_UID, serialPacket, packetLength, uidSize, UID, CUSTOM_UID_LENGTH, newUID);
 
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
@@ -257,13 +321,124 @@ bool CRJController::ReadRFID() {
 
 	return (written == packetLength);
 }
-UINT CRJController::GetRFIDInfo(BYTE* pRFIDInfo) {
-	if (pRFIDInfo == nullptr) return 0;
-	if (m_nRFIDLength == 0) return 0;
 
-	memcpy(pRFIDInfo, m_RFID, m_nRFIDLength);
-	return m_nRFIDLength;
+bool CRJController::SetRFIDUsage(int uidSize, BYTE* UID, BYTE count) {
+	if (!m_initMotor) return false;
+
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	BYTE countBytes[COUNT_LEN];
+	countBytes[0] = count;
+	RFIDProtocol::setPacketByFID(eFID::FID_RFID_SET_USAGE, serialPacket, packetLength, uidSize, UID, COUNT_LEN, countBytes);
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	return (written == packetLength);
 }
+
+bool CRJController::SetRFIDManuf(int uidSize, BYTE* UID, int dataSize, BYTE* manuf) {
+	if (!m_initMotor) return false;
+	if (dataSize < MANUF_LEN) return false;
+
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	RFIDProtocol::setPacketByFID(eFID::FID_RFID_SET_MANUF, serialPacket, packetLength, uidSize, UID, MANUF_LEN, manuf);
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	return (written == packetLength);
+}
+
+
+bool CRJController::SetRFIDKey(int uidSize, BYTE* UID, int dataSize, BYTE* key) {
+	if (!m_initMotor) return false;
+	if (dataSize < KEY_LEN*2) return false;
+
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+
+	RFIDProtocol::setPacketByFID(eFID::FID_RFID_SET_KEY, serialPacket, packetLength, uidSize, UID, KEY_LEN*2, key);
+	RFIDProtocol::writeKeyChangeLog(key);
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	return (written == packetLength);
+}
+
+bool CRJController::GetRFIDKey() {
+	if (!m_initMotor) return false;
+
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+
+	RFIDProtocol::setPacketByFID(eFID::FID_RFID_GET_KEY, serialPacket, packetLength);
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	return (written == packetLength);
+}
+
+bool CRJController::SetRFIDStep(int uidSize, BYTE* UID, int step) {
+	if (!m_initMotor) return false;
+	if (step > MAX_STEP_VALUE) return false;
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	BYTE stepByte[STEP_LEN];
+	for (int st = STEP_LEN-1; st >= 0; st--) {
+		stepByte[st] = step % 256;
+		step /= 256;
+	}
+
+	RFIDProtocol::setPacketByFID(eFID::FID_RFID_SET_STEP, serialPacket, packetLength, uidSize, UID, STEP_LEN, stepByte);
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	return (written == packetLength);
+}
+
+bool CRJController::GetRFIDStep() {
+	if (!m_initMotor) return false;
+
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+
+	RFIDProtocol::setPacketByFID(eFID::FID_RFID_GET_STEP, serialPacket, packetLength);
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	return (written == packetLength);
+}
+
+
+UINT CRJController::GetRFIDUID(BYTE* pRFIDUID) {
+	if (pRFIDUID == nullptr) return 0;
+	RFIDProtocol::SRFIDState rfidState;
+	RFIDProtocol::getCurRFIDData(&rfidState);
+	if (sizeof(rfidState.aCustomUID)/sizeof(BYTE) + sizeof(rfidState.aHardwareUID) / sizeof(BYTE) != CUSTOM_UID_LENGTH+HARDWARE_UID_LENGTH) return 0;
+	memcpy(pRFIDUID, rfidState.aHardwareUID, HARDWARE_UID_LENGTH);
+	memcpy(pRFIDUID+HARDWARE_UID_LENGTH, rfidState.aCustomUID, CUSTOM_UID_LENGTH);
+	return CUSTOM_UID_LENGTH + HARDWARE_UID_LENGTH;
+}
+
+int CRJController::GetRFIDCountCurrentState() {
+	RFIDProtocol::SRFIDState rfidState;
+	RFIDProtocol::getCurRFIDData(&rfidState);
+	return rfidState.aCNT;
+}
+
 int CRJController::ConvertMMtoStep(UINT mm) {
 	return floor((float)mm / (float)PULLBACK_MOTOR_RESOLUTION * (float)MOTOR_CONTROL_RESOLUTION);
 }
@@ -300,6 +475,33 @@ void CRJController::initSetting() {
 		PLOGI.printf("Written size is not matched. (%d / %d bytes)", written, packetLength);
 	}
 }
+
+void CRJController::resendPacket(eFID fid) {
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	RFIDMessageData::Data* dataValue = RFIDProtocol::getRecentMessageData(fid);
+	if (dataValue == nullptr) return;
+	RFIDProtocol::resetPacketByFID(fid, serialPacket, packetLength, *dataValue);
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	RFIDProtocol::deleteMessageData(fid);
+	m_pConnection->Write(serialPacket, packetLength);
+
+}
+
+void CRJController::resendAllSaved() {
+	eFID fid = RFIDProtocol::popFailedFID();
+	//PLOGI.printf("resend start: work %d", fid);
+	while (fid != eFID::NO_FID) {
+		m_resendManager->addTask([=]() {
+			resendPacket(fid);
+			});
+		fid = RFIDProtocol::popFailedFID();
+	}
+}
+
+
 UINT CRJController::threadRJState(LPVOID param) {
 	CRJController* pRJController = (CRJController*)param;
 
@@ -332,13 +534,178 @@ UINT CRJController::threadReadPacket(LPVOID param) {
 			pRJController->addPacket(recvBuf, readSize);
 			pRJController->parseSerialPacket();
 		}
-
 		Sleep(1);
+	}
+	return NOERROR;
+}
+UINT CRJController::threadReadTag(LPVOID param) {
+	CRJController* pRJController = (CRJController*)param;
+
+	while (pRJController->m_pThreadRFIDTag->isRun) {
+		pRJController->GetIsTagging();
+		Sleep(1000);
 	}
 
 	return NOERROR;
 }
 void CRJController::updateState() {
+	switch (m_state) {
+	case eRJState::Initializing:
+		if (m_bLimitSwitch) {
+			PLOGI.printf("Error occured: eRJState::Initializing - limitSwitch On");
+			m_nextState = eRJState::Error;
+		}
+		break;
+	case eRJState::Disconnected:
+		if (m_bLimitSwitch) {
+			m_nextState = eRJState::Connected;
+		}
+		break;
+	case eRJState::Cleaning:
+		if (m_bLimitSwitch || m_bButton[1]) {
+			PLOGI.printf("Error occured: eRJState::Cleaning - limitSwitch(%d), stopButton(%d)", m_bLimitSwitch, m_bButton[0]);
+			m_nextState = eRJState::Error;
+		}
+		break;
+	case eRJState::Connected:
+		if (m_bLimitSwitch) {
+			m_nextState = eRJState::Validating;
+		}
+		else {
+			m_nextState = eRJState::Disconnected;
+		}
+		break;
+	case eRJState::Validating:
+		if(!m_bLimitSwitch) m_nextState = eRJState::Disconnected;
+		break;
+	case eRJState::Loading:
+		if (m_bButton[1] || !m_bLimitSwitch) {
+			PLOGI.printf("Error occured: eRJState::Loading - limitSwitch(%d), stopButton(%d)", m_bLimitSwitch, m_bButton[0]);
+			m_nextState = eRJState::Error;
+		}
+		break;
+	case eRJState::Loaded:
+		if (!m_bLimitSwitch || m_bButton[1]) {
+			PLOGI.printf("Error occured: eRJState::Loaded - limitSwitch(%d), stopButton(%d)", m_bLimitSwitch, m_bButton[0]);
+			Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
+			m_nextState = eRJState::Error;
+		}
+		if (/*m_bButton[0]*/false) {
+			m_nextState = eRJState::Unloading;
+		}
+		break;
+	case eRJState::Unloading:
+		if (m_bButton[1]) {
+			PLOGI.printf("Error occured: eRJState::Unloading - stopButton On");
+			m_nextState = eRJState::Error;
+		}
+		break;
+	case eRJState::Unloaded:
+		if (!m_bLimitSwitch) {
+			m_nextState = eRJState::Disconnected;
+		}
+		
+		if (m_bPhotoSensor[3] == 0) {
+			PLOGI.printf("Error occured: eRJState::Unloaded - photoSensor #4 Off");
+			m_nextState = eRJState::Error;
+		}
+		break;
+	case eRJState::Error:
+		if (!m_isInit) {
+			if (!m_bLimitSwitch) m_nextState = eRJState::Initializing;
+		}
+		else if (m_bButton[0] || GetRFIDCountCurrentState() >= 5) {
+			RFIDProtocol::initState(false);
+			m_nextState = eRJState::Unloading;
+		}
+		break;
+	default:
+		break;
+	}
+
+	//PLOGI.printf("update state : %d", m_state);
+
+	if (m_state != m_nextState) {
+		updateState(m_nextState);
+	}
+}
+
+DWORD WINAPI CRJController::checkKeyFinding(LPVOID) {
+	RFIDProtocol::SRFIDState rfidState;
+	do {
+		RFIDProtocol::getCurRFIDData(&rfidState);
+	} while (rfidState.errorState == RFIDProtocol::WAITING_KEYANSWER);
+	return 0;
+}
+
+RFID_AnswerType CRJController::checkAnswerRFID(RFIDProtocol::SRFIDState rfidState) {
+	if (rfidState.errorState == RFIDProtocol::NOTAG) {
+		PLOGI.printf("RFID Invalid : inexistence of tag");
+		return RFID_AnswerType::FAILED;
+	}
+	if (rfidState.errorState == RFIDProtocol::NOMATCHKEY) {
+		PLOGI.printf("RFID Invalid : no match key");
+		return RFID_AnswerType::FAILED;
+	}
+	else if (rfidState.errorState == RFIDProtocol::WAITING_KEYANSWER) {
+		HANDLE hThread = CreateThread(nullptr, 0, checkKeyFinding, nullptr, 0, nullptr);
+		if(hThread == 0) return RFID_AnswerType::FAILED;
+
+		DWORD result = WaitForSingleObject(hThread, 10000);
+		if (result == WAIT_TIMEOUT) {
+			RFIDProtocol::setRFIDErrorState(RFIDProtocol::NOMATCHKEY);
+			WaitForSingleObject(hThread, INFINITE); 
+			return RFID_AnswerType::FAILED;
+		}
+	}
+	else if (rfidState.errorState == RFIDProtocol::UNANSWERED) {
+		return RFID_AnswerType::PROCEEDING;
+	}
+	else if (rfidState.errorState != RFIDProtocol::OK) {
+		PLOGI.printf("RFID Invalid : undefined error");
+		return RFID_AnswerType::FAILED;
+	}
+	return RFID_AnswerType::ANSWERED;
+}
+
+RFID_ValidType CRJController::isValidRFID() {
+	RFIDProtocol::SRFIDState rfidState;
+	RFIDProtocol::getCurRFIDData(&rfidState);
+	//if(rfidState.errorState == RFIDProtocol::NOTAG) return RFID_ValidType::VALID;
+	RFID_AnswerType check = checkAnswerRFID(rfidState);
+	if(check == RFID_AnswerType::FAILED) return RFID_ValidType::INVALID;
+	if(check == RFID_AnswerType::PROCEEDING) return RFID_ValidType::WAITING;
+
+	if (rfidState.aCNT >= RFID_MAX_COUNT) {
+		PLOGI.printf("RFID Invalid : exceed of usage");
+		return RFID_ValidType::INVALID;
+	}
+	bool isNoData = true;
+
+	size_t arrayLength = sizeof(rfidState.aMANU) / sizeof(rfidState.aMANU[0]);
+	if (arrayLength != RFID_MANUFACTURER_LEN) {
+		PLOGI.printf("RFID Invalid : mismatch of manufacturer");
+		return RFID_ValidType::INVALID;
+	}
+	for (int i = 0; i < RFID_MANUFACTURER_LEN; i++) {
+		if (rfidState.aMANU[i] != 0) {
+			isNoData = false;
+			break;
+		}
+	}
+	if (isNoData) {
+		return RFID_ValidType::WAITING;
+	}
+	for (size_t i = 0; i < arrayLength; ++i) {
+		if (rfidState.aMANU[i] != static_cast<unsigned int>(RFID_MANUFACTURER[i])) {
+			PLOGI.printf("RFID Invalid : mismatch of manufacturer");
+			return RFID_ValidType::INVALID;
+		}
+	}
+	return RFID_ValidType::VALID;
+}
+
+void CRJController::updateStateManualMode() {
 	switch (m_state) {
 	case eRJState::Initializing:
 		if (m_bLimitSwitch) {
@@ -350,88 +717,15 @@ void CRJController::updateState() {
 			m_nextState = eRJState::Connected;
 		}
 		break;
-	case eRJState::Cleaning:
-		if (m_bLimitSwitch || m_bButton[1]) {
-			m_nextState = eRJState::Error;
-		}
-		break;
 	case eRJState::Connected:
 		if (m_bLimitSwitch) {
-#if ENABLE_RFID
-			if (m_nRFIDLength == 0) {
-				ReadRFID();
-			}
-			else {
-				m_nextState = eRJState::Validating;
-			}
-#else
 			m_nextState = eRJState::Validating;
-#endif
-		}
-		else {
-			m_nextState = eRJState::Disconnected;
+			RFIDProtocol::initState(false);
+			ReadRFID();
 		}
 		break;
 	case eRJState::Validating:
-		break;
-	case eRJState::Loading:
-		if (m_bButton[1] || !m_bLimitSwitch) {
-			m_nextState = eRJState::Error;
-		}
-		break;
-	case eRJState::Loaded:
-		if (!m_bLimitSwitch || m_bButton[1]) {
-			PLOGI.printf("Error occured: limitSwitch(%d), stopButton(%d)", m_bLimitSwitch, m_bButton[0]);
-			Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
-			m_nextState = eRJState::Error;
-		}
-		if (/*m_bButton[0]*/false) {
-			m_nextState = eRJState::Unloading;
-		}
-		break;
-	case eRJState::Unloading:
-		if (m_bButton[1]) {
-			m_nextState = eRJState::Error;
-		}
-		break;
-	case eRJState::Unloaded:
-		if (!m_bLimitSwitch) {
-			m_nextState = eRJState::Disconnected;
-		}
-		
-		if (m_bPhotoSensor[3] == 0) {
-			m_nextState = eRJState::Error;
-		}
-		break;
-	case eRJState::Error:
-		if (!m_isInit) {
-			if (!m_bLimitSwitch) m_nextState = eRJState::Initializing;
-		}
-		else if (m_bButton[0]) {
-			m_nextState = eRJState::Unloading;
-		}
-		break;
-	default:
-		break;
-	}
-
-	if (m_state != m_nextState) {
-		updateState(m_nextState);
-	}
-}
-
-void CRJController::updateStateManualMode() {
-	switch (m_state) {
-	case eRJState::Initializing:
-		if (m_bLimitSwitch) {
-			m_nextState = eRJState::Error;
-		}
-		break;
-	case eRJState::Disconnected:
-		break;
-	case eRJState::Connected:
-		break;
-	case eRJState::Validating:
+		if (!m_bLimitSwitch) m_nextState = eRJState::Disconnected;
 		break;
 	case eRJState::Loading:
 		if (m_bButton[1]) {
@@ -526,6 +820,9 @@ void CRJController::updateState(eRJState state) {
 	}
 
 	bool bStopThread = (m_state == eRJState::Error) ? true : false;
+
+	//PLOGI.printf("update next-state : %d", m_state);
+
 	m_state = m_nextState = state;
 	if (m_pMsg != nullptr) m_pMsg->postPriorMessage(WM_UPDATE_RJ_STATE, (WPARAM)m_state, (LPARAM)bStopThread);
 }
@@ -552,34 +849,107 @@ void CRJController::parseSMPacket(BYTE* packet, int size) {
 		for (int j = 0; j < 4; j++) {
 			curPos |= (packet[offset + j] << (j * 8));
 		}
-		//PLOGI.printf("StepMotor #%d (%s): %d", i, ((m_isSMMoving[i]) ? "Moving" : "Stop"), curPos);
+		PLOGI.printf("StepMotor #%d (%s): %d", i, ((m_isSMMoving[i]) ? "Moving" : "Stop"), curPos);
 		offset += 12;	// current pos (4byte), target pos (4byte), current speed (4byte)
 	}
 }
-void CRJController::parseRFIDPacket(BYTE* packet, int size) {
-	m_nRFIDLength = packet[1];
-	memcpy(m_RFID, packet + 2, m_nRFIDLength);
+
+void CRJController::RxPacketRFIDGetState(BYTE* buff, RFID_ReadType type)
+{
+	int idx = RFID_REPLY_DATA_IDX;
+	std::string limitKey = (buff[idx++] & 0x01) == 0x01 ? "On" : "Off";
+
+	int uidLength = buff[idx++];
+	if (uidLength >= buff[RFID_REPLY_LENGTH_IDX]) uidLength = HARDWARE_UID_LENGTH;
+	std::stringstream ss;
+
+	if (!RFIDProtocol::cmpUID(&buff[idx], uidLength)) {
+		RFIDProtocol::initState(false);
+	}
+
+	RFIDProtocol::setHardwareUID(&buff[idx], uidLength);
+	idx += uidLength;
+	RFIDProtocol::setCustomUID(&buff[idx], CUSTOM_UID_LENGTH);
+	idx += CUSTOM_UID_LENGTH;
+
+	if (type == MANUF || type == MANUF_CNT)
+	{
+		RFIDProtocol::setManuf(&buff[idx], MANUF_LEN);
+		idx += MANUF_LEN;
+	}
+	if (type == CNT || type == MANUF_CNT)
+	{
+		RFIDProtocol::setCount(&buff[idx], COUNT_LEN);
+		idx += COUNT_LEN;
+	}
+	if (type == KEYS)
+	{
+		RFIDProtocol::setKeyA(&buff[idx], KEY_LEN);
+		idx += KEY_LEN;
+
+		RFIDProtocol::setKeyB(&buff[idx], KEY_LEN);
+		idx += KEY_LEN;
+	}
+	if (type == STEP)
+	{
+		RFIDProtocol::setStep(&buff[idx], STEP_LEN);
+		idx += STEP_LEN;
+	}
+
+	if (RFIDProtocol::getRFIDErrorState() != RFIDProtocol::NOTAG) {
+		RFIDProtocol::printState();
+	}
 }
+
 void CRJController::handlePacket() {
 	BYTE length = m_vPacket[LENGTH_IDX];
 	int dataLength = length - HEADER_LEN;
 	eFID fid = (eFID) m_vPacket[FID_IDX];
-
 	char strTime[MAX_PATH];
 	CUtility::GetCurTime(strTime);
-
-	// photo sensor state
-	for (int i = 0; i < 6; i++) {
-		m_bPhotoSensor[i] = m_vPacket[PHOTO_IDX] & (0x1 << i);
+	std::stringstream strStream;
+	for (int i = 0; i < length; i++) {
+		strStream << std::uppercase << std::hex << static_cast<int>(m_vPacket[i]) << " ";
 	}
-	
-	// button, switch state
-	m_bButton[0] = m_vPacket[KEY_IDX] & 0x1;
-	m_bButton[1] = m_vPacket[KEY_IDX] & 0x2;
-	m_bLimitSwitch = m_vPacket[KEY_IDX] & 0x4;
 
-	//PLOGI.printf("\tButton: %02d %02d %02d\n", m_bButton[0], m_bButton[1], m_bLimitSwitch);
+	if (fid < eFID::FID_RFID_GET_STATE || fid == eFID::FID_SM_ENABLE || fid == eFID::FID_SM_DISABLE ) {
+		// photo sensor state
+		for (int i = 0; i < 6; i++) {
+			m_bPhotoSensor[i] = m_vPacket[PHOTO_IDX] & (0x1 << i);
+		}
 
+		// button, switch state
+		m_bButton[0] = m_vPacket[KEY_IDX] & 0x1;
+		m_bButton[1] = m_vPacket[KEY_IDX] & 0x2;
+		m_bLimitSwitch = m_vPacket[KEY_IDX] & 0x4;
+
+		//PLOGI.printf("\tButton: %02d %02d %02d\n", m_bButton[0], m_bButton[1], m_bLimitSwitch);
+	}
+	else {
+		if (m_vPacket[REPLY_RESULT_IDX] == static_cast<BYTE>(eCOMM_RJ::COMM_UNTAG_ERR)) {
+			RFIDProtocol::setRFIDErrorState(RFIDProtocol::NOTAG);
+			return;
+		}
+		if (m_vPacket[REPLY_RESULT_IDX] == static_cast<BYTE>(eCOMM_RJ::COMM_KEY_ERR)) {
+			if (fid != eFID::FID_RFID_GET_KEY) {
+				if (!RFIDProtocol::getFindingKeyStatus()) {
+					RFIDProtocol::setFindingKeyStatus(true);
+					RFIDProtocol::clearFailedFID();
+					findCorrectKey();
+				}
+				if (fid != eFID::FID_RFID_TAGGING) {
+					RFIDProtocol::addFailedFID(fid);
+				}
+			}
+			return;
+		}
+		if (m_vPacket[REPLY_RESULT_IDX] == static_cast<BYTE>(eCOMM_RJ::COMM_READ_ERR)) {
+			RFIDProtocol::setRFIDErrorState(RFIDProtocol::ETCERROR);
+			return;
+		}
+	}
+	RFIDProtocol::deleteMessageData(fid);
+	RFIDMessageData::Data* data = nullptr;
 	switch(fid) {
 	case eFID::FID_SM_GET_STATE:
 		parseSMPacket(&m_vPacket[DATA_IDX], dataLength);
@@ -588,21 +958,75 @@ void CRJController::handlePacket() {
 		parsePacket(&m_vPacket[DATA_IDX], dataLength);
 		break;
 	case eFID::FID_RFID_GET_STATE:
-		parseRFIDPacket(&m_vPacket[DATA_IDX], dataLength);
+		RxPacketRFIDGetState(&m_vPacket[0], MANUF_CNT);
+		break;
+	case eFID::FID_RFID_SET_UID:
+		RxPacketRFIDGetState(&m_vPacket[0]);
+		break;
+	case eFID::FID_RFID_USAGE_CLEAR:
+	case eFID::FID_RFID_SET_USAGE:
+		RxPacketRFIDGetState(&m_vPacket[0], CNT);
+		break;
+	case eFID::FID_RFID_SET_MANUF:
+		RxPacketRFIDGetState(&m_vPacket[0], MANUF);
+		break;
+	case eFID::FID_RFID_SET_KEY:
+		RFIDKeyController::addKey(&m_vPacket[RFID_REPLY_DATA_IDX + 1 + HARDWARE_UID_LENGTH + CUSTOM_UID_LENGTH]);
+		RxPacketRFIDGetState(&m_vPacket[0], KEYS);
+		break;
+	case eFID::FID_RFID_GET_KEY:
+		RxPacketRFIDGetState(&m_vPacket[0], KEYS);
+		resendAllSaved();
+		break;
+	case eFID::FID_RFID_SET_STEP:
+	case eFID::FID_RFID_GET_STEP:
+		RxPacketRFIDGetState(&m_vPacket[0], STEP);
+		break;
+
+	case eFID::FID_RFID_TAGGING:
 		break;
 	default:
 		break;
 	}
 
+	if (fid >= eFID::FID_RFID_GET_STATE && fid != eFID::FID_SM_ENABLE && fid != eFID::FID_SM_DISABLE)
+		RFIDProtocol::setRFIDErrorState(RFIDProtocol::OK);
 	m_bReadInitStatus = true;
 }
+
+void CRJController::findCorrectKey() {
+	std::vector<std::vector<BYTE>> keys = RFIDKeyController::getKeys();
+	for (std::vector<BYTE> key : keys) {
+		BYTE* keyVal = new BYTE[KEY_LEN];
+		for (int idx = 0; idx < KEY_LEN; idx++) {
+			keyVal[idx] = key[idx];
+		}
+		BYTE serialPacket[MAX_PATH];
+		int packetLength;
+		RFIDProtocol::setPacketByFID(eFID::FID_RFID_GET_KEY, serialPacket, packetLength, 0, NULL, 0, 0, keyVal);
+		BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+		serialPacket[packetLength - 2] = checksum;
+
+		int written = m_pConnection->Write(serialPacket, packetLength);
+		Sleep(10);
+	}
+	if (RFIDProtocol::getRFIDErrorState() == RFIDProtocol::UNANSWERED) {
+		RFIDProtocol::setRFIDErrorState(RFIDProtocol::WAITING_KEYANSWER);
+	}
+}
+
 bool CRJController::writeMotor(BYTE* packet, int size) {
 	if (!m_initMotor) return false;
 	
 	BYTE serialPacket[MAX_PATH];
-	int packetLength;
+	int packetLength = 0;
 	getSerialPacket(eFID::FID_BLDC_PASS, size, serialPacket, packetLength);
 	memcpy(serialPacket + DATA_IDX, packet, size);
+
+	if (packetLength < 2) {
+		PLOGI.printf("PacketLength is too small");
+		return 0;
+	}
 
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;

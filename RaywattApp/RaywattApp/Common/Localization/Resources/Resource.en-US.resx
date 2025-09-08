@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="$MSG001" xml:space="preserve">
-    <value>Get ready for the recording</value>
-  </data>
   <data name="$MSG002" xml:space="preserve">
     <value>Verify the catheter position for flush, Prepare for pullback.</value>
   </data>
@@ -200,6 +197,12 @@ for FFR</value>
   </data>
   <data name="$MSG024" xml:space="preserve">
     <value>Not enough storage space. Please free up space and try again.</value>
+  </data>
+  <data name="$MSG025" xml:space="preserve">
+    <value>The start date cannot be later than the end date.</value>
+  </data>
+  <data name="$MSG026" xml:space="preserve">
+    <value>Patient information with the same ID already exists. Update with the selected details?</value>
   </data>
   <data name="$Terms and Conditions" xml:space="preserve">
     <value>Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.
@@ -870,11 +873,17 @@ Overwrite existing data?</value>
   <data name="Patient Case" xml:space="preserve">
     <value>Patient Case</value>
   </data>
+  <data name="Patient ID" xml:space="preserve">
+    <value>Patient ID</value>
+  </data>
   <data name="Patient Information Anonymize" xml:space="preserve">
     <value>Patient Information Anonymize</value>
   </data>
   <data name="Patient List" xml:space="preserve">
     <value>Patient List</value>
+  </data>
+  <data name="Patient Name" xml:space="preserve">
+    <value>Patient Name</value>
   </data>
   <data name="Patient Summary" xml:space="preserve">
     <value>Patient Summary</value>
@@ -933,6 +942,9 @@ Overwrite existing data?</value>
   <data name="Procedure" xml:space="preserve">
     <value>Procedure</value>
   </data>
+  <data name="Procedure Start Date" xml:space="preserve">
+    <value>Procedure Start Date</value>
+  </data>
   <data name="Proximal" xml:space="preserve">
     <value>Proximal</value>
   </data>
@@ -987,6 +999,9 @@ Overwrite existing data?</value>
   <data name="Rename Folder" xml:space="preserve">
     <value>Rename Folder</value>
   </data>
+  <data name="Requested Procedure ID" xml:space="preserve">
+    <value>Requested Procedure ID</value>
+  </data>
   <data name="Reset" xml:space="preserve">
     <value>Reset</value>
   </data>
@@ -1007,6 +1022,12 @@ Overwrite existing data?</value>
   </data>
   <data name="Save" xml:space="preserve">
     <value>Save</value>
+  </data>
+  <data name="Scheduled Procedure Step Start Date" xml:space="preserve">
+    <value>Scheduled Procedure Step Start Date</value>
+  </data>
+  <data name="Scheduled Station AE" xml:space="preserve">
+    <value>Scheduled Station AE</value>
   </data>
   <data name="Search" xml:space="preserve">
     <value>Search</value>
@@ -1178,5 +1199,29 @@ Overwrite existing data?</value>
   </data>
   <data name="Zoom Out" xml:space="preserve">
     <value>Zoom Out</value>
+  </data>
+  <data name="$MSG001" xml:space="preserve">
+    <value>Get ready for the recording</value>
+  </data>
+  <data name="PasswordChange" xml:space="preserve">
+    <value>Password Change</value>
+  </data>
+  <data name="MSG_EnterCurrentPassword" xml:space="preserve">
+    <value>Enter Current Password</value>
+  </data>
+  <data name="MSG_EnterNewPassword" xml:space="preserve">
+    <value>Enter New Password</value>
+  </data>
+  <data name="MSG_ConfirmNewPassword" xml:space="preserve">
+    <value>Confirm New Password</value>
+  </data>
+  <data name="MSG_PasswordRequirement" xml:space="preserve">
+    <value>Password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters</value>
+  </data>
+  <data name="MSG_ChangeLaterContent" xml:space="preserve">
+    <value>Change after {0} days</value>
+  </data>
+  <data name="Patient ID cannot contain * or ?." xml:space="preserve">
+    <value>Patient ID cannot contain * or ?.</value>
   </data>
 </root>

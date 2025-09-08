@@ -8,12 +8,15 @@ namespace RaywattApp.Models
     {
         public class ReviewImageInfo
         {
-            public int Width = 0;
-            public int Height = 0;
-            public int Channels = 0;
-            public int Total = 0;
-            public int Current = 0;
+            public int Width;
+            public int Height;
+            public int Channels;
+            public int Total;
+            public int Current;
         };
+
+        [ObservableProperty]
+        private string _loginID = string.Empty;
 
         [ObservableProperty]
         private bool _isPowerOff = false;
@@ -40,7 +43,7 @@ namespace RaywattApp.Models
         private bool _isAngioInitialized = false;
 
         [ObservableProperty]
-        private bool _isPullbackDone = false;
+        private bool _isPullbackDone = true;
 
         [ObservableProperty]
         private bool _isLumenDetected = false;
@@ -76,16 +79,25 @@ namespace RaywattApp.Models
         private CathRoom _selectedCathRoom;
 
         [ObservableProperty]
-        private double _imageIntensity;
+        private bool _autoPullbackOnOff;
+
+        [ObservableProperty]
+        private bool _autoPullbackModel; //Detection Model - true: Lumen, false: Flush
+
+        [ObservableProperty]
+        private bool _autoPullbackIsImageCleared;
+
+        [ObservableProperty]
+        private int _autoPullbackTriggerCandidate;
+
+        [ObservableProperty]
+        private int _autoPullbackTriggerCount;
 
         [ObservableProperty]
         private bool _enhancedLUT;
 
         [ObservableProperty]
         private bool _isCleaningDone = true;
-
-        [ObservableProperty]
-        private bool _isExecutedAIFFR = false;
 
         [ObservableProperty]
         private Dictionary<string, bool> _testMode = new Dictionary<string, bool>();

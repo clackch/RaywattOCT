@@ -81,7 +81,7 @@ namespace RaywattApp.Common.Annotation.Util
             validate(contour, cvContours);
         }
 
-        private void calculateArea(Contour contour, Point[] cvPoints)
+        private static void calculateArea(Contour contour, Point[] cvPoints)
         {
             contour.Area = Cv2.ContourArea(cvPoints);
         }
@@ -99,17 +99,16 @@ namespace RaywattApp.Common.Annotation.Util
 
                 degree = (degree == 0) ? 360 : degree;
 
-                if (dictionary.ContainsKey(degree))
+                if (dictionary.TryGetValue(degree, out var existing))
                 {
                     conflict[(int)degree - 1]++;
-                    if (distance > dictionary[degree].Item2)
+                    if (distance > existing.Item2)
                     {
-                        dictionary.Remove(degree);
-                        dictionary.Add(degree, new Tuple<Point, double>(point, distance));
+                        dictionary[degree] = new Tuple<Point, double>(point, distance); // 덮어쓰기
                     }
                 }
-                else 
-                { 
+                else
+                {
                     dictionary.Add(degree, new Tuple<Point, double>(point, distance));
                 }
             }
