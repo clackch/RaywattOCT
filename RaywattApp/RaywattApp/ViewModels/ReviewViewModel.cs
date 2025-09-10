@@ -2032,11 +2032,11 @@ namespace RaywattApp.ViewModels
                 Mat temp = new Mat();
                 Cv2.BilateralFilter(frames[i], temp, 9, 10, 150);
                 frames[i] = temp;
-                Cv2.ImWrite("bilateral" + (i + 1).ToString() + ".tif", frames[i]);
+                Cv2.ImWrite("bilateralOne" + (i + 1).ToString() + ".tif", frames[i]);
 
-                _log.Debug(frames[i].Type());   // 예: CV_8UC1, CV_8UC3 등
-                _log.Debug(frames[i].Channels()); // 1(흑백), 3(컬러)
-                _log.Debug(frames[i].Depth());
+                //_log.Debug(frames[i].Type());   // 예: CV_8UC1, CV_8UC3 등
+                //_log.Debug(frames[i].Channels()); // 1(흑백), 3(컬러)
+                //_log.Debug(frames[i].Depth());
                 //Cv2.ImWrite("origin" + (i + 1).ToString() + ".tif", frames[i]);
                 Mat gradX = new Mat();
                 Mat gradY = new Mat();
@@ -2065,13 +2065,13 @@ namespace RaywattApp.ViewModels
                 temp = new Mat();
                 Cv2.BilateralFilter(frames[i], temp, 9, 20, 150);
                 frames[i] = temp;
-                Cv2.ImWrite("bilateral" + (i + 1).ToString() + ".tif", frames[i]);
+                Cv2.ImWrite("bilateralTwo" + (i + 1).ToString() + ".tif", frames[i]);
                 _log.Debug("Preprocessing time for frame " + (i + 1).ToString() + ": " + timeCheck.Elapsed);
             }
 
-            int thresholdOfNow = 80;    // 현재 프레임이 해당 값보다 작으면 혈관, 크면 혈관이 아닌 걸로 판정
-            int thresholdOfOther = 20;  // 앞, 뒤 프레임이 해당 값보다 작으면 현재 프레임이 혈관이 아니라고 판정된 상태에도 혈관으로 판정
-            int thresholdCut = 120;      // 앞, 뒤 프레임이 해당 값보다 크면 현재 프레임이 혈관이라고 판정된 상태에도 혈관이 아니라고 판정
+            int baseThreshold    = 80;    // 현재 프레임이 해당 값보다 작으면 혈관, 크면 혈관이 아닌 걸로 판정
+            int supportThreshold = 20;  // 앞, 뒤 프레임이 해당 값보다 작으면 현재 프레임이 혈관이 아니라고 판정된 상태에도 혈관으로 판정
+            int rejectThreshold  = 80;      // 앞, 뒤 프레임이 해당 값보다 크면 현재 프레임이 혈관이라고 판정된 상태에도 혈관이 아니라고 판정
 
             for (int i = 0; i < imageCount; i++)
             {
@@ -2091,7 +2091,7 @@ namespace RaywattApp.ViewModels
                             ThisPixelGoesWhere(x, y, i + 1, statusList, nextPoints, pastPoints, out final_x, out final_y);
 
                             byte pixVal = nowimage.At<byte>(y, x);
-                            if (pixVal < thresholdOfNow)
+                            if (pixVal < baseThreshold)
                             {
                                 nowimage.At<byte>(y, x) = 255;
                                 // 다음 프레임에 맞춰서 0으로 만드는 부분은 오류가 많아지는 경향이 있음.
@@ -2100,7 +2100,7 @@ namespace RaywattApp.ViewModels
                             {
                                 if (!(x + final_x < 0 || x + final_x >= nowimage.Cols ||
                                       y + final_y < 0 || y + final_y >= nowimage.Rows) &&
-                                    frames[i + 1].At<byte>(y + final_y, x + final_x) < thresholdOfOther)
+                                    frames[i + 1].At<byte>(y + final_y, x + final_x) < supportThreshold)
                                 {
                                     nowimage.At<byte>(y, x) = 255;
                                 }
@@ -2120,11 +2120,11 @@ namespace RaywattApp.ViewModels
                             ThisPixelGoesWhere(x, y, i, statusList, nextPoints, pastPoints, out final_x, out final_y);
 
                             byte pixVal = nowimage.At<byte>(y, x);
-                            if (pixVal < thresholdOfNow)
+                            if (pixVal < baseThreshold)
                             {
                                 if (!(x - final_x < 0 || x - final_x >= nowimage.Cols ||
                                       y - final_y < 0 || y - final_y >= nowimage.Rows) &&
-                                    frames[i - 1].At<byte>(y - final_y, x - final_x) > thresholdCut)
+                                    frames[i - 1].At<byte>(y - final_y, x - final_x) > rejectThreshold)
                                 {
                                     nowimage.At<byte>(y, x) = 0;
                                 }
@@ -2135,7 +2135,7 @@ namespace RaywattApp.ViewModels
                             {
                                 if (!(x - final_x < 0 || x - final_x >= nowimage.Cols ||
                                       y - final_y < 0 || y - final_y >= nowimage.Rows) &&
-                                    frames[i - 1].At<byte>(y - final_y, x - final_x) < thresholdOfOther)
+                                    frames[i - 1].At<byte>(y - final_y, x - final_x) < supportThreshold)
                                 {
                                     nowimage.At<byte>(y, x) = 255;
                                 }
@@ -2156,14 +2156,14 @@ namespace RaywattApp.ViewModels
                             ThisPixelGoesWhere(x, y, i + 1, statusList, nextPoints, pastPoints, out final_x1, out final_y1);
 
                             byte pixVal = nowimage.At<byte>(y, x);
-                            if (pixVal < thresholdOfNow)
+                            if (pixVal < baseThreshold)
                             {
                                 if (!(x - final_x0 < 0 || x - final_x0 >= nowimage.Cols ||
                                       y - final_y0 < 0 || y - final_y0 >= nowimage.Rows) &&
                                     !(x + final_x1 < 0 || x + final_x1 >= nowimage.Cols ||
                                       y + final_y1 < 0 || y + final_y1 >= nowimage.Rows) &&
-                                    (frames[i - 1].At<byte>(y - final_y0, x - final_x0) > thresholdCut &&
-                                     frames[i + 1].At<byte>(y + final_y1, x + final_x1) > thresholdCut))
+                                    (frames[i - 1].At<byte>(y - final_y0, x - final_x0) > rejectThreshold &&
+                                     frames[i + 1].At<byte>(y + final_y1, x + final_x1) > rejectThreshold))
                                 {
                                     nowimage.At<byte>(y, x) = 0;
                                 }
@@ -2176,8 +2176,8 @@ namespace RaywattApp.ViewModels
                                       y - final_y0 < 0 || y - final_y0 >= nowimage.Rows) &&
                                     !(x + final_x1 < 0 || x + final_x1 >= nowimage.Cols ||
                                       y + final_y1 < 0 || y + final_y1 >= nowimage.Rows) &&
-                                    (frames[i - 1].At<byte>(y - final_y0, x - final_x0) < thresholdOfOther &&
-                                     frames[i + 1].At<byte>(y + final_y1, x + final_x1) < thresholdOfOther))
+                                    (frames[i - 1].At<byte>(y - final_y0, x - final_x0) < supportThreshold &&
+                                     frames[i + 1].At<byte>(y + final_y1, x + final_x1) < supportThreshold))
                                 {
                                     nowimage.At<byte>(y, x) = 255;
                                 }
