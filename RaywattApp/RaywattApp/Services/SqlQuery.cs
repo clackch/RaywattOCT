@@ -412,7 +412,7 @@ namespace RaywattApp.Services
             //UpdatePatientCaseId
             _query["UpdatePatientCaseId"] = @$"
                 UPDATE rv_schema.patient_case
-                SET id = REGEXP_REPLACE(id, @originId, @id)
+                SET id = REGEXP_REPLACE(id, @originId, @id, 1, 1)
                 WHERE patient_id = @id;
                 ";
 
