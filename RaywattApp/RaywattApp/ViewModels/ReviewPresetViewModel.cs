@@ -230,10 +230,10 @@ namespace RaywattApp.ViewModels
             DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total = 0;
             DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current = 0;
             DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total = 0;
+            if (DeviceStatus.LongitudeOrientation != _longitudeOrientation) DeviceStatus.LongitudeOrientationChanged = true;
             DeviceStatus.LongitudeOrientation = _longitudeOrientation;
             DeviceStatus.IsOCTImagingDone = false;
 
-            // TODO: 정보를 받아서 표시 (Longitued Orientation)
             var __ = (RayError)RaySetProperty(Property.LongitudeOrientation, (double)DeviceStatus.LongitudeOrientation);
 
             Dictionary<string, Object> parameter = new Dictionary<string, Object>();

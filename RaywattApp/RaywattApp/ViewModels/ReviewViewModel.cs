@@ -417,8 +417,6 @@ namespace RaywattApp.ViewModels
             base.OnNavigated(sender, navigatedEventArgs);
             _log.Debug("OnNavigated");
 
-            LongitudeOrientationChanged();
-
             RayError result = (RayError)RayRegisterDetectionCallback(Marshal.GetFunctionPointerForDelegate(CBLumenContour));
             if (result != RayError.OK)
             {
@@ -435,6 +433,10 @@ namespace RaywattApp.ViewModels
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
                 
                 ReviewStatus.CurrentPage = Constants.ReviewPage;
+
+                /* longitude & lumen profile: orientation setting */
+                LongitudeOrientationLabelChanged();
+                AdjustLumenDataOrderByOrientation();
 
                 FieldOfView = PatientCase.FieldOfView;
                 ToggleAngio(ReviewStatus.IsAngioOn);
@@ -494,7 +496,7 @@ namespace RaywattApp.ViewModels
          */
         #region Initialize
 
-        private void LongitudeOrientationChanged()
+        private void LongitudeOrientationLabelChanged()
         {
             _dPLeftLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "P" : "D";
             _dPRightLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "D" : "P";
@@ -665,8 +667,6 @@ namespace RaywattApp.ViewModels
                 Measurements.Add(measurement);
             }
             Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
-
-            AdjustLumenDataOrderByOrientation();
         }
 
         private void AngioImageProcessing()
@@ -1015,14 +1015,17 @@ namespace RaywattApp.ViewModels
 
         private void AdjustLumenDataOrderByOrientation()
         {
-            //TODO: junghw
-            if (DeviceStatus.LongitudeOrientation != LongitudeOrientation.DistalToProximal)
+            if (DeviceStatus.LongitudeOrientationChanged)
             {
-                if (GuideWireRadiusList != null) GuideWireRadiusList.Reverse();
-                if (LumenSidebranches != null) LumenSidebranches.Reverse();
-                if (LumenStents != null) LumenStents.Reverse();
-                if (LumenGuidewires != null) LumenGuidewires.Reverse();
-                if (LumenContours != null) LumenContours.Reverse();
+                DeviceStatus.LongitudeOrientationChanged = false; // 수정 되었으므로,
+
+                DeviceStatus.IsExecutedAIFFR = false; // AI FFR 수행 X (다시 실행 하기 위함)
+                PatientCase.FfrFeature = null;  // FFR 관련 Feature 초기화
+
+                if (PatientCase.LumenSidebranches != null) PatientCase.LumenSidebranches.Reverse();
+                if (PatientCase.LumenStents != null) PatientCase.LumenStents.Reverse();
+                if (PatientCase.LumenGuidewires != null) PatientCase.LumenGuidewires.Reverse();
+                if (PatientCase.LumenContours != null) PatientCase.LumenContours.Reverse();
             }
         }
         #endregion
@@ -1373,8 +1376,6 @@ namespace RaywattApp.ViewModels
             }
             else
             {
-                AdjustLumenDataOrderByOrientation();
-
                 PatientCase.LumenContours = LumenContours;
                 PatientCase.LumenSidebranches = LumenSidebranches;
                 PatientCase.LumenStents = LumenStents;
@@ -1466,12 +1467,12 @@ namespace RaywattApp.ViewModels
 
                 bool isSame = true;
 
-                //if (ffrValue.DistalLumenArea != Section.Proximal.DValue) //P/D 위치 바꾸면서, FFR Value는 P/D 값은 반대로 들어가 있음
-                //    isSame = false;
+                if (ffrValue.DistalLumenArea != Section.Proximal.DValue) //P/D 위치 바꾸면서, FFR Value는 P/D 값은 반대로 들어가 있음
+                    isSame = false;
                 if (ffrValue.MinimalLumenArea != Section.MlaValue.DValue)
                     isSame = false;
-                //if (ffrValue.ProximalLumenArea != Section.Distal.DValue) //P/D 위치 바꾸면서, FFR Value는 P/D 값은 반대로 들어가 있음
-                //    isSame = false;
+                if (ffrValue.ProximalLumenArea != Section.Distal.DValue) //P/D 위치 바꾸면서, FFR Value는 P/D 값은 반대로 들어가 있음
+                    isSame = false;
                 if (ffrValue.LesionLength != Section.LesionLength.DValue)
                     isSame = false;
                 if (ffrValue.VesselType != PatientCase.Vessel)
