@@ -388,7 +388,7 @@ RayError COCTSystem::PullbackScan(char *strFilePath) {
 		if (m_pRJController->GetState() == eRJState::Error) return RayError::RotaryJunctionError;
 		m_strFilePath = CUtility::StringToWstring(strFilePath);
 
-		postMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Scanning);
+		postPriorMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Scanning);
 
 		return RayError::OK;
 		
