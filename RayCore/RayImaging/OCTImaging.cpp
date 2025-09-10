@@ -118,7 +118,7 @@ void COCTImaging::PostProcess(cv::Mat image) {
 
 	if (m_FindingSheathMathod == AutoCalibrationMathod::FindingMinMagnitude)
 	{
-		CalculateMagnitude(image);
+		CountWhitePixels(image);
 	}
 	else if (m_FindingSheathMathod == AutoCalibrationMathod::FindingSheath)
 	{
@@ -533,6 +533,33 @@ void COCTImaging::CalculateMagnitude(cv::Mat img) {
 	}
 	//PLOGI.printf("check the time - Magnitude: %d", totalMagnitude);
 	m_nSheathPosition = totalMagnitude;
+}
+
+void COCTImaging::CountWhitePixels(cv::Mat img)
+{
+	using namespace cv;
+
+	// LUT Table
+	const int    TOP_BAND_WIDTH = 30;
+	const double TARGET = 0.50;
+	const double POWER_MIN = 0.60;
+	const double POWER_MAX = 12.0;
+
+	// 1. 클론 이미지 생성
+	cv::Mat cloneImg = img.clone();
+
+	cv::Mat resizedImg;
+	cv::resize(cloneImg, resizedImg, cv::Size(), 0.125, 0.125, cv::INTER_AREA);
+
+	// 2. Otsu 이진화
+	cv::Mat binaryImg;
+	cv::threshold(resizedImg, binaryImg, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+
+	// 3. 흰 픽셀 수 카운팅
+	int whiteCount = cv::countNonZero(binaryImg);
+
+	// 4. 픽셀 수 반환
+	m_nSheathPosition = whiteCount;
 }
 
 cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {
