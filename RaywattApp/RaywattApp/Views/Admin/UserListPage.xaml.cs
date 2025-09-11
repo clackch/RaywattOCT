@@ -11,7 +11,7 @@ namespace RaywattApp.Views.Admin
         public UserListPage()
         {
             InitializeComponent();
-            DataContext = App.Current.Services.GetService(typeof(UserListVIewModel));
+            DataContext = App.Current.Services.GetService(typeof(UserListViewModel));
         }
     }
 }

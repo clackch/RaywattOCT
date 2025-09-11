@@ -49,9 +49,6 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private string _selectedFlushMedia;
 
-        [ObservableProperty]
-        private string _selectedPullbackTrigger;
-
         private IList<Code> pullbackTypes;
 
         [ObservableProperty]
