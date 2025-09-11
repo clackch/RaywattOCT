@@ -2114,12 +2114,12 @@ namespace RaywattApp.ViewModels
                 Mat temp = new Mat();
                 Cv2.BilateralFilter(frames[i], temp, 9, 10, 150);
                 frames[i] = temp;
-                Cv2.ImWrite("bilateralOne" + (i + 1).ToString() + ".tif", frames[i]);
+                //Cv2.ImWrite("bilateralOne" + (i + 1).ToString() + ".tif", frames[i]);
 
                 //_log.Debug(frames[i].Type());   // 예: CV_8UC1, CV_8UC3 등
                 //_log.Debug(frames[i].Channels()); // 1(흑백), 3(컬러)
                 //_log.Debug(frames[i].Depth());
-                Cv2.ImWrite("origin" + (i + 1).ToString() + ".tif", frames[i]);
+                //Cv2.ImWrite("origin" + (i + 1).ToString() + ".tif", frames[i]);
                 Mat gradX = new Mat();
                 Mat gradY = new Mat();
                 Cv2.Sobel(frames[i], gradX, MatType.CV_64F, 1, 0, ksize: 3);
@@ -2128,15 +2128,15 @@ namespace RaywattApp.ViewModels
                 Cv2.Magnitude(gradX, gradY, grad);
                 Mat edge = new Mat();
                 grad.ConvertTo(edge, frames[i].Type());
-                Cv2.ImWrite("edge" + (i + 1).ToString() + ".tif", edge);
+                //Cv2.ImWrite("edge" + (i + 1).ToString() + ".tif", edge);
 
                 frames[i] = frames[i] - edge / 2;
-                Cv2.ImWrite("sharpened" + (i + 1).ToString() + ".tif", frames[i]);
+                //Cv2.ImWrite("sharpened" + (i + 1).ToString() + ".tif", frames[i]);
 
                 temp = new Mat();
                 Cv2.BilateralFilter(frames[i], temp, 9, 20, 150);
                 frames[i] = temp;
-                Cv2.ImWrite("bilateralTwo" + (i + 1).ToString() + ".tif", frames[i]);
+                //Cv2.ImWrite("bilateralTwo" + (i + 1).ToString() + ".tif", frames[i]);
                 _log.Debug("Preprocessing time for frame " + (i + 1).ToString() + ": " + timeCheck.Elapsed);
             }
 
@@ -2279,7 +2279,7 @@ namespace RaywattApp.ViewModels
 
                 var timeCheck2 = new System.Diagnostics.Stopwatch();
                 Cv2.MorphologyEx(nowimage, morphedImage, MorphTypes.Close, kernel, iterations: 4);
-                Cv2.ImWrite("morphedImage" + frameNum.ToString() + ".tif", morphedImage);
+                //Cv2.ImWrite("morphedImage" + frameNum.ToString() + ".tif", morphedImage);
                 _log.Debug("morphologyEx for frame " + (i + 1).ToString() + ": " + timeCheck2.Elapsed);
 
                 timeCheck2.Restart();
@@ -2291,7 +2291,7 @@ namespace RaywattApp.ViewModels
                 PatientCase.AngioFrame.DijkstraHeap.Add(new DijkstraHeap(imageData, frames[i].Rows, frames[i].Cols));
                 frameNum++;
 
-                Cv2.ImWrite("check" + frameNum.ToString() + ".tif", skeleton);
+                //Cv2.ImWrite("check" + frameNum.ToString() + ".tif", skeleton);
                 _log.Debug("Total time for frame " + (i + 1).ToString() + ": " + timeCheck.Elapsed);
             }
         }
