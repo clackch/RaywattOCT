@@ -1022,6 +1022,12 @@ namespace RaywattApp.ViewModels
                 DeviceStatus.IsExecutedAIFFR = false; // AI FFR 수행 X (다시 실행 하기 위함)
                 PatientCase.FfrFeature = null;  // FFR 관련 Feature 초기화
 
+                var proxiaml = ReviewStatus.NumberOfFrames - PatientCase.SectionProximal;
+                var distal = ReviewStatus.NumberOfFrames - PatientCase.SectionDistal;
+
+                PatientCase.SectionProximal = distal;
+                PatientCase.SectionDistal = proxiaml;
+
                 if (PatientCase.LumenSidebranches != null) PatientCase.LumenSidebranches.Reverse();
                 if (PatientCase.LumenStents != null) PatientCase.LumenStents.Reverse();
                 if (PatientCase.LumenGuidewires != null) PatientCase.LumenGuidewires.Reverse();
