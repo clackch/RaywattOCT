@@ -15,9 +15,9 @@ using System;
 
 namespace RaywattApp.ViewModels.Admin
 {
-    public partial class UserListVIewModel : ViewModelBase
+    public partial class UserListViewModel : ViewModelBase
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(UserListVIewModel));
+        private static readonly ILog _log = LogManager.GetLogger(typeof(UserListViewModel));
 
         private readonly SqlManager _sqlManager;
 
@@ -53,9 +53,9 @@ namespace RaywattApp.ViewModels.Admin
             get { return this._editUserCommand ?? (this._editUserCommand = new RelayCommand<User>(EditUser)); }
         }
 
-        public UserListVIewModel(SqlManager sqlManager, IDialogService dialogService)
+        public UserListViewModel(SqlManager sqlManager, IDialogService dialogService)
         {
-            _log.Debug("UserListVIewModel");
+            _log.Debug("UserListViewModel");
 
             Constants.CurrentPage = Constants.UserListPage;
 
