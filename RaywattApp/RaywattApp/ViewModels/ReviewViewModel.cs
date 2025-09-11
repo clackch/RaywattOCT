@@ -23,6 +23,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -2069,13 +2070,29 @@ namespace RaywattApp.ViewModels
                 _log.Debug("Preprocessing time for frame " + (i + 1).ToString() + ": " + timeCheck.Elapsed);
             }
 
-            int baseThreshold    = 80;    // 현재 프레임이 해당 값보다 작으면 혈관, 크면 혈관이 아닌 걸로 판정
-            int supportThreshold = 20;  // 앞, 뒤 프레임이 해당 값보다 작으면 현재 프레임이 혈관이 아니라고 판정된 상태에도 혈관으로 판정
-            int rejectThreshold  = 80;      // 앞, 뒤 프레임이 해당 값보다 크면 현재 프레임이 혈관이라고 판정된 상태에도 혈관이 아니라고 판정
+            /*for (int i = 0; i < imageCount; i++)
+            {
+                _log.Debug("Frame " + (i + 1).ToString() + "80% top value : " + GetThreshold(frames[i], 97));
+                _log.Debug("Frame " + (i + 1).ToString() + "90% top value : " + GetThreshold(frames[i], 98));
+                _log.Debug("Frame " + (i + 1).ToString() + "95% top value : " + GetThreshold(frames[i], 99));
+                _log.Debug("Frame " + (i + 1).ToString() + "mean value : " + (double)Cv2.Mean(frames[i]));
+            }*/
+
+            int baseThreshold    = 80;      // 현재 프레임이 해당 값보다 작으면 혈관, 크면 혈관이 아닌 걸로 판정
+            int supportThreshold = 10;      // 앞, 뒤 프레임이 해당 값보다 작으면 현재 프레임이 혈관이 아니라고 판정된 상태에도 혈관으로 판정
+            int rejectThreshold  = 120;     // 앞, 뒤 프레임이 해당 값보다 크면 현재 프레임이 혈관이라고 판정된 상태에도 혈관이 아니라고 판정
 
             for (int i = 0; i < imageCount; i++)
             {
                 timeCheck.Restart();
+
+                List<int> percentages = new List<int> { 90, 99 };
+                List<int> thresholds = GetThresholds(frames[i], percentages);
+
+                baseThreshold = thresholds[0];
+                supportThreshold = thresholds[1];
+                rejectThreshold = (int)Cv2.Mean(frames[i]);
+
                 Mat nowimage = new Mat();
                 nowimage.Create(frames[i].Rows, frames[i].Cols, frames[i].Depth(), frames[i].Type());
                 frames[i].CopyTo(nowimage);
@@ -2343,6 +2360,86 @@ namespace RaywattApp.ViewModels
             }
         }
 
+        private List<int> GetThresholds(Mat src, List<int> percents)
+        {
+            if (src.Empty()) throw new ArgumentException("Empty image");
+            if (percents == null || percents.Count == 0)
+                throw new ArgumentException("percents must not be empty");
+            if (percents.Exists(p => p <= 0 || p >= 100))
+                throw new ArgumentException("percents must be in (0,100)");
+
+            Mat gray = src;
+            if (src.Channels() > 1)
+            {
+                gray = new Mat();
+                Cv2.CvtColor(src, gray, ColorConversionCodes.BGR2GRAY);
+            }
+
+            int bins;
+            Rangef[] ranges;
+            if (gray.Type() == MatType.CV_8UC1)
+            {
+                bins = 256;
+                ranges = new[] { new Rangef(0, 256) };
+            }
+            else if (gray.Type() == MatType.CV_16UC1)
+            {
+                bins = 4096;
+                ranges = new[] { new Rangef(0, 65536) };
+            }
+            else if (gray.Type() == MatType.CV_32FC1)
+            {
+                gray.MinMaxLoc(out double minVal, out double maxVal);
+                if (Math.Abs(maxVal - minVal) < 1e-12)
+                    return new List<int> { (int)minVal };
+                bins = 256;
+                ranges = new[] { new Rangef((float)minVal, (float)maxVal) };
+            }
+            else
+            {
+                throw new NotSupportedException($"Unsupported type: {gray.Type()}");
+            }
+
+            // 히스토그램 계산
+            Mat hist = new Mat();
+            Cv2.CalcHist(new[] { gray }, new[] { 0 }, null, hist, 1, new[] { bins }, ranges);
+
+            // 누적합(CDF)
+            float total = 0f;
+            for (int i = 0; i < bins; i++) total += hist.At<float>(i);
+            if (total <= 0) return percents.ConvertAll(p => 0);
+
+            // 목표값들을 미리 계산 (퍼센타일 → CDF 타겟)
+            var targets = new List<float>();
+            foreach (int p in percents)
+                targets.Add(total * (1.0f - (p / 100f)));
+
+            var results = new List<int>(percents.Count);
+
+            // 각 퍼센트에 대해 bin index 찾기
+            for (int j = 0; j < percents.Count; j++)
+            {
+                float target = targets[j];
+                float cdf = 0f;
+                int binIdx = 0;
+                for (; binIdx < bins; binIdx++)
+                {
+                    cdf += hist.At<float>(binIdx);
+                    if (cdf >= target) break;
+                }
+                if (binIdx >= bins) binIdx = bins - 1;
+
+                // bin index → intensity 값
+                double t0 = ranges[0].Start;
+                double t1 = ranges[0].End;
+                double binWidth = (t1 - t0) / bins;
+                double thresholdVal = t0 + binWidth * binIdx;
+
+                results.Add((int)Math.Round(thresholdVal));
+            }
+
+            return results;
+        }
 
         private Mat Skeletonize(Mat img)
         {
