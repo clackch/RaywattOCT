@@ -1949,9 +1949,10 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 		pRJController->UpdateState(eRJState::Error);
 		pSystem->postMessage(WM_NOTIFY_ERROR_OCCURED, (WPARAM)RayError::HomingFailed);
 	}
-  if( pRJController->GetRFIDCountCurrentState()>=5){
+
+	/*if( pRJController->GetRFIDCountCurrentState()>=5){
 		pRJController->UpdateState(eRJState::Error);
-  }
+	}*/
     
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
