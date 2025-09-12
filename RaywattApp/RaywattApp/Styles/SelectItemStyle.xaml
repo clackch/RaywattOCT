@@ -113,7 +113,7 @@
                                           Margin="20,17,0,16" TextBlock.Foreground="{DynamicResource GrayscaleGray3Brush}" />
                         <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Slide" VerticalOffset="6">
                             <Grid x:Name="DropDown" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}">
-                                <Border x:Name="DropDownBorder" CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}" Background="{DynamicResource popupBackground}"/>
+                                <Border x:Name="DropDownBorder" Cursor="{StaticResource arrow}"  CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}" Background="{DynamicResource popupBackground}"/>
                                 <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
                                     <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
                                 </ScrollViewer>
@@ -145,6 +145,8 @@
             <SolidColorBrush x:Key="selectedBackground" Color="{DynamicResource GrayscaleGray5}" />
         </Style.Resources>
         <Setter Property="Height" Value="42" />
+        <Setter Property="Cursor" Value="{StaticResource arrow}"/>
+        <Setter Property="ForceCursor" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ComboBoxItem}">
@@ -902,6 +904,8 @@
     </Style>
 
     <Style TargetType="{x:Type Calendar}" x:Key="CalendarStyle">
+        <Setter Property="Cursor" Value="{StaticResource arrow}"/>
+        <Setter Property="ForceCursor" Value="True"/>
         <Setter Property="CalendarButtonStyle" Value="{StaticResource CalendarButtonStyle}" />
         <Setter Property="CalendarDayButtonStyle" Value="{StaticResource CalendarDayButtonStyle}" />
         <Setter Property="CalendarItemStyle" Value="{StaticResource CalendarItemStyle}" />
