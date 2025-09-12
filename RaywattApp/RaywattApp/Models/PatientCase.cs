@@ -218,5 +218,8 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private bool isChecked;
+
+        [ObservableProperty]
+        private bool? isCompareDistalToProximal = true;
     }
 }

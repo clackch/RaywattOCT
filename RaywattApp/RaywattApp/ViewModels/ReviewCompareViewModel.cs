@@ -6,6 +6,7 @@ using OpenCvSharp;
 using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
+using RaywattApp.Common.Enums;
 using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Services;
@@ -82,6 +83,12 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private LumenContour _currentPreLumenContour = new LumenContour();
 
+        [ObservableProperty]
+        private string _proximalLabel = "";
+
+        [ObservableProperty]
+        private string _distalLabel = "";
+
         private string _lumenContourCommand;
         public string LumenContourCommand { get { return _lumenContourCommand; } set { _lumenContourCommand = value; OnPropertyChanged(nameof(LumenContourCommand)); } }
 
@@ -138,7 +145,7 @@ namespace RaywattApp.ViewModels
 
         private ICommand _cmdIndicatorLock;
         public ICommand CmdIndicatorLock
-        { 
+        {
             get { return this._cmdIndicatorLock ?? (this._cmdIndicatorLock = new RelayCommand(IndicatorLock)); }
         }
 
@@ -177,6 +184,8 @@ namespace RaywattApp.ViewModels
 
             if (extraData != null)
             {
+                LongitudeOrientationLabelChanged();
+
                 Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
                 Patient = (Patient)data["patient"];
                 PatientCase = (PatientCase)data["patientCase"];
@@ -215,7 +224,7 @@ namespace RaywattApp.ViewModels
                 {
                     SetCrossSectionBackground(RaySession.Compare, Constants.CompareBackgroundColor);
 
-                    if(ReviewStatus.SelectedPatientCase.LumenContours == null)
+                    if (ReviewStatus.SelectedPatientCase.LumenContours == null)
                     {
                         GetAnnotation();
                     }
@@ -236,6 +245,11 @@ namespace RaywattApp.ViewModels
         {
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
+
+            if (ReviewStatus.SelectedPatientCase.IsCompareDistalToProximal == false)
+            {
+                ReverseLumenProfileCompare();
+            }
         }
 
         private void GetAnnotation()
@@ -316,7 +330,8 @@ namespace RaywattApp.ViewModels
             DisplayPatientCase = patientCase;
             ExpandLeftUpMenu = false;
 
-            if (ReviewStatus.SelectedPatientCase != null) {
+            if (ReviewStatus.SelectedPatientCase != null)
+            {
                 LumenContourCommand = Constants.LumenContourClear;
                 HideLumenProfileCompare();
 
@@ -357,9 +372,9 @@ namespace RaywattApp.ViewModels
             sqlParameters["procedure"] = "$001";//Pre-PCI
 
             PatientCases = _sqlManager.SelectPatientCaseList(sqlParameters);
-            if(PatientCases != null && PatientCases.Count > 0)
+            if (PatientCases != null && PatientCases.Count > 0)
             {
-                if(isNullPatientCase)
+                if (isNullPatientCase)
                 {
                     sqlParameters.Clear();
                     sqlParameters["id"] = Patient.Id;
@@ -367,14 +382,14 @@ namespace RaywattApp.ViewModels
 
                     IList<PatientCase> prePatientCase = _sqlManager.SelectPrePatientCase(sqlParameters);
 
-                    foreach(PatientCase patientCase in PatientCases)
+                    foreach (PatientCase patientCase in PatientCases)
                     {
-                        if(patientCase.Id == prePatientCase[0].Id)
+                        if (patientCase.Id == prePatientCase[0].Id)
                         {
                             ReviewStatus.SelectedPatientCase = patientCase;
                             break;
                         }
-                    }                    
+                    }
                 }
                 else
                 {
@@ -392,9 +407,9 @@ namespace RaywattApp.ViewModels
                     ReviewStatus.SelectedPatientCase.LumenContours = lumenContours;
                 if (lumenSidebranches != null)
                     ReviewStatus.SelectedPatientCase.LumenSidebranches = lumenSidebranches;
-                if(lumenStents != null)
+                if (lumenStents != null)
                     ReviewStatus.SelectedPatientCase.LumenStents = lumenStents;
-                if(lumenGuidewires != null)
+                if (lumenGuidewires != null)
                     ReviewStatus.SelectedPatientCase.LumenGuidewires = lumenGuidewires;
                 DisplayPatientCase = ReviewStatus.SelectedPatientCase;
             }
@@ -506,7 +521,7 @@ namespace RaywattApp.ViewModels
             {
                 IsIndicatorLockOn = false;
                 return;
-            }                
+            }
 
             indicatorLockOffset = FrameNumberCompare - FrameNumber;
         }
@@ -518,7 +533,7 @@ namespace RaywattApp.ViewModels
             DeviceStatus.ReviewImageInfo frameInfo = DeviceStatus.ReviewImageInfos[(int)session];
 
             if (frameInfo != null)
-            {             
+            {
                 curPosition *= (frameInfo.Total - 1);
                 curPosition = Math.Round(curPosition);
 
@@ -529,11 +544,11 @@ namespace RaywattApp.ViewModels
                     int syncPosition = (indicator.IsCompare) ? (int)curPosition - diff : (int)curPosition + diff;
                     DeviceStatus.ReviewImageInfo syncInfo = (indicator.IsCompare) ? DeviceStatus.ReviewImageInfos[(int)RaySession.Review] : DeviceStatus.ReviewImageInfos[(int)RaySession.Compare];
 
-                    if (syncInfo == null) 
+                    if (syncInfo == null)
                         return;
                     if (syncPosition < 0 || syncPosition >= syncInfo.Total)
                     {
-                        if(syncPosition < 0)
+                        if (syncPosition < 0)
                             syncPosition = 0;
                         else
                             syncPosition = syncInfo.Total - 1;
@@ -553,7 +568,8 @@ namespace RaywattApp.ViewModels
                 {
                     FrameNumberCompare = (int)curPosition;
                 }
-                else {
+                else
+                {
                     FrameNumber = (int)curPosition;
                 }
             }
@@ -591,13 +607,15 @@ namespace RaywattApp.ViewModels
 
         private void ShowLumenProfileCompare()
         {
+            EnsureOrientationCompare();
+
             PreLumenContour = ReviewStatus.SelectedPatientCase.LumenContours;
             PreLumenSidebranches = ReviewStatus.SelectedPatientCase.LumenSidebranches;
             PreLumenStents = ReviewStatus.SelectedPatientCase.LumenStents;
             PreLumenGuidewires = ReviewStatus.SelectedPatientCase.LumenGuidewires;
             int frameProximalCompare = ReviewStatus.SelectedPatientCase.SectionProximal;
             int frameDistalCompare = ReviewStatus.SelectedPatientCase.SectionDistal;
-            if(SectionCompare.SetMlaMld(ReviewStatus.SelectedPatientCase.LumenContours, frameProximalCompare, frameDistalCompare, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total, Constants.LongitudeCompareWidth, ReviewStatus.SelectedPatientCase.PullbackLength))
+            if (SectionCompare.SetMlaMld(ReviewStatus.SelectedPatientCase.LumenContours, frameProximalCompare, frameDistalCompare, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total, Constants.LongitudeCompareWidth, ReviewStatus.SelectedPatientCase.PullbackLength))
             {
                 SectionCompare.VisibleMlaMld(true);
                 SectionCompare.Proximal.IsVisible = Visibility.Visible;
@@ -617,10 +635,39 @@ namespace RaywattApp.ViewModels
             imglumenProfileExtraCompare = CommonUtil.MakeLumenProfileImageExtra(DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total, colorFrames, true);
             DrawLumenProfileImageExtraCompare();
 
-            SectionCompare.Proximal.X = CommonUtil.GetPositionFromFrame(ReviewStatus.SelectedPatientCase.SectionProximal, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total, Constants.LongitudeCompareWidth, Constants.SectionIndicatorCenterWidth);            
+            SectionCompare.Proximal.X = CommonUtil.GetPositionFromFrame(ReviewStatus.SelectedPatientCase.SectionProximal, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total, Constants.LongitudeCompareWidth, Constants.SectionIndicatorCenterWidth);
             SectionCompare.Distal.X = CommonUtil.GetPositionFromFrame(ReviewStatus.SelectedPatientCase.SectionDistal, DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total, Constants.LongitudeCompareWidth, Constants.SectionIndicatorWidth - Constants.SectionIndicatorCenterWidth);
 
             IndicatorCompareLongitude.IsVisible = Visibility.Visible;
+        }
+
+        private void EnsureOrientationCompare()
+        {
+            _log.Debug("EnsureOrientationCompare");
+
+            if (ReviewStatus.SelectedPatientCase.IsCompareDistalToProximal == null)
+            {
+                ReviewStatus.SelectedPatientCase.IsCompareDistalToProximal = true; // 기본값
+            }
+
+            if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal &&
+                ReviewStatus.SelectedPatientCase.IsCompareDistalToProximal == true)
+            {
+                ReviewStatus.SelectedPatientCase.IsCompareDistalToProximal = false;
+                ReverseLumenProfileCompare();
+            }
+        }
+
+        private void ReverseLumenProfileCompare()
+        {
+            if (ReviewStatus.SelectedPatientCase == null) return;
+            
+            _log.Debug("ReverseLumenProfileCompare");
+
+            ReviewStatus.SelectedPatientCase.LumenContours.Reverse();
+            ReviewStatus.SelectedPatientCase.LumenStents.Reverse();
+            ReviewStatus.SelectedPatientCase.LumenSidebranches.Reverse();
+            ReviewStatus.SelectedPatientCase.LumenGuidewires.Reverse();
         }
 
         private void HideLumenProfileCompare()
@@ -647,6 +694,12 @@ namespace RaywattApp.ViewModels
 
             LumenProfileImageExtraCompare = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileExtraCompare);
             return true;
+        }
+
+        private void LongitudeOrientationLabelChanged()
+        {
+            _distalLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "P" : "D";
+            _proximalLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "D" : "P";
         }
     }
 }
