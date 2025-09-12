@@ -1730,7 +1730,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 				if(minVal * 1.1 < info[i + 1].first) // 최솟값의 110% 이상인 값은 제외
 					continue;
 				minList.push_back(std::make_pair(info[i + 1].second, i + 1));
-				//PLOGI.printf("local min found. Loc : %d, Value : %d", info[i + 1].second, info[i + 1].first);
+				PLOGI.printf("local min found. Loc : %d, Value : %d", info[i + 1].second, info[i + 1].first);
 			}
 		}
 
@@ -1747,7 +1747,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			//PLOGI.printf("startPosition : %d", startPosition);
 		}
 
-		//PLOGI.printf("first calibration. checkPosition : %d, checkValue : %d", Loc, minVal);
+		PLOGI.printf("first calibration. checkPosition : %d, checkValue : %d", Loc, minVal);
 
 		nZOffset = Loc - nJumpStep;
 		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO * 4 / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
