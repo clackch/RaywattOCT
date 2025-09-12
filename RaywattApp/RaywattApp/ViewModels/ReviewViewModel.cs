@@ -1029,6 +1029,12 @@ namespace RaywattApp.ViewModels
                 PatientCase.SectionProximal = distal;
                 PatientCase.SectionDistal = proxiaml;
 
+                var sectionDistal = Section.Distal.DValue;
+                var sectionProximal = Section.Proximal.DValue;
+
+                Section.Distal.DValue = sectionProximal;
+                Section.Proximal.DValue = sectionDistal;
+
                 if (PatientCase.LumenSidebranches != null) PatientCase.LumenSidebranches.Reverse();
                 if (PatientCase.LumenStents != null) PatientCase.LumenStents.Reverse();
                 if (PatientCase.LumenGuidewires != null) PatientCase.LumenGuidewires.Reverse();
