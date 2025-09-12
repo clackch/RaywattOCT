@@ -1668,6 +1668,8 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 	CLaserModule* pLaserModule = pSystem->m_pLaserModule;
 	int nTargetPos = 0;
 
+	//1차 탐색 속도
+	int firstCheckVelocity = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("firstVel"), 2, _T(".\\raycore.ini"));
 	//1차 탐색 후, 2차 탐색을 위해 이동할 거리
 	int nJumpStep = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("JumpStep"), 3600, _T(".\\raycore.ini")) * CConfiguration::GetInstance().laserModule.delayLineSMSteps;
 	//2차 탐색 범위 
@@ -1679,7 +1681,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 	{
 		// 0. Speed Up
 		pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_AUTO);
-		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO*2 / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
+		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO * firstCheckVelocity / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
 
 		// 1. Start Finding Sheath
 		pSystem->m_vCalibrationInfo.clear();
@@ -1697,20 +1699,45 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		int nMinDiff = INT_MAX;
 		int nZOffset = 0;
 
-		// way1
+		//way 1
+		const auto& info = pSystem->m_vCalibrationInfo;
+		std::vector<int> gradient(info.size() - 1);
 		int minVal = INT_MAX, maxVal = 0, Loc = startPosition;
-		for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
-			if (pSystem->m_vCalibrationInfo.at(i).first <= 100000)
-				continue;
 
-			if (pSystem->m_vCalibrationInfo.at(i).first < minVal) {
-				minVal = pSystem->m_vCalibrationInfo.at(i).first;
-				Loc = pSystem->m_vCalibrationInfo.at(i).second;
+		for (int i = 1; i < info.size(); i++)
+		{
+			gradient[i - 1] = info[i].first - info[i - 1].first;
+			if (info[i - 1].first < 10) {
+				if (i < 2)
+					gradient[i - 1] = -1;
+				else
+					gradient[i - 1] = info[i - 2].first - info[i].first;	
+			}else if(info[i].first < 10) {
+				gradient[i - 1] = -1;
 			}
-			if (pSystem->m_vCalibrationInfo.at(i).first > maxVal) {
-				maxVal = pSystem->m_vCalibrationInfo.at(i).first;
+			else if (info[i].first < minVal)
+			{
+				minVal = info[i].first;
+				Loc = info[i].second;
 			}
 		}
+
+		std::vector<std::pair<int, int>> minList; // pair<Loc, index>
+		for (int i = 0; i < gradient.size() - 1; i++)
+		{
+			if (gradient[i] < 0 && gradient[i + 1] >= 0 && gradient[i] != -1 && gradient[i+1] != -1) // local min
+			{
+				if(minVal * 1.1 < info[i + 1].first) // 최솟값의 110% 이상인 값은 제외
+					continue;
+				minList.push_back(std::make_pair(info[i + 1].second, i + 1));
+				//PLOGI.printf("local min found. Loc : %d, Value : %d", info[i + 1].second, info[i + 1].first);
+			}
+		}
+
+		std::sort(minList.begin(), minList.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
+			return a.first < b.first; // Loc 기준 오름차순 정렬
+			});
+		Loc = minList.empty() ? startPosition : minList[0].first;
 
 		if ((minVal * 4) / 3 > maxVal) {
 			PLOGI.printf("Calibration might be failed. Total edge is Too high. startPosition : %d", startPosition);
