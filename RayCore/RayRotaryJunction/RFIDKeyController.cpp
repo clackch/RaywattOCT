@@ -13,7 +13,11 @@ bool RFIDKeyController::isDuplicate(BYTE* arr, size_t len) {
 
 void RFIDKeyController::readKeys() {
 	std::ifstream keyFile(keyFilePath, std::ios::in);
-	if (!keyFile.is_open()) return;
+	if (!keyFile.is_open()) {
+		writeKeysFile();
+		std::ifstream keyFile(keyFilePath, std::ios::in);
+		if (!keyFile.is_open()) return;
+	}
 	std::string line;
 	while (std::getline(keyFile, line)) {
 		if (line.empty()) continue;
@@ -61,4 +65,20 @@ void RFIDKeyController::loadFirstKey(BYTE* key) {
 
 std::vector<std::vector<BYTE>> RFIDKeyController::getKeys() {
 	return keys;
+}
+
+void RFIDKeyController::writeKeysFile() {
+	std::ifstream keyFile(keyFilePath, std::ios::in);
+	if (!keyFile.is_open()) {
+		std::ofstream newFile(keyFilePath);
+		if (!newFile.is_open()) {
+			return;
+		}
+		newFile.close();
+		BYTE key[KEY_LEN] = DEFAULT_KEY;
+		addKey(key);
+		memset(key, 0xFF, KEY_LEN);
+		addKey(key);
+	}
+	return;
 }
