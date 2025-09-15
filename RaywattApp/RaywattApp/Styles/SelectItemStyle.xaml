@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:const="clr-namespace:RaywattApp.Common.Bases"
+                    xmlns:bh="clr-namespace:RaywattApp.Common.Behaviors"
                     xmlns:svgc="http://sharpvectors.codeplex.com/svgc/">
 
     <!-- Check Box -->
@@ -422,6 +423,7 @@
     </Style>
 
     <Style TargetType="{x:Type DatePicker}" x:Key="DatePickerStyle" BasedOn="{StaticResource Pretendard-Medium-18}">
+        <Setter Property="bh:AlwaysArrowCursorBehavior.Enabled" Value="True"/>
         <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray3Brush}" />
         <Setter Property="IsTodayHighlighted" Value="True" />
         <Setter Property="BorderThickness" Value="1" />
@@ -454,9 +456,13 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsDropDownOpen" Value="True">
+                            <!--<Setter Property="bh:AlwaysArrowCursorBehavior.Enabled" Value="True"/>-->
                             <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
                             <Setter TargetName="PART_TextBox" Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
                             <Setter TargetName="PART_Button" Property="Style" Value="{StaticResource DropDownButtonStyleActive}"/>
+                        </Trigger>
+                        <Trigger Property="IsDropDownOpen" Value="False">
+                            <Setter Property="bh:AlwaysArrowCursorBehavior.Enabled" Value="False"/>
                         </Trigger>
                         <Trigger Property="SelectedDate" Value="{x:Null}">
                             <Setter TargetName="placeholder" Property="Opacity" Value="1"/>
