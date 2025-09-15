@@ -76,9 +76,9 @@ namespace RaywattApp.ViewModels.Dialog
         public double Degree
         {
             get { return degree; }
-            set 
-            { 
-                degree = value; 
+            set
+            {
+                degree = value;
                 OnPropertyChanged(nameof(Degree));
                 RayError result = (RayError)RaySetProperty(Property.LongitudeDegree, degree);
                 if (result != RayError.OK)
@@ -196,6 +196,12 @@ namespace RaywattApp.ViewModels.Dialog
         [ObservableProperty]
         private BitmapSource _sheathIndicator;
 
+        [ObservableProperty]
+        private string _distalOrientationLabel;
+
+        [ObservableProperty]
+        private string _proximalOrientationLabel;
+
         public FileExportDialogViewModel(SqlManager sqlManager)
         {
             _sqlManager = sqlManager;
@@ -217,14 +223,20 @@ namespace RaywattApp.ViewModels.Dialog
 
             if (CommonUtil.IsTestMode(DeviceStatus.TestMode, "Sidebranch"))
                 IsDrawLumenSideBranch = true;
+
+            // label setting (D/P or P/D)
+            bool isDistalToProximal = DeviceStatus.LongitudeOrientation == Common.Enums.LongitudeOrientation.DistalToProximal;
+            DistalOrientationLabel = isDistalToProximal ? "D" : "P";
+            ProximalOrientationLabel = isDistalToProximal ? "P" : "D";
         }
 
         public double SetInitialize(PatientCase patientCase, List<Mat> crossSections, Mat lMode, FileExport fileExport)
         {
             PatientCase = patientCase;
-            Degree = PatientCase.IndicatorDegree;            
+            Degree = PatientCase.IndicatorDegree;
 
             this.crossSections = crossSections;
+
             if (fileExport.AngioView && patientCase.AngioYn)
             {
                 CommonUtil.ReadAngioParams(PatientCase);
@@ -234,12 +246,23 @@ namespace RaywattApp.ViewModels.Dialog
 
             imgCrossSectionMask = GenerateMask(crossSections[0]);
             imgCrossSectionBackground = crossSections[0].EmptyClone();
-            LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(lMode);
 
             FileExport = fileExport;
-
-            if(fileExport.Longitude || fileExport.MeasureAuto || fileExport.MeasureManual)
+            if (fileExport.Longitude || fileExport.MeasureAuto || fileExport.MeasureManual)
                 SetAnnotation();
+
+            bool isDistalToProximal = DeviceStatus.LongitudeOrientation == Common.Enums.LongitudeOrientation.DistalToProximal;
+            if (!isDistalToProximal)
+            {
+                lMode = lMode.Flip(FlipMode.Y);
+                LumenStents.Reverse();
+                LumenContours.Reverse();
+                LumenSidebranches.Reverse();
+                LumenGuidewires.Reverse();
+                this.crossSections.Reverse();
+            }
+
+            LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(lMode);
 
             if ((fileExport.AngioView && patientCase.AngioYn) || fileExport.Longitude)
             {
@@ -256,14 +279,16 @@ namespace RaywattApp.ViewModels.Dialog
 
                     int frameProximal = PatientCase.SectionProximal;
                     int frameDistal = PatientCase.SectionDistal;
-                    
+
                     imglumenProfile = CommonUtil.MakeLumenProfileImage(LumenContours, LumenSidebranches, LumenStents, patientCase.AppositionThreshold, frameProximal, frameDistal, CommonUtil.IsPostCase(PatientCase.Procedure));
+
+
                     DrawLumenProfileImage();
 
                     List<int> colorFrames = new List<int>();
                     if (CommonUtil.IsPreCase(patientCase.Procedure))
                     {
-                        if(Section.SetMlaMld(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength))
+                        if (Section.SetMlaMld(LumenContours, patientCase.SectionProximal, patientCase.SectionDistal, this.crossSections.Count, Constants.ExportLongitudeImageWidth, patientCase.PullbackLength))
                             Section.VisibleMlaMld(true);
                         else
                             Section.VisibleMlaMld(false);
@@ -310,10 +335,10 @@ namespace RaywattApp.ViewModels.Dialog
                 TextPartWidth = Constants.ExportTextPartSize;
 
                 if (fileExport.MeasureManual)
-                    MeasurementCommand = Constants.MeasureDrawAll;                
+                    MeasurementCommand = Constants.MeasureDrawAll;
             }
 
-            if(fileExport.MeasureAuto && fileExport.MeasureManual)
+            if (fileExport.MeasureAuto && fileExport.MeasureManual)
                 MeasureSeparator = Visibility.Visible;
 
             //for Calcium
@@ -360,7 +385,7 @@ namespace RaywattApp.ViewModels.Dialog
 
             if (FileExport.AngioView && PatientCase.AngioYn)
             {
-                double ratio = (double)PatientCase.AngioFrame.AngioImage.Count / crossSections.Count * frameNumber ;
+                double ratio = (double)PatientCase.AngioFrame.AngioImage.Count / crossSections.Count * frameNumber;
                 int currentAngioFrameNumber = (int)ratio;
                 AngioImage = (BitmapSource)angioImages[currentAngioFrameNumber];
             }
@@ -501,7 +526,7 @@ namespace RaywattApp.ViewModels.Dialog
             for (int i = 0; i < this.crossSections.Count; i++)
             {
                 Measurement measurement = new Measurement();
-                measurement.FrameNumber = i;                
+                measurement.FrameNumber = i;
                 Measurements.Add(measurement);
             }
 
