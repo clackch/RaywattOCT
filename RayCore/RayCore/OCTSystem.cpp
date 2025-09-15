@@ -1737,7 +1737,18 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		std::sort(minList.begin(), minList.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
 			return a.first < b.first; // Loc 기준 오름차순 정렬
 			});
-		Loc = minList.empty() ? startPosition : minList[0].first;
+		if (minList.empty())
+			Loc = startPosition;
+		else {
+			Loc = minList[0].first;
+			for(int i = 1; i < minList.size(); i++)
+			{
+				if (abs(minList[i - 1].first - minList[i].first) > 1000)
+					Loc = minList[i].first;
+				else
+					break;
+			}
+		}
 
 		if ((minVal * 4) / 3 > maxVal) {
 			PLOGI.printf("Calibration might be failed. Total edge is Too high. startPosition : %d", startPosition);
