@@ -1741,13 +1741,13 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			Loc = startPosition;
 		else {
 			Loc = minList[0].first;
-			for(int i = 1; i < minList.size(); i++)
+			/*for(int i = 1; i < minList.size(); i++)
 			{
 				if (abs(minList[i - 1].first - minList[i].first) > 1000)
 					Loc = minList[i].first;
 				else
 					break;
-			}
+			}*/
 		}
 
 		if ((minVal * 4) / 3 > maxVal) {

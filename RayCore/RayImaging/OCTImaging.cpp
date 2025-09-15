@@ -118,7 +118,7 @@ void COCTImaging::PostProcess(cv::Mat image) {
 
 	if (m_FindingSheathMathod == AutoCalibrationMathod::FindingMinMagnitude)
 	{
-		CountWhitePixels(image);
+		CalculateMagnitude(image);
 	}
 	else if (m_FindingSheathMathod == AutoCalibrationMathod::FindingSheath)
 	{
