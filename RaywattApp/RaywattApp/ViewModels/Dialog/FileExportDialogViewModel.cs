@@ -236,6 +236,8 @@ namespace RaywattApp.ViewModels.Dialog
 
         private void MarkOrinetation(int totalFrame, int currentFrame)
         {
+            if (FileExport.Longitude) return; // 오직 OCT 이미지만 있을 시에만 마킹
+
             int barLength = 10;
             double ratio = (double)currentFrame / totalFrame;
             int position = (int)Math.Round(ratio * barLength);

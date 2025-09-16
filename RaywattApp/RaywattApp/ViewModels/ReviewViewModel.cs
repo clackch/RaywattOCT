@@ -183,7 +183,7 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private string _dPRightLabel;
-        
+
 
         private double _lModeIndicatorX;
         public double LModeIndicatorX
@@ -226,9 +226,9 @@ namespace RaywattApp.ViewModels
         public double FieldOfView
         {
             get { return _fieldOfView; }
-            set 
-            { 
-                _fieldOfView = value; 
+            set
+            {
+                _fieldOfView = value;
                 OnPropertyChanged(nameof(FieldOfView));
 
                 this.convertedFoV = Constants.DefaultFoV / value;
@@ -408,7 +408,7 @@ namespace RaywattApp.ViewModels
 
             UpdateCrossSectionImage();
 
-            if(CommonUtil.IsTestMode(DeviceStatus.TestMode, "Sidebranch"))
+            if (CommonUtil.IsTestMode(DeviceStatus.TestMode, "Sidebranch"))
                 IsDrawLumenSideBranch = true;
         }
 
@@ -431,7 +431,7 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
-                
+
                 ReviewStatus.CurrentPage = Constants.ReviewPage;
 
                 /* longitude & lumen profile: orientation setting */
@@ -453,7 +453,7 @@ namespace RaywattApp.ViewModels
 
                 Degree = PatientCase.IndicatorDegree;
                 Brightness = PatientCase.Brightness;
-                Contrast = PatientCase.Contrast;                
+                Contrast = PatientCase.Contrast;
                 CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault);
                 CrossSectionAngioScale = (1 / Constants.ImageResolution) * (Constants.ZoomAngioCsScaleDefault);
 
@@ -527,7 +527,7 @@ namespace RaywattApp.ViewModels
                 threadReadAngioFrames.Start();
             }
         }
-        
+
         private void SetAnnotation()
         {
             string tempCrossSection = "[]", tempLongitude = "", tempBookmark = "[]";
@@ -590,7 +590,7 @@ namespace RaywattApp.ViewModels
                     threadMakeLumenProfile.Start();
 
                     //Sidebranch
-                    if(!String.IsNullOrEmpty(patientCaseAnnotations[0].LumenSidebranch))
+                    if (!String.IsNullOrEmpty(patientCaseAnnotations[0].LumenSidebranch))
                     {
                         LumenSidebranches = JsonConvert.DeserializeObject<List<LumenSidebranch>>(patientCaseAnnotations[0].LumenSidebranch);
                     }
@@ -605,7 +605,7 @@ namespace RaywattApp.ViewModels
                     }
 
                     //Stent
-                    if(!String.IsNullOrEmpty(patientCaseAnnotations[0].LumenStent))
+                    if (!String.IsNullOrEmpty(patientCaseAnnotations[0].LumenStent))
                     {
                         LumenStents = JsonConvert.DeserializeObject<List<LumenStent>>(patientCaseAnnotations[0].LumenStent);
                     }
@@ -617,17 +617,17 @@ namespace RaywattApp.ViewModels
                             LumenStent lumenStent = new LumenStent();
                             LumenStents.Add(lumenStent);
                         }
-                    }                    
+                    }
 
                     //Guidewire
-                    if(!String.IsNullOrEmpty(patientCaseAnnotations[0].LumenGuidewire))
+                    if (!String.IsNullOrEmpty(patientCaseAnnotations[0].LumenGuidewire))
                     {
                         LumenGuidewires = JsonConvert.DeserializeObject<List<LumenGuidewire>>(patientCaseAnnotations[0].LumenGuidewire);
-                        
+
                     }
                     else
                     {
-                        LumenGuidewires= new List<LumenGuidewire>();
+                        LumenGuidewires = new List<LumenGuidewire>();
                         for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
                         {
                             LumenGuidewire lumenGuidewire = new LumenGuidewire();
@@ -657,13 +657,13 @@ namespace RaywattApp.ViewModels
 
             //Cross-Section
             Measurements = JsonConvert.DeserializeObject<List<Measurement>>(tempCrossSection);
-            
+
             if (Measurements == null)
                 Measurements = new List<Measurement>();
             for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
             {
                 Measurement measurement = new Measurement();
-                measurement.FrameNumber = i;                
+                measurement.FrameNumber = i;
                 Measurements.Add(measurement);
             }
             Measurements = Measurements.DistinctBy(x => x.FrameNumber).OrderBy(x => x.FrameNumber).ToList();
@@ -822,7 +822,7 @@ namespace RaywattApp.ViewModels
 
             //side branch
             int sbSize = RayGetNumOfSidebranchContourSize(frameInfo);
-            if(sbSize > 0)
+            if (sbSize > 0)
             {
                 LumenSidebranches[frameInfo].Points = new List<List<Point>>();
                 for (int i = 0; i < sbSize; i++)
@@ -848,7 +848,7 @@ namespace RaywattApp.ViewModels
 
             //stent
             int stentHeight = RayGetNumOfStentPoints(frameInfo);
-            if(stentHeight > 0)
+            if (stentHeight > 0)
             {
                 IntPtr contour = RayGetStentPoints(frameInfo);
                 if (contour == IntPtr.Zero) return;
@@ -889,7 +889,7 @@ namespace RaywattApp.ViewModels
                     for (int row = 0; row < mat.Rows; row++)
                     {
                         Vec2i point = mat.At<Vec2i>(0, row);
-                        if(point.Item0 < 0 || point.Item0 < 0)
+                        if (point.Item0 < 0 || point.Item0 < 0)
                         {
                             LumenGuidewires[frameInfo].Points.Add(new Point(0, 0));
                         }
@@ -974,7 +974,7 @@ namespace RaywattApp.ViewModels
 
         private double GetGuidewireAverageRadius()
         {
-            if(GuideWireRadiusList == null || !(GuideWireRadiusList.Any()))
+            if (GuideWireRadiusList == null || !(GuideWireRadiusList.Any()))
             {
                 return 0.0;
             }
@@ -1005,7 +1005,7 @@ namespace RaywattApp.ViewModels
             {
                 return 0.0;
             }
-            
+
             double filteredAverage = filteredValues.Average();
 
             _log.Debug("Average Radius Value" + filteredAverage.ToString());
@@ -1015,54 +1015,57 @@ namespace RaywattApp.ViewModels
 
         private void AdjustLumenDataOrderByOrientation()
         {
-            // 1) 변경 없으면 종료
-            if (!DeviceStatus.LongitudeOrientationChanged)  return;
-
-            DeviceStatus.LongitudeOrientationChanged = false;   // 처리 완료 플래그 리셋
-            DeviceStatus.IsExecutedAIFFR = false;               // AI FFR 재실행 유도
-            PatientCase.FfrFeature = null;                      // FFR Feature 초기화
-
-            // 2) 섹션 인덱스 보정 (프레임 축 반전 + 상호 스왑)
-            int nf = ReviewStatus.NumberOfFrames;
-            PatientCase.SectionProximal = FlipIndex(PatientCase.SectionDistal, nf);
-            PatientCase.SectionDistal = FlipIndex(PatientCase.SectionProximal, nf); 
-
-            // 3) 표시 구간 값 스왑 (튜플 스왑)
-            (Section.Distal.DValue, Section.Proximal.DValue) =
-            (Section.Proximal.DValue, Section.Distal.DValue);
-
-            // 4) 도형/주석 데이터 순서 반전 (null-세이프)
-            PatientCase.LumenSidebranches?.Reverse();
-            PatientCase.LumenStents?.Reverse();
-            PatientCase.LumenGuidewires?.Reverse();
-            PatientCase.LumenContours?.Reverse();
-
-            // 5) 북마크 좌표/프레임 반전
-            if (!string.IsNullOrWhiteSpace(PatientCase.Bookmark))
+            if (DeviceStatus.LongitudeOrientationChanged)
             {
-                try
+                DeviceStatus.LongitudeOrientationChanged = false; // 수정 되었으므로,
+
+                /* ai ffr */
+                DeviceStatus.IsExecutedAIFFR = false; // AI FFR 수행 X (다시 실행 하기 위함)
+                PatientCase.FfrFeature = null;  // FFR 관련 Feature 초기화
+
+                /* indicator */
+                var proxiaml = ReviewStatus.NumberOfFrames - PatientCase.SectionProximal;
+                var distal = ReviewStatus.NumberOfFrames - PatientCase.SectionDistal;
+
+                PatientCase.SectionProximal = distal;
+                PatientCase.SectionDistal = proxiaml;
+
+                var sectionDistal = Section.Distal.DValue;
+                var sectionProximal = Section.Proximal.DValue;
+
+                Section.Distal.DValue = sectionProximal;
+                Section.Proximal.DValue = sectionDistal;
+
+
+                /* lumen data */
+                if (PatientCase.LumenSidebranches != null) PatientCase.LumenSidebranches.Reverse();
+                if (PatientCase.LumenStents != null) PatientCase.LumenStents.Reverse();
+                if (PatientCase.LumenGuidewires != null) PatientCase.LumenGuidewires.Reverse();
+                if (PatientCase.LumenContours != null) PatientCase.LumenContours.Reverse();
+
+
+                /* book marker */
+                if (PatientCase.Bookmark == null)
                 {
-                    var bookmarks = JsonConvert.DeserializeObject<List<Bookmark>>(PatientCase.Bookmark) ?? new List<Bookmark>();
-
-                    int frames = PatientCase.NumOfFrames;
-                    double width = Constants.LongitudeWidth;
-
-                    var adjusted = bookmarks.Select(b => new Bookmark
-                    {
-                        FrameNumber = FlipIndex(b.FrameNumber, frames),
-                        LongitudeX = FlipCoordX(b.LongitudeX, width)
-                    }).ToList();
-
-                    PatientCase.Bookmark = JsonConvert.SerializeObject(adjusted);
+                    return;
                 }
-                catch (Exception ex)
+                else
                 {
-                    _log.Error("Bookmark deserialize/adjust failed", ex);
+                    var bookmarkJson = PatientCase.Bookmark;
+                    var bookmarks = JsonConvert.DeserializeObject<List<Bookmark>>(bookmarkJson);
+
+                    int totalFrames = PatientCase.NumOfFrames;
+                    var adjustedBookmarks = bookmarks!
+                        .Select(bm => new Bookmark
+                        {
+                            FrameNumber = totalFrames - bm.FrameNumber - 1,
+                            LongitudeX = Constants.LongitudeWidth - bm.LongitudeX - 1
+                        })
+                        .ToList();
+
+                    PatientCase.Bookmark = JsonConvert.SerializeObject(adjustedBookmarks);
                 }
             }
-
-            int FlipIndex(int idx, int length) => Math.Clamp(length - 1 - idx, 0, Math.Max(0, length - 1));
-            double FlipCoordX(double x, double w) => (w > 0) ? (w - 1 - x) : x;
         }
         #endregion
 
@@ -1091,7 +1094,8 @@ namespace RaywattApp.ViewModels
             {
                 Playback();
 
-                if (!IsPaused) {
+                if (!IsPaused)
+                {
                     ReviewStatus.IsMeasurementOn = false;
                     ReviewStatus.IsPlay = true;
                 }
@@ -1099,7 +1103,7 @@ namespace RaywattApp.ViewModels
                 {
                     ReviewStatus.IsPlay = false;
                 }
-                
+
             }
         }
 
@@ -1283,7 +1287,7 @@ namespace RaywattApp.ViewModels
 
             ReviewStatus.ZoomAngioCs.ZoomOut();
 
-            if(CommonUtil.GetRoundScale(ReviewStatus.ZoomAngioCs.ScaleX) == CommonUtil.GetRoundScale(Constants.ZoomAngioCsScaleDefault * this.convertedFoV))
+            if (CommonUtil.GetRoundScale(ReviewStatus.ZoomAngioCs.ScaleX) == CommonUtil.GetRoundScale(Constants.ZoomAngioCsScaleDefault * this.convertedFoV))
             {
                 ReviewStatus.IsCalciumOnAngioCs = true;
                 ReviewStatus.IsSheathOnAngioCs = true;
@@ -1519,7 +1523,7 @@ namespace RaywattApp.ViewModels
                     if (PatientCase.FfrFeature == null)
                     {
                         PatientCase.FfrFeature = ffrValue;
-                        List < Measurement> plaqueAreaList = JsonConvert.DeserializeObject<List<Measurement>>(ffrPlaques[0].ReturnString);
+                        List<Measurement> plaqueAreaList = JsonConvert.DeserializeObject<List<Measurement>>(ffrPlaques[0].ReturnString);
 
                         for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)
                         {
@@ -1588,7 +1592,7 @@ namespace RaywattApp.ViewModels
         {
             if (DrawCrossSectionImage())
             {
-                DeviceStatus.ReviewImageInfo imageInfo = DeviceStatus.ReviewImageInfos[(int)RaySession.Review];                
+                DeviceStatus.ReviewImageInfo imageInfo = DeviceStatus.ReviewImageInfos[(int)RaySession.Review];
                 if (!IndicatorLongitude.IsCaptured) updateNavigator(imageInfo.Current, imageInfo.Total);
 
                 FrameNumber = imageInfo.Current;
@@ -1702,7 +1706,7 @@ namespace RaywattApp.ViewModels
             else
             {
                 int stentProximal = 0, stentDistal = 0;
-                if(CommonUtil.GetStentProximalDistal(LumenStents, out stentProximal, out stentDistal))
+                if (CommonUtil.GetStentProximalDistal(LumenStents, out stentProximal, out stentDistal))
                 {
                     int frameDiff = (int)(Constants.PostLesionLengthInitValue * ReviewStatus.NumberOfFrames * 10 / int.Parse(PatientCase.PullbackLength));
                     proximalIdx = stentProximal - frameDiff > 0 ? stentProximal - frameDiff : 0;
@@ -1715,9 +1719,9 @@ namespace RaywattApp.ViewModels
                 }
             }
 
-            if(proximalIdx >= 0)
+            if (proximalIdx >= 0)
                 Section.Proximal.X = CommonUtil.GetPositionFromFrame(proximalIdx, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveCenterWidth);
-            if(distalIdx >= 0)
+            if (distalIdx >= 0)
                 Section.Distal.X = CommonUtil.GetPositionFromFrame(distalIdx, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth);
 
             SetLumenProfileValue();
@@ -2012,7 +2016,7 @@ namespace RaywattApp.ViewModels
                     _log.Debug($"angio : Height = {angioFrameHeight}, Width = {angioFrameWidth}, Channel = {channels}");
 
                     Scale = angioFrameHeight > angioFrameWidth ? (float)Constants.AngioSize / angioFrameHeight : (float)Constants.AngioSize / angioFrameWidth;
-                    
+
                     if (Scale >= 1.0)
                     {
                         newHeight = (int)(angioFrameHeight / Scale);
@@ -2153,7 +2157,7 @@ namespace RaywattApp.ViewModels
 
             IList<PatientCaseAnnotation> annotations = _sqlManager.SelectCoRegistration(sqlParameters);
 
-            if(annotations != null && annotations.Count == 1 )
+            if (annotations != null && annotations.Count == 1)
             {
                 if (!string.IsNullOrEmpty(annotations[0].CoRegistration))
                 {
@@ -2202,7 +2206,7 @@ namespace RaywattApp.ViewModels
                 Cv2.EqualizeHist(frames[i], frames[i]);
                 //Cv2.ImWrite("HE" + (i + 1).ToString() + ".png", frames[i]);// Histogram Equalization
 
-                frames[i] = frames[i] - edge/2;
+                frames[i] = frames[i] - edge / 2;
                 //Cv2.ImWrite("real" + (i + 1).ToString() + ".png", frames[i]);
             }
 
@@ -2339,12 +2343,12 @@ namespace RaywattApp.ViewModels
             }
         }
 
-        private void ThisPixelGoesWhere(int x, int y, int index, 
-            List<List<byte>> statusList, List<List<Point>> nextPoints, List<List<Point>> pastPoints, 
+        private void ThisPixelGoesWhere(int x, int y, int index,
+            List<List<byte>> statusList, List<List<Point>> nextPoints, List<List<Point>> pastPoints,
             out int nextX, out int nextY)
         {
             int mask_r = 40;
-            int validCount = 0;                                 
+            int validCount = 0;
             double total = 0.0;
 
             for (int j = 0; j < pastPoints[index].Count; j++)
