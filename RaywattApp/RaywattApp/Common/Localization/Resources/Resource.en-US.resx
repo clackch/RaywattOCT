@@ -1223,4 +1223,10 @@ Overwrite existing data?</value>
   <data name="Patient ID cannot contain * or ?." xml:space="preserve">
     <value>Patient ID cannot contain * or ?.</value>
   </data>
+  <data name="Recording is Complete" xml:space="preserve">
+    <value>Recording is Complete</value>
+  </data>
+  <data name="Recording starts automatically" xml:space="preserve">
+    <value>Recording starts automatically</value>
+  </data>
 </root>

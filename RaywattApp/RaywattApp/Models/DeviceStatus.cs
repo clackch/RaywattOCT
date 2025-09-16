@@ -43,6 +43,9 @@ namespace RaywattApp.Models
         private bool _isAngioInitialized = false;
 
         [ObservableProperty]
+        private bool _isRecordingDone = true;
+
+        [ObservableProperty]
         private bool _isPullbackDone = true;
 
         [ObservableProperty]

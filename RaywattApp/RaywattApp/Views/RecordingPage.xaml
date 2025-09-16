@@ -195,9 +195,14 @@
                                     <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" Visibility="{Binding DeviceStatus.IsPullbackDone, Converter={StaticResource BoolToVisibilityConverter}}">
                                         <Label Style="{DynamicResource Pretendard-Bold-14}" Content="{Binding [Preparing Blood Flushing Detection], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleGray3Brush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                     </Border>
-                                    <Border CornerRadius="10" Background="{DynamicResource MainPrimaryColorBrush}" Visibility="{Binding DeviceStatus.IsPullbackDone, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                                        <Label Style="{DynamicResource Pretendard-Bold-14}" Content="{Binding [Pullback], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleBlackBrush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                    </Border>
+                                    <Grid Visibility="{Binding DeviceStatus.IsPullbackDone, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                        <Border CornerRadius="10" Background="{DynamicResource MainPrimaryColorBrush}" Visibility="{Binding DeviceStatus.IsRecordingDone, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                            <Label Style="{DynamicResource Pretendard-Bold-14}" Content="{Binding [Recording], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleBlackBrush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        </Border>
+                                        <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" Visibility="{Binding DeviceStatus.IsRecordingDone, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <Label Style="{DynamicResource Pretendard-Bold-14}" Content="{Binding [Recording], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleBlackBrush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        </Border>
+                                    </Grid>                                    
                                 </Grid>
                             </Grid>
                             <Border Grid.Row="6" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
@@ -239,7 +244,12 @@
                             <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [sec], Source={StaticResource L10N}}"/>
                         </StackPanel>
                         <StackPanel Visibility="{Binding IsStart, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [Recording], Source={StaticResource L10N}}"/>
+                            <StackPanel Visibility="{Binding DeviceStatus.IsRecordingDone, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [Recording], Source={StaticResource L10N}}"/>
+                            </StackPanel>
+                            <StackPanel Visibility="{Binding DeviceStatus.IsRecordingDone, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Recording is Complete], Source={StaticResource L10N}}"/>
+                            </StackPanel>
                         </StackPanel>
                     </StackPanel>
                     <Grid Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,16,0">

@@ -123,7 +123,7 @@ namespace RaywattApp.ViewModels
             IsReady = true;
             IsStart = true;
             IsCancel = true;
-            AutoPullbackMsg = _l10n["Pullback starts automatically."];
+            AutoPullbackMsg = _l10n["Recording starts automatically"];
 
             timer.Interval = TimeSpan.FromMilliseconds(1000);
             timer.Tick += new EventHandler(StartTimer);
@@ -331,13 +331,14 @@ namespace RaywattApp.ViewModels
 
             IsStart = false;
             IsCancel = false;
-            AutoPullbackMsg = _l10n["Pullback has started."];
+            AutoPullbackMsg = "";
 
             PatientCase.Image = generateFileName("oct");
             DeviceStatus.IsSaveRawDataDone = false;
             DeviceStatus.IsLumenSaved = false;
             DeviceStatus.IsOCTImagingDone = false;
             DeviceStatus.IsLumenDetected = false;
+            DeviceStatus.IsRecordingDone = false;
             DeviceStatus.IsPullbackDone = false;
 
             RayError result = (RayError)RayPullbackScan(PatientCase.ImageFullPath);
@@ -365,14 +366,19 @@ namespace RaywattApp.ViewModels
 
         private void threadFuncWaitPullbackDone()
         {
+            while (!DeviceStatus.IsRecordingDone)
+            {
+                Thread.Sleep((int)Constants.WaitForEventInterval);
+            }
+
+            PatientCase.CreateDate = DateTime.Now;
+
             while (!DeviceStatus.IsPullbackDone)
             {
                 Thread.Sleep((int)Constants.WaitForEventInterval);
             }
 
-            this.isMoveConfirm = true;
-
-            PatientCase.CreateDate = DateTime.Now;
+            this.isMoveConfirm = true;            
 
             leaveToPage(Constants.RecordingConfirmPage);
         }

@@ -680,13 +680,14 @@ namespace RaywattApp.ViewModels
                     DeviceStatus.CatheterStatus = Constants.CatheterStatusEnable;
                     break;
                 case RayWorkItem.Recording:
+                    DeviceStatus.IsRecordingDone = true;
                     if (DeviceStatus.IsAngioConnected)
                     {
                         _angioManager.StopGettingAngioImageThread();
                     }
                     break;
                 case RayWorkItem.Pullback:
-                    DeviceStatus.IsPullbackDone = true;                                        
+                    DeviceStatus.IsPullbackDone = true;
                     break;
                 case RayWorkItem.OCTImaging:
                     if(param == (int)RaySession.Review)
