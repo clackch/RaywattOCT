@@ -153,6 +153,16 @@
                             </Image.RenderTransform>
                         </Image>
                     </Grid>
+
+                    <Label  Content="{Binding CrossSectionlabel}"
+                            FontSize="30"
+                            FontWeight="Bold"
+                            Foreground="{StaticResource CaseInfoSecondBrush}"
+                            HorizontalAlignment="left"
+                            VerticalAlignment="Top"
+                            Margin="20"
+                            IsHitTestVisible="False"/>
+                    
                 </Grid>
             </Grid>
             <!-- Longitude -->

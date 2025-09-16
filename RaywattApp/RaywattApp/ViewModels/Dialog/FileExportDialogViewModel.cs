@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -202,6 +203,9 @@ namespace RaywattApp.ViewModels.Dialog
         [ObservableProperty]
         private string _proximalOrientationLabel;
 
+        [ObservableProperty]
+        private string _crossSectionlabel;
+
         public FileExportDialogViewModel(SqlManager sqlManager)
         {
             _sqlManager = sqlManager;
@@ -228,6 +232,27 @@ namespace RaywattApp.ViewModels.Dialog
             bool isDistalToProximal = DeviceStatus.LongitudeOrientation == Common.Enums.LongitudeOrientation.DistalToProximal;
             DistalOrientationLabel = isDistalToProximal ? "D" : "P";
             ProximalOrientationLabel = isDistalToProximal ? "P" : "D";
+        }
+
+        private void MarkOrinetation(int totalFrame, int currentFrame)
+        {
+            int barLength = 10;
+            double ratio = (double)currentFrame / totalFrame;
+            int position = (int)Math.Round(ratio * barLength);
+
+            if (position < 0) position = 0;
+            if (position > barLength) position = barLength;
+
+            var bar = new StringBuilder();
+            for (int i = 0; i < barLength; i++)
+            {
+                if (i == position)
+                    bar.Append("o");
+                else
+                    bar.Append("-");
+            }
+
+            CrossSectionlabel = $"{DistalOrientationLabel}{bar}{ProximalOrientationLabel}";
         }
 
         public double SetInitialize(PatientCase patientCase, List<Mat> crossSections, Mat lMode, FileExport fileExport)
@@ -381,6 +406,8 @@ namespace RaywattApp.ViewModels.Dialog
 
         public void SetFrameNumber(int frameNumber)
         {
+            MarkOrinetation(PatientCase.NumOfFrames, frameNumber);
+
             CrossSectionImage = DrawCrossSectionWithBackground(crossSections[frameNumber], new Scalar(0x0d, 0x0d, 0x0d));
 
             if (FileExport.AngioView && PatientCase.AngioYn)

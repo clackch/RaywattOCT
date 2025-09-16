@@ -1015,31 +1015,54 @@ namespace RaywattApp.ViewModels
 
         private void AdjustLumenDataOrderByOrientation()
         {
-            if (DeviceStatus.LongitudeOrientationChanged)
+            // 1) 변경 없으면 종료
+            if (!DeviceStatus.LongitudeOrientationChanged)  return;
+
+            DeviceStatus.LongitudeOrientationChanged = false;   // 처리 완료 플래그 리셋
+            DeviceStatus.IsExecutedAIFFR = false;               // AI FFR 재실행 유도
+            PatientCase.FfrFeature = null;                      // FFR Feature 초기화
+
+            // 2) 섹션 인덱스 보정 (프레임 축 반전 + 상호 스왑)
+            int nf = ReviewStatus.NumberOfFrames;
+            PatientCase.SectionProximal = FlipIndex(PatientCase.SectionDistal, nf);
+            PatientCase.SectionDistal = FlipIndex(PatientCase.SectionProximal, nf); 
+
+            // 3) 표시 구간 값 스왑 (튜플 스왑)
+            (Section.Distal.DValue, Section.Proximal.DValue) =
+            (Section.Proximal.DValue, Section.Distal.DValue);
+
+            // 4) 도형/주석 데이터 순서 반전 (null-세이프)
+            PatientCase.LumenSidebranches?.Reverse();
+            PatientCase.LumenStents?.Reverse();
+            PatientCase.LumenGuidewires?.Reverse();
+            PatientCase.LumenContours?.Reverse();
+
+            // 5) 북마크 좌표/프레임 반전
+            if (!string.IsNullOrWhiteSpace(PatientCase.Bookmark))
             {
-                DeviceStatus.LongitudeOrientationChanged = false; // 수정 되었으므로,
+                try
+                {
+                    var bookmarks = JsonConvert.DeserializeObject<List<Bookmark>>(PatientCase.Bookmark) ?? new List<Bookmark>();
 
-                DeviceStatus.IsExecutedAIFFR = false; // AI FFR 수행 X (다시 실행 하기 위함)
-                PatientCase.FfrFeature = null;  // FFR 관련 Feature 초기화
+                    int frames = PatientCase.NumOfFrames;
+                    double width = Constants.LongitudeWidth;
 
-                /* indicator */ 
-                var proxiaml = ReviewStatus.NumberOfFrames - PatientCase.SectionProximal;
-                var distal = ReviewStatus.NumberOfFrames - PatientCase.SectionDistal;
+                    var adjusted = bookmarks.Select(b => new Bookmark
+                    {
+                        FrameNumber = FlipIndex(b.FrameNumber, frames),
+                        LongitudeX = FlipCoordX(b.LongitudeX, width)
+                    }).ToList();
 
-                PatientCase.SectionProximal = distal;
-                PatientCase.SectionDistal = proxiaml;
-
-                var sectionDistal = Section.Distal.DValue;
-                var sectionProximal = Section.Proximal.DValue;
-
-                Section.Distal.DValue = sectionProximal;
-                Section.Proximal.DValue = sectionDistal;
-
-                if (PatientCase.LumenSidebranches != null) PatientCase.LumenSidebranches.Reverse();
-                if (PatientCase.LumenStents != null) PatientCase.LumenStents.Reverse();
-                if (PatientCase.LumenGuidewires != null) PatientCase.LumenGuidewires.Reverse();
-                if (PatientCase.LumenContours != null) PatientCase.LumenContours.Reverse();
+                    PatientCase.Bookmark = JsonConvert.SerializeObject(adjusted);
+                }
+                catch (Exception ex)
+                {
+                    _log.Error("Bookmark deserialize/adjust failed", ex);
+                }
             }
+
+            int FlipIndex(int idx, int length) => Math.Clamp(length - 1 - idx, 0, Math.Max(0, length - 1));
+            double FlipCoordX(double x, double w) => (w > 0) ? (w - 1 - x) : x;
         }
         #endregion
 
