@@ -227,8 +227,12 @@ namespace RaywattApp.ViewModels
                 {
                     _log.Error("RayStopLiveView Error");
                 }
-                AutoPullback.OnOff = false;
-                RaySetProperty(Property.AutoPullback, 0.0);
+
+                if (PatientCase.PullbackTrigger.Equals("AUTO"))
+                {
+                    AutoPullback.OnOff = false;
+                    RaySetProperty(Property.AutoPullback, 0.0);
+                }                
             }
         }
 
@@ -306,8 +310,11 @@ namespace RaywattApp.ViewModels
                 IsReady = true;
                 IsStart = true;
                 IsCancel = true;
-                AutoPullback.OnOff = false;
-                RaySetProperty(Property.AutoPullback, 0.0);
+                if (PatientCase.PullbackTrigger.Equals("AUTO"))
+                {
+                    AutoPullback.OnOff = false;
+                    RaySetProperty(Property.AutoPullback, 0.0);
+                }                    
                 (ReadyCommand as RelayCommand).NotifyCanExecuteChanged();
                 timer.Stop();
 
