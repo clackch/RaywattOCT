@@ -2856,7 +2856,8 @@ namespace RaywattApp.Common.Util
                         triggerTargetCount = int.Parse(item.Value);
                         break;
                     case "ShowGuide":
-                        RaySetProperty(Property.ShowLumenGuide, item.Value == "Y" ? 1.0 : 0.0);
+                        if(!String.IsNullOrWhiteSpace(item.Buffer) && item.Buffer.Contains(Environment.UserName))
+                            RaySetProperty(Property.ShowLumenGuide, item.Value == "Y" ? 1.0 : 0.0);
                         break;
                     default:
                         break;
