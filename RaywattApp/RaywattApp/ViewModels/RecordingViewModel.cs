@@ -194,6 +194,12 @@ namespace RaywattApp.ViewModels
                     PbTime = temp[2];
                 }
 
+                if (PatientCase.PullbackTrigger.Equals("AUTO"))
+                {
+                    AutoPullback = new AutoPullback();
+                    AutoPullback.TriggerTargetCount = CommonUtil.SetAutuPullback(_sqlManager);
+                }
+
                 Ready();
             }
         }
@@ -221,7 +227,8 @@ namespace RaywattApp.ViewModels
                 {
                     _log.Error("RayStopLiveView Error");
                 }
-                DeviceStatus.AutoPullbackOnOff = false;
+                AutoPullback.OnOff = false;
+                RaySetProperty(Property.AutoPullback, 0.0);
             }
         }
 
@@ -276,14 +283,9 @@ namespace RaywattApp.ViewModels
 
             if (PatientCase.PullbackTrigger.Equals("AUTO"))
             {
-                DeviceStatus.AutoPullbackOnOff = true;
-                if(DeviceStatus.AutoPullbackModel)
-                    RaySetProperty(Property.AutoPullback, 1.0);
-            }
-            else
-            {
-                DeviceStatus.AutoPullbackOnOff = false;
-            }                
+                AutoPullback.OnOff = true;
+                RaySetProperty(Property.AutoPullback, 1.0);
+            }             
 
             readyTimer.Stop();
         }
@@ -304,9 +306,8 @@ namespace RaywattApp.ViewModels
                 IsReady = true;
                 IsStart = true;
                 IsCancel = true;
-                DeviceStatus.AutoPullbackOnOff = false;
-                if (DeviceStatus.AutoPullbackModel)
-                    RaySetProperty(Property.AutoPullback, 0.0);
+                AutoPullback.OnOff = false;
+                RaySetProperty(Property.AutoPullback, 0.0);
                 (ReadyCommand as RelayCommand).NotifyCanExecuteChanged();
                 timer.Stop();
 
