@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using static RaywattOCT.RayCoreWrapper;
 using RaywattOCT;
 using RaywattApp.Common.Angio;
+using System.Linq;
 
 namespace RaywattApp.ViewModels
 {
@@ -23,6 +24,8 @@ namespace RaywattApp.ViewModels
         private readonly SqlManager _sqlManager;
         private readonly AngioManager _angioManager;
 
+        private IList<Code> pullbackTypes;
+
         [ObservableProperty]
         private PrevStatus _prevStatus;
 
@@ -31,6 +34,15 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private PatientCase _patientCase;
+
+        [ObservableProperty]
+        private string _pbLength;
+
+        [ObservableProperty]
+        private string _pbSpeed;
+
+        [ObservableProperty]
+        private string _pbTime;
 
         [ObservableProperty]
         private Zoom _zoom = new Zoom(Constants.CrossSectionConfirmSize);
@@ -61,6 +73,10 @@ namespace RaywattApp.ViewModels
             {
                 _log.Error("RayLaserOnOff Error");
             }
+
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "PBTY";
+            pullbackTypes = _sqlManager.SelectCode(sqlParameters);
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -88,6 +104,15 @@ namespace RaywattApp.ViewModels
 
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
                 Playback();
+
+                Code pullback = pullbackTypes.FirstOrDefault(x => x.Key == PatientCase.PullbackType);
+                if (pullback != null)
+                {
+                    string[] temp = pullback.Buffer1.Split("|");
+                    PbLength = temp[0];
+                    PbSpeed = temp[1];
+                    PbTime = temp[2];
+                }
             }
 
             _angioManager.ReadyToRecv = false;
@@ -200,6 +225,7 @@ namespace RaywattApp.ViewModels
             PatientCase.SectionDistal = PatientCase.NumOfFrames - 1;
             sqlParameters["section_distal"] = PatientCase.SectionDistal;
             sqlParameters["guidewire_radius"] = PatientCase.GuidewireRadius;
+            sqlParameters["create_date"] = PatientCase.CreateDate;
 
             int nRows = _sqlManager.InsertPatientCase(sqlParameters);
 

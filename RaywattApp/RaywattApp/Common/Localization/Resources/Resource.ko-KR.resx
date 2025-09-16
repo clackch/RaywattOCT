@@ -127,8 +127,7 @@
     <value>[K]Verify Image Quality</value>
   </data>
   <data name="$MSG005" xml:space="preserve">
-    <value>[K]Review pullback to ensure proper blood clearance in relevant areas.
-And identify regions of uncertainty in lumen contour.</value>
+    <value>[K]Review pullback to ensure proper blood clearance in relevant areas. And identify regions of uncertainty in lumen contour.</value>
   </data>
   <data name="$MSG006" xml:space="preserve">
     <value>[K]Connect the catheter to the RJ</value>
