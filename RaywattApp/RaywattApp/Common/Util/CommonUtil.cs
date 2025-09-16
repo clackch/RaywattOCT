@@ -2329,6 +2329,8 @@ namespace RaywattApp.Common.Util
 
         public static void SetColormap(string? colorCode)
         {
+            _log.Debug("SetColormap : " + colorCode);
+
             if (colorCode == null)
                 return;
 

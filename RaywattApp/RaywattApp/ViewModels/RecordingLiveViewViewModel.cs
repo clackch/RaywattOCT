@@ -15,8 +15,8 @@ using System.Windows.Input;
 using System.Windows.Navigation;
 using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
-using RaywattApp.Common.Angio;
 using System.IO;
+using RaywattApp.Common.Util;
 
 namespace RaywattApp.ViewModels
 {
@@ -98,6 +98,30 @@ namespace RaywattApp.ViewModels
                     _log.Error("RaySetProperty Error");
                 }
             }
+        }
+
+        private string _colormap;
+        public string Colormap
+        {
+            get { return _colormap; }
+            set
+            {
+                _colormap = value;
+                CommonUtil.SetColormap(_colormap);
+                OnPropertyChanged(nameof(Colormap));                
+            }
+        }
+
+        private ICommand _cmdManualZoomIn;
+        public ICommand CmdManualZoomIn
+        {
+            get { return _cmdManualZoomIn ?? (this._cmdManualZoomIn = new RelayCommand<bool>(ManualZoomIn)); }
+        }
+
+        private ICommand _cmdAutoCalibration;
+        public ICommand CmdAutoCalibration
+        {
+            get { return _cmdAutoCalibration ?? (this._cmdAutoCalibration = new RelayCommand(AutoCalibration)); }
         }
 
         private double _fieldOfView;
@@ -196,6 +220,7 @@ namespace RaywattApp.ViewModels
                 Brightness = PatientCase.Brightness;
                 Contrast = PatientCase.Contrast;
                 FieldOfView = PatientCase.FieldOfView;
+                Colormap = PatientCase.Colormap;
 
                 if (PatientCase.ImageFullPath != null && PatientCase.Image != null)
                 {
@@ -370,6 +395,7 @@ namespace RaywattApp.ViewModels
             PatientCase.Brightness = Brightness;
             PatientCase.Contrast = Contrast;
             PatientCase.FieldOfView = FieldOfView;
+            PatientCase.Colormap = Colormap;
             parameter["patientCase"] = PatientCase;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(viewPage) { Parameter = parameter });
         }
@@ -377,6 +403,19 @@ namespace RaywattApp.ViewModels
         private void DrawAngioImage()
         {
             AngioImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(_angioManager.ImgAngio);
+        }
+
+        private void ManualZoomIn(bool zoomIn)
+        {
+            _log.Debug("ManualZoomIn : " + ((zoomIn) ? "IN" : "OUT"));
+
+            RayManualCalibration(zoomIn);
+        }
+
+        private void AutoCalibration()
+        {
+            RayAutoCalibration();
+            DeviceStatus.CanExecuteCalibration = false;
         }
     }
 }

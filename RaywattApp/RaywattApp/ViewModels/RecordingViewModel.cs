@@ -15,6 +15,7 @@ using RaywattApp.Common.Util;
 using static RaywattOCT.RayCoreWrapper;
 using RaywattApp.Common.Angio;
 using System.Threading;
+using System.Linq;
 
 namespace RaywattApp.ViewModels
 {
@@ -25,6 +26,8 @@ namespace RaywattApp.ViewModels
         private readonly SqlManager _sqlManager;
         private readonly AngioManager _angioManager;
 
+        private IList<Code> pullbackTypes;
+
         [ObservableProperty]
         private PrevStatus _prevStatus;
 
@@ -33,6 +36,15 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private PatientCase _patientCase;
+
+        [ObservableProperty]
+        private string _pbLength;
+
+        [ObservableProperty]
+        private string _pbSpeed;
+
+        [ObservableProperty]
+        private string _pbTime;
 
         [ObservableProperty]
         private bool _isStep1;
@@ -124,6 +136,10 @@ namespace RaywattApp.ViewModels
             DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current = 0;
             DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total = 0;
 
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "PBTY";
+            pullbackTypes = _sqlManager.SelectCode(sqlParameters);
+
             _angioManager.OnAngioAvailabilityChanged = UpdateAngioAvailabilityUI;
         }
 
@@ -168,6 +184,17 @@ namespace RaywattApp.ViewModels
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
                 timerUpdateImage.Start();
+
+                Code pullback = pullbackTypes.FirstOrDefault(x => x.Key == PatientCase.PullbackType);
+                if (pullback != null)
+                {
+                    string[] temp = pullback.Buffer1.Split("|");
+                    PbLength = temp[0];
+                    PbSpeed = temp[1];
+                    PbTime = temp[2];
+                }
+
+                Ready();
             }
         }
 
@@ -282,6 +309,8 @@ namespace RaywattApp.ViewModels
                     RaySetProperty(Property.AutoPullback, 0.0);
                 (ReadyCommand as RelayCommand).NotifyCanExecuteChanged();
                 timer.Stop();
+
+                leaveToPage(Constants.RecordingLiveViewPage);
             }
         }
 
@@ -334,6 +363,8 @@ namespace RaywattApp.ViewModels
             }
 
             this.isMoveConfirm = true;
+
+            PatientCase.CreateDate = DateTime.Now;
 
             leaveToPage(Constants.RecordingConfirmPage);
         }
