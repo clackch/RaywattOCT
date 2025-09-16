@@ -328,10 +328,6 @@ namespace RaywattApp.Common.Bases
                 _log.Debug("AutoPullback Start");
 
                 RaySetProperty(Property.AutoPullback, 0.0);
-                AutoPullback.OnOff = false;
-                AutoPullback.IsCleared = false;
-                AutoPullback.TriggerActualCount = 0;
-
                 AutoPullbackStart();
             }          
         }
