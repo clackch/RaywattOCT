@@ -125,7 +125,7 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 	if (pData != nullptr && pData->GetExtraData(OCTHeader::ExtraData::Background) != nullptr)
 	{
 		PLOGI.printf("Read background from .oct file.");
-		if (setting.nBufferSize > 1024 * 1024) {
+		if (setting.nBufferSize > 1024 * 1024 * 3) {
 			PLOGI.printf("BufferSize is too big : %d", setting.nBufferSize);
 			return nullptr;
 		}
