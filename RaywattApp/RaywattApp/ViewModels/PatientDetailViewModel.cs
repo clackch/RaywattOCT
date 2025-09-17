@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
+using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Enums;
@@ -406,6 +407,11 @@ namespace RaywattApp.ViewModels
 
             // TODO: 정보를 받아서 표시 (Longitued Orientation)
             var __ = (RayError)RaySetProperty(Property.LongitudeOrientation, (double)DeviceStatus.LongitudeOrientation);
+            if (DeviceStatus.LongitudeOrientation != LongitudeOrientation.DistalToProximal)
+            {
+                DeviceStatus.LongitudeOrientationChanged = true;
+            }
+
 
             Dictionary<string, Object> parameter = new Dictionary<string, Object>();
             parameter["patient"] = Patient;

@@ -458,6 +458,28 @@ namespace RaywattApp.Services
             return _databaseService.UpdateData(commandText, sqlParameters);
         }
 
+        public int UpdatePhysician(Physician physician)
+        {
+            _log.Debug("UpdatePhysician(physician)");
+
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["lastname"] = physician.Lastname.Trim();
+            sqlParameters["firstname"] = physician.Firstname.Trim();
+            sqlParameters["flush_media"] = physician.FlushMedia;
+            sqlParameters["pullback_trigger"] = physician.PullbackTrigger;
+            sqlParameters["pullback_type"] = physician.PullbackType;
+            sqlParameters["colormap"] = physician.Colormap;
+            sqlParameters["calcium_threshold"] = physician.CalciumThreshold;
+            sqlParameters["expansion_threshold"] = physician.ExpansionThreshold;
+            sqlParameters["apposition_threshold"] = physician.AppositionThreshold;
+            sqlParameters["is_distal_to_proximal"] = physician.Isdistaltoproximal;
+            sqlParameters["id"] = physician.Id;
+
+            string commandText = SqlQuery.GetQuery("UpdatePhysician");
+
+            return _databaseService.UpdateData(commandText, sqlParameters);
+        }
+
         public int DeletePhysician(Dictionary<string, Object> sqlParameters)
         {
             _log.Debug("DeletePhysician");

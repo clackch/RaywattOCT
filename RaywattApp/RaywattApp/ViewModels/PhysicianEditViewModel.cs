@@ -200,6 +200,7 @@ namespace RaywattApp.ViewModels
             sqlParameters["calcium_threshold"] = Physician.CalciumThreshold;
             sqlParameters["expansion_threshold"] = Physician.ExpansionThreshold;
             sqlParameters["apposition_threshold"] = Physician.AppositionThreshold;
+            sqlParameters["is_distal_to_proximal"] = Physician.Isdistaltoproximal;
 
             int nRows = 0;
 

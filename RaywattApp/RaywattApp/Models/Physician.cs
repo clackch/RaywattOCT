@@ -84,5 +84,8 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private DateTime _updateDate;
+
+        [ObservableProperty]
+        private bool _isdistaltoproximal;
     }
 }

@@ -135,6 +135,9 @@ namespace RaywattApp.ViewModels
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
 
+                CheckLongitudeOrientation();
+                LongitudeOrientation = DeviceStatus.LongitudeOrientation;
+
                 Code pullback = pullbackTypes.FirstOrDefault(x => x.Key == PatientCase.PullbackType);
                 if (pullback != null)
                 {
@@ -162,7 +165,6 @@ namespace RaywattApp.ViewModels
 
             //PatientCase.Colormap = SelectedColormap;
             //CommonUtil.SetColormap(PatientCase.Colormap);
-
             ConfirmAndGoToReview();
         }
         private void Cancel()
@@ -228,7 +230,12 @@ namespace RaywattApp.ViewModels
             DeviceStatus.IsOCTImagingDone = false;
 
             /* 방향 변경 */
-            if (DeviceStatus.LongitudeOrientation != _longitudeOrientation) DeviceStatus.LongitudeOrientationChanged = true;
+            if (DeviceStatus.LongitudeOrientation != _longitudeOrientation)
+            {
+                DeviceStatus.LongitudeOrientationChanged = true;
+                UpdateLongitudeOreinetation();
+            }
+
             DeviceStatus.LongitudeOrientation = _longitudeOrientation;
 
             RayError __ = (RayError)RaySetProperty(Property.LongitudeOrientation, (double)DeviceStatus.LongitudeOrientation);
@@ -242,6 +249,46 @@ namespace RaywattApp.ViewModels
             parameter["reviewStatus"] = reviewStatus;
             Ray3DWrapper.ray3DStatus = new Ray3DWrapper.Ray3DStatus();
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewPage) { Parameter = parameter });
+        }
+
+        private void CheckLongitudeOrientation()
+        {
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = Patient.PhysicianId;
+            IList<Physician> Physicians = _sqlManager.SelectPhysician(sqlParameters);
+
+            if (Physicians.Count == 0)
+            {
+                _log.Error("not find physician infomation");
+                DeviceStatus.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
+                return;
+            }
+
+            if (Physicians[0].Isdistaltoproximal) DeviceStatus.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
+            else DeviceStatus.LongitudeOrientation = LongitudeOrientation.ProximalToDistal;
+
+            LongitudeOrientation = DeviceStatus.LongitudeOrientation;
+        }
+
+        private void UpdateLongitudeOreinetation()
+        {
+            // load
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = Patient.PhysicianId;
+            IList<Physician> Physicians = _sqlManager.SelectPhysician(sqlParameters);
+
+            if (Physicians.Count == 0)
+            {
+                _log.Error("not find physician infomation");
+                DeviceStatus.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
+                return;
+            }
+
+            // update value
+            Physicians[0].Isdistaltoproximal = LongitudeOrientation == LongitudeOrientation.DistalToProximal;
+
+            // update
+            int result = _sqlManager.UpdatePhysician(Physicians[0]);
         }
     }
 }

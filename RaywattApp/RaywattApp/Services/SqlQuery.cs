@@ -206,7 +206,7 @@ namespace RaywattApp.Services
             _query["SelectPhysician"] = @$"
                 SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name
                 , flush_media, pullback_trigger, pullback_type, colormap
-                , calcium_threshold, expansion_threshold, apposition_threshold
+                , calcium_threshold, expansion_threshold, apposition_threshold, is_distal_to_proximal
                 , create_date, update_date
                 FROM rv_schema.physician
                 WHERE id=@id
@@ -442,7 +442,7 @@ namespace RaywattApp.Services
                 UPDATE rv_schema.physician
 	            SET lastname=@lastname, firstname=@firstname
 	            , flush_media=@flush_media, pullback_trigger=@pullback_trigger, pullback_type=@pullback_type, colormap=@colormap
-	            , calcium_threshold=@calcium_threshold, expansion_threshold=@expansion_threshold, apposition_threshold=@apposition_threshold
+	            , calcium_threshold=@calcium_threshold, expansion_threshold=@expansion_threshold, apposition_threshold=@apposition_threshold, is_distal_to_proximal=@is_distal_to_proximal
 	            , update_date=now()
 	            WHERE id=@id
                 ";
