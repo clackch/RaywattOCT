@@ -19,43 +19,43 @@ PullbackLengthManager::~PullbackLengthManager() {
 void PullbackLengthManager::CutPullbackLength(int pullbackType) {
 	PLOGI.printf("CutPullbackLength Start");
 	int rotationRatio = 1;  // 1 : 400, 2 : 200, 4 : 100
-	int stopFrames = 15 / rotationRatio; /*Default Stop Frames*/
+	int stopFrames = 3 / rotationRatio; /*Default Stop Frames*/
 	int maxFrames = 0;
+	int extraFrameNum = 0;
 
 	switch (pullbackType) {
 	case (int)PullbackType::HISH_20_60:
-		stopFrames = 6 /*½ÇÁ¦ Set Recording Value*/ / rotationRatio;
+		extraFrameNum = m_nNumOfSamples - 1200 / rotationRatio;
 		break;
 	case (int)PullbackType::HILO_40_100:
-		stopFrames = 18 / rotationRatio;
+		extraFrameNum = m_nNumOfSamples - 1000 / rotationRatio;
 		break;
 	case (int)PullbackType::STSH_60_60:
-		stopFrames = 18 / rotationRatio;
+		extraFrameNum = m_nNumOfSamples - 400 / rotationRatio;
 		break;
 	case (int)PullbackType::STLO_100_100:
-		stopFrames = 18 / rotationRatio;
+		extraFrameNum = m_nNumOfSamples - 400 / rotationRatio;
 		break;
 	case (int)PullbackType::FAST_120_60:
-		stopFrames = 25 / rotationRatio;
+		extraFrameNum = m_nNumOfSamples - 200 / rotationRatio;
 		break;
 	}
 
-	SkipFrames(stopFrames, pullbackType, rotationRatio);
+	SkipFrames(stopFrames, pullbackType, rotationRatio, extraFrameNum);
 }
 
-void PullbackLengthManager::SkipFrames(int stopRecordedFrames, int pullbackType, int rotationRatio) {
+void PullbackLengthManager::SkipFrames(int stopRecordedFrames, int pullbackType, int rotationRatio, int extraFrameNum) {
 	PLOGI.printf("SkipFrames");
 	try {
 		const double A = m_pisp[m_SMProfile][pullbackType].a;
 		const double B = m_pisp[m_SMProfile][pullbackType].b;
 		const double C = m_pisp[m_SMProfile][pullbackType].c;
 		const double threshold = m_pisp[m_SMProfile][pullbackType].threshold;
-		const int    frameNum = m_pisp[m_SMProfile][pullbackType].frameNum / rotationRatio;
 
 		PLOGI.printf("A = %.4lf, B = %.4lf, C = %.4lf, Threshold = %.4lf, frameNum = %d",
-			A, B, C, threshold, frameNum);
+			A, B, C, threshold, extraFrameNum);
 
-		const int halfLen = std::max(0, frameNum);
+		const int halfLen = std::max(0, extraFrameNum);
 		const int accelStart = stopRecordedFrames / 2;
 		const int accelEnd = accelStart + halfLen; // Next Index of accel range
 		const int decelStart = m_nNumOfSamples - halfLen - stopRecordedFrames / 2;
@@ -65,6 +65,7 @@ void PullbackLengthManager::SkipFrames(int stopRecordedFrames, int pullbackType,
 
 		int numOfSkip = 0;
 		double acc = 0.0;
+		int count = 0;
 
 		std::vector<bool> keepMask(static_cast<size_t>(m_nNumOfSamples), false);
 
@@ -104,6 +105,10 @@ void PullbackLengthManager::SkipFrames(int stopRecordedFrames, int pullbackType,
 				keepMask[i] = false; // skip
 				acc = 0.0;
 				numOfSkip += 2;
+				count++;
+				if (count >= halfLen / 2) {
+					break;
+				}
 				PLOGI.printf("skipped index = %d, reset acc; thr = %.4lf", i, threshold);
 			}
 			else {

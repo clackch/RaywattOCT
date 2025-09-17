@@ -1885,7 +1885,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 
 		auto now = std::chrono::system_clock::now();
 		auto duration = now.time_since_epoch();
-		double seconds_since_epoch = std::chrono::duration_cast<std::chrono::seconds>(duration).count() + 
+		double seconds_since_epoch = std::chrono::duration_cast<std::chrono::seconds>(duration).count() +
 			std::chrono::duration_cast<std::chrono::microseconds>(duration).count() / 1'000'000.0;
 		pSystem->SetPullbackStartTime(seconds_since_epoch);
 
