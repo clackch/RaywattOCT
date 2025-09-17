@@ -378,7 +378,7 @@ namespace RaywattApp.ViewModels
                 Thread.Sleep((int)Constants.WaitForEventInterval);
             }
 
-            this.isMoveConfirm = true;            
+            this.isMoveConfirm = true;
 
             leaveToPage(Constants.RecordingConfirmPage);
         }
