@@ -128,13 +128,17 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
-                
-                if(PatientCase.FfrFeature.Result > 0)
+
+                if (PatientCase.FfrFeature.Result > 0)
                 {
                     FfrResult = PatientCase.FfrFeature.Result;
                     BtnFfrEnabled = false;
                     VisibilityResult = Visibility.Visible;
                     OpacityResult = 1;
+                }
+                else
+                {
+                    Initialize();
                 }
 
                 Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
