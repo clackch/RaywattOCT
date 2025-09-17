@@ -1735,7 +1735,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		{
 			if (gradient[i] < 0 && gradient[i + 1] >= 0 && gradient[i] != -1 && gradient[i+1] != -1) // local min
 			{
-				if(minVal * 1.5 < info[i + 1].first) // 최솟값의 150% 이상인 값은 제외
+				if(minVal * 1.3 < info[i + 1].first) // 최솟값의 130% 이상인 값은 제외
 					continue;
 				minList.push_back(std::make_pair(info[i + 1].second, i + 1));
 				PLOGI.printf("local min found. Loc : %d, Value : %d", info[i + 1].second, info[i + 1].first);
@@ -1745,21 +1745,26 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			return a.first < b.first; // Loc 기준 오름차순 정렬
 			});
 		
-		std::vector<std::pair<int, int>> maxList; // pair<valueG, index>
+		std::vector<std::pair<int, int>> maxList; // pair<distLoc, index>
 		for (int i = 1; i < gradient.size() - 1; i++)
 		{
-			int valueG = 2 * gradient[i] - gradient[i + 1];
+			//int valueG = 2 * gradient[i] - gradient[i + 1];
+			int distLoc = abs(info[i + 1].second - Loc);
 			if (gradient[i] >= 0 && gradient[i + 1] < 0 && gradient[i] != -1 && gradient[i + 1] != -1) // local max
 			{
 				//if (minVal * 1.1 > info[i + 1].first) // 최솟값의 110% 이하인 값은 제외
 				//	continue;
-				maxList.push_back(std::make_pair(valueG, i + 1));
+				maxList.push_back(std::make_pair(distLoc, i + 1));
 				PLOGI.printf("local max found. Loc : %d, Value : %d", info[i + 1].second, info[i + 1].first);
 			}
 		}
 		//std::sort(maxList.begin(), maxList.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
 		//	return a.first > b.first; // valueG 기준 내림차순 정렬
 		//	});
+
+		std::sort(maxList.begin(), maxList.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
+			return a.first < b.first; // minLoc과의 거리 기준 오름 정렬
+			});
 
 		if (minList.empty() /*|| (minVal * 4) / 3 > maxVal*/) {
 			nTargetPos = startPosition;
@@ -1777,6 +1782,12 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 					break;
 				}
 			}
+
+			/*if(maxList.size() > 0) {
+				Loc = info[maxList.back().second].second;
+				maxFound = true;
+			}*/
+
 			if (!maxFound) {
 				PLOGI.printf("Cannot find Local max");
 				int nowIndex = minList[0].second;

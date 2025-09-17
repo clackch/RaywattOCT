@@ -508,8 +508,10 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 	}
 }
 
+int i = 0;
 void COCTImaging::CalculateMagnitude(cv::Mat img) {
 	auto start = std::chrono::high_resolution_clock::now();
+	i++;
 
 	cv::Mat edgeX, edgeY;
 	cv::Sobel(img, edgeX, CV_32F, 1, 0, 3);
@@ -531,6 +533,8 @@ void COCTImaging::CalculateMagnitude(cv::Mat img) {
 			totalMagnitude += absEdgeMagnitude.at<uchar>(y, x);
 		}
 	}
+
+	//cv::imwrite("origin"+std::to_string(i) + ".tif", img);
 	//PLOGI.printf("check the time - Magnitude: %d", totalMagnitude);
 	m_nSheathPosition = totalMagnitude;
 }
@@ -583,7 +587,6 @@ cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {
 	return result;
 }
 
-int i = 0;
 /*
 void COCTImaging::findSheath(cv::Mat input)
 {
@@ -856,7 +859,7 @@ void COCTImaging::findSheath(cv::Mat input)
 */
 void COCTImaging::findSheath(cv::Mat input) {
 	// ===== 0) 단일채널 8U로 정규화 =====
-	i++;
+	//i++;
 	cv::Mat gray;
 	if (input.channels() == 3) {
 		cvtColor(input, gray, cv::COLOR_BGR2GRAY);
@@ -903,7 +906,7 @@ void COCTImaging::findSheath(cv::Mat input) {
 		}
 	}
 	cv::line(tmp, cv::Point(0, nowRow), cv::Point(tmp.cols - 1, nowRow), cv::Scalar(255, 0, 0), 2);
-	cv::imwrite("origin" + std::to_string(i) + ".tif", tmp);
+	//cv::imwrite("origin" + std::to_string(i) + ".tif", tmp);
 
 	m_nSheathPosition = nowRow;
 }
