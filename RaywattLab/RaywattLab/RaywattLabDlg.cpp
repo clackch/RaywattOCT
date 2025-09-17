@@ -210,7 +210,7 @@ void CRaywattLabDlg::updateBrightnessContrast(CLabImaging* pImaging) {
 	double brightness = ((double)posB / rangeSliderB[1]) * (rangeB[1] - rangeB[0]) + rangeB[0];
 	double contrast = ((double)posC / rangeSliderC[1]) * (rangeC[1] - rangeC[0]) + rangeC[0];
 
-	pImaging->SetBrightnessContrast(brightness, contrast);
+	if(pImaging != nullptr) pImaging->SetBrightnessContrast(brightness, contrast);
 
 	AfxGetApp()->WriteProfileInt(_T("RECENT_SETTING"), _T("BRIGHTNESS"), posB);
 	AfxGetApp()->WriteProfileInt(_T("RECENT_SETTING"), _T("CONTRAST"), posC);
@@ -225,7 +225,7 @@ void CRaywattLabDlg::updateLevel(CLabImaging* pImaging) {
 	const int low = m_sliderLowLevel.GetPos();
 	const int high = m_sliderHighLevel.GetPos();
 
-	pImaging->SetLevel(low, high);
+	if (pImaging != nullptr) pImaging->SetLevel(low, high);
 
 	AfxGetApp()->WriteProfileInt(_T("RECENT_SETTING"), _T("LOWLEVEL"), low);
 	AfxGetApp()->WriteProfileInt(_T("RECENT_SETTING"), _T("HIGHLEVEL"), high);
@@ -265,7 +265,12 @@ CLabImaging* CRaywattLabDlg::createImaging(IImaging::Setting imaging) {
 	CLabImaging* pImaging = new CLabImaging(imaging, this);
 
 	CCalibration* calibration = new CCalibration(imaging.nAScan, imaging.nFFTLength);
-	calibration->Initialize(m_strCurCalibration);
+	bool result = calibration->Initialize(m_strCurCalibration);
+	if (!result) {
+		delete pImaging;
+		return nullptr;
+	}
+
 	USHORT* background = readBackground(BACKGROUND_FILEPATH, imaging);
 
 	pImaging->Initialize(calibration, background);
@@ -748,12 +753,15 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	int goodClockEnd = config.imaging.nAScan;
 
 	m_pImagingRealtime = createImaging(config.imaging);
-	m_pImagingRealtime->SetGoodClockRange(goodClockStart, goodClockEnd);
-	m_pImagingRealtime->Start();
-
 	m_pImagingSimulate = createImaging(config.imaging);
-	m_pImagingSimulate->SetGoodClockRange(goodClockStart, goodClockEnd);
-	m_pImagingSimulate->Start();
+
+	if (m_pImagingRealtime != nullptr && m_pImagingSimulate != nullptr) {
+		m_pImagingRealtime->SetGoodClockRange(goodClockStart, goodClockEnd);
+		m_pImagingRealtime->Start();
+
+		m_pImagingSimulate->SetGoodClockRange(goodClockStart, goodClockEnd);
+		m_pImagingSimulate->Start();
+	}
 
 	int nBufferSize = config.acquisition.nAScan * config.acquisition.nBScan;
 
@@ -990,6 +998,7 @@ void CRaywattLabDlg::OnBnClickedButtonLoadSelectedData()
 	int result = NOERROR;
 	bool dataLoaded = m_btnLoadData.pushed;
 	bool dataPlayed = m_btnPlayData.pushed;
+	CConfiguration& config = CConfiguration::GetInstance();
 
 	if (dataLoaded) {
 		result = m_pSimDevice->StopAcquisition();
@@ -1014,6 +1023,16 @@ void CRaywattLabDlg::OnBnClickedButtonLoadSelectedData()
 			m_pImagingSimulate->Stop();
 			delete m_pImagingSimulate;
 		}
+		PLOGI.printf("setting.distPerPixel: %f", setting.distPerPixel);
+		setting.applyCompensation = config.imaging.applyCompensation;
+		setting.exponentialFactor = config.imaging.exponentialFactor;
+		setting.brightnessControl = config.imaging.brightnessControl;
+		setting.energyThreshold = config.imaging.energyThreshold;
+		setting.applyGammaCorrection = config.imaging.applyGammaCorrection;
+		setting.GCAlpha = config.imaging.GCAlpha;
+		setting.intensityThreshold = config.imaging.intensityThreshold;
+
+		setting.distPerPixel = (setting.distPerPixel == 0.f) ? 4.9f : setting.distPerPixel;
 		m_pImagingSimulate = createImaging(setting);
 		m_pImagingSimulate->Start();
 
@@ -1233,7 +1252,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveTif()
 	strTifPath.Replace(strTifPath.Right(3), _T("tif"));
 
 	CDataReader* pReader = new CDataReader();
-	IImaging::Setting setting = initReader(strDataPath.GetBuffer(), pReader);
+	IImaging::Setting setting = m_pImagingSimulate->GetSetting(); // initReader(strDataPath.GetBuffer(), pReader);
 
 	CLabImaging* pImaging = createImaging(setting);
 	pImaging->SetImageCompensation(m_chkCompensation);
@@ -1243,7 +1262,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveTif()
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
 		pImaging->SetZOffset(m_vZOffset.at(i));
 		pImaging->Process(pReader->GetSample(i));		
-		cv::Mat imgRect = getFoVImage(pImaging->GetProcessedImage(), 9000.f);
+		cv::Mat imgRect = getFoVImage(pImaging->GetProcessedImage(), 10.f);
 		pImaging->PostProcess(imgRect);
 
 		tiffWriter.SaveFrame(((isCircle) ? pImaging->GetCircleImage() : pImaging->GetRectangleImage()));
@@ -1671,6 +1690,7 @@ void CRaywattLabDlg::OnBnClickedCheckCompensation()
 
 	if (m_pImagingSimulate == nullptr) return;
 	m_pImagingSimulate->SetImageCompensation(m_chkCompensation);
+	IImaging::Setting setting = m_pImagingSimulate->GetSetting();
 
 	if (m_chkCompensation) {
 		CUtility::StartThread(threadCompensationParamWindow, m_pThreadCompParamWin, this);
