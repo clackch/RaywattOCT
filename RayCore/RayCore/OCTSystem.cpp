@@ -1671,9 +1671,9 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 	//1차 탐색 속도
 	int firstCheckVelocity = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("firstVel"), 2, _T(".\\raycore.ini"));
 	//1차 탐색 후, 2차 탐색을 위해 이동할 거리
-	int nJumpStep = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("JumpStep"), 3600, _T(".\\raycore.ini")) * CConfiguration::GetInstance().laserModule.delayLineSMSteps;
+	int nJumpStep = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("JumpStep"), 3200, _T(".\\raycore.ini")) * CConfiguration::GetInstance().laserModule.delayLineSMSteps;
 	//2차 탐색 범위 
-	int nSearchRange = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("SearchRange"), 500, _T(".\\raycore.ini"));
+	int nSearchRange = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("SearchRange"), 600, _T(".\\raycore.ini"));
 	//2차 탐색 시, 모터 속도 조절 값
 	int nDLMotorSpeedDivVal = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("DelayLineSpeedDivValue"), 10, _T(".\\raycore.ini"));
 
@@ -1684,26 +1684,28 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO * firstCheckVelocity / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
 
 		// 1. Start Finding Sheath
-		pSystem->m_vCalibrationInfo.clear();
 		pSystem->m_pImagingLiveView->SetAutoCalibrationMathod(AutoCalibrationMathod::FindingMinMagnitude);
 		// 초기화
 		pSystem->m_cathState = CatheterState::FindingSheath;
 
 		pSystem->m_pImagingLiveView->SetDelayLineMovingDirection(1);
+		pSystem->m_vCalibrationInfo.clear();
 		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, 5000 * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
 		
 		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
+		std::vector<std::pair<int, int>> info = pSystem->m_vCalibrationInfo;
+
 		// 1-2. Find Z-Offset Position		
-		int startPosition = pSystem->m_vCalibrationInfo.empty() ? 0 : pSystem->m_vCalibrationInfo.at(0).second;
+		int startPosition = info.empty() ? 0 : info.at(0).second;
 		int nMinDiff = INT_MAX;
 		int nZOffset = 0;
 
 		//way 1
-		const auto& info = pSystem->m_vCalibrationInfo;
 		std::vector<int> gradient(info.size() - 1);
 		int minVal = INT_MAX, maxVal = 0, Loc = startPosition;
 
+		// gradient, minVal, maxVal 계산
 		for (int i = 1; i < info.size(); i++)
 		{
 			gradient[i - 1] = info[i].first - info[i - 1].first;
@@ -1725,6 +1727,8 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 				maxVal = info[i].first;
 			}
 		}
+
+		PLOGI.printf("minVal : %d, maxVal : %d", minVal, maxVal);
 
 		std::vector<std::pair<int, int>> minList; // pair<Loc, index>
 		for (int i = 0; i < gradient.size() - 1; i++)
@@ -1809,7 +1813,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			pSystem->m_pImagingLiveView->SetAutoCalibrationMathod(AutoCalibrationMathod::Disable);
 			const int nSheathPosition = CConfiguration::GetInstance().measurement.nSheathPosition;
 
-			nMinDiff = INT_MAX;
+			/*nMinDiff = INT_MAX;
 			nZOffset = 0;
 			int nFirstSheathPos = 0;
 			int nFirstSheathPosIdx = 0;
@@ -1870,10 +1874,25 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 				{
 					nOffsetAdj = 0;
 				}
+			}*/
+
+			int minDiff = INT_MAX;
+			int closestIdx = -1;
+			for(int i= pSystem->m_vCalibrationInfo.size() - 1; i>=0; i--)
+			{
+				int nowRow = pSystem->m_vCalibrationInfo.at(i).first;
+				if (abs(nowRow - 180) < minDiff)
+				{
+					closestIdx = i;
+					minDiff = abs(nowRow - 180);
+				}
 			}
+			nZOffset = pSystem->m_vCalibrationInfo.at(closestIdx).second;
 
 			// 1-3. Move to calibrated position
-			nTargetPos = nZOffset + nOffsetAdj;
+			nTargetPos = nZOffset - 450 - pSystem->autoCalibrationFranch;
+			PLOGI.printf("Target Position : %d", nTargetPos);
+			//PLOGI.printf("Sheath Position : %d, Target Position : %d, First Pos : %d, Second Pos : %d, Offset Adj : %d, StepPerPixel : %d", nSheathPosition, nTargetPos, nFirstSheathPos, nSecondSheathPos, nOffsetAdj, nStepPerPixel);
 		}
 		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);
 		pLaserModule->Move(eStepMotorIndex::DelayLine, nTargetPos);

@@ -583,6 +583,8 @@ cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {
 	return result;
 }
 
+int i = 0;
+/*
 void COCTImaging::findSheath(cv::Mat input)
 {
 	using namespace cv;
@@ -646,6 +648,9 @@ void COCTImaging::findSheath(cv::Mat input)
 
 	// ===== 1) 회전 =====
 	if (ROTATE_CCW_90) rotate(gray, gray, ROTATE_90_COUNTERCLOCKWISE);
+
+	i++;
+	//cv::imwrite("origin"+std::to_string(i) + ".tif", gray);
 
 	// ===== 2) 영상 개선 (LUT 테이블 적용) =====
 	{
@@ -847,6 +852,60 @@ void COCTImaging::findSheath(cv::Mat input)
 	// ===== 11) 최종 후보 선정 =====
 	int sheathPos = has_final ? (int)std::round(chosen_global.centerY) : -1;
 	m_nSheathPosition = sheathPos;	
+}
+*/
+void COCTImaging::findSheath(cv::Mat input) {
+	// ===== 0) 단일채널 8U로 정규화 =====
+	i++;
+	cv::Mat gray;
+	if (input.channels() == 3) {
+		cvtColor(input, gray, cv::COLOR_BGR2GRAY);
+	}
+	else if (input.channels() == 4) {
+		cv::Mat bgr; cvtColor(input, bgr, cv::COLOR_BGRA2BGR); cvtColor(bgr, gray, cv::COLOR_BGR2GRAY);
+	}
+	else {
+		if (input.type() == CV_8UC1) gray = input.clone();
+		else {
+			double mn = 0.0, mx = 0.0; minMaxLoc(input, &mn, &mx);
+			if (mx > mn) input.convertTo(gray, CV_8U, 255.0 / (mx - mn), -mn * 255.0 / (mx - mn));
+			else         input.convertTo(gray, CV_8U);
+		}
+	}
+
+	cv::rotate(gray, gray, cv::ROTATE_90_COUNTERCLOCKWISE);
+
+	//cv::resize(gray, gray, cv::Size(), 0.5, 0.5);
+	cv::Mat tmp = gray.clone();
+
+	cv::threshold(gray, gray, 0, 255, cv::THRESH_OTSU);
+
+	int nowRow = 0;
+	int startRow = 120;
+	int sheathThickness = 15;
+	int thickCount = 0;
+	for (int i = startRow; i < startRow + 200; i++) {
+		int pixelCount = 0;
+		for (int x = 0; x < gray.cols; x++) {
+			if (gray.at<uchar>(i, x) == 255)
+				pixelCount++;
+		}
+		nowRow = i;
+		if (pixelCount > gray.cols / 2) {
+			thickCount++;
+			if (thickCount > sheathThickness) {
+				nowRow -= sheathThickness;
+				break;
+			}
+		}
+		else {
+			thickCount = 0;
+		}
+	}
+	cv::line(tmp, cv::Point(0, nowRow), cv::Point(tmp.cols - 1, nowRow), cv::Scalar(255, 0, 0), 2);
+	cv::imwrite("origin" + std::to_string(i) + ".tif", tmp);
+
+	m_nSheathPosition = nowRow;
 }
 
 // 정규화를 위한 함수
