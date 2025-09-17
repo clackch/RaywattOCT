@@ -799,11 +799,11 @@ void* COCTSystem::GetImageData(int nFrame) {
 	return nullptr;
 }
 
-void COCTSystem::SetLongitudeOrientation(bool nOrientation) 
+void COCTSystem::SetLongitudeOrientation(const bool nOrientation) 
 {
 	PLOGI.printf("[junghw] longitude: %d", nOrientation);
 
-	bLongitudeOrientation = nOrientation;
+	bLongitudeOrientation = nOrientation; // false: Distal to PRoximlal, true: Proximal to Distal
 	IDataManager* pDataManager = m_reviewSession[SESSION_REVIEW]->GetDataManager();
 	pDataManager->SetLongitudeOrientation(nOrientation);
 }
