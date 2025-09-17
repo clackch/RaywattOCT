@@ -2832,6 +2832,7 @@ namespace RaywattApp.Common.Util
             IList<Configuration> autoPullback = sqlManager.SelectConfiguration(sqlParameters);
 
             int triggerTargetCount = 0;
+            RayError result;
 
             foreach (var item in autoPullback)
             {
@@ -2844,20 +2845,38 @@ namespace RaywattApp.Common.Util
                 switch (key)
                 {
                     case "LumenMin":
-                        RaySetProperty(Property.LumenThresholdMin, double.Parse(item.Value) / 100);
+                        result = (RayError)RaySetProperty(Property.LumenThresholdMin, double.Parse(item.Value) / 100);
+                        if (result != RayError.OK)
+                        {
+                            _log.Error("RaySetProperty Error");
+                        }
                         break;
                     case "LumenMax":
-                        RaySetProperty(Property.LumenThresholdMax, double.Parse(item.Value) / 100);
+                        result = (RayError)RaySetProperty(Property.LumenThresholdMax, double.Parse(item.Value) / 100);
+                        if (result != RayError.OK)
+                        {
+                            _log.Error("RaySetProperty Error");
+                        }
                         break;
                     case "SNR":
-                        RaySetProperty(Property.LumenSnrThreshold, double.Parse(item.Value));
+                        result = (RayError)RaySetProperty(Property.LumenSnrThreshold, double.Parse(item.Value));
+                        if (result != RayError.OK)
+                        {
+                            _log.Error("RaySetProperty Error");
+                        }
                         break;
                     case "Count":
                         triggerTargetCount = int.Parse(item.Value);
                         break;
                     case "ShowGuide":
                         if(!String.IsNullOrWhiteSpace(item.Buffer) && item.Buffer.Contains(Environment.UserName))
-                            RaySetProperty(Property.ShowLumenGuide, item.Value == "Y" ? 1.0 : 0.0);
+                        {
+                            result = (RayError)RaySetProperty(Property.ShowLumenGuide, item.Value == "Y" ? 1.0 : 0.0);
+                            if (result != RayError.OK)
+                            {
+                                _log.Error("RaySetProperty Error");
+                            }
+                        }                        
                         break;
                     default:
                         break;

@@ -550,7 +550,11 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("AutopullbackOff");
 
-            RaySetProperty(Property.AutoPullback, 0.0);
+            RayError result = (RayError)RaySetProperty(Property.AutoPullback, 0.0);
+            if (result != RayError.OK)
+            {
+                _log.Error("RaySetProperty Error");
+            }
         }
         
         private void AutopullbackOn()
@@ -558,7 +562,11 @@ namespace RaywattApp.ViewModels
             _log.Debug("AutopullbackOn");
 
             CommonUtil.SetAutuPullback(_sqlManager);
-            RaySetProperty(Property.AutoPullback, 1.0);
+            RayError result = (RayError)RaySetProperty(Property.AutoPullback, 1.0);
+            if (result != RayError.OK)
+            {
+                _log.Error("RaySetProperty Error");
+            }
         }
 
         //Test

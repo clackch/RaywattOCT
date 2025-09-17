@@ -232,7 +232,11 @@ namespace RaywattApp.ViewModels
             if (PatientCase.PullbackTrigger.Equals("AUTO"))
             {
                 AutoPullback.OnOff = false;
-                RaySetProperty(Property.AutoPullback, 0.0);
+                RayError result = (RayError)RaySetProperty(Property.AutoPullback, 0.0);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
             }
         }
 
@@ -288,7 +292,11 @@ namespace RaywattApp.ViewModels
             if (PatientCase.PullbackTrigger.Equals("AUTO"))
             {
                 AutoPullback.OnOff = true;
-                RaySetProperty(Property.AutoPullback, 1.0);
+                RayError result = (RayError)RaySetProperty(Property.AutoPullback, 1.0);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
             }             
 
             readyTimer.Stop();
@@ -313,7 +321,11 @@ namespace RaywattApp.ViewModels
                 if (PatientCase.PullbackTrigger.Equals("AUTO"))
                 {
                     AutoPullback.OnOff = false;
-                    RaySetProperty(Property.AutoPullback, 0.0);
+                    result = (RayError)RaySetProperty(Property.AutoPullback, 0.0);
+                    if (result != RayError.OK)
+                    {
+                        _log.Error("RaySetProperty Error");
+                    }
                 }
                 (ReadyCommand as RelayCommand).NotifyCanExecuteChanged();
                 timer.Stop();
@@ -434,12 +446,22 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ManualZoomIn : " + ((zoomIn) ? "IN" : "OUT"));
 
-            RayManualCalibration(zoomIn);
+            RayError result = (RayError)RayManualCalibration(zoomIn);
+            if (result != RayError.OK && result != RayError.DeviceBusy)
+            {
+                _log.Error("RayManualCalibration Error : " + result);
+            }
         }
 
         private void AutoCalibration()
         {
-            RayAutoCalibration();
+            _log.Debug("AutoCalibration");
+
+            RayError result = (RayError)RayAutoCalibration();
+            if (result != RayError.OK)
+            {
+                _log.Error("RayAutoCalibration Error");
+            }
             DeviceStatus.CanExecuteCalibration = false;
         }
     }

@@ -327,7 +327,11 @@ namespace RaywattApp.Common.Bases
             {
                 _log.Debug("AutoPullback Start");
 
-                RaySetProperty(Property.AutoPullback, 0.0);
+                RayError result = (RayError)RaySetProperty(Property.AutoPullback, 0.0);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
                 AutoPullbackStart();
             }          
         }

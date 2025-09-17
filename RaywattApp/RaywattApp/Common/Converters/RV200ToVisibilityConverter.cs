@@ -6,7 +6,7 @@ using RaywattApp.Common.Util;
 
 namespace RaywattApp.Common.Converters
 {
-    class RV200ToVisibilityConverter : IValueConverter
+    public class RV200ToVisibilityConverter : IValueConverter
     {
         public Visibility TrueValue { get; set; } = Visibility.Visible;
 

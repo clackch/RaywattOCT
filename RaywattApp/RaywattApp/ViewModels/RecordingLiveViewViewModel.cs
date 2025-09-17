@@ -409,12 +409,22 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ManualZoomIn : " + ((zoomIn) ? "IN" : "OUT"));
 
-            RayManualCalibration(zoomIn);
+            RayError result = (RayError)RayManualCalibration(zoomIn);
+            if (result != RayError.OK && result != RayError.DeviceBusy)
+            {
+                _log.Error("RayManualCalibration Error : " + result);
+            }
         }
 
         private void AutoCalibration()
         {
-            RayAutoCalibration();
+            _log.Debug("AutoCalibration");
+
+            RayError result = (RayError)RayAutoCalibration();
+            if (result != RayError.OK)
+            {
+                _log.Error("RayAutoCalibration Error");
+            }
             DeviceStatus.CanExecuteCalibration = false;
         }
     }

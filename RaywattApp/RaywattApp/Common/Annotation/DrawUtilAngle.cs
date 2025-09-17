@@ -392,7 +392,7 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
-        private double getAngle(Point angleFirstPoint, Point angleSecondPoint, Point angleThirdPoint)
+        private static double getAngle(Point angleFirstPoint, Point angleSecondPoint, Point angleThirdPoint)
         {
             Vector vector1 = angleFirstPoint - angleSecondPoint;
             Vector vector2 = angleThirdPoint - angleSecondPoint;
@@ -876,7 +876,7 @@ namespace RaywattApp.Common.Annotation
         }
 
 
-        private PathGeometry? getLine(Point firstPoint, Point secondPoint)
+        private static PathGeometry? getLine(Point firstPoint, Point secondPoint)
         {
             var myPathFigure = new PathFigure { StartPoint = firstPoint };
             var myPathSegmentCollection = new PathSegmentCollection();
