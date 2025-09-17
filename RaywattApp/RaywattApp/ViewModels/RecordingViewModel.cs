@@ -15,6 +15,7 @@ using RaywattApp.Common.Util;
 using static RaywattOCT.RayCoreWrapper;
 using RaywattApp.Common.Angio;
 using System.Threading;
+using System.Linq;
 
 namespace RaywattApp.ViewModels
 {
@@ -25,6 +26,8 @@ namespace RaywattApp.ViewModels
         private readonly SqlManager _sqlManager;
         private readonly AngioManager _angioManager;
 
+        private IList<Code> pullbackTypes;
+
         [ObservableProperty]
         private PrevStatus _prevStatus;
 
@@ -33,6 +36,15 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private PatientCase _patientCase;
+
+        [ObservableProperty]
+        private string _pbLength;
+
+        [ObservableProperty]
+        private string _pbSpeed;
+
+        [ObservableProperty]
+        private string _pbTime;
 
         [ObservableProperty]
         private bool _isStep1;
@@ -111,7 +123,7 @@ namespace RaywattApp.ViewModels
             IsReady = true;
             IsStart = true;
             IsCancel = true;
-            AutoPullbackMsg = _l10n["Pullback starts automatically."];
+            AutoPullbackMsg = _l10n["Recording starts automatically"];
 
             timer.Interval = TimeSpan.FromMilliseconds(1000);
             timer.Tick += new EventHandler(StartTimer);
@@ -123,6 +135,10 @@ namespace RaywattApp.ViewModels
 
             DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current = 0;
             DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total = 0;
+
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "PBTY";
+            pullbackTypes = _sqlManager.SelectCode(sqlParameters);
 
             _angioManager.OnAngioAvailabilityChanged = UpdateAngioAvailabilityUI;
         }
@@ -168,6 +184,23 @@ namespace RaywattApp.ViewModels
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
                 timerUpdateImage.Start();
+
+                Code pullback = pullbackTypes.FirstOrDefault(x => x.Key == PatientCase.PullbackType);
+                if (pullback != null)
+                {
+                    string[] temp = pullback.Buffer1.Split("|");
+                    PbLength = temp[0];
+                    PbSpeed = temp[1];
+                    PbTime = temp[2];
+                }
+
+                if (PatientCase.PullbackTrigger.Equals("AUTO"))
+                {
+                    AutoPullback = new AutoPullback();
+                    AutoPullback.TriggerTargetCount = CommonUtil.SetAutuPullback(_sqlManager);
+                }
+
+                Ready();
             }
         }
 
@@ -193,8 +226,13 @@ namespace RaywattApp.ViewModels
                 if (result != RayError.OK)
                 {
                     _log.Error("RayStopLiveView Error");
-                }
-                DeviceStatus.AutoPullbackOnOff = false;
+                }               
+            }
+
+            if (PatientCase.PullbackTrigger.Equals("AUTO"))
+            {
+                AutoPullback.OnOff = false;
+                RaySetProperty(Property.AutoPullback, 0.0);
             }
         }
 
@@ -249,14 +287,9 @@ namespace RaywattApp.ViewModels
 
             if (PatientCase.PullbackTrigger.Equals("AUTO"))
             {
-                DeviceStatus.AutoPullbackOnOff = true;
-                if(DeviceStatus.AutoPullbackModel)
-                    RaySetProperty(Property.AutoPullback, 1.0);
-            }
-            else
-            {
-                DeviceStatus.AutoPullbackOnOff = false;
-            }                
+                AutoPullback.OnOff = true;
+                RaySetProperty(Property.AutoPullback, 1.0);
+            }             
 
             readyTimer.Stop();
         }
@@ -277,11 +310,15 @@ namespace RaywattApp.ViewModels
                 IsReady = true;
                 IsStart = true;
                 IsCancel = true;
-                DeviceStatus.AutoPullbackOnOff = false;
-                if (DeviceStatus.AutoPullbackModel)
+                if (PatientCase.PullbackTrigger.Equals("AUTO"))
+                {
+                    AutoPullback.OnOff = false;
                     RaySetProperty(Property.AutoPullback, 0.0);
+                }
                 (ReadyCommand as RelayCommand).NotifyCanExecuteChanged();
                 timer.Stop();
+
+                leaveToPage(Constants.RecordingLiveViewPage);
             }
         }
 
@@ -294,13 +331,14 @@ namespace RaywattApp.ViewModels
 
             IsStart = false;
             IsCancel = false;
-            AutoPullbackMsg = _l10n["Pullback has started."];
+            AutoPullbackMsg = "";
 
             PatientCase.Image = generateFileName("oct");
             DeviceStatus.IsSaveRawDataDone = false;
             DeviceStatus.IsLumenSaved = false;
             DeviceStatus.IsOCTImagingDone = false;
             DeviceStatus.IsLumenDetected = false;
+            DeviceStatus.IsRecordingDone = false;
             DeviceStatus.IsPullbackDone = false;
 
             RayError result = (RayError)RayPullbackScan(PatientCase.ImageFullPath);
@@ -328,6 +366,13 @@ namespace RaywattApp.ViewModels
 
         private void threadFuncWaitPullbackDone()
         {
+            while (!DeviceStatus.IsRecordingDone)
+            {
+                Thread.Sleep((int)Constants.WaitForEventInterval);
+            }
+
+            PatientCase.CreateDate = DateTime.Now;
+
             while (!DeviceStatus.IsPullbackDone)
             {
                 Thread.Sleep((int)Constants.WaitForEventInterval);

@@ -59,8 +59,8 @@
                 <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Margin="310,5,0,0" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=RJ}">
                     <Button Style="{DynamicResource BtnForTest}" Command="{Binding CatheterConnectTestCommmand}" Width="100" Height="15" FontSize="9" Content="Catheter Connect"/>
                 </StackPanel>
-                <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="310,0,0,5" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=Image}">
-                    <Button Style="{DynamicResource BtnForTest}" Command="{Binding ImageAnalysisTestCommmand}" Width="100" Height="15" FontSize="9" Content="Image Analysis"/>
+                <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="310,0,0,5" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=AutoPB}">
+                    <Button Style="{DynamicResource BtnForTest}" Command="{Binding AutopullbackTestCommmand}" Width="100" Height="15" FontSize="9" Content="Auto Pullback"/>
                 </StackPanel>
                 <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Margin="420,5,0,0" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=Compensate}">
                     <Button Style="{DynamicResource BtnForTest}" Command="{Binding CompensationTestCommand}" Width="100" Height="15" FontSize="9" Content="Compensation"/>
@@ -69,59 +69,11 @@
                 <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Margin="520,5,0,0" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=Compensate}">
                     <Button Style="{DynamicResource BtnForTest}" Command="{Binding SaveVTIFileTestCommand}" Width="100" Height="15" FontSize="9" Content="Save3DVITFile"/>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="720,0,0,0" Visibility="{Binding IsImageAnalysisTest, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <StackPanel>
-                        <ToggleButton Style="{DynamicResource IconToggleBtn-Small}" IsChecked="{Binding AutoPullbackOnOff, Mode=TwoWay}" Margin="0,-1,0,-2"/>
-                        <Label Style="{DynamicResource Pretendard-Medium-10}" Content="{Binding AutoPullbackModel}" Foreground="{DynamicResource MainPrimaryColorBrush}" HorizontalAlignment="Center"/>
-                    </StackPanel>
-                    <StackPanel Width="5"/>
-                    <StackPanel>
-                        <Button Style="{DynamicResource BtnForTest2}" Command="{Binding ModelSwitchCommmand}" CommandParameter="LUMEN" Width="40" Height="15" FontSize="9" Content="Lumen"/>
-                        <Button Style="{DynamicResource BtnForTest2}" Command="{Binding ModelSwitchCommmand}" CommandParameter="FLUSH" Width="40" Height="15" FontSize="9" Content="Flush"/>
-                    </StackPanel>
-                    <StackPanel Width="5"/>
-                    <Grid>
-                        <Border Width="40" CornerRadius="10" Background="{DynamicResource MainPrimaryColorBrush}" Visibility="{Binding DeviceStatus.AutoPullbackIsImageCleared, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <Label Style="{DynamicResource Pretendard-Medium-10}" Content="Cleared" Foreground="{DynamicResource GrayscaleBlackBrush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </Border>
-                        <Border Width="40" CornerRadius="10" Background="{DynamicResource GrayscaleGray3Brush}" Visibility="{Binding DeviceStatus.AutoPullbackIsImageCleared, Converter={StaticResource BoolToVisibilityReverseConverter}}">
-                            <Label Style="{DynamicResource Pretendard-Medium-10}" Content="Present" Foreground="{DynamicResource GrayscaleBlackBrush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </Border>
-                    </Grid>
-                    <StackPanel Width="5"/>
-                    <StackPanel>
-                        <Label Style="{DynamicResource Pretendard-Medium-10}" Content="Guide" Foreground="{DynamicResource GrayscaleWhiteBrush}" HorizontalAlignment="Center"/>
-                        <ToggleButton Style="{DynamicResource IconToggleBtn-Small}" IsChecked="{Binding AutoPullbackShowLumenGuide, Mode=TwoWay}" Margin="0,-1,0,-2"/>
-                    </StackPanel>
-                    <StackPanel Width="5"/>
-                    <StackPanel>
-                        <Label Content="Min" Height="15" FontSize="9" VerticalContentAlignment="Center" Foreground="{DynamicResource GrayscaleWhiteBrush}"/>
-                        <Label Content="Max" Height="15" FontSize="9" VerticalContentAlignment="Center" Foreground="{DynamicResource GrayscaleWhiteBrush}"/>
-                    </StackPanel>
-                    <StackPanel Width="2"/>
-                    <StackPanel>
-                        <TextBox Width="20" Text="{Binding AutoPullbackLumenThresholdMin, UpdateSourceTrigger=PropertyChanged}" Height="15" FontSize="9" Foreground="{DynamicResource GrayscaleWhiteBrush}" Background="Transparent" BorderThickness="1" CaretBrush="{DynamicResource GrayscaleWhiteBrush}"/>
-                        <TextBox Width="20" Text="{Binding AutoPullbackLumenThresholdMax, UpdateSourceTrigger=PropertyChanged}" Height="15" FontSize="9" Foreground="{DynamicResource GrayscaleWhiteBrush}" Background="Transparent" BorderThickness="1" CaretBrush="{DynamicResource GrayscaleWhiteBrush}"/>
-                    </StackPanel>
-                    <StackPanel Width="5"/>
-                    <StackPanel>
-                        <Label Content="SNR" Height="15" FontSize="9" VerticalContentAlignment="Center" Foreground="{DynamicResource GrayscaleWhiteBrush}"/>
-                        <TextBox Width="20" Text="{Binding AutoPullbackLumenSnrThreshold, UpdateSourceTrigger=PropertyChanged}" Height="15" FontSize="9" Foreground="{DynamicResource GrayscaleWhiteBrush}" Background="Transparent" BorderThickness="1" CaretBrush="{DynamicResource GrayscaleWhiteBrush}"/>
-                    </StackPanel>
-                    <StackPanel Width="5"/>
-                    <StackPanel>
-                        <Label Content="Tot" Height="15" FontSize="9" VerticalContentAlignment="Center" Foreground="{DynamicResource GrayscaleWhiteBrush}"/>
-                        <Label Content="Cnt" Height="15" FontSize="9" VerticalContentAlignment="Center" Foreground="{DynamicResource GrayscaleWhiteBrush}"/>
-                    </StackPanel>
-                    <StackPanel Width="2"/>
-                    <StackPanel>
-                        <TextBox Width="21" Text="{Binding AutoPullbackTriggerCandidate, UpdateSourceTrigger=PropertyChanged}" Height="15" FontSize="9" Foreground="White" Background="Transparent" BorderThickness="1" CaretBrush="{DynamicResource GrayscaleWhiteBrush}"/>
-                        <TextBox Width="21" Text="{Binding AutoPullbackTriggerCount, UpdateSourceTrigger=PropertyChanged}" Height="15" FontSize="9" Foreground="White" Background="Transparent" BorderThickness="1" CaretBrush="{DynamicResource GrayscaleWhiteBrush}"/>
-                    </StackPanel>
-                    <StackPanel Width="5"/>
-                    <StackPanel>
-                        <Button Style="{DynamicResource BtnForTest2}" Command="{Binding ImageAnalysisReloadCommmand}" Width="40" Height="15" FontSize="9" Content="Reload"/>
-                        <Button Style="{DynamicResource BtnForTest2}" Command="{Binding ImageAnalysisApplyCommmand}" Width="40" Height="15" FontSize="9" Content="Apply"/>
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" Margin="800,0,0,0" Visibility="{Binding IsAutoPullbackTest, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Label Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource AdditionalColor2Brush}" Content="{Binding [Auto Pullback], Source={StaticResource L10N}}" HorizontalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Style="{DynamicResource BtnForTest2}" Command="{Binding AutopullbackOnCommmand}" Width="40" Height="15" FontSize="9" Content="On"/>
+                        <Button Style="{DynamicResource BtnForTest2}" Command="{Binding AutopullbackOffCommmand}" Width="40" Height="15" FontSize="9" Content="Off"/>
                     </StackPanel>
                 </StackPanel>
             </Grid>

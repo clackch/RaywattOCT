@@ -474,6 +474,7 @@
     </Style>
 
     <Style TargetType="{x:Type DatePicker}" x:Key="DatePickerValidator" BasedOn="{StaticResource Pretendard-Medium-18}">
+        <Setter Property="bh:AlwaysArrowCursorBehavior.Enabled" Value="True"/>
         <Setter Property="ToolTipService.IsEnabled" Value="False"/>
         <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray3Brush}" />
         <Setter Property="IsTodayHighlighted" Value="True" />
@@ -517,6 +518,9 @@
                             <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
                             <Setter TargetName="PART_TextBox" Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
                             <Setter TargetName="PART_Button" Property="Style" Value="{StaticResource DropDownButtonStyleActive}"/>
+                        </Trigger>
+                        <Trigger Property="IsDropDownOpen" Value="False">
+                            <Setter Property="bh:AlwaysArrowCursorBehavior.Enabled" Value="False"/>
                         </Trigger>
                         <Trigger Property="SelectedDate" Value="{x:Null}">
                             <Setter TargetName="placeholder" Property="Opacity" Value="1"/>

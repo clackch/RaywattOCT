@@ -35,6 +35,7 @@ using System.Net.Sockets;
 using RayCoreWrapper;
 using System.Diagnostics;
 using System.Globalization;
+using RaywattApp.Services;
 
 namespace RaywattApp.Common.Util
 {
@@ -2329,6 +2330,8 @@ namespace RaywattApp.Common.Util
 
         public static void SetColormap(string? colorCode)
         {
+            _log.Debug("SetColormap : " + colorCode);
+
             if (colorCode == null)
                 return;
 
@@ -2818,6 +2821,50 @@ namespace RaywattApp.Common.Util
                 return true;
             else
                 return false;
+        }
+
+        public static int SetAutuPullback(SqlManager sqlManager)
+        {
+            _log.Debug("SetAutoPullback");
+
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "AutoPB";
+            IList<Configuration> autoPullback = sqlManager.SelectConfiguration(sqlParameters);
+
+            int triggerTargetCount = 0;
+
+            foreach (var item in autoPullback)
+            {
+                var key = item.Key;
+                _log.Debug(key + ": " + item.Value);
+
+                if (String.IsNullOrWhiteSpace(item.Value))
+                    continue;
+
+                switch (key)
+                {
+                    case "LumenMin":
+                        RaySetProperty(Property.LumenThresholdMin, double.Parse(item.Value) / 100);
+                        break;
+                    case "LumenMax":
+                        RaySetProperty(Property.LumenThresholdMax, double.Parse(item.Value) / 100);
+                        break;
+                    case "SNR":
+                        RaySetProperty(Property.LumenSnrThreshold, double.Parse(item.Value));
+                        break;
+                    case "Count":
+                        triggerTargetCount = int.Parse(item.Value);
+                        break;
+                    case "ShowGuide":
+                        if(!String.IsNullOrWhiteSpace(item.Buffer) && item.Buffer.Contains(Environment.UserName))
+                            RaySetProperty(Property.ShowLumenGuide, item.Value == "Y" ? 1.0 : 0.0);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return triggerTargetCount;
         }
 
     }
