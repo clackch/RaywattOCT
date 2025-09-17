@@ -113,6 +113,9 @@
     <!-- CrossSection Scale MultiConverter -->
     <converters:CrossSectionScaleMultiConverter x:Key="CrossSectionScaleMultiConverter" />
 
+    <!-- Longitude Orienation Converter -->
+    <converters:LongitudeOrientationConverter x:Key="LongitudeOrienationConverter"/>
+
     <!-- Longitude Scale Converter -->
     <converters:LongitudeScaleConverter x:Key="LongitudeScaleConverter" />
     

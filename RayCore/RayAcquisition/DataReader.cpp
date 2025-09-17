@@ -171,33 +171,46 @@ void CDataReader::finalize() {
 }
 bool CDataReader::readFrame(int nIndex) {
 	DWORD dwBytesRead = 0;
-	bool result = true;
 
-	if (nIndex < 0 || nIndex >= m_nNumOfSamples) return false;
+	const int N = m_nNumOfSamples;
+	if (nIndex < 0 || nIndex >= N) return false;
+	PLOGI.printf("[junghw] bLongitudeOrientation : %d / %d", bLongitudeOrientation, nIndex);
 
-	if (m_nDataSize > 1024 * 1024 * 10) {
+	const int srcIndex = bLongitudeOrientation ? (N - 1 - nIndex) : nIndex;
+
+	const size_t bytes = static_cast<size_t>(m_nDataSize) * sizeof(unsigned short);
+	if (bytes > 1024ull * 1024ull * 10ull * sizeof(unsigned short)) {
 		PLOGI.printf("Data size is too big : %d", m_nDataSize);
 		return false;
 	}
 
-	if (m_pReadSamples[nIndex] == NULL) {
-		m_pReadSamples[nIndex] = new char[m_nDataSize * sizeof(unsigned short)];
+	if (m_pReadSamples[nIndex] == nullptr) {
+		m_pReadSamples[nIndex] = new char[bytes];
 
-		long long offset = m_nHeaderSize + m_nDataSize * sizeof(unsigned short) * nIndex;
-		long offsetL = 0xFFFFFFFF & offset;
-		long offsetH = 0xFFFFFFFF & (offset >> 32);
-		DWORD newPos = SetFilePointer(m_hFile, offsetL, &offsetH, FILE_BEGIN);
-		if (newPos != INVALID_SET_FILE_POINTER) {
+		LARGE_INTEGER li;
+		li.QuadPart =
+			static_cast<LONGLONG>(m_nHeaderSize) +
+			static_cast<LONGLONG>(bytes) * static_cast<LONGLONG>(srcIndex);
+
+		if (!SetFilePointerEx(m_hFile, li, nullptr, FILE_BEGIN)) {
 			DWORD err = GetLastError();
-			if (err != NO_ERROR) {
-				PLOGI.printf("SetFilePointer failed. Error : %lu", err);
-			}
+			PLOGI.printf("SetFilePointerEx failed. Error : %lu", err);
+			return false;
 		}
 
-		result = ReadFile(m_hFile, m_pReadSamples[nIndex], m_nDataSize * sizeof(unsigned short), &dwBytesRead, NULL);
+		if (!ReadFile(m_hFile, m_pReadSamples[nIndex],
+			static_cast<DWORD>(bytes), &dwBytesRead, NULL)) {
+			DWORD err = GetLastError();
+			PLOGI.printf("ReadFile failed. Error : %lu", err);
+			return false;
+		}
+		if (dwBytesRead != bytes) {
+			PLOGI.printf("ReadFile partial read: %lu / %zu bytes", dwBytesRead, bytes);
+			return false;
+		}
 	}
 
-	return result;
+	return true;
 }
 bool CDataReader::readExtraData(HANDLE hFile, OCTHeader::ExtraData extraData, int nSize) {
 	DWORD dwBytesRead = 0;

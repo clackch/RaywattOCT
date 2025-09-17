@@ -47,6 +47,7 @@ namespace RaywattOCT
             LongitudeImageWidth,
             LongitudeImageHeight,
             LongitudeImageChannels,
+            LongitudeOrientation,
             PullbackRPM,
             PullbackDistance,
             PullbackSpeed,

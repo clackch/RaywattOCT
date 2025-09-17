@@ -3,21 +3,22 @@ using CommunityToolkit.Mvvm.Input;
 using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
+using RaywattApp.Common.Enums;
+using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Services;
+using RaywattApp.Views.Dialog;
+using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Navigation;
 using System.Windows.Threading;
-using RaywattApp.Views.Dialog;
-using static RaywattOCT.RayCoreWrapper;
 using static RaywattOCT.Ray3DWrapper;
-using System.Runtime.InteropServices;
-using RaywattApp.Common.Util;
-using System.Threading;
-using SharpDX;
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
 {
@@ -138,6 +139,12 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private Zoom _zoom = new Zoom(Constants.CrossSection3dSize);
 
+        [ObservableProperty]
+        private string _dPLeftLabel;
+
+        [ObservableProperty]
+        private string _dPRightLabel;
+
         private DispatcherTimer timerShowData = new DispatcherTimer();
 
         private bool isFirstRendering = true;
@@ -214,6 +221,8 @@ namespace RaywattApp.ViewModels
             IndicatorLongitude = new Indicator();
             IndicatorLongitude.X = Constants.LongitudeIndicatorWidth / 2;
             IndicatorLongitude.IsVisible = Visibility.Visible;
+
+            LongitudeOrientationChanged();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -325,6 +334,11 @@ namespace RaywattApp.ViewModels
                 _log.Error("Update Error");
         }
 
+        private void LongitudeOrientationChanged()
+        {
+            _dPLeftLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "P" : "D";
+            _dPRightLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "D" : "P";
+        }
         protected override void UpdateCrossSectionImage()
         {
             if (DrawCrossSectionImage())

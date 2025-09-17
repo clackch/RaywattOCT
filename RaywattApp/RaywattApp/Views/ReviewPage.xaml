@@ -1315,12 +1315,20 @@
 
                         <StackPanel Grid.Column="0" Orientation="Vertical">
                             <StackPanel Height="76"/>
-                            <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" HorizontalAlignment="Center" Foreground="#fcfcfc" Opacity="0.5"/>
+                            <Label Content="{Binding DPLeftLabel}" 
+                                   Style="{DynamicResource Pretendard-Semibold-20}" 
+                                   HorizontalAlignment="Center" 
+                                   Foreground="#fcfcfc" 
+                                   Opacity="0.5"/>
                         </StackPanel>
                         <Grid Grid.Column="2">
                             <StackPanel Orientation="Vertical">
                                 <StackPanel Height="76"/>
-                                <Label Content="P" Style="{DynamicResource Pretendard-Semibold-20}" HorizontalAlignment="Center" Foreground="#fcfcfc" Opacity="0.5"/>
+                                <Label Content="{Binding DPRightLabel}" 
+                                       Style="{DynamicResource Pretendard-Semibold-20}" 
+                                       HorizontalAlignment="Center" 
+                                       Foreground="#fcfcfc" 
+                                       Opacity="0.5"/>
                             </StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>

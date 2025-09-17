@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:RaywattApp.Views"
+      xmlns:en="clr-namespace:RaywattApp.Common.Enums"
       xmlns:component="clr-namespace:RaywattApp.Views.Component"
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
@@ -74,6 +75,8 @@
                                     <RowDefinition Height="109"/>
                                     <RowDefinition Height="1"/>
                                     <RowDefinition Height="86"/>
+                                    <RowDefinition Height="1"/>
+                                    <RowDefinition Height="51"/>
                                     <RowDefinition Height="1"/>
                                     <RowDefinition Height="51"/>
                                     <RowDefinition Height="1"/>
@@ -167,6 +170,35 @@
                                         <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="㎜"/>
                                     </StackPanel>
                                 </Grid>
+                                <Separator Grid.Row="11" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray7Brush}"/>
+
+                                <Label Grid.Row="12" 
+                                       Grid.Column="0" 
+                                       Style="{DynamicResource Pretendard-Medium-16}" 
+                                       Foreground="{DynamicResource GrayscaleGray3Brush}" 
+                                       Content="Logitude Image Orientation"
+                                       VerticalAlignment="Center" 
+                                       Margin="45,0,0,0"/>
+
+                                <Border Grid.Row="12" 
+                                        Grid.Column="1"
+                                        CornerRadius="8"
+                                        Padding="6"
+                                        HorizontalAlignment="Left">
+                                    <StackPanel Orientation="Horizontal">
+                                        <RadioButton    Content="{Binding [Distal → Proximal], Source={StaticResource L10N}}"
+                                                        IsChecked="{Binding LongitudeOrientation, 
+                                                                    Mode=TwoWay, 
+                                                                    Converter={StaticResource LongitudeOrienationConverter},
+                                                                    ConverterParameter={x:Static en:LongitudeOrientation.DistalToProximal}}"
+                                                                    Margin="0 0 30 0"/>
+                                        <RadioButton    Content="{Binding [Proximal → Distal], Source={StaticResource L10N}}"
+                                                        IsChecked="{Binding LongitudeOrientation, 
+                                                                    Mode=TwoWay, 
+                                                                    Converter={StaticResource LongitudeOrienationConverter},
+                                                                    ConverterParameter={x:Static en:LongitudeOrientation.ProximalToDistal}}"/>
+                                    </StackPanel>
+                                </Border>
                             </Grid>
                         </Border>
                     </Grid>

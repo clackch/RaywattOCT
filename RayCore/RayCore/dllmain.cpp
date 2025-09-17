@@ -150,6 +150,9 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
     case RayProperty::ShowLumenGuide:
         octSystem.SetShowLumenGuide(value);
         break;
+	case RayProperty::LongitudeOrientation:
+		octSystem.SetLongitudeOrientation(value);
+        break;
     default:
         return RayError::InvalidArgument;
     }

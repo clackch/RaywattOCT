@@ -54,7 +54,7 @@ class IDataManager
 protected:
 	int m_nNumOfSamples;
 	std::map<OCTHeader::ExtraData, uint8_t*> mapExtraData;
-
+	bool bLongitudeOrientation;
 public:
 	IDataManager() { m_nNumOfSamples = 0;}
 	virtual ~IDataManager() {
@@ -97,5 +97,11 @@ public:
 	uint8_t* GetExtraData(OCTHeader::ExtraData extraData) {
 		auto it = mapExtraData.find(extraData);
 		return (it != mapExtraData.end()) ? it->second : nullptr;
+	}
+
+	void SetLongitudeOrientation(bool nOrientation)
+	{
+		PLOGI.printf("[junghw] Datamanager longitude: %d", nOrientation);
+		bLongitudeOrientation = nOrientation;
 	}
 };

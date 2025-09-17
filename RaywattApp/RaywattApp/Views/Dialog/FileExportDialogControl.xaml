@@ -153,6 +153,16 @@
                             </Image.RenderTransform>
                         </Image>
                     </Grid>
+
+                    <Label  Content="{Binding CrossSectionlabel}"
+                            FontSize="30"
+                            FontWeight="Bold"
+                            Foreground="{StaticResource CaseInfoSecondBrush}"
+                            HorizontalAlignment="left"
+                            VerticalAlignment="Top"
+                            Margin="20"
+                            IsHitTestVisible="False"/>
+                    
                 </Grid>
             </Grid>
             <!-- Longitude -->
@@ -165,13 +175,13 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                    <Label Content="P" Style="{DynamicResource Pretendard-Semibold-32}" HorizontalAlignment="Center" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+                    <Label Content="{Binding DistalOrientationLabel}" Style="{DynamicResource Pretendard-Semibold-32}" HorizontalAlignment="Center" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
                 </StackPanel>
                 <StackPanel Grid.Column="2" VerticalAlignment="Bottom" Margin="0,0,0,75">
                     <Image Width="12" Height="139" Source="{svgc:SvgImage Source=/res/icon/indicatorExport.svg}" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
                 </StackPanel>
                 <StackPanel Grid.Column="2" Grid.ColumnSpan="2" VerticalAlignment="Center">
-                    <Label Content="D" Style="{DynamicResource Pretendard-Semibold-32}" HorizontalAlignment="Center" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+                    <Label Content="{Binding ProximalOrientationLabel}" Style="{DynamicResource Pretendard-Semibold-32}" HorizontalAlignment="Center" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
                 </StackPanel>
 
                 <Grid Grid.Column="1" Width="{x:Static const:Constants.ExportLongitudeImageWidth}">

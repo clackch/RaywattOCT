@@ -4,15 +4,19 @@ using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
+using RaywattApp.Common.Enums;
 using RaywattApp.Common.Messages;
 using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Services;
+using RaywattOCT;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Windows.Input;
 using System.Windows.Navigation;
+using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels
 {
@@ -75,6 +79,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private double _minAppositionThreshold;
 
+        [ObservableProperty]
+        private LongitudeOrientation _longitudeOrientation;
+
         private double originAppositionThreshold;
 
         private ICommand _okCommand;
@@ -110,6 +117,8 @@ namespace RaywattApp.ViewModels
             MinExpansionThreshold = Constants.MinExpansionThreshold;
             MaxAppositionThreshold = Constants.MaxAppositionThreshold;
             MinAppositionThreshold = Constants.MinAppositionThreshold;
+
+            LongitudeOrientation = DeviceStatus.LongitudeOrientation;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -151,10 +160,10 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Ok");
 
-            PatientCase.Colormap = SelectedColormap;
-            CommonUtil.SetColormap(PatientCase.Colormap);
+            //PatientCase.Colormap = SelectedColormap;
+            //CommonUtil.SetColormap(PatientCase.Colormap);
 
-            GoToReview();
+            ConfirmAndGoToReview();
         }
         private void Cancel()
         {
@@ -176,6 +185,62 @@ namespace RaywattApp.ViewModels
             parameter["patientCase"] = PatientCase;
             parameter["prevStatus"] = PrevStatus;
             parameter["reviewStatus"] = ReviewStatus;
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewPage) { Parameter = parameter });
+        }
+
+        private void ConfirmAndGoToReview()
+        {
+            _log.Debug("ConfirmAndGoToReview");
+
+            RayError _ = (RayError)RayEndReview();
+            Thread.Sleep(300);
+
+            PatientCase.Colormap = SelectedColormap;
+            CommonUtil.SetColormap(PatientCase.Colormap);
+
+            RayError result = (RayError)RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+            if (result != RayError.OK)
+            {
+                _log.Error("RaySetProperty Error");
+            }
+
+            int numOfFrames = RayStartReview(PatientCase.ImageFullPath, PatientCase.ImageResolution, PatientCase.ZOffset);
+            if (numOfFrames < (int)RayError.OK)
+            {
+                _log.Error("numOfFrames < (int)RayError.OK");
+                _log.Error("patientCase.ImageFullPath : " + PatientCase.ImageFullPath);
+                return;
+            }
+            else
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    if ((RayScannerState)RayGetProperty(Property.CurrentState) == RayScannerState.Review)
+                        break;
+                    Thread.Sleep(5);
+                }
+            }
+
+            DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current = 0;
+            DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total = 0;
+            DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current = 0;
+            DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total = 0;
+            DeviceStatus.IsOCTImagingDone = false;
+
+            /* 방향 변경 */
+            if (DeviceStatus.LongitudeOrientation != _longitudeOrientation) DeviceStatus.LongitudeOrientationChanged = true;
+            DeviceStatus.LongitudeOrientation = _longitudeOrientation;
+
+            RayError __ = (RayError)RaySetProperty(Property.LongitudeOrientation, (double)DeviceStatus.LongitudeOrientation);
+
+            Dictionary<string, Object> parameter = new Dictionary<string, Object>();
+            parameter["patient"] = Patient;
+            parameter["patientCase"] = PatientCase;
+            parameter["prevStatus"] = PrevStatus;
+            ReviewStatus reviewStatus = new ReviewStatus();
+            reviewStatus.NumberOfFrames = numOfFrames;
+            parameter["reviewStatus"] = reviewStatus;
+            Ray3DWrapper.ray3DStatus = new Ray3DWrapper.Ray3DStatus();
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewPage) { Parameter = parameter });
         }
     }

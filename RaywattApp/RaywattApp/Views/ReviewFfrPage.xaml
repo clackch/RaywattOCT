@@ -90,12 +90,23 @@
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
-                            <Label Grid.Column="0" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" VerticalAlignment="Center" Margin="20,0,0,0">
+                            <Label Grid.Column="0" 
+                                   Style="{DynamicResource Pretendard-Medium-12}" 
+                                   Foreground="{DynamicResource GrayscaleWhiteBrush}" 
+                                   VerticalAlignment="Center" 
+                                   Margin="20,0,0,0">
                                 <Label.Content>
-                                    <AccessText TextWrapping="Wrap" Text="{Binding [Distal       Lumen Area], Source={StaticResource L10N}}"/>
+                                    <AccessText TextWrapping="Wrap" 
+                                                Text="{Binding DistalLumenAreaLabel}"/>
                                 </Label.Content>
                             </Label>
-                            <Label Grid.Column="1" Style="{DynamicResource Pretendard-Bold-28}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.DistalLumenArea, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleArea}}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,20,0"/>
+                            <Label Grid.Column="1" 
+                                   Style="{DynamicResource Pretendard-Bold-28}" 
+                                   Foreground="{DynamicResource GrayscaleWhiteBrush}" 
+                                   Content="{Binding PatientCase.FfrFeature.DistalLumenArea, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleArea}}" 
+                                   VerticalAlignment="Center" 
+                                   HorizontalAlignment="Center" 
+                                   Margin="0,0,20,0"/>
                         </Grid>
                     </Border>
                 </StackPanel>
@@ -130,12 +141,23 @@
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
-                            <Label Grid.Column="0" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Width="70" VerticalAlignment="Center" Margin="20,0,0,0">
+                            <Label Grid.Column="0" 
+                                   Style="{DynamicResource Pretendard-Medium-12}" 
+                                   Foreground="{DynamicResource GrayscaleWhiteBrush}" 
+                                   Width="70" 
+                                   VerticalAlignment="Center" 
+                                   Margin="20,0,0,0">
                                 <Label.Content>
-                                    <AccessText TextWrapping="Wrap" Text="{Binding [Proximal Lumen Area], Source={StaticResource L10N}}"/>
+                                    <AccessText TextWrapping="Wrap" 
+                                                Text="{Binding ProximalLumenAreaLabel}"/>                                
                                 </Label.Content>
                             </Label>
-                            <Label Grid.Column="1" Style="{DynamicResource Pretendard-Bold-28}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FfrFeature.ProximalLumenArea, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleArea}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <Label Grid.Column="1" 
+                                   Style="{DynamicResource Pretendard-Bold-28}" 
+                                   Foreground="{DynamicResource GrayscaleWhiteBrush}" 
+                                   Content="{Binding PatientCase.FfrFeature.ProximalLumenArea, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleArea}}" 
+                                   VerticalAlignment="Center" 
+                                   HorizontalAlignment="Center"/>
                         </Grid>
                     </Border>
                 </StackPanel>
@@ -149,7 +171,11 @@
                 <StackPanel Grid.Column="0">
                     <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="10" Width="1" Background="{DynamicResource GrayscaleGray3Brush}" Margin="0"/>
                     <Border Width="60" Height="21" CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray3Brush}" Background="{DynamicResource GrayscaleGray5Brush}">
-                        <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Distal], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        <Label Style="{DynamicResource Pretendard-Semibold-12}" 
+                               Foreground="{DynamicResource GrayscaleWhiteBrush}" 
+                               Content="{Binding DistalLumenLabel}"
+                               VerticalAlignment="Center" 
+                               HorizontalAlignment="Center"/>
                     </Border>
                     <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="10" Width="1" Background="{DynamicResource GrayscaleGray3Brush}" Margin="0"/>
                     <Grid Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}">
@@ -198,7 +224,11 @@
                 <StackPanel Grid.Column="2">
                     <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="10" Width="1" Background="{DynamicResource GrayscaleGray3Brush}" Margin="0"/>
                     <Border Width="60" Height="21" CornerRadius="4" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray3Brush}" Background="{DynamicResource GrayscaleGray5Brush}">
-                        <Label Style="{DynamicResource Pretendard-Semibold-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Proximal], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        <Label Style="{DynamicResource Pretendard-Semibold-12}" 
+                               Foreground="{DynamicResource GrayscaleWhiteBrush}" 
+                               Content="{Binding ProximalLumenLabel}" 
+                               VerticalAlignment="Center" 
+                               HorizontalAlignment="Center"/>
                     </Border>
                     <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="10" Width="1" Background="{DynamicResource GrayscaleGray3Brush}" Margin="0"/>
                     <Grid Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}">
@@ -232,10 +262,16 @@
                     <RowDefinition Height="82"/>
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="12,0,0,0">
-                    <Label Content="D" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource AdditionalColor7Brush}" Opacity="0.5"/>
+                    <Label Content="{Binding DPLeftLabel}" 
+                           Style="{DynamicResource Pretendard-Semibold-16}" 
+                           Foreground="{DynamicResource AdditionalColor7Brush}" 
+                           Opacity="0.5"/>
                 </StackPanel>
                 <StackPanel Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,12,0">
-                    <Label Content="P" Style="{DynamicResource Pretendard-Semibold-16}" Foreground="{DynamicResource AdditionalColor7Brush}" Opacity="0.5"/>
+                    <Label Content="{Binding DPRightLabel}" 
+                           Style="{DynamicResource Pretendard-Semibold-16}" 
+                           Foreground="{DynamicResource AdditionalColor7Brush}" 
+                           Opacity="0.5"/>
                 </StackPanel>
 
                 <Grid Grid.Row="1" Grid.Column="1">
