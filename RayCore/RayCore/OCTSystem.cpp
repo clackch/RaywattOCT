@@ -116,6 +116,7 @@ RayError COCTSystem::Init() {
 	m_prevState = RayScannerState::Initial;
 	m_curState = RayScannerState::Initial;
 	m_cathState = CatheterState::Unloaded;
+	m_autoCalibState = RayError::OK;
 
 	//Property
 	m_fBrightness = 0.0f;
@@ -319,6 +320,7 @@ RayError COCTSystem::AutoCalibration() {
 
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 
+		m_autoCalibState = RayError::OK;
 		CUtility::StartThread(threadAutoCalibration, m_pThreadRotaryJunction, this);
 
 		return RayError::OK;
@@ -1769,6 +1771,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		if (minList.empty() /*|| (minVal * 4) / 3 > maxVal*/) {
 			nTargetPos = startPosition;
 			PLOGI.printf("Calibration is failed.");
+			pSystem->m_autoCalibState = RayError::AutoCalibError;
 		}
 		else {
 			Loc = minList[0].first;
@@ -1903,6 +1906,9 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			// 1-3. Move to calibrated position
 			nTargetPos = nZOffset - 450 - pSystem->autoCalibrationFranch;
 			PLOGI.printf("Target Position : %d", nTargetPos);
+
+			if(minDiff > 50)
+				pSystem->m_autoCalibState = RayError::AutoCalibError;
 			//PLOGI.printf("Sheath Position : %d, Target Position : %d, First Pos : %d, Second Pos : %d, Offset Adj : %d, StepPerPixel : %d", nSheathPosition, nTargetPos, nFirstSheathPos, nSecondSheathPos, nOffsetAdj, nStepPerPixel);
 		}
 		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX / CConfiguration::GetInstance().laserModule.delayLineSMSpeed * CConfiguration::GetInstance().laserModule.delayLineSMSteps);

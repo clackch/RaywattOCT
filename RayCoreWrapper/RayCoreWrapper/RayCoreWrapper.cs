@@ -19,7 +19,8 @@ namespace RaywattOCT
             WrongSession,
             InvalidFunctionCall,
             HomingFailed,
-            RotaryJunctionError
+            RotaryJunctionError,
+            AutoCalibError
         };
 
         public enum Property : int
@@ -148,6 +149,8 @@ namespace RaywattOCT
         public static extern int RayDisconnectDevices();
         [DllImport("RayCore.dll")]
         public static extern int RayAutoCalibration();
+        [DllImport("RayCore.dll")]
+        public static extern int RayGetAutoCalibResult();
         [DllImport("RayCore.dll")]
         public static extern int RayManualCalibration(bool moveForward);        
         [DllImport("RayCore.dll")]

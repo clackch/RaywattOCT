@@ -31,6 +31,9 @@ _declspec(dllexport) RayError RayDisconnectDevices() {
 _declspec(dllexport) RayError RayAutoCalibration() {
     return octSystem.AutoCalibration();
 }
+_declspec(dllexport) RayError RayGetAutoCalibResult() {
+    return octSystem.GetAutoCalibResult();
+}
 _declspec(dllexport) RayError RayManualCalibration(bool moveForward) {
     return octSystem.ManualCalibration(moveForward);
 }

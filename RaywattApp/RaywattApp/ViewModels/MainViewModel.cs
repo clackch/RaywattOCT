@@ -842,6 +842,14 @@ namespace RaywattApp.ViewModels
                     break;
                 case RayWorkItem.AutoCalibration:
                     DeviceStatus.CanExecuteCalibration = true;
+                    RayError result = (RayError)RayGetAutoCalibResult();
+                    if (result == RayError.AutoCalibError)
+                    {
+                        _log.Error("AutoCalibration Error");
+                    }else
+                    {
+                        _log.Debug("AutoCalibration Success");
+                    }
                     break;
                 case RayWorkItem.LoadCatheter:
                     DeviceStatus.CatheterStatus = Constants.CatheterStatusLoaded;
