@@ -79,6 +79,8 @@ COCTImaging::COCTImaging(Setting setting, CMessageService* pMsg) {
 
 	m_nSheathPosition = 0;
 
+	m_FindingSheathMathod = AutoCalibrationMathod::Disable;
+
 	clahe = cv::createCLAHE(0.02, cv::Size(8, 8));
 }
 
