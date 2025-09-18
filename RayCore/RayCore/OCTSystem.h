@@ -33,7 +33,8 @@ private:
 		Enable,
 		FindingSheath,
 		FindingPeak,
-		Calibrated
+		Calibrated,
+		CheckSheath
 	};
 
 	// Thread

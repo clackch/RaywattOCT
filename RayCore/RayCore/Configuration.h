@@ -16,8 +16,6 @@ public:
 		int delayPosition;
 		int delayPositionOnePointSeven;
 		int polarPosition;
-		int delayLineSMSteps;
-		int delayLineSMSpeed;
 	};
 
 	class StepMotorSetting {

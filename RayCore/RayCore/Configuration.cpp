@@ -71,8 +71,6 @@ void CConfiguration::Initialize(tstring configFile)
 	this->laserModule.delayPosition = ::GetPrivateProfileInt(_T("LaserModule"), _T("DelayLine"), 0, configFilePath.c_str());
 	this->laserModule.delayPositionOnePointSeven = ::GetPrivateProfileInt(_T("LaserModule"), _T("delayPositionOnePointSeven"), 0, configFilePath.c_str());
 	this->laserModule.polarPosition = ::GetPrivateProfileInt(_T("LaserModule"), _T("Polarization"), 0, configFilePath.c_str());
-	this->laserModule.delayLineSMSteps = ::GetPrivateProfileInt(_T("LaserModule"), _T("DelayLineSMSteps"), 1, configFilePath.c_str());
-	this->laserModule.delayLineSMSpeed = ::GetPrivateProfileInt(_T("LaserModule"), _T("DelayLineSMSpeed"), 1, configFilePath.c_str());
 
 	// [StepMotor]
 	::GetPrivateProfileString(_T("StepMotor"), _T("Port"), _T(""), this->stepMotor.port, sizeof(this->stepMotor.port), configFilePath.c_str());
