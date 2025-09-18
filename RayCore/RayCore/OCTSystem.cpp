@@ -2666,9 +2666,8 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 		{
 		case CatheterState::FindingSheath:
 		{
-			int nAdjLatency = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("AdjustLatencyValue"), 100, _T(".\\raycore.ini"));
 			int nSheathPosition = m_pImagingRealtime->GetSheathPosition();
-			int nDelayLinePos = m_pLaserModule->GetPosition(eStepMotorIndex::DelayLine) - nAdjLatency;
+			int nDelayLinePos = m_pLaserModule->GetPosition(eStepMotorIndex::DelayLine);
 			m_vCalibrationInfo.push_back(std::make_pair(nSheathPosition, nDelayLinePos));
 			PLOGI.printf("FindingSheath - %d, %d", nSheathPosition, nDelayLinePos);
 		}
