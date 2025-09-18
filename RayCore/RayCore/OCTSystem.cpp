@@ -2169,11 +2169,11 @@ void COCTSystem::autoCalibrationInit(LPVOID param) {
 
 		// 1-1. Move Delay-line & Find Sheath
 		pSystem->m_pImagingLiveView->SetDelayLineMovingDirection(-1);
-		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, -1000 * microSteps);
+		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, -1000);
 		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
 		pSystem->m_pImagingLiveView->SetDelayLineMovingDirection(1);
-		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, 2000 * microSteps);
+		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, 2000);
 		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
 		// 1-2. Find Z-Offset Position
