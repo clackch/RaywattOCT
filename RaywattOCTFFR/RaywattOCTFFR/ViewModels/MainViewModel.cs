@@ -161,8 +161,6 @@ namespace RaywattOCTFFR.ViewModels
             }
 
             DeviceStatus.PowerOffMsg = _l10n["Shutting down"];
-            DeviceStatus.CatheterStatus = Constants.CatheterStatusDisconnected;
-
         }
 
         private void OnNavigationMessage(object recipient, NavigationMessage message)
@@ -290,7 +288,6 @@ namespace RaywattOCTFFR.ViewModels
         {
             _log.Debug("state: " + state.ToString());
             RayScannerState curState = (RayScannerState)RayGetProperty(Property.CurrentState);
-            DeviceStatus.IsLiveView = (bool)(RayGetProperty(Property.MotorOnOff) != 0);
         }
 
         protected static void handleProgress(RayCallbackRequest request, int progress, int param) { }

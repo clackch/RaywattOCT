@@ -64,12 +64,12 @@ namespace RaywattOCTFFR.ViewModels
 
         private void ProgressTest(object sender, EventArgs e)
         {
-            if (Progress >= 100 && DeviceStatus.IsServiceStarted && DeviceStatus.IsDeviceConnected)
+            if (Progress >= 100 && DeviceStatus.IsServiceStarted)
             {
                 timer.Stop();
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
             }
-            else if (DeviceStatus.IsServiceStarted && DeviceStatus.IsDeviceConnected)
+            else if (DeviceStatus.IsServiceStarted)
             {
                 Progress = 100;
             }
@@ -101,20 +101,7 @@ namespace RaywattOCTFFR.ViewModels
             result |= (RayError)RaySetConfigPath(Constants.ConfigPath);
             result |= (RayError)RayStartSystem();
 
-            if (result == RayError.OK)
-            {
-                result |= (RayError)RayConnectDevices();
-                if (result == RayError.OK)
-                {
-                    DeviceStatus.IsDeviceConnected = true;
-                }
-                else
-                {
-                    errorMsg = "$MSG011";
-                    isError = true;
-                }
-            }
-            else
+            if (result != RayError.OK)
             {
                 errorMsg = "$MSG011";
                 isError = true;

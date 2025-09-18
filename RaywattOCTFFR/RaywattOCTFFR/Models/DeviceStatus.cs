@@ -25,28 +25,10 @@ namespace RaywattOCTFFR.Models
         private string _powerOffMsg;
 
         [ObservableProperty]
-        private bool _isDeviceConnected = false;
-
-        [ObservableProperty]
         private bool _isServiceStarted = false;
 
         [ObservableProperty]
-        private bool _isLiveView = false;
-
-        [ObservableProperty]
-        private bool _canExecuteCalibration = true;
-
-        [ObservableProperty]
-        private bool _isRecordingDone = true;
-
-        [ObservableProperty]
-        private bool _isPullbackDone = true;
-
-        [ObservableProperty]
         private bool _isLumenDetected = false;
-
-        [ObservableProperty]
-        private bool _isSaveRawDataDone = true;
 
         [ObservableProperty]
         private bool _isLumenLoaded = true;
@@ -65,15 +47,6 @@ namespace RaywattOCTFFR.Models
 
         [ObservableProperty]
         private bool _canExit = true;
-
-        [ObservableProperty]
-        private string? _catheterStatus;
-
-        [ObservableProperty]
-        private bool _enhancedLUT;
-
-        [ObservableProperty]
-        private bool _isCleaningDone = true;
 
         [ObservableProperty]
         private Dictionary<string, bool> _testMode = new Dictionary<string, bool>();

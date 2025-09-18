@@ -1126,7 +1126,6 @@ namespace RaywattOCTFFR.Common.Util
                 if(deviceStatus != null)
                 {
                     deviceStatus.IsServiceStarted = false;
-                    deviceStatus.IsDeviceConnected = false;
                 }
             }
             
