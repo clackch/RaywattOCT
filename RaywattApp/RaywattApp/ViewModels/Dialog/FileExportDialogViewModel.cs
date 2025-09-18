@@ -246,7 +246,7 @@ namespace RaywattApp.ViewModels.Dialog
             if (position > barLength) position = barLength;
 
             var bar = new StringBuilder();
-            for (int i = 0; i < barLength; i++)
+            for (int i = 0; i <= barLength; i++)
             {
                 if (i == position)
                     bar.Append("o");
