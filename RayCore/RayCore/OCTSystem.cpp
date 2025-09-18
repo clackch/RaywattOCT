@@ -454,7 +454,7 @@ int COCTSystem::StartReview(char* strFilePath, double imageResolution, double zO
 		}
 		pSession->LoadZOffset(strFilePath);
 		pSession->SetZOffset((int)zOffset);
-		pSession->SetLongitudeOrientation(bLongitudeOrientation);
+		pSession->GetDataManager()->SetLongitudeOrientation(bLongitudeOrientation);
 
 		postPriorMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
 		postPriorMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
@@ -807,10 +807,9 @@ void* COCTSystem::GetImageData(int nFrame) {
 void COCTSystem::SetLongitudeOrientation(const bool nOrientation) 
 {
 	PLOGI.printf("[junghw] longitude: %d", nOrientation);
-
 	bLongitudeOrientation = nOrientation; // false: Distal to PRoximlal, true: Proximal to Distal
-	IDataManager* pDataManager = m_reviewSession[SESSION_REVIEW]->GetDataManager();
-	pDataManager->SetLongitudeOrientation(nOrientation);
+	//IDataManager* pDataManager = m_reviewSession[SESSION_REVIEW]->GetDataManager();
+	//pDataManager->SetLongitudeOrientation(nOrientation);
 }
 
 /*
@@ -3022,6 +3021,9 @@ LRESULT COCTSystem::OnMsgStartReviewSession(WPARAM wParam, LPARAM lParam) {
 	}
 
 	PLOGI.printf("Start session #%d", nSession);
+
+	PLOGI.printf("[junghw] Start session %d", bLongitudeOrientation);
+
 	m_reviewSession[nSession] = pSession;
 	m_reviewSession[nSession]->Start();
 	m_curSession = (SessionType) nSession;
@@ -3029,6 +3031,7 @@ LRESULT COCTSystem::OnMsgStartReviewSession(WPARAM wParam, LPARAM lParam) {
 	if (nSession == SESSION_REVIEW) {
 		pSession->StartCutViewUpdate(m_backgroundColor);
 		pSession->StartVolumeGeneration();
+		m_reviewSession[nSession]->SetLongitudeOrientation(bLongitudeOrientation);
 	}
 
 	return NOERROR;

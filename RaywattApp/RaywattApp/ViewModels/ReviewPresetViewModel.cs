@@ -206,6 +206,16 @@ namespace RaywattApp.ViewModels
                 _log.Error("RaySetProperty Error");
             }
 
+            /* 방향 변경 */
+            if (DeviceStatus.LongitudeOrientation != _longitudeOrientation)
+            {
+                DeviceStatus.LongitudeOrientationChanged = true;
+                UpdateLongitudeOreinetation();
+            }
+
+            DeviceStatus.LongitudeOrientation = _longitudeOrientation;
+            RaySetProperty(Property.LongitudeOrientation, (double)DeviceStatus.LongitudeOrientation);
+
             int numOfFrames = RayStartReview(PatientCase.ImageFullPath, PatientCase.ImageResolution, PatientCase.ZOffset);
             if (numOfFrames < (int)RayError.OK)
             {
@@ -229,16 +239,7 @@ namespace RaywattApp.ViewModels
             DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total = 0;
             DeviceStatus.IsOCTImagingDone = false;
 
-            /* 방향 변경 */
-            if (DeviceStatus.LongitudeOrientation != _longitudeOrientation)
-            {
-                DeviceStatus.LongitudeOrientationChanged = true;
-                UpdateLongitudeOreinetation();
-            }
 
-            DeviceStatus.LongitudeOrientation = _longitudeOrientation;
-
-            RayError __ = (RayError)RaySetProperty(Property.LongitudeOrientation, (double)DeviceStatus.LongitudeOrientation);
 
             Dictionary<string, Object> parameter = new Dictionary<string, Object>();
             parameter["patient"] = Patient;
