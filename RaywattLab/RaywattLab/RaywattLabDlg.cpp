@@ -266,10 +266,6 @@ CLabImaging* CRaywattLabDlg::createImaging(IImaging::Setting imaging) {
 
 	CCalibration* calibration = new CCalibration(imaging.nAScan, imaging.nFFTLength);
 	bool result = calibration->Initialize(m_strCurCalibration);
-	if (!result) {
-		delete pImaging;
-		return nullptr;
-	}
 
 	USHORT* background = readBackground(BACKGROUND_FILEPATH, imaging);
 
