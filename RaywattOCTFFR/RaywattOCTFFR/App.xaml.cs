@@ -1,6 +1,5 @@
 ﻿using log4net;
 using Microsoft.Extensions.DependencyInjection;
-using RaywattOCTFFR.Common.Angio;
 using RaywattOCTFFR.Common.Dialog;
 using RaywattOCTFFR.Common.Util;
 using RaywattOCTFFR.Services;
@@ -14,7 +13,6 @@ using System;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
-using RaywattOCTFFR.Common.Util;
 using System.Windows.Input;
 using System.Threading.Tasks;
 using System.Windows;
@@ -78,50 +76,25 @@ namespace RaywattOCTFFR
             services.AddTransient(typeof(OutsetLoginViewModel));
             services.AddTransient(typeof(OutsetLoadingViewModel));
             services.AddTransient(typeof(PatientListViewModel));
-            services.AddTransient(typeof(PatientNewViewModel));
             services.AddTransient(typeof(PatientEditViewModel));
             services.AddTransient(typeof(PatientDetailViewModel));
-            services.AddTransient(typeof(PhysicianListViewModel));
-            services.AddTransient(typeof(PhysicianEditViewModel));
-            services.AddTransient(typeof(RecordingLiveViewViewModel));
-            services.AddTransient(typeof(RecordingCalibrationViewModel));
-            services.AddTransient(typeof(RecordingViewModel));
-            services.AddTransient(typeof(RecordingConfirmViewModel));
-            services.AddTransient(typeof(RecordingPresetViewModel));
-            services.AddTransient(typeof(RecordingSetupViewModel));
-            services.AddTransient(typeof(RecordingCatheterFailViewModel));
             services.AddTransient(typeof(ReviewViewModel));
-            services.AddTransient(typeof(Review3dViewModel));
-            services.AddTransient(typeof(ReviewCompareViewModel));
             services.AddTransient(typeof(ReviewFfrSettingViewModel));
             services.AddSingleton(typeof(ReviewFfrViewModel));
             services.AddTransient(typeof(ReviewPresetViewModel));
-            services.AddTransient(typeof(ReviewAngioCoRegViewModel));
             services.AddTransient(typeof(ReviewLumenEditViewModel));
             services.AddTransient(typeof(ReviewCalibrationViewModel));
-            services.AddTransient(typeof(PatientNewDicomViewModel));
-            services.AddTransient(typeof(PatientNewDicomPacsViewModel));
-            services.AddTransient(typeof(PatientNewDicomMwlViewModel));
             services.AddTransient(typeof(InitialPasswordSetupViewModel));
             services.AddTransient(typeof(PasswordExpiryCheckViewModel));
 
             //Setting
-            services.AddTransient(typeof(SettingAcquisitionViewModel));
-            services.AddTransient(typeof(SettingLocalizationViewModel));
             services.AddTransient(typeof(SettingDatabaseViewModel));
             services.AddTransient(typeof(SettingAboutViewModel));
             services.AddTransient(typeof(SettingLogViewModel));
             services.AddTransient(typeof(SettingTermsConditionsViewModel));
-            services.AddTransient(typeof(SettingTermsConditionsViewModel_RV200));
-            services.AddTransient(typeof(SettingMaintenanceViewModel));
-            services.AddTransient(typeof(SettingDicomViewModel));
             services.AddTransient(typeof(SettingPasswordChangeViewModel));
 
             //File
-            services.AddTransient(typeof(FileExportStep1ViewModel));
-            services.AddTransient(typeof(FileExportStep2NativeViewModel));
-            services.AddTransient(typeof(FileExportStep2DicomViewModel));
-            services.AddTransient(typeof(FileExportStep2StandardViewModel));
             services.AddTransient(typeof(FileImportViewModel));
 
             //Dialog 등록
@@ -135,20 +108,9 @@ namespace RaywattOCTFFR
             services.AddTransient(typeof(FileFolderBrowseDialogViewModel));
             services.AddTransient(typeof(FileFolderActionDialogViewModel));
             services.AddTransient(typeof(FileImportDialogViewModel));
-            services.AddTransient(typeof(FileCopyDialogViewModel));
             services.AddTransient(typeof(FileAlternateIdDialogViewModel));
-            services.AddTransient(typeof(FileExportDialogViewModel));
-            services.AddTransient(typeof(TermsConditionsDialogViewModel)); 
-            services.AddTransient(typeof(TermsConditionsDialogViewModel_RV200)); 
-            services.AddTransient(typeof(Review3dViewMenuViewModel));
-            services.AddTransient(typeof(Review3dPatientMenuViewModel));
+            services.AddTransient(typeof(TermsConditionsDialogViewModel));
             services.AddTransient(typeof(PowerOffDialogViewModel));
-            services.AddTransient(typeof(CathRoomDialogViewModel));
-            services.AddTransient(typeof(PhysicianDialogViewModel));
-            services.AddTransient(typeof(LocalHostDialogViewModel));
-            services.AddTransient(typeof(DicomServerDialogViewModel));
-            services.AddTransient(typeof(NewPatientDialogViewModel));
-            services.AddTransient(typeof(DicomPacsDialogViewModel));
             services.AddTransient(typeof(PasswordChangeDialogViewModel));
             services.AddTransient(typeof(EditInstituteDialogViewModel));
 
@@ -163,7 +125,6 @@ namespace RaywattOCTFFR
 
             services.AddTransient<IPasswordService, PasswordService>();
 
-            services.AddSingleton(typeof(AngioManager));
             services.AddTransient(typeof(IdleMonitorService));
 
             return services.BuildServiceProvider();

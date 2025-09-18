@@ -42,7 +42,7 @@ namespace RaywattOCTFFR.ViewModels.Dialog
             if (fileType == Constants.FileTypeExport)
             {
                 Title = _l10n["Export"];
-                PopupNavigationSource = Constants.FileExportStep1Page;
+                //PopupNavigationSource = Constants.FileExportStep1Page;
                 FileExport fileExport = null;
 
                 if (data.TryGetValue("fileExport", out var value) && value is FileExport fe)

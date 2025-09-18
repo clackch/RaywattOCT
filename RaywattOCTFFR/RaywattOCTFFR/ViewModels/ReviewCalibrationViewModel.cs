@@ -72,7 +72,7 @@ namespace RaywattOCTFFR.ViewModels
         {
             _log.Debug("ReviewCalibrationViewModel");
 
-            Constants.CurrentPage = Constants.RecordingCalibrationPage;
+            Constants.CurrentPage = Constants.ReviewCalibrationPage;
 
             _dialogService = dialogService;
         }

@@ -172,9 +172,7 @@ namespace RaywattOCTFFR.ViewModels
             {
                 string uriString = args.Uri?.ToString() ?? string.Empty;
 
-                bool isReviewPage =
-                    uriString == Constants.Review3dPage ||
-                    uriString == Constants.ReviewPage;
+                bool isReviewPage = uriString == Constants.ReviewPage;
 
                 if (!isReviewPage)
                 {

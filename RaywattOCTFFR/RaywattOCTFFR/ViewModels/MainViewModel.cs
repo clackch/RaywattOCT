@@ -14,11 +14,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Input;
-using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
-using RaywattOCTFFR.Common.Angio;
-using System.Threading;
-using OpenCvSharp;
 using System.Threading.Tasks;
 
 namespace RaywattOCTFFR.ViewModels
@@ -31,7 +27,6 @@ namespace RaywattOCTFFR.ViewModels
         private static readonly ILog _log = LogManager.GetLogger(typeof(MainViewModel));
 
         private readonly SqlManager _sqlManager;
-        private readonly AngioManager _angioManager;
         private readonly IdleMonitorService _idleMonitorService;
         private IDialogService _dialogService;
 
@@ -91,83 +86,6 @@ namespace RaywattOCTFFR.ViewModels
             get { return this._exitCommand ?? (this._exitCommand = new RelayCommand(Exit)); }
         }
 
-        private ICommand _angioIndicatorCommand;
-        public ICommand AngioIndicatorCommand
-        {
-            get { return this._angioIndicatorCommand ?? (this._angioIndicatorCommand = new RelayCommand(_angioManager.SelectCathRoom)); }
-        }
-
-        private ICommand _catheterIndicatorCommand;
-        public ICommand CatheterIndicatorCommand
-        {
-            get { return this._catheterIndicatorCommand ?? (this._catheterIndicatorCommand = new RelayCommand(UnloadCatheter)); }
-        }
-
-        //Test
-        private ICommand _catheterFailTest;
-        public ICommand CatheterFailTestCommmand
-        {
-            get { return this._catheterFailTest ?? (this._catheterFailTest = new RelayCommand(CatheterFailReceiver)); }
-        }
-
-        //Test
-        private ICommand _catheterUnlockTest;
-        public ICommand CatheterUnlockTestCommmand
-        {
-            get { return this._catheterUnlockTest ?? (this._catheterUnlockTest = new RelayCommand(CatheterUnlockReceiver)); }
-        }
-
-        //Test
-        private ICommand _catheterConnectTest;
-        public ICommand CatheterConnectTestCommmand
-        {
-            get { return this._catheterConnectTest ?? (this._catheterConnectTest = new RelayCommand(CatheterConnectReceiver)); }
-        }
-
-        //Test
-        private ICommand _autopullbackTest;
-        public ICommand AutopullbackTestCommmand
-        {
-            get { return this._autopullbackTest ?? (this._autopullbackTest = new RelayCommand(AutopullbackTest)); }
-        }
-
-        //Test
-        private ICommand _compensationTest;
-        public ICommand CompensationTestCommand
-        {
-            get { return this._compensationTest ?? (this._compensationTest = new RelayCommand(CompensationTest)); }
-        }
-
-        //Test
-        private ICommand _compensationWindowTest;
-        public ICommand CompensationWindowTestCommand
-        {
-            get { return this._compensationWindowTest ?? (this._compensationWindowTest = new RelayCommand(CompensationControlWindowTest)); }
-        }
-
-        private Thread threadCompensationWindow;
-        private bool showCompensationWindow;
-
-        private ICommand _SaveVTIFileTest;
-        public ICommand SaveVTIFileTestCommand
-        {
-            get { return this._SaveVTIFileTest ?? (this._SaveVTIFileTest = new RelayCommand(SaveVTIFileTest)); }
-        }
-
-        //Test
-        private ICommand _autopullbackOff;
-        public ICommand AutopullbackOffCommmand
-        {
-            get { return this._autopullbackOff ?? (this._autopullbackOff = new RelayCommand(AutopullbackOff)); }
-        }
-
-        //Test
-        private ICommand _autopullbackOn;
-        public ICommand AutopullbackOnCommmand
-        {
-            get { return this._autopullbackOn ?? (this._autopullbackOn = new RelayCommand(AutopullbackOn)); }
-        }
-
         // to avoid garbage collection
         private CallbackFunction cbFunction;
         public CallbackFunction CBFunction => (this.cbFunction) ?? (this.cbFunction = new CallbackFunction(OnMsgCallback));
@@ -175,12 +93,11 @@ namespace RaywattOCTFFR.ViewModels
         /// <summary>
         /// 생성자
         /// </summary>
-        public MainViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager, IdleMonitorService idleMonitorService)
+        public MainViewModel(SqlManager sqlManager, IDialogService dialogService, IdleMonitorService idleMonitorService)
         {
             _log.Debug("MainViewModel");
 
             _sqlManager = sqlManager;
-            _angioManager = angioManager;
             _dialogService = dialogService;
             _idleMonitorService = idleMonitorService;
 
@@ -189,10 +106,7 @@ namespace RaywattOCTFFR.ViewModels
             codeDefinition.GetCode();
 
             //시작 페이지 설정
-            if(CommonUtil.IsRV200())
-                NavigationSource = Constants.OutsetLoadingPage;
-            else
-                NavigationSource = Constants.OutsetLoginPage;
+            NavigationSource = Constants.OutsetLoginPage;
 
             //네비게이션 메시지 수신 등록
             WeakReferenceMessenger.Default.Register<NavigationMessage>(this, OnNavigationMessage);
@@ -212,12 +126,9 @@ namespace RaywattOCTFFR.ViewModels
 
             reviewPages = new List<string>();
             reviewPages.Add(Constants.ReviewPage);
-            reviewPages.Add(Constants.Review3dPage);
-            reviewPages.Add(Constants.ReviewComparePage);
             reviewPages.Add(Constants.ReviewFfrSettingPage);
             reviewPages.Add(Constants.ReviewFfrPage);
             reviewPages.Add(Constants.ReviewPresetPage);
-            reviewPages.Add(Constants.ReviewAngioCoRegPage);
             reviewPages.Add(Constants.ReviewLumenEditPage);
             reviewPages.Add(Constants.ReviewCalibrationPage);
 
@@ -283,8 +194,7 @@ namespace RaywattOCTFFR.ViewModels
                     PatientCase = null;
             }
 
-            if ((reviewPages.Contains(Constants.CurrentPage) && !reviewPages.Contains(pageUri))//Review 화면에서 나가는 경우, RayEndReview 호출
-                || (Constants.CurrentPage == Constants.RecordingConfirmPage && !pageUri.Equals(Constants.ReviewPage)))//Recording(Confirm) 화면에서 나가는 경우, RayEndReview 호출
+            if ((reviewPages.Contains(Constants.CurrentPage) && !reviewPages.Contains(pageUri)))//Review 화면에서 나가는 경우, RayEndReview 호출
             {
                 RayError result = (RayError)RayEndReview();
                 if (result != RayError.OK)
@@ -344,242 +254,12 @@ namespace RaywattOCTFFR.ViewModels
 
             if (result != null && result.DialogAnswer != DialogResults.Answer.No)
             {
-                if (threadCompensationWindow != null)
-                {
-                    showCompensationWindow = false;
-                    threadCompensationWindow.Join();
-                }
-
                 if (result.DialogAnswer == DialogResults.Answer.Extra)
                 {
                     DeviceStatus.PowerOffMsg = _l10n["Logging out"];
                 }
-                CommonUtil.Exit(DeviceStatus, _angioManager, result.DialogAnswer == DialogResults.Answer.Yes ? true : false, this.isAdmin);
+                CommonUtil.Exit(DeviceStatus, result.DialogAnswer == DialogResults.Answer.Yes ? true : false, this.isAdmin);
             }
-        }
-
-        private void UnloadCatheter()
-        {
-            _log.Debug("UnloadCatheter");
-
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            DialogResults? result = null;
-
-            parameter["title"] = _l10n["Information"];
-            parameter["message"] = _l10n["Confirm unloading of the catheter"];
-            result = _dialogService.OpenDialog(new ConfirmDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
-            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
-            {
-                CatheterUnlockReceiver();
-            }            
-        }
-
-        private void LeaveFromRecording()
-        {
-            List<string> recordingPages = new List<string>();
-            recordingPages.Add(Constants.RecordingLiveViewPage);
-            recordingPages.Add(Constants.RecordingCalibrationPage);
-            recordingPages.Add(Constants.RecordingPage);
-
-            if (recordingPages.Contains(Constants.CurrentPage))
-            {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["patient"] = Patient;
-                parameter["patientCase"] = PatientCase;
-                parameter["prevStatus"] = PrevStatus;
-                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
-            }
-        }
-
-        private void InitCatheterTimer()
-        {
-            double rotationTime = RayGetProperty(Property.LoadCatheterTime);
-            timer.Interval = TimeSpan.FromMilliseconds(rotationTime / (100 / catheterProgressStep));
-            timer.Tick += new EventHandler(ProgressLoadTest);
-            timerUnload.Interval = TimeSpan.FromMilliseconds(rotationTime / (100 / catheterProgressStep) / 2);
-            timerUnload.Tick += new EventHandler(ProgressUnloadTest);
-        }
-
-        private void CatheterFailReceiver()
-        {
-            _log.Debug("CatheterFailReceiver");
-
-            if (this.isCatheterFailPopupOpened)
-                return;
-
-            this.isCatheterFailPopupOpened = true;
-
-            DeviceStatus.CatheterStatus = Constants.CatheterStatusFailed;//Fail Receive
-
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
-            {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["title"] = _l10n["Error"];
-                parameter["message"] = _l10n["$MSG007"];
-                parameter["error"] = true;
-                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
-                if (result != null && result.DialogAnswer == DialogResults.Answer.Undefined)
-                {
-                    parameter.Clear();
-                    parameter["patient"] = Patient;
-                    parameter["patientCase"] = PatientCase;
-                    parameter["prevStatus"] = PrevStatus;
-                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingCatheterFailPage) { Parameter = parameter });
-
-                    this.isCatheterFailPopupOpened = false;
-                }
-            });
-        }
-
-        private void CatheterUnlockReceiver() 
-        {
-            _log.Debug("CatheterUnlockReceiver");
-
-            DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloading;
-
-            LeaveFromRecording();
-
-            RayError result = (RayError)RayUnloadCatheter();
-            if (result != RayError.OK)
-            {
-                _log.Error("RayUnloadCatheter Error");
-            }
-        }
-
-        private DispatcherTimer timerUnload = new DispatcherTimer();
-        private void ProgressUnloadTest(object sender, EventArgs e)
-        {
-            if(DeviceStatus.CatheterStatus == Constants.CatheterStatusConnected)
-            {
-                timerUnload.Stop();
-            }
-
-            CatheterProgress -= catheterProgressStep;
-        }
-
-
-        private void CatheterConnectReceiver()
-        {
-            _log.Debug("CatheterConnectReceiver");
-            DeviceStatus.CatheterStatus = Constants.CatheterStatusLoading;    // Micro-limit switch on
-
-            RayError result = (RayError)RayLoadCatheter();
-            if (result != RayError.OK)
-            {
-                _log.Error("RayLoadCatheter Error");
-            }
-        }
-
-        private void AutopullbackTest()
-        {
-            _log.Debug("AutopullbackTest");
-
-            IsAutoPullbackTest = !IsAutoPullbackTest;
-        }
-
-        private void CompensationTest()
-        {
-            _log.Debug("CompensationTest");
-
-            bool bImageCompensation = (bool)(RayGetProperty(Property.ImageCompensation) != 0);
-
-            RayError result = (RayError)RaySetProperty(Property.ImageCompensation, bImageCompensation ? 0 : 1);
-            if (result != RayError.OK)
-            {
-                _log.Error("RaySetProperty Error");
-            }
-        }
-
-        private void CompensationControlWindowTest()
-        {
-            _log.Debug("CompensationControlWindowTest");
-
-            if (threadCompensationWindow == null)
-            {
-                threadCompensationWindow = new Thread(() => ThreadCompensationWindow(this));
-                threadCompensationWindow.Start();
-            }
-            else {
-                showCompensationWindow = false;
-                threadCompensationWindow.Join();
-                threadCompensationWindow = null;
-            }
-        }
-
-        private static void ThreadCompensationWindow(MainViewModel model)
-        {
-            _log.Debug("ThreadCompensationWindow");
-
-            model.showCompensationWindow = true;
-            RayError result = (RayError)RaySetProperty(Property.ImageCompensationControlWindow, 1);
-            if (result != RayError.OK)
-            {
-                _log.Error("RaySetProperty Error");
-            }
-
-            while (model.showCompensationWindow) 
-            {
-                Cv2.WaitKey(1);
-            }
-
-            result = (RayError)RaySetProperty(Property.ImageCompensationControlWindow, 0);
-            if (result != RayError.OK)
-            {
-                _log.Error("RaySetProperty Error");
-            }
-
-            _log.Debug("ThreadCompensationWindow done.");
-        }
-
-        private void SaveVTIFileTest()
-        {
-            _log.Debug("SaveVTIFileTest");
-
-            CommonUtil.IsVTIFileSave = !CommonUtil.IsVTIFileSave;
-            if(CommonUtil.IsVTIFileSave)
-                _log.Debug("SaveVTIFileTest True");
-            else
-            {
-                _log.Debug("SaveVTIFileTest False");
-            }
-        }
-
-        private void AutopullbackOff()
-        {
-            _log.Debug("AutopullbackOff");
-
-            RayError result = (RayError)RaySetProperty(Property.AutoPullback, 0.0);
-            if (result != RayError.OK)
-            {
-                _log.Error("RaySetProperty Error");
-            }
-        }
-        
-        private void AutopullbackOn()
-        {
-            _log.Debug("AutopullbackOn");
-
-            CommonUtil.SetAutuPullback(_sqlManager);
-            RayError result = (RayError)RaySetProperty(Property.AutoPullback, 1.0);
-            if (result != RayError.OK)
-            {
-                _log.Error("RaySetProperty Error");
-            }
-        }
-
-        //Test
-        private double catheterProgressStep = 10;
-        private DispatcherTimer timer = new DispatcherTimer();
-        private void ProgressLoadTest(object sender, EventArgs e)
-        {
-            if (DeviceStatus.CatheterStatus == Constants.CatheterStatusEnable)
-            {
-                timer.Stop();
-            }
-
-            CatheterProgress += catheterProgressStep;
         }
 
         private void OnMsgCallback(int request, int response, int param)
@@ -623,15 +303,6 @@ namespace RaywattOCTFFR.ViewModels
             {
                 switch (error)
                 {
-                    case RayError.CatheterNotValid:
-                        CatheterFailReceiver();
-                        break;
-                    case RayError.HomingFailed:
-                        DeviceStatus.CatheterStatus = Constants.CatheterStatusFailed;
-                        break;
-                    case RayError.RotaryJunctionError:
-                        DeviceStatus.CatheterStatus = Constants.CatheterStatusFailed;
-                        break;
                     default:
                         break;
                 }
@@ -643,24 +314,6 @@ namespace RaywattOCTFFR.ViewModels
             _log.Debug("event: " + e.ToString());
             switch (e)
             {
-                case RayEvent.CatheterConnected:
-                    CatheterConnectReceiver();
-                    break;
-                case RayEvent.CatheterLoading:
-                    //Test
-                    DeviceStatus.CatheterStatus = Constants.CatheterStatusLoading;
-                    CatheterProgress = 0;
-                    if(!timer.IsEnabled)
-                        timer.Start();
-                    break;
-                case RayEvent.CatheterUnloading:
-                    //Test
-                    DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloading;
-                    CatheterProgress = 100;
-                    if(!timerUnload.IsEnabled)
-                        timerUnload.Start();
-                    LeaveFromRecording();
-                    break;
                 default:
                     break;
             }
@@ -673,35 +326,9 @@ namespace RaywattOCTFFR.ViewModels
             {
                 case RayWorkItem.StartService:
                     DeviceStatus.IsServiceStarted = true;
-                    InitCatheterTimer();
-                    break;
-                case RayWorkItem.AutoCalibration:
-                    DeviceStatus.CanExecuteCalibration = true;
-                    break;
-                case RayWorkItem.LoadCatheter:
-                    DeviceStatus.CatheterStatus = Constants.CatheterStatusLoaded;
-                    break;
-                case RayWorkItem.UnloadCatheter:
-                    DeviceStatus.CatheterStatus = Constants.CatheterStatusConnected;
-                    break;
-                case RayWorkItem.EnableCatheter:
-                    DeviceStatus.CatheterStatus = Constants.CatheterStatusEnable;
-                    break;
-                case RayWorkItem.Recording:
-                    DeviceStatus.IsRecordingDone = true;
-                    if (DeviceStatus.IsAngioConnected)
-                    {
-                        _angioManager.StopGettingAngioImageThread();
-                    }
-                    break;
-                case RayWorkItem.Pullback:
-                    DeviceStatus.IsPullbackDone = true;
                     break;
                 case RayWorkItem.OCTImaging:
-                    if(param == (int)RaySession.Review)
-                        DeviceStatus.IsOCTImagingDone = true;
-                    else
-                        DeviceStatus.IsOCTImagingCompareDone = true;
+                    DeviceStatus.IsOCTImagingDone = true;
                     break;
                 case RayWorkItem.GenerateCutView:
                     break;
@@ -709,12 +336,6 @@ namespace RaywattOCTFFR.ViewModels
                     DeviceStatus.IsLumenDetected = true;
                     break;
                 case RayWorkItem.GenerateVolume:
-                    break;
-                case RayWorkItem.SaveRawData:
-                    DeviceStatus.IsSaveRawDataDone = true;
-                    break;
-                case RayWorkItem.CleanRotaryJunction:
-                    DeviceStatus.IsCleaningDone = true;
                     break;
                 default:
                     break;

@@ -22,48 +22,21 @@ namespace RaywattOCTFFR.Common.Bases
         //Patient
         public const string PatientListPage = "Views/PatientListPage.xaml";
         public const string PatientDetailPage = "Views/PatientDetailPage.xaml";
-        public const string PatientNewPage = "Views/PatientNewPage.xaml";
         public const string PatientEditPage = "Views/PatientEditPage.xaml";
-        public const string PatientNewDicomPage = "Views/PatientNewDicomPage.xaml";
-        public const string PatientNewDicomPacsPage = "Views/PatientNewDicomPacsPage.xaml";
-        public const string PatientNewDicomMwlPage = "Views/PatientNewDicomMwlPage.xaml";
-        //Physician
-        public const string PhysicianListPage = "Views/PhysicianListPage.xaml";
-        public const string PhysicianEditPage = "Views/PhysicianEditPage.xaml";
-        //Recording
-        public const string RecordingPresetPage = "Views/RecordingPresetPage.xaml";
-        public const string RecordingSetupPage = "Views/RecordingSetupPage.xaml";
-        public const string RecordingLiveViewPage = "Views/RecordingLiveViewPage.xaml";
-        public const string RecordingCalibrationPage = "Views/RecordingCalibrationPage.xaml";
-        public const string RecordingPage = "Views/RecordingPage.xaml";
-        public const string RecordingConfirmPage = "Views/RecordingConfirmPage.xaml";
-        public const string RecordingCatheterFailPage = "Views/RecordingCatheterFailPage.xaml";
         //Review
         public const string ReviewPage = "Views/ReviewPage.xaml";
-        public const string Review3dPage = "Views/Review3dPage.xaml";
-        public const string ReviewComparePage = "Views/ReviewComparePage.xaml";
         public const string ReviewFfrSettingPage = "Views/ReviewFfrSettingPage.xaml";
         public const string ReviewFfrPage = "Views/ReviewFfrPage.xaml";
         public const string ReviewPresetPage = "Views/ReviewPresetPage.xaml";
-        public const string ReviewAngioCoRegPage = "Views/ReviewAngioCoRegPage.xaml";
         public const string ReviewLumenEditPage = "Views/ReviewLumenEditPage.xaml";
         public const string ReviewCalibrationPage = "Views/ReviewCalibrationPage.xaml";
         //File
-        public const string FileExportStep1Page = "Views/File/FileExportStep1Page.xaml";
-        public const string FileExportStep2DicomPage = "Views/File/FileExportStep2DicomPage.xaml";
-        public const string FileExportStep2NativePage = "Views/File/FileExportStep2NativePage.xaml";
-        public const string FileExportStep2StandardPage = "Views/File/FileExportStep2StandardPage.xaml";
         public const string FileImportPage = "Views/File/FileImportPage.xaml";
         //Setting
-        public const string SettingAcquisitionPage = "Views/Setting/SettingAcquisitionPage.xaml";
-        public const string SettingLocalizationPage = "Views/Setting/SettingLocalizationPage.xaml";
         public const string SettingDatabasePage = "Views/Setting/SettingDatabasePage.xaml";
         public const string SettingAboutPage = "Views/Setting/SettingAboutPage.xaml";
         public const string SettingLogPage = "Views/Setting/SettingLogPage.xaml";
         public const string SettingTermsConditionsPage = "Views/Setting/SettingTermsConditionsPage.xaml";
-        public const string SettingTermsConditionsPage_RV200 = "Views/Setting/SettingTermsConditionsPage_RV200.xaml";
-        public const string SettingMaintenancePage = "Views/Setting/SettingMaintenancePage.xaml";
-        public const string SettingDicomPage = "Views/Setting/SettingDicomPage.xaml";
         public const string SettingPasswordChangePage = "Views/Setting/SettingPasswordChangePage.xaml";
 
         //Admin
@@ -76,8 +49,8 @@ namespace RaywattOCTFFR.Common.Bases
         public const string PasswordExpiryCheckPage = "Views/Password/PasswordExpiryCheckPage.xaml";
 
         //Resolution
-        public const double ApplicationWidth = 1280;
-        public const double ApplicationHeight = 1024;
+        public const double ApplicationWidth = 1920;
+        public const double ApplicationHeight = 1080;
         public const double FileExportDialogWidth = 860;
         public const double FileExportDialogHeight = 741;
         public const double FileImportDialogWidth = 860;
@@ -202,8 +175,6 @@ namespace RaywattOCTFFR.Common.Bases
         public const string FileExtension = "dbf";
         public const string AnnotationFileExtension = "annot";
         public const string FileNamePrefix = "Export_";
-        public const string AngioImageExtension = "angioframes";
-        public const string AngioParmasExtension = "params";
 
         //Export Layout
         public const double ExportHeight = 1080;
@@ -216,7 +187,6 @@ namespace RaywattOCTFFR.Common.Bases
         public const double ExportLongitudeHeight = 403;
         public const double ExportLongitudeImageWidth = 1200;
         public const double ExportLongitudeImageHeight = 140;
-        public const double ExportAngioSize = 677;
         public const double ExportTextPartSize = 566;
         public const double ExportLongitudeIndicatorWidth = 12;
         public const double CalciumIndicatorExportSizeBig = 989;
@@ -260,7 +230,6 @@ namespace RaywattOCTFFR.Common.Bases
         //Background Color
         public const int BackgroundColor = 0x161616;
         public const int CardBackgroundColor = 0x232323;
-        public const int CompareBackgroundColor = 0x0d0d0d;
 
         //Playback Interval (msec)
         public const double PlaybackInterval = 50;
@@ -280,17 +249,12 @@ namespace RaywattOCTFFR.Common.Bases
         public const string ConfigPath = SystemRootPath + "\\Raywatt\\System\\config";
 
         //Log Folder
-        public const string LogFolderPath = SystemRootPath + "\\Raywatt\\log";
+        public const string LogFolderPath = SystemRootPath + "\\Raywatt\\log\\octffr";
         public const string LogExtension = "*.log";
 
-        //FrameGrabber Folder
-        public const string FGFolderPath = SystemRootPath + "\\Raywatt\\FrameGrabber";
 
         //ML Model Folder
         public const string MlModelFolderPath = SystemRootPath + "\\Raywatt\\system\\3rdparty\\model";
-
-        //DICOM Temp Folder
-        public const string DicomTempFolderPath = ".\\dicomTempFolder";
 
         //Storage Limit (GB)
         public const int StorageLimit = 10;
@@ -306,25 +270,10 @@ namespace RaywattOCTFFR.Common.Bases
         public static readonly System.Windows.Point CrossSectionPointCenter = new System.Windows.Point(CrossSectionRadius, CrossSectionRadius);
         public static readonly System.Windows.Rect CrossSectionRect = new System.Windows.Rect(0, 0, CrossSectionSize, CrossSectionSize);
         public const double CalciumIndicatorSize = 645;
-        public const double CalciumIndicatorAngioSize = 490;
         public const double CalciumThicknessIndicatorSize = 681;
-        public const double CalciumThicknessIndicatorAngioSize = 510;
         public const double CalciumThicknessIndicatorCenter = CalciumThicknessIndicatorSize / 2;
-        public const double CalciumThicknessIndicatorCenterAngio = CalciumThicknessIndicatorAngioSize / 2;
         public static readonly System.Windows.Point CalciumThicknessIndicatorPointCenter = new System.Windows.Point(CalciumThicknessIndicatorCenter, CalciumThicknessIndicatorCenter);
-        public static readonly System.Windows.Point CalciumThicknessIndicatorPointCenterAngio = new System.Windows.Point(CalciumThicknessIndicatorCenterAngio, CalciumThicknessIndicatorCenterAngio);
         public const int CalciumIndicatorColor = 0x57FEEB;
-
-        //Review - 2D - Angio
-        public const double AngioSize = 580;
-        public const double CrossSectionAngio = 470;
-        public const double CrossSectionAngioCenter = CrossSectionAngio / 2;
-        public const double CrossSectionAngioRadius = CrossSectionAngioCenter;
-        public static readonly System.Windows.Point CrossSectionAngioPointCenter = new System.Windows.Point(CrossSectionAngioRadius, CrossSectionAngioRadius);
-        public static readonly System.Windows.Rect CrossSectionAngioRect = new System.Windows.Rect(0, 0, CrossSectionAngio, CrossSectionAngio);
-        public const double CrossSectionAngioScale = CrossSectionAngio / CrossSectionSize;
-        public const double CoRegZoomAngioSize = 382;
-        public const double CoRegZoomScale = 5;
 
         //Review - 2D - Longitude
         public const double LongitudeWidth = 1140;
@@ -354,48 +303,6 @@ namespace RaywattOCTFFR.Common.Bases
         public const string LongitudeProfile = "Profile";
         public const string LongitudeLMode = "LMode";
 
-        //Review - 3D - Cut View
-        public const double CutView3dX = 98;
-        public const double CutView3dY = 130; // 140 - 10 (for View Edge Round)
-        public const double CutView3dWidth = 734;
-        public const double CutView3dHeight = 540; // 560 - 20 (for View Edge Round)
-        public const double XYScale3D = 1024 / 500;
-
-        //Review - 3D - Fly Through View
-        public const double FlyThroughView3dX = 886;
-        public const double FlyThroughView3dY = 216;
-        public const double FlyThroughView3dWidth = 368;
-        public const double FlyThroughView3dHeight = 368;
-
-        //Review - 3D - Cross Section
-        public const double CrossSection3dSize = 180;
-        public const double CrossSection3dCenter = CrossSection3dSize / 2;
-
-        //Review - 3D - Longitude
-        public const double Longitude3dWidth = 868;
-        public const double Longitude3dHeight = 150;
-        public const double Longitude3dImageClipHeight = Longitude3dHeight + 10;
-        public const double Longitude3dScale = Longitude3dWidth / 10;
-        public const double LongitudeIndicator3dHeight = 161;
-
-        //Review - 3D - Side Menu
-        public const double LeftSideBarExpand3dSize = 329;
-        public const double ViewMenu3dY = 70;
-        public const double PatientMenu3dY = 409;
-
-        //Review - Compare - Cross Section
-        public const double CrossSectionCompareSize = 344;
-
-        //Review - Compare - Longitude
-        public const double LongitudeCompareWidth = 720;
-        public const double LongitudeCompareHeight = 170;
-        public const double LongitudeCompareScale = (LongitudeCompareWidth - 1) / 10;
-        public const double LongitudeIndicatorCompareHeight = 177;
-        public const double LumenProfileExtraCompareHeight = 6;
-
-        //Review - Compare - Side Menu
-        public const double SelectPreCaseExpandSize = 460;
-
         //Review - AI FFR
         public const double LongitudeFfrWidth = 1080;
         public const double LongitudeFfrHeight = 90;
@@ -406,15 +313,6 @@ namespace RaywattOCTFFR.Common.Bases
         public const string FfrStep4 = "FfrStep4";
         public const string FfrStep5 = "FfrStep5";
         public const double CrossSectionFfrSize = 344;
-
-        //Recording
-        public const int TransientTime = 2000;
-        public const int StartTime = 10;
-        public const double SmallCrossSectionSize = 318;
-
-        //Recording - Confirm
-        public const double CrossSectionConfirmSize = 475;
-        public const double LongitudeConfirmWidth = 1080;
 
         //Measurement
         public const string MeasureDrawAll = "DrawAll";  //Draw All
@@ -478,8 +376,6 @@ namespace RaywattOCTFFR.Common.Bases
         //Scale
         public const string ScaleLength = "Length";
         public const string ScaleArea = "Area";
-        public const string ScaleLengthCompare = "LengthCompare";
-        public const string ScaleAreaCompare = "AreaCompare";
 
         //Field of View
         public const double DefaultFoV = 10.0f;
@@ -501,35 +397,5 @@ namespace RaywattOCTFFR.Common.Bases
         //Zoom
         public const double ZoomScaleDefault = CrossSectionSize / OCTImageSize;
         public const double ZoomScaleMax = ZoomScaleDefault * 2;
-        public const double ZoomAngioCsScaleDefault = CrossSectionAngio / OCTImageSize;
-        public const double ZoomAngioCsScaleMax = ZoomAngioCsScaleDefault * 2;
-        public const int Zoom3DScaleMax = 5;
-
-        //AngioManager
-        public const string ServerIP = "127.0.0.1";
-        public const int ServerPort = 8888;
-        public const byte SOF = 0x3A;
-        public const byte EOF = 0xA3;
-        public const int ImageHeaderSize = 15;
-        public const int ImageTailSize = 2;
-        public const int CommandPacketSize = 5;
-        public const int DeviceInfoPacketSize = 10;
-
-        //AngioCoRegistration
-        public const double ellipsePathWidth = 4;
-        public const double ellipsePathHeight = 4;
-        public const double ellipseTrackWidth = 6;
-        public const double ellipseTrackHeight = 6;
-        public const double ellipseOuterTrackWidth = 16;
-        public const double ellipseOuterTrackHeight = 16;
-        public const double coregistrationCursorSize = 113;
-        public const string objectSeedPath = "..\\bin\\Data\\Object.png";
-        public const string backgroundSeedPath = "..\\bin\\Data\\Background.png";
-        public const double pathInterval = 7.6;
-        public const int pathIntervalPowerHISH = 1;
-        public const int pathIntervalPowerHILO = 2;
-        public const int pathIntervalPowerSTSH = 3;
-        public const int pathIntervalPowerSTLO = 5;
-        public const int pathIntervalPowerFAST = 12;
     }
 }

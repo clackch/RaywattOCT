@@ -249,12 +249,6 @@ Acceptance of Terms: Require users to explicitly accept the terms and conditions
   <data name="2D Option" xml:space="preserve">
     <value>2D Option</value>
   </data>
-  <data name="3D" xml:space="preserve">
-    <value>3D</value>
-  </data>
-  <data name="3D Option" xml:space="preserve">
-    <value>3D Option</value>
-  </data>
   <data name="About" xml:space="preserve">
     <value>About</value>
   </data>
@@ -290,12 +284,6 @@ Acceptance of Terms: Require users to explicitly accept the terms and conditions
   </data>
   <data name="Alternate Patient IDs" xml:space="preserve">
     <value>Alternate Patient IDs</value>
-  </data>
-  <data name="Angio" xml:space="preserve">
-    <value>Angio</value>
-  </data>
-  <data name="Angio Co-Registration" xml:space="preserve">
-    <value>Angio Co-Registration</value>
   </data>
   <data name="Apply" xml:space="preserve">
     <value>Apply</value>
@@ -396,9 +384,6 @@ Acceptance of Terms: Require users to explicitly accept the terms and conditions
   </data>
   <data name="Comment" xml:space="preserve">
     <value>Comment</value>
-  </data>
-  <data name="Compare" xml:space="preserve">
-    <value>Compare</value>
   </data>
   <data name="Confirm" xml:space="preserve">
     <value>Confirm</value>
@@ -841,9 +826,6 @@ Overwrite existing data?</value>
   </data>
   <data name="OCT" xml:space="preserve">
     <value>OCT</value>
-  </data>
-  <data name="OCT + Angio" xml:space="preserve">
-    <value>OCT + Angio</value>
   </data>
   <data name="OCT Colormap" xml:space="preserve">
     <value>OCT Colormap</value>

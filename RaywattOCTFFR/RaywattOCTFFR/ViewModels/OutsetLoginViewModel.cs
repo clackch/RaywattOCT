@@ -245,7 +245,7 @@ namespace RaywattOCTFFR.ViewModels
 
             if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
             {
-                CommonUtil.Exit(DeviceStatus, null, true, true);
+                CommonUtil.Exit(DeviceStatus, true, true);
             }
         }
     }

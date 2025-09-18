@@ -15,9 +15,7 @@ using System.Windows.Controls;
 using RaywattOCTFFR.Views.Dialog;
 using RaywattOCTFFR.Common.Dialog;
 using static RaywattOCT.RayCoreWrapper;
-using System.Windows;
 using System.Threading;
-using RaywattOCT;
 using RaywattOCTFFR.Common.Util;
 
 namespace RaywattOCTFFR.ViewModels
@@ -50,12 +48,6 @@ namespace RaywattOCTFFR.ViewModels
 
         private List<string> selectedItem;
 
-        private ICommand _exportCommand;
-        public ICommand ExportCommand
-        {
-            get { return this._exportCommand ?? (this._exportCommand = new RelayCommand(Export)); }
-        }
-
         private ICommand _deleteCommand;
         public ICommand DeleteCommand
         {
@@ -72,12 +64,6 @@ namespace RaywattOCTFFR.ViewModels
         public ICommand PatientEditCommand
         {
             get { return this._patiendEditCommand ?? (this._patiendEditCommand = new RelayCommand(GoPatientEdit)); }
-        }
-
-        private ICommand _newRecordingCommand;
-        public ICommand NewRecordingCommand
-        {
-            get { return this._newRecordingCommand ?? (this._newRecordingCommand = new RelayCommand(NewRecording)); }
         }
 
         private ICommand _showPatientCaseCommand;
@@ -229,55 +215,6 @@ namespace RaywattOCTFFR.ViewModels
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientEditPage) { Parameter = parameter });
         }
 
-        private void NewRecording()
-        {
-            _log.Debug("NewRecording");
-
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-
-            if (!CommonUtil.IsStorageAvailable())
-            {
-                parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["$MSG024"];
-                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
-                return;
-            }
-
-            if (Patient.PhysicianId == 0)
-            {
-                parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["$MSG016"];
-                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
-                return;
-            }
-
-            parameter.Clear();
-            parameter["patient"] = Patient;
-            GetDetailStatus();
-            parameter["prevStatus"] = PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingPresetPage) { Parameter = parameter });
-        }
-
-        private void Export()
-        {
-            _log.Debug("Export");
-
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["fileType"] = Constants.FileTypeExport;
-            FileExport fileExport = new FileExport();
-            fileExport.PatientId = Patient.Id;
-            fileExport.SelectedItem = selectedItem;
-            parameter["fileExport"] = fileExport;
-
-            GetDetailStatus();
-
-            var result = _dialogService.OpenDialog(new FileDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
-            SetPrevStatus();
-        }
-
         private void Delete(PatientCase patientCase)
         {
             _log.Debug("Delete");
@@ -412,7 +349,6 @@ namespace RaywattOCTFFR.ViewModels
             ReviewStatus reviewStatus = new ReviewStatus();
             reviewStatus.NumberOfFrames = numOfFrames;
             parameter["reviewStatus"] = reviewStatus;
-            Ray3DWrapper.ray3DStatus = new Ray3DWrapper.Ray3DStatus();
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewPage) { Parameter = parameter });
         }
 

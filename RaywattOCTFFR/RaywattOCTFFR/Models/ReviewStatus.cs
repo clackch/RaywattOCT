@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using RaywattOCTFFR.Common.Bases;
 
 namespace RaywattOCTFFR.Models
 {
@@ -10,9 +9,6 @@ namespace RaywattOCTFFR.Models
         private string _currentPage;
 
         //2D
-        [ObservableProperty]
-        private bool _isAngioOn = false;
-
         [ObservableProperty]
         private bool _isLumenProfile = true;
 
@@ -32,12 +28,6 @@ namespace RaywattOCTFFR.Models
         private bool _isSheathOn = true;
 
         [ObservableProperty]
-        private bool _isCalciumOnAngioCs = true;
-
-        [ObservableProperty]
-        private bool _isSheathOnAngioCs = true;
-
-        [ObservableProperty]
         private bool _isPlay = true;
 
         [ObservableProperty]
@@ -45,15 +35,6 @@ namespace RaywattOCTFFR.Models
 
         [ObservableProperty]
         private Zoom _zoom = new Zoom();
-
-        [ObservableProperty]
-        private Zoom _zoomAngioCs = new Zoom(Constants.CrossSectionAngio);
-
-        [ObservableProperty]
-        private Zoom _zoomAngio = new Zoom(Constants.AngioSize);
-
-        [ObservableProperty]
-        private int _angioFrameNumber = -1;
 
         [ObservableProperty]
         private bool _isNoPullback = false;
@@ -66,13 +47,6 @@ namespace RaywattOCTFFR.Models
 
         [ObservableProperty]
         private bool _isRestartLumenDetection = false;
-
-        //3D
-
-
-        //Compare
-        [ObservableProperty]
-        private PatientCase _selectedPatientCase;
 
         //FFR
         [ObservableProperty]

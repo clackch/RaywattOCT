@@ -202,27 +202,6 @@ namespace RaywattOCTFFR.Services
                 LIMIT 1
                 ";
 
-            //SelectPhysician
-            _query["SelectPhysician"] = @$"
-                SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name
-                , flush_media, pullback_trigger, pullback_type, colormap
-                , calcium_threshold, expansion_threshold, apposition_threshold
-                , create_date, update_date
-                FROM rv_schema.physician
-                WHERE id=@id
-                ";
-
-            //SelectPhysicianList
-            _query["SelectPhysicianList"] = @$"
-                SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name
-                , flush_media, pullback_trigger, pullback_type, colormap
-                , calcium_threshold, expansion_threshold, apposition_threshold
-                , create_date, update_date
-                FROM rv_schema.physician
-                WHERE LOWER(lastname) LIKE LOWER(@lastname) OR LOWER(firstname) LIKE LOWER(@firstname)
-                ORDER BY name
-                ";
-
             //SelectPatientCaseAnnotation
             _query["SelectPatientCaseAnnotation"] = @$"
                 SELECT id, bookmark, longitude, cross_section, lumen_contour, lumen_sidebranch, lumen_stent, lumen_guidewire, co_registration
@@ -235,43 +214,6 @@ namespace RaywattOCTFFR.Services
                 SELECT ffr_plaque return_string, ffr_value return_string2
                 FROM rv_schema.patient_case_annotation
                 WHERE id = @id
-                ";
-
-            //SelectCathRoomList
-            _query["SelectCathRoomList"] = @$"
-                SELECT id, name, setup_chp, app_chp, rect_left, rect_top, rect_right, rect_bottom, description, create_date, update_date
-                FROM rv_schema.cath_room
-                ORDER BY name;
-                ";
-
-            //SelectCoRegistration
-            _query["SelectCoRegistration"] = @$"
-                SELECT id,  co_registration
-                FROM rv_schema.patient_case_annotation
-                WHERE id = @id
-                ";
-
-            //SelectDicomServer
-            _query["SelectDicomServer"] = @$"
-                SELECT id, ae_title, hostname, specify_ip_address, ip_address, port, tls_yn, server_type, comment, ca_file_path, create_date, update_date
-                FROM rv_schema.dicom_server
-                ORDER BY ae_title
-                ";
-
-            //SelectDicomServerByType
-            _query["SelectDicomServerByType"] = @$"
-                SELECT id, ae_title, hostname, specify_ip_address, ip_address, port, tls_yn, server_type, comment, ca_file_path, create_date, update_date
-                FROM rv_schema.dicom_server
-                WHERE server_type = @server_type
-                ORDER BY ae_title
-                ";
-
-            //SelectDicomServerExcludeId
-            _query["SelectDicomServerExcludeId"] = @$"
-                SELECT id, ae_title, hostname, specify_ip_address, ip_address, port, tls_yn, server_type, comment, ca_file_path, create_date, update_date
-                FROM rv_schema.dicom_server
-                WHERE id != @id
-                ORDER BY ae_title
                 ";
                   
             //SelectUserList
@@ -333,27 +275,6 @@ namespace RaywattOCTFFR.Services
                 , @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold
                 , @brightness, @contrast, @sheath_diameter, @section_proximal, @section_distal
                 , @create_date, now())
-                ";
-
-            //InsertPhysician
-            _query["InsertPhysician"] = @$"
-                INSERT INTO rv_schema.physician(lastname, firstname
-	            , flush_media, pullback_trigger, pullback_type, colormap
-	            , calcium_threshold, expansion_threshold, apposition_threshold
-	            , create_date, update_date)
-	            VALUES (@lastname, @firstname
-	            , @flush_media, @pullback_trigger, @pullback_type, @colormap
-	            , @calcium_threshold, @expansion_threshold, @apposition_threshold
-	            , now(), now())
-                ";
-
-            //InsertDicomServer
-            _query["InsertDicomServer"] = @$"
-                INSERT INTO rv_schema.dicom_server(ae_title, hostname, specify_ip_address
-                , ip_address, port, tls_yn, server_type, comment, ca_file_path, create_date, update_date)
-	            VALUES (@ae_title, @hostname, @specify_ip_address
-                , @ip_address, @port, @tls_yn, @server_type, @comment, @ca_file_path
-	            , now(), now())
                 ";
 
             //InsertUser
@@ -437,31 +358,6 @@ namespace RaywattOCTFFR.Services
                 WHERE id = @id
                 ";
 
-            //UpdatePhysician
-            _query["UpdatePhysician"] = @$"
-                UPDATE rv_schema.physician
-	            SET lastname=@lastname, firstname=@firstname
-	            , flush_media=@flush_media, pullback_trigger=@pullback_trigger, pullback_type=@pullback_type, colormap=@colormap
-	            , calcium_threshold=@calcium_threshold, expansion_threshold=@expansion_threshold, apposition_threshold=@apposition_threshold
-	            , update_date=now()
-	            WHERE id=@id
-                ";
-              
-            //UpdatePatientCaseAngioCoRegistration
-            _query["UpdatePatientCaseAngioCoRegistration"] = @$"
-                UPDATE rv_schema.patient_case
-                SET angio_co_registration=@angio_co_registration
-                WHERE id=@id
-                ";
-
-            //UpdateDicomServer
-            _query["UpdateDicomServer"] = @$"
-                UPDATE rv_schema.dicom_server
-                SET ae_title=@ae_title, hostname=@hostname, specify_ip_address=@specify_ip_address
-                , ip_address=@ip_address, port=@port, tls_yn=@tls_yn, server_type=@server_type, comment=@comment, ca_file_path=@ca_file_path, update_date=now()
-                WHERE id=@id
-                ";
-
             //UpdateUser
             _query["UpdateTermsAgreedDateUser"] = @$"
                 UPDATE rv_schema.user
@@ -503,18 +399,6 @@ namespace RaywattOCTFFR.Services
             //DeletePatientCase
             _query["DeletePatientCase"] = @$"
                 DELETE FROM rv_schema.patient_case
-                WHERE id=@id
-                ";
-
-            //DeletePhysician
-            _query["DeletePhysician"] = @$"
-                DELETE FROM rv_schema.physician
-                WHERE id=@id
-                ";
-
-            //DeleteDicomServer
-            _query["DeleteDicomServer"] = @$"
-                DELETE FROM rv_schema.dicom_server
                 WHERE id=@id
                 ";
 
@@ -571,15 +455,6 @@ namespace RaywattOCTFFR.Services
                 DO UPDATE
                 SET bookmark=@bookmark, longitude=@longitude, cross_section=@cross_section
                 , lumen_contour=@lumen_contour, lumen_sidebranch=@lumen_sidebranch, lumen_stent=@lumen_stent, lumen_guidewire=@lumen_guidewire, ffr_plaque=@ffr_plaque, co_registration=@co_registration, update_date=now()
-                ";
-
-            //UpsertCoRegistration
-            _query["UpsertCoRegistration"] = @$"
-                INSERT INTO rv_schema.patient_case_annotation (id, co_registration)
-                VALUES (@id, @co_registration)
-                ON CONFLICT (id)
-                DO UPDATE
-                SET co_registration = @co_registration
                 ";
         }
     }

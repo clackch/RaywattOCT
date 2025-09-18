@@ -41,34 +41,16 @@ namespace RaywattOCTFFR.ViewModels
             get { return this._importCommand ?? (this._importCommand = new RelayCommand(Import)); }
         }
 
-        private ICommand _exportCommand;
-        public ICommand ExportCommand
-        {
-            get { return this._exportCommand ?? (this._exportCommand = new RelayCommand(Export)); }
-        }
-
         private ICommand _searchCommand;
         public ICommand SearchCommand
         {
             get { return this._searchCommand ?? (this._searchCommand = new RelayCommand(Search)); }
         }
 
-        private ICommand _physicianCommand;
-        public ICommand PhysicianCommand
-        {
-            get { return this._physicianCommand ?? (this._physicianCommand = new RelayCommand(Physician)); }
-        }
-
         private ICommand _gridDoubleClickCommand;
         public ICommand GridDoubleClickCommand
         {
             get { return this._gridDoubleClickCommand ?? (this._gridDoubleClickCommand = new RelayCommand<Patient>(MovePatientDetail)); }
-        }
-
-        private ICommand _newPatientCommand;
-        public ICommand NewPatientCommand
-        {
-            get { return this._newPatientCommand ?? (this._newPatientCommand = new RelayCommand(MovePatientNew)); }
         }
 
         [ObservableProperty]
@@ -234,18 +216,6 @@ namespace RaywattOCTFFR.ViewModels
             Search();
         }
 
-        private void Export()
-        {
-            _log.Debug("Export");
-
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["fileType"] = Constants.FileTypeExport;
-
-            var result = _dialogService.OpenDialog(new FileDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
-            Search();
-        }
-
         private void MovePatientDetail(Patient patient)
         {
             _log.Debug("MovePatientDetail");
@@ -257,38 +227,6 @@ namespace RaywattOCTFFR.ViewModels
             parameter["patient"] = patient;
             parameter["prevStatus"] = GetListStatus();
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientDetailPage) { Parameter = parameter });
-        }
-
-        private void MovePatientNew()
-        {
-            _log.Debug("MovePatientNew");
-
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["prevStatus"] = GetListStatus();
-
-            if (CommonUtil.IsRV200())
-            {
-                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientNewPage) { Parameter = parameter });
-            }
-            else
-            {
-                var result = _dialogService.OpenDialog(new NewPatientDialogControl(), null, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
-                if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
-                {
-                    Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
-                    bool isManual = (bool)data["isManual"];
-
-                    if (isManual)
-                    {
-                        WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientNewPage) { Parameter = parameter });
-                    }
-                    else
-                    {
-                        WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientNewDicomPage) { Parameter = parameter });
-                    }
-                }
-            }
         }
 
         private PrevStatus GetListStatus()
@@ -304,15 +242,6 @@ namespace RaywattOCTFFR.ViewModels
             prevStatus.ListPageNumber = PagingNoIdx;
 
             return prevStatus;
-        }
-
-        private void Physician()
-        {
-            _log.Debug("Physician");
-
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["prevStatus"] = GetListStatus();
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PhysicianListPage) { Parameter = parameter });
         }
     }
 }

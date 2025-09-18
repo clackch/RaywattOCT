@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
-using RaywattOCTFFR.Common.Angio;
 using RaywattOCTFFR.Common.Bases;
 using RaywattOCTFFR.Common.Dialog;
 using RaywattOCTFFR.Common.Messages;
@@ -12,10 +11,8 @@ using RaywattOCTFFR.Views.Dialog;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Windows.Interop;
 using System.Windows.Navigation;
 using System.Windows.Threading;
-using static RaywattOCT.Ray3DWrapper;
 using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattOCTFFR.ViewModels
@@ -26,8 +23,6 @@ namespace RaywattOCTFFR.ViewModels
 
         private readonly SqlManager _sqlManager;
 
-        private readonly AngioManager _angioManager;
-
         private readonly IPasswordService _passwordService;
 
         private IDialogService _dialogService;
@@ -36,21 +31,18 @@ namespace RaywattOCTFFR.ViewModels
 
         private bool isError;
 
-        private ConnectionStatus connState = ConnectionStatus.Default;
-
         private string errorMsg;
 
         [ObservableProperty]
         private double _progress;
 
-        public OutsetLoadingViewModel(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager, IPasswordService passwordService)
+        public OutsetLoadingViewModel(SqlManager sqlManager, IDialogService dialogService, IPasswordService passwordService)
         {
             _log.Debug("OutsetLoadingViewModel");
 
             Constants.CurrentPage = Constants.OutsetLoadingPage;
 
             _sqlManager = sqlManager;
-            _angioManager = angioManager;
             _dialogService = dialogService;
             _passwordService = passwordService;
         }
@@ -62,15 +54,7 @@ namespace RaywattOCTFFR.ViewModels
             if (navigatedEventArgs is not NavigationEventArgs navArgs)
                 return;
 
-            if (CommonUtil.IsRV200())
-            {
-                if(TermsAndConditionCheck())
-                    InitializeSystem();
-            }
-            else
-            {
-                InitializeSystem();
-            }
+            InitializeSystem();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -82,45 +66,6 @@ namespace RaywattOCTFFR.ViewModels
         {
             if (Progress >= 100 && DeviceStatus.IsServiceStarted && DeviceStatus.IsDeviceConnected)
             {
-                IntPtr hWnd = new WindowInteropHelper(Constants.mainWindow).Handle;
-                int ray3DResult = ODSOCT_CreateDll(hWnd);
-                if (ray3DResult == 0)
-                {
-                    _log.Error("ODSOCT_CreateDll Error");
-                }
-                ray3DResult = ODSOCT_CreateOCTWindowByPos(Ray3DViewID.CutView, (int)Constants.CutView3dX, (int)Constants.CutView3dY,
-                    (int)Constants.CutView3dWidth, (int)Constants.CutView3dHeight);
-                if (ray3DResult == 0)
-                {
-                    _log.Error("ODSOCT_CreateOCTWindowByPos Error");
-                }
-                ray3DResult = ODSOCT_CreateOCTWindowByPos(Ray3DViewID.FlyThrough, (int)Constants.FlyThroughView3dX, (int)Constants.FlyThroughView3dY,
-                    (int)Constants.FlyThroughView3dWidth, (int)Constants.FlyThroughView3dHeight);
-                if (ray3DResult == 0)
-                {
-                    _log.Error("ODSOCT_CreateOCTWindowByPos Error");
-                }
-                ray3DResult = ODSOCT_StartRendering();
-                if (ray3DResult == 0)
-                {
-                    _log.Error("ODSOCT_StartRendering Error");
-                }
-                ray3DResult = ODSOCT_EnableInteractor(Ray3DViewID.CutView, false);
-                if (ray3DResult == 0)
-                {
-                    _log.Error("ODSOCT_EnableInteractor Error");
-                }
-                ray3DResult = ODSOCT_EnableInteractor(Ray3DViewID.FlyThrough, false);
-                if (ray3DResult == 0)
-                {
-                    _log.Error("ODSOCT_EnableInteractor Error");
-                }
-                ray3DResult = ODSOCT_EnableWheelEvent(false);
-                if (ray3DResult == 0)
-                {
-                    _log.Error("ODSOCT_EnableWheelEvent Error");
-                }
-
                 timer.Stop();
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
             }
@@ -140,7 +85,7 @@ namespace RaywattOCTFFR.ViewModels
 
                 if (resultDialog != null && resultDialog.DialogAnswer == DialogResults.Answer.Undefined)
                 {
-                    CommonUtil.Exit(DeviceStatus, _angioManager, true);
+                    CommonUtil.Exit(DeviceStatus, true);
                 }
             }
 
@@ -161,18 +106,7 @@ namespace RaywattOCTFFR.ViewModels
                 result |= (RayError)RayConnectDevices();
                 if (result == RayError.OK)
                 {
-                    connState = _angioManager.ConnectToServer();
-                    switch (connState)
-                    {
-                        case ConnectionStatus.Success:
-                            DeviceStatus.IsDeviceConnected = true;
-                            break;
-                        case ConnectionStatus.BoardFailure:
-                            DeviceStatus.IsDeviceConnected = false;
-                            errorMsg = "$MSG014";
-                            isError = true;
-                            break;
-                    }
+                    DeviceStatus.IsDeviceConnected = true;
                 }
                 else
                 {
@@ -198,35 +132,5 @@ namespace RaywattOCTFFR.ViewModels
             timer.Interval = TimeSpan.FromMilliseconds(25);
             timer.Start();
         }
-
-        private bool TermsAndConditionCheck()
-        {
-            _log.Debug("TermsAndConditionCheck");
-
-            // Terms and Contidions 확인
-            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
-            sqlParameters["classification"] = "Terms&Cond";
-            IList<Configuration> tnCs = _sqlManager.SelectConfiguration(sqlParameters);
-            if (tnCs != null || tnCs.Count == 1)
-            {
-                if ("N".Equals(tnCs[0].Value))
-                {
-                    Dictionary<string, object> parameter = new Dictionary<string, object>();
-                    parameter["tnC"] = tnCs[0];
-                    var result = _dialogService.OpenDialog(new TermsConditionsControl_RV200(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
-                    if (result != null && result.DialogAnswer == DialogResults.Answer.No)
-                    {
-                        DeviceStatus.PowerOffMsg = _l10n["Switching user"];
-                        CommonUtil.Exit(DeviceStatus, _angioManager, false, true);
-
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
-
     }
 }

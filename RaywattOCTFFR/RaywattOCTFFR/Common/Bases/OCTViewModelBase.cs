@@ -20,9 +20,6 @@ namespace RaywattOCTFFR.Common.Bases
         [ObservableProperty]
         private BitmapSource _crossSectionImage;
 
-        [ObservableProperty]
-        private BitmapSource _crossSectionForCompare;
-
         protected Mat[] imgCrossSection = new Mat[2];
         protected Scalar[] crossSectionBackground = new Scalar[2];
         protected Mat imgCrossSectionMask;
@@ -31,19 +28,7 @@ namespace RaywattOCTFFR.Common.Bases
         protected double _crossSectionScale;
 
         [ObservableProperty]
-        protected double _crossSectionAngioScale;
-
-        [ObservableProperty]
         protected double _crossSectionScaleIndicator;
-
-        [ObservableProperty]
-        protected double _crossSectionAngioScaleIndicator;
-
-        [ObservableProperty]
-        private double _crossSection3dScale = 28;
-
-        [ObservableProperty]
-        private double _crossSectionCompareScale = 40;
 
         [ObservableProperty]
         private BitmapSource _longitudeImage;
@@ -68,16 +53,10 @@ namespace RaywattOCTFFR.Common.Bases
         private BitmapSource _sheathIndicator;
 
         [ObservableProperty]
-        private BitmapSource _sheathIndicatorAngio;
-
-        [ObservableProperty]
         private bool _isPaused = true;
 
         [ObservableProperty]
         private int _frameNumberForInit;
-
-        [ObservableProperty]
-        private AutoPullback _autoPullback;
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
@@ -133,8 +112,6 @@ namespace RaywattOCTFFR.Common.Bases
         {
             Mat imgRecv = CommonUtil.ByteMemoryToCvMat(data, width, height, ch);
             imgCrossSection[session] = imgRecv;
-
-            CanAutoPullback(imgRecv, isCleared == 1.0 ? true : false);
         }
 
         private void OnRecvLongitude(int session, IntPtr data, int width, int height, int ch, int frameInfo, double intensity)
@@ -160,14 +137,7 @@ namespace RaywattOCTFFR.Common.Bases
 
             return true;
         }
-        protected bool DrawCrossSectionForCompare()
-        {
-            if (imgCrossSection[1] == null) return false;
 
-            CrossSectionForCompare = DrawCrossSectionWithBackground(imgCrossSection[1], crossSectionBackground[1]);
-
-            return true;
-        }
         protected void SetCrossSectionBackground(RaySession session, int rgbCode) {
             crossSectionBackground[(int)session] = new Scalar(rgbCode & 0xFF, (rgbCode >> 8) & 0xFF, (rgbCode >> 16) & 0xFF);
         }
@@ -209,7 +179,6 @@ namespace RaywattOCTFFR.Common.Bases
         protected void DrawSheathIndicator(double sheathDiameter)
         {
             SheathIndicator = CommonUtil.DrawSheathIndicator((int)Constants.CrossSectionSize, sheathDiameter);
-            SheathIndicatorAngio = CommonUtil.DrawSheathIndicator((int)Constants.CrossSectionAngio, sheathDiameter);
         }
 
         private static Mat GenerateMask(Mat image)
@@ -305,36 +274,6 @@ namespace RaywattOCTFFR.Common.Bases
         protected virtual void UpdateCrossSectionImage() { }
 
         protected virtual void UpdateLumenProfile() { }
-
-        protected virtual void AutoPullbackStart() { }
-
-        private void CanAutoPullback(Mat img, bool isCleared = false)
-        {
-            if (AutoPullback == null || !AutoPullback.OnOff)
-                return;
-
-            if (AutoPullback.TriggerTargetCount == 0)
-                return;
-
-            AutoPullback.IsCleared = isCleared;
-
-            if (AutoPullback.IsCleared)
-                AutoPullback.TriggerActualCount++;
-
-            _log.Debug($"[Blood Flushing] IsCleared: {AutoPullback.IsCleared} / Trigger Count: {AutoPullback.TriggerActualCount}");
-
-            if (AutoPullback.TriggerActualCount >= AutoPullback.TriggerTargetCount)
-            {
-                _log.Debug("AutoPullback Start");
-
-                RayError result = (RayError)RaySetProperty(Property.AutoPullback, 0.0);
-                if (result != RayError.OK)
-                {
-                    _log.Error("RaySetProperty Error");
-                }
-                AutoPullbackStart();
-            }          
-        }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {

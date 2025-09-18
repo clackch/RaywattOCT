@@ -12,22 +12,16 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Runtime.InteropServices;
 using static RaywattOCT.RayCoreWrapper;
-using static RaywattOCT.Ray3DWrapper;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Size = OpenCvSharp.Size;
 using RaywattOCTFFR.Common.Annotation.Models;
-using RaywattOCTFFR.Common.Dialog;
 using RaywattOCTFFR.Models;
-using RaywattOCTFFR.ViewModels.Dialog;
-using RaywattOCTFFR.Views.Dialog;
 using System.Threading;
 using System.Windows.Controls;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattOCTFFR.Common.Messages;
 using Newtonsoft.Json;
-using RaywattOCTFFR.Common.Angio;
-using System.Xml;
 using Python.Runtime;
 using FFMpegCore;
 using System.Net.NetworkInformation;
@@ -384,165 +378,6 @@ namespace RaywattOCTFFR.Common.Util
             }
 
             return imgLongitude;
-        }
-
-        public static async Task<List<Mat>> MakeImageForExport(PatientCase patientCase, List<Mat> imgCrossSections, Mat imgLongitude, List<int>? exportIndices, FileExport fileExport, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
-        {
-            List<Mat> convertedImages = new List<Mat>();
-
-            IDialogWindow window = new DialogWindow();
-
-            var dialog = new FileExportDialogControl();
-            double originWidth = dialog.Width;
-            double originHeight = dialog.Height;
-            dialog.Width = 0;
-            dialog.Height = 0;
-            window.Content = dialog;
-
-            var dialogFE = dialog as System.Windows.FrameworkElement;
-            var dialogDataContext = dialogFE.DataContext as FileExportDialogViewModel;
-            double dialogWidth = dialogDataContext.SetInitialize(patientCase, imgCrossSections, imgLongitude, fileExport);
-
-            window.Show();
-            window.Hide();
-
-            dialog.Width = dialogWidth;
-            dialog.Height = originHeight;
-
-            int totalCnt = imgCrossSections.Count;
-            if (exportIndices != null)
-                totalCnt = exportIndices.Count;
-
-            for (int i = 0; i < totalCnt; i++)
-            {
-                int index = i;
-                if (exportIndices != null)
-                    index = exportIndices[i];
-
-                dialogDataContext.SetFrameNumber(index);
-                dialog.UpdateLayout();
-
-                Size originalSize = new Size(dialog.ActualWidth, dialog.ActualHeight);
-                dialog.Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
-                dialog.Arrange(new System.Windows.Rect(0, 0, dialog.DesiredSize.Width, dialog.DesiredSize.Height));
-
-                RenderTargetBitmap rtb = new RenderTargetBitmap((int)dialog.DesiredSize.Width, (int)dialog.DesiredSize.Height, 96, 96, PixelFormats.Pbgra32);
-                System.Windows.Rect bounds = VisualTreeHelper.GetDescendantBounds(dialog);
-                DrawingVisual dv = new DrawingVisual();
-                using (DrawingContext ctx = dv.RenderOpen())
-                {
-                    VisualBrush vb = new VisualBrush(dialog);
-                    ctx.DrawRectangle(vb, null, bounds);
-                }
-                rtb.Render(dv);
-
-                dialog.Measure(new System.Windows.Size(originalSize.Width, originalSize.Height));
-                dialog.Arrange(new System.Windows.Rect(0, 0, originalSize.Width, originalSize.Height));
-
-                PngBitmapEncoder png = new PngBitmapEncoder();
-                png.Frames.Add(BitmapFrame.Create(rtb));
-                var bitmapImage = new BitmapImage();
-
-                using (var stream = new System.IO.MemoryStream())
-                {
-                    png.Save(stream);
-                    stream.Seek(0, System.IO.SeekOrigin.Begin);
-
-                    bitmapImage.BeginInit();
-                    bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmapImage.StreamSource = stream;
-                    bitmapImage.EndInit();
-                }
-
-                Mat image = new Mat();
-                Mat imgDraw = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToMat(bitmapImage);
-                Mat imgDrawGray = new Mat();
-                Mat imgBW = new Mat();
-                Cv2.CvtColor(imgDraw, imgDrawGray, ColorConversionCodes.RGBA2GRAY);
-                Cv2.Threshold(imgDrawGray, imgBW, 1, 255, ThresholdTypes.Binary);
-                Cv2.CvtColor(imgDraw, imgDraw, ColorConversionCodes.RGBA2RGB);
-                Cv2.CopyTo(imgDraw, image, imgBW);
-
-                convertedImages.Add(image);
-
-                await Task.Run(() => {
-                    progressCallback(progress / totalCnt);
-                    progressTextCallback(Constants.ExportStatusMakeImage);
-                    Thread.Sleep(100);
-                });
-            }
-            window.Close();
-
-            return convertedImages;
-        }
-
-        public static Mat MakeImageForExport(Mat crossSection, Mat? longitude, Mat? lumenProfile, Mat? angio, out List<Tuple<Rect, Size2f>> region)
-        {
-            Mat imgExport = new Mat();
-            imgExport.Create((int)Constants.ApplicationHeight, (int)Constants.ApplicationWidth, MatType.CV_8UC3);
-            imgExport.SetTo(0x00);
-
-            region = new List<Tuple<Rect, Size2f>>();
-            if (crossSection == null) return imgExport;
-
-            Size szRemain = new Size(imgExport.Width, imgExport.Height);
-            Size szLongitudeInfo = new Size(imgExport.Width, 30);
-            Size szLongitude = new Size(imgExport.Width, (imgExport.Height / 2 - szLongitudeInfo.Height) / 2);
-            if (longitude != null)
-            {
-                Mat imgLongitude = new Mat();
-                Rect rectLongitude = new Rect(0, szRemain.Height - szLongitude.Height, szLongitude.Width, szLongitude.Height);
-                Size2f scaleLongitude = new Size2f(1, 1);
-                Cv2.Resize(longitude, imgLongitude, szLongitude);
-                Cv2.CopyTo(imgLongitude, imgExport[rectLongitude]);
-                szRemain.Height -= szLongitude.Height;
-
-                Tuple<Rect, Size2f> regionLongitude = new Tuple<Rect, Size2f>(rectLongitude, scaleLongitude);
-                region.Add(regionLongitude);
-
-                // draw longitude info
-                Rect rectLongitudeInfo = new Rect(0, szRemain.Height - szLongitude.Height, szLongitudeInfo.Width, szLongitudeInfo.Height);
-                Size2f scaleLongitudeInfo = new Size2f(1, 1);
-                szRemain.Height -= szLongitudeInfo.Height;
-
-                Tuple<Rect, Size2f> regionLongitudeInfo = new Tuple<Rect, Size2f>(rectLongitudeInfo, scaleLongitudeInfo);
-                region.Add(regionLongitudeInfo);
-            }
-            if (lumenProfile != null)
-            {
-                Mat imgLumenProfile = new Mat();
-                Rect rectLumenProfile = new Rect(0, szRemain.Height - szLongitude.Height, szLongitude.Width, szLongitude.Height);
-                Size2f scaleLumenProfile = new Size2f(1, 1);
-                Cv2.Resize(lumenProfile, imgLumenProfile, szLongitude);
-                Cv2.CopyTo(imgLumenProfile, imgExport[rectLumenProfile]);
-                szRemain.Height -= szLongitude.Height;
-
-                Tuple<Rect, Size2f> regionLumenProfile = new Tuple<Rect, Size2f>(rectLumenProfile, scaleLumenProfile);
-                region.Add(regionLumenProfile);
-            }
-
-            int diameterCrossSection = Math.Min(szRemain.Width, szRemain.Height);
-
-            if (angio != null)
-            {
-                Rect rectAngio = new Rect(0, 0, szRemain.Width - diameterCrossSection, szRemain.Height);
-                Mat imgAngio = new Mat();
-                Cv2.Resize(angio, imgAngio, rectAngio.Size);
-                Cv2.CopyTo(imgAngio, imgExport[rectAngio]);
-                szRemain.Width -= rectAngio.Width;
-            }
-
-            int offsetCrossSection = imgExport.Width - szRemain.Width;
-            Rect rectCrossSection = new Rect(offsetCrossSection + (szRemain.Width - diameterCrossSection) / 2, 0, diameterCrossSection, diameterCrossSection);
-            Size2f scaleCrossSection = new Size2f(1, 1);
-            Mat imgCrossSection = new Mat();
-            Cv2.Resize(crossSection, imgCrossSection, rectCrossSection.Size);
-            Cv2.CopyTo(imgCrossSection, imgExport[rectCrossSection]);
-
-            Tuple<Rect, Size2f> regionCrossSection = new Tuple<Rect, Size2f>(rectCrossSection, scaleCrossSection);
-            region.Add(regionCrossSection);
-
-            return imgExport;
         }
 
         public static Mat MakeLumenProfileImage(List<LumenContour> lumenContours, int currentFrame = -1)
@@ -1233,7 +1068,7 @@ namespace RaywattOCTFFR.Common.Util
             return textBlock.DesiredSize;
         }
 
-        public static void Exit(DeviceStatus? deviceStatus = null, AngioManager? angioManager = null, bool isShutdown = false, bool isAdmin = false)
+        public static void Exit(DeviceStatus? deviceStatus = null, bool isShutdown = false, bool isAdmin = false)
         {
             if (deviceStatus != null)
             {
@@ -1245,9 +1080,6 @@ namespace RaywattOCTFFR.Common.Util
                     Thread.Sleep(50);
                 }
             }
-
-            if (angioManager != null)
-                angioManager.CloseAngioManager();
 
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
 
@@ -1291,12 +1123,6 @@ namespace RaywattOCTFFR.Common.Util
                     _log.Error("RayStopSystem Error");
                 }
 
-                int ray3DResult = ODSOCT_DeleteDll();
-                if (ray3DResult == 0)
-                {
-                    _log.Error("ODSOCT_DeleteDll Error");
-                }
-
                 if(deviceStatus != null)
                 {
                     deviceStatus.IsServiceStarted = false;
@@ -1323,21 +1149,7 @@ namespace RaywattOCTFFR.Common.Util
                 }
                 else
                 {
-                    if (CommonUtil.IsRV200())
-                    {
-                        if (CommonUtil.IsTestMode(deviceStatus.TestMode, "Power"))
-                        {
-                            System.Windows.Application.Current.Shutdown();
-                        }
-                        else
-                        {
-                            Win32Helper.LogOff();
-                        }                            
-                    }
-                    else
-                    {
-                        deviceStatus.IsPowerOff = false;
-                    }
+                    deviceStatus.IsPowerOff = false;
                 }
             });
         }
@@ -1637,122 +1449,6 @@ namespace RaywattOCTFFR.Common.Util
             return lumenContours;
         }
 
-        public static string CoRegistrationsToJson(List<CoRegistration> coRegistrations)
-        {
-            StringBuilder sb = new StringBuilder();
-            StringWriter sw = new StringWriter(sb);
-
-            using (JsonTextWriter writer = new JsonTextWriter(sw))
-            {
-                writer.WriteStartArray();
-
-                foreach (CoRegistration coRegistration in coRegistrations)
-                {
-                    //Tracking Points (Proximal, Distal and additional connetion Points)
-                    writer.WriteStartObject();
-                    writer.WritePropertyName(nameof(coRegistration.TrackPoints));
-                    writer.WriteStartArray();
-                  
-                    foreach(System.Windows.Point point in  coRegistration.TrackPoints)
-                    {
-                        string strPoint = (int)point.X + "," + (int)point.Y;
-                        writer.WriteValue(strPoint);
-                    }
-
-                    writer.WriteEndArray();
-
-                    //Path Points
-                    writer.WritePropertyName(nameof(coRegistration.Line));
-                    writer.WriteStartArray();
-
-                    foreach (List<System.Windows.Point> points in coRegistration.Line)
-                    {
-                        if (points.Count > 0)
-                        {
-                            writer.WriteStartArray();
-                            foreach (System.Windows.Point point in points)
-                            {
-                                string strPoint = (int)point.X + "," + (int)point.Y;
-                                writer.WriteValue(strPoint);
-                            }
-                            writer.WriteEndArray();
-                        }
-                    }
-
-                    writer.WriteEndArray();
-
-                    //Marker Point
-                    writer.WritePropertyName(nameof(coRegistration.MarkerPoint));
-                    string strMarkerPoint = (int)coRegistration.MarkerPoint.X + "," + (int)coRegistration.MarkerPoint.Y;
-                    writer.WriteValue(strMarkerPoint);
-
-                    writer.WriteEndObject();
-                }
-                writer.WriteEndArray();
-            }
-
-            return sb.ToString();
-        }
-
-        public static List<CoRegistration> JsonToCoRegistrations(string strCoRegistration)
-        {
-            List<CoRegistration> coRegistrations = new List<CoRegistration>();
-
-            JsonTextReader reader = new JsonTextReader(new StringReader(strCoRegistration));
-
-            string currentProperty = string.Empty;
-
-            while (reader.Read())
-            {
-                if (reader.Depth == 1 && reader.TokenType == JsonToken.StartObject)
-                {
-                    CoRegistration coRegistration = new CoRegistration();
-
-                    while (reader.Read())
-                    {
-                        if (reader.Depth == 1 && reader.TokenType == JsonToken.EndObject)
-                        {
-                            coRegistrations.Add(coRegistration);
-                            break;
-                        }
-
-                        if (reader.TokenType == JsonToken.PropertyName)
-                        {
-                            currentProperty = reader.Value.ToString();
-                        }
-
-                        if (reader.Depth > 1 /*이유는 모르겠으나, Array 첫번째 요소가 depth 2로 출력됨. 같은 Array의 나머지 요소는 depth 3*/)
-                        {
-                            if (nameof(coRegistration.TrackPoints).Equals(currentProperty))
-                            {
-                                coRegistration.TrackPoints = new List<System.Windows.Point>();
-                                SetContour(reader, currentProperty, null, coRegistration);
-                            }
-                            else if (nameof(coRegistration.Line).Equals(currentProperty))
-                            {
-                                coRegistration.Line = new List<List<System.Windows.Point>>();
-                                SetContour(reader, currentProperty, null, coRegistration);
-                            }
-                            else if (nameof(coRegistration.MarkerPoint).Equals(currentProperty))
-                            {
-                                coRegistration.MarkerPoint = new System.Windows.Point();
-                                while (reader.Read())
-                                {
-                                    if (reader.Value != null)
-                                    {
-                                        coRegistration.MarkerPoint = StrToPoint(reader.Value.ToString());
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            return coRegistrations;
-        }
-
         unsafe public static void ContoursToMemory(List<LumenContour>? contourList, Size sizeContour, IntPtr buffer, Size sizeBuffer)
         {
             if (contourList == null) return;
@@ -1864,7 +1560,7 @@ namespace RaywattOCTFFR.Common.Util
             return new Tuple<double, double>(double.Parse(temp[0]), double.Parse(temp[1]));
         }
 
-        private static void SetContour(JsonTextReader reader, string currentProperty, Contour lumenContour, CoRegistration coRegistration = null)
+        private static void SetContour(JsonTextReader reader, string currentProperty, Contour lumenContour)
         {
             switch (currentProperty)
             {
@@ -1895,12 +1591,6 @@ namespace RaywattOCTFFR.Common.Util
                 case nameof(lumenContour.Valid):
                     if (reader.Value != null && reader.TokenType == JsonToken.Boolean)
                         lumenContour.Valid = (bool)reader.Value;
-                    break;
-                case nameof(coRegistration.TrackPoints):
-                    SetPoints(reader, coRegistration.TrackPoints);
-                    break;
-                case nameof(coRegistration.Line):
-                    SetMultiDimensionalPoints(reader, coRegistration.Line);
                     break;
                 default:
                     break;
@@ -2361,59 +2051,6 @@ namespace RaywattOCTFFR.Common.Util
             return testMode.TryGetValue(key, out var result) && result;
         }
 
-        public static void ReadAngioParams(PatientCase patientCase)
-        {
-            string file = patientCase.Image;
-            string paramsFile = string.Concat(file.AsSpan(0, file.Length - 3), "params");
-
-            string directory = Path.Combine(Constants.DataRootPath, patientCase.PatientId);
-            string paramsPath = Path.Combine(directory, paramsFile);
-
-            //Read .params
-            XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.Load(paramsPath);
-
-            XmlNode configNode = xmlDoc.SelectSingleNode("/config");
-            if (patientCase.AngioFrame == null) patientCase.AngioFrame = new AngioFrame();
-            patientCase.AngioFrame.AngioFrameHeight = int.Parse(configNode.SelectSingleNode("AngioFrameHeight").InnerText);
-            patientCase.AngioFrame.AngioFrameWidth = int.Parse(configNode.SelectSingleNode("AngioFrameWidth").InnerText);
-            patientCase.AngioFrame.Channels = int.Parse(configNode.SelectSingleNode("BitsPerPixel").InnerText) / 8;
-        }
-
-        public static void ReadAngioImages(PatientCase patientCase, List<Mat>? angioFrames = null)
-        {
-            string file = patientCase.Image;
-            string angioFile = string.Concat(file.AsSpan(0, file.Length - 3), "angioframes");
-
-            string directory = Path.Combine(Constants.DataRootPath, patientCase.PatientId);
-            string angioPath = Path.Combine(directory, angioFile);
-
-            int angioHeight = patientCase.AngioFrame.AngioFrameHeight;
-            int angioWidth = patientCase.AngioFrame.AngioFrameWidth;
-            int angioChannels = patientCase.AngioFrame.Channels;
-
-            using (BinaryReader reader = new BinaryReader(System.IO.File.Open(angioPath, FileMode.Open)))
-            {
-                while (reader.BaseStream.Position != reader.BaseStream.Length)
-                {
-                    byte[] data = reader.ReadBytes(angioWidth * angioHeight * angioChannels);
-                    Mat frame = new Mat(angioHeight, angioWidth, MatType.CV_8UC(angioChannels), data);
-                    switch (angioChannels)
-                    {
-                        case 3:
-                            Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
-                            break;
-
-                        case 4:
-                            Cv2.CvtColor(frame, frame, ColorConversionCodes.RGBA2GRAY);
-                            break;
-                    }
-                    if (angioFrames != null) angioFrames.Add(frame);
-                    patientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(frame));
-                }
-            }
-        }
-
         public static ImageSource ConvertMatsToImageSource(Mat mat)
         {
             using (var stream = new MemoryStream())
@@ -2638,122 +2275,7 @@ namespace RaywattOCTFFR.Common.Util
                 return false;
 
             return true;
-        }
-
-        public static LocalHost GetNetworkInfo()
-        {
-            LocalHost localHost = new LocalHost();
-            localHost.Hostname = Environment.MachineName;
-
-            foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
-            {
-                if (nic.OperationalStatus == OperationalStatus.Up && nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-                {
-                    _log.Debug($"Network Adapter: {nic.Description}");
-                    localHost.AdapterName = nic.Description;
-                    _log.Debug($"MAC Address: {nic.GetPhysicalAddress()}");
-
-                    IPInterfaceProperties ipProperties = nic.GetIPProperties();
-
-                    //DHCP 여부 확인
-                    bool isDhcpEnabled = ipProperties.GetIPv4Properties().IsDhcpEnabled;
-                    _log.Debug($"DHCP?: {(isDhcpEnabled ? "DHCP" : "Static IP")}");
-                    localHost.IsManual = !isDhcpEnabled;
-
-                    foreach (UnicastIPAddressInformation ip in ipProperties.UnicastAddresses)
-                    {
-                        if (ip.Address.AddressFamily == AddressFamily.InterNetwork) // IPv4만 가져오기
-                        {
-                            _log.Debug($"IP Address: {ip.Address}");
-                            localHost.IpAddress = ip.Address.ToString();
-                            _log.Debug($"Subnet Mask: {ip.IPv4Mask}");
-                            localHost.SubnetMask = ip.IPv4Mask.ToString();
-                        }
-                    }
-
-                    foreach (GatewayIPAddressInformation gateway in ipProperties.GatewayAddresses)
-                    {
-                        _log.Debug($"Default Gateway: {gateway.Address}");
-                        localHost.DefaultGateway = gateway.Address.ToString();
-                    }
-
-                    if (ipProperties.DnsAddresses.Count > 0)
-                    {
-                        _log.Debug($"Preferred Dns Server: {ipProperties.DnsAddresses[0]}");
-                        localHost.PreferredDnsServer = ipProperties.DnsAddresses[0].ToString();
-                    }
-
-                    if (ipProperties.DnsAddresses.Count > 1)
-                    {
-                        _log.Debug($"Alternate Dns Server: {ipProperties.DnsAddresses[1]}");
-                        localHost.AlternateDnsServer = ipProperties.DnsAddresses[1].ToString();
-                    }
-                    else
-                    {
-                        _log.Debug($"Alternate Dns Server: (Not set)");
-                    }
-
-                    break;
-                }
-            }
-
-            return localHost;
-        }
-
-        public static void ParseDicomName(string dicomName, out string lastname, out string firstname)
-        {
-            lastname = string.Empty;
-            firstname = string.Empty;
-
-            if (string.IsNullOrWhiteSpace(dicomName))
-                return;
-
-            string[] nameParts = dicomName.Split('^');
-
-            if (nameParts.Length > 0)
-                lastname = nameParts[0];
-
-            if (nameParts.Length > 1)
-                firstname = nameParts[1];
-        }
-
-        public static string GetDicomResultMessage(RayExportWrapper.DicomNetRWError resultCode)
-        {
-            switch (resultCode)
-            {
-                case RayExportWrapper.DicomNetRWError.Normal:
-                    return "Operation completed successfully.";
-                case RayExportWrapper.DicomNetRWError.InitializeFail:
-                    return "Initialization failed. Please check the configuration.";
-                case RayExportWrapper.DicomNetRWError.NetworkInitFail:
-                    return "Failed to initialize network. Please check your network connection.";
-                case RayExportWrapper.DicomNetRWError.AssociationFail:
-                    return "Failed to establish DICOM association with the server.";
-                case RayExportWrapper.DicomNetRWError.EchoFail:
-                    return "DICOM Echo test failed. Please verify the server status.";
-                case RayExportWrapper.DicomNetRWError.FindFail:
-                    return "Failed to perform query (Find).";
-                case RayExportWrapper.DicomNetRWError.StoreFail:
-                    return "Failed to store/send image (Store).";
-                case RayExportWrapper.DicomNetRWError.NoPresentationConterxt:
-                    return "No supported Presentation Contexts found.";
-                case RayExportWrapper.DicomNetRWError.NoUncompressedPC:
-                    return "No uncompressed Presentation Contexts available.";
-                case RayExportWrapper.DicomNetRWError.NoSOPClass:
-                    return "Unsupported SOP Class.";
-                case RayExportWrapper.DicomNetRWError.FileLoadFail:
-                    return "Failed to load the file.";
-                case RayExportWrapper.DicomNetRWError.TLSProfileFail:
-                    return "TLS security profile error.";
-                case RayExportWrapper.DicomNetRWError.NoConnection:
-                    return "No connection to the server.";
-                case RayExportWrapper.DicomNetRWError.NoSCU:
-                    return "No SCU (Service Class User) is configured.";
-                case RayExportWrapper.DicomNetRWError.UnknownError:
-                default:
-                    return "An unknown error has occurred.";
-            }
-        }
+        }      
 
         // List<Point> → PathGeometry 변환
         public static PathGeometry CreatePolygonGeometry(List<System.Windows.Point> points)
@@ -2813,14 +2335,6 @@ namespace RaywattOCTFFR.Common.Util
                 }
             }
             return password.ToString();
-        }
-
-        public static bool IsRV200()
-        {
-            if ("RV200".Equals(System.Configuration.ConfigurationManager.AppSettings.Get("ModelVersion")))
-                return true;
-            else
-                return false;
         }
 
         public static int SetAutuPullback(SqlManager sqlManager)

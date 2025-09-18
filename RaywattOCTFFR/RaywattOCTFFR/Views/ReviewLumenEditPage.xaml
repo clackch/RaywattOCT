@@ -11,7 +11,7 @@
       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:behaviors="clr-namespace:RaywattOCTFFR.Common.Behaviors"
       mc:Ignorable="d" 
-      d:DesignHeight="1024" d:DesignWidth="1280"
+      d:DesignHeight="1080" d:DesignWidth="1920"
       Background="{DynamicResource GrayscaleGray8Brush}"
       Title="ReviewLumenEditPage">
     <Page.Resources>

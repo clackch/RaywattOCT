@@ -1,16 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattOCTFFR.Common.Bases;
 using RaywattOCTFFR.Common.Dialog;
-using RaywattOCTFFR.Common.Messages;
 using RaywattOCTFFR.Common.Util;
 using RaywattOCTFFR.Models;
 using RaywattOCTFFR.Views.Dialog;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -129,7 +126,7 @@ namespace RaywattOCTFFR.Common.File
         {
             _log.Debug("Back");
 
-            WeakReferenceMessenger.Default.Send(new PopupNavigationMessage(Constants.FileExportStep1Page) { Parameter = FileExport });
+            //WeakReferenceMessenger.Default.Send(new PopupNavigationMessage(Constants.FileExportStep1Page) { Parameter = FileExport });
         }
 
         protected override void Cancel()

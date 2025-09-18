@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:RaywattOCTFFR.Views"
       xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
       mc:Ignorable="d" 
-      d:DesignHeight="1024" d:DesignWidth="1280"
+      d:DesignHeight="1080" d:DesignWidth="1920"
       Background="{DynamicResource GrayscaleGray8Brush}"
       Title="OutsetLoadingPage">
 

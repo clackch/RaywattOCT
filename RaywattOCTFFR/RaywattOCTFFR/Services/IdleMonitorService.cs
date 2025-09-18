@@ -1,5 +1,4 @@
 ﻿using log4net;
-using RaywattOCTFFR.Common.Angio;
 using RaywattOCTFFR.Common.Bases;
 using RaywattOCTFFR.Common.Dialog;
 using RaywattOCTFFR.Common.Localization;
@@ -22,7 +21,6 @@ namespace RaywattOCTFFR.Services
         private readonly DynamicResource _l10n;
 
         private IDialogService? _dialogService;
-        private AngioManager? _angioManager;
         private SqlManager _sqlManager;
         private IPasswordService _passwordService;
 
@@ -48,10 +46,9 @@ namespace RaywattOCTFFR.Services
 
         List<Type> _skipDialogs = new List<Type>()
         {
-            typeof(FileCopyDialogViewModel),
         };
 
-        public IdleMonitorService(SqlManager sqlManager, IDialogService dialogService, AngioManager angioManager, IPasswordService passwordService)
+        public IdleMonitorService(SqlManager sqlManager, IDialogService dialogService, IPasswordService passwordService)
         {
             _log.Debug("IdleMonitorService");
 
@@ -59,7 +56,6 @@ namespace RaywattOCTFFR.Services
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
-            _angioManager = angioManager;
             _passwordService = passwordService;
             _l10n = (DynamicResource)App.Current.Resources["L10N"];
 
@@ -80,12 +76,9 @@ namespace RaywattOCTFFR.Services
 
         private void Init()
         {
-            if (!CommonUtil.IsRV200())
-            {
-                StartIdleMonitorLoop();
-                RegisterUserActivityEvents();
-                ApplyLogoutTimeSettings();
-            }
+            StartIdleMonitorLoop();
+            RegisterUserActivityEvents();
+            ApplyLogoutTimeSettings();
         }
         private void ApplyLogoutTimeSettings()
         {
@@ -239,11 +232,11 @@ namespace RaywattOCTFFR.Services
 
             if (isAdminPage)
             {
-                CommonUtil.Exit(ViewModelBase.DeviceStatus, _angioManager, false, true);
+                CommonUtil.Exit(ViewModelBase.DeviceStatus, false, true);
             }
             else
             {
-                CommonUtil.Exit(ViewModelBase.DeviceStatus, _angioManager);
+                CommonUtil.Exit(ViewModelBase.DeviceStatus);
             }
 
         }

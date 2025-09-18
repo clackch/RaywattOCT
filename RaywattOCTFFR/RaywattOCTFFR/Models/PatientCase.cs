@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using RaywattOCTFFR.Common.Angio;
 using RaywattOCTFFR.Common.Annotation.Models;
 using RaywattOCTFFR.Common.Bases;
 using RaywattOCTFFR.Common.Util;
@@ -11,9 +10,6 @@ namespace RaywattOCTFFR.Models
 {
     public partial class PatientCase : ObservableObject
     {
-        [ObservableProperty]
-        private AngioFrame angioFrame;
-
         [ObservableProperty]
         private string id;
 

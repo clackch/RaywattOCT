@@ -8,7 +8,7 @@
       xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
       xmlns:component="clr-namespace:RaywattOCTFFR.Views.Component"
       mc:Ignorable="d" 
-      d:DesignHeight="1024" d:DesignWidth="1280"
+      d:DesignHeight="1080" d:DesignWidth="1920"
       Background="{DynamicResource GrayscaleGray8Brush}"
       Title="PatientDetailPage">
 
@@ -21,9 +21,6 @@
 
         <Grid Grid.Row="0" Height="60" Background="{DynamicResource GrayscaleGray7Brush}">
             <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Margin="75,20,0,19" Content="{Binding [Patient Summary], Source={StaticResource L10N}}"/>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="exportSimple" Margin="0,9,118,9" Command="{Binding ExportCommand}"/>
-            </StackPanel>
         </Grid>
 
         <Grid Grid.Row="1">
@@ -127,13 +124,6 @@
                                             <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Procedure, Converter={StaticResource CodeConverter}, ConverterParameter='PROC'}" Header="{Binding [Procedure], Source={StaticResource L10N}}"/>
                                             <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Vessel, Converter={StaticResource CodeConverter}, ConverterParameter='VESS'}" Header="{Binding [Vessel], Source={StaticResource L10N}}"/>
                                             <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Location, Converter={StaticResource CodeConverter}, ConverterParameter='LOCT'}" Header="{Binding [Location], Source={StaticResource L10N}}"/>
-                                            <DataGridTemplateColumn CellStyle="{StaticResource DataGridCellCheckbox}" Width="*" Header="{Binding [Angio], Source={StaticResource L10N}}">
-                                                <DataGridTemplateColumn.CellTemplate>
-                                                    <DataTemplate>
-                                                        <CheckBox Style="{StaticResource DataGridDisplayCheckBox}" IsChecked="{Binding AngioYn}" IsEnabled="False" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    </DataTemplate>
-                                                </DataGridTemplateColumn.CellTemplate>
-                                            </DataGridTemplateColumn>
                                             <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding PhysicianName}" Header="{Binding [Physician], Source={StaticResource L10N}}"/>
                                             <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="2*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}"/>
                                             <DataGridTemplateColumn CellStyle="{StaticResource DataGridCellDelete}" Width="0.6*">
@@ -174,8 +164,7 @@
 
         <Grid Grid.Row="2" Height="40" Background="{DynamicResource GrayscaleBlackBrush}">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource OutlinedBtnType1-Small-Short}" Margin="0,7,8,7" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}"/>
-                <Button Style="{StaticResource OutlinedBtnType1-Small-Wide}" Margin="0,7,16,7" Command="{Binding NewRecordingCommand}" Content="{Binding [New Recording], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource OutlinedBtnType1-Small-Short}" Margin="0,7,16,7" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}"/>
             </StackPanel>
         </Grid>
     </Grid>

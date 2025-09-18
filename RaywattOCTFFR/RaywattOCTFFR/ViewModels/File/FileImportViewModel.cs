@@ -290,20 +290,6 @@ namespace RaywattOCTFFR.ViewModels.File
                             {
                                 string destPath = CommonUtil.CreateFolder(Constants.DataRootPath + "\\" + patientCase.PatientId) + "\\" + patientCase.Image;
                                 importfiles.Add(srcPath, destPath);
-                                if (patientCase.AngioYn)
-                                {
-                                    srcPath = srcPath.Substring(0, srcPath.Length - 3);
-                                    destPath = destPath.Substring(0, destPath.Length - 3);
-
-                                    List<string> extensions = new List<string> { Constants.AngioImageExtension, Constants.AngioParmasExtension };
-                                    string fileName = string.Concat(patientCase.Image.AsSpan(0, patientCase.Image.Length - Constants.AngioImageExtension.Length - 1), ".");
-                                    string srcFilePath = string.Concat(patientCase.ImageFullPath.AsSpan(0, patientCase.ImageFullPath.Length - Constants.AngioImageExtension.Length - 1), ".");
-
-                                    foreach (string ext in extensions)
-                                    {
-                                        importfiles.Add(srcPath + ext, destPath + ext);
-                                    }
-                                }
                             }
                         }
                     }
@@ -491,8 +477,6 @@ namespace RaywattOCTFFR.ViewModels.File
                             patientCase.FieldOfView = GetDoubleValue(caseObj, "FieldOfView");
                             patientCase.PullbackType = GetStrValue(caseObj, "PullbackType");
                             patientCase.PullbackLength = GetStrValue(caseObj, "PullbackLength");
-                            patientCase.AngioYn = GetBoolValue(caseObj, "AngioYn");
-                            patientCase.AngioCoRegistration = GetBoolValue(caseObj, "AngioCoRegistration");
                             patientCase.IndicatorDegree = GetDoubleValue(caseObj, "IndicatorDegree");
                             patientCase.FlushMedia = GetStrValue(caseObj, "FlushMedia");
                             patientCase.PullbackTrigger = GetStrValue(caseObj, "PullbackTrigger");

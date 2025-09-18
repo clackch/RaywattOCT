@@ -76,12 +76,6 @@ namespace RaywattOCTFFR.Common.Bases
             get { return this._editPresetCommand ?? (this._editPresetCommand = new RelayCommand(EditPreset)); }
         }
 
-        private ICommand _exportCommand;
-        public ICommand ExportCommand
-        {
-            get { return this._exportCommand ?? (this._exportCommand = new RelayCommand(Export)); }
-        }
-
         private ICommand _editLumenContourCommand;
         public ICommand EditLumenContourCommand
         {
@@ -98,12 +92,6 @@ namespace RaywattOCTFFR.Common.Bases
         public ICommand EndReviewCommand
         {
             get { return this._endReviewCommand ?? (this._endReviewCommand = new RelayCommand(EndReview)); }
-        }
-
-        private ICommand _newRecordingCommand;
-        public ICommand NewRecordingCommand
-        {
-            get { return this._newRecordingCommand ?? (this._newRecordingCommand = new RelayCommand(NewRecording)); }
         }
 
         private ICommand _expandCollapseCommand;
@@ -153,29 +141,6 @@ namespace RaywattOCTFFR.Common.Bases
             parameter["prevStatus"] = PrevStatus;
             parameter["reviewStatus"] = ReviewStatus;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewPresetPage) { Parameter = parameter });
-        }
-
-        private void Export()
-        {
-            _log.Debug("Export");
-
-            StopPlayback();
-
-            //화면 변경 사항에 대해서도 Export 하기 위해서, Save 처리
-            Save();
-
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["fileType"] = Constants.FileTypeExport;
-            FileExport fileExport = new FileExport();
-            fileExport.PatientId = Patient.Id;
-            fileExport.SelectedItem = new List<string>();
-            fileExport.SelectedItem.Add(PatientCase.Id);
-            fileExport.IsFromReview = true;
-            fileExport.CurrentFrame = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current;
-            fileExport.BookmarkedFrames = GetBookmarks();
-            parameter["fileExport"] = fileExport;
-
-            var result = _dialogService.OpenDialog(new FileDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
         }
 
         private void EditLumenContour()
@@ -234,36 +199,6 @@ namespace RaywattOCTFFR.Common.Bases
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientDetailPage) { Parameter = parameter });
-        }
-
-        private void NewRecording()
-        {
-            _log.Debug("NewRecording");
-
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-
-            if (!CommonUtil.IsStorageAvailable())
-            {
-                parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["$MSG024"];
-                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
-                return;
-            }
-
-            if (Patient.PhysicianId == 0)
-            {
-                parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["$MSG016"];
-                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
-                return;
-            }
-
-            parameter.Clear();
-            parameter["patient"] = Patient;
-            parameter["prevStatus"] = PrevStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingPresetPage) { Parameter = parameter });
         }
 
         private void ExpandCollapseMenu(string param)

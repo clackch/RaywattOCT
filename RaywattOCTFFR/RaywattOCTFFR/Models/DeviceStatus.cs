@@ -37,12 +37,6 @@ namespace RaywattOCTFFR.Models
         private bool _canExecuteCalibration = true;
 
         [ObservableProperty]
-        private bool _isAngioConnected = false;
-
-        [ObservableProperty]
-        private bool _isAngioInitialized = false;
-
-        [ObservableProperty]
         private bool _isRecordingDone = true;
 
         [ObservableProperty]
@@ -64,9 +58,6 @@ namespace RaywattOCTFFR.Models
         private bool _isOCTImagingDone = true;
 
         [ObservableProperty]
-        private bool _isOCTImagingCompareDone = true;
-
-        [ObservableProperty]
         private bool _isFfrCalculated = true;
 
         [ObservableProperty]
@@ -77,9 +68,6 @@ namespace RaywattOCTFFR.Models
 
         [ObservableProperty]
         private string? _catheterStatus;
-
-        [ObservableProperty]
-        private CathRoom _selectedCathRoom;
 
         [ObservableProperty]
         private bool _enhancedLUT;

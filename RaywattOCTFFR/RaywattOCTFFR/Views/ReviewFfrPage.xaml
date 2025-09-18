@@ -9,7 +9,7 @@
       xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
       xmlns:annotation="clr-namespace:RaywattOCTFFR.Common.Annotation"
       mc:Ignorable="d" 
-      d:DesignHeight="1024" d:DesignWidth="1280"
+      d:DesignHeight="1080" d:DesignWidth="1920"
       Background="{DynamicResource GrayscaleGray8Brush}"
       Title="ReviewFfrPage">
 
@@ -28,8 +28,6 @@
             <StackPanel Grid.Column="0" Orientation="Horizontal">
                 <StackPanel Width="70"/>
                 <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [2D], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewPage}"/>
-                <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [3D], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.Review3dPage}"/>
-                <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [Compare], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewComparePage}" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$002|$003}"/>
                 <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" IsChecked="True" IsEnabled="False"/>
             </StackPanel>
         </Grid>
@@ -161,8 +159,8 @@
                             <Image Source="{Binding ProximalOctImage}" Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}">
                                 <Image.RenderTransform>
                                     <TransformGroup>
-                                        <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}"/>
-                                        <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}"/>
+                                        <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionFfrSize}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionFfrSize}}"/>
+                                        <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionFfrSize}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionFfrSize}}"/>
                                     </TransformGroup>
                                 </Image.RenderTransform>
                             </Image>
@@ -185,8 +183,8 @@
                             <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}">
                                 <Image.RenderTransform>
                                     <TransformGroup>
-                                        <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}"/>
-                                        <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}"/>
+                                        <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionFfrSize}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionFfrSize}}"/>
+                                        <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionFfrSize}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionFfrSize}}"/>
                                     </TransformGroup>
                                 </Image.RenderTransform>
                             </Image>
@@ -210,8 +208,8 @@
                             <Image Source="{Binding DistalOctImage}" Width="{x:Static const:Constants.CrossSectionFfrSize}" Height="{x:Static const:Constants.CrossSectionFfrSize}">
                                 <Image.RenderTransform>
                                     <TransformGroup>
-                                        <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}"/>
-                                        <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}"/>
+                                        <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionFfrSize}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionFfrSize}}"/>
+                                        <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionFfrSize}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionFfrSize}}"/>
                                     </TransformGroup>
                                 </Image.RenderTransform>
                             </Image>
@@ -311,8 +309,6 @@
 
         <Grid Grid.Row="2" Height="40" Background="{DynamicResource GrayscaleBlackBrush}">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" >
-                <Button Style="{StaticResource OutlinedBtnType1-Small-Wide}" Command="{Binding NewRecordingCommand}" Content="{Binding [New Recording], Source={StaticResource L10N}}"/>
-                <StackPanel Width="8"/>
                 <Button Style="{StaticResource OutlinedBtnType1-Small-Medium}" Command="{Binding EndReviewCommand}" Content="{Binding [End Review], Source={StaticResource L10N}}"/>
                 <StackPanel Width="16"/>
             </StackPanel>

@@ -23,8 +23,6 @@ namespace RaywattOCTFFR.Models
 
         public bool OppositeCaptured;
 
-        public bool IsCompare;
-
         public bool IsCrossSection;
 
         public bool IsLongitudeClicked;

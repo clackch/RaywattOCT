@@ -7,7 +7,7 @@
       xmlns:const="clr-namespace:RaywattOCTFFR.Common.Bases"
       xmlns:component="clr-namespace:RaywattOCTFFR.Views.Component"
       mc:Ignorable="d" 
-      d:DesignHeight="1024" d:DesignWidth="1280"
+      d:DesignHeight="1080" d:DesignWidth="1920"
       Background="{DynamicResource GrayscaleGray8Brush}"
       Title="ReviewPresetPage">
 

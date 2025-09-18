@@ -12,11 +12,11 @@
       xmlns:ut="clr-namespace:RaywattOCTFFR.Common.Util"
       xmlns:component="clr-namespace:RaywattOCTFFR.Views.Component"
       mc:Ignorable="d"
-      d:DesignHeight="1024" d:DesignWidth="1280"
+      d:DesignHeight="1080" d:DesignWidth="1920"
       Background="{DynamicResource GrayscaleGray8Brush}"
       Title="OutsetLoginPage">
 
-    <Grid Visibility="{Binding ., Converter={StaticResource RV200ToVisibilityReverseConverter}}">
+    <Grid>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
             <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="power" Margin="0,9,12,9" Command="{Binding ExitCommand}"/>
         </StackPanel>

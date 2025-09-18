@@ -70,9 +70,6 @@ namespace RaywattOCTFFR.Models
         private string stillFrame; //JPEG, Bitmap, TIFF
 
         [ObservableProperty]
-        private bool angioView; //Advanced View - Angio Co-Registration
-
-        [ObservableProperty]
         private bool longitude; //Advanced View - longitude
 
         [ObservableProperty]

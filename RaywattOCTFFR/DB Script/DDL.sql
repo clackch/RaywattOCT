@@ -49,33 +49,6 @@ TABLESPACE rv_tablespace;
 ALTER TABLE IF EXISTS rv_schema.code
     OWNER to rv_user;
 
--- Table: rv_schema.physician
-
--- DROP TABLE IF EXISTS rv_schema.physician;
-
-CREATE TABLE IF NOT EXISTS rv_schema.physician
-(
-    id serial NOT NULL,
-    lastname character varying(20) COLLATE pg_catalog."default",
-    firstname character varying(200) COLLATE pg_catalog."default",
-	flush_media character varying(4) COLLATE pg_catalog."default",
-	pullback_trigger character varying(4) COLLATE pg_catalog."default",
-    pullback_type character varying(4) COLLATE pg_catalog."default",
-	colormap character varying(4) COLLATE pg_catalog."default",
-    calcium_threshold integer,
-    expansion_threshold integer,
-    apposition_threshold real,
-    create_date timestamp without time zone,
-    update_date timestamp without time zone,
-    CONSTRAINT physician_pkey PRIMARY KEY (id)
-        USING INDEX TABLESPACE rv_tablespace
-)
-
-TABLESPACE rv_tablespace;
-
-ALTER TABLE IF EXISTS rv_schema.physician
-    OWNER to rv_user;
-
 
 -- Table: rv_schema.patient
 
@@ -189,6 +162,7 @@ TABLESPACE rv_tablespace;
 ALTER TABLE IF EXISTS rv_schema.patient_case_annotation
     OWNER to rv_user;
 
+
 -- Table: rv_schema.dicom_property
 
 -- DROP TABLE IF EXISTS rv_schema.dicom_property;
@@ -205,61 +179,6 @@ CREATE TABLE IF NOT EXISTS rv_schema.dicom_property
 TABLESPACE rv_tablespace;
 
 ALTER TABLE IF EXISTS rv_schema.dicom_property
-    OWNER to rv_user;
-
-
--- Table: rv_schema.cath_room
-
--- DROP TABLE IF EXISTS rv_schema.cath_room;
-
-CREATE TABLE IF NOT EXISTS rv_schema.cath_room
-(
-    id serial NOT NULL,
-    name character varying(50) COLLATE pg_catalog."default",
-    setup_chp character varying(200) COLLATE pg_catalog."default",
-    app_chp character varying(200) COLLATE pg_catalog."default",	
-    rect_left integer,
-    rect_top integer,
-    rect_right integer,
-    rect_bottom integer,
-    description character varying(200) COLLATE pg_catalog."default",
-    create_date timestamp without time zone,
-    update_date timestamp without time zone,
-    CONSTRAINT cath_room_pkey PRIMARY KEY (id)
-        USING INDEX TABLESPACE rv_tablespace
-)
-
-TABLESPACE rv_tablespace;
-
-ALTER TABLE IF EXISTS rv_schema.cath_room
-    OWNER to rv_user;
-	
-
--- Table: rv_schema.dicom_server
-
--- DROP TABLE IF EXISTS rv_schema.dicom_server;
-
-CREATE TABLE IF NOT EXISTS rv_schema.dicom_server
-(
-    id serial NOT NULL,
-    ae_title character varying(255) COLLATE pg_catalog."default" NOT NULL,
-    hostname character varying(255) COLLATE pg_catalog."default",
-    specify_ip_address boolean,
-    ip_address character varying(15) COLLATE pg_catalog."default",
-    port character varying(10) COLLATE pg_catalog."default",
-    tls_yn boolean,
-    server_type character varying(4) COLLATE pg_catalog."default",
-    comment character varying(255) COLLATE pg_catalog."default",
-    ca_file_path character varying(255) COLLATE pg_catalog."default",
-    create_date timestamp without time zone,
-    update_date timestamp without time zone,
-    CONSTRAINT dicom_server_pkey PRIMARY KEY (id)
-        USING INDEX TABLESPACE rv_tablespace
-)
-
-TABLESPACE rv_tablespace;
-
-ALTER TABLE IF EXISTS rv_schema.dicom_server
     OWNER to rv_user;
 
 
