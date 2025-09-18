@@ -268,10 +268,15 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	// - select clock source INTERNAL_CLOCK and sample rate SAMPLE_RATE_100MSPS
 	// - select clock source FAST_EXTERNAL_CLOCK, sample rate SAMPLE_RATE_USER_DEF, and connect a
 	//   100 MHz signal to the EXT CLK BNC connector.
-
 	double dutyCycle = 0.5f;	// maximum 50%
-	U32 srcClock = (useKClock) ? FAST_EXTERNAL_CLOCK : INTERNAL_CLOCK_10MHz_REF;
-	U32 rate = (useKClock) ? SAMPLE_RATE_USER_DEF : dSamplePerSec / dutyCycle;
+	U32 srcClock = INTERNAL_CLOCK;
+	U32 rate = SAMPLE_RATE_500MSPS;
+
+	if (useKClock) {
+		srcClock = FAST_EXTERNAL_CLOCK;
+		rate = SAMPLE_RATE_USER_DEF;
+	}
+
 	retCode = AlazarSetCaptureClock(boardHandle,
 		srcClock,
 		rate,
