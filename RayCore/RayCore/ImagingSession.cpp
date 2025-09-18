@@ -171,8 +171,6 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 }
 
 RayError CImagingSession::Start() {
-	PLOGI.printf("[junghw] Start thread imaging");
-
 	if (m_pImaging == nullptr) return RayError::InvalidFunctionCall;
 
 	CUtility::StopThread(m_pThreadImaging);
@@ -182,7 +180,6 @@ RayError CImagingSession::Start() {
 }
 
 RayError CImagingSession::Stop() {
-	PLOGI.printf("[junghw] Stop thread imaging");
 	CUtility::StopThread(m_pThreadUpdateCutView);
 	CUtility::StopThread(m_pThreadObjectDetection);
 	CUtility::StopThread(m_pThreadVolumeGeneration);
@@ -193,8 +190,6 @@ RayError CImagingSession::Stop() {
 
 void CImagingSession::StopThreadForRestart()
 {
-	PLOGI.printf("[junghw] Start StopThreadForRestart");
-
 	CUtility::StopThread(m_pThreadUpdateCutView);
 	CUtility::StopThread(m_pThreadObjectDetection);
 	CUtility::StopThread(m_pThreadVolumeGeneration);

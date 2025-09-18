@@ -51,8 +51,6 @@ int CDataReader::Initialize(tstring strDataFilePath, int nDataSize) {
 
 }
 char* CDataReader::GetSample(int nIndex) {
-	PLOGI.printf("[junghw] GetSample: %d", nIndex);
-
 	if (nIndex < 0 || nIndex >= m_nNumOfSamples) return NULL;
 
 	EnterCriticalSection(&m_csReadFrame);
@@ -176,8 +174,7 @@ bool CDataReader::readFrame(int nIndex) {
 
 	const int N = m_nNumOfSamples;
 	const int srcIndex = bLongitudeOrientation ? (N - 1 - nIndex) : nIndex;
-	PLOGI.printf("[junghw] bLongitudeOrientation 01: %d / %d / %d / %d", bLongitudeOrientation, nIndex, srcIndex, m_nNumOfSamples);
-
+	
 	if (nIndex < 0 || nIndex >= N) return false;
 	
 	const size_t bytes = static_cast<size_t>(m_nDataSize) * sizeof(unsigned short);

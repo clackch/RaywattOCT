@@ -443,7 +443,6 @@ RayError COCTSystem::UnloadCatheter() {
 * return Error Code (<0) when something is wrong.
 */
 int COCTSystem::StartReview(char* strFilePath, double imageResolution, double zOffset) {
-	PLOGE.printf("[junghw] StartReview : %d", bLongitudeOrientation);
 	if (m_curState == RayScannerState::Initial || m_curState == RayScannerState::Default) {
 		if (imageResolution == 0.0f) return (int)RayError::InvalidArgument;
 
@@ -806,10 +805,7 @@ void* COCTSystem::GetImageData(int nFrame) {
 
 void COCTSystem::SetLongitudeOrientation(const bool nOrientation) 
 {
-	PLOGI.printf("[junghw] longitude: %d", nOrientation);
-	bLongitudeOrientation = nOrientation; // false: Distal to PRoximlal, true: Proximal to Distal
-	//IDataManager* pDataManager = m_reviewSession[SESSION_REVIEW]->GetDataManager();
-	//pDataManager->SetLongitudeOrientation(nOrientation);
+	bLongitudeOrientation = nOrientation;
 }
 
 /*
@@ -3021,8 +3017,6 @@ LRESULT COCTSystem::OnMsgStartReviewSession(WPARAM wParam, LPARAM lParam) {
 	}
 
 	PLOGI.printf("Start session #%d", nSession);
-
-	PLOGI.printf("[junghw] Start session %d", bLongitudeOrientation);
 
 	m_reviewSession[nSession] = pSession;
 	m_reviewSession[nSession]->Start();

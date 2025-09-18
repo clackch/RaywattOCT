@@ -101,7 +101,6 @@ public:
 
 	void SetLongitudeOrientation(bool nOrientation)
 	{
-		PLOGI.printf("[junghw] Datamanager longitude: %d", nOrientation);
 		bLongitudeOrientation = nOrientation;
 	}
 };
