@@ -434,9 +434,6 @@ namespace RaywattApp.ViewModels
 
                 ReviewStatus.CurrentPage = Constants.ReviewPage;
 
-                /* longitude & lumen profile: orientation setting */
-                LongitudeOrientationLabelChanged();
-                AdjustLumenDataOrderByOrientation();
 
                 FieldOfView = PatientCase.FieldOfView;
                 ToggleAngio(ReviewStatus.IsAngioOn);
@@ -465,8 +462,12 @@ namespace RaywattApp.ViewModels
 
                 SetAnnotation();
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
-
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
+
+
+                /* longitude & lumen profile: orientation setting */
+                LongitudeOrientationLabelChanged();
+                AdjustLumenDataOrderByOrientation();
 
                 ReviewStatus.IsNoPullback = PatientCase.PullbackType == "TEST" ? true : false;
 
@@ -588,7 +589,7 @@ namespace RaywattApp.ViewModels
                     DeviceStatus.IsLumenLoaded = false;
                     Thread threadMakeLumenProfile = new Thread(() => ThreadMakeLumenProfile(patientCaseAnnotations[0].LumenContour));
                     threadMakeLumenProfile.Start();
-
+                    threadMakeLumenProfile.Join();
                     //Sidebranch
                     if (!String.IsNullOrEmpty(patientCaseAnnotations[0].LumenSidebranch))
                     {
@@ -1037,14 +1038,16 @@ namespace RaywattApp.ViewModels
                 Section.Distal.DValue = sectionProximal;
                 Section.Proximal.DValue = sectionDistal;
 
-
                 /* lumen data */
-                if (PatientCase.LumenSidebranches != null) PatientCase.LumenSidebranches.Reverse();
-                if (PatientCase.LumenStents != null) PatientCase.LumenStents.Reverse();
-                if (PatientCase.LumenGuidewires != null) PatientCase.LumenGuidewires.Reverse();
-                if (PatientCase.LumenContours != null) PatientCase.LumenContours.Reverse();
+                //if (PatientCase.LumenSidebranches != null) PatientCase.LumenSidebranches.Reverse();
+                //if (PatientCase.LumenStents != null) PatientCase.LumenStents.Reverse();
+                //if (PatientCase.LumenGuidewires != null) PatientCase.LumenGuidewires.Reverse();
+                //if (PatientCase.LumenContours != null) PatientCase.LumenContours.Reverse();
 
-
+                if (LumenSidebranches != null) LumenSidebranches.Reverse();
+                if (LumenStents != null) LumenStents.Reverse();
+                if (LumenGuidewires != null) LumenGuidewires.Reverse();
+                if (LumenContours != null) LumenContours.Reverse();
                 /* book marker */
                 if (PatientCase.Bookmark == null)
                 {
