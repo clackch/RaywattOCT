@@ -134,7 +134,7 @@ char* CDataWriter::GetSample(int nFrame) {
 
 void CDataWriter::AddFrame(void* pFrame) {
 	if (m_isRecording == false) {
-		PLOGI.printf("m_isRecording is False");
+		//PLOGI.printf("m_isRecording is False");
 		return;
 	}
 	if (m_nNumOfSamples >= m_nBufferSize) {
