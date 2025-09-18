@@ -1670,20 +1670,11 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 	CLaserModule* pLaserModule = pSystem->m_pLaserModule;
 	int nTargetPos = 0;
 
-	//1차 탐색 속도
-	int firstCheckVelocity = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("firstVel"), 2, _T(".\\raycore.ini"));
-	//1차 탐색 후, 2차 탐색을 위해 이동할 거리
-	int nJumpStep = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("JumpStep"), 3200, _T(".\\raycore.ini"));
-	//2차 탐색 범위 
-	int nSearchRange = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("SearchRange"), 600, _T(".\\raycore.ini"));
-	//2차 탐색 시, 모터 속도 조절 값
-	int nDLMotorSpeedDivVal = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("DelayLineSpeedDivValue"), 10, _T(".\\raycore.ini"));
-
 	if (pLaserModule != nullptr && pLaserModule->IsConnected())
 	{
 		// 0. Speed Up
 		pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_AUTO);
-		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO * firstCheckVelocity);
+		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO_1ST);
 
 		// 1. Start Finding Sheath
 		pSystem->m_pImagingLiveView->SetAutoCalibrationMathod(AutoCalibrationMathod::FindingMinMagnitude);
@@ -1804,12 +1795,14 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			PLOGI.printf("first calibration. checkPosition : %d, checkValue : %d", Loc, minVal);
 
 			// 2차 탐색
+			int nJumpStep = 3200;			//1차 탐색에서 확인한 지점으로부터, 2차 탐색을 위해 이동할 거리
+			int nSearchRange = 600;			//2차 탐색 범위 
 			nZOffset = Loc - nJumpStep;
 			pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX);
 			pLaserModule->Move(eStepMotorIndex::DelayLine, nZOffset);
 			pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
-			pLaserModule->Set(eStepMotorIndex::DelayLine, (CM_SM_SPEED_AUTO / nDLMotorSpeedDivVal));
+			pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO_2ND);
 			pSystem->m_pImagingLiveView->SetAutoCalibrationMathod(AutoCalibrationMathod::FindingSheath);
 			pSystem->m_vCalibrationInfo.clear();
 
