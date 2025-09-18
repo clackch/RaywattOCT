@@ -263,13 +263,8 @@ CString CRaywattLabDlg::splitFileName(CString strFilePath) {
 }
 CLabImaging* CRaywattLabDlg::createImaging(IImaging::Setting imaging) {
 	CLabImaging* pImaging = new CLabImaging(imaging, this);
-
 	CCalibration* calibration = new CCalibration(imaging.nAScan, imaging.nFFTLength);
 	bool result = calibration->Initialize(m_strCurCalibration);
-	if (!result) {
-		delete pImaging;
-		return nullptr;
-	}
 
 	USHORT* background = readBackground(BACKGROUND_FILEPATH, imaging);
 
@@ -679,7 +674,9 @@ BOOL CRaywattLabDlg::OnInitDialog()
 
 	CLookUpTable& lut = CLookUpTable::GetInstance();
 	lut.Load("LUT_green.csv");
+	lut.Load("LUT_gray.csv");
 	lut.Load("LUT_abbott.csv");
+	lut.Load("LUT_enhanced.csv");
 
 	m_largeMonitorMode = false;
 	m_showScope = false;

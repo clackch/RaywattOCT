@@ -106,6 +106,7 @@ bool CCalibration::readCalibration(LPCTSTR calibrationFileName){
 
 		if (fileSize != calibrationSize)
 		{
+			PLOGI.printf("Calibration File Size Should be %d byte", calibrationSize);
 			return false;
 		}
 
