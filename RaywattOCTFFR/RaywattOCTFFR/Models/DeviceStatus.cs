@@ -31,6 +31,9 @@ namespace RaywattOCTFFR.Models
         private bool _isLumenDetected = false;
 
         [ObservableProperty]
+        private bool _isSaveRawDataDone = true; //파일 import 시, 시간 소요되면 사용 예정
+
+        [ObservableProperty]
         private bool _isLumenLoaded = true;
 
         [ObservableProperty]

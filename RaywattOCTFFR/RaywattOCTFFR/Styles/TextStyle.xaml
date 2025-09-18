@@ -235,7 +235,7 @@
     <Style TargetType="PasswordBox" x:Key="PasswordBoxValidator">
         <Setter Property="Cursor" Value="{StaticResource iBeam}"/>
         <Setter Property="Width" Value="408"/>
-        <Setter Property="Height" Value="70"/>
+        <Setter Property="Height" Value="72"/>
         <Setter Property="SelectionBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
         <Setter Property="SelectionOpacity" Value="0.30"/>
         <Setter Property="CaretBrush" Value="{DynamicResource GrayscaleWhiteBrush}"/>

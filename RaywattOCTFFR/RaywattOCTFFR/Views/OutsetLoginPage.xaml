@@ -20,9 +20,9 @@
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
             <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="power" Margin="0,9,12,9" Command="{Binding ExitCommand}"/>
         </StackPanel>
-        <StackPanel Margin="415,280,415,314" bh:EnterKeyLoginBehavior.EnableLoginBehavior="True">
-            <Image  x:Name="FocusDummy" Focusable="True" Source="{svgc:SvgImage Source=/res/icon/fasterWhite.svg}"/>
-            <StackPanel Height="40"/>
+        <StackPanel Width="450" Margin="0,337,0,337" bh:EnterKeyLoginBehavior.EnableLoginBehavior="True">
+            <Image Source="{svgc:SvgImage Source=/res/icon/aiFfr.svg}" Height="64"/>
+            <StackPanel Height="60"/>
             <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [ID], Source={StaticResource L10N}}"/>
             <StackPanel Height="6"/>
             <TextBox Style="{DynamicResource TextBoxValidator}"
