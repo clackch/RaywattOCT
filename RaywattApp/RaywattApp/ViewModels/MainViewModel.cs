@@ -2,6 +2,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
+using OpenCvSharp;
+using RaywattApp.Common.Angio;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Messages;
@@ -12,14 +14,13 @@ using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
-using RaywattApp.Common.Angio;
-using System.Threading;
-using OpenCvSharp;
-using System.Threading.Tasks;
 
 namespace RaywattApp.ViewModels
 {
@@ -845,6 +846,13 @@ namespace RaywattApp.ViewModels
                     RayError result = (RayError)RayGetAutoCalibResult();
                     if (result == RayError.AutoCalibError)
                     {
+                        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            Dictionary<string, object> parameter = new Dictionary<string, object>();
+                            parameter["title"] = _l10n["Auto calibration"];
+                            parameter["message"] = _l10n["failed"];
+                            var resultOpenDialog = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.AlertDialogWidth, Constants.AlertDialogHeight);
+                        });
                         _log.Error("AutoCalibration Error");
                     }else
                     {
