@@ -3016,7 +3016,7 @@ LRESULT COCTSystem::OnMsgStartReviewSession(WPARAM wParam, LPARAM lParam) {
 		m_reviewSession[nSession] = nullptr;
 	}
 
-	PLOGI.printf("Start session #%d", nSession);
+	PLOGI.printf("Start session #%d %d", nSession, bLongitudeOrientation);
 
 	m_reviewSession[nSession] = pSession;
 	m_reviewSession[nSession]->Start();
@@ -3025,8 +3025,8 @@ LRESULT COCTSystem::OnMsgStartReviewSession(WPARAM wParam, LPARAM lParam) {
 	if (nSession == SESSION_REVIEW) {
 		pSession->StartCutViewUpdate(m_backgroundColor);
 		pSession->StartVolumeGeneration();
-		m_reviewSession[nSession]->SetLongitudeOrientation(bLongitudeOrientation);
 	}
+	m_reviewSession[nSession]->SetLongitudeOrientation(bLongitudeOrientation);
 
 	return NOERROR;
 }

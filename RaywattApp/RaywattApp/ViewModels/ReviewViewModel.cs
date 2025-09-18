@@ -463,10 +463,10 @@ namespace RaywattApp.ViewModels
                 }
 
                 SetAnnotation();
+                AdjustLumenDataByOrientation();
+
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
-
-                AdjustLumenDataByOrientation();
 
                 ReviewStatus.IsNoPullback = PatientCase.PullbackType == "TEST" ? true : false;
 
@@ -481,6 +481,7 @@ namespace RaywattApp.ViewModels
         {
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
+
             Save();
             FfrValueChangedCheck();
 
@@ -1020,22 +1021,9 @@ namespace RaywattApp.ViewModels
             if (DeviceStatus.LongitudeOrientationChanged)
             {
                 //DeviceStatus.LongitudeOrientationChanged = false; // 수정 되었으므로,
-                
+
                 /* ai ffr */
                 PatientCase.FfrFeature = null;  // FFR 관련 Feature 초기화
-
-                /* indicator */
-                var proxiaml = ReviewStatus.NumberOfFrames - PatientCase.SectionProximal - 1;
-                var distal = ReviewStatus.NumberOfFrames - PatientCase.SectionDistal - 1;
-
-                PatientCase.SectionProximal = distal;
-                PatientCase.SectionDistal = proxiaml;
-
-                var sectionDistal = Section.Distal.DValue;
-                var sectionProximal = Section.Proximal.DValue;
-
-                Section.Distal.DValue = sectionProximal;
-                Section.Proximal.DValue = sectionDistal;
 
                 /* book marker */
                 if (PatientCase.Bookmark == null)
@@ -1044,6 +1032,13 @@ namespace RaywattApp.ViewModels
                 }
                 else
                 {
+                    ///* indicator */
+                    var proxiaml = ReviewStatus.NumberOfFrames - PatientCase.SectionProximal - 1;
+                    var distal = ReviewStatus.NumberOfFrames - PatientCase.SectionDistal - 1;
+
+                    PatientCase.SectionProximal = distal;
+                    PatientCase.SectionDistal = proxiaml;
+
                     var bookmarkJson = PatientCase.Bookmark;
                     var bookmarks = JsonConvert.DeserializeObject<List<Bookmark>>(bookmarkJson);
 
@@ -1413,11 +1408,11 @@ namespace RaywattApp.ViewModels
             sqlParameters["z_offset"] = PatientCase.ZOffset;
             PatientCase.FieldOfView = FieldOfView;
             sqlParameters["field_of_view"] = PatientCase.FieldOfView;
-            PatientCase.SectionProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveCenterWidth);
-            sqlParameters["section_proximal"] = PatientCase.SectionProximal;
-            PatientCase.SectionDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth);
-            sqlParameters["section_distal"] = PatientCase.SectionDistal;
             sqlParameters["guidewire_radius"] = PatientCase.GuidewireRadius;
+            PatientCase.SectionProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveCenterWidth);
+            PatientCase.SectionDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, ReviewStatus.NumberOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth);
+            sqlParameters["section_proximal"] = PatientCase.SectionProximal;
+            sqlParameters["section_distal"] = PatientCase.SectionDistal;
 
             int nRows = _sqlManager.UpdatePatientCase(sqlParameters);
             if (nRows == 0)

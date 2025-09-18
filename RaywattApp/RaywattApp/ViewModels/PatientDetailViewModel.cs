@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
-using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Common.Enums;
@@ -378,19 +377,43 @@ namespace RaywattApp.ViewModels
                 _log.Error("RaySetProperty Error");
             }
             CommonUtil.SetColormap(patientCase.Colormap);
-            int numOfFrames = RayStartReview(patientCase.ImageFullPath, patientCase.ImageResolution, patientCase.ZOffset);
 
+            // TODO: 정보를 받아서 표시 (Longitued Orientation)
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = Patient.PhysicianId;
+            IList<Physician> Physicians = _sqlManager.SelectPhysician(sqlParameters);
+
+            if (Physicians.Count == 0)
+            {
+                _log.Error("not find physician infomation");
+                DeviceStatus.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
+                return;
+            }
+
+            if (Physicians[0].Isdistaltoproximal) // true: distal to proximal / false: proximal to distal
+            {
+                DeviceStatus.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
+            }
+            else
+            {
+                DeviceStatus.LongitudeOrientation = LongitudeOrientation.ProximalToDistal;
+            }
+
+            var __ = (RayError)RaySetProperty(Property.LongitudeOrientation, (double)DeviceStatus.LongitudeOrientation);
+            if (DeviceStatus.LongitudeOrientation != LongitudeOrientation.DistalToProximal)
+            {
+                DeviceStatus.LongitudeOrientationChanged = true;
+            }
+
+            int numOfFrames = RayStartReview(patientCase.ImageFullPath, patientCase.ImageResolution, patientCase.ZOffset);
             if (numOfFrames < (int)RayError.OK)
             {
-                // To-Do: Error
                 _log.Error("numOfFrames :" + numOfFrames + " < (int)RayError.OK");
                 _log.Error("patientCase.ImageFullPath : " + patientCase.ImageFullPath);
-
                 return;
             }
             else
             {
-                // Wait for Review to start
                 for (int i = 0; i < 100; i++)
                 {
                     if ((RayScannerState)RayGetProperty(Property.CurrentState) == RayScannerState.Review)
@@ -404,13 +427,6 @@ namespace RaywattApp.ViewModels
             DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current = 0;
             DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total = 0;
             DeviceStatus.IsOCTImagingDone = false;
-
-            // TODO: 정보를 받아서 표시 (Longitued Orientation)
-            var __ = (RayError)RaySetProperty(Property.LongitudeOrientation, (double)DeviceStatus.LongitudeOrientation);
-            if (DeviceStatus.LongitudeOrientation != LongitudeOrientation.DistalToProximal)
-            {
-                DeviceStatus.LongitudeOrientationChanged = true;
-            }
 
 
             Dictionary<string, Object> parameter = new Dictionary<string, Object>();
