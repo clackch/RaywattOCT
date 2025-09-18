@@ -434,6 +434,8 @@ namespace RaywattApp.ViewModels
 
                 ReviewStatus.CurrentPage = Constants.ReviewPage;
 
+                LongitudeOrientationLabelChanged();
+                AdjustIndicatorByOrientation();
 
                 FieldOfView = PatientCase.FieldOfView;
                 ToggleAngio(ReviewStatus.IsAngioOn);
@@ -464,10 +466,7 @@ namespace RaywattApp.ViewModels
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
 
-
-                /* longitude & lumen profile: orientation setting */
-                LongitudeOrientationLabelChanged();
-                AdjustLumenDataOrderByOrientation();
+                AdjustLumenDataByOrientation();
 
                 ReviewStatus.IsNoPullback = PatientCase.PullbackType == "TEST" ? true : false;
 
@@ -1014,16 +1013,16 @@ namespace RaywattApp.ViewModels
             return filteredAverage;
         }
 
-        private void AdjustLumenDataOrderByOrientation()
+        private void AdjustIndicatorByOrientation()
         {
+            _log.Debug("AdjustIndicatorByOrientation " + DeviceStatus.LongitudeOrientationChanged);
+
             if (DeviceStatus.LongitudeOrientationChanged)
             {
-                DeviceStatus.LongitudeOrientationChanged = false; // 수정 되었으므로,
-
+                //DeviceStatus.LongitudeOrientationChanged = false; // 수정 되었으므로,
+                
                 /* ai ffr */
-                //DeviceStatus.IsExecutedAIFFR = false; // AI FFR 수행 X (다시 실행 하기 위함)
                 PatientCase.FfrFeature = null;  // FFR 관련 Feature 초기화
-                //PatientCase.FfrFeature.Result = 0;
 
                 /* indicator */
                 var proxiaml = ReviewStatus.NumberOfFrames - PatientCase.SectionProximal - 1;
@@ -1038,16 +1037,6 @@ namespace RaywattApp.ViewModels
                 Section.Distal.DValue = sectionProximal;
                 Section.Proximal.DValue = sectionDistal;
 
-                /* lumen data */
-                //if (PatientCase.LumenSidebranches != null) PatientCase.LumenSidebranches.Reverse();
-                //if (PatientCase.LumenStents != null) PatientCase.LumenStents.Reverse();
-                //if (PatientCase.LumenGuidewires != null) PatientCase.LumenGuidewires.Reverse();
-                //if (PatientCase.LumenContours != null) PatientCase.LumenContours.Reverse();
-
-                if (LumenSidebranches != null) LumenSidebranches.Reverse();
-                if (LumenStents != null) LumenStents.Reverse();
-                if (LumenGuidewires != null) LumenGuidewires.Reverse();
-                if (LumenContours != null) LumenContours.Reverse();
                 /* book marker */
                 if (PatientCase.Bookmark == null)
                 {
@@ -1071,6 +1060,23 @@ namespace RaywattApp.ViewModels
                 }
             }
         }
+
+        private void AdjustLumenDataByOrientation()
+        {
+            _log.Debug("AdjustLumenDataByOrientation " + DeviceStatus.LongitudeOrientationChanged);
+
+            if (DeviceStatus.LongitudeOrientationChanged)
+            {
+                DeviceStatus.LongitudeOrientationChanged = false; // 최종 수정 되었으므로,
+
+                /* lumen data */
+                if (LumenSidebranches != null) LumenSidebranches.Reverse();
+                if (LumenStents != null) LumenStents.Reverse();
+                if (LumenGuidewires != null) LumenGuidewires.Reverse();
+                if (LumenContours != null) LumenContours.Reverse();
+            }
+        }
+
         #endregion
 
         /*
