@@ -1,0 +1,170 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+                    xmlns:converters="clr-namespace:RaywattOCTFFR.Common.Converters">
+
+    <!--  true이면 보이고, false이면 안보임  -->
+    <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+    
+    <!--  true이면 안보이고, false이면 보임  -->
+    <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityReverseConverter" FalseValue="Visible" TrueValue="Collapsed" />
+
+    <!--  true이면 보이고, false이면 안보임  -->
+    <converters:BoolToVisibilityMultiConverter x:Key="BoolToVisibilityMultiConverter" />
+
+    <!--  true이면 안보이고, false이면 보임  -->
+    <converters:BoolToVisibilityMultiConverter x:Key="BoolToVisibilityMultReverseConverter" FalseValue="Visible" TrueValue="Collapsed" OCTValue="Collapsed"/>
+
+    <!--  Bool To Enable Converter  -->
+    <converters:BoolToEnableConverter x:Key="BoolToEnableConverter" />
+
+    <!--  Bool To Enable Reverse Converter  -->
+    <converters:BoolToEnableConverter x:Key="BoolToEnableReverseConverter" FalseValue="True" TrueValue="False" />
+
+    <!-- Radio Button Converter -->
+    <converters:RadioButtonConverter x:Key="RadioButtonConverter" />
+
+    <!-- Radio Button Reverse Converter -->
+    <converters:RadioButtonConverter x:Key="RadioButtonReverseConverter" FalseValue="True" TrueValue="False"/>
+
+    <!-- Paging No Indicator Converter -->
+    <converters:PagingNoIndicatorConverter x:Key="PagingNoIndicatorConverter" />
+
+    <!-- Paging No Style Converter -->
+    <converters:PagingNoStyleConverter x:Key="PagingNoStyleConverter" />
+
+    <!-- L10N Converter -->
+    <converters:L10NConverter x:Key="L10NConverter" />
+
+    <!-- Setting Selected Converter -->
+    <converters:SettingSelectedConverter x:Key="SettingSelectedConverter" />
+
+    <!-- Expander Selected Converter -->
+    <converters:ExpanderSelectedConverter x:Key="ExpanderSelectedConverter" />
+
+    <!-- Radio Button Visibility Converter -->
+    <converters:RadioButtonVisibilityConverter x:Key="RadioButtonVisibilityConverter" />
+
+    <!-- Radio Button Visibility Reverse Converter -->
+    <converters:RadioButtonVisibilityConverter x:Key="RadioButtonVisibilityReverseConverter" FalseValue="Visible" TrueValue="Collapsed"/>
+
+    <!-- Not Null To Enable Converter -->
+    <converters:NotNullToEnableConverter x:Key="NotNullToEnableConverter" />
+
+    <!-- Not Empty String To Enable Converter -->
+    <converters:NotEmptyStringToEnableConverter x:Key="NotEmptyStringToEnableConverter" />
+
+    <!-- Code Converter -->
+    <converters:CodeConverter x:Key="CodeConverter" />
+
+    <!-- AsDs Converter -->
+    <converters:AsDsConverter x:Key="AsDsConverter" />
+
+    <!-- Group Name Converter -->
+    <converters:GroupNameConverter x:Key="GroupNameConverter" />
+
+    <!-- Inverse Boolean Converter -->
+    <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" /> 
+    
+    <!-- Grid Length Converter -->
+    <converters:GridLengthConverter x:Key="GridLengthConverter"/>
+
+    <!-- Grid Margin Converter -->
+    <converters:GridMarginConverter x:Key="GridMarginConverter"/>
+    
+    <!-- DataGrid Sort Icon Converter -->
+    <converters:DataGridSortIconConverter x:Key="DataGridSortIconConverter" />
+
+    <!-- DataGrid Sort Text Converter -->
+    <converters:DataGridSortTextConverter x:Key="DataGridSortTextConverter" />
+
+    <!-- Bool to Tranparent Converter -->
+    <converters:DataGridSortTextConverter x:Key="TransparentConverter" />
+    
+    <!-- File Icon Converter -->
+    <converters:FileIconConverter x:Key="FileIconConverter" />
+
+    <!-- Opacity Converter -->
+    <converters:OpacityConverter x:Key="OpacityConverter" />
+
+    <!-- Longitude Scale Label Visibility Converter -->
+    <converters:LongitudeScaleLabelVisibilityConverter x:Key="LongitudeScaleLabelVisibilityConverter" />
+
+    <!-- Longitude Scale Column Visibility Converter -->
+    <converters:LongitudeScaleColumnVisibilityConverter x:Key="LongitudeScaleColumnVisibilityConverter" />
+
+    <!-- Scale Converter -->
+    <converters:ScaleConverter x:Key="ScaleConverter" />
+
+    <!-- Scale Transform Converter -->
+    <converters:ScaleTransformConverter x:Key="ScaleTransformConverter" />
+
+    <!-- Unit Converter -->
+    <converters:UnitConverter x:Key="UnitConverter" />
+
+    <!-- CrossSection Scale Converter -->
+    <converters:CrossSectionScaleConverter x:Key="CrossSectionScaleConverter" />
+
+    <!-- CrossSection Scale Reverse Converter -->
+    <converters:CrossSectionScaleReverseConverter x:Key="CrossSectionScaleReverseConverter" />
+
+    <!-- CrossSection Translate Reverse Converter -->
+    <converters:CrossSectionTranslateReverseConverter x:Key="CrossSectionTranslateReverseConverter" />
+
+    <!-- CrossSection Scale MultiConverter -->
+    <converters:CrossSectionScaleMultiConverter x:Key="CrossSectionScaleMultiConverter" />
+
+    <!-- Longitude Scale Converter -->
+    <converters:LongitudeScaleConverter x:Key="LongitudeScaleConverter" />
+    
+    <!-- Longitude Translate Converter -->
+    <converters:LongitudeTranslateConverter x:Key="LongitudeTranslateConverter" />
+
+    <!-- Procedure Visibility Converter -->
+    <converters:ProcedureVisibilityConverter x:Key="ProcedureVisibilityConverter" />
+
+    <!-- Expansion Converter -->
+    <converters:ExpansionConverter x:Key="ExpansionConverter" />
+
+    <!-- ScaleBar Scale Converter -->
+    <converters:ScaleBarScaleConverter x:Key="ScaleBarScaleConverter" />
+
+    <!-- ScaleBar Scale MultiConverter -->
+    <converters:ScaleBarScaleMultiConverter x:Key="ScaleBarScaleMultiConverter" />
+
+    <!-- Halve Converter -->
+    <converters:HalveConverter x:Key="HalveConverter" />
+
+    <!-- Indicator Scale Conveter -->
+    <converters:IndicatorScaleConveter x:Key="IndicatorScaleConveter" />
+
+    <!-- Component Visibility Converter -->
+    <converters:ComponentVisibilityConverter x:Key="ComponentVisibilityConverter" />
+
+    <!-- Component Unable Converter -->
+    <converters:ComponentUnableConverter x:Key="ComponentUnableConverter" />
+
+    <!-- MaxThickness Visibility Converter -->
+    <converters:MaxThicknessVisibilityConverter x:Key="MaxThicknessVisibilityConverter" />
+
+    <!--  Not Null To Visibility Conveter  -->
+    <converters:NotNullToVisibilityConveter x:Key="NotNullToVisibilityConveter" />
+
+    <!--  IsTestMode Converter  -->
+    <converters:IsTestModeConverter x:Key="IsTestModeConverter" />
+
+    <!-- CrossSection Translate Converter -->
+    <converters:CoRegistrationTranslateConverter x:Key="CoRegistrationTranslateConverter" />
+
+    <!--  FFR Step Visibility Conveter  -->
+    <converters:FfrStepVisibilityConveter x:Key="FfrStepVisibilityConveter" />
+
+    <!--  DateTime Min To Empty Converter  -->
+    <converters:DateTimeMinToEmptyConverter x:Key="DateTimeMinToEmptyConverter" />
+
+    <!--  RV200 To Visibility Converter  -->
+    <converters:RV200ToVisibilityConverter x:Key="RV200ToVisibilityConverter" />
+
+    <!--  RV200 To Visibility Reverse Converter  -->
+    <converters:RV200ToVisibilityConverter x:Key="RV200ToVisibilityReverseConverter" FalseValue="Visible" TrueValue="Collapsed"/>
+
+</ResourceDictionary>

@@ -1,0 +1,1232 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="$MSG002" xml:space="preserve">
+    <value>Verify the catheter position for flush, Prepare for pullback.</value>
+  </data>
+  <data name="$MSG003" xml:space="preserve">
+    <value>Inject flush media</value>
+  </data>
+  <data name="$MSG004" xml:space="preserve">
+    <value>Verify Image Quality</value>
+  </data>
+  <data name="$MSG005" xml:space="preserve">
+    <value>Review pullback to ensure proper blood clearance in relevant areas. And identify regions of uncertainty in lumen contour.</value>
+  </data>
+  <data name="$MSG006" xml:space="preserve">
+    <value>Connect the catheter to the RJ</value>
+  </data>
+  <data name="$MSG007" xml:space="preserve">
+    <value>The imaging catheter has failed.
+Remove the catheter from patient before proceeding.</value>
+  </data>
+  <data name="$MSG008" xml:space="preserve">
+    <value>Disconnect the damaged catheter from the RJ after removing it from the patient.</value>
+  </data>
+  <data name="$MSG009" xml:space="preserve">
+    <value>Unlock the catheter</value>
+  </data>
+  <data name="$MSG010" xml:space="preserve">
+    <value>Mark at least two points on the vessel.</value>
+  </data>
+  <data name="$MSG011" xml:space="preserve">
+    <value>The system is currently unavailable. Please check your devices and connections.</value>
+  </data>
+  <data name="$MSG012" xml:space="preserve">
+    <value>Successfully changed Cath Room.</value>
+  </data>
+  <data name="$MSG013" xml:space="preserve">
+    <value>Failed to change Cath Room.</value>
+  </data>
+  <data name="$MSG014" xml:space="preserve">
+    <value>Failed to init board.</value>
+  </data>
+  <data name="$MSG015" xml:space="preserve">
+    <value>Failed to open server.</value>
+  </data>
+  <data name="$MSG016" xml:space="preserve">
+    <value>Add physician information on the edit patient screen.</value>
+  </data>
+  <data name="$MSG017" xml:space="preserve">
+    <value>Select the vessel from the case information on the 2D screen.</value>
+  </data>
+  <data name="$MSG018" xml:space="preserve">
+    <value>Select
+Vessel Type</value>
+  </data>
+  <data name="$MSG019" xml:space="preserve">
+    <value>Define
+Reference
+Proximal
+Lumen</value>
+  </data>
+  <data name="$MSG020" xml:space="preserve">
+    <value>Define
+Reference
+Distal
+Lumen</value>
+  </data>
+  <data name="$MSG021" xml:space="preserve">
+    <value>Measure
+Plaque Area</value>
+  </data>
+  <data name="$MSG022" xml:space="preserve">
+    <value>Verify
+the features
+for FFR</value>
+  </data>
+  <data name="$MSG023" xml:space="preserve">
+    <value>The angiography device is not connected.</value>
+  </data>
+  <data name="$MSG024" xml:space="preserve">
+    <value>Not enough storage space. Please free up space and try again.</value>
+  </data>
+  <data name="$MSG025" xml:space="preserve">
+    <value>The start date cannot be later than the end date.</value>
+  </data>
+  <data name="$MSG026" xml:space="preserve">
+    <value>Patient information with the same ID already exists. Update with the selected details?</value>
+  </data>
+  <data name="$Terms and Conditions" xml:space="preserve">
+    <value>Product Intended Use: Clearly define the intended use of the OCT device, including any limitations or specific conditions for use.
+
+Product Warranty: Outline the warranty coverage provided for the OCT device, including the duration, scope, and process for claiming warranty services.
+
+Limitations of the Device: Clearly state any limitations, risks, or potential side effects associated with the use of the OCT device.
+
+Regulatory Compliance: Ensure that the OCT device complies with all relevant regulatory standards and requirements, and inform users about any necessary certifications.
+
+Intellectual Property: Specify the ownership and protection of intellectual property related to the OCT device, including patents, trademarks, and copyrights.
+
+User Responsibilities: Detail the responsibilities of users when operating or maintaining the OCT device, including proper usage, storage, and maintenance.
+
+Data Privacy and Security: Address how user data collected by the OCT device will be handled, stored, and protected to ensure user privacy and comply with data protection laws.
+
+Service and Support: Describe the availability of customer support and service for the OCT device, including contact information and response times.
+
+Product Modifications: Specify whether users are allowed to modify or alter the OCT device and any consequences for doing so.
+
+Liability and Indemnification: Clearly define the limitations of liability for the manufacturer and specify instances where users may indemnify the manufacturer.
+
+Dispute Resolution: Outline the procedures for resolving any disputes related to the OCT device or the terms and conditions.
+
+Governing Law: Specify the governing law that applies to the terms and conditions and the OCT device's use.
+
+Termination: Define the circumstances under which the manufacturer may terminate or suspend access to the OCT device or its services.
+
+Updates and Changes: Specify how updates or changes to the device's software or firmware will be communicated to users.
+
+Acceptance of Terms: Require users to explicitly accept the terms and conditions before using the OCT device.</value>
+  </data>
+  <data name="%AS" xml:space="preserve">
+    <value>%AS</value>
+  </data>
+  <data name="%DS" xml:space="preserve">
+    <value>%DS</value>
+  </data>
+  <data name="* Vessel type not supported" xml:space="preserve">
+    <value>* Vessel type not supported</value>
+  </data>
+  <data name="2D" xml:space="preserve">
+    <value>2D</value>
+  </data>
+  <data name="2D Option" xml:space="preserve">
+    <value>2D Option</value>
+  </data>
+  <data name="3D" xml:space="preserve">
+    <value>3D</value>
+  </data>
+  <data name="3D Option" xml:space="preserve">
+    <value>3D Option</value>
+  </data>
+  <data name="About" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="Accept and Continue" xml:space="preserve">
+    <value>Accept and Continue</value>
+  </data>
+  <data name="Accession Name" xml:space="preserve">
+    <value>Accession Name</value>
+  </data>
+  <data name="Accession Number" xml:space="preserve">
+    <value>Accession Number</value>
+  </data>
+  <data name="Acquisition" xml:space="preserve">
+    <value>Acquisition</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Add Patient" xml:space="preserve">
+    <value>Add Patient</value>
+  </data>
+  <data name="Add Physician" xml:space="preserve">
+    <value>Add Physician</value>
+  </data>
+  <data name="Additional Option" xml:space="preserve">
+    <value>Additional Option</value>
+  </data>
+  <data name="AI FFR" xml:space="preserve">
+    <value>AI FFR</value>
+  </data>
+  <data name="Alternate ID" xml:space="preserve">
+    <value>Alternate ID</value>
+  </data>
+  <data name="Alternate Patient IDs" xml:space="preserve">
+    <value>Alternate Patient IDs</value>
+  </data>
+  <data name="Angio" xml:space="preserve">
+    <value>Angio</value>
+  </data>
+  <data name="Angio Co-Registration" xml:space="preserve">
+    <value>Angio Co-Registration</value>
+  </data>
+  <data name="Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="Apposition" xml:space="preserve">
+    <value>Apposition</value>
+  </data>
+  <data name="Apposition Threshold" xml:space="preserve">
+    <value>Apposition Threshold</value>
+  </data>
+  <data name="Approximate Import Size" xml:space="preserve">
+    <value>Approximate Import Size</value>
+  </data>
+  <data name="Archive" xml:space="preserve">
+    <value>Archive</value>
+  </data>
+  <data name="Area" xml:space="preserve">
+    <value>Area</value>
+  </data>
+  <data name="Area(㎟)" xml:space="preserve">
+    <value>Area
+(㎟)</value>
+  </data>
+  <data name="Auto" xml:space="preserve">
+    <value>Auto</value>
+  </data>
+  <data name="Auto Calibration" xml:space="preserve">
+    <value>Auto Calibration</value>
+  </data>
+  <data name="Auto Detect" xml:space="preserve">
+    <value>Auto Detect</value>
+  </data>
+  <data name="Available Space" xml:space="preserve">
+    <value>Available Space</value>
+  </data>
+  <data name="AVI" xml:space="preserve">
+    <value>AVI</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Birth" xml:space="preserve">
+    <value>Birth</value>
+  </data>
+  <data name="Birth Date" xml:space="preserve">
+    <value>Birth Date</value>
+  </data>
+  <data name="Bitmap" xml:space="preserve">
+    <value>Bitmap</value>
+  </data>
+  <data name="Bookmarked Frames" xml:space="preserve">
+    <value>Bookmarked Frames</value>
+  </data>
+  <data name="Brightness" xml:space="preserve">
+    <value>Brightness</value>
+  </data>
+  <data name="Byte" xml:space="preserve">
+    <value>Byte</value>
+  </data>
+  <data name="bytes" xml:space="preserve">
+    <value>bytes</value>
+  </data>
+  <data name="Calcium" xml:space="preserve">
+    <value>Calcium</value>
+  </data>
+  <data name="Calcium Threshold" xml:space="preserve">
+    <value>Calcium Threshold</value>
+  </data>
+  <data name="Calibration" xml:space="preserve">
+    <value>Calibration</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Case" xml:space="preserve">
+    <value>Case</value>
+  </data>
+  <data name="Case Default Settings" xml:space="preserve">
+    <value>Case Default Settings</value>
+  </data>
+  <data name="Case Edit" xml:space="preserve">
+    <value>Case Edit</value>
+  </data>
+  <data name="Case Info." xml:space="preserve">
+    <value>Case Info.</value>
+  </data>
+  <data name="Case List" xml:space="preserve">
+    <value>Case List</value>
+  </data>
+  <data name="Choose one of the power off options" xml:space="preserve">
+    <value>Choose one of the power off options</value>
+  </data>
+  <data name="Clarify a lesion" xml:space="preserve">
+    <value>Clarify a lesion</value>
+  </data>
+  <data name="Co-Registration" xml:space="preserve">
+    <value>Co-Registration</value>
+  </data>
+  <data name="Comment" xml:space="preserve">
+    <value>Comment</value>
+  </data>
+  <data name="Compare" xml:space="preserve">
+    <value>Compare</value>
+  </data>
+  <data name="Confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="Confirm deletion of selected patient" xml:space="preserve">
+    <value>Confirm deletion of selected patient</value>
+  </data>
+  <data name="Confirm deletion of selected patient case" xml:space="preserve">
+    <value>Confirm deletion of selected patient case</value>
+  </data>
+  <data name="Confirm deletion of selected preset" xml:space="preserve">
+    <value>Confirm deletion of selected preset</value>
+  </data>
+  <data name="Confirm import of selected file" xml:space="preserve">
+    <value>Confirm import of selected file</value>
+  </data>
+  <data name="Confirm reversion to original calibration" xml:space="preserve">
+    <value>Confirm reversion to original calibration</value>
+  </data>
+  <data name="Contrast" xml:space="preserve">
+    <value>Contrast</value>
+  </data>
+  <data name="Create Date" xml:space="preserve">
+    <value>Create Date</value>
+  </data>
+  <data name="Create New Folder" xml:space="preserve">
+    <value>Create New Folder</value>
+  </data>
+  <data name="Create Time" xml:space="preserve">
+    <value>Create Time</value>
+  </data>
+  <data name="Current Folder" xml:space="preserve">
+    <value>Current Folder</value>
+  </data>
+  <data name="Current Frame" xml:space="preserve">
+    <value>Current Frame</value>
+  </data>
+  <data name="Current Frame Indicator" xml:space="preserve">
+    <value>Current Frame Indicator</value>
+  </data>
+  <data name="Cut-View" xml:space="preserve">
+    <value>Cut-View</value>
+  </data>
+  <data name="Data already exists. Overwrite existing data?" xml:space="preserve">
+    <value>Data already exists.
+Overwrite existing data?</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Destination" xml:space="preserve">
+    <value>Destination</value>
+  </data>
+  <data name="Diagonal 1" xml:space="preserve">
+    <value>Diagonal 1</value>
+  </data>
+  <data name="Diagonal 2" xml:space="preserve">
+    <value>Diagonal 2</value>
+  </data>
+  <data name="Diameter" xml:space="preserve">
+    <value>Diameter</value>
+  </data>
+  <data name="DICOM" xml:space="preserve">
+    <value>DICOM</value>
+  </data>
+  <data name="DICOM Servers" xml:space="preserve">
+    <value>DICOM Servers</value>
+  </data>
+  <data name="Disable Cleaning" xml:space="preserve">
+    <value>Disable Cleaning</value>
+  </data>
+  <data name="Display Modes" xml:space="preserve">
+    <value>Display Modes</value>
+  </data>
+  <data name="Distal" xml:space="preserve">
+    <value>Distal</value>
+  </data>
+  <data name="Distal Lumen Area" xml:space="preserve">
+    <value>Distal Lumen Area</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Edit Case" xml:space="preserve">
+    <value>Edit Case</value>
+  </data>
+  <data name="Edit Patient" xml:space="preserve">
+    <value>Edit Patient</value>
+  </data>
+  <data name="Edit Physician" xml:space="preserve">
+    <value>Edit Physician</value>
+  </data>
+  <data name="en-US" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Enable Cleaning" xml:space="preserve">
+    <value>Enable Cleaning</value>
+  </data>
+  <data name="End Review" xml:space="preserve">
+    <value>End Review</value>
+  </data>
+  <data name="Enter an External Device" xml:space="preserve">
+    <value>Enter an External Device</value>
+  </data>
+  <data name="Enter Birth Date" xml:space="preserve">
+    <value>Enter Birth Date</value>
+  </data>
+  <data name="Enter First Name" xml:space="preserve">
+    <value>Enter First Name</value>
+  </data>
+  <data name="Enter Folder Name" xml:space="preserve">
+    <value>Enter Folder Name</value>
+  </data>
+  <data name="Enter ID" xml:space="preserve">
+    <value>Enter ID</value>
+  </data>
+  <data name="Enter Institute Name" xml:space="preserve">
+    <value>Enter Institute Name</value>
+  </data>
+  <data name="Enter Last Name" xml:space="preserve">
+    <value>Enter Last Name</value>
+  </data>
+  <data name="Enter Physician Name" xml:space="preserve">
+    <value>Enter Physician Name</value>
+  </data>
+  <data name="Enter Preset Name" xml:space="preserve">
+    <value>Enter Preset Name</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Exit" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="Expansion" xml:space="preserve">
+    <value>Expansion</value>
+  </data>
+  <data name="Expansion Calculation" xml:space="preserve">
+    <value>Expansion Calculation</value>
+  </data>
+  <data name="Expansion Threshold" xml:space="preserve">
+    <value>Expansion Threshold</value>
+  </data>
+  <data name="Export" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="Export Option" xml:space="preserve">
+    <value>Export Option</value>
+  </data>
+  <data name="Export Size" xml:space="preserve">
+    <value>Export Size</value>
+  </data>
+  <data name="Export Type" xml:space="preserve">
+    <value>Export Type</value>
+  </data>
+  <data name="External Drive" xml:space="preserve">
+    <value>External Drive</value>
+  </data>
+  <data name="Faster for specialized care" xml:space="preserve">
+    <value>Faster for specialized care</value>
+  </data>
+  <data name="Feature Parameters" xml:space="preserve">
+    <value>Feature Parameters</value>
+  </data>
+  <data name="Female" xml:space="preserve">
+    <value>Female</value>
+  </data>
+  <data name="FFR" xml:space="preserve">
+    <value>FFR</value>
+  </data>
+  <data name="Field of View" xml:space="preserve">
+    <value>Field of View</value>
+  </data>
+  <data name="First Name" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="Flush Media" xml:space="preserve">
+    <value>Flush Media</value>
+  </data>
+  <data name="Fly-Through" xml:space="preserve">
+    <value>Fly-Through</value>
+  </data>
+  <data name="Folder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="Folder Name" xml:space="preserve">
+    <value>Folder Name</value>
+  </data>
+  <data name="Folder name is duplicated" xml:space="preserve">
+    <value>Folder name is duplicated</value>
+  </data>
+  <data name="Follow-Up" xml:space="preserve">
+    <value>Follow-Up</value>
+  </data>
+  <data name="Frame Option" xml:space="preserve">
+    <value>Frame Option</value>
+  </data>
+  <data name="Free" xml:space="preserve">
+    <value>Free</value>
+  </data>
+  <data name="GB" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="Gender" xml:space="preserve">
+    <value>Gender</value>
+  </data>
+  <data name="Guidewire 1" xml:space="preserve">
+    <value>Guidewire 1</value>
+  </data>
+  <data name="Guidewire 2" xml:space="preserve">
+    <value>Guidewire 2</value>
+  </data>
+  <data name="Guidewires" xml:space="preserve">
+    <value>Guidewires</value>
+  </data>
+  <data name="High Resolution" xml:space="preserve">
+    <value>High Resolution</value>
+  </data>
+  <data name="High Resolution - Long" xml:space="preserve">
+    <value>High Resolution - Long</value>
+  </data>
+  <data name="ID" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="ID is duplicated" xml:space="preserve">
+    <value>ID is duplicated</value>
+  </data>
+  <data name="Import" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="Indicator Lock" xml:space="preserve">
+    <value>Indicator Lock</value>
+  </data>
+  <data name="Information" xml:space="preserve">
+    <value>Information</value>
+  </data>
+  <data name="Institute Name" xml:space="preserve">
+    <value>Institute Name</value>
+  </data>
+  <data name="Insufficient storage space available" xml:space="preserve">
+    <value>Insufficient storage space available</value>
+  </data>
+  <data name="JPEG" xml:space="preserve">
+    <value>JPEG</value>
+  </data>
+  <data name="KB" xml:space="preserve">
+    <value>KB</value>
+  </data>
+  <data name="ko-KR" xml:space="preserve">
+    <value>Korean</value>
+  </data>
+  <data name="L-View" xml:space="preserve">
+    <value>L-View</value>
+  </data>
+  <data name="LAD Distal" xml:space="preserve">
+    <value>LAD Distal</value>
+  </data>
+  <data name="LAD Mid" xml:space="preserve">
+    <value>LAD Mid</value>
+  </data>
+  <data name="LAD Prox" xml:space="preserve">
+    <value>LAD Prox</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="Last Case (Total)" xml:space="preserve">
+    <value>Last Case (Total)</value>
+  </data>
+  <data name="Last Name" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="LCX Distal" xml:space="preserve">
+    <value>LCX Distal</value>
+  </data>
+  <data name="LCX Mid" xml:space="preserve">
+    <value>LCX Mid</value>
+  </data>
+  <data name="LCX OM1" xml:space="preserve">
+    <value>LCX OM1</value>
+  </data>
+  <data name="LCX OM2" xml:space="preserve">
+    <value>LCX OM2</value>
+  </data>
+  <data name="LCX Prox" xml:space="preserve">
+    <value>LCX Prox</value>
+  </data>
+  <data name="Left Main" xml:space="preserve">
+    <value>Left Main</value>
+  </data>
+  <data name="Length" xml:space="preserve">
+    <value>Length</value>
+  </data>
+  <data name="Lesion Length" xml:space="preserve">
+    <value>Lesion Length</value>
+  </data>
+  <data name="Live" xml:space="preserve">
+    <value>Live</value>
+  </data>
+  <data name="Live View" xml:space="preserve">
+    <value>Live View</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading</value>
+  </data>
+  <data name="Loading..." xml:space="preserve">
+    <value>Loading...</value>
+  </data>
+  <data name="Local Host Info." xml:space="preserve">
+    <value>Local Host Info.</value>
+  </data>
+  <data name="Localization" xml:space="preserve">
+    <value>Localization</value>
+  </data>
+  <data name="Location" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="Log" xml:space="preserve">
+    <value>Log</value>
+  </data>
+  <data name="Longitude" xml:space="preserve">
+    <value>Longitude</value>
+  </data>
+  <data name="Lumen" xml:space="preserve">
+    <value>Lumen</value>
+  </data>
+  <data name="Lumen Contour" xml:space="preserve">
+    <value>Lumen Contour</value>
+  </data>
+  <data name="Lumen Profile" xml:space="preserve">
+    <value>Lumen Profile</value>
+  </data>
+  <data name="Maintenance" xml:space="preserve">
+    <value>Maintenance</value>
+  </data>
+  <data name="Male" xml:space="preserve">
+    <value>Male</value>
+  </data>
+  <data name="Manual" xml:space="preserve">
+    <value>Manual</value>
+  </data>
+  <data name="Max" xml:space="preserve">
+    <value>Max</value>
+  </data>
+  <data name="Max Diam.(㎜)" xml:space="preserve">
+    <value>Max Diam.
+(㎜)</value>
+  </data>
+  <data name="Max Thickness" xml:space="preserve">
+    <value>Max Thickness</value>
+  </data>
+  <data name="MB" xml:space="preserve">
+    <value>MB</value>
+  </data>
+  <data name="Mean Diam.(㎜)" xml:space="preserve">
+    <value>Mean Diam.
+(㎜)</value>
+  </data>
+  <data name="Measure" xml:space="preserve">
+    <value>Measure</value>
+  </data>
+  <data name="Measurement" xml:space="preserve">
+    <value>Measurement</value>
+  </data>
+  <data name="Measurements" xml:space="preserve">
+    <value>Measurements</value>
+  </data>
+  <data name="Min" xml:space="preserve">
+    <value>Min</value>
+  </data>
+  <data name="Min Diam.(㎜)" xml:space="preserve">
+    <value>Min Diam.
+(㎜)</value>
+  </data>
+  <data name="Min Exp." xml:space="preserve">
+    <value>Min Exp.</value>
+  </data>
+  <data name="Minimal Lumen Area" xml:space="preserve">
+    <value>Minimal Lumen Area</value>
+  </data>
+  <data name="MLA" xml:space="preserve">
+    <value>MLA</value>
+  </data>
+  <data name="MLD" xml:space="preserve">
+    <value>MLD</value>
+  </data>
+  <data name="MSA" xml:space="preserve">
+    <value>MSA</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Name is duplicated" xml:space="preserve">
+    <value>Name is duplicated</value>
+  </data>
+  <data name="Native" xml:space="preserve">
+    <value>Native</value>
+  </data>
+  <data name="Native(Raw)" xml:space="preserve">
+    <value>Native(Raw)</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="New Folder" xml:space="preserve">
+    <value>New Folder</value>
+  </data>
+  <data name="New Folder Name" xml:space="preserve">
+    <value>New Folder Name</value>
+  </data>
+  <data name="New Patient" xml:space="preserve">
+    <value>New Patient</value>
+  </data>
+  <data name="New Physician" xml:space="preserve">
+    <value>New Physician</value>
+  </data>
+  <data name="New Recording" xml:space="preserve">
+    <value>New Recording</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="No Drive" xml:space="preserve">
+    <value>No Drive</value>
+  </data>
+  <data name="No items have been selected" xml:space="preserve">
+    <value>No items have been selected</value>
+  </data>
+  <data name="No." xml:space="preserve">
+    <value>No.</value>
+  </data>
+  <data name="Not Selected" xml:space="preserve">
+    <value>Not Selected</value>
+  </data>
+  <data name="OCT" xml:space="preserve">
+    <value>OCT</value>
+  </data>
+  <data name="OCT + Angio" xml:space="preserve">
+    <value>OCT + Angio</value>
+  </data>
+  <data name="OCT Colormap" xml:space="preserve">
+    <value>OCT Colormap</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="Output Option" xml:space="preserve">
+    <value>Output Option</value>
+  </data>
+  <data name="P to D" xml:space="preserve">
+    <value>P to D</value>
+  </data>
+  <data name="Page Size" xml:space="preserve">
+    <value>Page Size</value>
+  </data>
+  <data name="Path" xml:space="preserve">
+    <value>Path</value>
+  </data>
+  <data name="Patient" xml:space="preserve">
+    <value>Patient</value>
+  </data>
+  <data name="Patient Case" xml:space="preserve">
+    <value>Patient Case</value>
+  </data>
+  <data name="Patient ID" xml:space="preserve">
+    <value>Patient ID</value>
+  </data>
+  <data name="Patient Information Anonymize" xml:space="preserve">
+    <value>Patient Information Anonymize</value>
+  </data>
+  <data name="Patient List" xml:space="preserve">
+    <value>Patient List</value>
+  </data>
+  <data name="Patient Name" xml:space="preserve">
+    <value>Patient Name</value>
+  </data>
+  <data name="Patient Summary" xml:space="preserve">
+    <value>Patient Summary</value>
+  </data>
+  <data name="PDA" xml:space="preserve">
+    <value>PDA</value>
+  </data>
+  <data name="Percent Area Stenosis" xml:space="preserve">
+    <value>Percent Area Stenosis</value>
+  </data>
+  <data name="Physician" xml:space="preserve">
+    <value>Physician</value>
+  </data>
+  <data name="Physician ID" xml:space="preserve">
+    <value>Physician ID</value>
+  </data>
+  <data name="Physician Info." xml:space="preserve">
+    <value>Physician Info.</value>
+  </data>
+  <data name="Physician List" xml:space="preserve">
+    <value>Physician List</value>
+  </data>
+  <data name="Physician Name" xml:space="preserve">
+    <value>Physician Name</value>
+  </data>
+  <data name="Plaque Area" xml:space="preserve">
+    <value>Plaque Area</value>
+  </data>
+  <data name="Post" xml:space="preserve">
+    <value>Post</value>
+  </data>
+  <data name="Post-PCI" xml:space="preserve">
+    <value>Post-PCI</value>
+  </data>
+  <data name="Power Off" xml:space="preserve">
+    <value>Power Off</value>
+  </data>
+  <data name="Pre" xml:space="preserve">
+    <value>Pre</value>
+  </data>
+  <data name="Pre-PCI" xml:space="preserve">
+    <value>Pre-PCI</value>
+  </data>
+  <data name="Predict FFR" xml:space="preserve">
+    <value>Predict FFR</value>
+  </data>
+  <data name="Presentation" xml:space="preserve">
+    <value>Presentation</value>
+  </data>
+  <data name="Preset" xml:space="preserve">
+    <value>Preset</value>
+  </data>
+  <data name="Preset Name" xml:space="preserve">
+    <value>Preset Name</value>
+  </data>
+  <data name="Procedure" xml:space="preserve">
+    <value>Procedure</value>
+  </data>
+  <data name="Procedure Start Date" xml:space="preserve">
+    <value>Procedure Start Date</value>
+  </data>
+  <data name="Proximal" xml:space="preserve">
+    <value>Proximal</value>
+  </data>
+  <data name="Proximal Lumen Area" xml:space="preserve">
+    <value>Proximal Lumen Area</value>
+  </data>
+  <data name="Pullback" xml:space="preserve">
+    <value>Pullback</value>
+  </data>
+  <data name="Pullback Again" xml:space="preserve">
+    <value>Pullback Again</value>
+  </data>
+  <data name="Pullback Setting" xml:space="preserve">
+    <value>Pullback Setting</value>
+  </data>
+  <data name="Pullback Trigger" xml:space="preserve">
+    <value>Pullback Trigger</value>
+  </data>
+  <data name="Pullback Type" xml:space="preserve">
+    <value>Pullback Type</value>
+  </data>
+  <data name="Purpose" xml:space="preserve">
+    <value>Purpose</value>
+  </data>
+  <data name="Raywatt" xml:space="preserve">
+    <value>Raywatt</value>
+  </data>
+  <data name="RCA Distal" xml:space="preserve">
+    <value>RCA Distal</value>
+  </data>
+  <data name="RCA Mid" xml:space="preserve">
+    <value>RCA Mid</value>
+  </data>
+  <data name="RCA Prox" xml:space="preserve">
+    <value>RCA Prox</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="Recording" xml:space="preserve">
+    <value>Recording</value>
+  </data>
+  <data name="Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Remove when complete" xml:space="preserve">
+    <value>Remove when complete</value>
+  </data>
+  <data name="Rename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="Rename Folder" xml:space="preserve">
+    <value>Rename Folder</value>
+  </data>
+  <data name="Requested Procedure ID" xml:space="preserve">
+    <value>Requested Procedure ID</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="Revert Changes" xml:space="preserve">
+    <value>Revert Changes</value>
+  </data>
+  <data name="Review" xml:space="preserve">
+    <value>Review</value>
+  </data>
+  <data name="Review Preset" xml:space="preserve">
+    <value>Review Preset</value>
+  </data>
+  <data name="Review Settings" xml:space="preserve">
+    <value>Review Settings</value>
+  </data>
+  <data name="Rotary Junction" xml:space="preserve">
+    <value>Rotary Junction</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Scheduled Procedure Step Start Date" xml:space="preserve">
+    <value>Scheduled Procedure Step Start Date</value>
+  </data>
+  <data name="Scheduled Station AE" xml:space="preserve">
+    <value>Scheduled Station AE</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Search ID or Name" xml:space="preserve">
+    <value>Search ID or Name</value>
+  </data>
+  <data name="Search Name" xml:space="preserve">
+    <value>Search Name</value>
+  </data>
+  <data name="sec" xml:space="preserve">
+    <value>sec</value>
+  </data>
+  <data name="Select Cath Room" xml:space="preserve">
+    <value>Select Cath Room</value>
+  </data>
+  <data name="Select Destination Path" xml:space="preserve">
+    <value>Select Destination Path</value>
+  </data>
+  <data name="Select Drive" xml:space="preserve">
+    <value>Select Drive</value>
+  </data>
+  <data name="Select Flush Media" xml:space="preserve">
+    <value>Select Flush Media</value>
+  </data>
+  <data name="Select Folder" xml:space="preserve">
+    <value>Select Folder</value>
+  </data>
+  <data name="Select Gender" xml:space="preserve">
+    <value>Select Gender</value>
+  </data>
+  <data name="Select Language" xml:space="preserve">
+    <value>Select Language</value>
+  </data>
+  <data name="Select OCT Colormap" xml:space="preserve">
+    <value>Select OCT Colormap</value>
+  </data>
+  <data name="Select Physician" xml:space="preserve">
+    <value>Select Physician</value>
+  </data>
+  <data name="Select Pre-PCI Case" xml:space="preserve">
+    <value>Select Pre-PCI Case</value>
+  </data>
+  <data name="Select Procedure" xml:space="preserve">
+    <value>Select Procedure</value>
+  </data>
+  <data name="Select Pullback" xml:space="preserve">
+    <value>Select Pullback</value>
+  </data>
+  <data name="Select Pullback Type" xml:space="preserve">
+    <value>Select Pullback Type</value>
+  </data>
+  <data name="Service" xml:space="preserve">
+    <value>Service</value>
+  </data>
+  <data name="Setting" xml:space="preserve">
+    <value>Setting</value>
+  </data>
+  <data name="Shutting down" xml:space="preserve">
+    <value>Shutting down</value>
+  </data>
+  <data name="Side Branch View" xml:space="preserve">
+    <value>Side Branch View</value>
+  </data>
+  <data name="Size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="SKIP" xml:space="preserve">
+    <value>SKIP</value>
+  </data>
+  <data name="Speed" xml:space="preserve">
+    <value>Speed</value>
+  </data>
+  <data name="Standard" xml:space="preserve">
+    <value>Standard</value>
+  </data>
+  <data name="Standard (60㎜)" xml:space="preserve">
+    <value>Standard (60㎜)</value>
+  </data>
+  <data name="Standard - Long" xml:space="preserve">
+    <value>Standard - Long</value>
+  </data>
+  <data name="Start" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="Start Recording" xml:space="preserve">
+    <value>Start Recording</value>
+  </data>
+  <data name="Step 1." xml:space="preserve">
+    <value>Step 1.</value>
+  </data>
+  <data name="Step 2." xml:space="preserve">
+    <value>Step 2.</value>
+  </data>
+  <data name="Step 3." xml:space="preserve">
+    <value>Step 3.</value>
+  </data>
+  <data name="Step 4." xml:space="preserve">
+    <value>Step 4.</value>
+  </data>
+  <data name="Step 5." xml:space="preserve">
+    <value>Step 5.</value>
+  </data>
+  <data name="Storage" xml:space="preserve">
+    <value>Storage</value>
+  </data>
+  <data name="Survey (100㎜)" xml:space="preserve">
+    <value>Survey (100㎜)</value>
+  </data>
+  <data name="Switch User" xml:space="preserve">
+    <value>Switch User</value>
+  </data>
+  <data name="Switching user" xml:space="preserve">
+    <value>Switching user</value>
+  </data>
+  <data name="System File Option" xml:space="preserve">
+    <value>System File Option</value>
+  </data>
+  <data name="Tapered" xml:space="preserve">
+    <value>Tapered</value>
+  </data>
+  <data name="Terms and Conditions" xml:space="preserve">
+    <value>Terms and Conditions</value>
+  </data>
+  <data name="TIFF" xml:space="preserve">
+    <value>TIFF</value>
+  </data>
+  <data name="Time" xml:space="preserve">
+    <value>Time</value>
+  </data>
+  <data name="Tissue" xml:space="preserve">
+    <value>Tissue</value>
+  </data>
+  <data name="Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="Total Angle" xml:space="preserve">
+    <value>Total Angle</value>
+  </data>
+  <data name="Total Export Size" xml:space="preserve">
+    <value>Total Export Size</value>
+  </data>
+  <data name="Unloading..." xml:space="preserve">
+    <value>Unloading...</value>
+  </data>
+  <data name="Update Date" xml:space="preserve">
+    <value>Update Date</value>
+  </data>
+  <data name="Value Info." xml:space="preserve">
+    <value>Value Info.</value>
+  </data>
+  <data name="Vessel" xml:space="preserve">
+    <value>Vessel</value>
+  </data>
+  <data name="View" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="Zoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="Zoom In" xml:space="preserve">
+    <value>Zoom In</value>
+  </data>
+  <data name="Zoom Out" xml:space="preserve">
+    <value>Zoom Out</value>
+  </data>
+  <data name="$MSG001" xml:space="preserve">
+    <value>Get ready for the recording</value>
+  </data>
+  <data name="PasswordChange" xml:space="preserve">
+    <value>Password Change</value>
+  </data>
+  <data name="MSG_EnterCurrentPassword" xml:space="preserve">
+    <value>Enter Current Password</value>
+  </data>
+  <data name="MSG_EnterNewPassword" xml:space="preserve">
+    <value>Enter New Password</value>
+  </data>
+  <data name="MSG_ConfirmNewPassword" xml:space="preserve">
+    <value>Confirm New Password</value>
+  </data>
+  <data name="MSG_PasswordRequirement" xml:space="preserve">
+    <value>Password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters</value>
+  </data>
+  <data name="MSG_ChangeLaterContent" xml:space="preserve">
+    <value>Change after {0} days</value>
+  </data>
+  <data name="Patient ID cannot contain * or ?." xml:space="preserve">
+    <value>Patient ID cannot contain * or ?.</value>
+  </data>
+  <data name="Recording is Complete" xml:space="preserve">
+    <value>Recording is Complete</value>
+  </data>
+  <data name="Recording starts automatically" xml:space="preserve">
+    <value>Recording starts automatically</value>
+  </data>
+</root>

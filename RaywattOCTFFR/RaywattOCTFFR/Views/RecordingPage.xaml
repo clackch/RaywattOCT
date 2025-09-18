@@ -1,0 +1,286 @@
+﻿<Page x:Class="RaywattOCTFFR.Views.RecordingPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:RaywattOCTFFR.Views"
+      xmlns:const="clr-namespace:RaywattOCTFFR.Common.Bases"
+      xmlns:System="clr-namespace:System;assembly=mscorlib"
+      xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+      xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
+      xmlns:component="clr-namespace:RaywattOCTFFR.Views.Component"
+      mc:Ignorable="d" 
+      d:DesignHeight="1024" d:DesignWidth="1280"
+      Background="{DynamicResource GrayscaleGray8Brush}"
+      Title="RecordingPage">
+    <Page.Resources>
+        <System:Boolean x:Key="TrueValue">True</System:Boolean>
+        <System:Boolean x:Key="FalseValue">False</System:Boolean>
+        <System:Double x:Key="CrossSectionSize">474</System:Double>
+    </Page.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Height="60" Background="{DynamicResource GrayscaleGray7Brush}">
+            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Margin="75,20,0,19" Content="{Binding [New Recording], Source={StaticResource L10N}}"/>
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="60,40,60,40">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="769"/>
+                <RowDefinition Height="1"/>
+                <RowDefinition Height="74"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" CornerRadius="10,10,0,0" Background="{DynamicResource GrayscaleGray7Brush}">
+                <Grid Margin="40,44,40,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="38"/>
+                        <RowDefinition Height="14"/>
+                        <RowDefinition Height="1"/>
+                        <RowDefinition Height="24"/>
+                        <RowDefinition Height="620"/>
+                        <RowDefinition Height="30"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Recording], Source={StaticResource L10N}}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Patient.Firstname}"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content=", "/>
+                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Patient.Lastname}"/>
+                            </StackPanel>
+                            <StackPanel Height="2"/>
+                            <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [ID], Source={StaticResource L10N}}"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.Id}"/>
+                                </StackPanel>
+                                <StackPanel Width="12"/>
+                                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Birth], Source={StaticResource L10N}}"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.Birthdate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}"/>
+                                </StackPanel>
+                                <StackPanel Width="12"/>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                    <Separator Grid.Row="2" Background="{DynamicResource GrayscaleGray5Brush}"/>
+                    <Grid Grid.Row="4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="620"/>
+                            <ColumnDefinition Width="36"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
+                            <Grid Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
+                                <Grid.Clip>
+                                    <EllipseGeometry Center="{x:Static const:Constants.CrossSectionPointCenter}" RadiusX="{x:Static const:Constants.CrossSectionRadius}" RadiusY="{x:Static const:Constants.CrossSectionRadius}"/>
+                                </Grid.Clip>
+                                <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" Stretch="Fill">
+                                    <Image.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="{Binding Zoom.ScaleX, Converter={StaticResource CrossSectionScaleConverter}}" ScaleY="{Binding Zoom.ScaleY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                            <TranslateTransform X="{Binding Zoom.TranslateX, Converter={StaticResource CrossSectionScaleConverter}}" Y="{Binding Zoom.TranslateY, Converter={StaticResource CrossSectionScaleConverter}}"/>
+                                        </TransformGroup>
+                                    </Image.RenderTransform>
+                                </Image>
+                            </Grid>
+                        </Border>
+                        <Grid Grid.Column="2">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="91"/>
+                                <RowDefinition Height="1"/>
+                                <RowDefinition Height="91"/>
+                                <RowDefinition Height="1"/>
+                                <RowDefinition Height="44"/>
+                                <RowDefinition Height="74"/>
+                                <RowDefinition Height="318"/>
+                            </Grid.RowDefinitions>
+                            <Grid Grid.Column="0" Margin="0,14,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="112"/>
+                                    <ColumnDefinition Width="112"/>
+                                    <ColumnDefinition Width="127"/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="25"/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Label Grid.Row="0" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Flush Media], Source={StaticResource L10N}}"/>
+                                <Label Grid.Row="0" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.FlushMedia, Converter={StaticResource CodeConverter}, ConverterParameter='FLMD'}"/>
+                                <Label Grid.Row="1" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Type], Source={StaticResource L10N}}"/>
+                                <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3">
+                                    <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.PullbackType, Converter={StaticResource CodeConverter}, ConverterParameter='PBTY'}"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Length], Source={StaticResource L10N}}"/>
+                                            <StackPanel Width="10"/>
+                                            <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PbLength}"/>
+                                            <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [㎜], Source={StaticResource L10N}}"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="25,0,0,0">
+                                            <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Speed], Source={StaticResource L10N}}"/>
+                                            <StackPanel Width="10"/>
+                                            <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PbSpeed}"/>
+                                            <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [㎜/s], Source={StaticResource L10N}}"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="25,0,0,0">
+                                            <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Time], Source={StaticResource L10N}}"/>
+                                            <StackPanel Width="10"/>
+                                            <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PbTime}"/>
+                                            <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [s], Source={StaticResource L10N}}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                            <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
+                            <Grid Grid.Row="2" Margin="0,12,0,0" IsEnabled="False">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="216"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="25"/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Label Grid.Row="0" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Trigger], Source={StaticResource L10N}}"/>
+                                <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,0,0,8">
+                                    <StackPanel>
+                                        <RadioButton IsChecked="{Binding PatientCase.PullbackTrigger, Converter={StaticResource RadioButtonConverter}, ConverterParameter=MANL}" Content="{Binding [Manual], Source={StaticResource L10N}}" />
+                                    </StackPanel>
+                                    <StackPanel Margin="10,0,0,0">
+                                        <RadioButton IsChecked="{Binding PatientCase.PullbackTrigger, Converter={StaticResource RadioButtonConverter}, ConverterParameter=AUTO}" Content="{Binding [Auto], Source={StaticResource L10N}}" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <Label Grid.Row="0" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Calibration], Source={StaticResource L10N}}"/>
+                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center"  Margin="0,0,0,8">
+                                    <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="calibrationZoomIn" Width="42" Height="42" Command="{Binding CmdManualZoomIn}" CommandParameter="{StaticResource TrueValue}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}"/>
+                                    <StackPanel Width="6"/>
+                                    <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="calibrationZoomOut" Width="42" Height="42" Command="{Binding CmdManualZoomIn}" CommandParameter="{StaticResource FalseValue}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}"/>
+                                    <StackPanel Width="6"/>
+                                    <Button Style="{StaticResource OutlinedBtnType1-Large}" Width="120" Command="{Binding CmdAutoCalibration}" IsEnabled="{Binding DeviceStatus.CanExecuteCalibration}" Content="{Binding [Auto], Source={StaticResource L10N}}"/>
+                                </StackPanel>
+                            </Grid>
+                            <Separator Grid.Row="3" Background="{DynamicResource GrayscaleGray5Brush}"/>
+                            <Grid Grid.Row="4" Margin="0,12,0,0" IsEnabled="False">
+                                <Label Content="{Binding [Presentation], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray5Brush}" Margin="12,7,0,0" />
+                                <ToggleButton Width="424" Height="32" Template="{StaticResource ComboBoxToggleButton}"/>
+                            </Grid>
+                            <Grid Grid.Row="5" Margin="0,12,0,12" Visibility="{Binding PatientCase.PullbackTrigger, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=AUTO}">
+                                <Grid Visibility="{Binding AutoPullback.OnOff, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <Border CornerRadius="10" Background="{DynamicResource MainPrimaryColorBrush}" Visibility="{Binding AutoPullback.IsCleared, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <Label Style="{DynamicResource Pretendard-Bold-14}" Content="{Binding [Blood Cleared], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleBlackBrush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray3Brush}" Visibility="{Binding AutoPullback.IsCleared, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                        <Label Style="{DynamicResource Pretendard-Bold-14}" Content="{Binding [Blood Present], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleBlackBrush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    </Border>
+                                </Grid>
+                                <Grid Visibility="{Binding AutoPullback.OnOff, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                    <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" Visibility="{Binding DeviceStatus.IsPullbackDone, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <Label Style="{DynamicResource Pretendard-Bold-14}" Content="{Binding [Preparing Blood Flushing Detection], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleGray3Brush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Grid Visibility="{Binding DeviceStatus.IsPullbackDone, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                        <Border CornerRadius="10" Background="{DynamicResource MainPrimaryColorBrush}" Visibility="{Binding DeviceStatus.IsRecordingDone, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                            <Label Style="{DynamicResource Pretendard-Bold-14}" Content="{Binding [Recording], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleBlackBrush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        </Border>
+                                        <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" Visibility="{Binding DeviceStatus.IsRecordingDone, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <Label Style="{DynamicResource Pretendard-Bold-14}" Content="{Binding [Recording], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleBlackBrush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        </Border>
+                                    </Grid>                                    
+                                </Grid>
+                            </Grid>
+                            <Border Grid.Row="6" CornerRadius="10" Background="{DynamicResource AdditionalColor5Brush}">
+                                <Grid>
+                                    <Image Source="{Binding AngioImage}" 
+                                           Visibility="{Binding DeviceStatus.IsAngioInitialized, Converter={StaticResource BoolToVisibilityConverter}}"
+                                           Width="{x:Static const:Constants.SmallCrossSectionSize}"
+                                           Height="{x:Static const:Constants.SmallCrossSectionSize}"
+                                           Stretch="Uniform"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-14}"
+                                           Foreground="{DynamicResource GrayscaleGray3Brush}"
+                                           Content="{Binding [$MSG023], Source={StaticResource L10N}}"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center"
+                                           Visibility="{Binding IsDeviceConnectedMessage, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Border>
+            <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
+            <Border Grid.Row="2" CornerRadius="0,0,10,10" Background="{DynamicResource GrayscaleGray6Brush}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" HorizontalAlignment="Left" Margin="16,16,0,0">
+                        <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}" IsEnabled="{Binding IsCancel}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal" Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                        <StackPanel Orientation="Horizontal" Visibility="{Binding IsStart, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [$MSG003], Source={StaticResource L10N}}"/>
+                            <StackPanel Width="10"/>
+                            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding StartTime}"/>
+                            <StackPanel Width="10"/>
+                            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [sec], Source={StaticResource L10N}}"/>
+                        </StackPanel>
+                        <StackPanel Visibility="{Binding IsStart, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                            <StackPanel Visibility="{Binding DeviceStatus.IsRecordingDone, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [Recording], Source={StaticResource L10N}}"/>
+                            </StackPanel>
+                            <StackPanel Visibility="{Binding DeviceStatus.IsRecordingDone, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Recording is Complete], Source={StaticResource L10N}}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                    <Grid Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,16,0">
+                        <component:ButtonUnableComponent Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding ReadyCommand}" Content="{Binding [Ready], Source={StaticResource L10N}}" Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityConverter}}" IsFirst="{Binding IsReady}" IsSecond="{Binding DeviceStatus.CanExecuteCalibration}">
+                            <component:ButtonUnableComponent.IsEnabled>
+                                <MultiBinding Converter="{StaticResource ComponentUnableConverter}">
+                                    <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFirst"/>
+                                    <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSecond"/>
+                                </MultiBinding>
+                            </component:ButtonUnableComponent.IsEnabled>
+                        </component:ButtonUnableComponent>
+                        <Grid Visibility="{Binding IsStep1, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                            <Grid Visibility="{Binding PatientCase.PullbackTrigger, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=MANL}">
+                                <component:ButtonUnableComponent Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding StartCommand}" Content="{Binding [Start], Source={StaticResource L10N}}" IsFirst="{Binding IsStart}" IsSecond="{Binding DeviceStatus.CanExecuteCalibration}">
+                                    <component:ButtonUnableComponent.IsEnabled>
+                                        <MultiBinding Converter="{StaticResource ComponentUnableConverter}">
+                                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFirst"/>
+                                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSecond"/>
+                                        </MultiBinding>
+                                    </component:ButtonUnableComponent.IsEnabled>
+                                </component:ButtonUnableComponent>
+                            </Grid>
+                            <Grid Visibility="{Binding PatientCase.PullbackTrigger, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=AUTO}">
+                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding AutoPullbackMsg}" Margin="0,10,0,0"/>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="2" Height="40" Background="{DynamicResource GrayscaleBlackBrush}"/>
+    </Grid>
+</Page>

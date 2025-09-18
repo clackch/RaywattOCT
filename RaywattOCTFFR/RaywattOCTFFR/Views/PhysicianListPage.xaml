@@ -1,0 +1,179 @@
+﻿<Page x:Class="RaywattOCTFFR.Views.PhysicianListPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:RaywattOCTFFR.Views"
+      xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+      xmlns:component="clr-namespace:RaywattOCTFFR.Views.Component"
+      mc:Ignorable="d" 
+      d:DesignHeight="1024" d:DesignWidth="1280"
+      Background="{DynamicResource GrayscaleGray8Brush}"
+      Title="PhysicianListPage">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Height="60" Background="{DynamicResource GrayscaleGray7Brush}">
+            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Margin="75,20,0,19" Content="{Binding [Physician], Source={StaticResource L10N}}"/>
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="60,40,60,40">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="769"/>
+                <RowDefinition Height="1"/>
+                <RowDefinition Height="74"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" CornerRadius="10,10,0,0" Background="{DynamicResource GrayscaleGray7Brush}">
+                <StackPanel Margin="41,51,41,32">
+                    <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Physician List], Source={StaticResource L10N}}"/>
+                    <Separator Background="{DynamicResource GrayscaleGray5Brush}" Margin="0,20,0,28"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="360"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <Grid Grid.Row="0" Grid.Column="0" Height="42">
+                                <TextBox Style="{DynamicResource PatientSearch}" Width="360" Height="42" x:Name="PatientSearchName" Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}">
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Command="{Binding SearchCommand}" Key="Enter"/>
+                                    </TextBox.InputBindings>
+                                </TextBox>
+                                <Label Style="{DynamicResource PatientSearchPlaceholder}" TextBlock.FontSize="16" Content="{Binding [Search Name], Source={StaticResource L10N}}" Margin="60,0,0,0"/>
+                                <Button Style="{DynamicResource SearchOpacity_Icon}" Command="{Binding SearchCommand}" Margin="18,0,0,0"/>
+                            </Grid>
+                            <Border Grid.Row="1" Grid.Column="0" Height="542" CornerRadius="10" BorderThickness="0" Background="{DynamicResource GrayscaleGray8Brush}" Margin="0,16,0,0">
+                                <StackPanel>
+                                    <StackPanel>
+                                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="0,12,0,10" Content="{Binding [Name], Source={StaticResource L10N}}" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                    <Separator Background="{DynamicResource GrayscaleGray6Brush}"/>
+                                    <StackPanel Height="495">
+                                        <DataGrid Name="physicianList" ItemsSource="{Binding PhysicianList}" SelectedItem="{Binding SelectedPhysician}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" HeadersVisibility="None" Height="495" SelectionMode="Single">
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="SelectionChanged">
+                                                    <i:InvokeCommandAction Command="{Binding ShowPhysicianCommand}" CommandParameter="{Binding ElementName=physicianList, Path=CurrentItem}"/>
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Name}"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Visibility="{Binding VisibilityPhysician}" Margin="28,4,0,0">
+                            <Grid>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Style="{DynamicResource Pretendard-Bold-28}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Physician.Firstname}"/>
+                                    <Label Style="{DynamicResource Pretendard-Bold-28}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content=", "/>
+                                    <Label Style="{DynamicResource Pretendard-Bold-28}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Physician.Lastname}"/>
+                                </StackPanel>
+                                <component:IconButton Style="{DynamicResource IconButton}" Icon="editSimple" HorizontalAlignment="Right" Command="{Binding EditPhysicianCommand}"/>
+                            </Grid>
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Case Default Settings], Source={StaticResource L10N}}" Margin="0,20,0,0"/>
+                            <Border Height="513" Margin="0,10,0,0" CornerRadius="10" BorderThickness="0" Background="{DynamicResource GrayscaleGray8Brush}">
+                                <Grid Margin="0,2,0,0">
+                                    <Grid Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="284"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="51"/>
+                                            <RowDefinition Height="1"/>
+                                            <RowDefinition Height="51"/>
+                                            <RowDefinition Height="1"/>
+                                            <RowDefinition Height="73"/>
+                                            <RowDefinition Height="1"/>
+                                            <RowDefinition Height="51"/>
+                                            <RowDefinition Height="1"/>
+                                            <RowDefinition Height="51"/>
+                                            <RowDefinition Height="1"/>
+                                            <RowDefinition Height="51"/>
+                                            <RowDefinition Height="1"/>
+                                            <RowDefinition Height="51"/>
+                                            <RowDefinition Height="1"/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <Label Grid.Row="0" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Flush Media], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="24,0,0,0"/>
+                                        <Label Grid.Row="0" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Physician.FlushMedia, Converter={StaticResource CodeConverter}, ConverterParameter='FLMD'}" VerticalAlignment="Center"/>
+                                        <Separator Grid.Row="1" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray7Brush}"/>
+                                        <Label Grid.Row="2" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Trigger], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="24,0,0,0"/>
+                                        <Label Grid.Row="2" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Physician.PullbackTrigger, Converter={StaticResource CodeConverter}, ConverterParameter='PBTG'}" VerticalAlignment="Center"/>
+                                        <Separator Grid.Row="3" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray7Brush}"/>
+                                        <Label Grid.Row="4" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Pullback Type], Source={StaticResource L10N}}" Margin="24,16,0,0"/>
+                                        <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,16,0,0">
+                                            <Label Grid.Row="4" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Physician.PullbackType, Converter={StaticResource CodeConverter}, ConverterParameter='PBTY'}" HorizontalAlignment="Left"/>
+                                            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Length], Source={StaticResource L10N}}"/>
+                                                    <StackPanel Width="5"/>
+                                                    <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PbLength}"/>
+                                                    <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [㎜], Source={StaticResource L10N}}"/>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                                    <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Speed], Source={StaticResource L10N}}"/>
+                                                    <StackPanel Width="5"/>
+                                                    <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PbSpeed}"/>
+                                                    <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [㎜/s], Source={StaticResource L10N}}"/>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                                    <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Time], Source={StaticResource L10N}}"/>
+                                                    <StackPanel Width="5"/>
+                                                    <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PbTime}"/>
+                                                    <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [s], Source={StaticResource L10N}}"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </StackPanel>
+                                        <Separator Grid.Row="5" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray7Brush}"/>
+                                        <Label Grid.Row="6" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [OCT Colormap], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="24,0,0,0"/>
+                                        <Label Grid.Row="6" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Physician.Colormap, Converter={StaticResource CodeConverter}, ConverterParameter='CLMP'}" VerticalAlignment="Center"/>
+                                        <Separator Grid.Row="7" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray7Brush}"/>
+                                        <Label Grid.Row="8" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Calcium Threshold], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="24,0,0,0"/>
+                                        <StackPanel Grid.Row="8" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Physician.CalciumThreshold}"/>
+                                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="º"/>
+                                        </StackPanel>
+                                        <Separator Grid.Row="9" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray7Brush}"/>
+                                        <Label Grid.Row="10" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Expansion Threshold], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="24,0,0,0"/>
+                                        <StackPanel Grid.Row="10" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Physician.ExpansionThreshold}"/>
+                                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="%"/>
+                                        </StackPanel>
+                                        <Separator Grid.Row="11" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray7Brush}"/>
+                                        <Label Grid.Row="12" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Apposition Threshold], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="24,0,0,0"/>
+                                        <StackPanel Grid.Row="12" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Physician.AppositionThreshold}"/>
+                                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="㎜"/>
+                                        </StackPanel>
+                                        <Separator Grid.Row="13" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray7Brush}"/>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+            <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
+            <Border Grid.Row="2" CornerRadius="0,0,10,10" Background="{DynamicResource GrayscaleGray6Brush}">
+                <Grid>
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" Margin="15,0,0,0">
+                        <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,15,0">
+                        <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding NewPhysicianCommand}" Content="{Binding [New Physician], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="2" Height="40" Background="{DynamicResource GrayscaleBlackBrush}"/>
+    </Grid>
+</Page>

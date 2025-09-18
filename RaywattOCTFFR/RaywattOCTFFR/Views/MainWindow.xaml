@@ -1,0 +1,196 @@
+﻿<Window x:Class="RaywattOCTFFR.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:behaviors="clr-namespace:RaywattOCTFFR.Common.Behaviors"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RaywattOCTFFR"
+        xmlns:component="clr-namespace:RaywattOCTFFR.Views.Component"
+        xmlns:const="clr-namespace:RaywattOCTFFR.Common.Bases"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        mc:Ignorable="d"
+        Width="1280" Height="1024" Cursor="{DynamicResource arrow}" Left="0" Top="0">
+
+    <Grid Width="1280">
+        <Frame NavigationUIVisibility="Hidden">
+            <b:Interaction.Behaviors>
+                <behaviors:FrameBehavior Parameter="{Binding NavigationParameter, Mode=TwoWay}" Navigation="{Binding NavigationSource, Mode=TwoWay}" />
+            </b:Interaction.Behaviors>
+        </Frame>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="60"/>
+                <RowDefinition/>
+                <RowDefinition Height="40"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <StackPanel HorizontalAlignment="Left">
+                    <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="home" Margin="14,9,0,9" Command="{Binding HomeCommand}" Visibility="{Binding IsHome, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="setting" Margin="0,9,6,9" Command="{Binding SettingCommand}" Visibility="{Binding IsSetting, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                    <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="power" Margin="0,9,12,9" Command="{Binding ExitCommand}" Visibility="{Binding IsExit, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                </StackPanel>
+            </Grid>
+            <Grid Grid.Row="2">
+                <Image Style="{DynamicResource RaywattSmall_Icon}"/>
+                <StackPanel Margin="130,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" Orientation="Horizontal">
+                    <component:IconButton Style="{DynamicResource IconButton}" Icon="angioIndicator" Margin="0" Command="{Binding AngioIndicatorCommand}" IsEnabled="{Binding DeviceStatus.IsAngioConnected, Converter={StaticResource BoolToEnableConverter}}"/>
+                    <component:IconButton Style="{DynamicResource IconButton}" Icon="catheterIndicator" Margin="6,0,0,0" Command="{Binding CatheterIndicatorCommand}" IsEnabled="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusEnable}}"/>
+                </StackPanel>
+                <StackPanel MinWidth="130" VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal" Visibility="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusLoading}}">
+                    <ProgressBar Style="{DynamicResource HomeCatheterProgressBar}" Value="{Binding CatheterProgress}" Width="72" Height="20" Visibility="{Binding IsHome, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    <ProgressBar Style="{DynamicResource CatheterProgressBar}" Value="{Binding CatheterProgress}" Width="72" Height="20" Visibility="{Binding IsHome, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                    <StackPanel Width="8"/>
+                    <Label Style="{DynamicResource Pretendard-Medium-14}" MinWidth="52" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [Loading], Source={StaticResource L10N}}"/>
+                </StackPanel>
+                <StackPanel MinWidth="130" VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal" Visibility="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusUnloading}}">
+                    <ProgressBar Style="{DynamicResource HomeCatheterProgressBar}" Value="{Binding CatheterProgress}" Width="72" Height="20" Visibility="{Binding IsHome, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    <ProgressBar Style="{DynamicResource CatheterProgressBar}" Value="{Binding CatheterProgress}" Width="72" Height="20" Visibility="{Binding IsHome, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                    <StackPanel Width="8"/>
+                    <Label Style="{DynamicResource Pretendard-Medium-14}" MinWidth="52" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [Unloading], Source={StaticResource L10N}}"/>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" Margin="200,0,0,0" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=RJ}">
+                    <Button Style="{DynamicResource BtnForTest}" Command="{Binding CatheterFailTestCommmand}" Width="100" Height="15" FontSize="9" Content="Catheter Fail"/>
+                    <Button Style="{DynamicResource BtnForTest}" Command="{Binding CatheterUnlockTestCommmand}" Width="100" Height="15" FontSize="9" Content="Unlock Catheter"/>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Margin="310,5,0,0" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=RJ}">
+                    <Button Style="{DynamicResource BtnForTest}" Command="{Binding CatheterConnectTestCommmand}" Width="100" Height="15" FontSize="9" Content="Catheter Connect"/>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="310,0,0,5" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=AutoPB}">
+                    <Button Style="{DynamicResource BtnForTest}" Command="{Binding AutopullbackTestCommmand}" Width="100" Height="15" FontSize="9" Content="Auto Pullback"/>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Margin="420,5,0,0" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=Compensate}">
+                    <Button Style="{DynamicResource BtnForTest}" Command="{Binding CompensationTestCommand}" Width="100" Height="15" FontSize="9" Content="Compensation"/>
+                    <Button Style="{DynamicResource BtnForTest}" Command="{Binding CompensationWindowTestCommand}" Width="100" Height="15" FontSize="9" Content="CompensationWindow"/>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Margin="520,5,0,0" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=Compensate}">
+                    <Button Style="{DynamicResource BtnForTest}" Command="{Binding SaveVTIFileTestCommand}" Width="100" Height="15" FontSize="9" Content="Save3DVITFile"/>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" Margin="800,0,0,0" Visibility="{Binding IsAutoPullbackTest, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Label Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource AdditionalColor2Brush}" Content="{Binding [Auto Pullback], Source={StaticResource L10N}}" HorizontalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Style="{DynamicResource BtnForTest2}" Command="{Binding AutopullbackOnCommmand}" Width="40" Height="15" FontSize="9" Content="On"/>
+                        <Button Style="{DynamicResource BtnForTest2}" Command="{Binding AutopullbackOffCommmand}" Width="40" Height="15" FontSize="9" Content="Off"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="56"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <component:MenuUnableComponent Grid.Column="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="True" IsFfrCalculated="{Binding DeviceStatus.IsFfrCalculated}">
+                    <component:MenuUnableComponent.Visibility>
+                        <MultiBinding Converter="{StaticResource ComponentVisibilityConverter}">
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFfrCalculated"/>
+                        </MultiBinding>
+                    </component:MenuUnableComponent.Visibility>
+                </component:MenuUnableComponent>
+                <component:MenuUnableComponent Grid.Column="1" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}" IsFfrCalculated="{Binding DeviceStatus.IsFfrCalculated}">
+                    <component:MenuUnableComponent.Visibility>
+                        <MultiBinding Converter="{StaticResource ComponentVisibilityConverter}">
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFfrCalculated"/>
+                        </MultiBinding>
+                    </component:MenuUnableComponent.Visibility>
+                </component:MenuUnableComponent>
+            </Grid>
+
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="96"/>
+                    <ColumnDefinition Width="16"/>
+                </Grid.ColumnDefinitions>
+                <component:MenuUnableComponent Grid.Column="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}" IsFfrCalculated="{Binding DeviceStatus.IsFfrCalculated}">
+                    <component:MenuUnableComponent.Visibility>
+                        <MultiBinding Converter="{StaticResource ComponentVisibilityConverter}">
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFfrCalculated"/>
+                        </MultiBinding>
+                    </component:MenuUnableComponent.Visibility>
+                </component:MenuUnableComponent>
+                <Grid Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="26"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <component:MenuUnableComponent Grid.Row="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}" IsFfrCalculated="{Binding DeviceStatus.IsFfrCalculated}">
+                        <component:MenuUnableComponent.Visibility>
+                            <MultiBinding Converter="{StaticResource ComponentVisibilityConverter}">
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFfrCalculated"/>
+                            </MultiBinding>
+                        </component:MenuUnableComponent.Visibility>
+                    </component:MenuUnableComponent>
+                    <component:MenuUnableComponent Grid.Row="1" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="True" IsFfrCalculated="{Binding DeviceStatus.IsFfrCalculated}">
+                        <component:MenuUnableComponent.Visibility>
+                            <MultiBinding Converter="{StaticResource ComponentVisibilityConverter}">
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFfrCalculated"/>
+                            </MultiBinding>
+                        </component:MenuUnableComponent.Visibility>
+                    </component:MenuUnableComponent>
+                    <component:MenuUnableComponent Grid.Row="2" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}" IsFfrCalculated="{Binding DeviceStatus.IsFfrCalculated}">
+                        <component:MenuUnableComponent.Visibility>
+                            <MultiBinding Converter="{StaticResource ComponentVisibilityConverter}">
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
+                                <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFfrCalculated"/>
+                            </MultiBinding>
+                        </component:MenuUnableComponent.Visibility>
+                    </component:MenuUnableComponent>
+                </Grid>
+                <component:MenuUnableComponent Grid.Column="2" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}" IsFfrCalculated="{Binding DeviceStatus.IsFfrCalculated}">
+                    <component:MenuUnableComponent.Visibility>
+                        <MultiBinding Converter="{StaticResource ComponentVisibilityConverter}">
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
+                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFfrCalculated"/>
+                        </MultiBinding>
+                    </component:MenuUnableComponent.Visibility>
+                </component:MenuUnableComponent>
+            </Grid>
+
+            <!-- Power Off/Switch User Msg -->
+            <StackPanel Grid.Row="0" Grid.RowSpan="3" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" Visibility="{Binding DeviceStatus.IsPowerOff, Converter={StaticResource BoolToVisibilityConverter}}"/>
+            <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding DeviceStatus.IsPowerOff, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Width="{x:Static const:Constants.PowerOffDialogWidth}" Height="{x:Static const:Constants.PowerOffDialogHeight}">
+                    <StackPanel HorizontalAlignment="Center" Width="{x:Static const:Constants.PowerOffDialogWidth}">
+                        <StackPanel Height="85"/>
+                        <ContentControl Template="{DynamicResource Loading}"/>
+                        <StackPanel Height="21"/>
+                        <Label HorizontalAlignment="Center" Style="{DynamicResource Pretendard-Medium-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding DeviceStatus.PowerOffMsg}"/>
+                        <StackPanel Height="60"/>
+                        <Image Style="{DynamicResource Raywatt}" Width="49" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,16,0"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

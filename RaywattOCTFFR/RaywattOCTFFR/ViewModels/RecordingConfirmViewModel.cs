@@ -1,0 +1,265 @@
+﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using log4net;
+using RaywattOCTFFR.Common.Bases;
+using RaywattOCTFFR.Common.Messages;
+using RaywattOCTFFR.Models;
+using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using RaywattOCTFFR.Services;
+using System.Windows.Navigation;
+using System;
+using System.Collections.Generic;
+using static RaywattOCT.RayCoreWrapper;
+using RaywattOCT;
+using RaywattOCTFFR.Common.Angio;
+using System.Linq;
+
+namespace RaywattOCTFFR.ViewModels
+{
+    public partial class RecordingConfirmViewModel : OCTViewModelBase
+    {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(RecordingConfirmViewModel));
+
+        private readonly SqlManager _sqlManager;
+        private readonly AngioManager _angioManager;
+
+        private IList<Code> pullbackTypes;
+
+        [ObservableProperty]
+        private PrevStatus _prevStatus;
+
+        [ObservableProperty]
+        private Patient _patient;
+
+        [ObservableProperty]
+        private PatientCase _patientCase;
+
+        [ObservableProperty]
+        private string _pbLength;
+
+        [ObservableProperty]
+        private string _pbSpeed;
+
+        [ObservableProperty]
+        private string _pbTime;
+
+        [ObservableProperty]
+        private Zoom _zoom = new Zoom(Constants.CrossSectionConfirmSize);
+
+        private ICommand _redoPullbackCommand;
+        public ICommand RedoPullbackCommand
+        {
+            get { return this._redoPullbackCommand ?? (this._redoPullbackCommand = new RelayCommand(RedoPullback)); }
+        }
+
+        private ICommand _confirmCommand;
+        public ICommand ConfirmCommand
+        {
+            get { return this._confirmCommand ?? (this._confirmCommand = new RelayCommand(Confirm)); }
+        }
+
+        public RecordingConfirmViewModel(SqlManager sqlManager, AngioManager angioManager)
+        {
+            _log.Debug("RecordingConfirmViewModel");
+
+            Constants.CurrentPage = Constants.RecordingConfirmPage;
+
+            _sqlManager = sqlManager;
+            _angioManager = angioManager;
+
+            RayError result = (RayError)RayLaserOnOff(false);
+            if (result != RayError.OK)
+            {
+                _log.Error("RayLaserOnOff Error");
+            }
+
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "PBTY";
+            pullbackTypes = _sqlManager.SelectCode(sqlParameters);
+        }
+
+        public override void OnNavigated(object sender, object navigatedEventArgs)
+        {
+            base.OnNavigated(sender, navigatedEventArgs);
+            _log.Debug("OnNavigated");
+
+            var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
+
+            if (extraData != null)
+            {
+                Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
+                Patient = (Patient)data["patient"];
+                PrevStatus = (PrevStatus)data["prevStatus"];
+                PatientCase = (PatientCase)data["patientCase"];
+
+                Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
+
+                GetImageInfo(RaySession.Review);
+                RayError result = (RayError)RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
+
+                MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
+                Playback();
+
+                Code pullback = pullbackTypes.FirstOrDefault(x => x.Key == PatientCase.PullbackType);
+                if (pullback != null)
+                {
+                    string[] temp = pullback.Buffer1.Split("|");
+                    PbLength = temp[0];
+                    PbSpeed = temp[1];
+                    PbTime = temp[2];
+                }
+            }
+
+            _angioManager.ReadyToRecv = false;
+        }
+
+        public override void OnNavigating(object sender, object navigationEventArgs)
+        {
+            base.OnNavigating(sender, navigationEventArgs);
+            _log.Debug("OnNavigating");
+        }
+
+        private void RedoPullback()
+        {
+            _log.Debug("RedoPullback");
+
+            DeviceStatus.IsSaveRawDataDone = true;
+            DeviceStatus.IsLumenSaved = true;
+            DeviceStatus.IsOCTImagingDone = true;
+
+            _angioManager.threadOnRedoPullback = true;
+            if (_angioManager.threadFuncSaveAngioFrames != null)
+                _angioManager.threadFuncSaveAngioFrames.Join();
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = Patient;
+            parameter["prevStatus"] = PrevStatus;
+            parameter["patientCase"] = PatientCase;
+
+            if (DeviceStatus.CatheterStatus == Constants.CatheterStatusFailed)
+            {
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingCatheterFailPage) { Parameter = parameter });
+            }
+            else
+            {
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
+            }                
+        }
+
+        private void Confirm()
+        {
+            _log.Debug("Confirm");
+
+            //RayError result = (RayError) RayUnloadCatheter();
+            //if (result == RayError.OK)
+            //{
+            //    DeviceStatus.CatheterStatus = Constants.CatheterStatusUnloading;
+            //}
+            //else {
+            //    _log.Debug("RayUnloadCatheter - " + result);
+            //}
+
+            RayError result = (RayError)RaySetSession(RaySession.Review);
+            if (result != RayError.OK)
+            {
+                _log.Error("RaySetSession Error");
+            }
+            int numOfFrames = (int) RayGetProperty(Property.ImageDepth);
+
+            result = (RayError)RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+            if (result != RayError.OK)
+            {
+                _log.Error("RaySetProperty Error");
+            }
+
+            _angioManager.StartSaveAngioFrames();
+            _angioManager.fromRecording = true;
+
+            //초기값 설정
+            PatientCase.Id = Patient.Id + "_" + DateTime.Now.ToString("yyyyMMddHHmmss");
+            PatientCase.PatientId = Patient.Id;
+            PatientCase.NumOfFrames = numOfFrames;
+            PatientCase.IndicatorDegree = 90;
+            PatientCase.AngioYn = false;
+            if (_angioManager.isChpFileConnected == 1 && DeviceStatus.IsAngioConnected) 
+            {
+                PatientCase.AngioYn = true;
+            }
+
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = PatientCase.Id;
+            sqlParameters["patient_id"] = PatientCase.PatientId;
+            sqlParameters["physician_name"] = PatientCase.PhysicianName;
+            sqlParameters["accession_number"] = PatientCase.AccessionNumber;
+            sqlParameters["comment"] = PatientCase.Comment;
+            sqlParameters["vessel"] = PatientCase.Vessel;
+            sqlParameters["location"] = PatientCase.Location;
+            sqlParameters["procedure"] = PatientCase.Procedure;
+            sqlParameters["num_of_frames"] = PatientCase.NumOfFrames;
+            sqlParameters["image"] = PatientCase.Image;
+            sqlParameters["image_resolution"] = PatientCase.ImageResolution;
+            sqlParameters["z_offset"] = PatientCase.ZOffset;
+            sqlParameters["field_of_view"] = PatientCase.FieldOfView;
+            sqlParameters["pullback_type"] = PatientCase.PullbackType;
+            sqlParameters["pullback_length"] = PatientCase.PullbackLength;
+            sqlParameters["angio_yn"] = PatientCase.AngioYn;
+            sqlParameters["angio_co_registration"] = PatientCase.AngioCoRegistration;
+            sqlParameters["indicator_degree"] = PatientCase.IndicatorDegree;
+            sqlParameters["flush_media"] = PatientCase.FlushMedia;
+            sqlParameters["pullback_trigger"] = PatientCase.PullbackTrigger;
+            sqlParameters["colormap"] = PatientCase.Colormap;
+            sqlParameters["calcium_threshold"] = PatientCase.CalciumThreshold;
+            sqlParameters["expansion_calculation"] = PatientCase.ExpansionCalculation;
+            sqlParameters["expansion_threshold"] = PatientCase.ExpansionThreshold;
+            sqlParameters["apposition_threshold"] = PatientCase.AppositionThreshold;
+            sqlParameters["brightness"] = PatientCase.Brightness;
+            sqlParameters["contrast"] = PatientCase.Contrast;
+            sqlParameters["sheath_diameter"] = PatientCase.SheathDiameter;
+            PatientCase.SectionProximal = 0;
+            sqlParameters["section_proximal"] = PatientCase.SectionProximal;
+            PatientCase.SectionDistal = PatientCase.NumOfFrames - 1;
+            sqlParameters["section_distal"] = PatientCase.SectionDistal;
+            sqlParameters["guidewire_radius"] = PatientCase.GuidewireRadius;
+            sqlParameters["create_date"] = PatientCase.CreateDate;
+
+            int nRows = _sqlManager.InsertPatientCase(sqlParameters);
+
+            if (nRows == 1)
+            {
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["patient"] = Patient;
+                parameter["patientCase"] = PatientCase;
+                SetDetailStatusInit();
+                parameter["prevStatus"] = PrevStatus;
+                ReviewStatus reviewStatus = new ReviewStatus();
+                reviewStatus.NumberOfFrames = numOfFrames;
+                reviewStatus.IsMeasureInit = true;
+                parameter["reviewStatus"] = reviewStatus;
+                Ray3DWrapper.ray3DStatus = new Ray3DWrapper.Ray3DStatus();
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewPage) { Parameter = parameter });
+            }
+            else
+            {
+                _log.Error("Insert Error");
+            }            
+        }
+
+        private void SetDetailStatusInit()
+        {
+            PrevStatus.DetailSelectedGroup = null;
+            PrevStatus.DetailPageOffset = 0;
+            PrevStatus.DetailPageGroup = 1;
+            PrevStatus.DetailPageNumber = 0;
+        }
+
+        protected override void UpdateCrossSectionImage()
+        {
+            DrawCrossSectionImage();
+        }
+    }
+}
