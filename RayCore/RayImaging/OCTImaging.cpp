@@ -413,22 +413,27 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f) {
 				// 4. Zero Pad & Reorder (1 | 2 | 0 | 0)
 				ippsZero_32fc(ctx.fcBuffer_IFFT, nFFTLength);
 				ippsCopy_32fc(ctx.fcBuffer_FFT, ctx.fcBuffer_IFFT, nOutputLength);
+				if (calibration->IsInit()) {
+					// 5. Inverse FFT
+					ippsFFTInv_CToC_32fc_I(ctx.fcBuffer_IFFT, ifftSpec, ctx.fftWorkBufIFFT);
 
-				// 5. Inverse FFT
-				ippsFFTInv_CToC_32fc_I(ctx.fcBuffer_IFFT, ifftSpec, ctx.fftWorkBufIFFT);
+					// 6. Interpolation
+					ippsZero_32fc(ctx.fcBuffer_FFT, nOutputLength);
+					for (int j = 0; j < nAScan / 2; j++) {
+						ctx.fcBuffer_FFT[j].re = (calibration->weightMap[j] * ctx.fcBuffer_IFFT[calibration->indexMap[j]].re + (1.0f - calibration->weightMap[j]) * ctx.fcBuffer_IFFT[calibration->indexMap[j] + 1].re);
+						ctx.fcBuffer_FFT[j].im = (calibration->weightMap[j] * ctx.fcBuffer_IFFT[calibration->indexMap[j]].im + (1.0f - calibration->weightMap[j]) * ctx.fcBuffer_IFFT[calibration->indexMap[j] + 1].im);
+					}
 
-				// 6. Interpolation
-				ippsZero_32fc(ctx.fcBuffer_FFT, nOutputLength);
-				for (int j = 0; j < nAScan / 2; j++) {
-					ctx.fcBuffer_FFT[j].re = (calibration->weightMap[j] * ctx.fcBuffer_IFFT[calibration->indexMap[j]].re + (1.0f - calibration->weightMap[j]) * ctx.fcBuffer_IFFT[calibration->indexMap[j] + 1].re);
-					ctx.fcBuffer_FFT[j].im = (calibration->weightMap[j] * ctx.fcBuffer_IFFT[calibration->indexMap[j]].im + (1.0f - calibration->weightMap[j]) * ctx.fcBuffer_IFFT[calibration->indexMap[j] + 1].im);
+					// 7. Numerical Dispersion Compensation
+					ippsMul_32fc_I((Ipp32fc*)calibration->dispersion, ctx.fcBuffer_FFT, nAScan / 2);
+
+					// 8. FFT Again
+					ippsFFTFwd_CToC_32fc_I(ctx.fcBuffer_FFT, fftSpecSecond, ctx.fftWorkBufSecond);
 				}
-
-				// 7. Numerical Dispersion Compensation
-				ippsMul_32fc_I((Ipp32fc*)calibration->dispersion, ctx.fcBuffer_FFT, nAScan / 2);
-
-				// 8. FFT Again
-				ippsFFTFwd_CToC_32fc_I(ctx.fcBuffer_FFT, fftSpecSecond, ctx.fftWorkBufSecond);
+				else {
+					ippsZero_32fc(ctx.fcBuffer_FFT, nFFTLength);
+					ippsCopy_32fc(ctx.fcBuffer_IFFT, ctx.fcBuffer_FFT, nOutputLength);
+				}
 
 				// 9. Extract Magnitude
 				ippsPowerSpectr_32fc(ctx.fcBuffer_FFT, fFFTResult + i * nOutputLength, nOutputLength);

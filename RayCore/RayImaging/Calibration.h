@@ -14,6 +14,7 @@ class CCalibration
 private:
 	int nAScan;
 	int nFFTLength;
+	bool isInit;
 
 public:
 	// from calibration file
@@ -29,6 +30,7 @@ public:
 
 	bool Initialize(tstring calibFile);
 	bool Initialize(char* data);
+	bool IsInit() { return isInit; }
 private:
 	void allocateMemory();
 	void releaseMemory();

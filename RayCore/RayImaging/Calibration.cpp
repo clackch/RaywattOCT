@@ -9,7 +9,8 @@ CCalibration::CCalibration(int nAScan, int nFFTLength) :
 	indexMap(nullptr),
 	weightMap(nullptr),
 	window(nullptr),
-	dispersion(nullptr)
+	dispersion(nullptr),
+	isInit(false)
 {
 	allocateMemory();
 	setWindow(Hanning);
@@ -70,6 +71,8 @@ bool CCalibration::loadCalibration() {
 	ippsRealToCplx_32f(dispersionReal, dispersionReal + nAScan / 2, (Ipp32fc*)dispersion, nAScan / 2);
 
 	delete[] dispersionReal;
+
+	isInit = true;
 
 	return true;
 }
