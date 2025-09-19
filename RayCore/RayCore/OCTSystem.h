@@ -78,7 +78,6 @@ private:
 	RayScannerState m_prevState;
 	RayScannerState m_curState;
 	CatheterState m_cathState;
-	RayError m_autoCalibState;
 
 	// Init
 	bool m_bInit;
@@ -117,7 +116,6 @@ public:
 	RayError ConnectDevices();
 	RayError DisconnectDevices();
 	RayError AutoCalibration();
-	RayError GetAutoCalibResult() { return m_autoCalibState; }
 	RayError ManualCalibration(bool forward);
 	RayError ShowCalibrationGuide(bool enable);
 	RayError ReadyPullback();

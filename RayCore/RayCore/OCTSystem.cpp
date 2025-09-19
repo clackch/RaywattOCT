@@ -116,7 +116,6 @@ RayError COCTSystem::Init() {
 	m_prevState = RayScannerState::Initial;
 	m_curState = RayScannerState::Initial;
 	m_cathState = CatheterState::Unloaded;
-	m_autoCalibState = RayError::OK;
 
 	//Property
 	m_fBrightness = 0.0f;
@@ -320,7 +319,6 @@ RayError COCTSystem::AutoCalibration() {
 
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 
-		m_autoCalibState = RayError::OK;
 		CUtility::StartThread(threadAutoCalibration, m_pThreadRotaryJunction, this);
 
 		return RayError::OK;
@@ -1669,6 +1667,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CLaserModule* pLaserModule = pSystem->m_pLaserModule;
 	int nTargetPos = 0;
+	RayError autoCalibError = RayError::OK;
 
 	if (pLaserModule != nullptr && pLaserModule->IsConnected())
 	{
@@ -1756,7 +1755,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		if (minList.empty()) {
 			nTargetPos = startPosition;
 			//PLOGI.printf("Calibration is failed.");
-			pSystem->m_autoCalibState = RayError::AutoCalibError;
+			autoCalibError = RayError::AutoCalibError;
 		}
 		else {
 			Loc = minList[0].first; // 가장 작은 local min 위치로 우선 설정
@@ -1832,7 +1831,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			//PLOGI.printf("Target Position : %d", nTargetPos);
 
 			if (minDiff > 50) // 내경 위치가 너무 이상적인 위치에서 멀리 떨어져 있는 경우 보정 실패로 간주
-				pSystem->m_autoCalibState = RayError::AutoCalibError;
+				autoCalibError = RayError::AutoCalibError;
 		}
 		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX);
 		pLaserModule->Move(eStepMotorIndex::DelayLine, nTargetPos);
@@ -1854,9 +1853,9 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			}
 		}
 		if(validSheathCount > sheathInfo.size()/2)
-			pSystem->m_autoCalibState = RayError::OK;
+			autoCalibError = RayError::OK;
 		else
-			pSystem->m_autoCalibState = RayError::AutoCalibError;
+			autoCalibError = RayError::AutoCalibError;
 
 		pSystem->m_pImagingLiveView->SetAutoCalibrationMathod(AutoCalibrationMathod::Disable);
 		
@@ -1893,6 +1892,8 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 
 	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Calibrated);
 	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::AutoCalibration);
+	if (autoCalibError == RayError::AutoCalibError)
+		pSystem->postMessage(WM_NOTIFY_ERROR_OCCURED, (WPARAM)RayError::AutoCalibError);
 
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);

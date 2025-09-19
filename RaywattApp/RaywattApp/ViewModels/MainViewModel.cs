@@ -798,6 +798,16 @@ namespace RaywattApp.ViewModels
                     case RayError.RotaryJunctionError:
                         DeviceStatus.CatheterStatus = Constants.CatheterStatusFailed;
                         break;
+                    case RayError.AutoCalibError:
+                        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            Dictionary<string, object> parameter = new Dictionary<string, object>();
+                            parameter["title"] = _l10n["Auto calibration"];
+                            parameter["message"] = _l10n["Auto calibration might be failed.\nCheck the image please."];
+                            var resultOpenDialog = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.AlertDialogWidth, Constants.AlertDialogHeight);
+                        });
+                        _log.Error("AutoCalibration Error");
+                        break;
                     default:
                         break;
                 }
@@ -843,21 +853,6 @@ namespace RaywattApp.ViewModels
                     break;
                 case RayWorkItem.AutoCalibration:
                     DeviceStatus.CanExecuteCalibration = true;
-                    RayError result = (RayError)RayGetAutoCalibResult();
-                    if (result == RayError.AutoCalibError)
-                    {
-                        System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                        {
-                            Dictionary<string, object> parameter = new Dictionary<string, object>();
-                            parameter["title"] = _l10n["Auto calibration"];
-                            parameter["message"] = _l10n["Auto calibration might be failed.\nCheck the image please."];
-                            var resultOpenDialog = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.AlertDialogWidth, Constants.AlertDialogHeight);
-                        });
-                        _log.Error("AutoCalibration Error");
-                    }else
-                    {
-                        _log.Debug("AutoCalibration Success");
-                    }
                     break;
                 case RayWorkItem.LoadCatheter:
                     DeviceStatus.CatheterStatus = Constants.CatheterStatusLoaded;
