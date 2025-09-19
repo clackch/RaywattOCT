@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
+using RaywattApp.Common.Enums;
 using RaywattApp.Common.Messages;
 using RaywattApp.Common.Util;
 using RaywattApp.Models;
@@ -117,6 +118,8 @@ namespace RaywattApp.ViewModels
                 this.Patient = (Patient)data["patient"];
                 this.PrevStatus = (PrevStatus)data["prevStatus"];
 
+                CheckLongitudeOrientation();
+
                 if (data.TryGetValue("patientCase", out var patientCaseObj) && patientCaseObj is PatientCase caseData)
                 {
                     PatientCase = caseData;
@@ -182,6 +185,29 @@ namespace RaywattApp.ViewModels
                 SelectedPullbackType = PatientCase.PullbackType;
             }
         }
+        private void CheckLongitudeOrientation()
+        {
+            _log.Debug("CheckLongitudeOrientation");
+
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = this.Patient.PhysicianId;
+            IList<Physician> Physicians = _sqlManager.SelectPhysician(sqlParameters);
+
+            if (Physicians.Count == 0)
+            {
+                _log.Error("not find physician infomation");
+                DeviceStatus.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
+                return;
+            }
+
+            if (Physicians[0].Isdistaltoproximal) DeviceStatus.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
+            else DeviceStatus.LongitudeOrientation = LongitudeOrientation.ProximalToDistal;
+            
+            _log.Debug("apply: " + DeviceStatus.LongitudeOrientation);
+            var _ = (RayError)RaySetProperty(Property.LongitudeOrientation, (double)DeviceStatus.LongitudeOrientation);
+            _log.Debug("apply done: " + DeviceStatus.LongitudeOrientation);
+        }
+
 
         public override void OnNavigating(object sender, object navigationEventArgs)
         {

@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using static RaywattOCT.RayCoreWrapper;
 using RaywattOCT;
 using RaywattApp.Common.Angio;
+using RaywattApp.Common.Enums;
 
 namespace RaywattApp.ViewModels
 {
@@ -34,6 +35,12 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private Zoom _zoom = new Zoom(Constants.CrossSectionConfirmSize);
+
+        [ObservableProperty]
+        private string _proximalLabel = "P";
+
+        [ObservableProperty]
+        private string _distalLabel = "D";
 
         private ICommand _redoPullbackCommand;
         public ICommand RedoPullbackCommand
@@ -77,6 +84,8 @@ namespace RaywattApp.ViewModels
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 PatientCase = (PatientCase)data["patientCase"];
 
+                LongitudeOrientationChanged();
+
                 Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
 
                 GetImageInfo(RaySession.Review);
@@ -91,6 +100,33 @@ namespace RaywattApp.ViewModels
             }
 
             _angioManager.ReadyToRecv = false;
+        }
+
+        private void LongitudeOrientationChanged()
+        {
+            //CheckLongitudeOrientation();
+
+            _distalLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "P" : "D";
+            _proximalLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "D" : "P";
+        }
+
+        private void CheckLongitudeOrientation()
+        {
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = Patient.PhysicianId;
+            IList<Physician> Physicians = _sqlManager.SelectPhysician(sqlParameters);
+
+            if (Physicians.Count == 0)
+            {
+                _log.Error("not find physician infomation");
+                DeviceStatus.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
+                return;
+            }
+
+            if (Physicians[0].Isdistaltoproximal) DeviceStatus.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
+            else DeviceStatus.LongitudeOrientation = LongitudeOrientation.ProximalToDistal;
+
+            var _ = (RayError)RaySetProperty(Property.LongitudeOrientation, (double)DeviceStatus.LongitudeOrientation);
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
