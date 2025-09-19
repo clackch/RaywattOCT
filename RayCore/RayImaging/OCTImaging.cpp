@@ -512,10 +512,8 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 	}
 }
 
-int i = 0;
 void COCTImaging::CalculateMagnitude(cv::Mat img) {
 	auto start = std::chrono::high_resolution_clock::now();
-	//i++;
 
 	cv::Mat edgeX, edgeY;
 	cv::Sobel(img, edgeX, CV_32F, 1, 0, 3);
@@ -538,15 +536,12 @@ void COCTImaging::CalculateMagnitude(cv::Mat img) {
 		}
 	}
 
-	//cv::imwrite("origin"+std::to_string(i) + ".tif", img);
 	//PLOGI.printf("check the time - Magnitude: %d", totalMagnitude);
 	m_nSheathPosition = totalMagnitude;
 }
 
 void COCTImaging::CheckSheathPixels(cv::Mat img)
 {
-	PLOGI.printf("type: %d, channels: %d", img.type(), img.channels());
-	i++;
 	// LUT Table
 	const int    TOP_BAND_WIDTH = 30;
 	const double TARGET = 0.50;
@@ -594,7 +589,7 @@ void COCTImaging::CheckSheathPixels(cv::Mat img)
 			pixelCount++;
 		}
 	}
-	PLOGI.printf("check the time - pixelCount: %d", pixelCount);
+	//PLOGI.printf("check the time - pixelCount: %d", pixelCount);
 	if (pixelCount > binaryImg.rows - 100) {
 		m_nPixelNum = 1;
 	}

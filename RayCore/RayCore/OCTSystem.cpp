@@ -1721,7 +1721,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			}
 		}
 
-		PLOGI.printf("minVal : %d, maxVal : %d", minVal, maxVal);
+		//PLOGI.printf("minVal : %d, maxVal : %d", minVal, maxVal);
 
 		std::vector<std::pair<int, int>> minList; // pair<motor loc, index>
 		for (int i = 0; i < gradient.size() - 1; i++)
@@ -1731,7 +1731,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 				if(minVal * 1.3 < info[i + 1].first) // 최솟값의 130% 이상인 값은 제외
 					continue;
 				minList.push_back(std::make_pair(info[i + 1].second, i + 1));
-				PLOGI.printf("local min found. Loc : %d, Value : %d", info[i + 1].second, info[i + 1].first);
+				//PLOGI.printf("local min found. Loc : %d, Value : %d", info[i + 1].second, info[i + 1].first);
 			}
 		}
 		std::sort(minList.begin(), minList.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
@@ -1745,7 +1745,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			if (gradient[i] >= 0 && gradient[i + 1] < 0 && gradient[i] != -1 && gradient[i + 1] != -1) // local max
 			{
 				maxList.push_back(std::make_pair(distLoc, i + 1));
-				PLOGI.printf("local max found. Loc : %d, Value : %d", info[i + 1].second, info[i + 1].first);
+				//PLOGI.printf("local max found. Loc : %d, Value : %d", info[i + 1].second, info[i + 1].first);
 			}
 		}
 		std::sort(maxList.begin(), maxList.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
@@ -1755,7 +1755,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		int minMaxDistRange = 800; // local max가 local min과 너무 멀리 떨어져 있는 경우를 배제하기 위한 임계값
 		if (minList.empty()) {
 			nTargetPos = startPosition;
-			PLOGI.printf("Calibration is failed.");
+			//PLOGI.printf("Calibration is failed.");
 			pSystem->m_autoCalibState = RayError::AutoCalibError;
 		}
 		else {
@@ -1774,7 +1774,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			int valDist = 10000000; // 조건에 맞는 local max가 없는 경우, local min 좌우의 값 차이가 유효할 정도로 큰지 확인하기 위한 임계값
 			int adjustVal = 200; // 조건에 맞는 local max가 없는 경우, local min에서 local max로 이동하기 위한 보정값
 			if (!maxFound) {
-				PLOGI.printf("Cannot find Local max");
+				//PLOGI.printf("Cannot find Local max");
 				int nowIndex = minList[0].second;
 				if(abs(info[nowIndex - 2].first - info[nowIndex + 2].first) < valDist){
 					if (nowIndex - 2 >= 0 && nowIndex + 1 < gradient.size() &&
@@ -1792,7 +1792,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 
 			}
 
-			PLOGI.printf("first calibration. checkPosition : %d, checkValue : %d", Loc, minVal);
+			//PLOGI.printf("first calibration. checkPosition : %d, checkValue : %d", Loc, minVal);
 
 			// 2차 탐색
 			int nJumpStep = 3200;			//1차 탐색에서 확인한 지점으로부터, 2차 탐색을 위해 이동할 거리
@@ -1829,7 +1829,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			// 1-3. Move to calibrated position
 			int adjustMotorStep = 450; // 내경에서 외경까지의 거리 150 step + reflection 배제를 위해 움직였던 거리 300 step
 			nTargetPos = nZOffset - adjustMotorStep - pSystem->autoCalibrationFranch;
-			PLOGI.printf("Target Position : %d", nTargetPos);
+			//PLOGI.printf("Target Position : %d", nTargetPos);
 
 			if (minDiff > 50) // 내경 위치가 너무 이상적인 위치에서 멀리 떨어져 있는 경우 보정 실패로 간주
 				pSystem->m_autoCalibState = RayError::AutoCalibError;
@@ -1850,7 +1850,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		{
 			if (val.first > 0) {
 				validSheathCount++;
-				PLOGI.printf("sheath check - true");
+				//PLOGI.printf("sheath check - true");
 			}
 		}
 		if(validSheathCount > sheathInfo.size()/2)
@@ -2683,7 +2683,7 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 			int nSheathPosition = m_pImagingRealtime->GetSheathPosition();
 			int nDelayLinePos = m_pLaserModule->GetPosition(eStepMotorIndex::DelayLine);
 			m_vCalibrationInfo.push_back(std::make_pair(nSheathPosition, nDelayLinePos));
-			PLOGI.printf("FindingSheath - %d, %d", nSheathPosition, nDelayLinePos);
+			//PLOGI.printf("FindingSheath - %d, %d", nSheathPosition, nDelayLinePos);
 		}
 			break;
 		case CatheterState::CheckSheath: 
@@ -2703,7 +2703,7 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 
 			int nPolarizationPos = m_pLaserModule->GetPosition(eStepMotorIndex::Polarization);
 			m_vCalibrationInfo.push_back(std::make_pair(nPeakValue, nPolarizationPos));
-			PLOGI.printf("FindingPeak - %d, %d", nPeakValue, nPolarizationPos);
+			//PLOGI.printf("FindingPeak - %d, %d", nPeakValue, nPolarizationPos);
 		}
 			break;
 		default:
