@@ -21,7 +21,7 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <Image Grid.Row="1" Style="{DynamicResource RaywattOutset}"/>
+        <Image Grid.Row="1" Source="{svgc:SvgImage Source=/res/icon/aiFfr.svg}" Height="64"/>
 
         <Grid Grid.Row="3">
             <Image Source="{svgc:SvgImage Source=/res/icon/progressBound.svg}" Width="600" Height="64"/>

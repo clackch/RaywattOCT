@@ -25,20 +25,20 @@
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="380"/>
                 <ColumnDefinition/>
-                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="380"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="40" />
-                <RowDefinition Height="104" />
-                <RowDefinition Height="40" />
+                <RowDefinition Height="54" />
+                <RowDefinition Height="110" />
+                <RowDefinition Height="53" />
                 <RowDefinition Height="21" />
                 <RowDefinition Height="10" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="28"/>
                 <RowDefinition Height="26"/>
-                <RowDefinition Height="56"/>
+                <RowDefinition Height="54"/>
             </Grid.RowDefinitions>
 
             <Border Grid.Row="1" Grid.Column="1" CornerRadius="10" Background="{DynamicResource GrayscaleGray7Brush}">
@@ -70,10 +70,6 @@
                     <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal" Margin="0,13,0,0">
                         <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
                         <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.Gender, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}"/>
-                    </StackPanel>
-                    <StackPanel Grid.Row="1" Grid.Column="3" Orientation="Horizontal" Margin="0,13,0,0">
-                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding [Physician], Source={StaticResource L10N}}"/>
-                        <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="8,0,0,0" Content="{Binding Patient.PhysicianName}"/>
                     </StackPanel>
                     <StackPanel Grid.Row="1" Grid.Column="4" HorizontalAlignment="Right">
                         <component:IconButton Style="{DynamicResource IconButton}" Icon="editSimple" HorizontalAlignment="Right" Margin="0,0,20,20" Command="{Binding PatientEditCommand}"/>

@@ -146,7 +146,6 @@ namespace RaywattOCTFFR.ViewModels
             {
                 sqlParameters["gender"] = "";
             }
-            sqlParameters["physician_id"] = PatientEdit.PhysicianId;
 
             int nRows = _sqlManager.UpdatePatient(sqlParameters);
 
@@ -204,9 +203,6 @@ namespace RaywattOCTFFR.ViewModels
             if (string.IsNullOrEmpty(PatientEdit.Firstname.Trim()))
                 return false;
 
-            if (PatientEdit.PhysicianId == 0)
-                return false;
-
             return true;
         }
 
@@ -219,7 +215,6 @@ namespace RaywattOCTFFR.ViewModels
             dest.Firstname = src.Firstname.Trim();
             dest.Birthdate = src.Birthdate;
             dest.Gender = src.Gender;
-            dest.PhysicianId = src.PhysicianId;
             dest.PhysicianName = src.PhysicianName;
         }
 

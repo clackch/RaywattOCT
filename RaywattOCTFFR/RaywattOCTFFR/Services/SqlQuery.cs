@@ -305,14 +305,14 @@ namespace RaywattOCTFFR.Services
             //UpdatePatient
             _query["UpdatePatient"] = @$"
                 UPDATE rv_schema.patient
-                SET id=@id, lastname=@lastname, firstname=@firstname, birthdate=@birthdate, gender=@gender, physician_id=@physician_id, update_date=now()
+                SET id=@id, lastname=@lastname, firstname=@firstname, birthdate=@birthdate, gender=@gender, update_date=now()
                 WHERE id=@originId
                 ";
 
             //UpdatePatientWithoutBirth
             _query["UpdatePatientWithoutBirth"] = @$"
                 UPDATE rv_schema.patient
-                SET id=@id, lastname=@lastname, firstname=@firstname, gender=@gender, physician_id=@physician_id, update_date=now()
+                SET id=@id, lastname=@lastname, firstname=@firstname, gender=@gender, update_date=now()
                 WHERE id=@originId
                 ";
 

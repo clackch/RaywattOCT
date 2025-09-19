@@ -109,7 +109,7 @@ namespace RaywattOCTFFR.Common.Bases
 
         //Page
         public const int PageNumberMax = 5;
-        public const int PageSizeList = 10;
+        public const int PageSizeList = 11;
         public const int PageSizeListChoice1 = 10;
         public const int PageSizeListChoice2 = 30;
         public const int PageSizeListChoice3 = 50;
