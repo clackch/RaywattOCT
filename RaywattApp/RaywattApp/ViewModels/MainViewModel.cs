@@ -850,7 +850,7 @@ namespace RaywattApp.ViewModels
                         {
                             Dictionary<string, object> parameter = new Dictionary<string, object>();
                             parameter["title"] = _l10n["Auto calibration"];
-                            parameter["message"] = _l10n["failed"];
+                            parameter["message"] = _l10n["Auto calibration might be failed.\nCheck the image please."];
                             var resultOpenDialog = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.AlertDialogWidth, Constants.AlertDialogHeight);
                         });
                         _log.Error("AutoCalibration Error");

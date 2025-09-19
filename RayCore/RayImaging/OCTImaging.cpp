@@ -545,6 +545,7 @@ void COCTImaging::CalculateMagnitude(cv::Mat img) {
 
 void COCTImaging::CheckSheathPixels(cv::Mat img)
 {
+	PLOGI.printf("type: %d, channels: %d", img.type(), img.channels());
 	i++;
 	// LUT Table
 	const int    TOP_BAND_WIDTH = 30;
@@ -561,12 +562,45 @@ void COCTImaging::CheckSheathPixels(cv::Mat img)
 	cv::threshold(cloneImg, binaryImg, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
 
 	// 3. 흰 픽셀 수 카운팅
-	int whiteCount = cv::countNonZero(binaryImg);
-	cv::imwrite("origin" + std::to_string(i) + ".tif", cloneImg);
-	cv::imwrite("binaryImg" + std::to_string(i) + ".tif", binaryImg);
-
-	// 4. 픽셀 수 반환
-	m_nPixelNum = whiteCount;
+	int nowRow = 0;
+	int startCol = 30, endCol = 100;
+	int InnerSheathThickness = 15, outerSheathThickness = 3;
+	int pixelCount = 0;
+	for (int y = 0; y < binaryImg.rows; y++) {
+		int thickCount = 0;
+		int innerSheath = 0, outerSheath = 0;
+		for (int x = startCol; x < endCol; x++) {
+			if (binaryImg.at<uchar>(y, x) == 255) {
+				thickCount++;
+				if (thickCount > InnerSheathThickness) {
+					innerSheath = x - InnerSheathThickness;
+					break;
+				}
+			}
+		}
+		for (int x = innerSheath + 40; x < innerSheath + 60; x++) {
+			if (binaryImg.at<uchar>(y, x) == 255) {
+				thickCount++;
+				if (thickCount > outerSheathThickness) {
+					outerSheath = x - outerSheathThickness;
+					break;
+				}
+			}
+			else {
+				thickCount = 0;
+			}
+		}
+		if (outerSheath - innerSheath > 30 && outerSheath - innerSheath < 50) {
+			pixelCount++;
+		}
+	}
+	PLOGI.printf("check the time - pixelCount: %d", pixelCount);
+	if (pixelCount > binaryImg.rows - 100) {
+		m_nPixelNum = 1;
+	}
+	else {
+		m_nPixelNum = -1;
+	}
 }
 
 cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {

@@ -1841,9 +1841,23 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		pSystem->m_pImagingLiveView->SetAutoCalibrationMathod(AutoCalibrationMathod::CheckSheathPixelNum);
 		pSystem->m_cathState = CatheterState::CheckSheath;
 		pSystem->m_vCalibrationInfo.clear();
-		while (pSystem->m_vCalibrationInfo.size() < 2) {
+		while (pSystem->m_vCalibrationInfo.size() < 3) {
 			Sleep(50);
 		}
+		auto const& sheathInfo = pSystem->m_vCalibrationInfo;
+		int validSheathCount = 0;
+		for(auto const& val : sheathInfo)
+		{
+			if (val.first > 0) {
+				validSheathCount++;
+				PLOGI.printf("sheath check - true");
+			}
+		}
+		if(validSheathCount > sheathInfo.size()/2)
+			pSystem->m_autoCalibState = RayError::OK;
+		else
+			pSystem->m_autoCalibState = RayError::AutoCalibError;
+
 		pSystem->m_pImagingLiveView->SetAutoCalibrationMathod(AutoCalibrationMathod::Disable);
 		
 #if 0
