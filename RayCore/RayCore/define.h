@@ -23,6 +23,7 @@ enum class RayError {
 	InvalidFunctionCall,
 	HomingFailed,
 	RotaryJunctionError,
+	AutoCalibError
 };
 
 enum class RayProperty {

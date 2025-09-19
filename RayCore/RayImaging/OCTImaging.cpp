@@ -78,6 +78,7 @@ COCTImaging::COCTImaging(Setting setting, CMessageService* pMsg) {
 	m_nTotalFrame = 0;
 
 	m_nSheathPosition = 0;
+	m_nPixelNum = 0;
 
 	clahe = cv::createCLAHE(0.02, cv::Size(8, 8));
 }
@@ -123,6 +124,9 @@ void COCTImaging::PostProcess(cv::Mat image) {
 	else if (m_FindingSheathMathod == AutoCalibrationMathod::FindingSheath)
 	{
 		findSheath(image);
+	}else if(m_FindingSheathMathod == AutoCalibrationMathod::CheckSheathPixelNum)
+	{
+		CheckSheathPixels(image);
 	}
 
 	cv::cvtColor(image, imageResultColor, cv::COLOR_GRAY2RGB);
@@ -531,8 +535,67 @@ void COCTImaging::CalculateMagnitude(cv::Mat img) {
 			totalMagnitude += absEdgeMagnitude.at<uchar>(y, x);
 		}
 	}
+
 	//PLOGI.printf("check the time - Magnitude: %d", totalMagnitude);
 	m_nSheathPosition = totalMagnitude;
+}
+
+void COCTImaging::CheckSheathPixels(cv::Mat img)
+{
+	// LUT Table
+	const int    TOP_BAND_WIDTH = 30;
+	const double TARGET = 0.50;
+	const double POWER_MIN = 0.60;
+	const double POWER_MAX = 12.0;
+
+	// 1. 클론 이미지 생성
+	cv::Mat cloneImg = img.clone();
+	cv::rotate(cloneImg, cloneImg, cv::ROTATE_180);
+
+	// 2. Otsu 이진화
+	cv::Mat binaryImg;
+	cv::threshold(cloneImg, binaryImg, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+
+	// 3. 흰 픽셀 수 카운팅
+	int nowRow = 0;
+	int startCol = 30, endCol = 100;
+	int InnerSheathThickness = 15, outerSheathThickness = 3;
+	int pixelCount = 0;
+	for (int y = 0; y < binaryImg.rows; y++) {
+		int thickCount = 0;
+		int innerSheath = 0, outerSheath = 0;
+		for (int x = startCol; x < endCol; x++) {
+			if (binaryImg.at<uchar>(y, x) == 255) {
+				thickCount++;
+				if (thickCount > InnerSheathThickness) {
+					innerSheath = x - InnerSheathThickness;
+					break;
+				}
+			}
+		}
+		for (int x = innerSheath + 40; x < innerSheath + 60; x++) {
+			if (binaryImg.at<uchar>(y, x) == 255) {
+				thickCount++;
+				if (thickCount > outerSheathThickness) {
+					outerSheath = x - outerSheathThickness;
+					break;
+				}
+			}
+			else {
+				thickCount = 0;
+			}
+		}
+		if (outerSheath - innerSheath > 30 && outerSheath - innerSheath < 50) {
+			pixelCount++;
+		}
+	}
+	//PLOGI.printf("check the time - pixelCount: %d", pixelCount);
+	if (pixelCount > binaryImg.rows - 100) {
+		m_nPixelNum = 1;
+	}
+	else {
+		m_nPixelNum = -1;
+	}
 }
 
 cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {
@@ -556,57 +619,13 @@ cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {
 	return result;
 }
 
-void COCTImaging::findSheath(cv::Mat input)
-{
-	using namespace cv;
-
-	// ===== 파라미터 =====
-	const bool  ROTATE_CCW_90 = true;
-
-	// LUT Table
-	const int    TOP_BAND_WIDTH = 30;
-	const double TARGET = 0.50;
-	const double POWER_MIN = 0.60;
-	const double POWER_MAX = 12.0;
-
-	// ROI
-	const int POS_MIN = 50;
-	const int POS_MAX = 500;
-
-	// 1차 이진화(상단 ROI Top-K + 퍼센타일 바닥)
-	const int    FIRST_H_ROI_TOPK = 200; // ROI 내부 상단 높이
-	const int    FIRST_EXPECTED_BAND_THICK_PX = 50;  // 예상 상단 밝은 밴드 두께
-	const double FIRST_ROI_PERCENTILE_FLOOR = 80;  // 퍼센타일 바닥
-
-	// 형태학
-	const int KSIZE = 5;
-	const int ERODE_ITER = 1;
-	const int DILATE_ITER = 1;
-
-	// 하단 라인 노이즈 제거(최대 공백 비율 Threshold)
-	const double BOTTOM_ZERO_GAP_FRAC = 0.27;
-
-	// 후보 선택 규칙
-	const int THICK_MIN = 5;
-	const int THICK_MAX = 40;
-	const int ADJ_DIFF_MAX = THICK_MAX - THICK_MIN;;
-
-	// 2차 이진화(Top-K만 사용)
-	const int SECOND_TARGET_THICK_PX = (THICK_MAX+ THICK_MIN)/2 * 2; // 기본: 이전과 동일한 감도
-	const int SECOND_PIXELS_PER_THICK_UNIT = 2504;
-
-	// 유효성 검사(ROI 내부 평균 대비 밝기 상승/점유율)
-	const double VALID_MIN_DELTA = 7.0;
-	const double VALID_MIN_OCCUPANCY = 0.02;
-	const int    VALID_BG_MARGIN = 5;
-
-	// ===== 0) 단일채널 8U로 정규화 =====
-	Mat gray;
+void COCTImaging::findSheath(cv::Mat input) {
+	cv::Mat gray;
 	if (input.channels() == 3) {
-		cvtColor(input, gray, COLOR_BGR2GRAY);
+		cvtColor(input, gray, cv::COLOR_BGR2GRAY);
 	}
 	else if (input.channels() == 4) {
-		Mat bgr; cvtColor(input, bgr, COLOR_BGRA2BGR); cvtColor(bgr, gray, COLOR_BGR2GRAY);
+		cv::Mat bgr; cvtColor(input, bgr, cv::COLOR_BGRA2BGR); cvtColor(bgr, gray, cv::COLOR_BGR2GRAY);
 	}
 	else {
 		if (input.type() == CV_8UC1) gray = input.clone();
@@ -617,209 +636,36 @@ void COCTImaging::findSheath(cv::Mat input)
 		}
 	}
 
-	// ===== 1) 회전 =====
-	if (ROTATE_CCW_90) rotate(gray, gray, ROTATE_90_COUNTERCLOCKWISE);
+	cv::rotate(gray, gray, cv::ROTATE_90_COUNTERCLOCKWISE);
+	//cv::Mat tmp = gray.clone();
+	cv::threshold(gray, gray, 0, 255, cv::THRESH_OTSU);
 
-	// ===== 2) 영상 개선 (LUT 테이블 적용) =====
-	{
-		double Xd; minMaxLoc(gray, nullptr, &Xd);
-		int X = std::max(1, (int)std::round(Xd));
-		double p = 1.0;
-		if (X > TOP_BAND_WIDTH) {
-			double a = (double)(X - TOP_BAND_WIDTH) / (double)X;
-			double t = clamp_v(TARGET, 1e-3, 0.999);
-			p = std::log(t) / std::log(a);
-			p = clamp_v(p, POWER_MIN, POWER_MAX);
+	int nowRow = 0;
+	int startRow = 120;
+	int sheathThickness = 15;
+	int thickCount = 0;
+	for (int i = startRow; i < startRow + 200; i++) {
+		int pixelCount = 0;
+		for (int x = 0; x < gray.cols; x++) {
+			if (gray.at<uchar>(i, x) == 255)
+				pixelCount++;
 		}
-		std::vector<uchar> lut(256);
-		for (int i = 0; i < 256; ++i) {
-			double u = std::min(i, X) / (double)X;
-			double y = std::pow(u, p) * 255.0;
-			y = clamp_v(y, 0.0, 255.0);
-			lut[i] = (uchar)round_to_even(y);
-		}
-		Mat lutMat(1, 256, CV_8U, lut.data());
-		LUT(gray, lutMat, gray);
-	}
-
-	// ===== 3) ROI 적용 =====
-	const int Hfull = gray.rows;
-	const int Wfull = gray.cols;
-	int roi_y0 = clamp_v(POS_MIN, 0, Hfull);
-	int roi_y1 = clamp_v(POS_MAX + 1, 0, Hfull);
-	if (roi_y1 <= roi_y0) { roi_y0 = 0; roi_y1 = Hfull; }
-	Mat pre_roi = gray.rowRange(roi_y0, roi_y1).clone();
-
-	// ===== 4) 1차 이진화 (ROI 내부 상단 Top-K + Percentile floor) =====
-	Mat bin1_roi(pre_roi.size(), CV_8U, Scalar(0));
-	{
-		const int H = std::min(FIRST_H_ROI_TOPK, pre_roi.rows);
-		if (H > 0) {
-			int hist[256] = { 0 };
-			for (int r = 0; r < H; ++r) {
-				const uchar* p = pre_roi.ptr<uchar>(r);
-				for (int c = 0; c < pre_roi.cols; ++c) ++hist[p[c]];
-			}
-			const int roiPix = H * pre_roi.cols;
-
-			// Top-K
-			int K1 = clamp_v(FIRST_EXPECTED_BAND_THICK_PX * pre_roi.cols, 1, roiPix);
-			int cum = 0, t_topk = 0;
-			for (int v = 255; v >= 0; --v) { cum += hist[v]; if (cum >= K1) { t_topk = v; break; } }
-
-			// Percentile floor
-			int target = (int)std::floor(FIRST_ROI_PERCENTILE_FLOOR * 0.01 * roiPix);
-			target = clamp_v(target, 1, roiPix);
-			int ac = 0, t_floor = 0;
-			for (int v = 0; v <= 255; ++v) { ac += hist[v]; if (ac >= target) { t_floor = v; break; } }
-
-			int t1 = std::max(t_topk, t_floor);
-			threshold(pre_roi, bin1_roi, std::max(0, t1 - 1), 255, THRESH_BINARY); // src>t1
-		}
-	}
-
-	// ===== 5) Morphology =====
-	const int k = (KSIZE % 2 == 1) ? KSIZE : (KSIZE + 1);
-	Mat kernel = getStructuringElement(MORPH_ELLIPSE, Size(k, k));
-	erode(bin1_roi, bin1_roi, kernel, Point(-1, -1), ERODE_ITER);
-	dilate(bin1_roi, bin1_roi, kernel, Point(-1, -1), DILATE_ITER);
-
-	// ===== 6) 하단 라인 노이즈 제거(라인 내 최대 공백이 BOTTOM_ZERO_GAP_FRAC 이상인 라인 제거)
-	{
-		const int w = bin1_roi.cols;
-		const int thr = (int)std::ceil(BOTTOM_ZERO_GAP_FRAC * w);
-		for (int y = bin1_roi.rows - 1; y >= 0; --y) {
-			const uchar* row = bin1_roi.ptr<uchar>(y);
-			int max_run = 0, run = 0;
-			for (int x = 0; x < w; ++x) {
-				if (row[x] == 0) { ++run; if (run > max_run) max_run = run; }
-				else { run = 0; }
-			}
-			if (max_run >= thr) {
-				std::memset(bin1_roi.ptr<uchar>(y), 0, (size_t)w);
-			}
-			else {
+		nowRow = i;
+		if (pixelCount > gray.cols / 2) {
+			thickCount++;
+			if (thickCount > sheathThickness) {
+				nowRow -= sheathThickness;
 				break;
 			}
 		}
-	}
-
-	// ===== 7) Row-Mean 치환 =====
-	Mat rowMean_roi(bin1_roi.size(), CV_8U);
-#pragma omp parallel for schedule(static)
-	for (int r = 0; r < bin1_roi.rows; ++r) {
-		const uchar* src = bin1_roi.ptr<uchar>(r);
-		int sum = 0;
-		for (int c = 0; c < bin1_roi.cols; ++c) sum += src[c];
-		double m = (double)sum / (double)bin1_roi.cols;
-		const uchar v = (uchar)round_to_even(m);
-		uchar* dst = rowMean_roi.ptr<uchar>(r);
-		std::memset(dst, v, (size_t)bin1_roi.cols * sizeof(uchar));
-	}
-
-	// ===== 8) 2차 이진화 (Top-K) =====
-	Mat second_roi(rowMean_roi.size(), CV_8U, Scalar(0));
-	{
-		int hist2[256] = { 0 };
-		for (int r = 0; r < rowMean_roi.rows; ++r) {
-			const uchar* p = rowMean_roi.ptr<uchar>(r);
-			for (int c = 0; c < rowMean_roi.cols; ++c) ++hist2[p[c]];
-		}
-		const int roiPix2 = rowMean_roi.rows * rowMean_roi.cols;
-
-		long long K2_raw = 1LL * SECOND_TARGET_THICK_PX * SECOND_PIXELS_PER_THICK_UNIT;
-		int K2 = clamp_v((int)std::min<long long>(K2_raw, roiPix2), 1, roiPix2);
-
-		int cum = 0, t2 = 0;
-		for (int v = 255; v >= 0; --v) { cum += hist2[v]; if (cum >= K2) { t2 = v; break; } }
-
-		threshold(rowMean_roi, second_roi, std::max(0, t2 - 1), 255, THRESH_BINARY); // src>t2
-	}
-
-	// ===== 9) 연결요소 → 후보/선택 =====
-	Mat labels, stats, centroids;
-	int n = connectedComponentsWithStats((second_roi > 0), labels, stats, centroids, 8, CV_32S);
-
-	struct Comp { int left, top, width, height, area, bottom; double centerY; };
-	std::vector<Comp> candidates; candidates.reserve(std::max(0, n - 1));
-	for (int i = 1; i < n; ++i) {
-		int x = stats.at<int>(i, CC_STAT_LEFT);
-		int y = stats.at<int>(i, CC_STAT_TOP);
-		int w = stats.at<int>(i, CC_STAT_WIDTH);
-		int h = stats.at<int>(i, CC_STAT_HEIGHT);
-		int a = stats.at<int>(i, CC_STAT_AREA);
-		if (w <= 0 || h <= 0 || a <= 0) continue;
-		if (h < THICK_MIN || h > THICK_MAX) continue;
-		candidates.push_back({ x, y, w, h, a, y + h - 1, y + h * 0.5 });
-	}
-
-	std::sort(candidates.begin(), candidates.end(),
-		[](const Comp& a, const Comp& b) { return a.top < b.top; });
-
-	std::vector<Comp> paired_lowers;
-	if (candidates.size() >= 2) {
-		paired_lowers.reserve(candidates.size());
-		for (size_t i = 0; i + 1 < candidates.size(); ++i) {
-			const Comp& c1 = candidates[i];
-			const Comp& c2 = candidates[i + 1];
-			if (std::abs(c1.height - c2.height) <= ADJ_DIFF_MAX)
-				paired_lowers.push_back((c1.bottom >= c2.bottom) ? c1 : c2);
+		else {
+			thickCount = 0;
 		}
 	}
+	//cv::line(tmp, cv::Point(0, nowRow), cv::Point(tmp.cols - 1, nowRow), cv::Scalar(255, 0, 0), 2);
+	//cv::imwrite("origin" + std::to_string(i) + ".tif", tmp);
 
-	bool has_raw = false;
-	Comp chosen_roi_comp{};
-	for (const auto& c : paired_lowers) {
-		if (!has_raw || c.bottom > chosen_roi_comp.bottom) { chosen_roi_comp = c; has_raw = true; }
-	}
-
-	// ===== 10) 유효성 검사 (ROI 내부 평균/점유율 기준) =====
-	bool has_final = false;
-	Comp chosen_global{};
-	if (has_raw) {
-		const int Hroi = pre_roi.rows;
-		int y = chosen_roi_comp.top, h = chosen_roi_comp.height;
-		int y0 = clamp_v(y, 0, Hroi), y1 = clamp_v(y + h, 0, Hroi);
-		if (y1 > y0) {
-			Mat band_mask = (second_roi.rowRange(y0, y1) > 0);
-			Mat band_pre = pre_roi.rowRange(y0, y1);
-
-			double occ = (double)countNonZero(band_mask) / band_mask.total();
-			// 평균(마스크 적용)
-			Scalar mean_band_sc = (countNonZero(band_mask) > 0) ?
-				cv::mean(band_pre, band_mask) : cv::mean(band_pre);
-
-			int m = VALID_BG_MARGIN;
-			int up0 = clamp_v(y0 - h - m, 0, Hroi), up1 = clamp_v(y0 - m, 0, Hroi);
-			int dn0 = clamp_v(y1 + m, 0, Hroi), dn1 = clamp_v(y1 + h + m, 0, Hroi);
-
-			Scalar mean_bg_sc;
-			if (up1 > up0 || dn1 > dn0) {
-				std::vector<Mat> bgs;
-				if (up1 > up0) bgs.push_back(pre_roi.rowRange(up0, up1));
-				if (dn1 > dn0) bgs.push_back(pre_roi.rowRange(dn0, dn1));
-				Mat bg; vconcat(bgs, bg);
-				mean_bg_sc = cv::mean(bg);
-			}
-			else {
-				mean_bg_sc = cv::mean(pre_roi);
-			}
-
-			double delta = mean_band_sc[0] - mean_bg_sc[0];
-			if (occ >= VALID_MIN_OCCUPANCY && delta >= VALID_MIN_DELTA) {
-				has_final = true;
-				chosen_global = chosen_roi_comp;
-				// ROI → 전역좌표 오프셋
-				chosen_global.top += roi_y0;
-				chosen_global.bottom += roi_y0;
-				chosen_global.centerY += roi_y0;
-			}
-		}
-	}
-
-	// ===== 11) 최종 후보 선정 =====
-	int sheathPos = has_final ? (int)std::round(chosen_global.centerY) : -1;
-	m_nSheathPosition = sheathPos;	
+	m_nSheathPosition = nowRow;
 }
 
 // 정규화를 위한 함수

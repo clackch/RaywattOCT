@@ -19,7 +19,8 @@ namespace RaywattOCT
             WrongSession,
             InvalidFunctionCall,
             HomingFailed,
-            RotaryJunctionError
+            RotaryJunctionError,
+            AutoCalibError
         };
 
         public enum Property : int
