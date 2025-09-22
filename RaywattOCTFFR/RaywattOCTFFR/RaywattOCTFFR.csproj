@@ -15,6 +15,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="OCT\**" />
+    <EmbeddedResource Remove="OCT\**" />
+    <None Remove="OCT\**" />
+    <Page Remove="OCT\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="res\bar\indicator.png" />
     <None Remove="res\bar\indicator2.png" />
     <None Remove="res\guide\ConnectCatheter.png" />
@@ -1244,9 +1251,6 @@
 
   <ItemGroup>
     <Folder Include="DICOM\" />
-    <Folder Include="OCT\Imaging\" />
-    <Folder Include="OCT\3D\" />
-    <Folder Include="OCT\Core\" />
     <Folder Include="res\button\check\" />
     <Folder Include="res\button\radio\" />
   </ItemGroup>
