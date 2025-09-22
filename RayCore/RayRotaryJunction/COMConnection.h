@@ -6,8 +6,8 @@ class CSerialPort;
 class CCOMConnection : public IConnection
 {
 private:
-	CSerialPort* m_pPort;
-	WriteTaskController* m_pWriteManager;
+	CSerialPort* m_pPort = nullptr;
+	WriteTaskController* m_pWriteManager = nullptr;
 
 public:
 	CCOMConnection();
