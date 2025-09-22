@@ -655,8 +655,10 @@ RFID_AnswerType CRJController::checkAnswerRFID(RFIDProtocol::SRFIDState rfidStat
 		if (result == WAIT_TIMEOUT) {
 			RFIDProtocol::setRFIDErrorState(RFIDProtocol::NOMATCHKEY);
 			WaitForSingleObject(hThread, INFINITE); 
+			CloseHandle(hThread);
 			return RFID_AnswerType::FAILED;
 		}
+		CloseHandle(hThread);
 	}
 	else if (rfidState.errorState == RFIDProtocol::UNANSWERED) {
 		return RFID_AnswerType::PROCEEDING;

@@ -137,10 +137,11 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 		PLOGI.printf("Read background from .dat file.");
 		tstring strBackgroundPath = config.configPath + _T("\\BACKGROUND.bin");
 
-		char strPath[MAX_PATH];
-		WideCharToMultiByte(CP_ACP, 0, strBackgroundPath.c_str(), strBackgroundPath.length(), strPath, MAX_PATH, nullptr, nullptr);
+		char strPath[MAX_PATH + 1] = { 0 };
+		int len = WideCharToMultiByte(CP_ACP, 0, strBackgroundPath.c_str(), strBackgroundPath.length(), strPath, MAX_PATH, nullptr, nullptr);
 		background = readBackground(strPath, setting);
 	}
+
 
 	PLOGI.printf("Create Imaging - %d x %d (type: %d)", setting.nAScan, setting.nBScan, type);
 
@@ -149,19 +150,23 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 	case ImagingType::OCTImaging:
 		pImaging = new COCTImaging(setting, msg);
 		pImaging->Initialize(calibration);
+		delete[] background; background = nullptr;
 		break;
 	case ImagingType::LabImaging:
 		pImaging = new CLabImaging(setting, msg);
 		((CLabImaging *)pImaging)->Initialize(calibration, background);
 		((CLabImaging *)pImaging)->SetBackgroundSubtract(false);
+		background = nullptr;
 		break;
 	case ImagingType::TIFFImaging:
 		pImaging = new CTIFFImaging(setting, msg);
 		((CTIFFImaging*)pImaging)->Initialize();
 		delete calibration;
+		delete[] background; background = nullptr;
 		break;
 	default:
 		delete calibration;
+		delete[] background;
 		return nullptr;
 	}
 
@@ -1337,7 +1342,7 @@ UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 	return NOERROR;
 }
 USHORT* CImagingSession::readBackground(const char* strBackgroundFile, IImaging::Setting setting) {
-	if (strBackgroundFile == nullptr) return nullptr;
+	if (strBackgroundFile == nullptr || strBackgroundFile[0] == '\0') return nullptr;
 	
 	FILE* fp = fopen(strBackgroundFile, "rb");
 	if (fp == nullptr) {

@@ -108,6 +108,10 @@ void RFIDProtocol::setPacketByFID(eFID fid, BYTE* packet, int& packetLength, int
 		break;
 	}
 	(aRFIDMessageData.messageMap)[fid] = messageData;
+	delete[] keyType;
+	delete[] uidLen;
+	keyType = nullptr;
+	uidLen = nullptr;
 }
 
 
