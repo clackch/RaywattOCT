@@ -1,0 +1,176 @@
+﻿<Page x:Class="RaywattOCTFFR.Views.File.FileImportStep1Page"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:RaywattOCTFFR.Views.File"
+      xmlns:model="clr-namespace:RaywattOCTFFR.Common.Util"
+      xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
+      xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+      xmlns:behaviors="clr-namespace:RaywattOCTFFR.Common.Behaviors"
+      xmlns:const="clr-namespace:RaywattOCTFFR.Common.Bases"
+      mc:Ignorable="d" 
+      d:DesignHeight="1080" d:DesignWidth="1920"
+      Background="{DynamicResource GrayscaleGray8Brush}"
+      Title="FileImportStep1Page">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Height="60" Background="{DynamicResource GrayscaleGray7Brush}">
+            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Margin="75,20,0,19" Content="{Binding [Import], Source={StaticResource L10N}}"/>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="380"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="380"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="57.5" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="57.5"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="1" Grid.Column="1" CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}">
+                <Grid Margin="40,56,40,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="54"/>
+                        <RowDefinition Height="1"/>
+                        <RowDefinition Height="24"/>
+                        <RowDefinition Height="36"/>
+                        <RowDefinition Height="42"/>
+                        <RowDefinition Height="24"/>
+                        <RowDefinition Height="26"/>
+                        <RowDefinition Height="54"/>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="1"/>
+                        <RowDefinition Height="74"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Top">
+                        <Border CornerRadius="18" Width="93" Height="38" Background="{StaticResource GrayscaleGray5Brush}">
+                            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray1Brush}" Content="{Binding [STEP 1.], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Width="16"/>
+                        <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Select Import File], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+
+                    <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
+                    
+                    <StackPanel Grid.Row="3">
+                        <Label Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Select Import Type], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="4" Orientation="Horizontal">
+                        <Button Style="{Binding ImportType, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.ImportTypeDicom}}" Width="360" Command="{Binding SelectImportTypeCommand}" CommandParameter="{x:Static const:Constants.ImportTypeDicom}" Content="{Binding [DICOM], Source={StaticResource L10N}}"/>
+                        <Button Style="{Binding ImportType, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.ImportTypeTiff}}" Width="360" Command="{Binding SelectImportTypeCommand}" CommandParameter="{x:Static const:Constants.ImportTypeTiff}" Content="{Binding [TIFF], Source={StaticResource L10N}}"/>
+                        <Button Style="{Binding ImportType, Converter={StaticResource SettingSelectedConverter}, ConverterParameter={x:Static const:Constants.ImportTypeRaw}}" Width="360" Command="{Binding SelectImportTypeCommand}" CommandParameter="{x:Static const:Constants.ImportTypeRaw}" Content="{Binding [RAW(Raywatt Format)], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="6">
+                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Select Drive], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="7">
+                        <ComboBox Style="{DynamicResource ComboBoxDialog}" Width="1080" ItemsSource="{Binding ExternalDriveComboBox}" SelectedValue="{Binding SelectedExternalDrive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectedValuePath="Key" DisplayMemberPath="Value" IsEnabled="{Binding IsEnableExternalDrive}" Tag="{Binding [No Drive], Source={StaticResource L10N}}"/>
+                    </StackPanel>
+
+                    <Grid Grid.Row="9">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="220"/>
+                        </Grid.ColumnDefinitions>
+                        <TreeView Grid.Column="0" Style="{DynamicResource TreeViewImport}" ItemsSource="{Binding DirItems}">
+                            <TreeView.Resources>
+                                <HierarchicalDataTemplate DataType="{x:Type model:DirectoryItem}" ItemsSource="{Binding Path=Items, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                    <TextBlock Text="{Binding Path=Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,6,10,6"/>
+                                </HierarchicalDataTemplate>
+                            </TreeView.Resources>
+                            <i:Interaction.Behaviors>
+                                <behaviors:BindableSelectedItemBehavior SelectedItem="{Binding SelectedDir, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            </i:Interaction.Behaviors>
+                        </TreeView>
+                        <Grid Grid.Column="2">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="25"/>
+                                <RowDefinition/>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="25"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Label Grid.Row="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Patient], Source={StaticResource L10N}}"/>
+                            <DataGrid Grid.Row="1" Width="220" Name="patientList" ItemsSource="{Binding PatientList}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="SelectionChanged">
+                                        <i:InvokeCommandAction Command="{Binding ShowCaseCommand}" CommandParameter="{Binding ElementName=patientList, Path=CurrentItem}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Id}" Header="{Binding [ID], Source={StaticResource L10N}}"/>
+                                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding Name}" Header="{Binding [Name], Source={StaticResource L10N}}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <Label Grid.Row="3" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Patient Case], Source={StaticResource L10N}}"/>
+                            <DataGrid Grid.Row="4" ItemsSource="{Binding PatientCaseList}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding CreateDate, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Recording], Source={StaticResource L10N}}" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </Grid>
+
+                    <Grid Grid.Row="11">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" >
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Available Space], Source={StaticResource L10N}}"/>
+                            <StackPanel Orientation="Horizontal" Margin="16,0,0,0">
+                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding AvailableSpace}"/>
+                                <StackPanel Width="5"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [GB], Source={StaticResource L10N}}"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Approximate Import Size], Source={StaticResource L10N}}"/>
+                            <StackPanel Orientation="Horizontal" Margin="16,0,0,0">
+                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding ApproximateImportSize}"/>
+                                <StackPanel Width="5"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource MainPrimaryColorBrush}" Content="{Binding [GB], Source={StaticResource L10N}}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+
+                    <Separator Grid.Row="13" Margin="-40,0,-40,0" Background="{DynamicResource GrayscaleGray5Brush}"/>
+                    
+                    <Grid Grid.Row="14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="-24,0,0,0">
+                            <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,-24,0">
+                            <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding ImportCommand}" Content="{Binding [Import], Source={StaticResource L10N}}"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="2" Height="40" Background="{DynamicResource GrayscaleBlackBrush}"/>
+    </Grid>
+</Page>

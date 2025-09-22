@@ -15,6 +15,7 @@ using System.Reflection;
 using RaywattOCTFFR.Common.Dialog;
 using RaywattOCTFFR.Views.Dialog;
 using RaywattOCTFFR.Common.Util;
+using System.Reflection.Metadata;
 
 namespace RaywattOCTFFR.ViewModels
 {
@@ -204,16 +205,10 @@ namespace RaywattOCTFFR.ViewModels
                 popupParameter["title"] = _l10n["Information"];
                 popupParameter["message"] = _l10n["$MSG024"];
                 var popupResult = _dialogService.OpenDialog(new AlertDialogControl(), popupParameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
                 return;
             }
 
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["fileType"] = Constants.FileTypeImport;
-
-            var result = _dialogService.OpenDialog(new FileDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-
-            Search();
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.FileImportStep1Page));
         }
 
         private void MovePatientDetail(Patient patient)

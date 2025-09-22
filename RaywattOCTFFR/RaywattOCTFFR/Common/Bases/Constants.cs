@@ -32,6 +32,11 @@ namespace RaywattOCTFFR.Common.Bases
         public const string ReviewCalibrationPage = "Views/ReviewCalibrationPage.xaml";
         //File
         public const string FileImportPage = "Views/File/FileImportPage.xaml";
+        public const string FileImportStep1Page = "Views/File/FileImportStep1Page.xaml";
+        public const string FileImportStep2Page = "Views/File/FileImportStep2Page.xaml";
+        public const string FileImportStep3Page = "Views/File/FileImportStep3Page.xaml";
+        public const string FileImportStep4Page = "Views/File/FileImportStep4Page.xaml";
+        public const string FileImportStep5Page = "Views/File/FileImportStep5Page.xaml";
         //Setting
         public const string SettingDatabasePage = "Views/Setting/SettingDatabasePage.xaml";
         public const string SettingAboutPage = "Views/Setting/SettingAboutPage.xaml";
@@ -169,6 +174,11 @@ namespace RaywattOCTFFR.Common.Bases
         //Export DICOM Prefix
         public const string ExportDicomPrefix = "IMG";
         public const double DICOMPhysicalDeltaXY = 0.00684931506849; /*0.0289256198347107;*/ // mm
+
+        //Import Type
+        public const string ImportTypeDicom = "DICOM";
+        public const string ImportTypeTiff = "TIFF";
+        public const string ImportTypeRaw = "RAW";
 
         //File Import/Export
         public const string FileImageExtension = "bin";

@@ -96,6 +96,11 @@ namespace RaywattOCTFFR
 
             //File
             services.AddTransient(typeof(FileImportViewModel));
+            services.AddTransient(typeof(FileImportStep1ViewModel));
+            services.AddTransient(typeof(FileImportStep2ViewModel));
+            services.AddTransient(typeof(FileImportStep3ViewModel));
+            services.AddTransient(typeof(FileImportStep4ViewModel));
+            services.AddTransient(typeof(FileImportStep5ViewModel));
 
             //Dialog 등록
             services.AddTransient<IDialogService, DialogService>();
