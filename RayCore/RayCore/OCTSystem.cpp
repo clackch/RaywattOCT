@@ -1392,9 +1392,7 @@ UINT COCTSystem::threadService(LPVOID param) {
 	CLookUpTable& lut = CLookUpTable::GetInstance();
 	lut.Load("LUT_green.csv");
 	lut.Load("LUT_gray.csv");
-	lut.Load("LUT_abbott.csv");
-	lut.Load("LUT_enhanced.csv");
-	//lut.Load("LUT_ML.csv");
+	lut.Load("LUT_orange.csv");
 
 #ifdef DEBUG
 	cv::Mat imgSample = cv::imread(".\\oct_sample.png");
