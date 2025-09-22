@@ -270,7 +270,7 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	//   100 MHz signal to the EXT CLK BNC connector.
 	double dutyCycle = 0.5f;	// maximum 50%
 	U32 srcClock = INTERNAL_CLOCK;
-	U32 rate = SAMPLE_RATE_500MSPS;
+	U32 rate = SAMPLE_RATE_1000MSPS;
 
 	if (useKClock) {
 		srcClock = FAST_EXTERNAL_CLOCK;
