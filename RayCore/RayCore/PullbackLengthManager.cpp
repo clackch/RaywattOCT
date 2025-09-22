@@ -152,9 +152,11 @@ void PullbackLengthManager::ReadAccelDecelPofileParameter()
 		PLOGI.printf("start to read SMProfileParameters.txt");
 		std::ifstream reader("./SMProfileParameters.txt");
 
+		constexpr int kProfiles = 2, kItems = 5;
+
 		if (reader.is_open()) {
 			std::string line;
-			int profile;
+			int profile = -1;
 			int index = 0;
 			while (std::getline(reader, line)) {
 				std::vector<std::string> parameter;
@@ -168,9 +170,13 @@ void PullbackLengthManager::ReadAccelDecelPofileParameter()
 				if (parameter.size() == 2) {
 					profile = stoi(parameter[1]);
 					index = 0;
+					if (profile < 0 || profile >= kProfiles) {
+						PLOGI.printf("Profile index error");
+						continue;
+					}
 				}
 
-				if (parameter.size() == 5)
+				if (parameter.size() == 5 && index < kItems && profile >= 0)
 				{
 					m_pisp[profile][index].a = stod(parameter[0]);
 					m_pisp[profile][index].b = stod(parameter[1]);
@@ -191,7 +197,7 @@ void PullbackLengthManager::ReadAccelDecelPofileParameter()
 			PLOGI.printf("Cannot SMProfileParameters open .txt");
 		}
 	}
-	catch (std::exception e) {
+	catch (std::exception& e) {
 		PLOGI.printf(e.what());
 	}
 }

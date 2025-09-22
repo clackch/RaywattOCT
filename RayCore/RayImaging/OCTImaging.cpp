@@ -940,7 +940,7 @@ void COCTImaging::logarithmic_contrast_stretching(cv::Mat& img, float lower_perc
 	const float eps = 1e-8f;
 	const float invWidth = (BINS - 1) / (vmax - vmin + eps);
 
-	std::vector<std::vector<uint32_t>> localH(nt, std::vector<uint32_t>(BINS, 0u));
+	std::vector<std::vector<uint32_t>> localH(nt, std::vector<uint32_t>(BINS));		// 0으로 채워져 초기화.
 
 #pragma omp parallel for schedule(static)
 	for (int i = 0; i < rows; ++i) {
@@ -959,7 +959,7 @@ void COCTImaging::logarithmic_contrast_stretching(cv::Mat& img, float lower_perc
 		}
 	}
 
-	std::vector<uint32_t> hist(BINS, 0u);
+	std::vector<uint32_t> hist(BINS);
 	for (int t = 0; t < nt; ++t) {
 		const auto& h = localH[t];
 		for (int b = 0; b < BINS; ++b) hist[b] += h[b];

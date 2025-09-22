@@ -544,7 +544,8 @@ struct EdgePrefix {
 		}
 		P = std::accumulate(seg.begin(), seg.end(), 0.0);
 		// 원형을 2배로 펼쳐서 누적합 구성
-		pref.resize(2 * N + 1, 0.0);
+		double doubleZero = 0.0;
+		pref.resize(2 * N + 1, doubleZero);
 		for (int k = 0; k < 2 * N; ++k) pref[k + 1] = pref[k] + seg[k % N];
 	}
 

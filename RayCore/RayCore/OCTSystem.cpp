@@ -1925,7 +1925,14 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	// 1. Start Recording OCT
 	CDataWriter* pDataWriter = new PullbackLengthManager();
 	pDataWriter->Initialize(settingPullback.nBufferSize * sizeof(USHORT));
-	pDataWriter->AddExtraData(OCTHeader::ExtraData::Dispersion, pSystem->m_pImagingPullback->GetCalibrationData(), settingPullback.nAScan * 2 * sizeof(int));
+	size_t count = static_cast<size_t>(settingPullback.nAScan);
+	if (count > std::numeric_limits<size_t>::max() / (2 * sizeof(int)))
+	{
+		PLOGI.printf("nAScan is too large.");
+		delete pDataWriter;
+		return ERROR;;
+	}
+	pDataWriter->AddExtraData(OCTHeader::ExtraData::Dispersion, pSystem->m_pImagingPullback->GetCalibrationData(), count * 2 * sizeof(int));
 	if (ImagingType::Default == ImagingType::LabImaging)
 	{
 		pDataWriter->AddExtraData(OCTHeader::ExtraData::Background, 
