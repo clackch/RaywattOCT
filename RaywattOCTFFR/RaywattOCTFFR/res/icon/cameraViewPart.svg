@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="91" height="181" viewBox="0 0 91 181">
+    <defs>
+        <clipPath id="m951pd2k4a">
+            <path data-name="사각형 1369" transform="translate(-.216 -.092)" style="stroke:#b1b1b1;stroke-dasharray:2 2;fill:none" d="M0 0h91v181H0z"/>
+        </clipPath>
+    </defs>
+    <g data-name="마스크 그룹 462" transform="rotate(180 45.392 90.454)" style="clip-path:url(#m951pd2k4a)">
+        <g data-name="Cross-section View_이미지" transform="translate(-.216 -.092)" style="stroke:#b1b1b1;stroke-dasharray:2 2;fill:none">
+            <ellipse cx="90" cy="90.5" rx="90" ry="90.5" style="stroke:none"/>
+            <ellipse cx="90" cy="90.5" rx="89.5" ry="90" style="fill:none"/>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,838 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+                    xmlns:component="clr-namespace:RaywattOCTFFR.Views.Component">
+
+    <!-- Button -->
+    <Style TargetType="Button" x:Key="SideMenuTitleLeft">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <StackPanel Orientation="Vertical">
+                        <Grid Height="20" Background="Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="8.3"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Image x:Name="icon" Grid.Column="1" Height="8" VerticalAlignment="Center" Source="{svgc:SvgImage Source=/res/icon/sideMenuArrowLeft.svg}"/>
+                            <TextBlock x:Name="title" Grid.Column="3" VerticalAlignment="Center" Text="{TemplateBinding Content}" Foreground="{StaticResource SideMenuTitleBrush}" FontFamily="Pretendard" FontWeight="Medium" FontSize="12px"/>
+                        </Grid>
+                        <Separator Height="1" Margin="0,0,0,0" Background="{DynamicResource SeparatorBrush}"/>
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style TargetType="Button" x:Key="SideMenuTitleLeftCollapsed">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <StackPanel Orientation="Vertical">
+                        <Grid Height="20" Background="Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="7.7"/>
+                                <ColumnDefinition Width="7.3"/>
+                            </Grid.ColumnDefinitions>
+                            <Image x:Name="icon" Grid.Column="1" Source="{svgc:SvgImage Source=/res/icon/sideMenuArrowRight.svg}"/>
+                        </Grid>
+                        <Separator Height="1" Margin="0,0,0,0" Background="{DynamicResource SeparatorBrush}"/>
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Button" x:Key="SideMenuTitleRight">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <StackPanel Orientation="Vertical">
+                        <Grid Height="20" Background="Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="7.7"/>
+                                <ColumnDefinition Width="8.3"/>
+                            </Grid.ColumnDefinitions>
+                            <Image x:Name="icon" Grid.Column="2" Height="8" VerticalAlignment="Center" Source="{svgc:SvgImage Source=/res/icon/sideMenuArrowRight.svg}"/>
+                            <TextBlock x:Name="title" Grid.Column="1" VerticalAlignment="Center" Text="{TemplateBinding Content}" Foreground="{StaticResource SideMenuTitleBrush}" FontFamily="Pretendard" FontWeight="Medium" FontSize="12px"/>
+                        </Grid>
+                        <Separator Height="1" Margin="0,0,0,0" Background="{DynamicResource SeparatorBrush}"/>
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Button" x:Key="SideMenuTitleRightCollapsed">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <StackPanel Orientation="Vertical">
+                        <Grid Height="20" Background="Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="7.3"/>
+                                <ColumnDefinition Width="7.7"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Image x:Name="icon" Grid.Column="1" Source="{svgc:SvgImage Source=/res/icon/sideMenuArrowLeft.svg}"/>
+                        </Grid>
+                        <Separator Height="1" Margin="0,0,0,0" Background="{DynamicResource SeparatorBrush}"/>
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- OutlinedBtnType1 -->
+    <Style TargetType="Button" x:Key="OutlinedBtnType1" BasedOn="{StaticResource Pretendard-Medium-14}">
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray3Brush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="border" CornerRadius="6" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}" Background="Transparent"/>
+                        <ContentPresenter x:Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Height" Value="26">
+                            <Setter TargetName="border" Property="CornerRadius" Value="4"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource AdditionalColor1Brush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainThemeBrush}"/>
+                            <Setter TargetName="border" Property="Background" Value="Transparent"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource MainThemeBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource GrayscaleGray6Brush}"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource GrayscaleGray6Brush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType1-Large" BasedOn="{StaticResource OutlinedBtnType1}">
+        <Setter Property="Width" Value="200"/>
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="FontSize" Value="18"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType1-Medium" BasedOn="{StaticResource OutlinedBtnType1}">
+        <Setter Property="Width" Value="192"/>
+        <Setter Property="Height" Value="32"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType1-Small-Extra" BasedOn="{StaticResource OutlinedBtnType1}">
+        <Setter Property="Width" Value="160"/>
+        <Setter Property="Height" Value="26"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType1-Small-Wide" BasedOn="{StaticResource OutlinedBtnType1}">
+        <Setter Property="Width" Value="120"/>
+        <Setter Property="Height" Value="26"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType1-Small-Medium" BasedOn="{StaticResource OutlinedBtnType1}">
+        <Setter Property="Width" Value="96"/>
+        <Setter Property="Height" Value="26"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType1-Small-Short" BasedOn="{StaticResource OutlinedBtnType1}">
+        <Setter Property="Width" Value="74"/>
+        <Setter Property="Height" Value="26"/>
+    </Style>
+
+    <!-- OutlinedBtnType2 -->
+    <Style TargetType="Button" x:Key="OutlinedBtnType2" BasedOn="{StaticResource Pretendard-Medium-14}">
+        <Setter Property="Foreground" Value="{DynamicResource MainPrimaryColorBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="border" CornerRadius="6" BorderThickness="1" BorderBrush="{DynamicResource MainPrimaryColorBrush}" Background="Transparent"/>
+                        <ContentPresenter x:Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Height" Value="26">
+                            <Setter TargetName="border" Property="CornerRadius" Value="4"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource MainThemeBrush}"/>
+                            <Setter TargetName="border" Property="Opacity" Value="0.3"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="Transparent"/>
+                            <Setter TargetName="border" Property="Opacity" Value="1.0"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainThemePressedBrush}"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource MainThemePressedBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource GrayscaleGray6Brush}"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource GrayscaleGray6Brush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType2-Large" BasedOn="{StaticResource OutlinedBtnType2}">
+        <Setter Property="Width" Value="200"/>
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="FontSize" Value="18"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType2-Medium" BasedOn="{StaticResource OutlinedBtnType2}">
+        <Setter Property="Width" Value="192"/>
+        <Setter Property="Height" Value="32"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType2-Small" BasedOn="{StaticResource OutlinedBtnType2}">
+        <Setter Property="Width" Value="120"/>
+        <Setter Property="Height" Value="26"/>
+    </Style>
+
+    <!-- OutlinedBtnType3 -->
+    <Style TargetType="Button" x:Key="OutlinedBtnType3" BasedOn="{StaticResource Pretendard-Medium-14}">
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="border" CornerRadius="6" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}" Background="Transparent"/>
+                        <ContentPresenter x:Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Height" Value="26">
+                            <Setter TargetName="border" Property="CornerRadius" Value="4"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource AdditionalColor4Brush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainThemeBrush}"/>
+                            <Setter TargetName="border" Property="Background" Value="Transparent"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource MainThemeBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource GrayscaleGray7Brush}"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource GrayscaleGray7Brush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType3-Large" BasedOn="{StaticResource OutlinedBtnType3}">
+        <Setter Property="Width" Value="200"/>
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="FontSize" Value="18"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType3-Medium" BasedOn="{StaticResource OutlinedBtnType3}">
+        <Setter Property="Width" Value="192"/>
+        <Setter Property="Height" Value="32"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType3-Small-Extra" BasedOn="{StaticResource OutlinedBtnType3}">
+        <Setter Property="Width" Value="160"/>
+        <Setter Property="Height" Value="26"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType3-Small-Wide" BasedOn="{StaticResource OutlinedBtnType3}">
+        <Setter Property="Width" Value="120"/>
+        <Setter Property="Height" Value="26"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType3-Small-Medium" BasedOn="{StaticResource OutlinedBtnType3}">
+        <Setter Property="Width" Value="96"/>
+        <Setter Property="Height" Value="26"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType3-Small-Short" BasedOn="{StaticResource OutlinedBtnType3}">
+        <Setter Property="Width" Value="74"/>
+        <Setter Property="Height" Value="26"/>
+    </Style>
+
+    <!-- OutlinedBtnType4 -->
+    <Style TargetType="Button" x:Key="OutlinedBtnType4" BasedOn="{StaticResource Pretendard-Medium-14}">
+        <Setter Property="Foreground" Value="{DynamicResource MainPrimaryColorBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="border" CornerRadius="6" BorderThickness="1" BorderBrush="{DynamicResource MainPrimaryColorBrush}" Background="Transparent"/>
+                        <ContentPresenter x:Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Height" Value="26">
+                            <Setter TargetName="border" Property="CornerRadius" Value="4"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource MainThemeBrush}"/>
+                            <Setter TargetName="border" Property="Opacity" Value="0.3"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="Transparent"/>
+                            <Setter TargetName="border" Property="Opacity" Value="1.0"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainThemePressedBrush}"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource MainThemePressedBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource GrayscaleGray7Brush}"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource GrayscaleGray7Brush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType4-Large" BasedOn="{StaticResource OutlinedBtnType4}">
+        <Setter Property="Width" Value="200"/>
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="FontSize" Value="18"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType4-Medium" BasedOn="{StaticResource OutlinedBtnType4}">
+        <Setter Property="Width" Value="192"/>
+        <Setter Property="Height" Value="32"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="OutlinedBtnType4-Small" BasedOn="{StaticResource OutlinedBtnType4}">
+        <Setter Property="Width" Value="120"/>
+        <Setter Property="Height" Value="26"/>
+    </Style>
+
+    <!-- ContainedBtnType1 -->
+    <Style TargetType="Button" x:Key="ContainedBtnType1" BasedOn="{StaticResource Pretendard-Medium-14}">
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray7Brush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="border" CornerRadius="6" BorderThickness="0" Background="{DynamicResource MainPrimaryColorBrush}"/>
+                        <ContentPresenter x:Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Height" Value="26">
+                            <Setter TargetName="border" Property="CornerRadius" Value="4"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource MainSecondaryColorBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource MainTertiaryColorBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource AdditionalColor2Brush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Button" x:Key="ContainedBtnType1-XLarge-Wide" BasedOn="{StaticResource ContainedBtnType1}">
+        <Setter Property="Width" Value="450"/>
+        <Setter Property="Height" Value="54"/>
+        <Setter Property="FontSize" Value="18"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="ContainedBtnType1-XLarge-Short" BasedOn="{StaticResource ContainedBtnType1}">
+        <Setter Property="Width" Value="200"/>
+        <Setter Property="Height" Value="54"/>
+        <Setter Property="FontSize" Value="18"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="ContainedBtnType1-Large-Wide" BasedOn="{StaticResource ContainedBtnType1}">
+        <Setter Property="Width" Value="200"/>
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="FontSize" Value="18"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="ContainedBtnType1-Large-Short" BasedOn="{StaticResource ContainedBtnType1}">
+        <Setter Property="Width" Value="150"/>
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="FontSize" Value="18"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="ContainedBtnType1-Medium" BasedOn="{StaticResource ContainedBtnType1}">
+        <Setter Property="Width" Value="192"/>
+        <Setter Property="Height" Value="32"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="ContainedBtnType1-Small-Wide" BasedOn="{StaticResource ContainedBtnType1}">
+        <Setter Property="Width" Value="120"/>
+        <Setter Property="Height" Value="26"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="ContainedBtnType1-Small-Short" BasedOn="{StaticResource ContainedBtnType1}">
+        <Setter Property="Width" Value="74"/>
+        <Setter Property="Height" Value="26"/>
+    </Style>
+
+    <!-- ContainedBtnType2 -->
+    <Style TargetType="Button" x:Key="ContainedBtnType2" BasedOn="{StaticResource Pretendard-Medium-14}">
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray5Brush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="border" CornerRadius="6" BorderThickness="0" Background="{DynamicResource GrayscaleGray7Brush}"/>
+                        <ContentPresenter x:Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Height" Value="26">
+                            <Setter TargetName="border" Property="CornerRadius" Value="4"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource MainPrimaryColorBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource MainTertiaryColorBrush}"/>
+                            <Setter TargetName="border" Property="Opacity" Value="0.08"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource MainPrimaryColorBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource GrayscaleGray6Brush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Button" x:Key="ContainedBtnType2-Large" BasedOn="{StaticResource ContainedBtnType2}">
+        <Setter Property="Width" Value="200"/>
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="FontSize" Value="18"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="ContainedBtnType2-Medium" BasedOn="{StaticResource ContainedBtnType2}">
+        <Setter Property="Width" Value="192"/>
+        <Setter Property="Height" Value="32"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="ContainedBtnType2-Small-Wide" BasedOn="{StaticResource ContainedBtnType2}">
+        <Setter Property="Width" Value="120"/>
+        <Setter Property="Height" Value="26"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="ContainedBtnType2-Small-Short" BasedOn="{StaticResource ContainedBtnType2}">
+        <Setter Property="Width" Value="74"/>
+        <Setter Property="Height" Value="26"/>
+    </Style>
+
+    <!-- BtnForTest -->
+    <Style TargetType="Button" x:Key="BtnForTest" BasedOn="{StaticResource Pretendard-Medium-14}">
+        <Setter Property="Foreground" Value="Transparent"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="border" CornerRadius="6" BorderThickness="1" BorderBrush="Transparent" Background="Transparent"/>
+                        <ContentPresenter x:Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Height" Value="26">
+                            <Setter TargetName="border" Property="CornerRadius" Value="4"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource AdditionalColor1Brush}"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource MainBackgroundColorBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainThemeBrush}"/>
+                            <Setter TargetName="border" Property="Background" Value="Transparent"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource MainThemeBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- BtnForTest2 -->
+    <Style TargetType="Button" x:Key="BtnForTest2" BasedOn="{StaticResource Pretendard-Medium-14}">
+        <Setter Property="Foreground" Value="{DynamicResource MainBackgroundColorBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="border" CornerRadius="6" BorderThickness="1" Background="{DynamicResource AdditionalColor1Brush}"/>
+                        <ContentPresenter x:Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Height" Value="26">
+                            <Setter TargetName="border" Property="CornerRadius" Value="4"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource AdditionalColor2Brush}"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource MainTertiaryColorBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainThemeBrush}"/>
+                            <Setter TargetName="border" Property="Background" Value="Transparent"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource MainThemeBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- FfrPredictBtn -->
+    <Style TargetType="Button" x:Key="FfrPredictBtn" BasedOn="{StaticResource Pretendard-Medium-18}">
+        <Setter Property="Width" Value="250"/>
+        <Setter Property="Height" Value="54"/>
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="Foreground" Value="{DynamicResource MainPrimaryColorBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="border" CornerRadius="6" BorderThickness="1" BorderBrush="{DynamicResource MainPrimaryColorBrush}" Background="Transparent"/>
+                        <Image x:Name="icon" Source="{svgc:SvgImage Source=/res/icon/ffrPredict.svg}" Width="26" Height="27" HorizontalAlignment="Left" Margin="56,0,0,0"/>
+                        <ContentPresenter x:Name="content" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="95,0,0,0"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource MainThemeBrush}"/>
+                            <Setter TargetName="border" Property="Opacity" Value="0.3"/>
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/icon/ffrPredict_hover.svg}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="Transparent"/>
+                            <Setter TargetName="border" Property="Opacity" Value="1.0"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainThemePressedBrush}"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource MainThemePressedBrush}"/>
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/icon/ffrPredict_active.svg}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource GrayscaleGray6Brush}"/>
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource GrayscaleGray6Brush}"/>
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/icon/ffrPredict_disabled.svg}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Setting -->
+    <Style TargetType="Button" x:Key="SettingSelected" BasedOn="{StaticResource Pretendard-Medium-18}">
+        <Setter Property="Width" Value="200"/>
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="Foreground" Value="{DynamicResource MainPrimaryColorBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid Background="Transparent">
+                        <Border x:Name="border" CornerRadius="6" BorderThickness="0" Background="{DynamicResource MainPrimaryColorBrush}" Opacity="0.08"/>
+                        <ContentPresenter x:Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Button" x:Key="SettingNotSelected" BasedOn="{StaticResource Pretendard-Medium-18}">
+        <Setter Property="Width" Value="200"/>
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray5Brush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid Background="Transparent">
+                        <ContentPresenter x:Name="content" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="content" Property="TextBlock.Foreground" Value="{DynamicResource MainPrimaryColorBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    
+
+    <!-- Toggle Button -->
+    <Style TargetType="ToggleButton" x:Key="ContainedToggleBtnType2">
+        <Setter Property="Width" Value="192"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Grid>
+                        <Border x:Name="border" CornerRadius="6" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" BorderThickness="1" BorderBrush="Transparent">
+                            <Grid Background="Transparent"/>
+                        </Border>
+                        <TextBlock x:Name="title" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{TemplateBinding Content}" Foreground="{DynamicResource GrayscaleGray5Brush}" FontFamily="Pretendard" FontWeight="Medium" FontSize="14px"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="Transparent"/>
+                            <Setter TargetName="border" Property="Opacity" Value="1.0"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="title" Property="Foreground" Value="{DynamicResource MainThemeBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="border" Property="Opacity" Value="0.08"/>
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource MainThemeBrush}"/>
+                            <Setter TargetName="title" Property="Foreground" Value="{DynamicResource MainThemeBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ToggleButton" x:Key="ContainedToggleBtnType2-Small" BasedOn="{StaticResource ContainedToggleBtnType2}">
+        <Setter Property="Width" Value="120"/>
+        <Setter Property="Height" Value="26"/>
+    </Style>
+
+    <Style TargetType="ToggleButton" x:Key="IconToggleBtn-Large">
+        <Setter Property="Width" Value="56"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Grid>
+                        <Border x:Name="border" CornerRadius="12" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="{DynamicResource BackgroundBrush}" BorderThickness="4" BorderBrush="Transparent">
+                            <Grid Background="Transparent"/>
+                        </Border>
+                        <Image x:Name="icon" Source="{svgc:SvgImage Source=/res/button/toggle/large.svg}" Width="18" Height="18" HorizontalAlignment="Left" Margin="7"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="Transparent"/>
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/button/toggle/large.svg}"/>
+                            <Setter TargetName="icon" Property="HorizontalAlignment" Value="Left"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/button/toggle/large_disabled.svg}"/>
+                            <Setter TargetName="icon" Property="HorizontalAlignment" Value="Left"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="White"/>
+                            <Setter TargetName="border" Property="Opacity" Value="0.08"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/button/toggle/large_active.svg}"/>
+                            <Setter TargetName="icon" Property="HorizontalAlignment" Value="Right"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ToggleButton" x:Key="IconToggleBtn-Small">
+        <Setter Property="Width" Value="32"/>
+        <Setter Property="Height" Value="20"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Grid>
+                        <Border x:Name="border" CornerRadius="8" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="{DynamicResource BackgroundBrush}" BorderThickness="2" BorderBrush="Transparent">
+                            <Grid Background="Transparent"/>
+                        </Border>
+                        <Image x:Name="icon" Source="{svgc:SvgImage Source=/res/button/toggle/small.svg}" Width="12" Height="12" HorizontalAlignment="Left" Margin="4"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="Transparent"/>
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/button/toggle/small.svg}"/>
+                            <Setter TargetName="icon" Property="HorizontalAlignment" Value="Left"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/button/toggle/small_disabled.svg}"/>
+                            <Setter TargetName="icon" Property="HorizontalAlignment" Value="Left"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="White"/>
+                            <Setter TargetName="border" Property="Opacity" Value="0.08"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/button/toggle/small_active.svg}"/>
+                            <Setter TargetName="icon" Property="HorizontalAlignment" Value="Right"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ToggleButton" x:Key="TabToggleBtn">
+        <Setter Property="Width" Value="92"/>
+        <Setter Property="Height" Value="60"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Grid Background="Transparent">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="21"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock x:Name="text" Grid.Row="1" Text="{TemplateBinding Content}" HorizontalAlignment="Center" FontFamily="Pretendard" FontWeight="Medium" FontSize="18" Foreground="{DynamicResource TabMenuDefaultBrush}"/>
+                        <StackPanel x:Name="separator" Grid.Row="2" Height="4" VerticalAlignment="Bottom" Background="Transparent"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="True">
+                            <Setter TargetName="text" Property="Foreground" Value="{DynamicResource TabMenuDefaultBrush}"/>
+                            <Setter TargetName="separator" Property="Background" Value="Transparent"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="text" Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="text" Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+                            <Setter TargetName="separator" Property="Background" Value="{DynamicResource MainThemeBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ToggleButton" x:Key="LiveToggleBtn" BasedOn="{StaticResource Pretendard-Medium-14}">
+        <Setter Property="Width" Value="98"/>
+        <Setter Property="Height" Value="36"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Grid>
+                        <Border x:Name="hoverBorder" CornerRadius="18" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="Transparent"/>
+                        <Border x:Name="outsideBorder" CornerRadius="18" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="{DynamicResource AdditionalColor6Brush}"/>
+                        <Grid>
+                            <Label x:Name="text" Content="{TemplateBinding Content}" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{DynamicResource GrayscaleBlackBrush}"/>
+                            <Border x:Name="border" CornerRadius="12" Width="48" Height="24" Background="{DynamicResource GrayscaleGray8Brush}" BorderThickness="0" Margin="39,4,4,4">
+                                <Image x:Name="icon" Source="{svgc:SvgImage Source=/res/button/toggle/live.svg}" Width="18" Height="18" HorizontalAlignment="Left" Margin="3"/>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="outsideBorder" Property="Opacity" Value="0.5"/>
+                            <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            <Setter TargetName="text" Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="outsideBorder" Property="Background" Value="{DynamicResource MainPrimaryColorBrush}"/>
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/button/toggle/live_active.svg}"/>
+                            <Setter TargetName="icon" Property="HorizontalAlignment" Value="Right"/>
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="False"/>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="hoverBorder" Property="BorderBrush" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+                            <Setter TargetName="hoverBorder" Property="Opacity" Value="0.08"/>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="True"/>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="hoverBorder" Property="BorderBrush" Value="{DynamicResource AdditionalColor2Brush}"/>
+                        </MultiTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type component:IconToggleButton}" x:Key="ToggleButtonWithText" BasedOn="{StaticResource Pretendard-Medium-14}">
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type component:IconToggleButton}">
+                    <Border CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}">
+                        <StackPanel Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Image x:Name="icon" Source="{Binding IconDefault, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}" Height="20" Margin="10,0,0,0"/>
+                            <Label Content="{TemplateBinding Content}" VerticalAlignment="Center" Margin="6,0,0,0" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+                            <Grid Margin="8,0,8,0">
+                                <Border x:Name="hoverBorder" CornerRadius="8" Width="34" Height="22" Background="Transparent" BorderThickness="2" BorderBrush="Transparent"/>
+                                <Border x:Name="border" CornerRadius="8" Width="30" Height="18" Background="Transparent" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}">
+                                    <Image x:Name="toggleIcon" Source="{svgc:SvgImage Source=/res/button/toggle/small.svg}" Width="12" Height="12" HorizontalAlignment="Left" Margin="2"/>
+                                </Border>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="toggleIcon" Property="Source" Value="{svgc:SvgImage Source=/res/button/toggle/small_disabled.svg}"/>
+                            <Setter TargetName="toggleIcon" Property="HorizontalAlignment" Value="Left"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="hoverBorder" Property="BorderBrush" Value="White"/>
+                            <Setter TargetName="hoverBorder" Property="Opacity" Value="0.08"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="toggleIcon" Property="Source" Value="{svgc:SvgImage Source=/res/button/toggle/small_active.svg}"/>
+                            <Setter TargetName="toggleIcon" Property="HorizontalAlignment" Value="Right"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ToggleButton" x:Key="FlyThroughToggleBtn" BasedOn="{StaticResource Pretendard-Medium-14}">
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Border CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}">
+                        <StackPanel Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Image x:Name="icon" Source="{svgc:SvgImage Source=/res/icon/flyThroughDtoP.svg}" Height="20" Margin="10,0,0,0"/>
+                            <Label Content="{TemplateBinding Content}" VerticalAlignment="Center" Margin="6,0,0,0" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+                            <Grid Margin="8,0,8,0">
+                                <Border x:Name="hoverBorder" CornerRadius="8" Width="34" Height="22" Background="Transparent" BorderThickness="2" BorderBrush="Transparent"/>
+                                <Border x:Name="border" CornerRadius="8" Width="30" Height="18" Background="Transparent" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}">
+                                    <Image x:Name="toggleIcon" Source="{svgc:SvgImage Source=/res/button/toggle/small.svg}" Width="12" Height="12" HorizontalAlignment="Left" Margin="2"/>
+                                </Border>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="toggleIcon" Property="Source" Value="{svgc:SvgImage Source=/res/button/toggle/small_disabled.svg}"/>
+                            <Setter TargetName="toggleIcon" Property="HorizontalAlignment" Value="Left"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="hoverBorder" Property="BorderBrush" Value="White"/>
+                            <Setter TargetName="hoverBorder" Property="Opacity" Value="0.08"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="toggleIcon" Property="Source" Value="{svgc:SvgImage Source=/res/button/toggle/small_active.svg}"/>
+                            <Setter TargetName="toggleIcon" Property="HorizontalAlignment" Value="Right"/>
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/icon/flyThroughPtoD.svg}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Repeat Button -->
+    <Style TargetType="RepeatButton">
+
+    </Style>
+    
+</ResourceDictionary>

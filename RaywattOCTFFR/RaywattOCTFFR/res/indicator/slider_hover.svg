@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+    <defs>
+        <filter id="tj1ze5no4a" x="0" y="0" width="32" height="32" filterUnits="userSpaceOnUse">
+            <feOffset dy="3"/>
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feFlood flood-opacity=".161"/>
+            <feComposite operator="in" in2="blur"/>
+            <feComposite in="SourceGraphic"/>
+        </filter>
+    </defs>
+    <g style="filter:url(#tj1ze5no4a)">
+		<g style="filter:url(#hukb5ol39a)">
+			<g data-name="패스 2552" style="fill:none;opacity:.08">
+				<path d="M0 2.6v7.012L7 16.6l7-6.988V2.6z" style="stroke:none" transform="translate(13 7.4)"/>
+				<path d="M0 2.6v7.012L7 16.6l7-6.988V2.6H0m-4-4h22V11.27L7 22.251l-11-10.98V-1.4z" style="fill:#1ed760;stroke:none" transform="translate(13 7.4)"/>
+			</g>
+		</g>
+		<g style="filter:url(#zyggzii1ic)">
+			<g data-name="패스 2550" style="fill:#161616">
+				<path d="m7 15.187-6-5.99V3.6h12v5.597l-6 5.99z" style="stroke:none" transform="translate(13 7.4)"/>
+				<path d="M2 4.6v4.183l5 4.99 5-4.99V4.6H2m-2-2h14v7.012L7 16.6 0 9.612V2.6z" style="fill:#1ed760;stroke:none" transform="translate(13 7.4)"/>
+			</g>
+		</g>
+    </g>
+</svg>

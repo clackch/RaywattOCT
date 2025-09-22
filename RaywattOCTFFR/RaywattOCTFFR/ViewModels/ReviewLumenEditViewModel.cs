@@ -1,0 +1,315 @@
+﻿using log4net;
+using RaywattOCTFFR.Common.Bases;
+using RaywattOCTFFR.Common.Dialog;
+using RaywattOCTFFR.Models;
+using RaywattOCTFFR.Services;
+using System;
+using System.Collections.Generic;
+using static RaywattOCT.RayCoreWrapper;
+using System.Windows.Navigation;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using System.Windows.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using RaywattOCTFFR.Common.Messages;
+using RaywattOCTFFR.Common.Annotation.Models;
+using System.Threading;
+using RaywattOCTFFR.Common.Util;
+using OpenCvSharp;
+using Newtonsoft.Json;
+using System.Linq;
+
+namespace RaywattOCTFFR.ViewModels
+{
+    public partial class ReviewLumenEditViewModel : OCTViewModelBase
+    {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewLumenEditViewModel));
+
+        private readonly SqlManager _sqlManager;
+
+        private IDialogService _dialogService;
+
+        [ObservableProperty]
+        private PrevStatus _prevStatus;
+
+        [ObservableProperty]
+        private ReviewStatus _reviewStatus;
+
+        [ObservableProperty]
+        private Patient _patient;
+
+        [ObservableProperty]
+        private PatientCase _patientCase;
+
+        [ObservableProperty]
+        private Zoom _zoom = new Zoom();
+
+        private int frameNumber = -1;
+        public int FrameNumber
+        {
+            get { return frameNumber; }
+            set
+            {
+                frameNumber = value;
+                OnPropertyChanged(nameof(FrameNumber));
+                DisplayFrameNumber = FrameNumber + 1;
+            }
+        }
+
+        [ObservableProperty]
+        private int displayFrameNumber;
+
+        private List<LumenContour> _lumenContours;
+        public List<LumenContour> LumenContours { get { return _lumenContours; } set { _lumenContours = value; OnPropertyChanged(nameof(LumenContours)); } }
+
+        private string _lumenContourCommand;
+        public string LumenContourCommand { get { return _lumenContourCommand; } set { _lumenContourCommand = value; OnPropertyChanged(nameof(LumenContourCommand)); } }
+
+        [ObservableProperty]
+        private List<int> _modifiedFrames = new List<int>();
+
+        private ICommand _okCommand;
+        public ICommand OkCommand
+        {
+            get { return this._okCommand ?? (this._okCommand = new RelayCommand(Ok)); }
+        }
+
+        private ICommand _cancelCommand;
+        public ICommand CancelCommand
+        {
+            get { return this._cancelCommand ?? (this._cancelCommand = new RelayCommand(Cancel)); }
+        }
+
+        private ICommand _informationCommand;
+        public ICommand InformationCommand
+        {
+            get { return this._informationCommand ?? (this._informationCommand = new RelayCommand(Information)); }
+        }
+
+        private ICommand _zoomInCommand;
+        public ICommand ZoomInCommand
+        {
+            get { return this._zoomInCommand ?? (this._zoomInCommand = new RelayCommand(ZoomIn)); }
+        }
+
+        private ICommand _zoomOutCommand;
+        public ICommand ZoomOutCommand
+        {
+            get { return this._zoomOutCommand ?? (this._zoomOutCommand = new RelayCommand(ZoomOut)); }
+        }
+
+        private ICommand _restoreCommand;
+        public ICommand RestoreCommand
+        {
+            get { return this._restoreCommand ?? (this._restoreCommand = new RelayCommand(Restore)); }
+        }
+
+        private ICommand _resetCommand;
+        public ICommand ResetCommand
+        {
+            get { return this._resetCommand ?? (this._resetCommand = new RelayCommand(Reset)); }
+        }
+
+        private ICommand _autoDetectCommand;
+        public ICommand AutoDetectCommand
+        {
+            get { return this._autoDetectCommand ?? (this._autoDetectCommand = new RelayCommand(AutoDetect)); }
+        }
+
+        private ICommand _cmdPlayback;
+        public ICommand CmdPlayback
+        {
+            get { return this._cmdPlayback ?? (this._cmdPlayback = new RelayCommand<object>(Playback)); }
+        }
+
+        public ReviewLumenEditViewModel(SqlManager sqlManager, IDialogService dialogService)
+        {
+            _log.Debug("ReviewLumenEditViewModel");
+
+            Constants.CurrentPage = Constants.ReviewLumenEditPage;
+
+            _sqlManager = sqlManager;
+            _dialogService = dialogService;
+        }
+
+        public override void OnNavigated(object sender, object navigatedEventArgs)
+        {
+            base.OnNavigated(sender, navigatedEventArgs);
+            _log.Debug("OnNavigated");
+
+            var extraData = ((NavigationEventArgs)navigatedEventArgs).ExtraData;
+
+            if (extraData != null)
+            {
+                Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
+                Patient = (Patient)data["patient"];
+                PrevStatus = (PrevStatus)data["prevStatus"];
+                PatientCase = (PatientCase)data["patientCase"];
+                ReviewStatus = (ReviewStatus)data["reviewStatus"];
+
+                Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
+
+                LumenContours = PatientCase.LumenContours;
+                CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);
+
+                SetCrossSectionBackground(RaySession.Review, Constants.CardBackgroundColor);
+
+                GetImageInfo(RaySession.Review);
+                MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
+            }
+        }
+
+        public override void OnNavigating(object sender, object navigationEventArgs)
+        {
+            base.OnNavigating(sender, navigationEventArgs);
+            _log.Debug("OnNavigating");
+        }
+
+        protected override void UpdateCrossSectionImage()
+        {
+            if (DrawCrossSectionImage())
+            {
+                FrameNumber = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current;
+            }
+        }
+
+        private void Ok()
+        {
+            _log.Debug("Ok");
+            
+            GoToPreviousPage(true);
+        }
+
+        private void Cancel()
+        {
+            _log.Debug("Cancel");
+
+            GoToPreviousPage(false);
+        }
+
+        private void GoToPreviousPage(bool isSave)
+        {
+            _log.Debug("GoToPreviousPage");
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["patient"] = Patient;
+            if (isSave)
+            {
+                DeviceStatus.IsLumenSaved = false;
+
+                Thread threadSaveLumenContour = new Thread(() => ThreadSaveLumenContour());
+                threadSaveLumenContour.Start();
+            }
+            else
+            {
+                Reset();
+            }
+            parameter["patientCase"] = PatientCase;
+            parameter["prevStatus"] = PrevStatus;
+            parameter["reviewStatus"] = ReviewStatus;
+
+            ReviewStatus.IsLumenEdited = isSave;
+
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(ReviewStatus.CurrentPage) { Parameter = parameter });
+        }
+
+        private void ThreadSaveLumenContour()
+        {
+            ResetModifiedFrames();
+
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = PatientCase.Id;
+            sqlParameters["lumen_contour"] = CommonUtil.LumenContoursToJson(PatientCase.LumenContours);
+            sqlParameters["lumen_stent"] = JsonConvert.SerializeObject(PatientCase.LumenStents, Formatting.Indented);
+            int nRows = _sqlManager.UpdatePatientCaseAnnotationLumenContour(sqlParameters);
+            if (nRows == 0)
+            {
+                _log.Error("Update Error");
+            }
+
+            DeviceStatus.IsLumenSaved = true;
+
+            //Thread 종료 시, Review에서 OnRecvLongitude 받아서 Lumen Profile 생성하기 위함
+            RaySetProperty(Property.LongitudeDegree, PatientCase.IndicatorDegree);
+        }
+
+        private void ResetModifiedFrames()
+        {
+            ModifiedFrames = ModifiedFrames.Distinct().ToList();
+
+            foreach (int i in ModifiedFrames)
+            {
+                //Stent Apposition
+                Point[][] lumenContours = CommonUtil.GetLumenContours(PatientCase.LumenContours[i].Points);
+
+                if (lumenContours != null && PatientCase.LumenStents[i].AppositionLength != null)
+                {
+                    PatientCase.LumenStents[i].AppositionLength.Clear();
+                    for (int row = 0; row < PatientCase.LumenStents[i].Points.Count; row++)
+                    {
+                        PatientCase.LumenStents[i].AppositionLength.Add(CommonUtil.GetAppositionLength(lumenContours, new Point(PatientCase.LumenStents[i].Points[row].X, PatientCase.LumenStents[i].Points[row].Y)));
+                    }
+                }
+
+                //Sidebranch
+                PatientCase.LumenSidebranches[i].IsCalcOverlapping = false;
+            }
+        }
+
+        private void Information()
+        {
+            _log.Debug("Information");
+        }
+
+        private void ZoomIn()
+        {
+            _log.Debug("ZoomIn");
+
+            if (Zoom.ZoomIn())
+                LumenContourCommand = Constants.LumenContourZoomIn;
+        }
+
+        private void ZoomOut()
+        {
+            _log.Debug("ZoomOut");
+
+            if (Zoom.ZoomOut())
+                LumenContourCommand = Constants.LumenContourZoomOut;
+        }
+
+        private void Restore()
+        {
+            _log.Debug("Restore");
+
+            LumenContourCommand = Constants.LumenContourRestore;
+        }
+
+        private void Reset()
+        {
+            _log.Debug("Reset");
+
+            LumenContourCommand = Constants.LumenContourReset;
+        }
+
+        private void AutoDetect()
+        {
+            _log.Debug("AutoDetect");
+
+            LumenContourCommand = Constants.LumenContourAutoDetect;
+        }
+
+        private void Playback(object param)
+        {
+            string action = (string)param;
+
+            if (action.ToLower().Equals("prev"))
+            {
+                PrevFrame(RaySession.Review);
+            }
+            else if (action.ToLower().Equals("next"))
+            {
+                NextFrame(RaySession.Review);
+            }
+        }
+    }
+}
