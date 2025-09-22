@@ -18,15 +18,28 @@ void RFIDKeyController::readKeys() {
 	while (std::getline(keyFile, line)) {
 		if (line.empty()) continue;
 		std::vector<BYTE> key;
+		bool valid = true;
 		for (int i = 0; i < KEY_LEN; ++i) {
 			std::string hexByte = line.substr(i * 2, 2); 
-			BYTE byteVal = static_cast<BYTE>(std::stoi(hexByte, nullptr, 16));
-			key.push_back(byteVal);
+			try {
+				int intByte = std::stoi(hexByte, nullptr, 16);
+				if (intByte < 0 || intByte > 255) {
+					valid = false;
+					break;
+				}
+				key.push_back(static_cast<BYTE>(intByte));
+			}
+			catch (const std::exception&) {
+				valid = false;
+				break;
+			}
 		}
+		if (!valid) continue;
 		keys.push_back(key);
 	}
 	keyFile.close();
 }
+
 void RFIDKeyController::addKey(BYTE* key) {
 	if (isDuplicate(key, KEY_LEN)) return;
 	std::ofstream logFile(keyFilePath, std::ios::app);

@@ -159,8 +159,8 @@ bool RFIDProtocol::cmpUID(BYTE* UID, int hardwardUIDSize) {
 	if (hardwardUIDSize != HARDWARE_UID_LENGTH) return false;
 
 	for (int i = 0; i < hardwardUIDSize +CUSTOM_UID_LENGTH; i++) {
-		if (i < HARDWARE_UID_LENGTH && UID[i] != aRFIDState.aHardwareUID[i]
-			|| UID[i] != aRFIDState.aCustomUID[i - HARDWARE_UID_LENGTH]) return false;
+		if ((i < HARDWARE_UID_LENGTH && UID[i] != aRFIDState.aHardwareUID[i])
+			|| (i >= HARDWARE_UID_LENGTH && UID[i] != aRFIDState.aCustomUID[i - HARDWARE_UID_LENGTH])) return false;
 	}
 	return true;
 }
@@ -226,8 +226,8 @@ bool RFIDProtocol::cmpUID_NOLOCK(BYTE* UID, int hardwardUIDSize) {
 	if (hardwardUIDSize != HARDWARE_UID_LENGTH) return false;
 
 	for (int i = 0; i < hardwardUIDSize + CUSTOM_UID_LENGTH; i++) {
-		if (i < HARDWARE_UID_LENGTH && UID[i] != aRFIDState.aHardwareUID[i]
-			|| UID[i] != aRFIDState.aCustomUID[i - HARDWARE_UID_LENGTH]) return false;
+		if ((i < HARDWARE_UID_LENGTH && UID[i] != aRFIDState.aHardwareUID[i])
+			|| (i >= HARDWARE_UID_LENGTH && UID[i] != aRFIDState.aCustomUID[i - HARDWARE_UID_LENGTH])) return false;
 	}
 	return true;
 }

@@ -277,10 +277,11 @@ bool CRJController::GetIsTagging() {
 
 bool CRJController::IncreaseRFIDUsage(int uidSize, BYTE* UID) {
 	if (!m_initMotor) return false;
-	BYTE cnt = RFIDProtocol::getCount(UID, uidSize-CUSTOM_UID_LENGTH)+1;
-	if (cnt == 256) {
+	int cntInt = RFIDProtocol::getCount(UID, uidSize-CUSTOM_UID_LENGTH)+1;
+	if (cntInt >= 256) {
 		return false;
 	}
+	BYTE cnt = static_cast<BYTE>(cntInt);
 	BYTE serialPacket[MAX_PATH];
 	int packetLength;
 	RFIDProtocol::setPacketByFID(eFID::FID_RFID_SET_USAGE, serialPacket, packetLength, uidSize, UID, 1, &cnt);
@@ -291,6 +292,7 @@ bool CRJController::IncreaseRFIDUsage(int uidSize, BYTE* UID) {
 	int written = m_pConnection->Write(serialPacket, packetLength);
 	return (written == packetLength);
 }
+
 bool CRJController::ResetRFIDUsage(int uidSize, BYTE* UID) {
 	if (!m_initMotor) return false;
 
