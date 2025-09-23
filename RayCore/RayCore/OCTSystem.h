@@ -198,6 +198,7 @@ public:
 	RayError SetShowLumenGuide(double value);
 	double GetLumenSnrThreshold();
 	RayError SetLumenSnrThreshold(double value);
+	RayError SetRefractiveIndex(double value);
 
 private:
 	// Main Thread

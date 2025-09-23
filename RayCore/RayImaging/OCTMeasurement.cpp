@@ -42,7 +42,7 @@ void COCTMeasurement::CalculateAxialResolution(USHORT* fftData, UINT nLength, Se
 	double fLeftWidth = (double)(fftData[nLeftIndex] - nFWHM) / (double)(fftData[nLeftIndex] - fftData[nLeftIndex - 1]);
 	double fRightWidth = (double)(fftData[nRightIndex] - nFWHM) / (double)(fftData[nRightIndex - 1] - fftData[nRightIndex]);
 
-	nLineWidth = ((fRightWidth + nRightIndex) - (fLeftWidth + nLeftIndex)) * setting.fAxialResolutionScale;
+	nLineWidth = ((fRightWidth + nRightIndex) - (fLeftWidth + nLeftIndex)) * setting.GetAxialResolutionScale();
 }
 void COCTMeasurement::CalculateNoisePower(USHORT* fftData, UINT nLength, Setting setting, int nPeakIndex, USHORT& nNoisePower) {
 	int nStart, nEnd;
