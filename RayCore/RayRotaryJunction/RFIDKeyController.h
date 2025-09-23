@@ -20,5 +20,5 @@ public:
 	void static readKeys();
 	void static addKey(BYTE* key);
 	void static loadFirstKey(BYTE* key);
-	std::vector<std::vector<BYTE>> static getKeys();
+	static const std::vector<std::vector<BYTE>>& getKeys();
 };

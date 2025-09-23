@@ -999,15 +999,21 @@ void CRJController::handlePacket() {
 }
 
 void CRJController::findCorrectKey() {
-	std::vector<std::vector<BYTE>> keys = RFIDKeyController::getKeys();
-	for (std::vector<BYTE> key : keys) {
-		BYTE* keyVal = new BYTE[KEY_LEN];
+	const std::vector<std::vector<BYTE>>& keys = RFIDKeyController::getKeys();
+	for (const std::vector<BYTE>& key : keys) {
+		if(key.size() != KEY_LEN) {
+			continue;
+		}
+		BYTE keyVal[KEY_LEN];
 		for (int idx = 0; idx < KEY_LEN; idx++) {
 			keyVal[idx] = key[idx];
 		}
 		BYTE serialPacket[MAX_PATH];
-		int packetLength;
+		int packetLength = 0;
 		RFIDProtocol::setPacketByFID(eFID::FID_RFID_GET_KEY, serialPacket, packetLength, 0, NULL, 0, 0, keyVal);
+		if (packetLength < 2) {
+			continue;
+		}
 		BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 		serialPacket[packetLength - 2] = checksum;
 

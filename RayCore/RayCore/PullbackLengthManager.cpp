@@ -7,7 +7,8 @@
 #include <cstring>
 
 PullbackLengthManager::PullbackLengthManager() {
-	m_nNumOfSamples = 0;
+	if(m_nNumOfSamples != 0)
+		m_nNumOfSamples = 0;
 	ReadAccelDecelPofileParameter();
 }
 

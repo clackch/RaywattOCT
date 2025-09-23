@@ -58,20 +58,23 @@ void RFIDKeyController::addKey(BYTE* key) {
 	}
 	keys.push_back(tnsKey);
 }
+
 void RFIDKeyController::loadFirstKey(BYTE* key) {
+	if (!key) return;
+
+	std::fill_n(key, KEY_LEN, static_cast<BYTE>(0));
+
 	if (keys.empty()) {
 		readKeys();
 	}
 	if (keys.empty()) {
-		memset(key, 0x00, KEY_LEN);
 		return;
 	}
-	std::vector<BYTE> firstKey = keys.at(0);
-	for (int i = 0; i < KEY_LEN; i++) {
-		key[i] = firstKey[i];
-	}
+	const std::vector<BYTE>& firstKey = keys.front();
+	if (firstKey.size() != KEY_LEN) return;
+	std::copy_n(firstKey.data(), KEY_LEN, key);
 }
 
-std::vector<std::vector<BYTE>> RFIDKeyController::getKeys() {
+const std::vector<std::vector<BYTE>>& RFIDKeyController::getKeys() {
 	return keys;
 }
