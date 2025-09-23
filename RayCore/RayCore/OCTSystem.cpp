@@ -1828,9 +1828,9 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			const int nSheathPosition = CConfiguration::GetInstance().measurement.nSheathPosition;
 
 			int minDiff = INT_MAX;
-			int closestIdx = -1;	// 내경이 row 180 위치에 가장 가까운 프레임 Index
+			int closestIdx = pSystem->m_vCalibrationInfo.size() - 1;	// 내경이 row 180 위치에 가장 가까운 프레임 Index
 			int idealRow = 180;		// 내경이 위치해야 한다고 가정하는 이상적인 row 위치(reflection 배제를 위해 실제 위치해야 하는 row보다 100 아래에서 확인)
-			for(int i= pSystem->m_vCalibrationInfo.size() - 1; i>=0; i--)
+			for(int i = pSystem->m_vCalibrationInfo.size() - 1; i>=0; i--)
 			{
 				int nowRow = pSystem->m_vCalibrationInfo.at(i).first;
 				if (abs(nowRow - idealRow) < minDiff)
