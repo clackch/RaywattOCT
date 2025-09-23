@@ -61,7 +61,8 @@ enum class RayProperty {
 	LumenThresholdMin,
 	LumenThresholdMax,
 	LumenSnrThreshold,
-	ShowLumenGuide
+	ShowLumenGuide,
+	RefractiveIndex
 };
 
 enum class RayCallbackRequest {

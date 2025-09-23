@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="RaywattOCTFFR.Common.Annotation.DrawCommandUtil"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:RaywattOCTFFR.Common.Annotation"
+             xmlns:component="clr-namespace:RaywattOCTFFR.Views.Component"
+             mc:Ignorable="d" 
+             x:Name="UserControl"
+             d:DesignHeight="68" d:DesignWidth="192">
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <Label Content="{Binding [Measurement Tool], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource SideMenuTitleBrush}"/>
+            <Grid Height="12"/>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
+                <component:IconToggleButton Style="{DynamicResource IconToggleButton}" Icon="area" Click="area_Add" IsChecked="{Binding IsAreaOn, ElementName=UserControl}"/>
+                <Grid Width="6"/>                
+                <component:IconToggleButton Style="{DynamicResource IconToggleButton}" Icon="length" Click="length_Add" IsChecked="{Binding IsLengthOn, ElementName=UserControl}"/>
+                <Grid Width="6"/>
+
+                <component:IconToggleButton Style="{DynamicResource IconToggleButton}" Icon="angle" Click="angle_Add" IsChecked="{Binding IsAngleOn, ElementName=UserControl}"/>
+                <Grid Width="6"/>
+
+                <component:IconToggleButton Style="{DynamicResource IconToggleButton}" Icon="text" Click="text_Add" IsChecked="{Binding IsTextOn, ElementName=UserControl}"/>
+                <Grid Width="6"/>
+                <component:IconToggleButton Style="{DynamicResource IconToggleButton}" Icon="erase" Click="erase_point" IsChecked="{Binding IsEraseOn, ElementName=UserControl}"/>
+                <Grid Width="6"/>
+                <component:IconButton Style="{DynamicResource IconButton}" Icon="deleteAll" Click="delete_All"/>
+
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -19,27 +19,33 @@ PullbackLengthManager::~PullbackLengthManager() {
 
 void PullbackLengthManager::CutPullbackLength(int pullbackType) {
 	PLOGI.printf("CutPullbackLength Start");
-	int rotationRatio = 1;  // 1 : 400, 2 : 200, 4 : 100
+	int rotationRatio = 1;  // 1 : 400rps, 2 : 200rps, 4 : 100rps
 	int stopFrames = 3 / rotationRatio; /*Default Stop Frames*/
 	int maxFrames = 0;
 	int extraFrameNum = 0;
 
 	switch (pullbackType) {
 	case (int)PullbackType::HISH_20_60:
-		extraFrameNum = m_nNumOfSamples - 1200 / rotationRatio;
+		extraFrameNum = m_nNumOfSamples - 1200 /*400 rps * 3sec*/ / rotationRatio;
 		break;
 	case (int)PullbackType::HILO_40_100:
-		extraFrameNum = m_nNumOfSamples - 1000 / rotationRatio;
+		extraFrameNum = m_nNumOfSamples - 1000 /*400 rps * 2.5sec*/ / rotationRatio;
 		break;
 	case (int)PullbackType::STSH_60_60:
-		extraFrameNum = m_nNumOfSamples - 400 / rotationRatio;
+		extraFrameNum = m_nNumOfSamples - 400 /*400 rps * 1sec*/ / rotationRatio;
 		break;
 	case (int)PullbackType::STLO_100_100:
-		extraFrameNum = m_nNumOfSamples - 400 / rotationRatio;
+		extraFrameNum = m_nNumOfSamples - 400 /*400 rps * 1sec*/ / rotationRatio;
 		break;
 	case (int)PullbackType::FAST_120_60:
-		extraFrameNum = m_nNumOfSamples - 200 / rotationRatio;
+		extraFrameNum = m_nNumOfSamples - 200 /*400 rps * 0.5sec*/ / rotationRatio;
 		break;
+	}
+
+	extraFrameNum -= stopFrames * 2;
+
+	if (extraFrameNum <= 0) {
+		return;
 	}
 
 	SkipFrames(stopFrames, pullbackType, rotationRatio, extraFrameNum);

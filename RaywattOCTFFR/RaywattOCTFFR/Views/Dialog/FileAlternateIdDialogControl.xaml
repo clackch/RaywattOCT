@@ -1,0 +1,50 @@
+﻿<UserControl x:Class="RaywattOCTFFR.Views.Dialog.FileAlternateIdDialogControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:RaywattOCTFFR.Views.Dialog"
+             xmlns:const="clr-namespace:RaywattOCTFFR.Common.Bases"
+             mc:Ignorable="d" 
+             Width="{Binding DialogWidth}" Height="{Binding DialogHeight}">
+
+    <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}" Width="{x:Static const:Constants.FileAlternateIdDialogWidth}" Height="{x:Static const:Constants.FileAlternateIdDialogHeight}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="31"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="31"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="35"/>
+                <RowDefinition Height="70"/>
+                <RowDefinition Height="224"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="71"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center">
+                <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Alternate Patient IDs], Source={StaticResource L10N}}"/>
+            </StackPanel>
+
+            <DataGrid Grid.Row="2" Grid.Column="1" Name="patientList" ItemsSource="{Binding PatientList, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" Style="{StaticResource DataGridDialog}" RowHeight="58" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" IsReadOnly="False" Height="224">
+                <DataGrid.Columns>
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="{Binding [Name], Source={StaticResource L10N}}" IsReadOnly="True" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="100" Binding="{Binding Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="{Binding [ID], Source={StaticResource L10N}}" IsReadOnly="True" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellEdit}" EditingElementStyle="{StaticResource DataGridCellEditTextBox}" Width="150" Binding="{Binding AlternateId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="{Binding [Alternate ID], Source={StaticResource L10N}}" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
+                <StackPanel Width="8"/>
+                <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding ResetCommand}" CommandParameter="{Binding ElementName=patientList, Path=SelectedItem}" Content="{Binding [Reset], Source={StaticResource L10N}}"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="5" Grid.Column="1" VerticalAlignment="Top">
+                <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Width="408" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>
