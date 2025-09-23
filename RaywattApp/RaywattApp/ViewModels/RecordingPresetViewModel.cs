@@ -155,7 +155,6 @@ namespace RaywattApp.ViewModels
                     PatientCase.AppositionThreshold = physicians[0].AppositionThreshold;
                     PatientCase.AccessionNumber = "";
                     PatientCase.Comment = "";
-                    PatientCase.ImageResolution = RayGetProperty(Property.ImageResolution);
 
                     sqlParameters.Clear();
                     sqlParameters["classification"] = "Present";
@@ -254,15 +253,33 @@ namespace RaywattApp.ViewModels
             }
             else
             {
+                RayError result;
+
+                Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+                sqlParameters["classification"] = "RefraIndex";
+                IList<Configuration> refractiveIndex = _sqlManager.SelectConfiguration(sqlParameters);
+
+                var item = refractiveIndex.FirstOrDefault(i => i.Key == PatientCase.FlushMedia);
+                if (item != null && double.TryParse(item.Value, out var val))
+                {
+                    result = (RayError)RaySetProperty(Property.RefractiveIndex, val);
+                    if (result != RayError.OK)
+                    {
+                        _log.Error("RaySetProperty Error");
+                    }
+                }
+
                 double sheathType = 2.6;
                 if (PatientCase.AccessionNumber.Equals("1.7"))
                     sheathType = 1.7;
-                RayError result = (RayError)RaySetProperty(Property.SheathDiameter, sheathType);
+                result = (RayError)RaySetProperty(Property.SheathDiameter, sheathType);
                 if (result != RayError.OK)
                 {
                     _log.Error("RaySetProperty Error");
                 }
                 PatientCase.SheathDiameter = RayGetProperty(Property.SheathDiameter);
+
+                PatientCase.ImageResolution = RayGetProperty(Property.ImageResolution);
 
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
             }

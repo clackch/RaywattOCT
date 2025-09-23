@@ -1112,7 +1112,7 @@ UINT COCTSystem::GetImageDepth()
 double COCTSystem::GetImageResolution()
 {
 	CConfiguration& config = CConfiguration::GetInstance();
-	return (config.measurement.fAxialResolutionScale / 1000.f) * 2;	// Convert polar scale to cartesian scale (mm)
+	return (config.measurement.GetAxialResolutionScale() / 1000.f) * 2;	// Convert polar scale to cartesian scale (mm)
 }
 
 /*
@@ -1167,8 +1167,8 @@ RayError COCTSystem::SetSheathDiameter(double value)
 		config.measurement.fSheathThickness = config.measurement.fSheathThicknessTwoPointSix;
 		autoCalibrationFranch = 0;
 	}
-	config.measurement.nSheathPosition = config.measurement.fSheathRadius * 1000.f / config.measurement.fAxialResolutionScale;
-	config.measurement.nSheathThickness = config.measurement.fSheathThickness * 1000.f / config.measurement.fAxialResolutionScale;
+	config.measurement.nSheathPosition = config.measurement.GetSheathRadius() * 1000.f / config.measurement.GetAxialResolutionScale();
+	config.measurement.nSheathThickness = config.measurement.GetSheathThickness() * 1000.f / config.measurement.GetAxialResolutionScale();
 
 	m_pImagingPullback->SetMeasurementSetting(config.measurement);
 	m_pImagingLiveView->SetMeasurementSetting(config.measurement);
@@ -1370,6 +1370,24 @@ double COCTSystem::GetLumenSnrThreshold()
 RayError COCTSystem::SetLumenSnrThreshold(double value)
 {
 	m_fLumenSrnThreshold = value;
+
+	return RayError::OK;
+}
+
+/*
+* SetRefractiveIndex
+*/
+RayError COCTSystem::SetRefractiveIndex(double value)
+{
+	PLOGI.printf("Set Refractive Index (%f)", value);
+
+	CConfiguration& config = CConfiguration::GetInstance();
+
+	config.measurement.fRefractiveIndex = value;
+
+	config.imaging.distPerPixel = config.measurement.GetAxialResolutionScale();
+	m_pImagingPullback->SetDistPerPixel(config.imaging.distPerPixel);
+	m_pImagingLiveView->SetDistPerPixel(config.imaging.distPerPixel);
 
 	return RayError::OK;
 }

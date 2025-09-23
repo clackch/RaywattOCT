@@ -17,6 +17,9 @@ INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES (
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('AutoPB', 'SNR', '1', '');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('AutoPB', 'Count', '2', '');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('AutoPB', 'ShowGuide', 'N', 'Raywatt;');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('RefraIndex', 'AIR', '1', 'Refractive Index - Air');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('RefraIndex', 'SALI', '1.333', 'Refractive Index - Saline');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('RefraIndex', 'CONT', '1.44', 'Refractive Index - Contrast');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'Power', 'Y', 'Raywatt;');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'RJ', 'Y', 'Raywatt;');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'FG', 'Y', 'Raywatt;');

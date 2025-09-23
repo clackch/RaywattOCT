@@ -110,6 +110,7 @@ public:
 		m_setting.lowLevel = low;
 		m_setting.highLevel = high;
 	}
+	void SetDistPerPixel(double distPerPixel) { m_setting.distPerPixel = distPerPixel; }
 	virtual void SetFrameInfo(int nCurFrame, int nTotalFrame) {
 		m_nCurFrame = nCurFrame;
 		m_nTotalFrame = nTotalFrame;
