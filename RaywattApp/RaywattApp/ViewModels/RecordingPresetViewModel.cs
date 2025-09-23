@@ -268,6 +268,7 @@ namespace RaywattApp.ViewModels
                         _log.Error("RaySetProperty Error");
                     }
                 }
+                PatientCase.ImageResolution = RayGetProperty(Property.ImageResolution);
 
                 double sheathType = 2.6;
                 if (PatientCase.AccessionNumber.Equals("1.7"))
@@ -277,9 +278,7 @@ namespace RaywattApp.ViewModels
                 {
                     _log.Error("RaySetProperty Error");
                 }
-                PatientCase.SheathDiameter = RayGetProperty(Property.SheathDiameter);
-
-                PatientCase.ImageResolution = RayGetProperty(Property.ImageResolution);
+                PatientCase.SheathDiameter = RayGetProperty(Property.SheathDiameter);                
 
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
             }
