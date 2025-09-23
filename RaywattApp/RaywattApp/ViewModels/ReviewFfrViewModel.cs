@@ -211,11 +211,6 @@ namespace RaywattApp.ViewModels
         {
             if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
             {
-                //ReviewStatus.SelectedPatientCase.LumenContours.Reverse();
-                //ReviewStatus.SelectedPatientCase.LumenStents.Reverse();
-                //ReviewStatus.SelectedPatientCase.LumenSidebranches.Reverse();
-                //ReviewStatus.SelectedPatientCase.LumenGuidewires.Reverse();
-
                 PatientCase.LumenContours.Reverse();
                 PatientCase.LumenSidebranches.Reverse();
                 PatientCase.LumenStents.Reverse();

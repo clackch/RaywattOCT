@@ -1062,6 +1062,7 @@ namespace RaywattApp.ViewModels
 
             if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
             {
+                _log.Debug("AdjustLumenDataByOrientation - ProximalToDistal");
                 // proximal 호출 시, lumen reverse 수행 하였으므로, 원위치
                 if (LumenSidebranches != null) LumenSidebranches.Reverse();
                 if (LumenStents != null) LumenStents.Reverse();
@@ -1073,8 +1074,7 @@ namespace RaywattApp.ViewModels
                 PatientCase.LumenStents = LumenStents;
                 PatientCase.LumenGuidewires = LumenGuidewires;
             }
-
-            RaySetProperty(Property.LongitudeDegree, PatientCase.IndicatorDegree);
+            _log.Debug("AdjustLumenDataByOrientation - Done");
         }
 
         #endregion

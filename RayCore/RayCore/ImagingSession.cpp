@@ -430,6 +430,7 @@ CImagingSession* CImagingSession::createSession(CMessageService* pMsg, IImaging:
 
 	return pSession;
 }
+
 UINT CImagingSession::threadImaging(LPVOID param) {
 	CImagingSession* pSession = (CImagingSession*)param;
 	IDataManager* pDataManager = pSession->m_pDataManager;
