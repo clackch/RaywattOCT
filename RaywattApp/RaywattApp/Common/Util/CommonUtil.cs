@@ -1,40 +1,40 @@
-﻿using OpenCvSharp;
-using BitMiracle.LibTiff.Classic;
+﻿using BitMiracle.LibTiff.Classic;
+using CommunityToolkit.Mvvm.Messaging;
+using FFMpegCore;
 using log4net;
-using System;
-using System.Text.RegularExpressions;
-using System.Security.Cryptography;
-using System.IO;
-using System.Text;
-using RaywattApp.Common.Bases;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Linq;
-using System.Runtime.InteropServices;
-using static RaywattOCT.RayCoreWrapper;
-using static RaywattOCT.Ray3DWrapper;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using Size = OpenCvSharp.Size;
+using Newtonsoft.Json;
+using OpenCvSharp;
+using Python.Runtime;
+using RayCoreWrapper;
+using RaywattApp.Common.Angio;
 using RaywattApp.Common.Annotation.Models;
+using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
+using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.ViewModels.Dialog;
 using RaywattApp.Views.Dialog;
-using System.Threading;
-using System.Windows.Controls;
-using CommunityToolkit.Mvvm.Messaging;
-using RaywattApp.Common.Messages;
-using Newtonsoft.Json;
-using RaywattApp.Common.Angio;
-using System.Xml;
-using Python.Runtime;
-using FFMpegCore;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
-using RayCoreWrapper;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Xml;
+using static RaywattOCT.Ray3DWrapper;
+using static RaywattOCT.RayCoreWrapper;
+using Size = OpenCvSharp.Size;
 
 namespace RaywattApp.Common.Util
 {
@@ -401,6 +401,7 @@ namespace RaywattApp.Common.Util
             var dialogFE = dialog as System.Windows.FrameworkElement;
             var dialogDataContext = dialogFE.DataContext as FileExportDialogViewModel;
             double dialogWidth = dialogDataContext.SetInitialize(patientCase, imgCrossSections, imgLongitude, fileExport);
+            dialogDataContext.ReverseLumenProfileCompare();
 
             window.Show();
             window.Hide();
@@ -470,6 +471,7 @@ namespace RaywattApp.Common.Util
                     Thread.Sleep(100);
                 });
             }
+
             window.Close();
 
             return convertedImages;

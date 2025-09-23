@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using OpenCvSharp;
 using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
+using RaywattApp.Common.Enums;
 using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using RaywattApp.Services;
@@ -257,6 +258,18 @@ namespace RaywattApp.ViewModels.Dialog
             CrossSectionlabel = $"{DistalOrientationLabel}{bar}{ProximalOrientationLabel}";
         }
 
+        public void ReverseLumenProfileCompare()
+        {
+            if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
+            {
+                LumenStents.Reverse();
+                LumenContours.Reverse();
+                LumenSidebranches.Reverse();
+                LumenGuidewires.Reverse();
+                this.crossSections.Reverse();
+            }
+        }
+
         public double SetInitialize(PatientCase patientCase, List<Mat> crossSections, Mat lMode, FileExport fileExport)
         {
             PatientCase = patientCase;
@@ -277,18 +290,7 @@ namespace RaywattApp.ViewModels.Dialog
             FileExport = fileExport;
             if (fileExport.Longitude || fileExport.MeasureAuto || fileExport.MeasureManual)
                 SetAnnotation();
-
-            bool isDistalToProximal = DeviceStatus.LongitudeOrientation == Common.Enums.LongitudeOrientation.DistalToProximal;
-            if (!isDistalToProximal)
-            {
-                lMode = lMode.Flip(FlipMode.Y);
-                LumenStents.Reverse();
-                LumenContours.Reverse();
-                LumenSidebranches.Reverse();
-                LumenGuidewires.Reverse();
-                this.crossSections.Reverse();
-            }
-
+            
             LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(lMode);
 
             if ((fileExport.AngioView && patientCase.AngioYn) || fileExport.Longitude)
