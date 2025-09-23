@@ -230,7 +230,7 @@ namespace RaywattApp.ViewModels.Dialog
                 IsDrawLumenSideBranch = true;
 
             // label setting (D/P or P/D)
-            bool isDistalToProximal = DeviceStatus.LongitudeOrientation == Common.Enums.LongitudeOrientation.DistalToProximal;
+            bool isDistalToProximal = PatientCase.LongitudeOrientation == Common.Enums.LongitudeOrientation.DistalToProximal;
             DistalOrientationLabel = isDistalToProximal ? "D" : "P";
             ProximalOrientationLabel = isDistalToProximal ? "P" : "D";
         }
@@ -260,7 +260,7 @@ namespace RaywattApp.ViewModels.Dialog
 
         public void ReverseLumenProfileCompare()
         {
-            if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
+            if (PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
             {
                 LumenStents.Reverse();
                 LumenContours.Reverse();

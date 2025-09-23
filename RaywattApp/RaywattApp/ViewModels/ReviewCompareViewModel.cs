@@ -607,7 +607,7 @@ namespace RaywattApp.ViewModels
 
         private void ShowLumenProfileCompare()
         {
-            if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
+            if (PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
             {
                 if (ReviewStatus.SelectedPatientCase.LumenContours != null) ReviewStatus.SelectedPatientCase.LumenContours.Reverse();
                 if (ReviewStatus.SelectedPatientCase.LumenStents != null) ReviewStatus.SelectedPatientCase.LumenStents.Reverse();
@@ -649,7 +649,7 @@ namespace RaywattApp.ViewModels
 
         private void ReverseLumenProfileCompare()
         {
-            if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
+            if (PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
             {
                 if (ReviewStatus.SelectedPatientCase.LumenContours != null) ReviewStatus.SelectedPatientCase.LumenContours.Reverse();
                 if (ReviewStatus.SelectedPatientCase.LumenStents != null) ReviewStatus.SelectedPatientCase.LumenStents.Reverse();
@@ -691,8 +691,8 @@ namespace RaywattApp.ViewModels
 
         private void LongitudeOrientationLabelChanged()
         {
-            _distalLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "P" : "D";
-            _proximalLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "D" : "P";
+            _distalLabel = PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "P" : "D";
+            _proximalLabel = PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "D" : "P";
         }
     }
 }

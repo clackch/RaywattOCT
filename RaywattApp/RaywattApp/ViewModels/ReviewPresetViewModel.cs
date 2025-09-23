@@ -118,7 +118,8 @@ namespace RaywattApp.ViewModels
             MaxAppositionThreshold = Constants.MaxAppositionThreshold;
             MinAppositionThreshold = Constants.MinAppositionThreshold;
 
-            LongitudeOrientation = DeviceStatus.LongitudeOrientation;
+            // TODO: db 읽어서 가져와야 함 hwjung
+            //LongitudeOrientation = PatientCase.LongitudeOrientation;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -136,7 +137,7 @@ namespace RaywattApp.ViewModels
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
 
                 CheckLongitudeOrientation();
-                LongitudeOrientation = DeviceStatus.LongitudeOrientation;
+                LongitudeOrientation = PatientCase.LongitudeOrientation;
 
                 Code pullback = pullbackTypes.FirstOrDefault(x => x.Key == PatientCase.PullbackType);
                 if (pullback != null)
@@ -192,7 +193,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ConfirmAndGoToReview");
 
-            if(DeviceStatus.LongitudeOrientation == _longitudeOrientation)
+            if(PatientCase.LongitudeOrientation == _longitudeOrientation)
             {
                 _log.Debug("[hwjung] not changed : " + _longitudeOrientation);
                 Cancel();
@@ -212,14 +213,14 @@ namespace RaywattApp.ViewModels
             }
 
             /* 방향 변경 */
-            if (DeviceStatus.LongitudeOrientation != _longitudeOrientation)
+            if (PatientCase.LongitudeOrientation != _longitudeOrientation)
             {
-                DeviceStatus.LongitudeOrientationChanged = true;
+                PatientCase.LongitudeOrientationChanged = true;
                 UpdateLongitudeOreinetation();
             }
 
-            DeviceStatus.LongitudeOrientation = _longitudeOrientation;
-            RaySetProperty(Property.LongitudeOrientation, (double)DeviceStatus.LongitudeOrientation);
+            PatientCase.LongitudeOrientation = _longitudeOrientation;
+            RaySetProperty(Property.LongitudeOrientation, (double)PatientCase.LongitudeOrientation);
 
             int numOfFrames = RayStartReview(PatientCase.ImageFullPath, PatientCase.ImageResolution, PatientCase.ZOffset);
             if (numOfFrames < (int)RayError.OK)
@@ -266,14 +267,14 @@ namespace RaywattApp.ViewModels
             if (Physicians.Count == 0)
             {
                 _log.Error("not find physician infomation");
-                DeviceStatus.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
+                PatientCase.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
                 return;
             }
 
-            if (Physicians[0].Isdistaltoproximal) DeviceStatus.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
-            else DeviceStatus.LongitudeOrientation = LongitudeOrientation.ProximalToDistal;
+            if (Physicians[0].Isdistaltoproximal) PatientCase.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
+            else PatientCase.LongitudeOrientation = LongitudeOrientation.ProximalToDistal;
 
-            LongitudeOrientation = DeviceStatus.LongitudeOrientation;
+            LongitudeOrientation = PatientCase.LongitudeOrientation;
         }
 
         private void UpdateLongitudeOreinetation()
@@ -286,7 +287,7 @@ namespace RaywattApp.ViewModels
             if (Physicians.Count == 0)
             {
                 _log.Error("not find physician infomation");
-                DeviceStatus.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
+                PatientCase.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
                 return;
             }
 

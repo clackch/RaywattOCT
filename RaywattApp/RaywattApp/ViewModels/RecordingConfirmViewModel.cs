@@ -104,29 +104,8 @@ namespace RaywattApp.ViewModels
 
         private void LongitudeOrientationChanged()
         {
-            //CheckLongitudeOrientation();
-
-            _distalLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "P" : "D";
-            _proximalLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "D" : "P";
-        }
-
-        private void CheckLongitudeOrientation()
-        {
-            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-            sqlParameters["id"] = Patient.PhysicianId;
-            IList<Physician> Physicians = _sqlManager.SelectPhysician(sqlParameters);
-
-            if (Physicians.Count == 0)
-            {
-                _log.Error("not find physician infomation");
-                DeviceStatus.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
-                return;
-            }
-
-            if (Physicians[0].Isdistaltoproximal) DeviceStatus.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
-            else DeviceStatus.LongitudeOrientation = LongitudeOrientation.ProximalToDistal;
-
-            var _ = (RayError)RaySetProperty(Property.LongitudeOrientation, (double)DeviceStatus.LongitudeOrientation);
+            _distalLabel = PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "P" : "D";
+            _proximalLabel = PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "D" : "P";
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)

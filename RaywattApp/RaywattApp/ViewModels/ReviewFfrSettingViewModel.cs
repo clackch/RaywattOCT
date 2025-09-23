@@ -82,12 +82,12 @@ namespace RaywattApp.ViewModels
         private double _afterLumenArea;
 
         public double ProximalAreaByOrientation =>
-            DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal
+            PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal
                 ? Section.Proximal.DValue
                 : Section.Distal.DValue;
 
         public double DistalAreaByOrientation =>
-            DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal
+            PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal
                 ? Section.Distal.DValue
                 : Section.Proximal.DValue;
 
@@ -176,7 +176,6 @@ namespace RaywattApp.ViewModels
             sqlParameters["classification"] = "VESS";
             VesselList = _sqlManager.SelectCode(sqlParameters);
 
-            LongitudeOrientationChanged();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -193,6 +192,8 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
+                LongitudeOrientationChanged();
+
                 ReverseLumenProfileCompare();
                 if (PatientCase.FfrFeature == null)
                     FfrFeature = new FfrFeature();
@@ -265,7 +266,7 @@ namespace RaywattApp.ViewModels
 
         private void ReverseLumenProfileCompare()
         {
-            if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
+            if (PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
             {
                 PatientCase.LumenContours.Reverse();
                 PatientCase.LumenSidebranches.Reverse();
@@ -665,17 +666,17 @@ namespace RaywattApp.ViewModels
 
         private void LongitudeOrientationChanged()
         {
-            _dPLeftLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "P" : "D";
-            _dPRightLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "D" : "P";
+            _dPLeftLabel = PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "P" : "D";
+            _dPRightLabel = PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "D" : "P";
 
             SubscribeLumenAreaChangeEvents();
         }
 
         private void SubscribeLumenAreaChangeEvents()
         {
-            DeviceStatus.PropertyChanged += (_, e) =>
+            PatientCase.PropertyChanged += (_, e) =>
             {
-                if (e.PropertyName == nameof(DeviceStatus.LongitudeOrientation))
+                if (e.PropertyName == nameof(PatientCase.LongitudeOrientation))
                 {
                     OnPropertyChanged(nameof(ProximalAreaByOrientation));
                     OnPropertyChanged(nameof(DistalAreaByOrientation));
@@ -704,7 +705,7 @@ namespace RaywattApp.ViewModels
 
         private void MapFfrStepByOrientation()
         {
-            if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
+            if (PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
             {
                 if (FfrStep == Constants.FfrStep2) FfrTargetStep = Constants.FfrStep3;
                 else if (FfrStep == Constants.FfrStep3) FfrTargetStep = Constants.FfrStep2;

@@ -6,6 +6,7 @@
       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:behaviors="clr-namespace:RaywattApp.Common.Behaviors"
       xmlns:local="clr-namespace:RaywattApp.Views"
+      xmlns:en="clr-namespace:RaywattApp.Common.Enums"
       mc:Ignorable="d" 
       d:DesignHeight="1024" d:DesignWidth="1280"
       Background="{DynamicResource GrayscaleGray8Brush}"
@@ -97,6 +98,25 @@
                                         <StackPanel Width="5"/>
                                         <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PbTime}"/>
                                         <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [s], Source={StaticResource L10N}}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,35,0,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding Longitude Orientation, Source={StaticResource L10N}}"/>
+                                        <StackPanel Width="5"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                                        <RadioButton    Content="{Binding [Distal → Proximal], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" 
+                                                        IsChecked="{Binding LongitudeOrientation, 
+                                                                    Mode=TwoWay, 
+                                                                    Converter={StaticResource LongitudeOrienationConverter},
+                                                                    ConverterParameter={x:Static en:LongitudeOrientation.DistalToProximal}}"/>
+                                        <StackPanel Width="15"/>
+                                        <RadioButton    Content="{Binding [Proximal → Distal], Source={StaticResource L10N}}" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleWhiteBrush}" 
+                                                        IsChecked="{Binding LongitudeOrientation, 
+                                                                    Mode=TwoWay, 
+                                                                    Converter={StaticResource LongitudeOrienationConverter},
+                                                                    ConverterParameter={x:Static en:LongitudeOrientation.ProximalToDistal}}"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Grid>

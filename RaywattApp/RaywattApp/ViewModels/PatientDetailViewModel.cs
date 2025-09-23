@@ -386,26 +386,26 @@ namespace RaywattApp.ViewModels
             if (Physicians.Count == 0)
             {
                 _log.Error("not find physician infomation");
-                DeviceStatus.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
+                patientCase.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
                 return;
             }
 
             if (Physicians[0].Isdistaltoproximal) // true: distal to proximal / false: proximal to distal
             {
-                DeviceStatus.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
+                patientCase.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
             }
             else
             {
-                DeviceStatus.LongitudeOrientation = LongitudeOrientation.ProximalToDistal;
+                patientCase.LongitudeOrientation = LongitudeOrientation.ProximalToDistal;
             }
 
-            var __ = (RayError)RaySetProperty(Property.LongitudeOrientation, (double)DeviceStatus.LongitudeOrientation);
-            if (DeviceStatus.LongitudeOrientation != LongitudeOrientation.DistalToProximal)
+            var __ = (RayError)RaySetProperty(Property.LongitudeOrientation, (double)patientCase.LongitudeOrientation);
+            if (patientCase.LongitudeOrientation != LongitudeOrientation.DistalToProximal)
             {
                 // proximal일 때만, changed 수행
                 // distal은 굳이 lumen 을 변호나 시킬 필요가 없으므로.
-                _log.Debug("[hwjung] orientation changed: " + DeviceStatus.LongitudeOrientation);
-                DeviceStatus.LongitudeOrientationChanged = true;
+                _log.Debug("[hwjung] orientation changed: " + patientCase.LongitudeOrientation);
+                patientCase.LongitudeOrientationChanged = true;
             }
 
             int numOfFrames = RayStartReview(patientCase.ImageFullPath, patientCase.ImageResolution, patientCase.ZOffset);

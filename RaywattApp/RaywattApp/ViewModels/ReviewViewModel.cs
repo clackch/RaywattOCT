@@ -499,8 +499,8 @@ namespace RaywattApp.ViewModels
 
         private void LongitudeOrientationLabelChanged()
         {
-            _dPLeftLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "P" : "D";
-            _dPRightLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "D" : "P";
+            _dPLeftLabel = PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "P" : "D";
+            _dPRightLabel = PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "D" : "P";
         }
 
         private void SetAngioFrame()
@@ -772,15 +772,7 @@ namespace RaywattApp.ViewModels
                 else
                     LumenContourCommand = Constants.LumenContourCurrentInit;
 
-               
-                if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
-                {
-                    // to align with storage orientation when Longitude is Proximal → Distal
-                    LumenContours.Reverse();
-                    LumenSidebranches.Reverse();
-                    LumenStents.Reverse();
-                    LumenGuidewires.Reverse();
-                }
+                ReverseLumenDataIfNeeded(); // to align with storage orientation when Longitude is Proximal → Distal
 
                 PatientCase.StrLumenContour = CommonUtil.LumenContoursToJson(LumenContours);
                 PatientCase.StrLumenSidebranch = JsonConvert.SerializeObject(LumenSidebranches, Newtonsoft.Json.Formatting.Indented);
@@ -788,14 +780,7 @@ namespace RaywattApp.ViewModels
                 PatientCase.StrLumenGuidewire = JsonConvert.SerializeObject(LumenGuidewires, Newtonsoft.Json.Formatting.Indented);
                 PatientCase.StrCoRegistration = "";
 
-                if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
-                {
-                    // Reverse lumen data again to restore orientation for display
-                    LumenContours.Reverse();
-                    LumenSidebranches.Reverse();
-                    LumenStents.Reverse();
-                    LumenGuidewires.Reverse();
-                }
+                ReverseLumenDataIfNeeded(); // Reverse lumen data again to restore orientation for display
 
                 DeviceStatus.IsLumenSaved = true;
                 SetLumenProfileInit();
@@ -811,6 +796,17 @@ namespace RaywattApp.ViewModels
                 {
                     DrawLumenProfile(frame);
                 });
+            }
+        }
+
+        private void ReverseLumenDataIfNeeded()
+        {
+            if (PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
+            {
+                if (LumenSidebranches != null) LumenSidebranches.Reverse();
+                if (LumenStents != null) LumenStents.Reverse();
+                if (LumenGuidewires != null) LumenGuidewires.Reverse();
+                if (LumenContours != null) LumenContours.Reverse();
             }
         }
 
@@ -1035,11 +1031,11 @@ namespace RaywattApp.ViewModels
 
         private void AdjustIndicatorByOrientation()
         {
-            _log.Debug("AdjustIndicatorByOrientation " + DeviceStatus.LongitudeOrientationChanged);
+            _log.Debug("AdjustIndicatorByOrientation " + PatientCase.LongitudeOrientationChanged);
 
-            if (DeviceStatus.LongitudeOrientationChanged)
+            if (PatientCase.LongitudeOrientationChanged)
             {
-                DeviceStatus.LongitudeOrientationChanged = false; // 수정 되었으므로,
+                PatientCase.LongitudeOrientationChanged = false; // 수정 되었으므로,
 
                 /* ai ffr */
                 PatientCase.FfrFeature = null;  // FFR 관련 Feature 초기화
@@ -1077,22 +1073,14 @@ namespace RaywattApp.ViewModels
 
         private void AdjustLumenDataByOrientation()
         {
-            _log.Debug("AdjustLumenDataByOrientation " + DeviceStatus.LongitudeOrientation);
+            _log.Debug("AdjustLumenDataByOrientation " + PatientCase.LongitudeOrientation);
+            ReverseLumenDataIfNeeded(); // p -> d 방향일 경우, d->p 데이터를 p->d로 전환
 
-            if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
-            {
-                _log.Debug("AdjustLumenDataByOrientation - ProximalToDistal");
-                // proximal 호출 시, lumen reverse 수행 하였으므로, 원위치
-                if (LumenSidebranches != null) LumenSidebranches.Reverse();
-                if (LumenStents != null) LumenStents.Reverse();
-                if (LumenGuidewires != null) LumenGuidewires.Reverse();
-                if (LumenContours != null) LumenContours.Reverse();
+            PatientCase.LumenContours = LumenContours;
+            PatientCase.LumenSidebranches = LumenSidebranches;
+            PatientCase.LumenStents = LumenStents;
+            PatientCase.LumenGuidewires = LumenGuidewires;
 
-                PatientCase.LumenContours = LumenContours;
-                PatientCase.LumenSidebranches = LumenSidebranches;
-                PatientCase.LumenStents = LumenStents;
-                PatientCase.LumenGuidewires = LumenGuidewires;
-            }
             _log.Debug("AdjustLumenDataByOrientation - Done");
         }
 
@@ -1445,14 +1433,7 @@ namespace RaywattApp.ViewModels
             }
             else
             {
-                if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
-                {
-                    // 다시 원복
-                    LumenContours.Reverse();
-                    LumenSidebranches.Reverse();
-                    LumenStents.Reverse();
-                    LumenGuidewires.Reverse();
-                }
+                ReverseLumenDataIfNeeded(); // 기존 p->d 방향일 경우, 다시 d->p로 전환
 
                 PatientCase.LumenContours = LumenContours;
                 PatientCase.LumenSidebranches = LumenSidebranches;
@@ -2000,7 +1981,7 @@ namespace RaywattApp.ViewModels
             double ratio = (double)angioTotalFrameNum / OctFrameLength * value;
             int frameIndex = (int)ratio;
 
-            bool longitudeOrientation = DeviceStatus.LongitudeOrientation == LongitudeOrientation.DistalToProximal ? true : false;
+            bool longitudeOrientation = PatientCase.LongitudeOrientation == LongitudeOrientation.DistalToProximal ? true : false;
 
             if (longitudeOrientation)
             {

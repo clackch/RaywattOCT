@@ -83,6 +83,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private KeyValuePair<string, string> _currentLocation;
 
+        [ObservableProperty]
+        private LongitudeOrientation longitudeOrientation = LongitudeOrientation.DistalToProximal;
+
         private ICommand _cancelCommand;
         public ICommand CancelCommand
         {
@@ -118,11 +121,10 @@ namespace RaywattApp.ViewModels
                 this.Patient = (Patient)data["patient"];
                 this.PrevStatus = (PrevStatus)data["prevStatus"];
 
-                CheckLongitudeOrientation();
-
                 if (data.TryGetValue("patientCase", out var patientCaseObj) && patientCaseObj is PatientCase caseData)
                 {
                     PatientCase = caseData;
+                    CheckLongitudeOrientation();
 
                     if (CodeDefinition.Codes.TryGetValue("PROC", out var procDict) && procDict.TryGetValue(PatientCase.Procedure, out var procValue))
                     {
@@ -159,6 +161,7 @@ namespace RaywattApp.ViewModels
                     PatientCase.AccessionNumber = "";
                     PatientCase.Comment = "";
                     PatientCase.ImageResolution = RayGetProperty(Property.ImageResolution);
+                    PatientCase.LongitudeOrientation = IsDistalToProximal();
 
                     sqlParameters.Clear();
                     sqlParameters["classification"] = "Present";
@@ -185,6 +188,16 @@ namespace RaywattApp.ViewModels
                 SelectedPullbackType = PatientCase.PullbackType;
             }
         }
+
+        private LongitudeOrientation IsDistalToProximal()
+        {
+            // TODO: PhysicianId로 DB에서 조회
+            LongitudeOrientation = LongitudeOrientation.ProximalToDistal;
+
+            if (LongitudeOrientation == LongitudeOrientation.DistalToProximal) return LongitudeOrientation.DistalToProximal;
+            return LongitudeOrientation.ProximalToDistal;
+        }
+
         private void CheckLongitudeOrientation()
         {
             _log.Debug("CheckLongitudeOrientation");
@@ -196,21 +209,16 @@ namespace RaywattApp.ViewModels
             if (Physicians.Count == 0)
             {
                 _log.Error("not find physician infomation");
-                DeviceStatus.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
+                PatientCase.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
                 return;
             }
 
-            if (Physicians[0].Isdistaltoproximal) DeviceStatus.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
-            else DeviceStatus.LongitudeOrientation = LongitudeOrientation.ProximalToDistal;
+            if (Physicians[0].Isdistaltoproximal) PatientCase.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
+            else PatientCase.LongitudeOrientation = LongitudeOrientation.ProximalToDistal;
             
-            _log.Debug("apply: " + DeviceStatus.LongitudeOrientation);
-            var _ = (RayError)RaySetProperty(Property.LongitudeOrientation, (double)DeviceStatus.LongitudeOrientation);
-            _log.Debug("apply done: " + DeviceStatus.LongitudeOrientation);
-
-            if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
-                DeviceStatus.RecodingOrientationProximal = true;
-            else
-                DeviceStatus.RecodingOrientationProximal = false;
+            _log.Debug("apply: " + PatientCase.LongitudeOrientation);
+            var _ = (RayError)RaySetProperty(Property.LongitudeOrientation, (double)PatientCase.LongitudeOrientation);
+            _log.Debug("apply done: " + PatientCase.LongitudeOrientation);
         }
 
 
@@ -278,6 +286,7 @@ namespace RaywattApp.ViewModels
             PatientCase.Procedure = CurrentProcedure.Key;
             PatientCase.Vessel = CurrentVessel.Key;
             PatientCase.Location = CurrentLocation.Key;
+            PatientCase.LongitudeOrientation = LongitudeOrientation;
 
             if (DeviceStatus.CatheterStatus == Constants.CatheterStatusFailed)
             {

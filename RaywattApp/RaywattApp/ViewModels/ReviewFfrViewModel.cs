@@ -209,7 +209,7 @@ namespace RaywattApp.ViewModels
 
         private void ReverseLumenProfileCompare()
         {
-            if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
+            if (PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
             {
                 PatientCase.LumenContours.Reverse();
                 PatientCase.LumenSidebranches.Reverse();
@@ -406,16 +406,16 @@ namespace RaywattApp.ViewModels
         }
         private void LongitudeOrientationChanged()
         {
-            _dPLeftLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "P" : "D";
-            _dPRightLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "D" : "P";
+            _dPLeftLabel = PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "P" : "D";
+            _dPRightLabel = PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "D" : "P";
 
             // Area label
-            _distalLumenAreaLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "Proximal Lumen Area" : "Distal Lumen Area";
-            _proximalLumenAreaLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "Distal Lumen Area" : "Proximal Lumen Area";
+            _distalLumenAreaLabel = PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "Proximal Lumen Area" : "Distal Lumen Area";
+            _proximalLumenAreaLabel = PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "Distal Lumen Area" : "Proximal Lumen Area";
 
             // Lumen label
-            _distalLumenLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "Proximal" : "Distal";
-            _proximalLumenLabel = DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "Distal" : "Proximal";
+            _distalLumenLabel = PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "Proximal" : "Distal";
+            _proximalLumenLabel = PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "Distal" : "Proximal";
         }
     }
 }

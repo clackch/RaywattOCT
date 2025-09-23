@@ -2,6 +2,7 @@
 using RaywattApp.Common.Angio;
 using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
+using RaywattApp.Common.Enums;
 using RaywattApp.Common.Util;
 using System;
 using System.Collections.Generic;
@@ -220,6 +221,10 @@ namespace RaywattApp.Models
         private bool isChecked;
 
         [ObservableProperty]
-        private bool? isCompareDistalToProximal = true;
+        // TODO: junghw 추후 의사 정보로 default로 변환
+        private LongitudeOrientation _longitudeOrientation = LongitudeOrientation.DistalToProximal; // default
+
+        [ObservableProperty]
+        private bool _longitudeOrientationChanged = false;
     }
 }
