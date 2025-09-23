@@ -34,6 +34,9 @@ CRJController::CRJController()
 	m_nRFIDLength = 0;
 
 	m_bManualMode = false;
+	
+	// Initialize firmware version info
+	memset(&m_fwVersionInfo, 0, sizeof(SFWVersionInfo));
 }
 
 CRJController::~CRJController()
@@ -985,6 +988,9 @@ void CRJController::handlePacket() {
 
 	case eFID::FID_RFID_TAGGING:
 		break;
+	case eFID::FID_GET_VERSION:
+		RxPacketGetVersion(&m_vPacket[0]);
+		break;
 	default:
 		break;
 	}
@@ -1102,4 +1108,48 @@ void CRJController::changeSMProfileToLoadUnload() {
 	{
 		PLOGI.printf("Written size is not matched. (%d / %d bytes)", written, packetLength);
 	}
+}
+
+SFWVersionInfo& CRJController::GetFWVersionInfo() {
+	if (!m_initMotor) {
+		memset(&m_fwVersionInfo, 0, sizeof(SFWVersionInfo));
+		return m_fwVersionInfo;
+	}
+
+	BYTE serialPacket[MAX_PATH];
+	int packetLength;
+	getSerialPacket(eFID::FID_GET_VERSION, 0, serialPacket, packetLength);
+
+	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
+	serialPacket[packetLength - 2] = checksum;
+
+	int written = m_pConnection->Write(serialPacket, packetLength);
+
+	Sleep(300);
+	
+	return m_fwVersionInfo;
+}
+
+void CRJController::RxPacketGetVersion(BYTE* buff) {
+	
+	if (m_vPacket.size() < (HEADER_LEN + 20)) {
+		PLOGI.printf("RxPacketGetVersion Packet length error rxlen = %d", static_cast<int>(m_vPacket.size()));
+		return;
+	}
+
+	int idx = DATA_IDX;
+	// Skip Hardware Version (4 bytes)
+	idx += 4;
+	
+	UINT data = *reinterpret_cast<UINT*>(&buff[idx]);
+	m_fwVersionInfo.isBootMode = ((data & 0xFF000000) != 0);
+	m_fwVersionInfo.major = static_cast<BYTE>((data >> 16) & 0xff);
+	m_fwVersionInfo.minor = static_cast<BYTE>((data >> 8) & 0xff);
+	m_fwVersionInfo.patch = static_cast<BYTE>(data & 0xff);
+	
+	PLOGI.printf("FW Version: %s %d.%d.%d",
+		m_fwVersionInfo.isBootMode ? "Boot" : "Main",
+		m_fwVersionInfo.major,
+		m_fwVersionInfo.minor,
+		m_fwVersionInfo.patch);
 }

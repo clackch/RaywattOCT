@@ -152,6 +152,7 @@ public:
 	void* GetGuidewirePoints(int nFrame);
 	int GetNumOfGuidewirePoints(int nFrame);
 	void* GetGuidewireRadius(int nFrame);
+	void GetRJFirmwareVersion(int* major, int* minor, int* patch, bool* isBootMode);
 	
 	//Property
 	RayScannerState GetCurrentState() { return m_curState; }

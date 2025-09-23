@@ -62,6 +62,13 @@ enum RFID_AnswerType
 	PROCEEDING
 };
 
+struct SFWVersionInfo {
+	bool isBootMode;
+	BYTE major;
+	BYTE minor;
+	BYTE patch;
+};
+
 class CMessageService;
 class CRJController
 	: public CMotorController,
@@ -95,6 +102,7 @@ private:
 	bool m_bManualMode;	// Manual Load Catheter
 
 	WriteTaskController* m_resendManager;
+	SFWVersionInfo m_fwVersionInfo;
 
 public:
 	CRJController();
@@ -131,6 +139,7 @@ public:
 	bool GetRFIDStep();
 	bool GetIsTagging();
 	void findCorrectKey();
+	SFWVersionInfo& GetFWVersionInfo();
 
 	UINT GetRFIDUID(BYTE* pRFIDUID); 
 	int GetRFIDCountCurrentState();
@@ -156,10 +165,10 @@ protected:
 	void updateState(eRJState state);
 	bool displayLCD(eLCDImage image);
 	void RxPacketRFIDGetState(BYTE* buff, RFID_ReadType type = DEFAULT);
+	void RxPacketGetVersion(BYTE* buff);
 	void parseSMPacket(BYTE*packet, int size);
 	virtual void handlePacket();
 	virtual bool writeMotor(BYTE* packet, int size);
 	void resendPacket(eFID fid);
 	void resendAllSaved();
 };
-

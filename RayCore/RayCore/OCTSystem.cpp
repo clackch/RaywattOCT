@@ -908,6 +908,26 @@ void* COCTSystem::GetGuidewireRadius(int nFrame) {
 }
 
 /*
+* GetRJFirmwareVersion
+*/
+void COCTSystem::GetRJFirmwareVersion(int* major, int* minor, int* patch, bool* isBootMode) {
+	if (m_pRJController != nullptr) {
+		const SFWVersionInfo& fwInfo = m_pRJController->GetFWVersionInfo();
+		if (major) *major = fwInfo.major;
+		if (minor) *minor = fwInfo.minor;
+		if (patch) *patch = fwInfo.patch;
+		if (isBootMode) *isBootMode = fwInfo.isBootMode;
+	}
+	else {
+		// RJ Controller가 없을 때 기본값
+		if (major) *major = 0;
+		if (minor) *minor = 0;
+		if (patch) *patch = 0;
+		if (isBootMode) *isBootMode = false;
+	}
+}
+
+/*
 * GetBrightness
 */
 double COCTSystem::GetBrightness() {

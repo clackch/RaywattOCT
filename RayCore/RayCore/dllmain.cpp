@@ -281,6 +281,10 @@ _declspec(dllexport) void* RayGetGuidewireRadius(int nFrame) {
     return octSystem.GetGuidewireRadius(nFrame);
 }
 
+_declspec(dllexport) void RayGetRJFirmwareVersion(int* major, int* minor, int* patch, bool* isBootMode) {
+    octSystem.GetRJFirmwareVersion(major, minor, patch, isBootMode);
+}
+
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
                        LPVOID lpReserved
