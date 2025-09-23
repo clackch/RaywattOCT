@@ -184,14 +184,15 @@ namespace RaywattApp.ViewModels
 
             if (extraData != null)
             {
-                LongitudeOrientationLabelChanged();
-
                 Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
                 Patient = (Patient)data["patient"];
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
                 ReviewStatus.CurrentPage = Constants.ReviewComparePage;
+
+                LongitudeOrientationLabelChanged();
+                ReverseLumenProfileCompare();
 
                 Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
 
@@ -604,8 +605,6 @@ namespace RaywattApp.ViewModels
 
         private void ShowLumenProfileCompare()
         {
-            EnsureOrientationCompare();
-
             PreLumenContour = ReviewStatus.SelectedPatientCase.LumenContours;
             PreLumenSidebranches = ReviewStatus.SelectedPatientCase.LumenSidebranches;
             PreLumenStents = ReviewStatus.SelectedPatientCase.LumenStents;
@@ -638,25 +637,19 @@ namespace RaywattApp.ViewModels
             IndicatorCompareLongitude.IsVisible = Visibility.Visible;
         }
 
-        private void EnsureOrientationCompare()
-        {
-            _log.Debug("EnsureOrientationCompare");
-
-
-            ReverseLumenProfileCompare();
-
-        }
-
         private void ReverseLumenProfileCompare()
         {
             if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
             {
-                _log.Debug("ReverseLumenProfileCompare");
+                //ReviewStatus.SelectedPatientCase.LumenContours.Reverse();
+                //ReviewStatus.SelectedPatientCase.LumenStents.Reverse();
+                //ReviewStatus.SelectedPatientCase.LumenSidebranches.Reverse();
+                //ReviewStatus.SelectedPatientCase.LumenGuidewires.Reverse();
 
-                ReviewStatus.SelectedPatientCase.LumenContours.Reverse();
-                ReviewStatus.SelectedPatientCase.LumenStents.Reverse();
-                ReviewStatus.SelectedPatientCase.LumenSidebranches.Reverse();
-                ReviewStatus.SelectedPatientCase.LumenGuidewires.Reverse();
+                PatientCase.LumenContours.Reverse();
+                PatientCase.LumenSidebranches.Reverse();
+                PatientCase.LumenStents.Reverse();
+                PatientCase.LumenGuidewires.Reverse();
             }
         }
 

@@ -148,6 +148,7 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
+                ReverseLumenProfileCompare();
 
                 if (PatientCase.FfrFeature.Result > 0)
                 {
@@ -202,9 +203,26 @@ namespace RaywattApp.ViewModels
                     Initialize();
                 }
             }
-
+            ReverseLumenProfileCompare();
             Save();
         }
+
+        private void ReverseLumenProfileCompare()
+        {
+            if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
+            {
+                //ReviewStatus.SelectedPatientCase.LumenContours.Reverse();
+                //ReviewStatus.SelectedPatientCase.LumenStents.Reverse();
+                //ReviewStatus.SelectedPatientCase.LumenSidebranches.Reverse();
+                //ReviewStatus.SelectedPatientCase.LumenGuidewires.Reverse();
+
+                PatientCase.LumenContours.Reverse();
+                PatientCase.LumenSidebranches.Reverse();
+                PatientCase.LumenStents.Reverse();
+                PatientCase.LumenGuidewires.Reverse();
+            }
+        }
+
 
         private void FfrPredict()
         {
