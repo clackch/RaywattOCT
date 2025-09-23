@@ -278,7 +278,7 @@ namespace RaywattApp.ViewModels
                 {
                     _log.Error("RaySetProperty Error");
                 }
-                PatientCase.SheathDiameter = RayGetProperty(Property.SheathDiameter);                
+                PatientCase.SheathDiameter = RayGetProperty(Property.SheathDiameter);
 
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
             }
