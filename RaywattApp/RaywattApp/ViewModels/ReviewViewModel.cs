@@ -772,11 +772,30 @@ namespace RaywattApp.ViewModels
                 else
                     LumenContourCommand = Constants.LumenContourCurrentInit;
 
+               
+                if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
+                {
+                    // to align with storage orientation when Longitude is Proximal → Distal
+                    LumenContours.Reverse();
+                    LumenSidebranches.Reverse();
+                    LumenStents.Reverse();
+                    LumenGuidewires.Reverse();
+                }
+
                 PatientCase.StrLumenContour = CommonUtil.LumenContoursToJson(LumenContours);
                 PatientCase.StrLumenSidebranch = JsonConvert.SerializeObject(LumenSidebranches, Newtonsoft.Json.Formatting.Indented);
                 PatientCase.StrLumenStent = JsonConvert.SerializeObject(LumenStents, Newtonsoft.Json.Formatting.Indented);
                 PatientCase.StrLumenGuidewire = JsonConvert.SerializeObject(LumenGuidewires, Newtonsoft.Json.Formatting.Indented);
                 PatientCase.StrCoRegistration = "";
+
+                if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
+                {
+                    // Reverse lumen data again to restore orientation for display
+                    LumenContours.Reverse();
+                    LumenSidebranches.Reverse();
+                    LumenStents.Reverse();
+                    LumenGuidewires.Reverse();
+                }
 
                 DeviceStatus.IsLumenSaved = true;
                 SetLumenProfileInit();
