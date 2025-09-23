@@ -334,7 +334,7 @@ namespace RaywattApp.Common.Bases
                     _log.Error("RaySetProperty Error");
                 }
                 AutoPullbackStart();
-            }          
+            }
         }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
