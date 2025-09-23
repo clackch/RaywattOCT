@@ -64,7 +64,7 @@ private:
 public:
 	virtual ~CImagingSession();
 
-	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, IImaging::Setting setting, IDataManager *pWriter);
+	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, IImaging::Setting setting, IDataManager* pWriter);
 	static CImagingSession* CreateSession(CMessageService* pMsg, int nSession, const char* strFilePath, double imageResolution);
 	static COCTImaging* CreateColorImaging(CMessageService* msg, IImaging::Setting setting, IDataManager* pData, ImagingType type);
 
@@ -108,17 +108,22 @@ public:
 
 	bool LoadZOffset(const char* strDataFilePath);
 	void SetZOffset(int zOffset) { m_zOffset = zOffset; }
-	void SetLongitudeOrientation(bool bLongitude) { bLongitudeOrientation = bLongitude; }
+	void SetLongitudeOrientation(bool bLongitude)
+	{
+		bLongitudeOrientation = bLongitude;
+		PLOGI.printf("[hwjung] SetLongitudeOrientation %d", bLongitudeOrientation);
+
+	}
 	int GetZOffset() { return m_zOffset; }
 	int GetZOffset(int nFrame);
 
-	static std::vector<cv::Point> GetValidLumenContour(const cv::Mat& imageResultWithoutCompensation, int imgSize, const cv::Mat& centerMask, const cv::Ptr<cv::CLAHE>& clahe, COCTImaging *pImaging);
+	static std::vector<cv::Point> GetValidLumenContour(const cv::Mat& imageResultWithoutCompensation, int imgSize, const cv::Mat& centerMask, const cv::Ptr<cv::CLAHE>& clahe, COCTImaging* pImaging);
 	static int IsLumenNormal(cv::Mat image, std::vector<cv::Point> contour, double lumenThresholdMin, double lumenThresholdMax, double lumenSnrThreshold, bool showLumenGuide);
 
 private:
 	static CImagingSession* createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type);
 	static UINT threadImaging(LPVOID param);
-	static UINT threadUpdateCutView(LPVOID param);	
+	static UINT threadUpdateCutView(LPVOID param);
 	static UINT threadDetectObject(LPVOID param);
 	static UINT threadGenerateVolume(LPVOID param);
 	static USHORT* readBackground(const char* strBackgroundFile, IImaging::Setting setting);

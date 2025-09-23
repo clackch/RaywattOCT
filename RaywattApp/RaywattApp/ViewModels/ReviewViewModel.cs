@@ -1020,7 +1020,7 @@ namespace RaywattApp.ViewModels
 
             if (DeviceStatus.LongitudeOrientationChanged)
             {
-                //DeviceStatus.LongitudeOrientationChanged = false; // 수정 되었으므로,
+                DeviceStatus.LongitudeOrientationChanged = false; // 수정 되었으므로,
 
                 /* ai ffr */
                 PatientCase.FfrFeature = null;  // FFR 관련 Feature 초기화
@@ -1058,18 +1058,23 @@ namespace RaywattApp.ViewModels
 
         private void AdjustLumenDataByOrientation()
         {
-            _log.Debug("AdjustLumenDataByOrientation " + DeviceStatus.LongitudeOrientationChanged);
+            _log.Debug("AdjustLumenDataByOrientation " + DeviceStatus.LongitudeOrientation);
 
-            if (DeviceStatus.LongitudeOrientationChanged)
+            if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
             {
-                DeviceStatus.LongitudeOrientationChanged = false; // 최종 수정 되었으므로,
-
-                /* lumen data */
+                // proximal 호출 시, lumen reverse 수행 하였으므로, 원위치
                 if (LumenSidebranches != null) LumenSidebranches.Reverse();
                 if (LumenStents != null) LumenStents.Reverse();
                 if (LumenGuidewires != null) LumenGuidewires.Reverse();
                 if (LumenContours != null) LumenContours.Reverse();
+
+                PatientCase.LumenContours = LumenContours;
+                PatientCase.LumenSidebranches = LumenSidebranches;
+                PatientCase.LumenStents = LumenStents;
+                PatientCase.LumenGuidewires = LumenGuidewires;
             }
+
+            RaySetProperty(Property.LongitudeDegree, PatientCase.IndicatorDegree);
         }
 
         #endregion
@@ -1421,6 +1426,15 @@ namespace RaywattApp.ViewModels
             }
             else
             {
+                if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
+                {
+                    //// 다시 원복
+                    //LumenContours.Reverse();
+                    //LumenSidebranches.Reverse();
+                    //LumenStents.Reverse();
+                    //LumenGuidewires.Reverse();
+                }
+
                 PatientCase.LumenContours = LumenContours;
                 PatientCase.LumenSidebranches = LumenSidebranches;
                 PatientCase.LumenStents = LumenStents;

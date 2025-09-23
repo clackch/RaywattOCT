@@ -442,7 +442,16 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 	PLOGI.printf("Session #%d process oct imaging - %d frames", pSession->m_nSession, nNumOfSamples);
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadImaging->isRun; nFrame++)
 	{
-		char* pBuffer = pDataManager->GetSample(nFrame);
+		bool isDistoalToProximal = pSession->bLongitudeOrientation;
+		
+		int reNFrame = nFrame;
+		if (isDistoalToProximal != 0)
+		{
+			reNFrame = nNumOfSamples - nFrame - 1;
+		}
+		PLOGI.printf("[hwjung] reNFrame %d, %d", reNFrame, isDistoalToProximal);
+
+		char* pBuffer = pDataManager->GetSample(reNFrame);
 		pImaging->Process(pBuffer);
 		cv::Mat imgResult = pImaging->GetProcessedImage().clone();
 		pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult));

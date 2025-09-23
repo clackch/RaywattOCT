@@ -163,8 +163,6 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("Ok");
 
-            //PatientCase.Colormap = SelectedColormap;
-            //CommonUtil.SetColormap(PatientCase.Colormap);
             ConfirmAndGoToReview();
         }
         private void Cancel()
@@ -193,6 +191,13 @@ namespace RaywattApp.ViewModels
         private void ConfirmAndGoToReview()
         {
             _log.Debug("ConfirmAndGoToReview");
+
+            if(DeviceStatus.LongitudeOrientation == _longitudeOrientation)
+            {
+                _log.Debug("[hwjung] not changed : " + _longitudeOrientation);
+                Cancel();
+                return;
+            }
 
             RayError _ = (RayError)RayEndReview();
             Thread.Sleep(300);

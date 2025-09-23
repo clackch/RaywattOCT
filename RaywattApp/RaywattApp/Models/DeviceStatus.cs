@@ -110,8 +110,12 @@ namespace RaywattApp.Models
         [ObservableProperty]
         // TODO: junghw 추후 의사 정보로 default로 변환
         private LongitudeOrientation _longitudeOrientation = LongitudeOrientation.DistalToProximal; // default
+
         [ObservableProperty]
         private bool _longitudeOrientationChanged = false;
+
+        [ObservableProperty]
+        private bool _recodingOrientationProximal = false;
 
         public DeviceStatus()
         {

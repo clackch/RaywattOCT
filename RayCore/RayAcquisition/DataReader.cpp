@@ -173,7 +173,7 @@ bool CDataReader::readFrame(int nIndex) {
 	DWORD dwBytesRead = 0;
 
 	const int N = m_nNumOfSamples;
-	const int srcIndex = bLongitudeOrientation ? (N - 1 - nIndex) : nIndex;
+	//const int srcIndex = bLongitudeOrientation ? (N - 1 - nIndex) : nIndex;
 	
 	if (nIndex < 0 || nIndex >= N) return false;
 	
@@ -189,7 +189,7 @@ bool CDataReader::readFrame(int nIndex) {
 		LARGE_INTEGER li;
 		li.QuadPart =
 			static_cast<LONGLONG>(m_nHeaderSize) +
-			static_cast<LONGLONG>(bytes) * static_cast<LONGLONG>(srcIndex);
+			static_cast<LONGLONG>(bytes) * static_cast<LONGLONG>(nIndex);
 
 		if (!SetFilePointerEx(m_hFile, li, nullptr, FILE_BEGIN)) {
 			DWORD err = GetLastError();

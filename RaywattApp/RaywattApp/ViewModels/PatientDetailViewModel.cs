@@ -402,6 +402,9 @@ namespace RaywattApp.ViewModels
             var __ = (RayError)RaySetProperty(Property.LongitudeOrientation, (double)DeviceStatus.LongitudeOrientation);
             if (DeviceStatus.LongitudeOrientation != LongitudeOrientation.DistalToProximal)
             {
+                // proximal일 때만, changed 수행
+                // distal은 굳이 lumen 을 변호나 시킬 필요가 없으므로.
+                _log.Debug("[hwjung] orientation changed: " + DeviceStatus.LongitudeOrientation);
                 DeviceStatus.LongitudeOrientationChanged = true;
             }
 

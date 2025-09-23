@@ -805,6 +805,7 @@ void* COCTSystem::GetImageData(int nFrame) {
 
 void COCTSystem::SetLongitudeOrientation(const bool nOrientation) 
 {
+	PLOGI.printf("[hwjung] SetLongitudeOrientation %d", nOrientation);
 	bLongitudeOrientation = nOrientation;
 }
 
@@ -1553,6 +1554,7 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 	COCTSystem* pSystem = (COCTSystem*)param;
 	tstring strSaveFilePath = pSystem->m_strFilePath;
 	CImagingSession* pSession = pSystem->m_reviewSession[SESSION_REALTIME];
+
 	PullbackLengthManager* pDataWriter = (PullbackLengthManager*)pSession->GetDataManager();
 	COCTImaging* pImaging = pSession->GetImaging();
 	ImagingType type = pSession->GetImagingType();
@@ -3016,6 +3018,7 @@ LRESULT COCTSystem::OnMsgStartReviewSession(WPARAM wParam, LPARAM lParam) {
 		m_reviewSession[nSession] = nullptr;
 	}
 
+	PLOGI.printf("[hwjung] OnMsgStartReviewSession %d", bLongitudeOrientation);
 	PLOGI.printf("Start session #%d %d", nSession, bLongitudeOrientation);
 
 	m_reviewSession[nSession] = pSession;

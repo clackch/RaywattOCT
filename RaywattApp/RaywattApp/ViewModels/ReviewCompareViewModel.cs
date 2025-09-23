@@ -246,10 +246,7 @@ namespace RaywattApp.ViewModels
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
 
-            if (ReviewStatus.SelectedPatientCase.IsCompareDistalToProximal == false)
-            {
-                ReverseLumenProfileCompare();
-            }
+            ReverseLumenProfileCompare();
         }
 
         private void GetAnnotation()
@@ -645,29 +642,22 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("EnsureOrientationCompare");
 
-            if (ReviewStatus.SelectedPatientCase.IsCompareDistalToProximal == null)
-            {
-                ReviewStatus.SelectedPatientCase.IsCompareDistalToProximal = true; // 기본값
-            }
 
-            if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal &&
-                ReviewStatus.SelectedPatientCase.IsCompareDistalToProximal == true)
-            {
-                ReviewStatus.SelectedPatientCase.IsCompareDistalToProximal = false;
-                ReverseLumenProfileCompare();
-            }
+            ReverseLumenProfileCompare();
+
         }
 
         private void ReverseLumenProfileCompare()
         {
-            if (ReviewStatus.SelectedPatientCase == null) return;
-            
-            _log.Debug("ReverseLumenProfileCompare");
+            if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
+            {
+                _log.Debug("ReverseLumenProfileCompare");
 
-            ReviewStatus.SelectedPatientCase.LumenContours.Reverse();
-            ReviewStatus.SelectedPatientCase.LumenStents.Reverse();
-            ReviewStatus.SelectedPatientCase.LumenSidebranches.Reverse();
-            ReviewStatus.SelectedPatientCase.LumenGuidewires.Reverse();
+                ReviewStatus.SelectedPatientCase.LumenContours.Reverse();
+                ReviewStatus.SelectedPatientCase.LumenStents.Reverse();
+                ReviewStatus.SelectedPatientCase.LumenSidebranches.Reverse();
+                ReviewStatus.SelectedPatientCase.LumenGuidewires.Reverse();
+            }
         }
 
         private void HideLumenProfileCompare()

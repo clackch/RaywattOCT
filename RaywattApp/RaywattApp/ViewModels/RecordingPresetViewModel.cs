@@ -206,6 +206,11 @@ namespace RaywattApp.ViewModels
             _log.Debug("apply: " + DeviceStatus.LongitudeOrientation);
             var _ = (RayError)RaySetProperty(Property.LongitudeOrientation, (double)DeviceStatus.LongitudeOrientation);
             _log.Debug("apply done: " + DeviceStatus.LongitudeOrientation);
+
+            if (DeviceStatus.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
+                DeviceStatus.RecodingOrientationProximal = true;
+            else
+                DeviceStatus.RecodingOrientationProximal = false;
         }
 
 
