@@ -1983,7 +1983,8 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	// 5. Homing
 
 	BYTE* uidRFID = new BYTE[CUSTOM_UID_LENGTH + HARDWARE_UID_LENGTH];
-	pRJController->IncreaseRFIDUsage(pRJController->GetRFIDUID(uidRFID), uidRFID);
+	if(ENABLE_RFID)
+		pRJController->IncreaseRFIDUsage(pRJController->GetRFIDUID(uidRFID), uidRFID);
 
 	pRJController->changeSMProfileToLoadUnload();
 	Sleep(2000);
@@ -2022,9 +2023,9 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 		pSystem->postMessage(WM_NOTIFY_ERROR_OCCURED, (WPARAM)RayError::HomingFailed);
 	}
 
-	/*if( pRJController->GetRFIDCountCurrentState()>=5){
+	if(ENABLE_RFID && pRJController->GetRFIDCountCurrentState()>=5){
 		pRJController->UpdateState(eRJState::Error);
-	}*/
+	}
     
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
