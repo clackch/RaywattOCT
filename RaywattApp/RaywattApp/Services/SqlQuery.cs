@@ -324,14 +324,14 @@ namespace RaywattApp.Services
                 , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
                 , flush_media, pullback_trigger, colormap, guidewire_radius
                 , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
-                , brightness, contrast, sheath_diameter, section_proximal, section_distal
+                , brightness, contrast, sheath_diameter, section_proximal, section_distal, is_distal_to_proximal
                 , create_date, update_date)
                 VALUES (@id, @patient_id, @physician_name, @accession_number
                 , @comment, @vessel, @location, @procedure, @num_of_frames, @image, @image_resolution, @z_offset, @field_of_view
                 , @pullback_type, @pullback_length, @angio_yn, @angio_co_registration, @indicator_degree
                 , @flush_media, @pullback_trigger, @colormap, @guidewire_radius
                 , @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold
-                , @brightness, @contrast, @sheath_diameter, @section_proximal, @section_distal
+                , @brightness, @contrast, @sheath_diameter, @section_proximal, @section_distal, @is_distal_to_proximal
                 , now(), now())
                 ";
 
