@@ -177,6 +177,22 @@ namespace RaywattApp.ViewModels
             GoToReview();
         }
 
+            
+        private void UpdatePatientCaseOrientationById()
+        {
+            // load
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = PatientCase.Id;
+            sqlParameters["is_distal_to_proximal"] = LongitudeOrientation == LongitudeOrientation.DistalToProximal ? true : false;
+            // update
+            int result = _sqlManager.UpdatePaitentCaseIsDistalToProximal(sqlParameters);
+
+            if(result == 0)
+            {
+                _log.Error(sqlParameters["id"].ToString() + " / " + sqlParameters["is_distal_to_proximal"].ToString());
+            }
+        }
+
         private void GoToReview()
         {
             _log.Debug("GoToReview");
@@ -199,6 +215,8 @@ namespace RaywattApp.ViewModels
                 Cancel();
                 return;
             }
+
+            UpdatePatientCaseOrientationById();
 
             RayError _ = (RayError)RayEndReview();
             Thread.Sleep(300);
@@ -260,20 +278,18 @@ namespace RaywattApp.ViewModels
 
         private void CheckLongitudeOrientation()
         {
-            // TODO: hwjung, PhysicianId로 DB에서 PatientCase로 전환 하기.
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-            sqlParameters["id"] = Patient.PhysicianId;
-            IList<Physician> Physicians = _sqlManager.SelectPhysician(sqlParameters);
+            sqlParameters["id"] = PatientCase.PatientId;
+            var PatientList = _sqlManager.SelectPatientCaseList(sqlParameters);
 
-            if (Physicians.Count == 0)
+            foreach (var a in PatientList)
             {
-                _log.Error("not find physician infomation");
-                PatientCase.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
-                return;
+                if (a.Id == PatientCase.Id)
+                {
+                    PatientCase.LongitudeOrientation = a.Isdistaltoproximal ? LongitudeOrientation.DistalToProximal : LongitudeOrientation.ProximalToDistal;
+                    break;
+                }
             }
-
-            if (Physicians[0].Isdistaltoproximal) PatientCase.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
-            else PatientCase.LongitudeOrientation = LongitudeOrientation.ProximalToDistal;
 
             LongitudeOrientation = PatientCase.LongitudeOrientation;
         }

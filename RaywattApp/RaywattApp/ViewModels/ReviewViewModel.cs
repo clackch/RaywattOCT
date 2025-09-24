@@ -434,6 +434,7 @@ namespace RaywattApp.ViewModels
 
                 ReviewStatus.CurrentPage = Constants.ReviewPage;
 
+                UpdatePatientCaseOrientationById();
                 LongitudeOrientationLabelChanged();
                 AdjustIndicatorByOrientation();
 
@@ -501,6 +502,22 @@ namespace RaywattApp.ViewModels
         {
             _dPLeftLabel = PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "P" : "D";
             _dPRightLabel = PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "D" : "P";
+        }
+
+        private void UpdatePatientCaseOrientationById()
+        {
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = PatientCase.PatientId;
+            var PatientList = _sqlManager.SelectPatientCaseList(sqlParameters);
+
+            foreach(var a in PatientList)
+            {
+                if(a.Id == PatientCase.Id)
+                {
+                    PatientCase.LongitudeOrientation = a.Isdistaltoproximal ? LongitudeOrientation.DistalToProximal : LongitudeOrientation.ProximalToDistal;
+                    break;
+                }
+            }
         }
 
         private void SetAngioFrame()

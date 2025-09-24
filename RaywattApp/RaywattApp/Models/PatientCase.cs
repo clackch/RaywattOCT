@@ -225,6 +225,9 @@ namespace RaywattApp.Models
         private LongitudeOrientation _longitudeOrientation = LongitudeOrientation.DistalToProximal; // default
 
         [ObservableProperty]
-        private bool _longitudeOrientationChanged = false;
+        private bool _longitudeOrientationChanged = false; // 방향
+
+        [ObservableProperty]
+        private bool _isdistaltoproximal;
     }
 }

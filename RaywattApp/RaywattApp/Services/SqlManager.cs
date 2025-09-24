@@ -135,7 +135,7 @@ namespace RaywattApp.Services
             else
             {
                 commandText = SqlQuery.GetQuery("SelectPatient");
-            }           
+            }
 
             return _databaseService.GetDatas<Patient>(commandText, sqlParameters);
         }
@@ -145,12 +145,12 @@ namespace RaywattApp.Services
             _log.Debug("SelectPatientByList");
 
             string commandText;
-            
+
             commandText = SqlQuery.GetQuery("SelectPatientByList");
 
             List<string> ids = (List<string>)sqlParameters["ids"];
             string commandTextExtra = "WHERE id IN (''";
-            for (int i=0; i<ids.Count; i++)
+            for (int i = 0; i < ids.Count; i++)
             {
                 commandTextExtra += ", '" + ids[i] + "'";
             }
@@ -195,7 +195,7 @@ namespace RaywattApp.Services
             else
             {
                 commandText = SqlQuery.GetQuery("InsertPatient");
-            }            
+            }
 
             return _databaseService.InsertData(commandText, sqlParameters);
         }
@@ -346,6 +346,13 @@ namespace RaywattApp.Services
 
             string commandText = SqlQuery.GetQuery("UpdatePatientCaseId");
 
+            return _databaseService.UpdateData(commandText, sqlParameters);
+        }
+
+        public int UpdatePaitentCaseIsDistalToProximal(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpdatePaitentCaseIsDistalToProximal");
+            string commandText = SqlQuery.GetQuery("UpdatePaitentCaseIsDistalToProximal");
             return _databaseService.UpdateData(commandText, sqlParameters);
         }
 
@@ -511,7 +518,7 @@ namespace RaywattApp.Services
             string commandText = SqlQuery.GetQuery("UpsertCoRegistration");
 
             return _databaseService.InsertData(commandText, sqlParameters);
-        }        
+        }
 
         public IList<PatientCaseAnnotation> SelectCoRegistration(Dictionary<string, Object> sqlParameters)
         {
@@ -554,7 +561,7 @@ namespace RaywattApp.Services
 
                 else
                     commandText = SqlQuery.GetQuery("SelectDicomServer");
-            }                
+            }
 
             return _databaseService.GetDatas<DicomServer>(commandText, sqlParameters);
         }
