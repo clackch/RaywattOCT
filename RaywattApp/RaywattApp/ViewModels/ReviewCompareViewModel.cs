@@ -191,7 +191,8 @@ namespace RaywattApp.ViewModels
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
                 ReviewStatus.CurrentPage = Constants.ReviewComparePage;
 
-                
+                ReverseLumenProfileCompare();
+
 
                 Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
 
@@ -235,7 +236,6 @@ namespace RaywattApp.ViewModels
                 }
 
                 LongitudeOrientationLabelChanged();
-                ReverseLumenProfileCompare();
             }
 
             GetImageInfo(RaySession.Review);
@@ -651,11 +651,6 @@ namespace RaywattApp.ViewModels
         {
             if (PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
             {
-                if (ReviewStatus.SelectedPatientCase.LumenContours != null) ReviewStatus.SelectedPatientCase.LumenContours.Reverse();
-                if (ReviewStatus.SelectedPatientCase.LumenStents != null) ReviewStatus.SelectedPatientCase.LumenStents.Reverse();
-                if (ReviewStatus.SelectedPatientCase.LumenSidebranches != null) ReviewStatus.SelectedPatientCase.LumenSidebranches.Reverse();
-                if (ReviewStatus.SelectedPatientCase.LumenGuidewires != null) ReviewStatus.SelectedPatientCase.LumenGuidewires.Reverse();
-
                 PatientCase.LumenContours.Reverse();
                 PatientCase.LumenSidebranches.Reverse();
                 PatientCase.LumenStents.Reverse();

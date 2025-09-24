@@ -228,8 +228,10 @@ namespace RaywattApp.ViewModels.Dialog
 
             if (CommonUtil.IsTestMode(DeviceStatus.TestMode, "Sidebranch"))
                 IsDrawLumenSideBranch = true;
+        }
 
-            // label setting (D/P or P/D)
+        private void LongitudeOrientationChanged()
+        {
             bool isDistalToProximal = PatientCase.LongitudeOrientation == Common.Enums.LongitudeOrientation.DistalToProximal;
             DistalOrientationLabel = isDistalToProximal ? "D" : "P";
             ProximalOrientationLabel = isDistalToProximal ? "P" : "D";
@@ -274,7 +276,6 @@ namespace RaywattApp.ViewModels.Dialog
         {
             PatientCase = patientCase;
             Degree = PatientCase.IndicatorDegree;
-
             this.crossSections = crossSections;
 
             if (fileExport.AngioView && patientCase.AngioYn)
@@ -290,7 +291,10 @@ namespace RaywattApp.ViewModels.Dialog
             FileExport = fileExport;
             if (fileExport.Longitude || fileExport.MeasureAuto || fileExport.MeasureManual)
                 SetAnnotation();
-            
+
+            ReverseLumenProfileCompare();
+            LongitudeOrientationChanged();
+
             LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(lMode);
 
             if ((fileExport.AngioView && patientCase.AngioYn) || fileExport.Longitude)

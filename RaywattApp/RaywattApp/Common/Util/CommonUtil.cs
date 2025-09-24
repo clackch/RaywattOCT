@@ -401,7 +401,6 @@ namespace RaywattApp.Common.Util
             var dialogFE = dialog as System.Windows.FrameworkElement;
             var dialogDataContext = dialogFE.DataContext as FileExportDialogViewModel;
             double dialogWidth = dialogDataContext.SetInitialize(patientCase, imgCrossSections, imgLongitude, fileExport);
-            dialogDataContext.ReverseLumenProfileCompare();
 
             window.Show();
             window.Hide();

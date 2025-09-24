@@ -221,8 +221,6 @@ namespace RaywattApp.ViewModels
             IndicatorLongitude = new Indicator();
             IndicatorLongitude.X = Constants.LongitudeIndicatorWidth / 2;
             IndicatorLongitude.IsVisible = Visibility.Visible;
-
-            LongitudeOrientationChanged();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -248,6 +246,7 @@ namespace RaywattApp.ViewModels
                 ReviewStatus.CurrentPage = Constants.Review3dPage;
 
                 Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
+                LongitudeOrientationChanged();
 
                 RayError result = (RayError)RaySetSession(RaySession.Review);
                 if (result != RayError.OK)

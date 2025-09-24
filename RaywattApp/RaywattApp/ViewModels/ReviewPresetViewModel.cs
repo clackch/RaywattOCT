@@ -260,6 +260,7 @@ namespace RaywattApp.ViewModels
 
         private void CheckLongitudeOrientation()
         {
+            // TODO: hwjung, PhysicianId로 DB에서 PatientCase로 전환 하기.
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = Patient.PhysicianId;
             IList<Physician> Physicians = _sqlManager.SelectPhysician(sqlParameters);
