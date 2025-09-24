@@ -117,9 +117,6 @@ namespace RaywattApp.ViewModels
             MinExpansionThreshold = Constants.MinExpansionThreshold;
             MaxAppositionThreshold = Constants.MaxAppositionThreshold;
             MinAppositionThreshold = Constants.MinAppositionThreshold;
-
-            // TODO: db 읽어서 가져와야 함 hwjung
-            //LongitudeOrientation = PatientCase.LongitudeOrientation;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -177,19 +174,21 @@ namespace RaywattApp.ViewModels
             GoToReview();
         }
 
-            
-        private void UpdatePatientCaseOrientationById()
+
+        private void SavePatientCaseOrientationToDb()
         {
-            // load
-            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-            sqlParameters["id"] = PatientCase.Id;
-            sqlParameters["is_distal_to_proximal"] = LongitudeOrientation == LongitudeOrientation.DistalToProximal ? true : false;
-            // update
+            var sqlParameters = new Dictionary<string, object>
+            {
+                ["id"] = PatientCase.Id,
+                ["is_distal_to_proximal"] = LongitudeOrientation == LongitudeOrientation.DistalToProximal
+            };
+
             int result = _sqlManager.UpdatePaitentCaseIsDistalToProximal(sqlParameters);
 
-            if(result == 0)
+            if (result == 0)
             {
-                _log.Error(sqlParameters["id"].ToString() + " / " + sqlParameters["is_distal_to_proximal"].ToString());
+                _log.Error($"Failed Update Id={sqlParameters["id"]}, " +
+                           $"IsDistalToProximal={sqlParameters["is_distal_to_proximal"]}");
             }
         }
 
@@ -209,14 +208,14 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("ConfirmAndGoToReview");
 
-            if(PatientCase.LongitudeOrientation == _longitudeOrientation)
+            if (PatientCase.LongitudeOrientation == _longitudeOrientation)
             {
                 _log.Debug("[hwjung] not changed : " + _longitudeOrientation);
                 Cancel();
                 return;
             }
 
-            UpdatePatientCaseOrientationById();
+            SavePatientCaseOrientationToDb();
 
             RayError _ = (RayError)RayEndReview();
             Thread.Sleep(300);

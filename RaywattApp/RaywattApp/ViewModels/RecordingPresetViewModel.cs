@@ -191,11 +191,14 @@ namespace RaywattApp.ViewModels
 
         private LongitudeOrientation IsDistalToProximal()
         {
-            // TODO: PhysicianId로 DB에서 조회
-            LongitudeOrientation = LongitudeOrientation.ProximalToDistal;
+            LongitudeOrientation = LongitudeOrientation.DistalToProximal; // Default
 
-            if (LongitudeOrientation == LongitudeOrientation.DistalToProximal) return LongitudeOrientation.DistalToProximal;
-            return LongitudeOrientation.ProximalToDistal;
+            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
+            sqlParameters["id"] = Patient.PhysicianId;
+            IList<Physician> physicians = _sqlManager.SelectPhysician(sqlParameters);
+
+            LongitudeOrientation = physicians[0].Isdistaltoproximal ? LongitudeOrientation.DistalToProximal : LongitudeOrientation.ProximalToDistal;
+            return LongitudeOrientation;
         }
 
         private void CheckLongitudeOrientation()
