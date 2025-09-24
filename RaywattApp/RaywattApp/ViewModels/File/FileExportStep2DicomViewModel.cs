@@ -115,7 +115,7 @@ namespace RaywattApp.ViewModels.File
             {
                 foreach (PatientCase patientCase in PatientCases)
                 {
-                    ExportSize += frameSize * int.Parse(patientCase.PullbackLength);
+                    ExportSize += frameSize * patientCase.NumOfFrames;
                 }
             }
             else if(FileExport.Material == Constants.ExportMaterialBookmarked)
