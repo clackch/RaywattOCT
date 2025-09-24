@@ -111,7 +111,7 @@
                                     <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding IsRendering, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                                 </Border>
                                 <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                                    <ToggleButton Style="{DynamicResource FlyThroughToggleBtn}" Content="{Binding [P to D], Source={StaticResource L10N}}" IsChecked="{Binding IsPtoD}" IsEnabled="{Binding IsRendering}"/>
+                                    <ToggleButton Style="{DynamicResource FlyThroughToggleBtn}" Content="{Binding [D to P], Source={StaticResource L10N}}" IsChecked="{Binding IsPtoD}" IsEnabled="{Binding IsRendering}"/>
                                     <StackPanel Width="6"/>
                                     <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="sideBranchView" Content="{Binding [Side Branch View], Source={StaticResource L10N}}" IsChecked="{Binding IsSideBranchView}" IsEnabled="{Binding IsRendering}" Visibility="Hidden"/>
                                 </StackPanel>
