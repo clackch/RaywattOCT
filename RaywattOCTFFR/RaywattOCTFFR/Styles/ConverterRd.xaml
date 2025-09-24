@@ -158,4 +158,7 @@
     <!--  DateTime Min To Empty Converter  -->
     <converters:DateTimeMinToEmptyConverter x:Key="DateTimeMinToEmptyConverter" />
 
+    <!--  Bool To Grid Length Or Zero Converter   -->
+    <converters:BoolToGridLengthOrZeroConverter x:Key="BoolToGridLengthOrZeroConverter" />
+
 </ResourceDictionary>

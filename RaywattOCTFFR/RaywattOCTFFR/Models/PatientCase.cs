@@ -159,6 +159,15 @@ namespace RaywattOCTFFR.Models
         private double _sheathDiameter;
 
         [ObservableProperty]
+        private double _catheterSize;
+
+        [ObservableProperty]
+        private string? _importType;
+
+        [ObservableProperty]
+        private bool _isDistalToProximal;
+
+        [ObservableProperty]
         private string? _bookmark;
 
         [ObservableProperty]

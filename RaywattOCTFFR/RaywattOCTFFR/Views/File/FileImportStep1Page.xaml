@@ -88,8 +88,8 @@
                     <Grid Grid.Row="9">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="20"/>
-                            <ColumnDefinition Width="220"/>
+                            <ColumnDefinition Width="{Binding IsSingleColumnMode, Converter={StaticResource BoolToGridLengthOrZeroConverter}, ConverterParameter=20}"/>
+                            <ColumnDefinition Width="{Binding IsSingleColumnMode, Converter={StaticResource BoolToGridLengthOrZeroConverter}, ConverterParameter=220}"/>
                         </Grid.ColumnDefinitions>
                         <TreeView Grid.Column="0" Style="{DynamicResource TreeViewImport}" ItemsSource="{Binding DirItems}">
                             <TreeView.Resources>
@@ -122,7 +122,12 @@
                                 </DataGrid.Columns>
                             </DataGrid>
                             <Label Grid.Row="3" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Patient Case], Source={StaticResource L10N}}"/>
-                            <DataGrid Grid.Row="4" ItemsSource="{Binding PatientCaseList}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}">
+                            <DataGrid Grid.Row="4" Name="patientCaseList" ItemsSource="{Binding PatientCaseList}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="SelectionChanged">
+                                        <i:InvokeCommandAction Command="{Binding SelectCaseCommand}" CommandParameter="{Binding ElementName=patientCaseList, Path=CurrentItem}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
                                 <DataGrid.Columns>
                                     <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding CreateDate, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Recording], Source={StaticResource L10N}}" />
                                 </DataGrid.Columns>
@@ -164,7 +169,7 @@
                             <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,-24,0">
-                            <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding ImportCommand}" Content="{Binding [Import], Source={StaticResource L10N}}"/>
+                            <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding NextCommand}" Content="{Binding [Next], Source={StaticResource L10N}}"/>
                         </StackPanel>
                     </Grid>
                 </Grid>

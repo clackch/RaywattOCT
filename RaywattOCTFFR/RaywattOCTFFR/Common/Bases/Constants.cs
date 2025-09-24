@@ -182,7 +182,9 @@ namespace RaywattOCTFFR.Common.Bases
 
         //File Import/Export
         public const string FileImageExtension = "bin";
-        public const string FileExtension = "dbf";
+        public const string FileExtension = "dbf";//RAW
+        public const string DicomFileExtension = "dcm";
+        public const string TiffFileExtension = "tif";
         public const string AnnotationFileExtension = "annot";
         public const string FileNamePrefix = "Export_";
 

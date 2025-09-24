@@ -11,6 +11,9 @@ namespace RaywattOCTFFR.Common.Converters
             var SettingSelected = App.Current.Resources["SettingSelected"];
             var SettingNotSelected = App.Current.Resources["SettingNotSelected"];
 
+            if (value == null)
+                return SettingNotSelected;
+
             if (value.Equals(parameter))
             {
                 return SettingSelected;

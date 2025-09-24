@@ -21,7 +21,7 @@ namespace RaywattOCTFFR.Common.Converters
             if (item.Path.Length == 2)
                 return Constants.FileIconDrive;
 
-            if (item.Name.EndsWith(Constants.FileExtension))
+            if (item.IsFile)
                 return Constants.FileIconFile;
 
             return Constants.FileIconFolder;

@@ -76,7 +76,7 @@ namespace RaywattOCTFFR.ViewModels.File
                     if (_selectedExternalDrive != null)
                     {
                         curPath = _selectedExternalDrive;
-                        directoryProvider.GetDirectoryWithExtension(curPath.Replace("\\", ""));
+                        directoryProvider.GetDirectoryWithExtension(curPath.Replace("\\", ""), "dbf");
                         DirItems = directoryProvider.DirItems;
 
                         externDriveInit = true;
