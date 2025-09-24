@@ -619,7 +619,9 @@ cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {
 	return result;
 }
 
+int i = 0;
 void COCTImaging::findSheath(cv::Mat input) {
+	i++;
 	cv::Mat gray;
 	if (input.channels() == 3) {
 		cvtColor(input, gray, cv::COLOR_BGR2GRAY);
@@ -637,35 +639,49 @@ void COCTImaging::findSheath(cv::Mat input) {
 	}
 
 	cv::rotate(gray, gray, cv::ROTATE_90_COUNTERCLOCKWISE);
-	//cv::Mat tmp = gray.clone();
+	cv::Mat tmp = gray.clone();
 	cv::threshold(gray, gray, 0, 255, cv::THRESH_OTSU);
 
-	int nowRow = 0;
 	int startRow = 120;
-	int sheathThickness = 15;
+	int minSheathThickness = 12, maxSheathThickness = 17;
 	int thickCount = 0;
-	for (int i = startRow; i < startRow + 200; i++) {
+
+	std::vector<int> innerSheathPositions;
+	for (int i = startRow + 200; i >= startRow; i--) {
 		int pixelCount = 0;
 		for (int x = 0; x < gray.cols; x++) {
 			if (gray.at<uchar>(i, x) == 255)
 				pixelCount++;
 		}
-		nowRow = i;
-		if (pixelCount > gray.cols / 2) {
+		if (pixelCount > gray.cols * 0.8 /* col의 80% */) {
 			thickCount++;
-			if (thickCount > sheathThickness) {
-				nowRow -= sheathThickness;
-				break;
-			}
 		}
 		else {
+			if (thickCount > minSheathThickness && thickCount < maxSheathThickness) {
+				innerSheathPositions.push_back(i + 1);
+			}
 			thickCount = 0;
 		}
 	}
+	if(innerSheathPositions.size() == 0) {
+		m_nSheathPosition = 0;
+		PLOGI.printf("No sheath found");
+		return;
+	}
+	if(innerSheathPositions.size() == 1) {
+		m_nSheathPosition = innerSheathPositions[0];
+	}
+	else {
+		int dist = innerSheathPositions[1] - innerSheathPositions[0];
+		int minDist = 20, maxDist = 30;
+		if (dist >= minDist && dist <= maxDist)
+			m_nSheathPosition = innerSheathPositions[1];
+		else
+			m_nSheathPosition = innerSheathPositions[0];
+	}
 	//cv::line(tmp, cv::Point(0, nowRow), cv::Point(tmp.cols - 1, nowRow), cv::Scalar(255, 0, 0), 2);
 	//cv::imwrite("origin" + std::to_string(i) + ".tif", tmp);
-
-	m_nSheathPosition = nowRow;
+	cv::imwrite("binary" + std::to_string(i) + ".tif", gray);
 }
 
 // 정규화를 위한 함수
