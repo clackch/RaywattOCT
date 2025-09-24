@@ -137,6 +137,7 @@ namespace RaywattApp.ViewModels
                     Physician = physician;
                     IsNew = false;
                     SetDefault(Physician);
+                    LongitudeOrientation = physician.Isdistaltoproximal ? LongitudeOrientation.DistalToProximal : LongitudeOrientation.ProximalToDistal;
                 }
                 else
                 {
@@ -189,6 +190,7 @@ namespace RaywattApp.ViewModels
             Physician.FlushMedia = SelectedFlushMedia;
             Physician.PullbackType = SelectedPullbackType;
             Physician.Colormap = SelectedColormap;
+            Physician.Isdistaltoproximal = LongitudeOrientation == LongitudeOrientation.DistalToProximal;
 
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["lastname"] = Physician.Lastname.Trim();

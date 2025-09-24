@@ -100,6 +100,8 @@
                                             <RowDefinition Height="1"/>
                                             <RowDefinition Height="51"/>
                                             <RowDefinition Height="1"/>
+                                            <RowDefinition Height="51"/>
+                                            <RowDefinition Height="1"/>
                                             <RowDefinition/>
                                         </Grid.RowDefinitions>
                                         <Label Grid.Row="0" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Flush Media], Source={StaticResource L10N}}" VerticalAlignment="Center" Margin="24,0,0,0"/>
@@ -154,6 +156,20 @@
                                             <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="㎜"/>
                                         </StackPanel>
                                         <Separator Grid.Row="13" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray7Brush}"/>
+                                        
+                                        <!-- 추가 hwjung -->
+                                        <Label Grid.Row="14" 
+                                               Grid.Column="0" 
+                                               Style="{DynamicResource Pretendard-Medium-16}" 
+                                               Foreground="{DynamicResource GrayscaleGray3Brush}" 
+                                               Content="{Binding Logitude Image Orientation, Source={StaticResource L10N}}"
+                                               VerticalAlignment="Center" Margin="24,0,0,0"/>
+                                        <StackPanel Grid.Row="14" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Label Style="{DynamicResource Pretendard-Medium-16}" 
+                                                   Foreground="{DynamicResource GrayscaleWhiteBrush}" 
+                                                   Content="{Binding LongitudeOrientation}"/>
+                                        </StackPanel>
+                                        <Separator Grid.Row="15" Grid.ColumnSpan="2" Background="{DynamicResource GrayscaleGray7Brush}"/>
                                     </Grid>
                                 </Grid>
                             </Border>

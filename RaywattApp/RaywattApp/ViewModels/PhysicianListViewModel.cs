@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
+using RaywattApp.Common.Enums;
 using RaywattApp.Common.Messages;
 using RaywattApp.Models;
 using RaywattApp.Services;
@@ -12,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Navigation;
 
 namespace RaywattApp.ViewModels
@@ -52,6 +54,9 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private string _pbTime;
+
+        [ObservableProperty]
+        private string _longitudeOrientation;
 
         private ICommand _newPhysicianCommand;
         public ICommand NewPhysicianCommand
@@ -105,6 +110,7 @@ namespace RaywattApp.ViewModels
             {
                 Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
                 PrevStatus = (PrevStatus)data["prevStatus"];
+                //LongitudeOrientation = 
             }
         }
 
@@ -170,6 +176,8 @@ namespace RaywattApp.ViewModels
                 PbLength = temp[0];
                 PbSpeed = temp[1];
                 PbTime = temp[2];
+
+                LongitudeOrientation = Physician.Isdistaltoproximal ? "Distal → Proximal" : "Proximal → Distal";
             }
         }
 

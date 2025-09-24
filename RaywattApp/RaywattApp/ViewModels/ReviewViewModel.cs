@@ -795,13 +795,11 @@ namespace RaywattApp.ViewModels
                     LumenContourCommand = Constants.LumenContourCurrentInit;
 
                 ReverseLumenDataIfNeeded(); // to align with storage orientation when Longitude is Proximal → Distal
-
                 PatientCase.StrLumenContour = CommonUtil.LumenContoursToJson(LumenContours);
                 PatientCase.StrLumenSidebranch = JsonConvert.SerializeObject(LumenSidebranches, Newtonsoft.Json.Formatting.Indented);
                 PatientCase.StrLumenStent = JsonConvert.SerializeObject(LumenStents, Newtonsoft.Json.Formatting.Indented);
                 PatientCase.StrLumenGuidewire = JsonConvert.SerializeObject(LumenGuidewires, Newtonsoft.Json.Formatting.Indented);
                 PatientCase.StrCoRegistration = "";
-
                 ReverseLumenDataIfNeeded(); // Reverse lumen data again to restore orientation for display
 
                 DeviceStatus.IsLumenSaved = true;

@@ -14,6 +14,7 @@ using RaywattApp.Views.Dialog;
 using RaywattOCT;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -378,19 +379,21 @@ namespace RaywattApp.ViewModels
             }
             CommonUtil.SetColormap(patientCase.Colormap);
 
-            // TODO: 정보를 받아서 표시 (Longitued Orientation)
-            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-            sqlParameters["id"] = Patient.PhysicianId;
-            IList<Physician> Physicians = _sqlManager.SelectPhysician(sqlParameters);
-
-            if (Physicians.Count == 0)
+            // patientcase 정보 획득
+            var sqlParameters = new Dictionary<string, object>
             {
-                _log.Error("not find physician infomation");
-                patientCase.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
+                ["id"] = patientCase.PatientId
+            };
+            var patientCases = _sqlManager.SelectPatientCaseList(sqlParameters);
+            var selectCase = patientCases.FirstOrDefault(pc => pc.Id == patientCase.Id);
+
+            if (selectCase == null)
+            {
+                _log.Error("not find paitencase infomation " + patientCase.Id);
                 return;
             }
 
-            if (Physicians[0].Isdistaltoproximal) // true: distal to proximal / false: proximal to distal
+            if (selectCase.Isdistaltoproximal) // true: distal to proximal / false: proximal to distal
             {
                 patientCase.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
             }

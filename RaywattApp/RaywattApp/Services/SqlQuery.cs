@@ -175,7 +175,7 @@ namespace RaywattApp.Services
                     , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
                     , flush_media, pullback_trigger, colormap
                     , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
-                    , brightness, contrast, sheath_diameter, section_proximal, section_distal
+                    , brightness, contrast, sheath_diameter, section_proximal, section_distal, is_distal_to_proximal
                     , create_date, update_date
                     FROM rv_schema.patient_case
                     WHERE patient_id = @id
@@ -192,7 +192,7 @@ namespace RaywattApp.Services
                     , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
                     , flush_media, pullback_trigger, colormap
                     , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
-                    , brightness, contrast, sheath_diameter, section_proximal, section_distal
+                    , brightness, contrast, sheath_diameter, section_proximal, section_distal, is_distal_to_proximal
                     , create_date, update_date
                     FROM rv_schema.patient_case
                     WHERE patient_id = @id
@@ -216,7 +216,7 @@ namespace RaywattApp.Services
             _query["SelectPhysicianList"] = @$"
                 SELECT id, lastname, firstname, concat(firstname, ', ', lastname) name
                 , flush_media, pullback_trigger, pullback_type, colormap
-                , calcium_threshold, expansion_threshold, apposition_threshold
+                , calcium_threshold, expansion_threshold, apposition_threshold, is_distal_to_proximal
                 , create_date, update_date
                 FROM rv_schema.physician
                 WHERE LOWER(lastname) LIKE LOWER(@lastname) OR LOWER(firstname) LIKE LOWER(@firstname)
@@ -339,11 +339,11 @@ namespace RaywattApp.Services
             _query["InsertPhysician"] = @$"
                 INSERT INTO rv_schema.physician(lastname, firstname
 	            , flush_media, pullback_trigger, pullback_type, colormap
-	            , calcium_threshold, expansion_threshold, apposition_threshold
+	            , calcium_threshold, expansion_threshold, apposition_threshold, is_distal_to_proximal
 	            , create_date, update_date)
 	            VALUES (@lastname, @firstname
 	            , @flush_media, @pullback_trigger, @pullback_type, @colormap
-	            , @calcium_threshold, @expansion_threshold, @apposition_threshold
+	            , @calcium_threshold, @expansion_threshold, @apposition_threshold, @is_distal_to_proximal
 	            , now(), now())
                 ";
 
