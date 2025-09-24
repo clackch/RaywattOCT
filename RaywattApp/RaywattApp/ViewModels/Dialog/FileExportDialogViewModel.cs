@@ -262,7 +262,7 @@ namespace RaywattApp.ViewModels.Dialog
 
         public void ReverseLumenProfileCompare()
         {
-            if (PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
+            if (!PatientCase.Isdistaltoproximal)
             {
                 LumenStents.Reverse();
                 LumenContours.Reverse();
