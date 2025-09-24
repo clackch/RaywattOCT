@@ -19,7 +19,8 @@ namespace RaywattOCT
             WrongSession,
             InvalidFunctionCall,
             HomingFailed,
-            RotaryJunctionError
+            RotaryJunctionError,
+            AutoCalibError
         };
 
         public enum Property : int
@@ -59,7 +60,8 @@ namespace RaywattOCT
             LumenThresholdMin,
             LumenThresholdMax,
             LumenSnrThreshold,
-            ShowLumenGuide
+            ShowLumenGuide,
+            RefractiveIndex
         }
 
         public enum RayCallbackRequest : int

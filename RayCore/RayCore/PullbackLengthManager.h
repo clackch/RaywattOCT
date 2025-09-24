@@ -27,11 +27,10 @@ public:
 
 	void CutPullbackLength(int pullbackType);
 	void SetSMProfile(int SMProfile) { m_SMProfile = SMProfile; }
-	
+
 private:
 	void ReadAccelDecelPofileParameter();
-	void SkipFrames(int stopRecordedFrames, int pullbackType, int rotationRatio);
+	void SkipFrames(int stopRecordedFrames, int pullbackType, int rotationRatio, int extraFrameNum);
 	void CompactByKeepMask(const std::vector<bool>& keepMask);
-
 };
 

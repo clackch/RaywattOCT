@@ -27,7 +27,8 @@ struct FFTThreadContext {
 enum class AutoCalibrationMathod {
 	Disable = 0,
 	FindingMinMagnitude,
-	FindingSheath
+	FindingSheath,
+	CheckSheathPixelNum
 };
 
 class COCTImaging : public IImaging
@@ -78,6 +79,7 @@ protected:
 	int m_nSheathPosition;
 	int m_nSheathSearchRange;
 	int m_nZOffset;
+	int m_nPixelNum;
 
 	int m_delayLineMovingDirection = 1;
 
@@ -108,6 +110,7 @@ public:
 		m_setting.lowLevel = low;
 		m_setting.highLevel = high;
 	}
+	void SetDistPerPixel(double distPerPixel) { m_setting.distPerPixel = distPerPixel; }
 	virtual void SetFrameInfo(int nCurFrame, int nTotalFrame) {
 		m_nCurFrame = nCurFrame;
 		m_nTotalFrame = nTotalFrame;
@@ -127,6 +130,7 @@ public:
 	void GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& centerPoints, std::vector<float>& radius);
 
 	int GetSheathPosition() { return m_nSheathPosition; }
+	int GetPixelNum() { return m_nPixelNum; }
 	void SetZOffset(int nOffset) { m_nZOffset = nOffset; }
 	void SetDelayLineMovingDirection(int direction) { m_delayLineMovingDirection = direction; }
 
@@ -150,6 +154,7 @@ protected:
 	void generateImage(Ipp32f* logaritihmData, bool bInvert);
 	void findSheath(Ipp32f* logaritihmData);
 	void CalculateMagnitude(cv::Mat img);
+	void CheckSheathPixels(cv::Mat img);
 	void findSheath(cv::Mat input);
 	std::vector<double> normalize(const std::vector<double>& values, double scale = 1.0);
 	void drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color);

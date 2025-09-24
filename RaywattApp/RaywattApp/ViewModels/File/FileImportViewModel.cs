@@ -531,7 +531,10 @@ namespace RaywattApp.ViewModels.File
                 PatientList = null;
                 PatientCaseList = null;
 
-                _log.Error("File Decrypt Error");
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["title"] = _l10n["Information"];
+                parameter["message"] = _l10n["The file format is invalid."];
+                var pupupResult = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.FileImportDialogWidth, Constants.FileImportDialogHeight);
             }
         }
 

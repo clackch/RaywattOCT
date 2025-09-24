@@ -45,6 +45,9 @@ namespace RaywattApp.Models
         private bool _isAngioInitialized = false;
 
         [ObservableProperty]
+        private bool _isRecordingDone = true;
+
+        [ObservableProperty]
         private bool _isPullbackDone = true;
 
         [ObservableProperty]
@@ -79,21 +82,6 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private CathRoom _selectedCathRoom;
-
-        [ObservableProperty]
-        private bool _autoPullbackOnOff;
-
-        [ObservableProperty]
-        private bool _autoPullbackModel; //Detection Model - true: Lumen, false: Flush
-
-        [ObservableProperty]
-        private bool _autoPullbackIsImageCleared;
-
-        [ObservableProperty]
-        private int _autoPullbackTriggerCandidate;
-
-        [ObservableProperty]
-        private int _autoPullbackTriggerCount;
 
         [ObservableProperty]
         private bool _enhancedLUT;

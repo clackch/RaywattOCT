@@ -331,8 +331,13 @@ namespace RaywattApp.Services
                 , @pullback_type, @pullback_length, @angio_yn, @angio_co_registration, @indicator_degree
                 , @flush_media, @pullback_trigger, @colormap, @guidewire_radius
                 , @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold
+<<<<<<< HEAD
                 , @brightness, @contrast, @sheath_diameter, @section_proximal, @section_distal, @is_distal_to_proximal
                 , now(), now())
+=======
+                , @brightness, @contrast, @sheath_diameter, @section_proximal, @section_distal
+                , @create_date, now())
+>>>>>>> development
                 ";
 
             //InsertPhysician

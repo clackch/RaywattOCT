@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="113" height="113" viewBox="0 0 113 113">
+    <g data-name="그룹 9943" transform="translate(-6.275 -6.275)">
+        <path data-name="패스 2884" d="M1 25.856v-5.518A19.394 19.394 0 0 1 20.338 1h5.521" transform="translate(6.775 6.775)" style="stroke-miterlimit:10;fill:none;stroke:#fff;stroke-width:3px"/>
+        <path data-name="패스 2885" d="M31.76 1h5.517a19.4 19.4 0 0 1 19.342 19.338v5.521" transform="translate(61.156 6.775)" style="stroke-miterlimit:10;fill:none;stroke:#fff;stroke-width:3px"/>
+        <path data-name="패스 2886" d="M56.618 31.76v5.517A19.4 19.4 0 0 1 37.28 56.619h-5.521" transform="translate(61.154 61.156)" style="stroke-miterlimit:10;fill:none;stroke:#fff;stroke-width:3px"/>
+        <path data-name="패스 2887" d="M25.859 56.618h-5.517A19.4 19.4 0 0 1 1 37.28v-5.521" transform="translate(6.775 61.154)" style="stroke-miterlimit:10;fill:none;stroke:#fff;stroke-width:3px"/>
+        <rect data-name="사각형 2207" width="91.365" height="91.365" rx="9" transform="translate(17.09 17.09)" style="stroke-miterlimit:10;fill:none;stroke:#fff;stroke-width:3px"/>
+        <g data-name="그룹 9944">
+            <path data-name="선 90" transform="translate(62.775 52.775)" style="fill:none;stroke:#fff;stroke-width:3px" d="M0 0v20"/>
+            <path data-name="선 91" transform="rotate(90 5 67.775)" style="fill:none;stroke:#fff;stroke-width:3px" d="M0 0v20"/>
+        </g>
+    </g>
+</svg>

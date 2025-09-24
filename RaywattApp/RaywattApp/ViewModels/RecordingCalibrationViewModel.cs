@@ -117,9 +117,9 @@ namespace RaywattApp.ViewModels
             _log.Debug("ManualZoomIn : " + ((zoomIn) ? "IN" : "OUT"));
 
             RayError result = (RayError)RayManualCalibration(zoomIn);
-            if (result != RayError.OK)
+            if (result != RayError.OK && result != RayError.DeviceBusy)
             {
-                _log.Error("RayManualCalibration Error");
+                _log.Error("RayManualCalibration Error : " + result);
             }
         }
 

@@ -1,0 +1,18 @@
+﻿<UserControl x:Class="RaywattOCTFFR.Views.Dialog.FileDialogControl"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+      xmlns:behaviors="clr-namespace:RaywattOCTFFR.Common.Behaviors"  
+      xmlns:local="clr-namespace:RaywattOCTFFR.Views.Dialog"
+      mc:Ignorable="d" 
+      Width="{Binding DialogWidth}" Height="{Binding DialogHeight}"
+      Name="fileDialogControl">
+
+    <Frame NavigationUIVisibility="Hidden">
+        <b:Interaction.Behaviors>
+            <behaviors:FrameBehavior Parameter="{Binding PopupNavigationParameter, Mode=TwoWay}" Navigation="{Binding PopupNavigationSource, Mode=TwoWay}"  />
+        </b:Interaction.Behaviors>
+    </Frame>
+</UserControl>

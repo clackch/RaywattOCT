@@ -220,7 +220,7 @@ namespace RaywattApp.Common.Util
 
             foreach (var directory in directoryInfo.GetDirectories().OrderBy(f => f.Name))
             {
-                if (directory.Attributes == FileAttributes.Directory)
+                if (directory.Attributes == FileAttributes.Directory || directory.Attributes == (FileAttributes.ReadOnly | FileAttributes.Directory))
                 {
                     string[] check = Directory.GetFiles(directory.FullName, "*." + Constants.FileExtension , SearchOption.AllDirectories);
 

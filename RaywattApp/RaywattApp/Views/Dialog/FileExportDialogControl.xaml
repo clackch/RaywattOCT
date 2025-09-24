@@ -173,9 +173,9 @@
                     <ColumnDefinition Width="22"/>
                     <ColumnDefinition Width="55"/>
                 </Grid.ColumnDefinitions>
-
                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
                     <Label Content="{Binding DistalOrientationLabel}" Style="{DynamicResource Pretendard-Semibold-32}" HorizontalAlignment="Center" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+
                 </StackPanel>
                 <StackPanel Grid.Column="2" VerticalAlignment="Bottom" Margin="0,0,0,75">
                     <Image Width="12" Height="139" Source="{svgc:SvgImage Source=/res/icon/indicatorExport.svg}" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
@@ -183,7 +183,6 @@
                 <StackPanel Grid.Column="2" Grid.ColumnSpan="2" VerticalAlignment="Center">
                     <Label Content="{Binding ProximalOrientationLabel}" Style="{DynamicResource Pretendard-Semibold-32}" HorizontalAlignment="Center" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
                 </StackPanel>
-
                 <Grid Grid.Column="1" Width="{x:Static const:Constants.ExportLongitudeImageWidth}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="48"/>
