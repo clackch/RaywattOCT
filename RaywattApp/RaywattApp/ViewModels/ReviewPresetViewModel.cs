@@ -175,7 +175,7 @@ namespace RaywattApp.ViewModels
         }
 
 
-        private void SavePatientCaseOrientationToDb()
+        private void SavePatientCaseOrientationToDB()
         {
             var sqlParameters = new Dictionary<string, object>
             {
@@ -210,12 +210,12 @@ namespace RaywattApp.ViewModels
 
             if (PatientCase.LongitudeOrientation == _longitudeOrientation)
             {
-                _log.Debug("[hwjung] not changed : " + _longitudeOrientation);
+                _log.Debug("Not changed : " + _longitudeOrientation);
                 Cancel();
                 return;
             }
 
-            SavePatientCaseOrientationToDb();
+            //SavePatientCaseOrientationToDB(); ?? 다시 살려?
 
             RayError _ = (RayError)RayEndReview();
             Thread.Sleep(300);
@@ -229,12 +229,12 @@ namespace RaywattApp.ViewModels
                 _log.Error("RaySetProperty Error");
             }
 
-            /* 방향 변경 */
             if (PatientCase.LongitudeOrientation != _longitudeOrientation)
             {
                 PatientCase.LongitudeOrientationChanged = true;
-                UpdateLongitudeOreinetation();
             }
+
+            SavePatientCaseOrientationToDB();
 
             PatientCase.LongitudeOrientation = _longitudeOrientation;
             RaySetProperty(Property.LongitudeOrientation, (double)PatientCase.LongitudeOrientation);
@@ -261,8 +261,6 @@ namespace RaywattApp.ViewModels
             DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current = 0;
             DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Total = 0;
             DeviceStatus.IsOCTImagingDone = false;
-
-
 
             Dictionary<string, Object> parameter = new Dictionary<string, Object>();
             parameter["patient"] = Patient;

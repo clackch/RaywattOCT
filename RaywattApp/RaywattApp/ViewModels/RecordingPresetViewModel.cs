@@ -124,7 +124,7 @@ namespace RaywattApp.ViewModels
                 if (data.TryGetValue("patientCase", out var patientCaseObj) && patientCaseObj is PatientCase caseData)
                 {
                     PatientCase = caseData;
-                    CheckLongitudeOrientation();
+                    PatientCase.LongitudeOrientation = IsDistalToProximal();
 
                     if (CodeDefinition.Codes.TryGetValue("PROC", out var procDict) && procDict.TryGetValue(PatientCase.Procedure, out var procValue))
                     {
@@ -179,6 +179,8 @@ namespace RaywattApp.ViewModels
                     CurrentLocation = new KeyValuePair<string, string>("$000", CodeDefinition.Codes["LOCT"]["$000"]);
                 }
 
+
+
                 if (data.TryGetValue("accessionNumber", out var value))
                 {
                     this.PatientCase.AccessionNumber = (string)value;
@@ -200,30 +202,6 @@ namespace RaywattApp.ViewModels
             LongitudeOrientation = physicians[0].Isdistaltoproximal ? LongitudeOrientation.DistalToProximal : LongitudeOrientation.ProximalToDistal;
             return LongitudeOrientation;
         }
-
-        private void CheckLongitudeOrientation()
-        {
-            _log.Debug("CheckLongitudeOrientation");
-
-            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-            sqlParameters["id"] = this.Patient.PhysicianId;
-            IList<Physician> Physicians = _sqlManager.SelectPhysician(sqlParameters);
-
-            if (Physicians.Count == 0)
-            {
-                _log.Error("not find physician infomation");
-                PatientCase.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
-                return;
-            }
-
-            if (Physicians[0].Isdistaltoproximal) PatientCase.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
-            else PatientCase.LongitudeOrientation = LongitudeOrientation.ProximalToDistal;
-            
-            _log.Debug("apply: " + PatientCase.LongitudeOrientation);
-            var _ = (RayError)RaySetProperty(Property.LongitudeOrientation, (double)PatientCase.LongitudeOrientation);
-            _log.Debug("apply done: " + PatientCase.LongitudeOrientation);
-        }
-
 
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
@@ -290,6 +268,9 @@ namespace RaywattApp.ViewModels
             PatientCase.Vessel = CurrentVessel.Key;
             PatientCase.Location = CurrentLocation.Key;
             PatientCase.LongitudeOrientation = LongitudeOrientation;
+
+            // Apply LongitudeOrientation to RayCore
+            var _ = (RayError)RaySetProperty(Property.LongitudeOrientation, (double)PatientCase.LongitudeOrientation);
 
             if (DeviceStatus.CatheterStatus == Constants.CatheterStatusFailed)
             {
