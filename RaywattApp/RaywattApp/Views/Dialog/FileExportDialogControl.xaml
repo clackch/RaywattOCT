@@ -132,6 +132,16 @@
                                     <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Right"/>
                                 </Grid>
                             </StackPanel>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
+                                <Label  Content="{Binding CrossSectionlabel}"
+                                        FontSize="17"
+                                        FontWeight="Bold"
+                                        Foreground="{StaticResource CaseInfoSecondBrush}"
+                                        HorizontalAlignment="left"
+                                        VerticalAlignment="Top"
+                                        Margin="20"
+                                        IsHitTestVisible="False"/>
+                            </StackPanel>
                         </Grid>
                         <!-- Calcium Indicator -->
                         <Grid Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}">
@@ -154,14 +164,14 @@
                         </Image>
                     </Grid>
 
-                    <Label  Content="{Binding CrossSectionlabel}"
+                    <!--<Label  Content="{Binding CrossSectionlabel}"
                             FontSize="30"
                             FontWeight="Bold"
                             Foreground="{StaticResource CaseInfoSecondBrush}"
                             HorizontalAlignment="left"
                             VerticalAlignment="Top"
                             Margin="20"
-                            IsHitTestVisible="False"/>
+                            IsHitTestVisible="False"/>-->
                     
                 </Grid>
             </Grid>
