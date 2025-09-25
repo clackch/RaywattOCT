@@ -150,7 +150,7 @@ namespace RaywattApp.Services
 
             //SelectPatientCaseByList
             _query["SelectPatientCaseByList"] = @$"
-                SELECT T1.id, patient_id, physician_name, accession_number, comment, vessel, location, procedure, num_of_frames, image, image_resolution, z_offset, field_of_view
+                SELECT T1.id, patient_id, physician_name, accession_number, comment, vessel, location, procedure, num_of_frames, image, image_resolution, z_offset, field_of_view, is_distal_to_proximal
                 , rv_schema.fn_patient(patient_id) patient_name
                 , rv_schema.fn_patient_gender(patient_id) gender, rv_schema.fn_patient_birth(patient_id) birthdate
                 , pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
@@ -556,12 +556,12 @@ namespace RaywattApp.Services
                 , num_of_frames, image, image_resolution, z_offset, field_of_view, pullback_type, pullback_length, angio_yn, angio_co_registration, indicator_degree
                 , flush_media, pullback_trigger, colormap, guidewire_radius
                 , calcium_threshold, expansion_calculation, expansion_threshold, apposition_threshold
-                , brightness, contrast, sheath_diameter, section_proximal, section_distal, create_date, update_date)
+                , brightness, contrast, sheath_diameter, section_proximal, section_distal, is_distal_to_proximal, create_date, update_date)
                 VALUES (@id, @patient_id, @physician_name, @accession_number, @comment, @vessel, @location, @procedure
                 , @num_of_frames, @image, @image_resolution, @z_offset, @field_of_view, @pullback_type, @pullback_length, @angio_yn, @angio_co_registration, @indicator_degree
                 , @flush_media, @pullback_trigger, @colormap, @guidewire_radius
                 , @calcium_threshold, @expansion_calculation, @expansion_threshold, @apposition_threshold
-                , @brightness, @contrast, @sheath_diameter, @section_proximal, @section_distal, @create_date, @update_date)
+                , @brightness, @contrast, @sheath_diameter, @section_proximal, @section_distal, @is_distal_to_proximal, @create_date, @update_date)
                 ON CONFLICT (id)
                 DO UPDATE
                 SET patient_id=@patient_id, physician_name=@physician_name, accession_number=@accession_number, comment=@comment
@@ -571,7 +571,7 @@ namespace RaywattApp.Services
                 , flush_media=@flush_media, pullback_trigger=@pullback_trigger, colormap=@colormap
                 , calcium_threshold=@calcium_threshold, expansion_calculation=@expansion_calculation, expansion_threshold=@expansion_threshold
                 , apposition_threshold=@apposition_threshold, brightness=@brightness, contrast=@contrast, sheath_diameter=@sheath_diameter
-                , section_proximal=@section_proximal, section_distal=@section_distal
+                , section_proximal=@section_proximal, section_distal=@section_distal, is_distal_to_proximal =@is_distal_to_proximal
                 , create_date=@create_date, update_date=@update_date
                 ";
 

@@ -179,7 +179,6 @@ namespace RaywattApp.Common.Bases
         }
 
         private void EditLumenContour()
-
         {
             _log.Debug("EditLumenContour");
 
