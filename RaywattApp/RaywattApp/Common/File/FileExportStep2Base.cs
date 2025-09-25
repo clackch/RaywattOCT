@@ -161,72 +161,81 @@ namespace RaywattApp.Common.File
 
             ExternalDriveList.Clear();
 
-            var searcher = new ManagementObjectSearcher(@"Select * From Win32_DiskDrive");
-
-            foreach (var drive in searcher.Get())
+            try
             {
-                var mediaType = drive["MediaType"]?.ToString();
-                var interfaceType = drive["InterfaceType"]?.ToString();
+                var searcher = new ManagementObjectSearcher(@"Select * From Win32_DiskDrive");
 
-                if (interfaceType == "USB" || mediaType == "Removable Media" || mediaType == "External hard disk media")
+                foreach (var drive in searcher.Get())
                 {
-                    //디스크 드라이브에 있는 모든 파티션 반환
-                    var partitionsQuery = new ManagementObjectSearcher($"ASSOCIATORS OF {{Win32_DiskDrive.DeviceID='{drive["DeviceID"]}'}} WHERE AssocClass=Win32_DiskDriveToDiskPartition");
-                    foreach (var partition in partitionsQuery.Get())
+                    var mediaType = drive["MediaType"]?.ToString();
+                    var interfaceType = drive["InterfaceType"]?.ToString();
+
+                    if (interfaceType == "USB" || mediaType == "Removable Media" || mediaType == "External hard disk media")
                     {
-                        //각 파티션에 부여된 드라이브 이름 반환 (C, D, E)
-                        var logicalDisksQuery = new ManagementObjectSearcher($"ASSOCIATORS OF {{Win32_DiskPartition.DeviceID='{partition["DeviceID"]}'}} WHERE AssocClass=Win32_LogicalDiskToPartition");
-                        foreach (var logicalDisk in logicalDisksQuery.Get())
+                        //디스크 드라이브에 있는 모든 파티션 반환
+                        var partitionsQuery = new ManagementObjectSearcher($"ASSOCIATORS OF {{Win32_DiskDrive.DeviceID='{drive["DeviceID"]}'}} WHERE AssocClass=Win32_DiskDriveToDiskPartition");
+                        foreach (var partition in partitionsQuery.Get())
                         {
-                            var d = new DriveInfo(logicalDisk["Name"].ToString());
-                            if (d.IsReady)
+                            //각 파티션에 부여된 드라이브 이름 반환 (C, D, E)
+                            var logicalDisksQuery = new ManagementObjectSearcher($"ASSOCIATORS OF {{Win32_DiskPartition.DeviceID='{partition["DeviceID"]}'}} WHERE AssocClass=Win32_LogicalDiskToPartition");
+                            foreach (var logicalDisk in logicalDisksQuery.Get())
                             {
-                                string driveName = d.Name.Replace("\\", "");
-
-                                currExternalDrive[driveName] = driveName;
-                                long[] data = { d.TotalSize, d.AvailableFreeSpace };
-                                ExternalDriveList.Add(driveName, data);
-
-                                if (isFirstExternalDrive)
+                                var d = new DriveInfo(logicalDisk["Name"].ToString());
+                                if (d.IsReady)
                                 {
-                                    firstExternalDrive = driveName;
-                                    isFirstExternalDrive = false;
+                                    string driveName = d.Name.Replace("\\", "");
+
+                                    currExternalDrive[driveName] = driveName;
+                                    long[] data = { d.TotalSize, d.AvailableFreeSpace };
+                                    ExternalDriveList.Add(driveName, data);
+
+                                    if (isFirstExternalDrive)
+                                    {
+                                        firstExternalDrive = driveName;
+                                        isFirstExternalDrive = false;
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-
-            if (ExternalDriveComboBox.Count != currExternalDrive.Count)
+            catch (Exception e)
             {
-                ExternalDriveComboBox = currExternalDrive;
-
-                if (ExternalDriveComboBox.Count > 0)
+                _log.Error("External Drive Disconnected: " + e.Message);
+            }
+            finally
+            {
+                if (ExternalDriveComboBox.Count != currExternalDrive.Count)
                 {
-                    IsEnableExternalDrive = true;
+                    ExternalDriveComboBox = currExternalDrive;
 
-                    if (String.IsNullOrEmpty(FileExport.ExternalDrive))
+                    if (ExternalDriveComboBox.Count > 0)
                     {
-                        SelectedExternalDrive = firstExternalDrive;
+                        IsEnableExternalDrive = true;
+
+                        if (String.IsNullOrEmpty(FileExport.ExternalDrive))
+                        {
+                            SelectedExternalDrive = firstExternalDrive;
+                        }
+                        else
+                        {
+                            SelectedExternalDrive = FileExport.ExternalDrive;
+                        }
+                        isExternalDriveInit = false;
                     }
                     else
                     {
-                        SelectedExternalDrive = FileExport.ExternalDrive;
+                        IsEnableExternalDrive = false;
                     }
-                    isExternalDriveInit = false;
                 }
-                else
-                {
-                    IsEnableExternalDrive = false;
-                }
-            }
 
-            if (ExternalDriveComboBox.Count == 1)
-            {
-                if (!ExternalDriveComboBox.ContainsKey(SelectedExternalDrive))
+                if (ExternalDriveComboBox.Count == 1)
                 {
-                    SelectedExternalDrive = firstExternalDrive;
+                    if (!ExternalDriveComboBox.ContainsKey(SelectedExternalDrive))
+                    {
+                        SelectedExternalDrive = firstExternalDrive;
+                    }
                 }
             }
         }
