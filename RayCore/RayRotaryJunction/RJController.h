@@ -36,7 +36,8 @@ enum class eRJState {
 	Loaded,
 	Unloading,
 	Unloaded,
-	Error
+	Error,
+	RFIDError
 };
 
 enum RFID_ReadType

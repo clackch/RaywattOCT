@@ -182,7 +182,7 @@ bool CRJController::Set(eStepMotorIndex idxMotor, int velStep) {
 }
 const char* CRJController::GetStateString(eRJState state)
 {
-	const char* strState[] = { "None", "Initializing", "Disconnected", "Cleaning", "Connected", "Validating", "Loading", "WaitManualLoad", "Loaded", "Unloading", "Unloaded", "Error" };
+	const char* strState[] = { "None", "Initializing", "Disconnected", "Cleaning", "Connected", "Validating", "Loading", "WaitManualLoad", "Loaded", "Unloading", "Unloaded", "Error", "RFIDError"};
 	return strState[(int)state];
 }
 bool CRJController::StartControl() {
@@ -619,6 +619,10 @@ void CRJController::updateState() {
 			m_nextState = eRJState::Unloading;
 		}
 		break;
+
+	case eRJState::RFIDError:
+		if (!m_bLimitSwitch) m_nextState = eRJState::Disconnected;
+		break;
 	default:
 		break;
 	}
@@ -687,15 +691,16 @@ RFID_ValidType CRJController::isValidRFID() {
 		PLOGI.printf("RFID Invalid : mismatch of manufacturer");
 		return RFID_ValidType::INVALID;
 	}
+	if (isNoData) {
+		return RFID_ValidType::WAITING;
+	}
 	for (int i = 0; i < HARDWARE_UID_LENGTH; i++) {
 		if (rfidState.aHardwareUID[i] != 0) {
 			isNoData = false;
 			break;
 		}
 	}
-	if (isNoData) {
-		return RFID_ValidType::WAITING;
-	}
+
 	for (size_t i = 0; i < arrayLength; ++i) {
 		if (rfidState.aMANU[i] != static_cast<unsigned int>(RFID_MANUFACTURER[i])) {
 			PLOGI.printf("RFID Invalid : mismatch of manufacturer");
@@ -771,6 +776,9 @@ void CRJController::updateStateManualMode() {
 			m_nextState = eRJState::Unloading;
 		}
 		break;
+	case eRJState::RFIDError:
+		if (!m_bLimitSwitch) m_nextState = eRJState::Disconnected;
+		break;
 	default:
 		break;
 	}
@@ -811,6 +819,11 @@ void CRJController::updateState(eRJState state) {
 		displayLCD(eLCDImage::LCD_IMAGE_UNLOADING);
 		break;
 	case eRJState::Error:
+		displayLCD(eLCDImage::LCD_IMAGE_ERROR);
+		StopMotor();
+		StopStepMotors();
+		break;
+	case eRJState::RFIDError:
 		displayLCD(eLCDImage::LCD_IMAGE_ERROR);
 		StopMotor();
 		StopStepMotors();

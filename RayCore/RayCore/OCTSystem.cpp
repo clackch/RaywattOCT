@@ -2462,7 +2462,7 @@ UINT COCTSystem::threadRFIDValidation(LPVOID param) {
 	}
 	else if (isValid == RFID_ValidType::INVALID) {
 		PLOGI.printf("validation false");
-		pRJController->UpdateState(eRJState::Error);
+		pRJController->UpdateState(eRJState::RFIDError);
 	}
 	
 	PLOGI.printf("[DONE]threadRFIDValidation");
@@ -3044,7 +3044,7 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 		}
 		else if (isValid == RFID_ValidType::INVALID) {
 			PLOGI.printf("validation false");
-			m_pRJController->UpdateState(eRJState::Error);
+			m_pRJController->UpdateState(eRJState::RFIDError);
 		}
 		else {
 			if (CUtility::StartThread(threadRFIDValidation, m_pThreadRotaryJunction, this)) {
@@ -3085,6 +3085,8 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 
 		PLOGI.printf("RotaryJunctionError");
 		postMessage(WM_NOTIFY_ERROR_OCCURED, (WPARAM)RayError::RotaryJunctionError);
+		break;
+	case eRJState::RFIDError:
 		break;
 	}
 
