@@ -277,10 +277,11 @@ bool CRJController::GetIsTagging() {
 
 bool CRJController::IncreaseRFIDUsage(int uidSize, BYTE* UID) {
 	if (!m_initMotor) return false;
-	BYTE cnt = RFIDProtocol::getCount(UID, uidSize-CUSTOM_UID_LENGTH)+1;
-	if (cnt == 256) {
+	int cntInt = RFIDProtocol::getCount(UID, uidSize-CUSTOM_UID_LENGTH)+1;
+	if (cntInt >= 256) {
 		return false;
 	}
+	BYTE cnt = static_cast<BYTE>(cntInt);
 	BYTE serialPacket[MAX_PATH];
 	int packetLength;
 	RFIDProtocol::setPacketByFID(eFID::FID_RFID_SET_USAGE, serialPacket, packetLength, uidSize, UID, 1, &cnt);
@@ -291,6 +292,7 @@ bool CRJController::IncreaseRFIDUsage(int uidSize, BYTE* UID) {
 	int written = m_pConnection->Write(serialPacket, packetLength);
 	return (written == packetLength);
 }
+
 bool CRJController::ResetRFIDUsage(int uidSize, BYTE* UID) {
 	if (!m_initMotor) return false;
 
@@ -655,8 +657,10 @@ RFID_AnswerType CRJController::checkAnswerRFID(RFIDProtocol::SRFIDState rfidStat
 		if (result == WAIT_TIMEOUT) {
 			RFIDProtocol::setRFIDErrorState(RFIDProtocol::NOMATCHKEY);
 			WaitForSingleObject(hThread, INFINITE); 
+			CloseHandle(hThread);
 			return RFID_AnswerType::FAILED;
 		}
+		CloseHandle(hThread);
 	}
 	else if (rfidState.errorState == RFIDProtocol::UNANSWERED) {
 		return RFID_AnswerType::PROCEEDING;
@@ -993,15 +997,21 @@ void CRJController::handlePacket() {
 }
 
 void CRJController::findCorrectKey() {
-	std::vector<std::vector<BYTE>> keys = RFIDKeyController::getKeys();
-	for (std::vector<BYTE> key : keys) {
-		BYTE* keyVal = new BYTE[KEY_LEN];
+	const std::vector<std::vector<BYTE>>& keys = RFIDKeyController::getKeys();
+	for (const std::vector<BYTE>& key : keys) {
+		if(key.size() != KEY_LEN) {
+			continue;
+		}
+		BYTE keyVal[KEY_LEN];
 		for (int idx = 0; idx < KEY_LEN; idx++) {
 			keyVal[idx] = key[idx];
 		}
 		BYTE serialPacket[MAX_PATH];
-		int packetLength;
+		int packetLength = 0;
 		RFIDProtocol::setPacketByFID(eFID::FID_RFID_GET_KEY, serialPacket, packetLength, 0, NULL, 0, 0, keyVal);
+		if (packetLength < 2) {
+			continue;
+		}
 		BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 		serialPacket[packetLength - 2] = checksum;
 

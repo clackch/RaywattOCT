@@ -98,15 +98,17 @@ std::string CUtility::GetFileExtension(const std::string path)
 }
 bool CUtility::IsExist(std::string path, bool isFile)
 {
-	if (_access(path.c_str(), 0) == 0) {
-		if (isFile) return true;
-
-		struct _stat info;
-		if (_stat(path.c_str(), &info) == 0 && (info.st_mode & _S_IFDIR)) {
-			return true; // directory
-		}
+	struct _stat info;
+	if (_stat(path.c_str(), &info) != 0) {
+		return false; // Not exist
 	}
-	return false;
+
+	if (isFile) {
+		return (info.st_mode & _S_IFREG) != 0;  // if it is a regular file, true.
+	}
+	else {
+		return (info.st_mode & _S_IFDIR) != 0;  // if it is a directory, true.
+	}
 }
 int CUtility::GetPrivateProfileIntEx(LPCWSTR lpAppName, LPCWSTR lpKeyName, int nDefault, LPCWSTR lpFileName)
 {
