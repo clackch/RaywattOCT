@@ -614,7 +614,7 @@ void CRJController::updateState() {
 		if (!m_isInit) {
 			if (!m_bLimitSwitch) m_nextState = eRJState::Initializing;
 		}
-		else if (m_bButton[0] || GetRFIDCountCurrentState() >= 5) {
+		else if (m_bButton[0] || GetRFIDCountCurrentState() >= GetCatheterUsage()) {
 			RFIDProtocol::initState(false);
 			m_nextState = eRJState::Unloading;
 		}
@@ -702,6 +702,8 @@ RFID_ValidType CRJController::isValidRFID() {
 			return RFID_ValidType::INVALID;
 		}
 	}
+
+	GetRFIDStep();
 	return RFID_ValidType::VALID;
 }
 

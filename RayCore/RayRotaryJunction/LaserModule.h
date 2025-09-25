@@ -24,7 +24,7 @@ private:
 	int m_nStepSpeed[2];
 	unsigned short m_nVOA, m_nVLD;
 
-	int m_nActualPosition[2];
+	int m_nActualPosition[2]; // 0 : Polarization Stepmotor, 1 : Delayline Stepmotor
 	bool m_isSMMoving[2];
 	bool m_bPhotoSensor[6];
 

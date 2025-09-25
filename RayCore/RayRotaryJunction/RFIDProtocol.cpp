@@ -284,7 +284,6 @@ void RFIDProtocol::initState(bool needLoadKey) {
 	aRFIDState.aStep = 0;
 	aRFIDState.findingKey = false;
 	aRFIDState.errorState = UNANSWERED;
-
 	if(needLoadKey)
 		RFIDKeyController::loadFirstKey(aRFIDState.aKeyA);
 }

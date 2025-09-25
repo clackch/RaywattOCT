@@ -2023,7 +2023,8 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 		pSystem->postMessage(WM_NOTIFY_ERROR_OCCURED, (WPARAM)RayError::HomingFailed);
 	}
 
-	if(ENABLE_RFID && pRJController->GetRFIDCountCurrentState()>=5){
+	PLOGI.printf("pRJController->GetCatheterUsage() = %d", pRJController->GetCatheterUsage());
+	if(ENABLE_RFID && pRJController->GetRFIDCountCurrentState()>= pRJController->GetCatheterUsage()){
 		pRJController->UpdateState(eRJState::Error);
 	}
     
@@ -2096,6 +2097,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 
 	if (pSystem->m_pThreadRotaryJunction->isRun) {
 		pSystem->m_bFirstLoad = true;
+		pRJController->SetCatheterUsage(config.catheter.catheterUsage);
 		pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::LoadCatheter);
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loading);
 	}
@@ -2315,6 +2317,26 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 			pRJController->UpdateState(eRJState::Loaded);
 		}
 		PLOGI.printf("postMessage - CatheterState::Enable");
+
+		RFIDProtocol::SRFIDState rfidState;
+		RFIDProtocol::getCurRFIDData(&rfidState);
+		PLOGI.printf("pRJController->GetRFIDState().aStep = %d", rfidState.aStep);
+
+		pLaserModule->ReadPosition();
+		int position = pLaserModule->GetPosition(eStepMotorIndex::DelayLine);
+
+		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX);
+		pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, config.laserModule.delayPosition - position);
+
+		Sleep(100);
+
+		while (pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) {
+			Sleep(50);
+		}
+
+		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_DEFAULT * 2);
+		pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, rfidState.aStep);
+
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Enable);
 	}
 	else {

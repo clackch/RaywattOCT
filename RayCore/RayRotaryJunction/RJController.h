@@ -6,7 +6,7 @@
 #include "WriteTaskController.h"
 #include <vector>
 #include <iomanip>
-#define ENABLE_RFID		false
+#define ENABLE_RFID		true
 
 // position: step, speed: step/s
 #define PULLBACK_MAX_DISTANCE			100		/* mm */	
@@ -96,6 +96,7 @@ private:
 
 	WriteTaskController* m_resendManager;
 
+	int catheterUsage;
 public:
 	CRJController();
 	virtual ~CRJController();
@@ -131,6 +132,8 @@ public:
 	bool GetRFIDStep();
 	bool GetIsTagging();
 	void findCorrectKey();
+	void SetCatheterUsage(int usage) { catheterUsage = usage; }
+	int GetCatheterUsage() { return catheterUsage;}
 
 	UINT GetRFIDUID(BYTE* pRFIDUID); 
 	int GetRFIDCountCurrentState();
@@ -145,6 +148,7 @@ public:
 	void changeSMProfileToPullback();
 	void changeSMProfileToLoadUnload();
 	void DisableStepMotors();
+	void moveDelaylineToRFIDPosition();
   
 protected:
 	void initSetting();
