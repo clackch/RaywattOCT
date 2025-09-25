@@ -1760,7 +1760,7 @@ namespace RaywattApp.ViewModels
                     double mla = mlaSubset.Min(x => x.Area);
                     int mlaIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.Area == mla) + frameProximal;
 
-                    int frameDiff = (int)(Constants.PreLesionLengthInitValue * ReviewStatus.NumberOfFrames * 10 / int.Parse(PatientCase.PullbackLength));
+                    int frameDiff = (int)(Constants.PreLesionLengthInitValue * ReviewStatus.NumberOfFrames / int.Parse(PatientCase.PullbackLength));
                     proximalIdx = mlaIdx - frameDiff > 0 ? mlaIdx - frameDiff : 0;
                     distalIdx = mlaIdx + frameDiff < ReviewStatus.NumberOfFrames ? mlaIdx + frameDiff : ReviewStatus.NumberOfFrames - 1;
                 }
@@ -1775,7 +1775,7 @@ namespace RaywattApp.ViewModels
                 int stentProximal = 0, stentDistal = 0;
                 if (CommonUtil.GetStentProximalDistal(LumenStents, out stentProximal, out stentDistal))
                 {
-                    int frameDiff = (int)(Constants.PostLesionLengthInitValue * ReviewStatus.NumberOfFrames * 10 / int.Parse(PatientCase.PullbackLength));
+                    int frameDiff = (int)(Constants.PostLesionLengthInitValue * ReviewStatus.NumberOfFrames / int.Parse(PatientCase.PullbackLength));
                     proximalIdx = stentProximal - frameDiff > 0 ? stentProximal - frameDiff : 0;
                     distalIdx = stentDistal + frameDiff < ReviewStatus.NumberOfFrames ? stentDistal + frameDiff : ReviewStatus.NumberOfFrames - 1;
                 }

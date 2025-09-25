@@ -126,7 +126,7 @@ public:
 	void CircularizeImage(cv::Mat& src, cv::Mat& dst);
 	void InverseCircularizeImage(cv::Mat& src, cv::Mat& dst);
 	void EraseStentOutLier(cv::Mat& stent);
-	void SetLumenContourOffset(std::vector<cv::Point> lumenContour);
+	void SetLumenContourOffset(const std::vector<cv::Point>& lumenContour);
 	void GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& centerPoints, std::vector<float>& radius);
 
 	int GetSheathPosition() { return m_nSheathPosition; }

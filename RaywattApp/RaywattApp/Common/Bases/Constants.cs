@@ -233,10 +233,6 @@ namespace RaywattApp.Common.Bases
         public const string FileIconFolder = "folder";
         public const string FileIconFile = "file";
 
-        //Pullback Length
-        public const string PullbackLengthLong = "LONG";
-        public const string PullbackLengthShort = "SHOR";
-
         //Not Selected
         public const string NotSelected = "Not Selected";
         public const string NotSelectedCode = "$000";

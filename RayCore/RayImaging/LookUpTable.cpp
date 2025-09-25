@@ -31,6 +31,7 @@ int CLookUpTable::Load(const char* strLUTPath, bool isTest) {
 			if (!strBuffer.empty() && strBuffer.back() == '\n') {
 				strBuffer.pop_back();
 			}
+			if (strBuffer.empty()) continue;
 
 			if (strBuffer[0] == '0') {
 				bStartLUT = true;
@@ -39,19 +40,27 @@ int CLookUpTable::Load(const char* strLUTPath, bool isTest) {
 			if (bStartLUT) {
 				std::stringstream buffer(strBuffer);
 				std::string token;
-				cv::Vec3b color;
+				cv::Vec3b color{0,0,0};
 
 				std::getline(buffer, token, ',');  // index
 				for (int i = 0; i < 3; i++) {
 					if (!std::getline(buffer, token, ',')) break;
 
-					int value = std::stoi(token);
+					try {
+						int value = std::stoi(token);
 
-					if (value < 0 || value > 255) {
-						PLOGI.printf("Warning: LUT value out of uchar range (%d)\n", value);
-						value = 0;
+						if (value < 0 || value > 255) {
+							PLOGI.printf("Warning: LUT value out of uchar range (%d)\n", value);
+							value = 0;
+						}
+						color[i] = static_cast<uchar>(value);
 					}
-					color[i] = static_cast<uchar>(value);
+					catch (...) {
+						PLOGI.printf("Warning: LUT value is not a number (%s)\n", token.c_str());
+						int value = 0;
+						color[i] = static_cast<uchar>(value);
+					}
+					
 				}
 				lut.push_back(color);
 			}
@@ -64,12 +73,11 @@ int CLookUpTable::Load(const char* strLUTPath, bool isTest) {
 			return static_cast<int>(m_vLUT.size());
 		}
 		else {
+			if (m_vLUT.size() < 4 || lut.empty()) return 0;
 			m_vLUT.at(3) = lut;
 			return static_cast<int>(m_vLUT.size());
 		}
 	}
-	return 0;
-
 	return 0;
 }
 
