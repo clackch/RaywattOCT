@@ -242,7 +242,7 @@ namespace RaywattApp.ViewModels
 
             PatientCase.FlushMedia = SelectedFlushMedia;
             PatientCase.PullbackType = SelectedPullbackType;
-            PatientCase.PullbackLength = PbLength + "0";
+            PatientCase.PullbackLength = PbLength;
             PatientCase.Procedure = CurrentProcedure.Key;
             PatientCase.Vessel = CurrentVessel.Key;
             PatientCase.Location = CurrentLocation.Key;
