@@ -668,6 +668,7 @@ void COCTImaging::findSheath(cv::Mat input) {
 	if(innerSheathPositions.size() == 0) {
 		m_nSheathPosition = 0;
 		PLOGI.printf("No sheath found");
+		return;
 	}
 	if(innerSheathPositions.size() == 1) {
 		m_nSheathPosition = innerSheathPositions[0];
