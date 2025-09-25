@@ -19,7 +19,7 @@ namespace RaywattOCTFFR.Common.Converters
 
             if(pullbackLength >= frameCnt)
             {
-                dValue = (double)values[1] / (pullbackLength / 100);
+                dValue = (double)values[1] / (pullbackLength / 10.0);
             }                
 
             return new GridLength(dValue);
