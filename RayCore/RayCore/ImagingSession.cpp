@@ -150,23 +150,17 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 	case ImagingType::OCTImaging:
 		pImaging = new COCTImaging(setting, msg);
 		pImaging->Initialize(calibration);
-		delete[] background; background = nullptr;
 		break;
 	case ImagingType::LabImaging:
 		pImaging = new CLabImaging(setting, msg);
 		((CLabImaging *)pImaging)->Initialize(calibration, background);
 		((CLabImaging *)pImaging)->SetBackgroundSubtract(false);
-		background = nullptr;
 		break;
 	case ImagingType::TIFFImaging:
 		pImaging = new CTIFFImaging(setting, msg);
 		((CTIFFImaging*)pImaging)->Initialize();
-		delete calibration;
-		delete[] background; background = nullptr;
 		break;
 	default:
-		delete calibration;
-		delete[] background;
 		return nullptr;
 	}
 

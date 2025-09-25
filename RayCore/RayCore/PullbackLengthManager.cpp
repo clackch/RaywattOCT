@@ -17,9 +17,10 @@ PullbackLengthManager::~PullbackLengthManager() {
 }
 
 
-void PullbackLengthManager::CutPullbackLength(int pullbackType) {
+void PullbackLengthManager::CutPullbackLength(int pullbackType, int rotationSpeed) {
 	PLOGI.printf("CutPullbackLength Start");
-	int rotationRatio = 1;  // 1 : 400rps, 2 : 200rps, 4 : 100rps
+
+	int rotationRatio = (int)(24038.0/rotationSpeed);  // 1 : 400rps, 2 : 200rps, 4 : 100rps
 	int stopFrames = 3 / rotationRatio; /*Default Stop Frames*/
 	int maxFrames = 0;
 	int extraFrameNum = 0;

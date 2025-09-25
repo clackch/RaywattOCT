@@ -2007,7 +2007,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	if (auto* mgr = dynamic_cast<PullbackLengthManager*>(pDataWriter)) {
 		PLOGI.printf("GetNumOfSamples() = %d", mgr->GetNumOfSamples());
 		mgr->SetSMProfile(config.stepMotor.SMPullbackProfile);
-		mgr->CutPullbackLength(pullbackType);
+		mgr->CutPullbackLength(pullbackType, config.bldcMotor.velocityPullback);
 	}
 
 	CImagingSession* pSession = CImagingSession::CreateSession(pSystem, SESSION_REVIEW, settingPullback, pDataWriter);
