@@ -830,6 +830,31 @@ namespace RaywattApp.ViewModels
                 if (LumenGuidewires != null) LumenGuidewires.Reverse();
                 if (LumenContours != null) LumenContours.Reverse();
                 if (measurements != null) measurements.Reverse();
+                ReverseGeometries();
+            }
+        }
+
+        private void ReverseGeometries()
+        {
+            if (PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
+            {
+                if (LModeLengthGeometries != null)
+                {
+                    foreach (var geom in LModeLengthGeometries)
+                    {
+                        geom.FirstPoint = new Point(Constants.LongitudeWidth - geom.FirstPoint.X, geom.FirstPoint.Y);
+                        geom.SecondPoint = new Point(Constants.LongitudeWidth - geom.SecondPoint.X, geom.SecondPoint.Y);
+                    }
+                }
+
+                if(LModeTextGeometries != null)
+                {
+                    foreach (var geom in LModeTextGeometries)
+                    {
+                        geom.PointerPoint = new Point(Constants.LongitudeWidth - geom.PointerPoint.X, geom.PointerPoint.Y);
+                        geom.TextPoint = new Point(Constants.LongitudeWidth - geom.TextPoint.X, geom.TextPoint.Y);
+                    }
+                }
             }
         }
 
@@ -1517,6 +1542,8 @@ namespace RaywattApp.ViewModels
 
         private string ConvertLongitudeToJson()
         {
+            ReverseGeometries();
+
             //Longitude
             Measurement longitudeMeasurement = new Measurement();
             longitudeMeasurement.LengthGeometries = LModeLengthGeometries;
