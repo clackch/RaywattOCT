@@ -215,10 +215,6 @@ namespace RaywattOCTFFR.Common.Bases
         public const string FileIconFolder = "folder";
         public const string FileIconFile = "file";
 
-        //Pullback Length
-        public const string PullbackLengthLong = "LONG";
-        public const string PullbackLengthShort = "SHOR";
-
         //Not Selected
         public const string NotSelected = "Not Selected";
         public const string NotSelectedCode = "$000";
@@ -258,12 +254,13 @@ namespace RaywattOCTFFR.Common.Bases
         //Data File Root Path (OCT raw files) - ※ Patient Folder (DataRootPath + Patient ID)
         public const string DataRootPath = SystemRootPath + "\\Raywatt\\DataSave";
 
+        public const string TempPath = DataRootPath + "\\[temp]";
+
         public const string ConfigPath = SystemRootPath + "\\Raywatt\\System\\config";
 
         //Log Folder
         public const string LogFolderPath = SystemRootPath + "\\Raywatt\\log\\octffr";
         public const string LogExtension = "*.log";
-
 
         //ML Model Folder
         public const string MlModelFolderPath = SystemRootPath + "\\Raywatt\\system\\3rdparty\\model";
