@@ -827,6 +827,7 @@ namespace RaywattApp.ViewModels
                 if (LumenStents != null) LumenStents.Reverse();
                 if (LumenGuidewires != null) LumenGuidewires.Reverse();
                 if (LumenContours != null) LumenContours.Reverse();
+                if (Measurements != null) measurements.Reverse();
             }
         }
 

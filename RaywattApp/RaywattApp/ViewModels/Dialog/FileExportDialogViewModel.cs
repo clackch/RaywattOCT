@@ -232,7 +232,7 @@ namespace RaywattApp.ViewModels.Dialog
 
         private void LongitudeOrientationChanged()
         {
-            bool isDistalToProximal = PatientCase.LongitudeOrientation == Common.Enums.LongitudeOrientation.DistalToProximal;
+            bool isDistalToProximal = PatientCase.Isdistaltoproximal;
             DistalOrientationLabel = isDistalToProximal ? "D" : "P";
             ProximalOrientationLabel = isDistalToProximal ? "P" : "D";
         }
