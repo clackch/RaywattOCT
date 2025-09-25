@@ -684,21 +684,12 @@ RFID_ValidType CRJController::isValidRFID() {
 		PLOGI.printf("RFID Invalid : exceed of usage");
 		return RFID_ValidType::INVALID;
 	}
-	bool isNoData = true;
 
+	if (!rfidState.receiveTotalState) return RFID_ValidType::WAITING;
 	size_t arrayLength = sizeof(rfidState.aMANU) / sizeof(rfidState.aMANU[0]);
 	if (arrayLength != RFID_MANUFACTURER_LEN) {
 		PLOGI.printf("RFID Invalid : mismatch of manufacturer");
 		return RFID_ValidType::INVALID;
-	}
-	if (isNoData) {
-		return RFID_ValidType::WAITING;
-	}
-	for (int i = 0; i < HARDWARE_UID_LENGTH; i++) {
-		if (rfidState.aHardwareUID[i] != 0) {
-			isNoData = false;
-			break;
-		}
 	}
 
 	for (size_t i = 0; i < arrayLength; ++i) {

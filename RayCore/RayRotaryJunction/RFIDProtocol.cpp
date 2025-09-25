@@ -177,6 +177,7 @@ void RFIDProtocol::setCustomUID(BYTE* packet, int packetLength) {
 }
 void RFIDProtocol::setManuf(BYTE* packet, int packetLength) {
 	std::lock_guard<std::mutex> lock(mtx);
+	aRFIDState.receiveTotalState = true;
 	if (packetLength != MANUF_LEN) return;
 	for (int cycle = 0; cycle < packetLength; cycle++) {
 		aRFIDState.aMANU[cycle] = packet[cycle];
@@ -364,6 +365,7 @@ void RFIDProtocol::getCurRFIDData(RFIDProtocol::SRFIDState* txState) {
 	txState->aStep = aRFIDState.aStep;
 	txState->aCNT = aRFIDState.aCNT;
 	txState->findingKey = aRFIDState.findingKey;
+	txState->receiveTotalState = aRFIDState.receiveTotalState;
 	txState->errorState = aRFIDState.errorState;
 	return;
 }
