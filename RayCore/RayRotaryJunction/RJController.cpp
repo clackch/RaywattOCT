@@ -687,8 +687,8 @@ RFID_ValidType CRJController::isValidRFID() {
 		PLOGI.printf("RFID Invalid : mismatch of manufacturer");
 		return RFID_ValidType::INVALID;
 	}
-	for (int i = 0; i < RFID_MANUFACTURER_LEN; i++) {
-		if (rfidState.aMANU[i] != 0) {
+	for (int i = 0; i < HARDWARE_UID_LENGTH; i++) {
+		if (rfidState.aHardwareUID[i] != 0) {
 			isNoData = false;
 			break;
 		}
