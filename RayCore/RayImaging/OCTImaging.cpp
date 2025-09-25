@@ -512,7 +512,9 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 	}
 }
 
+int i = 0;
 void COCTImaging::CalculateMagnitude(cv::Mat img) {
+	//i++;
 	auto start = std::chrono::high_resolution_clock::now();
 
 	cv::Mat edgeX, edgeY;
@@ -536,7 +538,8 @@ void COCTImaging::CalculateMagnitude(cv::Mat img) {
 		}
 	}
 
-	//PLOGI.printf("check the time - Magnitude: %d", totalMagnitude);
+	//cv::imwrite("origin_first" + std::to_string(i) + ".png", img);
+	PLOGI.printf("check the time - Magnitude: %d", totalMagnitude);
 	m_nSheathPosition = totalMagnitude;
 }
 
@@ -619,7 +622,6 @@ cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {
 	return result;
 }
 
-int i = 0;
 void COCTImaging::findSheath(cv::Mat input) {
 	i++;
 	cv::Mat gray;
@@ -666,7 +668,6 @@ void COCTImaging::findSheath(cv::Mat input) {
 	if(innerSheathPositions.size() == 0) {
 		m_nSheathPosition = 0;
 		PLOGI.printf("No sheath found");
-		return;
 	}
 	if(innerSheathPositions.size() == 1) {
 		m_nSheathPosition = innerSheathPositions[0];
