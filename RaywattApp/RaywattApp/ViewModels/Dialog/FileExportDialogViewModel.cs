@@ -269,6 +269,7 @@ namespace RaywattApp.ViewModels.Dialog
                 LumenSidebranches.Reverse();
                 LumenGuidewires.Reverse();
                 this.crossSections.Reverse();
+                measurements.Reverse();
             }
         }
 

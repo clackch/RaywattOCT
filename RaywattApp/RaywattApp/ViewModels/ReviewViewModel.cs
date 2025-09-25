@@ -478,12 +478,14 @@ namespace RaywattApp.ViewModels
             }
         }
 
+        private bool isRecoveryData = false;
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
             base.OnNavigating(sender, navigationEventArgs);
             _log.Debug("OnNavigating");
 
             Save();
+            ReverseLumenDataIfNeeded(); // 기존 p->d 방향일 경우, 다시 d->p로 전환
             FfrValueChangedCheck();
 
             RayError result = (RayError)RayUnregisterDetectionCallback();
@@ -827,7 +829,7 @@ namespace RaywattApp.ViewModels
                 if (LumenStents != null) LumenStents.Reverse();
                 if (LumenGuidewires != null) LumenGuidewires.Reverse();
                 if (LumenContours != null) LumenContours.Reverse();
-                if (Measurements != null) measurements.Reverse();
+                if (measurements != null) measurements.Reverse();
             }
         }
 
@@ -1454,8 +1456,6 @@ namespace RaywattApp.ViewModels
             }
             else
             {
-                ReverseLumenDataIfNeeded(); // 기존 p->d 방향일 경우, 다시 d->p로 전환
-
                 PatientCase.LumenContours = LumenContours;
                 PatientCase.LumenSidebranches = LumenSidebranches;
                 PatientCase.LumenStents = LumenStents;
