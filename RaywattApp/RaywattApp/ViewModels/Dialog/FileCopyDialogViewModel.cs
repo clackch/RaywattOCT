@@ -613,6 +613,7 @@ namespace RaywattApp.ViewModels.Dialog
                             sqlParameters["image_resolution"] = patientCase.ImageResolution;
                             sqlParameters["guidewire_radius"] = patientCase.GuidewireRadius;
                             sqlParameters["z_offset"] = patientCase.ZOffset;
+                            sqlParameters["is_distal_to_proximal"] = patientCase.Isdistaltoproximal;
 
                             var nRows = _sqlManager.UpsertPatientCase(sqlParameters);
                             if (nRows == 1)
