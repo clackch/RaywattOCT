@@ -683,7 +683,6 @@ RFID_ValidType CRJController::isValidRFID() {
 	RFID_AnswerType check = checkAnswerRFID(rfidState);
 	if(check == RFID_AnswerType::FAILED) return RFID_ValidType::INVALID;
 	if(check == RFID_AnswerType::PROCEEDING) return RFID_ValidType::WAITING;
-
 	if (rfidState.aCNT >= RFID_MAX_COUNT) {
 		PLOGI.printf("RFID Invalid : exceed of usage");
 		return RFID_ValidType::INVALID;
@@ -1024,8 +1023,10 @@ void CRJController::findCorrectKey() {
 		int written = m_pConnection->Write(serialPacket, packetLength);
 		Sleep(10);
 	}
-	if (RFIDProtocol::getRFIDErrorState() == RFIDProtocol::UNANSWERED) {
+	int num = RFIDProtocol::getRFIDErrorState();
+	if (num == RFIDProtocol::UNANSWERED) {
 		RFIDProtocol::setRFIDErrorState(RFIDProtocol::WAITING_KEYANSWER);
+		return;
 	}
 }
 
