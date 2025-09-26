@@ -36,8 +36,6 @@ namespace RaywattOCTFFR.ViewModels.File
 
         private string externalDrive;
 
-        private bool externDriveInit;
-
         private DirectoryProvider directoryProvider;
 
         [ObservableProperty]
@@ -73,7 +71,7 @@ namespace RaywattOCTFFR.ViewModels.File
             get { return _selectedExternalDrive; }
             set
             {
-                if (_selectedExternalDrive != value || !externDriveInit)
+                if (_selectedExternalDrive != value)
                 {
                     _selectedExternalDrive = value;
                     externalDrive = _selectedExternalDrive;
@@ -81,10 +79,8 @@ namespace RaywattOCTFFR.ViewModels.File
                     if (_selectedExternalDrive != null && ImportType != null)
                     {
                         curPath = _selectedExternalDrive;
-                        directoryProvider.GetDirectoryWithExtension(curPath.Replace("\\", ""), GetFileExtension(ImportType));
+                        directoryProvider.GetDirectoryWithExtension(curPath.Replace("\\", ""), CommonUtil.GetFileExtension(ImportType));
                         DirItems = directoryProvider.DirItems;
-
-                        externDriveInit = true;
                     }
                     else
                     {
@@ -171,6 +167,8 @@ namespace RaywattOCTFFR.ViewModels.File
             timer.Interval = TimeSpan.FromMilliseconds(1000);
             timer.Tick += new EventHandler(CheckDrive);
             timer.Start();
+
+            GetDrive();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -181,6 +179,12 @@ namespace RaywattOCTFFR.ViewModels.File
 
             if (extraData != null)
             {
+                Dictionary<string, Object> data = (Dictionary<string, Object>)extraData;
+                if (data.TryGetValue("fileImport", out var fileImportObj) && fileImportObj is FileImport fileImportData)
+                {
+                    FileImport = fileImportData;
+                    SelectImportType(FileImport.PatientCase.ImportType);
+                }
             }
 
             SetCondition();
@@ -218,14 +222,26 @@ namespace RaywattOCTFFR.ViewModels.File
 
             if (canNext)
             {
-                _log.Debug("Next Page");
-
                 FileImport.FilePath = SelectedDir.Path;
                 if (FileImport.Patient == null)
                     FileImport.Patient = new();
                 if (FileImport.PatientCase == null)
                     FileImport.PatientCase = new();
                 FileImport.PatientCase.ImportType = ImportType;
+
+                if(!string.IsNullOrEmpty(CommonUtil.CheckFile(FileImport.FilePath, FileImport.PatientCase.Image)))
+                {
+                    Dictionary<string, Object> parameter = new Dictionary<string, Object>();
+                    parameter["fileImport"] = FileImport;
+                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.FileImportStep2Page) { Parameter = parameter });
+                }
+                else
+                {
+                    Dictionary<string, object> parameter = new Dictionary<string, object>();
+                    parameter["title"] = _l10n["Information"];
+                    parameter["message"] = _l10n["No image file found."];
+                    var result2 = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                }
             }
             else
             {
@@ -262,7 +278,7 @@ namespace RaywattOCTFFR.ViewModels.File
 
             if (SelectedExternalDrive != null)
             {
-                directoryProvider.GetDirectoryWithExtension(SelectedExternalDrive.Replace("\\", ""), GetFileExtension(ImportType));
+                directoryProvider.GetDirectoryWithExtension(SelectedExternalDrive.Replace("\\", ""), CommonUtil.GetFileExtension(ImportType));
                 DirItems = directoryProvider.DirItems;
             }
         }
@@ -296,77 +312,79 @@ namespace RaywattOCTFFR.ViewModels.File
 
             ExternalDriveList.Clear();
 
-            var searcher = new ManagementObjectSearcher(@"Select * From Win32_DiskDrive");
-
-            foreach (var drive in searcher.Get())
+            try
             {
-                var mediaType = drive["MediaType"]?.ToString();
-                var interfaceType = drive["InterfaceType"]?.ToString();
+                var searcher = new ManagementObjectSearcher(@"Select * From Win32_DiskDrive");
 
-                if (interfaceType == "USB" || mediaType == "Removable Media" || mediaType == "External hard disk media")
+                foreach (var drive in searcher.Get())
                 {
-                    //디스크 드라이브에 있는 모든 파티션 반환
-                    var partitionsQuery = new ManagementObjectSearcher($"ASSOCIATORS OF {{Win32_DiskDrive.DeviceID='{drive["DeviceID"]}'}} WHERE AssocClass=Win32_DiskDriveToDiskPartition");
-                    foreach (var partition in partitionsQuery.Get())
+                    var mediaType = drive["MediaType"]?.ToString();
+                    var interfaceType = drive["InterfaceType"]?.ToString();
+
+                    if (interfaceType == "USB" || mediaType == "Removable Media" || mediaType == "External hard disk media")
                     {
-                        //각 파티션에 부여된 드라이브 이름 반환 (C, D, E)
-                        var logicalDisksQuery = new ManagementObjectSearcher($"ASSOCIATORS OF {{Win32_DiskPartition.DeviceID='{partition["DeviceID"]}'}} WHERE AssocClass=Win32_LogicalDiskToPartition");
-                        foreach (var logicalDisk in logicalDisksQuery.Get())
+                        //디스크 드라이브에 있는 모든 파티션 반환
+                        var partitionsQuery = new ManagementObjectSearcher($"ASSOCIATORS OF {{Win32_DiskDrive.DeviceID='{drive["DeviceID"]}'}} WHERE AssocClass=Win32_DiskDriveToDiskPartition");
+                        foreach (var partition in partitionsQuery.Get())
                         {
-                            var d = new DriveInfo(logicalDisk["Name"].ToString());
-                            if (d.IsReady)
+                            //각 파티션에 부여된 드라이브 이름 반환 (C, D, E)
+                            var logicalDisksQuery = new ManagementObjectSearcher($"ASSOCIATORS OF {{Win32_DiskPartition.DeviceID='{partition["DeviceID"]}'}} WHERE AssocClass=Win32_LogicalDiskToPartition");
+                            foreach (var logicalDisk in logicalDisksQuery.Get())
                             {
-                                string driveName = d.Name.Replace("\\", "");
-
-                                currExternalDrive[driveName] = driveName;
-                                long[] data = { d.TotalSize, d.AvailableFreeSpace };
-                                ExternalDriveList.Add(driveName, data);
-
-                                if (isFirstExternalDrive)
+                                var d = new DriveInfo(logicalDisk["Name"].ToString());
+                                if (d.IsReady)
                                 {
-                                    firstExternalDrive = driveName;
-                                    isFirstExternalDrive = false;
+                                    string driveName = d.Name.Replace("\\", "");
+
+                                    currExternalDrive[driveName] = driveName;
+                                    long[] data = { d.TotalSize, d.AvailableFreeSpace };
+                                    ExternalDriveList.Add(driveName, data);
+
+                                    if (isFirstExternalDrive)
+                                    {
+                                        firstExternalDrive = driveName;
+                                        isFirstExternalDrive = false;
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-
-            if (ExternalDriveComboBox.Count != currExternalDrive.Count)
+            catch(Exception e)
             {
-                ExternalDriveComboBox = currExternalDrive;
-
-                if (ExternalDriveComboBox.Count > 0)
+                _log.Error("External Drive Disconnected: " + e.Message);
+            }
+            finally
+            {
+                if (ExternalDriveComboBox.Count != currExternalDrive.Count)
                 {
-                    IsEnableExternalDrive = true;
+                    ExternalDriveComboBox = currExternalDrive;
 
-                    if (String.IsNullOrEmpty(externalDrive))
+                    if (ExternalDriveComboBox.Count > 0)
                     {
-                        SelectedExternalDrive = firstExternalDrive;
+                        IsEnableExternalDrive = true;
+
+                        if (String.IsNullOrEmpty(externalDrive))
+                        {
+                            SelectedExternalDrive = firstExternalDrive;
+                        }
+                        else
+                        {
+                            SelectedExternalDrive = externalDrive;
+                        }
                     }
                     else
                     {
-                        SelectedExternalDrive = externalDrive;
+                        IsEnableExternalDrive = false;
+                        DirItems = null;
                     }
                 }
-                else
+
+                if (ExternalDriveComboBox.Count == 0)
                 {
-                    IsEnableExternalDrive = false;
                     DirItems = null;
                 }
-            }
-
-            if (ExternalDriveComboBox.Count == 1)
-            {
-                if (!externDriveInit || !ExternalDriveComboBox.ContainsKey(SelectedExternalDrive))
-                {
-                    SelectedExternalDrive = firstExternalDrive;
-                }
-            }
-            else if (ExternalDriveComboBox.Count == 0)
-            {
-                DirItems = null;
             }
         }
 
@@ -569,28 +587,6 @@ namespace RaywattOCTFFR.ViewModels.File
                 return false;
 
             return (bool)obj[key];
-        }
-
-        private static string GetFileExtension(string importType)
-        {
-            string fileExtension = "";
-
-            switch(importType)
-            {
-                case Constants.ImportTypeDicom:
-                    fileExtension = Constants.DicomFileExtension;
-                    break;
-                case Constants.ImportTypeTiff:
-                    fileExtension = Constants.TiffFileExtension;
-                    break;
-                case Constants.ImportTypeRaw:
-                    fileExtension = Constants.FileExtension;
-                    break;
-                default:
-                    break;
-            }
-
-            return fileExtension;
         }
     }
 }

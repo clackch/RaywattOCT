@@ -26,21 +26,12 @@ using Python.Runtime;
 using FFMpegCore;
 using System.Diagnostics;
 using System.Globalization;
-using RaywattOCTFFR.Services;
 
 namespace RaywattOCTFFR.Common.Util
 {
     public class CommonUtil
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(CommonUtil));
-
-        private static bool _isVTIFileSave;
-
-        public static bool IsVTIFileSave
-        {
-            get => _isVTIFileSave;
-            set => _isVTIFileSave = value;
-        }
 
         public static bool ValidateText(string input)
         {
@@ -710,126 +701,6 @@ namespace RaywattOCTFFR.Common.Util
 
                     tiff.Close();
                 }
-            }
-        }
-
-        public static void TiffProcessByPython(List<Mat> images, string rootPath, string fileName, string format, CancellationTokenSource _cancellationTokenSource)
-        {
-            string filePath = rootPath + "\\" + fileName + "." + format.ToLower();
-
-            if (images == null || images.Count == 0) return;
-
-            string pythonDLL = Environment.GetEnvironmentVariable("PYTHON_DLL");
-            if (!System.IO.File.Exists(pythonDLL))
-            {
-                _log.Error($"Error: Python DLL not found at {pythonDLL}");
-                return;
-            }
-            Runtime.PythonDLL = pythonDLL;
-
-            try
-            {
-                PythonEngine.Initialize();
-                using (Py.GIL())
-                {
-                    dynamic sys = Py.Import("sys");
-                    sys.path.append(".\\"); // Python 모듈 검색 경로에 디렉터리 추가
-                    _log.Debug($"sys.path: {sys.path}");
-
-                    // Python 모듈 가져오기
-                    dynamic script = Py.Import("ImageProcess");
-
-                    // Mat 리스트를 Python으로 전달
-                    int width, height;
-                    var pyMatList = ConvertMatListToPython(ProcessMatList(images, out width, out height));
-                    string result = script.process_images(pyMatList, width, height, filePath);
-                    _log.Debug($"Python function returned: {result}");
-
-                    _cancellationTokenSource.Cancel();
-                }
-            }
-            catch (Python.Runtime.PythonException ex)
-            {
-                _log.Error($"Python Error: {ex.Message}");
-                _log.Error($"Traceback: {ex.StackTrace}");
-            }
-            catch (Exception ex)
-            {
-                _log.Error($"Error: {ex.Message}");
-            }
-            finally
-            {
-                PythonEngine.Shutdown();
-            }
-        }
-
-        private static dynamic ConvertMatListToPython(List<byte[]> matList)
-        {
-            var pythonList = new Python.Runtime.PyList();
-            dynamic np = Py.Import("numpy");
-
-            foreach (var mat in matList)
-            {
-                // NumPy 배열로 변환해서 Python 리스트에 추가
-                pythonList.Append(np.array(mat));
-            }
-            return pythonList;
-        }
-
-        private static List<byte[]> ProcessMatList(List<Mat> matList, out int width, out int height)
-        {
-            var byteList = new List<byte[]>();
-            width = 0;
-            height = 0;
-
-            try
-            {
-                foreach (var mat in matList)
-                {
-                    if (mat.Empty())
-                    {
-                        _log.Debug("Skipped empty Mat.");
-                        continue;
-                    }
-
-                    // Mat 크기 확인
-                    width = mat.Width;
-                    height = mat.Height;
-
-                    // Mat 데이터를 byte[]로 변환 (BGR -> RGB 변환 포함)
-                    byte[] byteData = ConvertMatToByteArray(mat);
-                    if (byteData != null)
-                    {
-                        byteList.Add(byteData);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.Error($"Error processing Mat list: {ex.Message}");
-            }
-
-            return byteList;
-        }
-
-        private static byte[] ConvertMatToByteArray(Mat mat)
-        {
-            try
-            {
-                // OpenCV에서 Mat 객체를 BGR -> RGB로 변환
-                Mat rgbMat = new Mat();
-                Cv2.CvtColor(mat, rgbMat, ColorConversionCodes.BGR2RGB);
-
-                // byte[]로 변환
-                byte[] byteData = new byte[rgbMat.Rows * rgbMat.Cols * rgbMat.Channels()];
-                Marshal.Copy(rgbMat.Data, byteData, 0, byteData.Length);
-
-                return byteData;
-            }
-            catch (Exception ex)
-            {
-                _log.Error($"Error converting Mat to byte array: {ex.Message}");
-                return null;
             }
         }
 
@@ -2333,68 +2204,59 @@ namespace RaywattOCTFFR.Common.Util
             return password.ToString();
         }
 
-        public static int SetAutuPullback(SqlManager sqlManager)
+        public static string GenerateFileName(string ext)
         {
-            _log.Debug("SetAutoPullback");
+            string filename = "{" +
+                CommonUtil.GetRandomText(8) + "-" +
+                CommonUtil.GetRandomText(4) + "-" +
+                CommonUtil.GetRandomText(4) + "-" +
+                CommonUtil.GetRandomText(4) + "-" +
+                CommonUtil.GetRandomText(12) +
+                "}." + ext;
 
-            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
-            sqlParameters["classification"] = "AutoPB";
-            IList<Configuration> autoPullback = sqlManager.SelectConfiguration(sqlParameters);
+            _log.Debug("generateFileName : " + filename);
 
-            int triggerTargetCount = 0;
-            RayError result;
-
-            foreach (var item in autoPullback)
-            {
-                var key = item.Key;
-                _log.Debug(key + ": " + item.Value);
-
-                if (String.IsNullOrWhiteSpace(item.Value))
-                    continue;
-
-                switch (key)
-                {
-                    case "LumenMin":
-                        result = (RayError)RaySetProperty(Property.LumenThresholdMin, double.Parse(item.Value) / 100);
-                        if (result != RayError.OK)
-                        {
-                            _log.Error("RaySetProperty Error");
-                        }
-                        break;
-                    case "LumenMax":
-                        result = (RayError)RaySetProperty(Property.LumenThresholdMax, double.Parse(item.Value) / 100);
-                        if (result != RayError.OK)
-                        {
-                            _log.Error("RaySetProperty Error");
-                        }
-                        break;
-                    case "SNR":
-                        result = (RayError)RaySetProperty(Property.LumenSnrThreshold, double.Parse(item.Value));
-                        if (result != RayError.OK)
-                        {
-                            _log.Error("RaySetProperty Error");
-                        }
-                        break;
-                    case "Count":
-                        triggerTargetCount = int.Parse(item.Value);
-                        break;
-                    case "ShowGuide":
-                        if(!String.IsNullOrWhiteSpace(item.Buffer) && item.Buffer.Contains(Environment.UserName))
-                        {
-                            result = (RayError)RaySetProperty(Property.ShowLumenGuide, item.Value == "Y" ? 1.0 : 0.0);
-                            if (result != RayError.OK)
-                            {
-                                _log.Error("RaySetProperty Error");
-                            }
-                        }                        
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            return triggerTargetCount;
+            return filename;
         }
 
+        public static string GetFileExtension(string importType, bool isOct = false)
+        {
+            string fileExtension = "";
+
+            switch (importType)
+            {
+                case Constants.ImportTypeDicom:
+                    fileExtension = Constants.DicomFileExtension;
+                    break;
+                case Constants.ImportTypeTiff:
+                    fileExtension = Constants.TiffFileExtension;
+                    break;
+                case Constants.ImportTypeRaw:
+                    if (isOct)
+                        fileExtension = Constants.FileRawExtension;
+                    else
+                        fileExtension = Constants.FileExtension;
+                    break;
+                default:
+                    break;
+            }
+
+            return fileExtension;
+        }
+
+        public static string CheckFile(string filePath, string octImage)
+        {
+            _log.Debug("CheckFile");
+
+            if (!string.IsNullOrWhiteSpace(octImage))
+                filePath = CommonUtil.GetDirectoryPath(filePath) + "\\" + octImage;
+
+            if (!System.IO.File.Exists(filePath))
+            {
+                return string.Empty;
+            }
+
+            return filePath;
+        }
     }
 }

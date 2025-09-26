@@ -56,6 +56,9 @@ namespace RaywattOCTFFR.ViewModels.Dialog
         [ObservableProperty]
         private bool enableDone = false;
 
+        [ObservableProperty]
+        private bool _isSuccess = true;
+
         public FileCopyDialogViewModel(SqlManager sqlManager)
         {
             _sqlManager = sqlManager;
@@ -70,47 +73,34 @@ namespace RaywattOCTFFR.ViewModels.Dialog
             if (data.TryGetValue("fileImport", out var importObj) && importObj is Dictionary<string, string> importFiles)//Import
             {
                 copyfiles = importFiles;
-                Patients = (IList<Patient>)data["patients"];
-                Path = data["path"].ToString();
-                AnnotationFilePath = data["annotationFilePath"].ToString();
 
                 if (copyfiles != null)
-                    FileImportAction();
+                    CopyFiles();
             }
             else if (data.TryGetValue("logExport", out var logObj) && logObj is Dictionary<string, string> logFiles)//logExport
             {
                 copyfiles = logFiles;
 
                 if (copyfiles != null)
-                    LogExportAction();
+                    CopyFiles();
             }
         }
 
-        private async void FileImportAction()
+        private async void CopyFiles()
         {
-            await FileImport();
+            await CommonUtil.CopyFiles(copyfiles, prog => Progress = prog, 100.0, progText => ProgressText = progText);
 
-            ProgressText = Constants.ExportStatusCompleted;
-            EnableDone = true;
-        }
-
-        private async void LogExportAction()
-        {
-            await LogExport();
-
-            ProgressText = Constants.ExportStatusCompleted;
-            EnableDone = true;
-        }
-
-        private async Task FileImport()
-        {
-            double progressSize = 90.0;
-            double progressInsert = 10.0;
-            if (copyfiles.Count > 0)
-                await CommonUtil.CopyFiles(copyfiles, prog => Progress = prog, progressSize, progText => ProgressText = progText);
+            if(Progress < 100)
+            {
+                ProgressText = Constants.ExportStatusFail;
+                IsSuccess = false;
+            }
             else
-                progressInsert = 100.0;
-            await InsertData(Patients, Path, AnnotationFilePath, prog => Progress += prog, progressInsert, progText => ProgressText = progText);
+            {
+                ProgressText = Constants.ExportStatusCompleted;
+            }
+
+            EnableDone = true;
         }
 
         private async Task InsertData(IList<Patient> patients, string path, string annotationPath, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
@@ -252,11 +242,6 @@ namespace RaywattOCTFFR.ViewModels.Dialog
                     progressTextCallback(Constants.ExportStatusSaveFile);
                 });
             }
-        }
-
-        private async Task LogExport()
-        {
-            await CommonUtil.CopyFiles(copyfiles, prog => Progress = prog, 100.0, progText => ProgressText = progText);
         }
     }
 }

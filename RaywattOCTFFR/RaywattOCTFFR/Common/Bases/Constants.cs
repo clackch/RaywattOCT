@@ -152,6 +152,7 @@ namespace RaywattOCTFFR.Common.Bases
         public const string ExportStatusSaveFile = "Save File";
         public const string ExportStatusCompleted = "Completed";
         public const string ExportStatusTransferDicom = "Transfer DICOM File(s)";
+        public const string ExportStatusFail = "Failed";
 
         //Export(Standard) Pullback - AVI, TIFF
         public const string ExportPullbackAVI = "MP4";
@@ -183,6 +184,7 @@ namespace RaywattOCTFFR.Common.Bases
         //File Import/Export
         public const string FileImageExtension = "bin";
         public const string FileExtension = "dbf";//RAW
+        public const string FileRawExtension = "oct";
         public const string DicomFileExtension = "dcm";
         public const string TiffFileExtension = "tif";
         public const string AnnotationFileExtension = "annot";
@@ -254,7 +256,7 @@ namespace RaywattOCTFFR.Common.Bases
         //Data File Root Path (OCT raw files) - ※ Patient Folder (DataRootPath + Patient ID)
         public const string DataRootPath = SystemRootPath + "\\Raywatt\\DataSave";
 
-        public const string TempPath = DataRootPath + "\\[temp]";
+        public const string TempPath = DataRootPath + "\\%temp%";
 
         public const string ConfigPath = SystemRootPath + "\\Raywatt\\System\\config";
 

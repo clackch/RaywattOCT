@@ -4,11 +4,169 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:RaywattOCTFFR.Views.File"
+      xmlns:const="clr-namespace:RaywattOCTFFR.Common.Bases"
+      xmlns:behaviors="clr-namespace:RaywattOCTFFR.Common.Behaviors"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      d:DesignHeight="1080" d:DesignWidth="1920"
+      Background="{DynamicResource GrayscaleGray8Brush}"
       Title="FileImportStep2Page">
 
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Height="60" Background="{DynamicResource GrayscaleGray7Brush}">
+            <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Margin="75,20,0,19" Content="{Binding [Import], Source={StaticResource L10N}}"/>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="380"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="380"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="57.5" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="57.5"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="1" Grid.Column="1" CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}">
+                <Grid Margin="40,56,40,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="1"/>
+                        <RowDefinition Height="74"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="54"/>
+                            <RowDefinition Height="1"/>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="24"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="70"/><!-- 5 -->
+                            <RowDefinition Height="16"/>
+                            <RowDefinition Height="54"/>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="24"/>
+                            <RowDefinition Height="20"/><!-- 10 -->
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="6"/>
+                            <RowDefinition Height="72"/>
+                            <RowDefinition Height="6"/>
+                            <RowDefinition Height="100"/><!-- 15 -->
+                            <RowDefinition Height="4"/>
+                            <RowDefinition Height="100"/>
+
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Top">
+                            <Border CornerRadius="18" Width="93" Height="38" Background="{StaticResource GrayscaleGray5Brush}">
+                                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray1Brush}" Content="{Binding [STEP 2.], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            </Border>
+                            <StackPanel Width="16"/>
+                            <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Input Necessary Data], Source={StaticResource L10N}}"/>
+                        </StackPanel>
+                        <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
+                        <Label Grid.Row="3" Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Input Information], Source={StaticResource L10N}}"/>
+                        <Grid Grid.Row="5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="24"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="6"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Label Grid.Row="0" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Catheter Size], Source={StaticResource L10N}}"/>
+                            <Grid Grid.Row="2" Grid.Column="0" VerticalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="40"/>
+                                </Grid.ColumnDefinitions>
+                                <Slider Grid.Column="0" Value="{Binding CatheterSize}" Maximum="3.0" Minimum="1.5" TickFrequency="0.1" IsSnapToTickEnabled="True" LargeChange="0.1" SmallChange="0.1" Margin="5,0,0,0"/>
+                                <Label Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding CatheterSize}" Margin="10,0,0,0" HorizontalContentAlignment="Right"/>
+                                <Label Grid.Column="2" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="Fr" Margin="5,0,0,0"/>
+                            </Grid>
+                            <Label Grid.Row="0" Grid.Column="2" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Pullback Length], Source={StaticResource L10N}}"/>
+                            <Grid Grid.Row="2" Grid.Column="2" VerticalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="40"/>
+                                </Grid.ColumnDefinitions>
+                                <Slider Grid.Column="0" Value="{Binding PullbackLength}" Maximum="100" Minimum="50" TickFrequency="1" IsSnapToTickEnabled="True" LargeChange="1" SmallChange="1" Margin="5,0,0,0"/>
+                                <Label Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PullbackLength}" Margin="10,0,0,0" HorizontalContentAlignment="Right"/>
+                                <Label Grid.Column="2" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="㎜" Margin="5,0,0,0"/>
+                            </Grid>
+                        </Grid>
+                        <StackPanel Grid.Row="7" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Longitudinal Direction], Source={StaticResource L10N}}" VerticalAlignment="Center"/>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="32,0,0,0">
+                                <StackPanel>
+                                    <RadioButton IsChecked="{Binding IsDistalToProximal, Converter={StaticResource BoolToEnableConverter}}" Content="{Binding [Distal to Proximal], Source={StaticResource L10N}}" />
+                                </StackPanel>
+                                <StackPanel Margin="20,0,0,0">
+                                    <RadioButton IsChecked="{Binding IsDistalToProximal, Converter={StaticResource BoolToEnableReverseConverter}}" Content="{Binding [Proximal to Distal], Source={StaticResource L10N}}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                        <Label Grid.Row="9" Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Input Information], Source={StaticResource L10N}}"/>
+                        <Label Grid.Row="11" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [ID], Source={StaticResource L10N}}"/>
+                        <TextBox Grid.Row="13" Style="{DynamicResource TextBoxValidator}" Text="{Binding FileImport.Patient.Id, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter ID], Source={StaticResource L10N}}" ToolTip="{Binding FileImport.Patient.ValidateId}" HorizontalAlignment="Left" Width="528" VerticalAlignment="Top"/>
+                        <Grid Grid.Row="15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="24"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="6"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Label Grid.Row="0" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [First Name], Source={StaticResource L10N}}"/>
+                            <TextBox Grid.Row="2" Grid.Column="0" Style="{DynamicResource TextBoxBase}" Text="{Binding FileImport.Patient.Firstname, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter First Name], Source={StaticResource L10N}}" Width="528" VerticalAlignment="Top"/>
+                            <Label Grid.Row="0" Grid.Column="2" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Last Name], Source={StaticResource L10N}}"/>
+                            <TextBox Grid.Row="2" Grid.Column="2" Style="{DynamicResource TextBoxBase}" Text="{Binding FileImport.Patient.Lastname, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter Last Name], Source={StaticResource L10N}}" Width="528" VerticalAlignment="Top"/>
+                        </Grid>
+                        <Grid Grid.Row="17">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="24"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="6"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Label Grid.Row="0" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Birth Date], Source={StaticResource L10N}}"/>
+                            <DatePicker Grid.Row="2" Grid.Column="0" Style="{DynamicResource DatePickerUpperStyle}" SelectedDate="{Binding FileImport.Patient.Birthdate, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter Birth Date], Source={StaticResource L10N}}" Height="54" VerticalAlignment="Top"/>
+                            <Label Grid.Row="0" Grid.Column="2" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
+                            <ComboBox Grid.Row="2" Grid.Column="2" ItemsSource="{Binding GenderComboBox}" SelectedValue="{Binding SelectedGender, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" Tag="{Binding [Select Gender], Source={StaticResource L10N}}" Width="528" VerticalAlignment="Top"/>
+                        </Grid>
+
+                    </Grid>
+                    <Separator Grid.Row="1" Margin="-40,0,-40,0" Background="{DynamicResource GrayscaleGray5Brush}"/>
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="-24,0,0,0">
+                            <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,-24,0">
+                            <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding NextCommand}" Content="{Binding [Next], Source={StaticResource L10N}}"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+        <Grid Grid.Row="2" Height="40" Background="{DynamicResource GrayscaleBlackBrush}"/>
     </Grid>
 </Page>

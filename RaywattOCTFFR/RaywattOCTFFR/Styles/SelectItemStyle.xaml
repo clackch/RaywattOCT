@@ -473,6 +473,57 @@
         </Setter>
     </Style>
 
+    <Style TargetType="{x:Type DatePicker}" x:Key="DatePickerUpperStyle" BasedOn="{StaticResource Pretendard-Medium-18}">
+        <Setter Property="bh:AlwaysArrowCursorBehavior.Enabled" Value="True"/>
+        <Setter Property="Foreground" Value="{DynamicResource GrayscaleGray3Brush}" />
+        <Setter Property="IsTodayHighlighted" Value="True" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="CalendarStyle" Value="{DynamicResource CalendarStyle}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type DatePicker}">
+                    <Border x:Name="border" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" BorderBrush="{DynamicResource GrayscaleGray5Brush}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="Disabled"/>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Grid x:Name="PART_Root" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <DatePickerTextBox x:Name="PART_TextBox" Grid.Column="0" Foreground="{TemplateBinding Foreground}" Focusable="{TemplateBinding Focusable}"
+                                               HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center" Margin="20,17,0,16"
+                                               Background="Transparent" Style="{DynamicResource DatePickerTextBoxStyle1}"/>
+                            <Label x:Name="placeholder" Opacity="0" Content="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Tag}" Foreground="{TemplateBinding Foreground}" Margin="20,17,0,16"/>
+                            <Button x:Name="PART_Button" Grid.ColumnSpan="2" Foreground="{TemplateBinding Foreground}" Focusable="False" Style="{StaticResource DropDownButtonStyle}"/>
+                            <Grid x:Name="PART_DisabledVisual" Grid.ColumnSpan="2" Grid.Column="0" IsHitTestVisible="False" Opacity="0">
+                                <Popup x:Name="PART_Popup" AllowsTransparency="True" Placement="Top" PlacementTarget="{Binding ElementName=PART_DisabledVisual}" HorizontalOffset="65" VerticalOffset="-6" StaysOpen="False" />
+                            </Grid>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsDropDownOpen" Value="True">
+                            <!--<Setter Property="bh:AlwaysArrowCursorBehavior.Enabled" Value="True"/>-->
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
+                            <Setter TargetName="PART_TextBox" Property="Foreground" Value="{DynamicResource GrayscaleWhiteBrush}"/>
+                            <Setter TargetName="PART_Button" Property="Style" Value="{StaticResource DropDownButtonStyleActive}"/>
+                        </Trigger>
+                        <Trigger Property="IsDropDownOpen" Value="False">
+                            <Setter Property="bh:AlwaysArrowCursorBehavior.Enabled" Value="False"/>
+                        </Trigger>
+                        <Trigger Property="SelectedDate" Value="{x:Null}">
+                            <Setter TargetName="placeholder" Property="Opacity" Value="1"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style TargetType="{x:Type DatePicker}" x:Key="DatePickerValidator" BasedOn="{StaticResource Pretendard-Medium-18}">
         <Setter Property="bh:AlwaysArrowCursorBehavior.Enabled" Value="True"/>
         <Setter Property="ToolTipService.IsEnabled" Value="False"/>
