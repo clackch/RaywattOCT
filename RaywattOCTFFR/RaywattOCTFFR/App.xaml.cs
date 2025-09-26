@@ -109,10 +109,11 @@ namespace RaywattOCTFFR
             services.AddTransient(typeof(ConfirmDialogViewModel));
             services.AddTransient(typeof(EditCaseInfoDialogViewModel));
             services.AddTransient(typeof(SettingDialogViewModel));
-            services.AddTransient(typeof(FileDialogViewModel));
+            services.AddTransient(typeof(FileDialogViewModel));            
             services.AddTransient(typeof(FileFolderBrowseDialogViewModel));
             services.AddTransient(typeof(FileFolderActionDialogViewModel));
             services.AddTransient(typeof(FileImportDialogViewModel));
+            services.AddTransient(typeof(FileCopyDialogViewModel));
             services.AddTransient(typeof(FileAlternateIdDialogViewModel));
             services.AddTransient(typeof(TermsConditionsDialogViewModel));
             services.AddTransient(typeof(PowerOffDialogViewModel));
