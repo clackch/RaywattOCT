@@ -58,7 +58,6 @@
                             <RowDefinition Height="100"/><!-- 15 -->
                             <RowDefinition Height="4"/>
                             <RowDefinition Height="100"/>
-
                         </Grid.RowDefinitions>
                         <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Top">
                             <Border CornerRadius="18" Width="93" Height="38" Background="{StaticResource GrayscaleGray5Brush}">
@@ -149,7 +148,6 @@
                             <Label Grid.Row="0" Grid.Column="2" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Gender], Source={StaticResource L10N}}"/>
                             <ComboBox Grid.Row="2" Grid.Column="2" ItemsSource="{Binding GenderComboBox}" SelectedValue="{Binding SelectedGender, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" Tag="{Binding [Select Gender], Source={StaticResource L10N}}" Width="528" VerticalAlignment="Top"/>
                         </Grid>
-
                     </Grid>
                     <Separator Grid.Row="1" Margin="-40,0,-40,0" Background="{DynamicResource GrayscaleGray5Brush}"/>
                     <Grid Grid.Row="2">
