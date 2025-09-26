@@ -512,7 +512,6 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 	}
 }
 
-int i = 0;
 void COCTImaging::CalculateMagnitude(cv::Mat img) {
 	cv::Mat edgeX, edgeY;
 	cv::Sobel(img, edgeX, CV_32F, 1, 0, 3);
