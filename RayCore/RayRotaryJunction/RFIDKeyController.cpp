@@ -93,8 +93,6 @@ void RFIDKeyController::writeKeysFile() {
 		newFile.close();
 		BYTE key[KEY_LEN] = DEFAULT_KEY;
 		addKey(key);
-		memset(key, 0xFF, KEY_LEN);
-		addKey(key);
 	}
 	return;
 }
