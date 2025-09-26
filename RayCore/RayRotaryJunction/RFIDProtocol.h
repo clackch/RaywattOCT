@@ -59,6 +59,7 @@ public:
 		int aCNT;
 		int aStep;
 		bool findingKey = false;
+		bool receiveTotalState = false;
 		RFIDErrorState errorState = UNANSWERED;
 	};
 private:

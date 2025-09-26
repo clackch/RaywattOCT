@@ -182,7 +182,7 @@ bool CRJController::Set(eStepMotorIndex idxMotor, int velStep) {
 }
 const char* CRJController::GetStateString(eRJState state)
 {
-	const char* strState[] = { "None", "Initializing", "Disconnected", "Cleaning", "Connected", "Validating", "Loading", "WaitManualLoad", "Loaded", "Unloading", "Unloaded", "Error" };
+	const char* strState[] = { "None", "Initializing", "Disconnected", "Cleaning", "Connected", "Validating", "Loading", "WaitManualLoad", "Loaded", "Unloading", "Unloaded", "Error", "RFIDError"};
 	return strState[(int)state];
 }
 bool CRJController::StartControl() {
@@ -616,10 +616,14 @@ void CRJController::updateState() {
 		if (!m_isInit) {
 			if (!m_bLimitSwitch) m_nextState = eRJState::Initializing;
 		}
-		else if (m_bButton[0] || GetRFIDCountCurrentState() >= 5) {
+		else if (m_bButton[0] || GetRFIDCountCurrentState() >= GetCatheterUsage()) {
 			RFIDProtocol::initState(false);
 			m_nextState = eRJState::Unloading;
 		}
+		break;
+
+	case eRJState::RFIDError:
+		if (!m_bLimitSwitch) m_nextState = eRJState::Disconnected;
 		break;
 	default:
 		break;
@@ -653,7 +657,7 @@ RFID_AnswerType CRJController::checkAnswerRFID(RFIDProtocol::SRFIDState rfidStat
 		HANDLE hThread = CreateThread(nullptr, 0, checkKeyFinding, nullptr, 0, nullptr);
 		if(hThread == 0) return RFID_AnswerType::FAILED;
 
-		DWORD result = WaitForSingleObject(hThread, 10000);
+		DWORD result = WaitForSingleObject(hThread, 3000);
 		if (result == WAIT_TIMEOUT) {
 			RFIDProtocol::setRFIDErrorState(RFIDProtocol::NOMATCHKEY);
 			WaitForSingleObject(hThread, INFINITE); 
@@ -684,28 +688,22 @@ RFID_ValidType CRJController::isValidRFID() {
 		PLOGI.printf("RFID Invalid : exceed of usage");
 		return RFID_ValidType::INVALID;
 	}
-	bool isNoData = true;
 
+	if (!rfidState.receiveTotalState) return RFID_ValidType::WAITING;
 	size_t arrayLength = sizeof(rfidState.aMANU) / sizeof(rfidState.aMANU[0]);
 	if (arrayLength != RFID_MANUFACTURER_LEN) {
 		PLOGI.printf("RFID Invalid : mismatch of manufacturer");
 		return RFID_ValidType::INVALID;
 	}
-	for (int i = 0; i < RFID_MANUFACTURER_LEN; i++) {
-		if (rfidState.aMANU[i] != 0) {
-			isNoData = false;
-			break;
-		}
-	}
-	if (isNoData) {
-		return RFID_ValidType::WAITING;
-	}
+
 	for (size_t i = 0; i < arrayLength; ++i) {
 		if (rfidState.aMANU[i] != static_cast<unsigned int>(RFID_MANUFACTURER[i])) {
 			PLOGI.printf("RFID Invalid : mismatch of manufacturer");
 			return RFID_ValidType::INVALID;
 		}
 	}
+
+	GetRFIDStep();
 	return RFID_ValidType::VALID;
 }
 
@@ -773,6 +771,9 @@ void CRJController::updateStateManualMode() {
 			m_nextState = eRJState::Unloading;
 		}
 		break;
+	case eRJState::RFIDError:
+		if (!m_bLimitSwitch) m_nextState = eRJState::Disconnected;
+		break;
 	default:
 		break;
 	}
@@ -813,6 +814,11 @@ void CRJController::updateState(eRJState state) {
 		displayLCD(eLCDImage::LCD_IMAGE_UNLOADING);
 		break;
 	case eRJState::Error:
+		displayLCD(eLCDImage::LCD_IMAGE_ERROR);
+		StopMotor();
+		StopStepMotors();
+		break;
+	case eRJState::RFIDError:
 		displayLCD(eLCDImage::LCD_IMAGE_ERROR);
 		StopMotor();
 		StopStepMotors();

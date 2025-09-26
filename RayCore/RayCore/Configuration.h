@@ -45,6 +45,7 @@ public:
 		int length;			// 2.6fr -> 1.6fr
 		bool catheterValidationOnOff;
 		bool catheterAutoCalibrationOnOff;
+		int  catheterUsage;
 	};
 
 	class Volume {
