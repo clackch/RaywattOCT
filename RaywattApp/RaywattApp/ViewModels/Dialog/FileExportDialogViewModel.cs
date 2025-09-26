@@ -2,6 +2,7 @@
 using log4net;
 using Newtonsoft.Json;
 using OpenCvSharp;
+using Python.Runtime;
 using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Enums;
@@ -270,6 +271,31 @@ namespace RaywattApp.ViewModels.Dialog
                 LumenGuidewires.Reverse();
                 this.crossSections.Reverse();
                 measurements.Reverse();
+                //ReverseGeometries();
+            }
+        }
+
+        private void ReverseGeometries()
+        {
+            if (!PatientCase.Isdistaltoproximal)
+            {
+                if (LModeLengthGeometries != null)
+                {
+                    foreach (var geom in LModeLengthGeometries)
+                    {
+                        geom.FirstPoint = new Point(Constants.LongitudeWidth - geom.FirstPoint.X, geom.FirstPoint.Y);
+                        geom.SecondPoint = new Point(Constants.LongitudeWidth - geom.SecondPoint.X, geom.SecondPoint.Y);
+                    }
+                }
+
+                if (LModeTextGeometries != null)
+                {
+                    foreach (var geom in LModeTextGeometries)
+                    {
+                        geom.PointerPoint = new Point(Constants.LongitudeWidth - geom.PointerPoint.X, geom.PointerPoint.Y);
+                        geom.TextPoint = new Point(Constants.LongitudeWidth - geom.TextPoint.X, geom.TextPoint.Y);
+                    }
+                }
             }
         }
 
@@ -293,6 +319,8 @@ namespace RaywattApp.ViewModels.Dialog
             if (fileExport.Longitude || fileExport.MeasureAuto || fileExport.MeasureManual)
                 SetAnnotation();
 
+            if (!PatientCase.Isdistaltoproximal)
+                lMode = lMode.Flip(FlipMode.Y);
             ReverseLumenProfileCompare();
             LongitudeOrientationChanged();
 
