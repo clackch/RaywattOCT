@@ -1879,7 +1879,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			const int nSheathPosition = CConfiguration::GetInstance().measurement.nSheathPosition;
 
 			int minDiff = INT_MAX;
-			int closestIdx = -1;	// 내경이 row 180 위치에 가장 가까운 프레임 Index
+			int closestIdx = pSystem->m_vCalibrationInfo.size() - 1;	// 내경이 row 180 위치에 가장 가까운 프레임 Index
 			int idealRow = 180;		// 내경이 위치해야 한다고 가정하는 이상적인 row 위치(reflection 배제를 위해 실제 위치해야 하는 row보다 100 아래에서 확인)
 			for (int i = pSystem->m_vCalibrationInfo.size() - 1; i >= 0; i--)
 			{
@@ -1997,7 +1997,14 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	// 1. Start Recording OCT
 	CDataWriter* pDataWriter = new PullbackLengthManager();
 	pDataWriter->Initialize(settingPullback.nBufferSize * sizeof(USHORT));
-	pDataWriter->AddExtraData(OCTHeader::ExtraData::Dispersion, pSystem->m_pImagingPullback->GetCalibrationData(), settingPullback.nAScan * 2 * sizeof(int));
+	size_t numAScans = static_cast<size_t>(settingPullback.nAScan);
+	if (numAScans > std::numeric_limits<size_t>::max() / (2 * sizeof(int)))
+	{
+		PLOGI.printf("nAScan is too large.");
+		delete pDataWriter;
+		return ERROR;;
+	}
+	pDataWriter->AddExtraData(OCTHeader::ExtraData::Dispersion, pSystem->m_pImagingPullback->GetCalibrationData(), numAScans * 2 * sizeof(int));
 	if (ImagingType::Default == ImagingType::LabImaging)
 	{
 		pDataWriter->AddExtraData(OCTHeader::ExtraData::Background, 
@@ -2039,7 +2046,8 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	// 5. Homing
 
 	BYTE* uidRFID = new BYTE[CUSTOM_UID_LENGTH + HARDWARE_UID_LENGTH];
-	pRJController->IncreaseRFIDUsage(pRJController->GetRFIDUID(uidRFID), uidRFID);
+	if(ENABLE_RFID)
+		pRJController->IncreaseRFIDUsage(pRJController->GetRFIDUID(uidRFID), uidRFID);
 
 	pRJController->changeSMProfileToLoadUnload();
 	Sleep(2000);
@@ -2056,7 +2064,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	if (auto* mgr = dynamic_cast<PullbackLengthManager*>(pDataWriter)) {
 		PLOGI.printf("GetNumOfSamples() = %d", mgr->GetNumOfSamples());
 		mgr->SetSMProfile(config.stepMotor.SMPullbackProfile);
-		mgr->CutPullbackLength(pullbackType);
+		mgr->CutPullbackLength(pullbackType, config.bldcMotor.velocityPullback);
 	}
 
 	CImagingSession* pSession = CImagingSession::CreateSession(pSystem, SESSION_REVIEW, settingPullback, pDataWriter);
@@ -2078,9 +2086,10 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 		pSystem->postMessage(WM_NOTIFY_ERROR_OCCURED, (WPARAM)RayError::HomingFailed);
 	}
 
-	/*if( pRJController->GetRFIDCountCurrentState()>=5){
+	PLOGI.printf("pRJController->GetCatheterUsage() = %d", pRJController->GetCatheterUsage());
+	if(ENABLE_RFID && pRJController->GetRFIDCountCurrentState()>= pRJController->GetCatheterUsage()){
 		pRJController->UpdateState(eRJState::Error);
-	}*/
+	}
     
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -2151,6 +2160,7 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 
 	if (pSystem->m_pThreadRotaryJunction->isRun) {
 		pSystem->m_bFirstLoad = true;
+		pRJController->SetCatheterUsage(config.catheter.catheterUsage);
 		pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::LoadCatheter);
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loading);
 	}
@@ -2370,6 +2380,26 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 			pRJController->UpdateState(eRJState::Loaded);
 		}
 		PLOGI.printf("postMessage - CatheterState::Enable");
+
+		RFIDProtocol::SRFIDState rfidState;
+		RFIDProtocol::getCurRFIDData(&rfidState);
+		PLOGI.printf("pRJController->GetRFIDState().aStep = %d", rfidState.aStep);
+
+		pLaserModule->ReadPosition();
+		int position = pLaserModule->GetPosition(eStepMotorIndex::DelayLine);
+
+		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX);
+		pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, config.laserModule.delayPosition - position);
+
+		Sleep(100);
+
+		while (pLaserModule->IsMoving(eStepMotorIndex::DelayLine)) {
+			Sleep(50);
+		}
+
+		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX);
+		pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, rfidState.aStep);
+
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Enable);
 	}
 	else {
@@ -2495,7 +2525,7 @@ UINT COCTSystem::threadRFIDValidation(LPVOID param) {
 	}
 	else if (isValid == RFID_ValidType::INVALID) {
 		PLOGI.printf("validation false");
-		pRJController->UpdateState(eRJState::Error);
+		pRJController->UpdateState(eRJState::RFIDError);
 	}
 	
 	PLOGI.printf("[DONE]threadRFIDValidation");
@@ -3077,7 +3107,7 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 		}
 		else if (isValid == RFID_ValidType::INVALID) {
 			PLOGI.printf("validation false");
-			m_pRJController->UpdateState(eRJState::Error);
+			m_pRJController->UpdateState(eRJState::RFIDError);
 		}
 		else {
 			if (CUtility::StartThread(threadRFIDValidation, m_pThreadRotaryJunction, this)) {
@@ -3118,6 +3148,8 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 
 		PLOGI.printf("RotaryJunctionError");
 		postMessage(WM_NOTIFY_ERROR_OCCURED, (WPARAM)RayError::RotaryJunctionError);
+		break;
+	case eRJState::RFIDError:
 		break;
 	}
 

@@ -182,7 +182,7 @@ bool CRJController::Set(eStepMotorIndex idxMotor, int velStep) {
 }
 const char* CRJController::GetStateString(eRJState state)
 {
-	const char* strState[] = { "None", "Initializing", "Disconnected", "Cleaning", "Connected", "Validating", "Loading", "WaitManualLoad", "Loaded", "Unloading", "Unloaded", "Error" };
+	const char* strState[] = { "None", "Initializing", "Disconnected", "Cleaning", "Connected", "Validating", "Loading", "WaitManualLoad", "Loaded", "Unloading", "Unloaded", "Error", "RFIDError"};
 	return strState[(int)state];
 }
 bool CRJController::StartControl() {
@@ -277,10 +277,11 @@ bool CRJController::GetIsTagging() {
 
 bool CRJController::IncreaseRFIDUsage(int uidSize, BYTE* UID) {
 	if (!m_initMotor) return false;
-	BYTE cnt = RFIDProtocol::getCount(UID, uidSize-CUSTOM_UID_LENGTH)+1;
-	if (cnt == 256) {
+	int cntInt = RFIDProtocol::getCount(UID, uidSize-CUSTOM_UID_LENGTH)+1;
+	if (cntInt >= 256) {
 		return false;
 	}
+	BYTE cnt = static_cast<BYTE>(cntInt);
 	BYTE serialPacket[MAX_PATH];
 	int packetLength;
 	RFIDProtocol::setPacketByFID(eFID::FID_RFID_SET_USAGE, serialPacket, packetLength, uidSize, UID, 1, &cnt);
@@ -291,6 +292,7 @@ bool CRJController::IncreaseRFIDUsage(int uidSize, BYTE* UID) {
 	int written = m_pConnection->Write(serialPacket, packetLength);
 	return (written == packetLength);
 }
+
 bool CRJController::ResetRFIDUsage(int uidSize, BYTE* UID) {
 	if (!m_initMotor) return false;
 
@@ -614,10 +616,14 @@ void CRJController::updateState() {
 		if (!m_isInit) {
 			if (!m_bLimitSwitch) m_nextState = eRJState::Initializing;
 		}
-		else if (m_bButton[0] || GetRFIDCountCurrentState() >= 5) {
+		else if (m_bButton[0] || GetRFIDCountCurrentState() >= GetCatheterUsage()) {
 			RFIDProtocol::initState(false);
 			m_nextState = eRJState::Unloading;
 		}
+		break;
+
+	case eRJState::RFIDError:
+		if (!m_bLimitSwitch) m_nextState = eRJState::Disconnected;
 		break;
 	default:
 		break;
@@ -651,12 +657,14 @@ RFID_AnswerType CRJController::checkAnswerRFID(RFIDProtocol::SRFIDState rfidStat
 		HANDLE hThread = CreateThread(nullptr, 0, checkKeyFinding, nullptr, 0, nullptr);
 		if(hThread == 0) return RFID_AnswerType::FAILED;
 
-		DWORD result = WaitForSingleObject(hThread, 10000);
+		DWORD result = WaitForSingleObject(hThread, 3000);
 		if (result == WAIT_TIMEOUT) {
 			RFIDProtocol::setRFIDErrorState(RFIDProtocol::NOMATCHKEY);
 			WaitForSingleObject(hThread, INFINITE); 
+			CloseHandle(hThread);
 			return RFID_AnswerType::FAILED;
 		}
+		CloseHandle(hThread);
 	}
 	else if (rfidState.errorState == RFIDProtocol::UNANSWERED) {
 		return RFID_AnswerType::PROCEEDING;
@@ -680,28 +688,22 @@ RFID_ValidType CRJController::isValidRFID() {
 		PLOGI.printf("RFID Invalid : exceed of usage");
 		return RFID_ValidType::INVALID;
 	}
-	bool isNoData = true;
 
+	if (!rfidState.receiveTotalState) return RFID_ValidType::WAITING;
 	size_t arrayLength = sizeof(rfidState.aMANU) / sizeof(rfidState.aMANU[0]);
 	if (arrayLength != RFID_MANUFACTURER_LEN) {
 		PLOGI.printf("RFID Invalid : mismatch of manufacturer");
 		return RFID_ValidType::INVALID;
 	}
-	for (int i = 0; i < RFID_MANUFACTURER_LEN; i++) {
-		if (rfidState.aMANU[i] != 0) {
-			isNoData = false;
-			break;
-		}
-	}
-	if (isNoData) {
-		return RFID_ValidType::WAITING;
-	}
+
 	for (size_t i = 0; i < arrayLength; ++i) {
 		if (rfidState.aMANU[i] != static_cast<unsigned int>(RFID_MANUFACTURER[i])) {
 			PLOGI.printf("RFID Invalid : mismatch of manufacturer");
 			return RFID_ValidType::INVALID;
 		}
 	}
+
+	GetRFIDStep();
 	return RFID_ValidType::VALID;
 }
 
@@ -720,8 +722,6 @@ void CRJController::updateStateManualMode() {
 	case eRJState::Connected:
 		if (m_bLimitSwitch) {
 			m_nextState = eRJState::Validating;
-			RFIDProtocol::initState(false);
-			ReadRFID();
 		}
 		break;
 	case eRJState::Validating:
@@ -771,6 +771,9 @@ void CRJController::updateStateManualMode() {
 			m_nextState = eRJState::Unloading;
 		}
 		break;
+	case eRJState::RFIDError:
+		if (!m_bLimitSwitch) m_nextState = eRJState::Disconnected;
+		break;
 	default:
 		break;
 	}
@@ -811,6 +814,11 @@ void CRJController::updateState(eRJState state) {
 		displayLCD(eLCDImage::LCD_IMAGE_UNLOADING);
 		break;
 	case eRJState::Error:
+		displayLCD(eLCDImage::LCD_IMAGE_ERROR);
+		StopMotor();
+		StopStepMotors();
+		break;
+	case eRJState::RFIDError:
 		displayLCD(eLCDImage::LCD_IMAGE_ERROR);
 		StopMotor();
 		StopStepMotors();
@@ -995,15 +1003,21 @@ void CRJController::handlePacket() {
 }
 
 void CRJController::findCorrectKey() {
-	std::vector<std::vector<BYTE>> keys = RFIDKeyController::getKeys();
-	for (std::vector<BYTE> key : keys) {
-		BYTE* keyVal = new BYTE[KEY_LEN];
+	const std::vector<std::vector<BYTE>>& keys = RFIDKeyController::getKeys();
+	for (const std::vector<BYTE>& key : keys) {
+		if(key.size() != KEY_LEN) {
+			continue;
+		}
+		BYTE keyVal[KEY_LEN];
 		for (int idx = 0; idx < KEY_LEN; idx++) {
 			keyVal[idx] = key[idx];
 		}
 		BYTE serialPacket[MAX_PATH];
-		int packetLength;
+		int packetLength = 0;
 		RFIDProtocol::setPacketByFID(eFID::FID_RFID_GET_KEY, serialPacket, packetLength, 0, NULL, 0, 0, keyVal);
+		if (packetLength < 2) {
+			continue;
+		}
 		BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 		serialPacket[packetLength - 2] = checksum;
 

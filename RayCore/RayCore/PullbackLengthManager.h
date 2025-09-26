@@ -25,7 +25,7 @@ public:
 	PullbackLengthManager();
 	~PullbackLengthManager();
 
-	void CutPullbackLength(int pullbackType);
+	void CutPullbackLength(int pullbackType, int rotationSpeed = 24038);
 	void SetSMProfile(int SMProfile) { m_SMProfile = SMProfile; }
 
 private:

@@ -327,13 +327,14 @@ namespace RaywattApp.Common.Bases
             {
                 _log.Debug("AutoPullback Start");
 
+                AutoPullback.OnOff = false;
                 RayError result = (RayError)RaySetProperty(Property.AutoPullback, 0.0);
                 if (result != RayError.OK)
                 {
                     _log.Error("RaySetProperty Error");
                 }
                 AutoPullbackStart();
-            }          
+            }
         }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
