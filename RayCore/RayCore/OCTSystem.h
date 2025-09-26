@@ -101,6 +101,7 @@ private:
 	bool m_isTestMode;
 	double m_fPullbackStartTime; // XXX.XXX sec
 	int autoCalibrationFranch = 0; // 0 for 2.6, 60 for 1.7
+	int catheterRFID;
 
 public:
 	COCTSystem();

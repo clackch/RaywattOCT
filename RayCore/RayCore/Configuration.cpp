@@ -98,6 +98,7 @@ void CConfiguration::Initialize(tstring configFile)
 	this->catheter.catheterValidationOnOff = ::GetPrivateProfileInt(_T("Catheter"), _T("CatheterValidationOnOff"), 0, configFilePath.c_str());
 	this->catheter.catheterAutoCalibrationOnOff = ::GetPrivateProfileInt(_T("Catheter"), _T("CatheterAutoCalibrationOnOff"), 0, configFilePath.c_str());
 	this->catheter.catheterUsage = ::GetPrivateProfileInt(_T("Catheter"), _T("CatheterUsage"), 0, configFilePath.c_str());
+	this->catheter.catheterRFID = ::GetPrivateProfileInt(_T("Catheter"), _T("CatheterRFID"), 0, configFilePath.c_str());
 
 	// [Volume]
 	this->volume.size = ::GetPrivateProfileInt(_T("Volume"), _T("Size"), 500, configFilePath.c_str());
