@@ -512,6 +512,7 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 	}
 }
 
+int i = 0;
 void COCTImaging::CalculateMagnitude(cv::Mat img) {
 	cv::Mat edgeX, edgeY;
 	cv::Sobel(img, edgeX, CV_32F, 1, 0, 3);
@@ -534,6 +535,7 @@ void COCTImaging::CalculateMagnitude(cv::Mat img) {
 		}
 	}
 
+	//cv::imwrite("origin_first" + std::to_string(i) + ".png", img);
 	//PLOGI.printf("check the time - Magnitude: %d", totalMagnitude);
 	m_nSheathPosition = totalMagnitude;
 }
@@ -618,6 +620,7 @@ cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {
 }
 
 void COCTImaging::findSheath(cv::Mat input) {
+	i++;
 	cv::Mat gray;
 	if (input.channels() == 3) {
 		cvtColor(input, gray, cv::COLOR_BGR2GRAY);
@@ -635,21 +638,22 @@ void COCTImaging::findSheath(cv::Mat input) {
 	}
 
 	cv::rotate(gray, gray, cv::ROTATE_90_COUNTERCLOCKWISE);
-	//cv::Mat tmp = gray.clone();
+	cv::Mat tmp = gray.clone();
 	cv::threshold(gray, gray, 0, 255, cv::THRESH_OTSU);
 
 	int nowRow = 0;
-	int startRow = 120;
+	int startRow = 100;
 	int sheathThickness = 15;
 	int thickCount = 0;
-	for (int i = startRow; i < startRow + 200; i++) {
+	
+	for (int i = startRow; i < startRow + 300; i++) {
 		int pixelCount = 0;
 		for (int x = 0; x < gray.cols; x++) {
 			if (gray.at<uchar>(i, x) == 255)
 				pixelCount++;
 		}
 		nowRow = i;
-		if (pixelCount > gray.cols / 2) {
+		if (pixelCount > gray.cols * 0.7 && pixelCount != gray.cols) {
 			thickCount++;
 			if (thickCount > sheathThickness) {
 				nowRow -= sheathThickness;
@@ -660,10 +664,11 @@ void COCTImaging::findSheath(cv::Mat input) {
 			thickCount = 0;
 		}
 	}
+
 	//cv::line(tmp, cv::Point(0, nowRow), cv::Point(tmp.cols - 1, nowRow), cv::Scalar(255, 0, 0), 2);
 	//cv::imwrite("origin" + std::to_string(i) + ".tif", tmp);
-
 	m_nSheathPosition = nowRow;
+	//cv::imwrite("binary" + std::to_string(i) + ".tif", gray);
 }
 
 // 정규화를 위한 함수

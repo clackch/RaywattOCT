@@ -1710,7 +1710,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 
 		//way 1
 		std::vector<int> gradient(info.size() - 1);
-		int minVal = INT_MAX, maxVal = 0, Loc = startPosition;
+		int minVal = INT_MAX, minIndex = 0, Loc = startPosition, maxVal = 0;
 		int errorValThreshold = 10; // 1차 확인에서 값이 너무 작게 나오는 경우를 걸러내기 위한 임계값
 
 		// gradient, minVal, maxVal 계산
@@ -1729,86 +1729,137 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			{
 				minVal = info[i].first;
 				Loc = info[i].second;
+				minIndex = i;
 			}
-			if(info[i].first > maxVal)
+			if (info[i].first > maxVal)
 			{
 				maxVal = info[i].first;
 			}
 		}
 
-		//PLOGI.printf("minVal : %d, maxVal : %d", minVal, maxVal);
+		int isThisSeverance = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("isThisSeverance"), 0, _T(".\\raycore.ini"));
 
-		std::vector<std::pair<int, int>> minList; // pair<motor loc, index>
-		for (int i = 0; i < gradient.size() - 1; i++)
-		{
-			if (gradient[i] < 0 && gradient[i + 1] >= 0 && gradient[i] != -1 && gradient[i+1] != -1) // local min
+		if (isThisSeverance == 0) {
+			std::vector<std::pair<int, int>> minList; // pair<motor loc, index>
+			for (int i = 0; i < gradient.size() - 1; i++)
 			{
-				if(minVal * 1.3 < info[i + 1].first) // 최솟값의 130% 이상인 값은 제외
-					continue;
-				minList.push_back(std::make_pair(info[i + 1].second, i + 1));
-				//PLOGI.printf("local min found. Loc : %d, Value : %d", info[i + 1].second, info[i + 1].first);
+				if (gradient[i] < 0 && gradient[i + 1] >= 0 && gradient[i] != -1 && gradient[i + 1] != -1) // local min
+				{
+					if (minVal * 1.3 < info[i + 1].first) // 최솟값의 130% 이상인 값은 제외
+						continue;
+					minList.push_back(std::make_pair(info[i + 1].second, i + 1));
+					//PLOGI.printf("local min found. Loc : %d, Value : %d", info[i + 1].second, info[i + 1].first);
+				}
 			}
-		}
-		std::sort(minList.begin(), minList.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
-			return a.first < b.first; // motor loc 기준 오름차순 정렬
-			});
-		
-		std::vector<std::pair<int, int>> maxList; // pair<distLoc, index>
-		for (int i = 1; i < gradient.size() - 1; i++)
-		{
-			int distLoc = abs(info[i + 1].second - Loc); // minLoc과의 거리
-			if (gradient[i] >= 0 && gradient[i + 1] < 0 && gradient[i] != -1 && gradient[i + 1] != -1) // local max
-			{
-				maxList.push_back(std::make_pair(distLoc, i + 1));
-				//PLOGI.printf("local max found. Loc : %d, Value : %d", info[i + 1].second, info[i + 1].first);
-			}
-		}
-		std::sort(maxList.begin(), maxList.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
-			return a.first < b.first; // minLoc과의 거리 기준 오름차순 정렬
-			});
+			std::sort(minList.begin(), minList.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
+				return a.first < b.first; // motor loc 기준 오름차순 정렬
+				});
 
-		int minMaxDistRange = 800; // local max가 local min과 너무 멀리 떨어져 있는 경우를 배제하기 위한 임계값
-		if (minList.empty()) {
-			nTargetPos = startPosition;
-			//PLOGI.printf("Calibration is failed.");
-			autoCalibError = RayError::AutoCalibError;
+			std::vector<std::pair<int, int>> maxList; // pair<distLoc, index>
+			for (int i = 1; i < gradient.size() - 1; i++)
+			{
+				int distLoc = abs(info[i + 1].second - Loc); // minLoc과의 거리
+				if (gradient[i] >= 0 && gradient[i + 1] < 0 && gradient[i] != -1 && gradient[i + 1] != -1) // local max
+				{
+					maxList.push_back(std::make_pair(distLoc, i + 1));
+					//PLOGI.printf("local max found. Loc : %d, Value : %d", info[i + 1].second, info[i + 1].first);
+				}
+			}
+			std::sort(maxList.begin(), maxList.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
+				return a.first < b.first; // minLoc과의 거리 기준 오름차순 정렬
+				});
+
+			int minMaxDistRange = 800; // local max가 local min과 너무 멀리 떨어져 있는 경우를 배제하기 위한 임계값
+			if (minList.empty()) {
+				nTargetPos = startPosition;
+				//PLOGI.printf("Calibration is failed.");
+				autoCalibError = RayError::AutoCalibError;
+			}
+			else {
+				Loc = minList[0].first; // 가장 작은 local min 위치로 우선 설정
+				bool maxFound = false;
+				for (int i = 0; i < maxList.size(); i++)
+				{
+					if (abs(info[maxList[i].second].second - Loc) < minMaxDistRange)
+					{
+						Loc = info[maxList[i].second].second;
+						maxFound = true;
+						break;
+					}
+				}
+
+				int valDist = 10000000; // 조건에 맞는 local max가 없는 경우, local min 좌우의 값 차이가 유효할 정도로 큰지 확인하기 위한 임계값
+				int adjustVal = 200; // 조건에 맞는 local max가 없는 경우, local min에서 local max로 이동하기 위한 보정값
+				if (!maxFound) {
+					//PLOGI.printf("Cannot find Local max");
+					int nowIndex = minList[0].second;
+					if (abs(info[nowIndex - 2].first - info[nowIndex + 2].first) < valDist) {
+						if (nowIndex - 2 >= 0 && nowIndex + 1 < gradient.size() &&
+							abs(gradient[nowIndex - 2] - gradient[nowIndex - 1]) > abs(gradient[nowIndex] - gradient[nowIndex + 1]))
+							Loc += adjustVal;
+						else
+							Loc -= adjustVal;
+					}
+					else {
+						if (info[nowIndex - 2].first > info[nowIndex + 2].first) {
+							Loc += adjustVal;
+						}
+						else
+							Loc -= adjustVal;
+					}
+
+				}
+			}
 		}
 		else {
-			Loc = minList[0].first; // 가장 작은 local min 위치로 우선 설정
-			bool maxFound = false;
-			for(int i = 0; i < maxList.size(); i++)
-			{
-				if (abs(info[maxList[i].second].second - Loc) < minMaxDistRange)
-				{
-					Loc = info[maxList[i].second].second;
-					maxFound = true;
-					break;
+			int maxLaplacian = INT_MIN;
+			int maxIndex = 0; double avgGradient = 0.0;
+			for (int i = 2; i < gradient.size(); i++) {
+				if (gradient[i] == -1 || gradient[i - 1] == -1)
+					continue;
+				avgGradient += abs(gradient[i]);
+				if (maxLaplacian < gradient[i - 1] - gradient[i]) {
+					maxLaplacian = gradient[i - 1] - gradient[i];
+					maxIndex = i;
 				}
 			}
+			avgGradient /= (double)(gradient.size() - 2);
+			PLOGI.printf("avgGradient : %f, maxGradient : %d, diff : %d", avgGradient, abs(gradient[maxIndex]), abs(info[maxIndex].second - Loc));
 
-			int valDist = 10000000; // 조건에 맞는 local max가 없는 경우, local min 좌우의 값 차이가 유효할 정도로 큰지 확인하기 위한 임계값
-			int adjustVal = 200; // 조건에 맞는 local max가 없는 경우, local min에서 local max로 이동하기 위한 보정값
-			if (!maxFound) {
-				//PLOGI.printf("Cannot find Local max");
-				int nowIndex = minList[0].second;
-				if(abs(info[nowIndex - 2].first - info[nowIndex + 2].first) < valDist){
-					if (nowIndex - 2 >= 0 && nowIndex + 1 < gradient.size() &&
-						abs(gradient[nowIndex - 2] - gradient[nowIndex - 1]) > abs(gradient[nowIndex] - gradient[nowIndex + 1]))
-						Loc += adjustVal;
-					else
-						Loc -= adjustVal;
-				}
-				else {
-					if (info[nowIndex - 2].first > info[nowIndex + 2].first) {
-						Loc += adjustVal;
-					}else
-						Loc -= adjustVal;
-				}
+			int maxGradientCheck = abs(gradient[maxIndex - 1]);
+			if (maxGradientCheck < abs(gradient[maxIndex]))
+				maxGradientCheck = abs(gradient[maxIndex]);
+			//if (abs(info[maxIndex].second - Loc) < 600 /* ±2 frame 정도의 step 차이 */
+			//	|| abs(info[maxIndex].second - Loc) < 1500 && abs(gradient[maxIndex - 1]) > avgGradient * 3)
+			//	Loc = info[maxIndex].second;
+			//else {
+			//	// min 위치와 max 위치가 너무 멀리 떨어져 있는 경우 올바르지 않은 위치로 간주
+			//	int valDist = 10000000; // min 좌우의 값 차이가 유효할 정도로 큰지 확인하기 위한 임계값
+			//	int adjustVal = 200; // min loc에서 올바른 위치 이동하기 위한 보정값
 
-			}
+			//	int nowIndex = minIndex;
+			//	if (abs(info[nowIndex - 2].first - info[nowIndex + 2].first) < valDist) {
+			//		if (nowIndex - 2 >= 0 && nowIndex + 1 < gradient.size() &&
+			//			abs(gradient[nowIndex - 2] - gradient[nowIndex - 1]) > abs(gradient[nowIndex] - gradient[nowIndex + 1]))
+			//			Loc += adjustVal;
+			//		else
+			//			Loc -= adjustVal;
+			//	}
+			//	else {
+			//		if (info[nowIndex - 2].first > info[nowIndex + 2].first) {
+			//			Loc += adjustVal;
+			//		}
+			//		else
+			//			Loc -= adjustVal;
+			//	}
+			//}
+			Loc = info[maxIndex].second;
+		}
+		
 
-			//PLOGI.printf("first calibration. checkPosition : %d, checkValue : %d", Loc, minVal);
+		PLOGI.printf("first calibration. checkPosition : %d, checkValue : %d", Loc, minVal);
 
+		if(autoCalibError != RayError::AutoCalibError){
 			// 2차 탐색
 			int nJumpStep = 3200;			//1차 탐색에서 확인한 지점으로부터, 2차 탐색을 위해 이동할 거리
 			int nSearchRange = 600;			//2차 탐색 범위 
@@ -1830,7 +1881,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			int minDiff = INT_MAX;
 			int closestIdx = pSystem->m_vCalibrationInfo.size() - 1;	// 내경이 row 180 위치에 가장 가까운 프레임 Index
 			int idealRow = 180;		// 내경이 위치해야 한다고 가정하는 이상적인 row 위치(reflection 배제를 위해 실제 위치해야 하는 row보다 100 아래에서 확인)
-			for(int i = pSystem->m_vCalibrationInfo.size() - 1; i>=0; i--)
+			for (int i = pSystem->m_vCalibrationInfo.size() - 1; i >= 0; i--)
 			{
 				int nowRow = pSystem->m_vCalibrationInfo.at(i).first;
 				if (abs(nowRow - idealRow) < minDiff)
@@ -1840,6 +1891,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 				}
 			}
 			nZOffset = pSystem->m_vCalibrationInfo.at(closestIdx).second;
+			nZOffset += (idealRow - pSystem->m_vCalibrationInfo.at(closestIdx).first) * 3; // 보정값 적용
 
 			// 1-3. Move to calibrated position
 			int adjustMotorStep = 450; // 내경에서 외경까지의 거리 150 step + reflection 배제를 위해 움직였던 거리 300 step
@@ -1849,6 +1901,10 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			if (minDiff > 50) // 내경 위치가 너무 이상적인 위치에서 멀리 떨어져 있는 경우 보정 실패로 간주
 				autoCalibError = RayError::AutoCalibError;
 		}
+		else {
+			nTargetPos = startPosition;
+		}
+
 		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX);
 		pLaserModule->Move(eStepMotorIndex::DelayLine, nTargetPos);
 		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
