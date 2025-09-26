@@ -644,15 +644,19 @@ void COCTImaging::findSheath(cv::Mat input) {
 	int startRow = 100;
 	int sheathThickness = 15;
 	int thickCount = 0;
-	
+
 	for (int i = startRow; i < startRow + 300; i++) {
 		int pixelCount = 0;
+		bool isThereHighPixel = false;
 		for (int x = 0; x < gray.cols; x++) {
 			if (gray.at<uchar>(i, x) == 255)
 				pixelCount++;
+			if (tmp.at<uchar>(i, x) > 200) {
+				isThereHighPixel = true;
+			}
 		}
 		nowRow = i;
-		if (pixelCount > gray.cols * 0.7 && pixelCount != gray.cols) {
+		if (pixelCount > gray.cols * 0.7 && pixelCount != gray.cols && isThereHighPixel) {
 			thickCount++;
 			if (thickCount > sheathThickness) {
 				nowRow -= sheathThickness;
