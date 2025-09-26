@@ -2334,7 +2334,7 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 			Sleep(50);
 		}
 
-		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_DEFAULT * 2);
+		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX);
 		pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, rfidState.aStep);
 
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Enable);
