@@ -644,45 +644,71 @@ void COCTImaging::findSheath(cv::Mat input) {
 	cv::Mat tmp = gray.clone();
 	cv::threshold(gray, gray, 0, 255, cv::THRESH_OTSU);
 
-	int startRow = 120;
-	int minSheathThickness = 12, maxSheathThickness = 17;
+	int nowRow = 0;
+	int startRow = 100;
+	int sheathThickness = 15;
+	//int minSheathThickness = 10, maxSheathThickness = 30;
 	int thickCount = 0;
 
-	std::vector<int> innerSheathPositions;
-	for (int i = startRow + 200; i >= startRow; i--) {
+	//std::vector<int> innerSheathPositions;
+	//for (int i = startRow + 200; i >= startRow; i--) {
+	//	int pixelCount = 0;
+	//	for (int x = 0; x < gray.cols; x++) {
+	//		if (gray.at<uchar>(i, x) == 255)
+	//			pixelCount++;
+	//	}
+	//	if (pixelCount > gray.cols * 0.8 /* col의 80% */
+	//		&& pixelCount != gray.cols) {
+	//		thickCount++;
+	//	}
+	//	else {
+	//		if (thickCount >= minSheathThickness && thickCount <= maxSheathThickness) {
+	//			innerSheathPositions.push_back(i + 1);
+	//		}
+	//		thickCount = 0;
+	//	}
+	//}
+	//if(innerSheathPositions.size() == 0) {
+	//	m_nSheathPosition = 0;
+	//	PLOGI.printf("No sheath found");
+	//}
+	//else if(innerSheathPositions.size() == 1) {
+	//	m_nSheathPosition = innerSheathPositions[0];
+	//}
+	//else {
+	//	int minDist = 25, maxDist = 40;
+	//	for(int i=0; i<innerSheathPositions.size() - 1; i++) {
+	//		int dist = innerSheathPositions[i + 1] - innerSheathPositions[i];
+	//		if (dist >= minDist && dist <= maxDist) {
+	//			m_nSheathPosition = innerSheathPositions[i + 1];
+	//			break;
+	//		}
+	//	}
+	//	
+	//}
+	
+	for (int i = startRow; i < startRow + 300; i++) {
 		int pixelCount = 0;
 		for (int x = 0; x < gray.cols; x++) {
 			if (gray.at<uchar>(i, x) == 255)
 				pixelCount++;
 		}
-		if (pixelCount > gray.cols * 0.8 /* col의 80% */) {
+		nowRow = i;
+		if (pixelCount > gray.cols * 0.7 && pixelCount != gray.cols) {
 			thickCount++;
+			if (thickCount > sheathThickness) {
+				nowRow -= sheathThickness;
+				break;
+			}
 		}
 		else {
-			if (thickCount > minSheathThickness && thickCount < maxSheathThickness) {
-				innerSheathPositions.push_back(i + 1);
-			}
 			thickCount = 0;
 		}
 	}
-	if(innerSheathPositions.size() == 0) {
-		m_nSheathPosition = 0;
-		PLOGI.printf("No sheath found");
-		return;
-	}
-	if(innerSheathPositions.size() == 1) {
-		m_nSheathPosition = innerSheathPositions[0];
-	}
-	else {
-		int dist = innerSheathPositions[1] - innerSheathPositions[0];
-		int minDist = 20, maxDist = 30;
-		if (dist >= minDist && dist <= maxDist)
-			m_nSheathPosition = innerSheathPositions[1];
-		else
-			m_nSheathPosition = innerSheathPositions[0];
-	}
+
 	//cv::line(tmp, cv::Point(0, nowRow), cv::Point(tmp.cols - 1, nowRow), cv::Scalar(255, 0, 0), 2);
-	//cv::imwrite("origin" + std::to_string(i) + ".tif", tmp);
+	cv::imwrite("origin" + std::to_string(i) + ".tif", tmp);
+	m_nSheathPosition = nowRow;
 	cv::imwrite("binary" + std::to_string(i) + ".tif", gray);
 }
 

@@ -1891,6 +1891,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 				}
 			}
 			nZOffset = pSystem->m_vCalibrationInfo.at(closestIdx).second;
+			nZOffset += (idealRow - pSystem->m_vCalibrationInfo.at(closestIdx).first) * 3; // 보정값 적용
 
 			// 1-3. Move to calibrated position
 			int adjustMotorStep = 450; // 내경에서 외경까지의 거리 150 step + reflection 배제를 위해 움직였던 거리 300 step
