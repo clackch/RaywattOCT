@@ -829,8 +829,21 @@ namespace RaywattApp.ViewModels
                 if (LumenStents != null) LumenStents.Reverse();
                 if (LumenGuidewires != null) LumenGuidewires.Reverse();
                 if (LumenContours != null) LumenContours.Reverse();
-                if (measurements != null) measurements.Reverse();
+                if (measurements != null)
+                {
+                    measurements.Reverse();
+                    ReverseMeasurementsFrameNumber();
+                }
+
                 ReverseGeometries();
+            }
+        }
+
+        private void ReverseMeasurementsFrameNumber()
+        {
+            foreach (var a in measurements)
+            {
+                a.FrameNumber = measurements.Count - a.FrameNumber - 1;
             }
         }
 
