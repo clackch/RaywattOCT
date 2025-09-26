@@ -93,6 +93,10 @@
             <Trigger Property="IsChecked" Value="True">
                 <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MainPrimaryColorBrush}"/>
                 <Setter TargetName="img" Property="Source" Value="{svgc:SvgImage Source=/res/icon/arrowUpLight.svg}"/>
+                <Setter Property="bh:AlwaysArrowCursorBehavior.Enabled" Value="True"/>
+            </Trigger>
+            <Trigger Property="IsChecked" Value="False">
+                <Setter Property="bh:AlwaysArrowCursorBehavior.Enabled" Value="False"/>
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
