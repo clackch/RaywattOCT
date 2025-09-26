@@ -619,7 +619,6 @@ cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {
 }
 
 void COCTImaging::findSheath(cv::Mat input) {
-	i++;
 	cv::Mat gray;
 	if (input.channels() == 3) {
 		cvtColor(input, gray, cv::COLOR_BGR2GRAY);
