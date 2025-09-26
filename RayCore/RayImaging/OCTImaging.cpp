@@ -539,7 +539,7 @@ void COCTImaging::CalculateMagnitude(cv::Mat img) {
 	}
 
 	//cv::imwrite("origin_first" + std::to_string(i) + ".png", img);
-	PLOGI.printf("check the time - Magnitude: %d", totalMagnitude);
+	//PLOGI.printf("check the time - Magnitude: %d", totalMagnitude);
 	m_nSheathPosition = totalMagnitude;
 }
 
@@ -647,45 +647,7 @@ void COCTImaging::findSheath(cv::Mat input) {
 	int nowRow = 0;
 	int startRow = 100;
 	int sheathThickness = 15;
-	//int minSheathThickness = 10, maxSheathThickness = 30;
 	int thickCount = 0;
-
-	//std::vector<int> innerSheathPositions;
-	//for (int i = startRow + 200; i >= startRow; i--) {
-	//	int pixelCount = 0;
-	//	for (int x = 0; x < gray.cols; x++) {
-	//		if (gray.at<uchar>(i, x) == 255)
-	//			pixelCount++;
-	//	}
-	//	if (pixelCount > gray.cols * 0.8 /* col의 80% */
-	//		&& pixelCount != gray.cols) {
-	//		thickCount++;
-	//	}
-	//	else {
-	//		if (thickCount >= minSheathThickness && thickCount <= maxSheathThickness) {
-	//			innerSheathPositions.push_back(i + 1);
-	//		}
-	//		thickCount = 0;
-	//	}
-	//}
-	//if(innerSheathPositions.size() == 0) {
-	//	m_nSheathPosition = 0;
-	//	PLOGI.printf("No sheath found");
-	//}
-	//else if(innerSheathPositions.size() == 1) {
-	//	m_nSheathPosition = innerSheathPositions[0];
-	//}
-	//else {
-	//	int minDist = 25, maxDist = 40;
-	//	for(int i=0; i<innerSheathPositions.size() - 1; i++) {
-	//		int dist = innerSheathPositions[i + 1] - innerSheathPositions[i];
-	//		if (dist >= minDist && dist <= maxDist) {
-	//			m_nSheathPosition = innerSheathPositions[i + 1];
-	//			break;
-	//		}
-	//	}
-	//	
-	//}
 	
 	for (int i = startRow; i < startRow + 300; i++) {
 		int pixelCount = 0;
@@ -707,9 +669,9 @@ void COCTImaging::findSheath(cv::Mat input) {
 	}
 
 	//cv::line(tmp, cv::Point(0, nowRow), cv::Point(tmp.cols - 1, nowRow), cv::Scalar(255, 0, 0), 2);
-	cv::imwrite("origin" + std::to_string(i) + ".tif", tmp);
+	//cv::imwrite("origin" + std::to_string(i) + ".tif", tmp);
 	m_nSheathPosition = nowRow;
-	cv::imwrite("binary" + std::to_string(i) + ".tif", gray);
+	//cv::imwrite("binary" + std::to_string(i) + ".tif", gray);
 }
 
 // 정규화를 위한 함수
