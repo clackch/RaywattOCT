@@ -47,6 +47,7 @@ protected:
 	cv::Mat matYMap;
 	cv::Mat imatXMap;  // circle image -> inverse circular -> Rotate CounterClock 90 -> Circluar -> Rotate_ClockWise 90
 	cv::Mat imatYMap;
+	cv::Mat autoCalibPatch;
 	std::vector<cv::Point> inversedContourYPoints;
 
 	cv::Mat imageResult;
@@ -131,6 +132,7 @@ public:
 
 	int GetSheathPosition() { return m_nSheathPosition; }
 	int GetPixelNum() { return m_nPixelNum; }
+	void SetPatchImage(cv::Mat Patch) { if(autoCalibPatch.empty()) autoCalibPatch = Patch.clone(); }
 	void SetZOffset(int nOffset) { m_nZOffset = nOffset; }
 	void SetDelayLineMovingDirection(int direction) { m_delayLineMovingDirection = direction; }
 

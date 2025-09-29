@@ -541,60 +541,41 @@ void COCTImaging::CalculateMagnitude(cv::Mat img) {
 
 void COCTImaging::CheckSheathPixels(cv::Mat img)
 {
-	// LUT Table
-	const int    TOP_BAND_WIDTH = 30;
-	const double TARGET = 0.50;
-	const double POWER_MIN = 0.60;
-	const double POWER_MAX = 12.0;
-
 	// 1. 클론 이미지 생성
 	cv::Mat cloneImg = img.clone();
-	cv::rotate(cloneImg, cloneImg, cv::ROTATE_180);
+	cv::rotate(cloneImg, cloneImg, cv::ROTATE_90_COUNTERCLOCKWISE);
+	if (cloneImg.type() == CV_8U)
+		cloneImg.convertTo(cloneImg, CV_32F, 1.0 / 255.0);
+	else if (cloneImg.type() == CV_32F) {}
+	else {
+		PLOGI.printf("CheckSheathPixels - Unsupported image type");
+	}
+	if(autoCalibPatch.empty())
+	{
+		PLOGI.printf("CheckSheathPixels - autoCalibPatch is empty");
+		return;
+	}
 
-	// 2. Otsu 이진화
-	cv::Mat binaryImg;
-	cv::threshold(cloneImg, binaryImg, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+	cv::Mat result;
+	cv::matchTemplate(cloneImg, autoCalibPatch, result, cv::TM_CCOEFF_NORMED);
 
-	// 3. 흰 픽셀 수 카운팅
-	int nowRow = 0;
-	int startCol = 30, endCol = 100;
-	int InnerSheathThickness = 15, outerSheathThickness = 3;
-	int pixelCount = 0;
-	for (int y = 0; y < binaryImg.rows; y++) {
-		int thickCount = 0;
-		int innerSheath = 0, outerSheath = 0;
-		for (int x = startCol; x < endCol; x++) {
-			if (binaryImg.at<uchar>(y, x) == 255) {
-				thickCount++;
-				if (thickCount > InnerSheathThickness) {
-					innerSheath = x - InnerSheathThickness;
-					break;
-				}
-			}
+	int maxRowVal = INT_MIN, maxRowIdx = 0;
+	for(int y = 0; y < result.rows; y++)
+	{
+		float rowSum = 0;
+		for(int x = 0; x < result.cols; x++)
+		{
+			rowSum += result.at<float>(y, x);
 		}
-		for (int x = innerSheath + 40; x < innerSheath + 60; x++) {
-			if (binaryImg.at<uchar>(y, x) == 255) {
-				thickCount++;
-				if (thickCount > outerSheathThickness) {
-					outerSheath = x - outerSheathThickness;
-					break;
-				}
-			}
-			else {
-				thickCount = 0;
-			}
+		if(maxRowVal < rowSum)
+		{
+			maxRowVal = rowSum;
+			maxRowIdx = y;
 		}
-		if (outerSheath - innerSheath > 30 && outerSheath - innerSheath < 50) {
-			pixelCount++;
-		}
+		PLOGI.printf("row %d, sum: %f", y, rowSum);
 	}
 	//PLOGI.printf("check the time - pixelCount: %d", pixelCount);
-	if (pixelCount > binaryImg.rows - 100) {
-		m_nPixelNum = 1;
-	}
-	else {
-		m_nPixelNum = -1;
-	}
+	m_nPixelNum = maxRowIdx;
 }
 
 cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {

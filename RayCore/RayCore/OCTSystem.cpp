@@ -167,6 +167,8 @@ RayError COCTSystem::Start() {
 	m_pImagingLiveView->SetSession(SESSION_REALTIME);
 	m_pImagingLiveView->Start();
 
+	loadAutoCalibPatch();
+
 	m_pAcqDevice = new CATSDevice(config.acquisition);
 
 	return RayError::OK;
@@ -1882,7 +1884,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 
 			int minDiff = INT_MAX;
 			int closestIdx = pSystem->m_vCalibrationInfo.size() - 1;	// 내경이 row 180 위치에 가장 가까운 프레임 Index
-			int idealRow = 180;		// 내경이 위치해야 한다고 가정하는 이상적인 row 위치(reflection 배제를 위해 실제 위치해야 하는 row보다 100 아래에서 확인)
+			int idealRow = 180;		// 2차 진행 시에 내경이 위치해야 한다고 가정하는 이상적인 row 위치
 			for (int i = pSystem->m_vCalibrationInfo.size() - 1; i >= 0; i--)
 			{
 				int nowRow = pSystem->m_vCalibrationInfo.at(i).first;
@@ -1918,10 +1920,11 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			Sleep(50);
 		}
 		auto const& sheathInfo = pSystem->m_vCalibrationInfo;
-		int validSheathCount = 0;
+		int validSheathCount = 0, idealRow = 30;
 		for(auto const& val : sheathInfo)
 		{
-			if (val.first > 0) {
+			PLOGI.printf("sheath check - row : %d", val.first);
+			if (abs(val.first - idealRow) < 5) {
 				validSheathCount++;
 				//PLOGI.printf("sheath check - true");
 			}
@@ -2316,6 +2319,25 @@ void COCTSystem::autoCalibrationInit(LPVOID param) {
 	}
 }
 
+void COCTSystem::loadAutoCalibPatch() {
+	std::string patchPath = "autoCalibPatch.tif";
+	cv::Mat patch = cv::imread(patchPath, cv::IMREAD_GRAYSCALE);
+	if(patch.empty()) {
+		PLOGI.printf("Failed to load auto calibration patch image.");
+		return;
+	}
+	else {
+		if (patch.type() == CV_8UC1)
+			patch.convertTo(m_autoCalibPatch, CV_32F, 1.0 / 255.0);
+		else if (patch.type() == CV_32F)
+			m_autoCalibPatch = patch;
+		else {
+			PLOGI.printf("Invalid auto calibration patch image format.");
+			return;
+		}
+	}
+}
+
 /*
 * threadValidateCatheter
 */
@@ -2601,6 +2623,7 @@ int COCTSystem::restartAcqDevice(COCTImaging* pImaging) {
 	stopAcqDevice();
 
 	m_pImagingRealtime = pImaging;
+	m_pImagingRealtime->SetPatchImage(m_autoCalibPatch);
 
 	IImaging::Setting imaging = pImaging->GetSetting();
 	CATSDevice::Setting acquire = ((CATSDevice *)m_pAcqDevice)->GetSetting();
