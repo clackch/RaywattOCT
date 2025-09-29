@@ -444,6 +444,9 @@ namespace RaywattApp.Common.Annotation
             ellipse.MouseMove += pointer_MouseMove;
             ellipse.MouseRightButtonDown += pointer_MouseRightButtonDown;
 
+            double labelHeight = GetLabelSize("StyleLabelText").Height;
+            double textBoxWidth = GetTextBoxSize("StyleTextBox").Width;
+
             this.canvas.Children.Add(ellipse);
         }
 

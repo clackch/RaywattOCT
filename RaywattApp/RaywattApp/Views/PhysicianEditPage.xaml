@@ -199,7 +199,7 @@
                                        Grid.Column="0" 
                                        Style="{DynamicResource Pretendard-Medium-16}" 
                                        Foreground="{DynamicResource GrayscaleGray3Brush}" 
-                                       Content="Logitude Image Orientation"
+                                       Content="Longitudinal Direction"
                                        VerticalAlignment="Center" 
                                        Margin="45,0,0,0"/>
                                     <Border Grid.Row="14" 

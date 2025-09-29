@@ -139,7 +139,6 @@
                                         Foreground="{StaticResource CaseInfoSecondBrush}"
                                         HorizontalAlignment="left"
                                         VerticalAlignment="Top"
-                                        Margin="20"
                                         IsHitTestVisible="False"/>
                             </StackPanel>
                         </Grid>

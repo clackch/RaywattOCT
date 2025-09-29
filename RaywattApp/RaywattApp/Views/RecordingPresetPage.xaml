@@ -102,7 +102,7 @@
                                 </StackPanel>
                                 <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,35,0,0">
                                     <StackPanel Orientation="Horizontal">
-                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding Longitude Orientation, Source={StaticResource L10N}}"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding Longitudinal Direction, Source={StaticResource L10N}}"/>
                                         <StackPanel Width="5"/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
