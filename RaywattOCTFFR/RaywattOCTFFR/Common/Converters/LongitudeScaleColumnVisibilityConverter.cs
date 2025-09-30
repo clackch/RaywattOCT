@@ -13,8 +13,9 @@ namespace RaywattOCTFFR.Common.Converters
                 return Visibility.Collapsed;
 
             int frameCnt = int.Parse(parameter.ToString());
+            int pullbackLength = int.Parse(value.ToString());
 
-            if (int.Parse(value.ToString()) >= frameCnt)
+            if (pullbackLength >= frameCnt)
                 return Visibility.Visible;
             else
                 return Visibility.Collapsed;

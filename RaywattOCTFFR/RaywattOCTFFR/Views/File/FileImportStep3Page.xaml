@@ -3,12 +3,202 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:local="clr-namespace:RaywattOCTFFR.Views.File"
+      xmlns:const="clr-namespace:RaywattOCTFFR.Common.Bases"
+      xmlns:System="clr-namespace:System;assembly=mscorlib"
+      xmlns:component="clr-namespace:RaywattOCTFFR.Views.Component"
+      xmlns:trigger="clr-namespace:RaywattOCTFFR.Common.TriggerAction"
+      xmlns:behaviors="clr-namespace:RaywattOCTFFR.Common.Behaviors"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      d:DesignHeight="1080" d:DesignWidth="1920"
+      Background="{DynamicResource GrayscaleGray8Brush}"
       Title="FileImportStep3Page">
+    <Page.Resources>
+        <System:Boolean x:Key="TrueValue">True</System:Boolean>
+        <System:Boolean x:Key="FalseValue">False</System:Boolean>
+    </Page.Resources>
 
     <Grid>
-        
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0" Height="60" Background="{DynamicResource GrayscaleGray7Brush}">
+                <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Margin="75,20,0,19" Content="{Binding [Import], Source={StaticResource L10N}}"/>
+            </Grid>
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="380"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="380"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="32.5" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="32.5"/>
+                </Grid.RowDefinitions>
+                <Border Grid.Row="1" Grid.Column="1" CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}">
+                    <Grid Margin="0,56,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="1"/>
+                            <RowDefinition Height="74"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Row="0">
+                            <Grid Height="620" Margin="40,0,40,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="620"/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" HorizontalAlignment="Left">
+                                    <Border CornerRadius="18" Width="93" Height="38" Background="{StaticResource GrayscaleGray5Brush}" HorizontalAlignment="Left">
+                                        <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray1Brush}" Content="{Binding [STEP 3.], Source={StaticResource L10N}}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Validate Image], Source={StaticResource L10N}}" HorizontalAlignment="Left"/>
+                                    <StackPanel Height="192"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Image Information], Source={StaticResource L10N}}" HorizontalAlignment="Left"/>
+                                    <StackPanel Height="6"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Total Frame:], Source={StaticResource L10N}}" HorizontalAlignment="Left"/>
+                                        <StackPanel Width="5"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding FileImport.PatientCase.NumOfFrames}" HorizontalAlignment="Left"/>
+                                    </StackPanel>
+                                    <StackPanel Height="246"/>
+                                    <Border HorizontalAlignment="Left" CornerRadius="10" Height="50" Background="{StaticResource GrayscaleGray7Brush}" Width="180">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="prev" Width="24" Height="21.3" Command="{Binding CmdPlayback}" CommandParameter="prev" />
+                                            <StackPanel Width="40"/>
+                                            <component:IconMultiToggleButton Style="{DynamicResource IconMultiToggleButton}" IsChecked="{Binding IsPaused}" Icon="pause" CheckedIcon="play" Width="22" Height="26.8" Command="{Binding CmdPlayback}" CommandParameter="play"/>
+                                            <StackPanel Width="40"/>
+                                            <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="next"  Width="24" Height="21.3" Command="{Binding CmdPlayback}" CommandParameter="next"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                                <Grid Grid.Column="1" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}" >
+                                    <Grid x:Name="crossSectionImage">
+                                        <!-- Cross Seciton Image -->
+                                        <Image Source="{Binding CrossSectionImage}" Width="{x:Static const:Constants.CrossSectionSize}" Height="{x:Static const:Constants.CrossSectionSize}">
+                                            <Image.Clip>
+                                                <EllipseGeometry Center="{x:Static const:Constants.CrossSectionPointCenter}" RadiusX="{x:Static const:Constants.CrossSectionRadius}" RadiusY="{x:Static const:Constants.CrossSectionRadius}"/>
+                                            </Image.Clip>
+                                        </Image>
+                                        <!-- Cross Section Info. -->
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="50">
+                                            <Label Content="F" Style="{DynamicResource Pretendard-ExtraBold-14}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+                                            <StackPanel Width="6"/>
+                                            <Label Content="{Binding DisplayFrameNumber}" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" />
+                                        </StackPanel>
+                                        <!-- Scale Bar -->
+                                        <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+                                            <Label Content="1 ㎜" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
+                                            <StackPanel Height="4"/>
+                                            <Grid>
+                                                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Left"/>
+                                                <Separator Width="{Binding CrossSectionScale}" Height="1" Margin="0"/>
+                                                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Right"/>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                            <StackPanel Height="165">
+                                <StackPanel Height="20"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <Grid Width="40" VerticalAlignment="Center">
+                                        <Label Content="{Binding FileImport.PatientCase.IsDistalToProximal, Converter={StaticResource DtoPConverter}}" Style="{DynamicResource Pretendard-Medium-16}" HorizontalContentAlignment="Center" Foreground="{StaticResource GrayscaleGray3Brush}"/>
+                                    </Grid>
+                                    <Grid x:Name="longitude" Width="{x:Static const:Constants.LongitudeWidth}">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="MouseDown">
+                                                <i:InvokeCommandAction Command="{Binding CmdTouchMoveIndicator}" PassEventArgsToCommand="True" IsEnabled="{Binding IndicatorLongitude.IsEnabled}"/>
+                                            </i:EventTrigger>
+                                            <i:EventTrigger EventName="MouseDown">
+                                                <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}" IsEnabled="{Binding IndicatorLongitude.IsEnabled}"/>
+                                            </i:EventTrigger>
+                                            <i:EventTrigger EventName="MouseUp">
+                                                <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}" IsEnabled="{Binding IndicatorLongitude.IsEnabled}"/>
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                        <!-- L-Mode -->
+                                        <Image x:Name="lMode" Source="{Binding LongitudeImage}" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeHeight}" Stretch="Fill">
+                                            <Image.Clip>
+                                                <RectangleGeometry RadiusX="8" RadiusY="8">
+                                                    <RectangleGeometry.Rect>
+                                                        <Rect X="0" Y="0" Width="{x:Static const:Constants.LongitudeWidth}" Height="{x:Static const:Constants.LongitudeImageClipHeight}"/>
+                                                    </RectangleGeometry.Rect>
+                                                </RectangleGeometry>
+                                            </Image.Clip>
+                                        </Image>
+                                        <!-- L-Mode Indicator -->
+                                        <Canvas>
+                                            <component:IndicatorImage Style="{DynamicResource IndicatorImage}" Icon="longitude" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" Width="{x:Static const:Constants.LongitudeIndicatorWidth}" Height="{x:Static const:Constants.LongitudeIndicatorHeight}" Stretch="None" Canvas.Left="{Binding IndicatorLongitude.X}" Margin="0,-11,0,0" IsEnabled="{Binding IndicatorLongitude.IsEnabled}">
+                                                <!-- Trigger -->
+                                                <i:Interaction.Triggers>
+                                                    <!--MouseDown : Image 영역에서 MouseDown 할 경우, Indicator 동작 가능 상태로 변경 -->
+                                                    <i:EventTrigger EventName="MouseDown" >
+                                                        <trigger:CustomInvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource TrueValue}"/>
+                                                    </i:EventTrigger>
+                                                    <!--MouseUp : Image 영역에서 MouseUp 할 경우, Indicator 멈춤 -->
+                                                    <i:EventTrigger EventName="MouseUp" >
+                                                        <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                                                    </i:EventTrigger>
+                                                    <!--MouseMove : Image 영역에서 MouseMove 할 경우, Indicator 동작(단, Indicator가 동작 가능 상태 일때) -->
+                                                    <i:EventTrigger EventName="MouseMove" >
+                                                        <i:InvokeCommandAction Command="{Binding CmdMoveIndicator}" CommandParameter="{Binding IndicatorLongitude}"/>
+                                                    </i:EventTrigger>
+                                                </i:Interaction.Triggers>
+                                            </component:IndicatorImage>
+                                        </Canvas>
+                                    </Grid>
+                                    <Grid Width="40" VerticalAlignment="Center">
+                                        <Label Content="{Binding FileImport.PatientCase.IsDistalToProximal, Converter={StaticResource DtoPReverseConverter}}" Style="{DynamicResource Pretendard-Medium-16}" HorizontalContentAlignment="Center" Foreground="{StaticResource GrayscaleGray3Brush}"/>
+                                    </Grid>
+                                </StackPanel>
+                                <ContentControl Template="{DynamicResource LongitudeScaleBar}" Height="20" Width="{x:Static const:Constants.LongitudeWidth}" Tag="{Binding FileImport.PatientCase.PullbackLength}"/>
+                                <StackPanel Height="20"/>
+                            </StackPanel>
+
+                        </StackPanel>
+                        <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="16,0,0,0">
+                                <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding BackCommand}" Content="{Binding [Back], Source={StaticResource L10N}}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,16,0">
+                                <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding NextCommand}" Content="{Binding [Next], Source={StaticResource L10N}}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+            <Grid Grid.Row="2" Height="40" Background="{DynamicResource GrayscaleBlackBrush}"/>
+        </Grid>
+
+        <!-- Indicator : Longitude -->
+        <component:IndicatorAreaGrid Style="{DynamicResource IndicatorAreaGrid}" IsCaptured="{Binding IndicatorLongitude.IsCaptured}" Visibility="{Binding IndicatorLongitude.IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
+            <i:Interaction.Behaviors>
+                <behaviors:MouseBehavior MouseX="{Binding IndicatorLongitude.PointLongitudeX, Mode=OneWayToSource}"/>
+            </i:Interaction.Behaviors>
+
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="MouseLeave" >
+                    <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="PreviewMouseUp" >
+                    <i:InvokeCommandAction Command="{Binding IndicatorLongitude.CmdSetCaptured}" CommandParameter="{StaticResource FalseValue}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="PreviewMouseMove" >
+                    <i:InvokeCommandAction Command="{Binding CmdMoveIndicator}" CommandParameter="{Binding IndicatorLongitude}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </component:IndicatorAreaGrid>
     </Grid>
 </Page>

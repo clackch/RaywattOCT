@@ -161,4 +161,10 @@
     <!--  Bool To Grid Length Or Zero Converter   -->
     <converters:BoolToGridLengthOrZeroConverter x:Key="BoolToGridLengthOrZeroConverter" />
 
+    <!--  D To P Converter   -->
+    <converters:DtoPConverter x:Key="DtoPConverter" />
+
+    <!--  D To P Reverse Converter   -->
+    <converters:DtoPConverter x:Key="DtoPReverseConverter" FalseValue="D" TrueValue="P" />
+
 </ResourceDictionary>

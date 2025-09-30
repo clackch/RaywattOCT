@@ -158,7 +158,7 @@ namespace RaywattOCTFFR.ViewModels
                 RayError result = (RayError)RaySetProperty(Property.Brightness, value);
                 if (result != RayError.OK)
                 {
-                    _log.Error("RayOpenImage Error");
+                    _log.Error("RaySetProperty Error");
                 }
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
             }
@@ -1255,19 +1255,6 @@ namespace RaywattOCTFFR.ViewModels
                 return false;
 
             return true;
-        }
-        protected override void UpdateCrossSectionImage()
-        {
-            if (DrawCrossSectionImage())
-            {
-                DeviceStatus.ReviewImageInfo imageInfo = DeviceStatus.ReviewImageInfos[(int)RaySession.Review];                
-                if (!IndicatorLongitude.IsCaptured) updateNavigator(imageInfo.Current, imageInfo.Total);
-
-                FrameNumber = imageInfo.Current;
-
-                if (CommonUtil.IsPreCase(PatientCase.Procedure))
-                    DrawCalciumIndicator();
-            }
         }
 
         protected override void UpdateLumenProfile()

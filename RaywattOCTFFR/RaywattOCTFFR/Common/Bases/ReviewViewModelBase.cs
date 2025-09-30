@@ -6,12 +6,12 @@ using Newtonsoft.Json;
 using RaywattOCTFFR.Common.Annotation.Models;
 using RaywattOCTFFR.Common.Dialog;
 using RaywattOCTFFR.Common.Messages;
-using RaywattOCTFFR.Common.Util;
 using RaywattOCTFFR.Models;
 using RaywattOCTFFR.Services;
-using RaywattOCTFFR.Views.Dialog;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
 using static RaywattOCT.RayCoreWrapper;
 
@@ -64,6 +64,9 @@ namespace RaywattOCTFFR.Common.Bases
         [ObservableProperty]
         private ObservableCollection<Bookmark> bookmarks;
 
+        [ObservableProperty]
+        private Indicator _indicatorLongitude;
+
         private ICommand _reviewTypeSwitchCommand;
         public ICommand ReviewTypeSwitchCommand
         {
@@ -76,18 +79,6 @@ namespace RaywattOCTFFR.Common.Bases
             get { return this._editPresetCommand ?? (this._editPresetCommand = new RelayCommand(EditPreset)); }
         }
 
-        private ICommand _editLumenContourCommand;
-        public ICommand EditLumenContourCommand
-        {
-            get { return this._editLumenContourCommand ?? (this._editLumenContourCommand = new RelayCommand(EditLumenContour)); }
-        }
-
-        private ICommand _manualCalibrationCommand;
-        public ICommand ManualCalibrationCommand
-        {
-            get { return this._manualCalibrationCommand ?? (this._manualCalibrationCommand = new RelayCommand(ManualCalibration)); }
-        }
-
         private ICommand _endReviewCommand;
         public ICommand EndReviewCommand
         {
@@ -98,6 +89,36 @@ namespace RaywattOCTFFR.Common.Bases
         public ICommand ExpandCollapseCommand
         {
             get { return this._expandCollapseCommand ?? (this._expandCollapseCommand = new RelayCommand<string>(ExpandCollapseMenu)); }
+        }
+
+        private ICommand _backCommand;
+        public ICommand BackCommand
+        {
+            get { return this._backCommand ?? (this._backCommand = new RelayCommand(Back)); }
+        }
+
+        private ICommand _nextCommand;
+        public ICommand NextCommand
+        {
+            get { return this._nextCommand ?? (this._nextCommand = new RelayCommand(Next)); }
+        }
+
+        private ICommand _cmdMoveIndicator;
+        public ICommand CmdMoveIndicator
+        {
+            get { return this._cmdMoveIndicator ?? (this._cmdMoveIndicator = new RelayCommand<object>(MoveIndicator)); }
+        }
+
+        private ICommand _cmdTouchMoveIndicator;
+        public ICommand CmdTouchMoveIndicator
+        {
+            get { return this._cmdTouchMoveIndicator ?? (this._cmdTouchMoveIndicator = new RelayCommand<object>(TouchMoveIndicator)); }
+        }
+
+        private ICommand _cmdPlayback;
+        public ICommand CmdPlayback
+        {
+            get { return this._cmdPlayback ?? (this._cmdPlayback = new RelayCommand<object>(Playback)); }
         }
 
         public ReviewViewModelBase()
@@ -143,31 +164,6 @@ namespace RaywattOCTFFR.Common.Bases
             WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewPresetPage) { Parameter = parameter });
         }
 
-        private void EditLumenContour()
-
-        {
-            _log.Debug("EditLumenContour");
-
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["patient"] = Patient;
-            parameter["patientCase"] = PatientCase;
-            parameter["prevStatus"] = PrevStatus;
-            parameter["reviewStatus"] = ReviewStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewLumenEditPage) { Parameter = parameter });
-        }
-
-        private void ManualCalibration()
-        {
-            _log.Debug("ManualCalibration");
-
-            Dictionary<string, object> parameter = new Dictionary<string, object>();
-            parameter["patient"] = Patient;
-            parameter["patientCase"] = PatientCase;
-            parameter["prevStatus"] = PrevStatus;
-            parameter["reviewStatus"] = ReviewStatus;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.ReviewCalibrationPage) { Parameter = parameter });
-        }
-
         private List<int> GetBookmarks()
         {
             List<int> bookmarks = new List<int>();
@@ -188,6 +184,10 @@ namespace RaywattOCTFFR.Common.Bases
         }
 
         protected virtual void Save() { }
+
+        protected virtual void Back() { }
+
+        protected virtual void Next() { }
 
         private void EndReview()
         {
@@ -227,6 +227,130 @@ namespace RaywattOCTFFR.Common.Bases
                 ReviewStatus.IsPlay = false;
             }
                 
+        }
+
+        protected void Playback(object param)
+        {
+            string action = (string)param;
+
+            if (action.ToLower().Equals("prev"))
+            {
+                StopPlayback();
+
+                PrevFrame(RaySession.Review);
+            }
+            else if (action.ToLower().Equals("next"))
+            {
+                StopPlayback();
+
+                NextFrame(RaySession.Review);
+            }
+            else if (action.ToLower().Equals("play"))
+            {
+                Playback();
+
+                if (!IsPaused)
+                {
+                    ReviewStatus.IsMeasurementOn = false;
+                    ReviewStatus.IsPlay = true;
+                }
+                else
+                {
+                    ReviewStatus.IsPlay = false;
+                }
+
+            }
+        }
+
+        protected override void UpdateCrossSectionImage()
+        {
+            if (DrawCrossSectionImage())
+            {
+                DeviceStatus.ReviewImageInfo imageInfo = DeviceStatus.ReviewImageInfos[(int)RaySession.Review];
+                if (!IndicatorLongitude.IsCaptured)
+                    updateNavigator(imageInfo.Current, imageInfo.Total);
+
+                FrameNumber = imageInfo.Current;
+            }
+        }
+
+        private void MoveIndicator(object param)
+        {
+            Indicator indicator = (Indicator)param;
+
+            if (indicator.IsCaptured)
+            {
+                if (indicator.IsLongitudeClicked)
+                {
+                    StopPlayback();
+
+                    indicator.IsLongitudeClicked = false;
+                    return;
+                }
+
+                if (indicator.IsLongitudeMove)
+                {
+                    indicator.IndicatorDiff = indicator.PointLongitudeX - indicator.Coordinate.X - indicator.X;
+                    indicator.IsLongitudeMove = false;
+                }
+
+                double indicatorX = indicator.PointLongitudeX - indicator.Coordinate.X - indicator.IndicatorDiff;
+                double indicatorCenterX = indicatorX + Constants.LongitudeIndicatorWidth / 2;
+
+                if (indicatorCenterX < 0)
+                {
+                    indicator.X = 0 - Constants.LongitudeIndicatorWidth / 2;
+                    indicator.CenterX = 0;
+                    setCurrentFrame(0);
+                }
+                else if (indicatorCenterX > Constants.LongitudeWidth)
+                {
+                    indicator.X = Constants.LongitudeWidth - Constants.LongitudeIndicatorWidth / 2;
+                    indicator.CenterX = Constants.LongitudeWidth;
+                    setCurrentFrame(Constants.LongitudeWidth);
+                }
+                else
+                {
+                    indicator.X = indicatorX;
+                    indicator.CenterX = indicatorCenterX;
+                    setCurrentFrame(indicatorCenterX);
+                }
+            }
+        }
+
+        private void TouchMoveIndicator(object param)
+        {
+            StopPlayback();
+
+            MouseEventArgs e = (MouseEventArgs)param;
+            var position = e.GetPosition((IInputElement)e.Source);
+
+            IndicatorLongitude.X = position.X - Constants.LongitudeIndicatorWidth / 2;
+            IndicatorLongitude.CenterX = IndicatorLongitude.X + Constants.LongitudeIndicatorWidth / 2;
+            setCurrentFrame(IndicatorLongitude.CenterX);
+        }
+
+        protected void updateNavigator(int curFrame, int totalFrame)
+        {
+            if (FrameNumber == curFrame)
+                return;
+
+            double curPosition = (double)curFrame / (totalFrame - 1);
+            curPosition *= Constants.LongitudeWidth;
+            IndicatorLongitude.X = curPosition - Constants.LongitudeIndicatorWidth / 2;
+            IndicatorLongitude.CenterX = curPosition;
+        }
+
+        private void setCurrentFrame(double navigatorPosition)
+        {
+            double curPosition = navigatorPosition / Constants.LongitudeWidth;
+
+            if (longitudeFrameInfo != null)
+            {
+                curPosition *= (longitudeFrameInfo.totalFrame - 1);
+                curPosition = Math.Round(curPosition);
+                MoveToFrame(RaySession.Review, (int)curPosition);
+            }
         }
     }
 }
