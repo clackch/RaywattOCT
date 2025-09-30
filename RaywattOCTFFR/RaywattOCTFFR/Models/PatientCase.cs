@@ -165,7 +165,7 @@ namespace RaywattOCTFFR.Models
         private string? _importType;
 
         [ObservableProperty]
-        private bool _isDistalToProximal;
+        private bool _isDistalToProximal = true;
 
         [ObservableProperty]
         private string? _bookmark;

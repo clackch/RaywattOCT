@@ -190,6 +190,12 @@ namespace RaywattOCTFFR.Common.Bases
         public const string AnnotationFileExtension = "annot";
         public const string FileNamePrefix = "Export_";
 
+        //File Import Condition
+        public const double CatheterSizeMin = 1.5;
+        public const double CatheterSizeMax = 3.0;
+        public const double PullbackLengthMin = 50;
+        public const double PullbackLengthMax = 100;
+
         //Export Layout
         public const double ExportHeight = 1080;
         public const double ExportWidth = 1920;
@@ -287,7 +293,7 @@ namespace RaywattOCTFFR.Common.Bases
         public const int CalciumIndicatorColor = 0x57FEEB;
 
         //Review - 2D - Longitude
-        public const double LongitudeWidth = 1140;
+        public const double LongitudeWidth = 1080;
         public const double LongitudeHeight = 105;
         public const double LongitudeImageClipHeight = LongitudeHeight + 10;
         public const double LongitudeScale = LongitudeWidth / 10;

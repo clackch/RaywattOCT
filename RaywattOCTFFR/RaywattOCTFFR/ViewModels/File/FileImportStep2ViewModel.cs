@@ -28,9 +28,6 @@ namespace RaywattOCTFFR.ViewModels.File
         [ObservableProperty]
         private FileImport _fileImport = new FileImport();
 
-        [ObservableProperty]
-        private Patient _patient;
-
         private double _catheterSize = 2.6;
         public double CatheterSize
         {
@@ -87,6 +84,10 @@ namespace RaywattOCTFFR.ViewModels.File
                 if (data.TryGetValue("fileImport", out var fileImportObj) && fileImportObj is FileImport fileImportData)
                 {
                     FileImport = fileImportData;
+                    int pullbackLength = string.IsNullOrWhiteSpace(FileImport.PatientCase.PullbackLength) ? 0 : int.Parse(FileImport.PatientCase.PullbackLength);
+                    if (pullbackLength >= Constants.PullbackLengthMin && pullbackLength <= Constants.PullbackLengthMax)
+                        PullbackLength = pullbackLength;
+                    IsDistalToProximal = FileImport.PatientCase.IsDistalToProximal;
                     SelectedGender = FileImport.Patient.Gender;
 
                     FileImport.Patient.PropertyChanged += Patient_PropertyChanged;
@@ -94,16 +95,16 @@ namespace RaywattOCTFFR.ViewModels.File
             }
         }
 
+        public override void OnNavigating(object sender, object navigationEventArgs)
+        {
+            _log.Debug("OnNavigating");
+        }
+
         private void Patient_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             _log.Debug("Patient_PropertyChanged");
 
             (NextCommand as RelayCommand).NotifyCanExecuteChanged();
-        }
-
-        public override void OnNavigating(object sender, object navigationEventArgs)
-        {
-            _log.Debug("OnNavigating");
         }
 
         protected override void Back()
@@ -119,23 +120,41 @@ namespace RaywattOCTFFR.ViewModels.File
         {
             _log.Debug("Next");
 
-            string filePath = CommonUtil.CheckFile(FileImport.FilePath, FileImport.PatientCase.Image);
-            if (!string.IsNullOrEmpty(filePath))
+            string importedFile = Constants.TempPath + "\\" + FileImport.PatientCase.Image;
+            if (System.IO.File.Exists(importedFile))
             {
-                if (ImportFile(filePath))
-                {
-                    Dictionary<string, Object> parameter = new Dictionary<string, Object>();
-                    parameter["fileImport"] = FileImport;
-                    WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.FileImportStep2Page) { Parameter = parameter });
-                }
+                MoveNextPage();
             }
             else
             {
-                Dictionary<string, object> parameter = new Dictionary<string, object>();
-                parameter["title"] = _l10n["Information"];
-                parameter["message"] = _l10n["No image file found."];
-                var result2 = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                string filePath = CommonUtil.CheckFile(FileImport.FilePath, FileImport.PatientCase.Image);
+                if (!string.IsNullOrEmpty(filePath))
+                {
+                    if (ImportFile(filePath))
+                    {
+                        MoveNextPage();
+                    }
+                }
+                else
+                {
+                    Dictionary<string, object> parameter = new Dictionary<string, object>();
+                    parameter["title"] = _l10n["Information"];
+                    parameter["message"] = _l10n["No image file found."];
+                    var result2 = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                }
+
             }
+        }
+
+        private void MoveNextPage()
+        {
+            FileImport.PatientCase.CatheterSize = CatheterSize;
+            FileImport.PatientCase.PullbackLength = PullbackLength.ToString();
+            FileImport.PatientCase.IsDistalToProximal = IsDistalToProximal;
+
+            Dictionary<string, Object> parameter = new Dictionary<string, Object>();
+            parameter["fileImport"] = FileImport;
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.FileImportStep3Page) { Parameter = parameter });
         }
 
         private bool ImportFile(string filePath)

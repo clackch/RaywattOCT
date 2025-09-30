@@ -86,7 +86,7 @@
                                     <ColumnDefinition Width="40"/>
                                     <ColumnDefinition Width="40"/>
                                 </Grid.ColumnDefinitions>
-                                <Slider Grid.Column="0" Value="{Binding CatheterSize}" Maximum="3.0" Minimum="1.5" TickFrequency="0.1" IsSnapToTickEnabled="True" LargeChange="0.1" SmallChange="0.1" Margin="5,0,0,0"/>
+                                <Slider Grid.Column="0" Value="{Binding CatheterSize}" Maximum="{x:Static const:Constants.CatheterSizeMax}" Minimum="{x:Static const:Constants.CatheterSizeMin}" TickFrequency="0.1" IsSnapToTickEnabled="True" LargeChange="0.1" SmallChange="0.1" Margin="5,0,0,0"/>
                                 <Label Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding CatheterSize}" Margin="10,0,0,0" HorizontalContentAlignment="Right"/>
                                 <Label Grid.Column="2" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="Fr" Margin="5,0,0,0"/>
                             </Grid>
@@ -97,7 +97,7 @@
                                     <ColumnDefinition Width="40"/>
                                     <ColumnDefinition Width="40"/>
                                 </Grid.ColumnDefinitions>
-                                <Slider Grid.Column="0" Value="{Binding PullbackLength}" Maximum="100" Minimum="50" TickFrequency="1" IsSnapToTickEnabled="True" LargeChange="1" SmallChange="1" Margin="5,0,0,0"/>
+                                <Slider Grid.Column="0" Value="{Binding PullbackLength}" Maximum="{x:Static const:Constants.PullbackLengthMax}" Minimum="{x:Static const:Constants.PullbackLengthMin}" TickFrequency="1" IsSnapToTickEnabled="True" LargeChange="1" SmallChange="1" Margin="5,0,0,0"/>
                                 <Label Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PullbackLength}" Margin="10,0,0,0" HorizontalContentAlignment="Right"/>
                                 <Label Grid.Column="2" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="㎜" Margin="5,0,0,0"/>
                             </Grid>

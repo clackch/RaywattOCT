@@ -151,7 +151,7 @@ namespace RaywattOCTFFR.Models
         {
             int frameCnt = int.Parse(pullbackLength);
 
-            LesionLength.DValue = Math.Round(((frameDistal - frameProximal + 1) * frameCnt / 10) / (double)totalFrame, 1);
+            LesionLength.DValue = Math.Round(((frameDistal - frameProximal + 1) * frameCnt) / (double)totalFrame, 1);
             double width = CommonUtil.GetTextBlockSize("TextBlock_Pretendard-Semibold-10", LesionLength.DValue + "㎜", 1).Width + 1;
             LesionLength.X = CommonUtil.GetPositionFromFrame((frameDistal + frameProximal) / 2, totalFrame, longitudeWidth, width / 2);
 
