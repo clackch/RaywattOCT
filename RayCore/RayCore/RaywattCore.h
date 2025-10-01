@@ -57,5 +57,6 @@ extern "C" {
 	_declspec(dllexport) void* RayGetGuidewirePoints(int nFrame);
 	_declspec(dllexport) int RayGetNumOfGuidewirePoints(int nFrame);
 	_declspec(dllexport) void* RayGetGuidewireRadius(int nFrame);
+	_declspec(dllexport) void RayGetRJFirmwareVersion(int* major, int* minor, int* patch, bool* isBootMode);
 
 }
