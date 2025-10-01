@@ -1799,7 +1799,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 					int nowIndex = minList[0].second;
 					if (abs(info[nowIndex - 2].first - info[nowIndex + 2].first) < valDist) {
 						if (nowIndex - 2 >= 0 && nowIndex + 1 < gradient.size() &&
-							abs(gradient[nowIndex - 2] - gradient[nowIndex - 1]) > abs(gradient[nowIndex] - gradient[nowIndex + 1]))
+							abs(gradient[nowIndex - 2] - gradient[nowIndex - 1]) < abs(gradient[nowIndex] - gradient[nowIndex + 1]))
 							Loc += adjustVal;
 						else
 							Loc -= adjustVal;
