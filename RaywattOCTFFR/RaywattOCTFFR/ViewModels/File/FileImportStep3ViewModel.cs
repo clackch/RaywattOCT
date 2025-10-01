@@ -102,7 +102,7 @@ namespace RaywattOCTFFR.ViewModels.File
                 _log.Error("RaySetProperty Error");
             }
             CommonUtil.SetColormap(FileImport.PatientCase.Colormap);
-            int numOfFrames = RayStartReview(Constants.TempPath + "\\" + FileImport.PatientCase.Image, 0.01, FileImport.PatientCase.ZOffset);
+            int numOfFrames = RayStartReview(Constants.TempPath + "\\" + FileImport.PatientCase.Image, FileImport.PatientCase.ImageResolution, FileImport.PatientCase.ZOffset);
 
             if (numOfFrames < (int)RayError.OK)
             {
