@@ -4,6 +4,8 @@ using OpenCvSharp;
 using RaywattOCTFFR.Common.Util;
 using RaywattOCTFFR.Models;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media.Imaging;
@@ -19,6 +21,9 @@ namespace RaywattOCTFFR.Common.Bases
 
         [ObservableProperty]
         private BitmapSource _crossSectionImage;
+
+        [ObservableProperty]
+        private ObservableCollection<Mat> _crossSectionImages;
 
         protected Mat[] imgCrossSection = new Mat[2];
         protected Scalar[] crossSectionBackground = new Scalar[2];
@@ -141,6 +146,7 @@ namespace RaywattOCTFFR.Common.Bases
         protected void SetCrossSectionBackground(RaySession session, int rgbCode) {
             crossSectionBackground[(int)session] = new Scalar(rgbCode & 0xFF, (rgbCode >> 8) & 0xFF, (rgbCode >> 16) & 0xFF);
         }
+
         protected bool DrawLongitudeImage()
         {
             if (imgLongitude == null) return false;
@@ -148,6 +154,7 @@ namespace RaywattOCTFFR.Common.Bases
             LongitudeImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgLongitude);
             return true;
         }
+
         protected bool DrawLumenProfileImage()
         {
             if (imglumenProfile == null) return false;
@@ -155,6 +162,7 @@ namespace RaywattOCTFFR.Common.Bases
             LumenProfileImage = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfile);
             return true;
         }
+
         protected bool DrawLumenProfileImageExtra()
         {
             if (imglumenProfileExtra == null) return false;
@@ -162,6 +170,7 @@ namespace RaywattOCTFFR.Common.Bases
             LumenProfileImageExtra = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imglumenProfileExtra);
             return true;
         }
+
         private BitmapSource DrawCrossSectionWithBackground(Mat image, Scalar background)
         {
             // Background Masking
@@ -194,7 +203,17 @@ namespace RaywattOCTFFR.Common.Bases
 
         protected bool PrevFrame(RaySession session)
         {
-            int nNumOfFrames = (int)RayGetProperty(Property.ImageDepth);
+            int nNumOfFrames;
+
+            if (CrossSectionImages != null && CrossSectionImages.Count > 0)
+            {
+                nNumOfFrames = CrossSectionImages.Count;
+            }
+            else
+            {
+                nNumOfFrames = (int)RayGetProperty(Property.ImageDepth);
+            }
+                
             int nMoveToFrame = DeviceStatus.ReviewImageInfos[(int)session].Current;
 
             nMoveToFrame--;
@@ -202,9 +221,20 @@ namespace RaywattOCTFFR.Common.Bases
             
             return MoveToFrame(session, nMoveToFrame);
         }
+
         protected bool NextFrame(RaySession session)
         {
-            int nNumOfFrames = (int)RayGetProperty(Property.ImageDepth);
+            int nNumOfFrames;
+
+            if (CrossSectionImages != null && CrossSectionImages.Count > 0)
+            {
+                nNumOfFrames = CrossSectionImages.Count;
+            }
+            else
+            {
+                nNumOfFrames = (int)RayGetProperty(Property.ImageDepth);
+            }
+                
             int nMoveToFrame = DeviceStatus.ReviewImageInfos[(int)session].Current;
             
             nMoveToFrame++;
@@ -212,6 +242,7 @@ namespace RaywattOCTFFR.Common.Bases
 
             return MoveToFrame(session, nMoveToFrame);
         }
+
         protected void Playback()
         {
             if (DeviceStatus.IsPaused)
@@ -230,25 +261,36 @@ namespace RaywattOCTFFR.Common.Bases
 
             IsPaused = DeviceStatus.IsPaused;
         }
+
         protected virtual bool MoveToFrame(RaySession session, int nFrame)
         {
-            RayError result = (RayError) RaySetSession(session);
-            if (result != RayError.OK)
+            Mat img = new Mat();
+
+            if (CrossSectionImages != null && CrossSectionImages.Count > 0)
             {
-                _log.Debug("OCTViewModelBase MoveToFrame : result != RayError.OK");
-                return false;
+                if(CrossSectionImages.Count > nFrame)
+                    img = CrossSectionImages[nFrame];
             }
-
-            IntPtr data = RayGetImageData(nFrame);
-            if (data == IntPtr.Zero)
+            else
             {
-                _log.Debug("OCTViewModelBase MoveToFrame : data == IntPtr.Zero");
-                return false;
+                RayError result = (RayError)RaySetSession(session);
+                if (result != RayError.OK)
+                {
+                    _log.Debug("OCTViewModelBase MoveToFrame : result != RayError.OK");
+                    return false;
+                }
+
+                IntPtr data = RayGetImageData(nFrame);
+                if (data == IntPtr.Zero)
+                {
+                    _log.Debug("OCTViewModelBase MoveToFrame : data == IntPtr.Zero");
+                    return false;
+                }
+
+                DeviceStatus.ReviewImageInfo imageInfo = DeviceStatus.ReviewImageInfos[(int)session];
+                img = CommonUtil.ByteMemoryToCvMat(data, imageInfo.Width, imageInfo.Height, imageInfo.Channels);
             }
-
-            DeviceStatus.ReviewImageInfo imageInfo = DeviceStatus.ReviewImageInfos[(int)session];
-            Mat img = CommonUtil.ByteMemoryToCvMat(data, imageInfo.Width, imageInfo.Height, imageInfo.Channels);
-
+              
             imgCrossSection[(int)session] = img;
             DeviceStatus.ReviewImageInfos[(int)session].Current = nFrame;
 
@@ -256,6 +298,7 @@ namespace RaywattOCTFFR.Common.Bases
 
             return true;
         }
+
         protected void GetImageInfo(RaySession session)
         {
             RayError result = (RayError) RaySetSession(session);
@@ -283,6 +326,78 @@ namespace RaywattOCTFFR.Common.Bases
                 NextFrame(RaySession.Review);
             }
             DeviceStatus.CanExit = true;
+        }
+
+        protected static Mat BuildLongitude(IReadOnlyList<Mat> frames, int totalCount, double angleDeg, int thickness = 1)
+        {
+            if (frames == null) throw new ArgumentNullException(nameof(frames));
+            if (frames.Count == 0) throw new InvalidOperationException("frames에 최소 1장이 필요합니다.");
+            if (totalCount <= 0) throw new ArgumentOutOfRangeException(nameof(totalCount));
+            if (thickness <= 0) throw new ArgumentOutOfRangeException(nameof(thickness));
+
+            var first = frames[0];
+            if (first.Empty()) throw new ArgumentException("첫 프레임이 비어 있습니다.", nameof(frames));
+
+            int H = first.Rows, W = first.Cols;
+            var type = first.Type();
+
+            // 중심/반경
+            var c = new Point2f((W - 1) / 2f, (H - 1) / 2f);
+            int rad = (int)Math.Floor(Math.Min(Math.Min(c.X, W - 1 - c.X), Math.Min(c.Y, H - 1 - c.Y)));
+            rad = Math.Max(rad, 1);
+
+            // θ(시계, 0°=위) → 화면 좌표 단위벡터
+            double th = angleDeg * Math.PI / 180.0;
+            double dx = Math.Sin(th);   // 0°→0, 90°→+1
+            double dy = -Math.Cos(th);  // 0°→-1(위), 180°→+1(아래)
+
+            // 두께 방향(직교) 벡터
+            double vx = Math.Cos(th);
+            double vy = Math.Sin(th);
+
+            int outH = 2 * rad + 1;
+            using var mapX = new Mat(outH, thickness, MatType.CV_32FC1);
+            using var mapY = new Mat(outH, thickness, MatType.CV_32FC1);
+
+            // ★ 포인트: 행 0 이 θ 방향의 가장 바깥(+rad)이 되도록 r = +rad .. -rad 로 매핑
+            float cx = c.X, cy = c.Y, half = (thickness - 1) * 0.5f;
+            unsafe
+            {
+                for (int row = 0; row < outH; row++)
+                {
+                    int r = rad - row; // +rad → ... → -rad
+                    float bx = cx + (float)(dx * r);
+                    float by = cy + (float)(dy * r);
+
+                    float* px = (float*)mapX.Ptr(row);
+                    float* py = (float*)mapY.Ptr(row);
+                    for (int k = 0; k < thickness; k++)
+                    {
+                        float off = (k - half); // 가운데 정렬
+                        px[k] = bx + (float)(vx * off);
+                        py[k] = by + (float)(vy * off);
+                    }
+                }
+            }
+
+            // 출력 버퍼: [outH x (totalCount*thickness)]
+            var output = new Mat(outH, totalCount * thickness, type, new Scalar(0x23, 0x23, 0x23));
+            var inter = InterpolationFlags.Linear;
+
+            int fill = Math.Min(frames.Count, totalCount);
+            for (int i = 0; i < fill; i++)
+            {
+                var f = frames[i];
+                if (f.Empty()) continue;
+
+                using var slice = new Mat();
+                Cv2.Remap(f, slice, mapX, mapY, inter, BorderTypes.Constant, Scalar.All(0));
+
+                using var dst = new Mat(output, new OpenCvSharp.Rect(i * thickness, 0, thickness, outH));
+                slice.CopyTo(dst);
+            }
+
+            return output; // 호출측 Dispose
         }
     }
 }

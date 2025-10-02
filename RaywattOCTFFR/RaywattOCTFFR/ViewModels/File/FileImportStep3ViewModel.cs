@@ -13,6 +13,9 @@ using static RaywattOCT.RayCoreWrapper;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattOCTFFR.Common.Messages;
 using System.Windows;
+using OpenCvSharp;
+using System.Threading.Tasks;
+using System.Collections.ObjectModel;
 
 namespace RaywattOCTFFR.ViewModels.File
 {
@@ -24,10 +27,14 @@ namespace RaywattOCTFFR.ViewModels.File
 
         private IDialogService _dialogService;
 
+        private TiffService _tiffService;
+
+        private CancellationTokenSource? _cts;
+
         [ObservableProperty]
         private FileImport _fileImport = new FileImport();
 
-        public FileImportStep3ViewModel(SqlManager sqlManager, IDialogService dialogService)
+        public FileImportStep3ViewModel(SqlManager sqlManager, IDialogService dialogService, TiffService tiffService)
         {
             _log.Debug("FileImportStep3ViewModel");
 
@@ -35,6 +42,7 @@ namespace RaywattOCTFFR.ViewModels.File
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
+            _tiffService = tiffService;
 
             ReviewStatus = new ReviewStatus();
 
@@ -42,8 +50,8 @@ namespace RaywattOCTFFR.ViewModels.File
 
             IndicatorLongitude = new Indicator();
             IndicatorLongitude.X = Constants.LongitudeIndicatorWidth / 2;
-            IndicatorLongitude.IsVisible = Visibility.Visible;
-            IndicatorLongitude.IsEnabled = true;
+            IndicatorLongitude.IsVisible = Visibility.Collapsed;
+            IndicatorLongitude.IsEnabled = false;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -60,11 +68,14 @@ namespace RaywattOCTFFR.ViewModels.File
                 {
                     FileImport = fileImportData;
 
-                    LoadImageFromRaw();
-
-                    GetImageInfo(RaySession.Review);
-
-                    FileImport.PatientCase.NumOfFrames = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total;
+                    if (Constants.ImportTypeRaw.Equals(FileImport.PatientCase.ImportType))
+                    {
+                        LoadImageFromRaw();                        
+                    }
+                    else if (Constants.ImportTypeTiff.Equals(FileImport.PatientCase.ImportType))
+                    {
+                        _ = LoadFromPathAsync();
+                    }
 
                     Playback();
                 }
@@ -76,8 +87,16 @@ namespace RaywattOCTFFR.ViewModels.File
             _log.Debug("OnNavigating");
             base.OnNavigating(sender, navigationEventArgs);
 
-            RayEndReview();
-            DeviceStatus.IsOCTImagingDone = true;
+            if (Constants.ImportTypeRaw.Equals(FileImport.PatientCase.ImportType))
+            {
+                RayEndReview();
+                DeviceStatus.IsOCTImagingDone = true;
+            }
+            else if (Constants.ImportTypeTiff.Equals(FileImport.PatientCase.ImportType))
+            {
+                if (_cts != null && !_cts.IsCancellationRequested)
+                    _cts?.Cancel();
+            }
         }
 
         protected override void Back()
@@ -101,6 +120,7 @@ namespace RaywattOCTFFR.ViewModels.File
             {
                 _log.Error("RaySetProperty Error");
             }
+            SetCrossSectionBackground(RaySession.Review, Constants.CardBackgroundColor);
             CommonUtil.SetColormap(FileImport.PatientCase.Colormap);
             int numOfFrames = RayStartReview(Constants.TempPath + "\\" + FileImport.PatientCase.Image, FileImport.PatientCase.ImageResolution, FileImport.PatientCase.ZOffset);
 
@@ -138,6 +158,61 @@ namespace RaywattOCTFFR.ViewModels.File
             DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current = 0;
             DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total = 0;
             DeviceStatus.IsOCTImagingDone = false;
+
+            GetImageInfo(RaySession.Review);
+
+            IndicatorLongitude.IsVisible = Visibility.Visible;
+
+            FileImport.PatientCase.NumOfFrames = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total;
+        }        
+
+        private async Task LoadFromPathAsync()
+        {
+            _cts = new CancellationTokenSource();
+            CrossSectionImages = new ObservableCollection<Mat>();
+            string path = Constants.TempPath + "\\" + FileImport.PatientCase.Image;
+            DeviceStatus.IsOCTImagingDone = false;
+
+            try
+            {
+                DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current = 0;
+                DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total = await _tiffService.CountFramesAsync(path, _cts.Token);
+                FileImport.PatientCase.NumOfFrames = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total;
+
+                await foreach (var (idx, mat) in _tiffService.StreamEnumerableAsync(path, _cts.Token))
+                {
+                    var cloned = mat.Clone();
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        CrossSectionImages.Add(cloned);
+                        imgLongitude = BuildLongitude(CrossSectionImages, FileImport.PatientCase.NumOfFrames, 0);
+                        longitudeFrameInfo = new FrameInfo((CrossSectionImages.Count << 16) | FileImport.PatientCase.NumOfFrames);
+                        DrawLongitudeImage();
+                        IndicatorLongitude.IsVisible = Visibility.Visible;
+                    }, System.Windows.Threading.DispatcherPriority.Background);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                _log.Debug("OperationCanceledException");
+            }
+            finally
+            {
+                DeviceStatus.IsOCTImagingDone = true;               
+                _cts?.Cancel();
+                _cts?.Dispose();
+            }
         }
+
+        protected override void UpdateCrossSectionImage()
+        {
+            base.UpdateCrossSectionImage();
+
+            if (longitudeFrameInfo != null && (longitudeFrameInfo.curFrame == longitudeFrameInfo.totalFrame))
+            {
+                IndicatorLongitude.IsEnabled = true;
+            }
+        }
+
     }
 }

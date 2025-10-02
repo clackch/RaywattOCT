@@ -128,10 +128,9 @@ namespace RaywattOCTFFR
             //IDatabaseService 등록 (Singleton 사용 안함 => Connection Pooling을 Default로 사용)
             services.AddTransient<IDatabaseService, SqlService>(obj => new SqlService(connectionString));
             services.AddTransient(typeof(SqlManager));
-
             services.AddTransient<IPasswordService, PasswordService>();
-
             services.AddTransient(typeof(IdleMonitorService));
+            services.AddTransient(typeof(TiffService));
 
             return services.BuildServiceProvider();
         }

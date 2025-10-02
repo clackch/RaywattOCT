@@ -132,7 +132,7 @@
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
                                 <Condition Property="IsChecked" Value="False"/>
-                                <Condition Property="IsMouseOver" Value="False"/>
+                                <Condition Property="IsEnabled" Value="True"/>
                             </MultiTrigger.Conditions>
                             <Setter TargetName="icon" Property="Source" Value="{Binding IconDefault, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
                         </MultiTrigger>
@@ -145,8 +145,22 @@
                         </MultiTrigger>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="False"/>
+                                <Condition Property="IsPressed" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconPressed, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="False"/>
+                                <Condition Property="IsEnabled" Value="False"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="icon" Property="Source" Value="{Binding IconDisabled, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
                                 <Condition Property="IsChecked" Value="True"/>
-                                <Condition Property="IsMouseOver" Value="False"/>
+                                <Condition Property="IsEnabled" Value="True"/>
                             </MultiTrigger.Conditions>
                             <Setter TargetName="icon" Property="Source" Value="{Binding CheckedIconDefault, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
                         </MultiTrigger>
@@ -156,6 +170,20 @@
                                 <Condition Property="IsMouseOver" Value="True"/>
                             </MultiTrigger.Conditions>
                             <Setter TargetName="icon" Property="Source" Value="{Binding CheckedIconOver, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="True"/>
+                                <Condition Property="IsPressed" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="icon" Property="Source" Value="{Binding CheckedIconPressed, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="True"/>
+                                <Condition Property="IsEnabled" Value="False"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="icon" Property="Source" Value="{Binding CheckedIconDisabled, Converter={svgc:SvgImageConverter}, RelativeSource={RelativeSource TemplatedParent}}"/>
                         </MultiTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
