@@ -1893,9 +1893,12 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 					closestIdx = i;
 					minDiff = abs(nowRow - idealRow);
 				}
+				if(nowRow < idealRow)	// 내경이 이상적인 위치보다 더 이상 깊은 위치에 있는 경우는 탐색 종료
+					break;
 			}
 			nZOffset = pSystem->m_vCalibrationInfo.at(closestIdx).second;
 			nZOffset += (idealRow - pSystem->m_vCalibrationInfo.at(closestIdx).first) * 3; // 보정값 적용
+			PLOGI.printf("second calibration. ZOffset Position : %d, row : %d, diff : %d", nZOffset, pSystem->m_vCalibrationInfo.at(closestIdx).first, minDiff);
 
 			// 1-3. Move to calibrated position
 			int adjustMotorStep = 450; // 내경에서 외경까지의 거리 150 step + reflection 배제를 위해 움직였던 거리 300 step
@@ -1920,11 +1923,11 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			Sleep(50);
 		}
 		auto const& sheathInfo = pSystem->m_vCalibrationInfo;
-		int validSheathCount = 0, idealRow = 30;
+		int validSheathCount = 0, idealRow = 35;
 		for(auto const& val : sheathInfo)
 		{
 			PLOGI.printf("sheath check - row : %d", val.first);
-			if (abs(val.first - idealRow) < 5) {
+			if (abs(val.first - idealRow) < 10) {
 				validSheathCount++;
 				//PLOGI.printf("sheath check - true");
 			}
@@ -2809,9 +2812,11 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 		case CatheterState::FindingSheath:
 		{
 			int nSheathPosition = m_pImagingRealtime->GetSheathPosition();
+			double FFTscore = m_pImagingRealtime->GetFFTHL();
 			int nDelayLinePos = m_pLaserModule->GetPosition(eStepMotorIndex::DelayLine);
 			m_vCalibrationInfo.push_back(std::make_pair(nSheathPosition, nDelayLinePos));
-			//PLOGI.printf("FindingSheath - %d, %d", nSheathPosition, nDelayLinePos);
+			PLOGI.printf("FindingSheath - %d, %d", nSheathPosition, nDelayLinePos);
+			//PLOGI.printf("FindingSheath - %lf, %d", FFTscore, nDelayLinePos);
 		}
 			break;
 		case CatheterState::CheckSheath: 
