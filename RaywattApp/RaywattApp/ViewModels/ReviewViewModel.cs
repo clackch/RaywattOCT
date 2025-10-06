@@ -1098,6 +1098,12 @@ namespace RaywattApp.ViewModels
             {
                 PatientCase.LongitudeOrientationChanged = false; // 수정 되었으므로,
 
+                if (PatientCase.AngioFrame != null && PatientCase.AngioFrame.AngioImage != null)
+                {
+                    // Needs to be reinitialized when Angio image information is available.
+                    PatientCase.AngioFrame.AngioImage.Clear();
+                }
+
                 /* ai ffr */
                 PatientCase.FfrFeature = null;  // FFR 관련 Feature 초기화
 
