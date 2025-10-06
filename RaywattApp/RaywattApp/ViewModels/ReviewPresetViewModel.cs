@@ -290,26 +290,5 @@ namespace RaywattApp.ViewModels
 
             LongitudeOrientation = PatientCase.LongitudeOrientation;
         }
-
-        private void UpdateLongitudeOreinetation()
-        {
-            // load
-            Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
-            sqlParameters["id"] = Patient.PhysicianId;
-            IList<Physician> Physicians = _sqlManager.SelectPhysician(sqlParameters);
-
-            if (Physicians.Count == 0)
-            {
-                _log.Error("not find physician infomation");
-                PatientCase.LongitudeOrientation = LongitudeOrientation.DistalToProximal;
-                return;
-            }
-
-            // update value
-            Physicians[0].Isdistaltoproximal = LongitudeOrientation == LongitudeOrientation.DistalToProximal;
-
-            // update
-            int result = _sqlManager.UpdatePhysician(Physicians[0]);
-        }
     }
 }
