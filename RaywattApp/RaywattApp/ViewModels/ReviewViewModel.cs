@@ -2205,7 +2205,6 @@ namespace RaywattApp.ViewModels
                             AngioFrames.Add(paddedFrame);
                             PatientCase.AngioFrame.AngioImage.Add(ConvertMatsToImageSource(paddedFrame));
                         }
-                        PatientCase.AngioFrame.AngioImage.Reverse();
                         reader.Close();
                     }
                     AngioImageProcessing();
