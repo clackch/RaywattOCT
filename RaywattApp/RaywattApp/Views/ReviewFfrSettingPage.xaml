@@ -277,27 +277,35 @@
                                 <StackPanel Height="10"/>
                                 <Label Style="{DynamicResource Pretendard-Medium-14}" 
                                        Foreground="{DynamicResource GrayscaleGray3Brush}" 
-                                       Content="{Binding [Distal Lumen Area], Source={StaticResource L10N}}"/>
+                                       Content="{Binding Step2Label}"/>
                                 <StackPanel Height="10"/>
                                 <Grid Height="31">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition/>
                                         <ColumnDefinition Width="27.1"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Style="{DynamicResource TextBlock_Pretendard-Bold-26}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Text="{Binding DistalAreaByOrientation, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleArea}}"/>
+                                    <TextBlock Grid.Column="0" 
+                                               Style="{DynamicResource TextBlock_Pretendard-Bold-26}" 
+                                               Foreground="{DynamicResource GrayscaleWhiteBrush}" 
+                                               Text="{Binding DistalAreaByOrientation, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleArea}}"/>
                                     <Image Grid.Column="1" Source="{svgc:SvgImage Source=/res/icon/ffrValueChecked.svg}" Visibility="{Binding FfrStep, Converter={StaticResource FfrStepVisibilityConveter}, ConverterParameter={x:Static const:Constants.FfrStep2}}"/>
                                 </Grid>
                                 <StackPanel Height="13"/>
                                 <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
                                 <StackPanel Height="10"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Proximal Lumen Area], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-14}" 
+                                       Foreground="{DynamicResource GrayscaleGray3Brush}" 
+                                       Content="{Binding Step3Label}"/>
                                 <StackPanel Height="10"/>
                                 <Grid Height="31">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition/>
                                         <ColumnDefinition Width="27.1"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Style="{DynamicResource TextBlock_Pretendard-Bold-26}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Text="{Binding ProximalAreaByOrientation, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleArea}}"/>
+                                    <TextBlock Grid.Column="0" 
+                                               Style="{DynamicResource TextBlock_Pretendard-Bold-26}" 
+                                               Foreground="{DynamicResource GrayscaleWhiteBrush}" 
+                                               Text="{Binding ProximalAreaByOrientation, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleArea}}"/>
                                     <Image Grid.Column="1" Source="{svgc:SvgImage Source=/res/icon/ffrValueChecked.svg}" Visibility="{Binding FfrStep, Converter={StaticResource FfrStepVisibilityConveter}, ConverterParameter={x:Static const:Constants.FfrStep3}}"/>
                                 </Grid>
                                 <StackPanel Height="13"/>

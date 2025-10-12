@@ -81,15 +81,25 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private double _afterLumenArea;
 
-        public double ProximalAreaByOrientation =>
-            PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal
-                ? Section.Proximal.DValue
-                : Section.Distal.DValue;
+        [ObservableProperty]
+        private string _step2Label;
+        [ObservableProperty]
+        private string _step3Label;
+        [ObservableProperty]
+        private double _distalAreaByOrientation;
 
-        public double DistalAreaByOrientation =>
-            PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal
-                ? Section.Distal.DValue
-                : Section.Proximal.DValue;
+        [ObservableProperty]
+        private double _proximalAreaByOrientation;
+
+        //public double DistalAreaByOrientation => 
+        //    PatientCase.LongitudeOrientation == LongitudeOrientation.DistalToProximal
+        //        ? Section.Distal.DValue
+        //        : Section.Proximal.DValue;
+
+        //public double ProximalAreaByOrientation =>
+        //    PatientCase.LongitudeOrientation == LongitudeOrientation.DistalToProximal
+        //        ? Section.Proximal.DValue
+        //        : Section.Distal.DValue;
 
         [ObservableProperty]
         public string _ffrTargetStep;
@@ -192,9 +202,9 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 PrevStatus = (PrevStatus)data["prevStatus"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
-                LongitudeOrientationChanged();
 
                 ReverseLumenProfileCompare();
+
                 if (PatientCase.FfrFeature == null)
                     FfrFeature = new FfrFeature();
                 else
@@ -226,6 +236,7 @@ namespace RaywattApp.ViewModels
                 SetCrossSectionBackground(RaySession.Review, Constants.CardBackgroundColor);
 
                 ShowLumenProfile();
+                LongitudeOrientationChanged();
                 DrawCrossSection(GetMlaFrameNumber());
 
                 CheckVesselType(CurrentVessel.Key);
@@ -669,52 +680,91 @@ namespace RaywattApp.ViewModels
             _dPLeftLabel = PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "P" : "D";
             _dPRightLabel = PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal ? "D" : "P";
 
+            bool isDistalToProximal = PatientCase.LongitudeOrientation == LongitudeOrientation.DistalToProximal;
+            string area = " Lumen Area";
+            if (isDistalToProximal)
+            {
+                Step2Label = "Distal" + area;
+                Step3Label = "Proximal" + area;
+            }
+            else
+            {
+                Step2Label = "Proximal" + area;
+                Step3Label = "Distal" + area;
+            }
+
             SubscribeLumenAreaChangeEvents();
         }
 
         private void SubscribeLumenAreaChangeEvents()
         {
-            PatientCase.PropertyChanged += (_, e) =>
+            if (PatientCase != null)
             {
-                if (e.PropertyName == nameof(PatientCase.LongitudeOrientation))
-                {
-                    OnPropertyChanged(nameof(ProximalAreaByOrientation));
-                    OnPropertyChanged(nameof(DistalAreaByOrientation));
-                }
-            };
+                PatientCase.PropertyChanged -= OnPatientCaseChanged;
+                PatientCase.PropertyChanged += OnPatientCaseChanged;
+            }
 
-            if (Section?.Proximal != null) Section.Proximal.PropertyChanged -= OnLumenNodeChanged;
-            if (Section?.Distal != null) Section.Distal.PropertyChanged -= OnLumenNodeChanged;
+            if (Section?.Proximal != null)
+            {
+                Section.Proximal.PropertyChanged -= OnLumenNodeChanged;
+                Section.Proximal.PropertyChanged += OnLumenNodeChanged;
+            }
 
-            Section.Proximal.PropertyChanged += OnLumenNodeChanged;
-            Section.Distal.PropertyChanged += OnLumenNodeChanged;
+            if (Section?.Distal != null)
+            {
+                Section.Distal.PropertyChanged -= OnLumenNodeChanged;
+                Section.Distal.PropertyChanged += OnLumenNodeChanged;
+            }
+
+            RecalculateAreasByOrientation();
+        }
+
+        private void OnPatientCaseChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "LongitudeOrientation")
+                RecalculateAreasByOrientation();
         }
 
         private void OnLumenNodeChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(Section.Proximal.DValue))
+            if (e.PropertyName != "DValue") return;
+
+            RecalculateAreasByOrientation();
+        }
+
+        private void RecalculateAreasByOrientation()
+        {
+            if (Section == null || PatientCase == null)
             {
-                OnPropertyChanged(nameof(ProximalAreaByOrientation));
+                ProximalAreaByOrientation = 0;
+                DistalAreaByOrientation = 0;
+                return;
             }
 
-            if (e.PropertyName == nameof(Section.Distal.DValue))
-            {
-                OnPropertyChanged(nameof(DistalAreaByOrientation));
-            }
+            double prox = Section.Proximal?.DValue ?? 0.0;
+            double dist = Section.Distal?.DValue ?? 0.0;
+
+            bool isDistalToProximal = PatientCase.LongitudeOrientation == LongitudeOrientation.DistalToProximal;
+
+            // 추후 방향에 대해서 확인 필요,
+            DistalAreaByOrientation = prox;
+            ProximalAreaByOrientation = dist;
         }
+
 
         private void MapFfrStepByOrientation()
         {
-            if (PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
-            {
-                if (FfrStep == Constants.FfrStep2) FfrTargetStep = Constants.FfrStep3;
-                else if (FfrStep == Constants.FfrStep3) FfrTargetStep = Constants.FfrStep2;
-                else FfrTargetStep = "";
-            }
-            else
-            {
-                FfrTargetStep = FfrStep;
-            }
+            //if (PatientCase.LongitudeOrientation == LongitudeOrientation.ProximalToDistal)
+            //{
+            //    if (FfrStep == Constants.FfrStep2) FfrTargetStep = Constants.FfrStep3;
+            //    else if (FfrStep == Constants.FfrStep3) FfrTargetStep = Constants.FfrStep2;
+            //    else FfrTargetStep = "";
+            //}
+            //else
+            //{
+            //    FfrTargetStep = FfrStep;
+            //}
+            FfrTargetStep = FfrStep;
         }
     }
 }
