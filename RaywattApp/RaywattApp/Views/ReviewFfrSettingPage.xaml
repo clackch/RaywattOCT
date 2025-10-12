@@ -96,7 +96,7 @@
                                     <StackPanel Height="16"/>
                                     <Label Style="{DynamicResource Pretendard-Semibold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}">
                                         <Label.Content>
-                                            <AccessText TextWrapping="Wrap" Text="{Binding [$MSG019], Source={StaticResource L10N}}"/>
+                                            <AccessText TextWrapping="Wrap" Text="{Binding Step3DefineText}"/>
                                         </Label.Content>
                                     </Label>
                                 </StackPanel>
@@ -104,9 +104,10 @@
                                 <StackPanel Grid.Row="1" VerticalAlignment="Center" Visibility="{Binding FfrStep, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FfrStep2}}">
                                     <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Step 2.], Source={StaticResource L10N}}"/>
                                     <StackPanel Height="16"/>
-                                    <Label Style="{DynamicResource Pretendard-Semibold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}">
+                                    <Label Style="{DynamicResource Pretendard-Semibold-32}" 
+                                           Foreground="{DynamicResource GrayscaleWhiteBrush}">
                                         <Label.Content>
-                                            <AccessText TextWrapping="Wrap" Text="{Binding [$MSG020], Source={StaticResource L10N}}"/>
+                                            <AccessText TextWrapping="Wrap" Text="{Binding Step2DefineText}"/>
                                         </Label.Content>
                                     </Label>
                                 </StackPanel>

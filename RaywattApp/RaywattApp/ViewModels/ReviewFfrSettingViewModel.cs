@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using RaywattApp.Common.Annotation.Models;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Enums;
+using RaywattApp.Common.Localization;
 using RaywattApp.Common.Messages;
 using RaywattApp.Common.Util;
 using RaywattApp.Models;
@@ -26,6 +27,8 @@ namespace RaywattApp.ViewModels
         private static readonly ILog _log = LogManager.GetLogger(typeof(ReviewFfrSettingViewModel));
 
         private readonly SqlManager _sqlManager;
+
+        protected readonly DynamicResource _l10n;
 
         [ObservableProperty]
         private string _ffrStep = Constants.FfrStep1;
@@ -91,15 +94,11 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private double _proximalAreaByOrientation;
 
-        //public double DistalAreaByOrientation => 
-        //    PatientCase.LongitudeOrientation == LongitudeOrientation.DistalToProximal
-        //        ? Section.Distal.DValue
-        //        : Section.Proximal.DValue;
+        [ObservableProperty]
+        private string _step2DefineText;
 
-        //public double ProximalAreaByOrientation =>
-        //    PatientCase.LongitudeOrientation == LongitudeOrientation.DistalToProximal
-        //        ? Section.Proximal.DValue
-        //        : Section.Distal.DValue;
+        [ObservableProperty]
+        private string _step3DefineText;
 
         [ObservableProperty]
         public string _ffrTargetStep;
@@ -175,6 +174,7 @@ namespace RaywattApp.ViewModels
             _log.Debug("ReviewFfrSettingViewModel");
 
             Constants.CurrentPage = Constants.ReviewFfrSettingPage;
+            _l10n = (DynamicResource)App.Current.Resources["L10N"];
 
             Section = new Section();
             Section.Proximal.IsEnabled = true;
@@ -686,11 +686,15 @@ namespace RaywattApp.ViewModels
             {
                 Step2Label = "Distal" + area;
                 Step3Label = "Proximal" + area;
+                Step2DefineText = _l10n["$MSG020"];
+                Step3DefineText = _l10n["$MSG019"];
             }
             else
             {
                 Step2Label = "Proximal" + area;
                 Step3Label = "Distal" + area;
+                Step2DefineText = _l10n["$MSG019"];
+                Step3DefineText = _l10n["$MSG020"];
             }
 
             SubscribeLumenAreaChangeEvents();
