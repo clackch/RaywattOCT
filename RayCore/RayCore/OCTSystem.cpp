@@ -1885,11 +1885,48 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			int minDiff = INT_MAX;
 			int closestIdx = pSystem->m_vCalibrationInfo.size() - 1;	// 내경이 row 180 위치에 가장 가까운 프레임 Index
 			int idealRow = 180;		// 2차 진행 시에 내경이 위치해야 한다고 가정하는 이상적인 row 위치
+
+			int expectedRow = pSystem->m_vCalibrationInfo.at(0).first;
+			int errorThreshold = 15; // 2차 탐색의 step별 row 이동 범위 threshold
+			int minusMove = 35; // 외경을 내경으로 판단한 경우 보정값
+			/*for (int i = 1; i < pSystem->m_vCalibrationInfo.size(); i++) {
+				int rowMoving = pSystem->m_vCalibrationInfo.at(i).first - expectedRow;
+				if (rowMoving > errorThreshold) {
+					pSystem->m_vCalibrationInfo.at(i).first -= minusMove;
+				}
+				expectedRow = pSystem->m_vCalibrationInfo.at(i).first;
+				PLOGI.printf("find sheath at row %d", expectedRow);
+			}*/
+			for(auto& val : pSystem->m_vCalibrationInfo)
+			{
+				int rowMoving = val.first - expectedRow;
+				if (rowMoving > errorThreshold) {
+					val.first -= minusMove;
+				}
+				expectedRow = val.first;
+			}
+			for (int i = pSystem->m_vCalibrationInfo.size() - 1; i >= 0; i--) {
+				int rowMoving = pSystem->m_vCalibrationInfo.at(i).first - expectedRow;
+				if (rowMoving > errorThreshold) {
+					pSystem->m_vCalibrationInfo.at(i).first -= minusMove;
+				}
+				expectedRow = pSystem->m_vCalibrationInfo.at(i).first;
+				PLOGI.printf("find sheath at row %d", expectedRow);
+			}
+			
+
+			// 내경이 이상적인 위치(idealRow)에 가장 가까운 프레임 탐색
 			for (int i = pSystem->m_vCalibrationInfo.size() - 1; i >= 0; i--)
 			{
 				int nowRow = pSystem->m_vCalibrationInfo.at(i).first;
 				if (abs(nowRow - idealRow) < minDiff)
 				{
+					//if (i > 0 && i < pSystem->m_vCalibrationInfo.size() - 1) {		// 가장자리 프레임이 아닌 경우에만 고려
+					//	int beforeGradient = pSystem->m_vCalibrationInfo.at(i).first - pSystem->m_vCalibrationInfo.at(i - 1).first;
+					//	int afterGradient = pSystem->m_vCalibrationInfo.at(i + 1).first - pSystem->m_vCalibrationInfo.at(i).first;
+					//	if (beforeGradient > 0 && afterGradient < 0)		// noise에 의한 극댓값인 경우는 제외
+					//		continue;
+					//}
 					closestIdx = i;
 					minDiff = abs(nowRow - idealRow);
 				}

@@ -670,9 +670,9 @@ void COCTImaging::findSheath(cv::Mat input) {
 	}
 
 	//cv::line(tmp, cv::Point(0, nowRow), cv::Point(tmp.cols - 1, nowRow), cv::Scalar(255, 0, 0), 2);
-	cv::imwrite("origin" + std::to_string(i) + ".tif", tmp);
+	//cv::imwrite("origin" + std::to_string(i) + ".tif", tmp);
 	m_nSheathPosition = nowRow;
-	cv::imwrite("binary" + std::to_string(i) + ".tif", gray);
+	//cv::imwrite("binary" + std::to_string(i) + ".tif", gray);
 }
 
 // 정규화를 위한 함수
