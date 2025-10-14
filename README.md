@@ -318,6 +318,7 @@ RJ Firmware 설치 안되어있으면 설치 필요
          - CatheterRFID: Catheter의 RFID를 사용하지 않을 시, 0으로 설정
          (※ 사용시, 1로 설정)
 
+<!--
 ## Local 환경 설정 참고
 
 - App 종료 시, Power Off/Switch User가 호출되지 않도록 설정 방법(https://github.com/Raywatt/RaywattOCT/pull/173#issue-1892013269)
@@ -325,3 +326,4 @@ RJ Firmware 설치 안되어있으면 설치 필요
   ※ 아래와 같이 buffer 컬럼에 본인 windows의 계정 추가 필요
   
   ![image](https://github.com/Raywatt/RaywattOCT/assets/110812182/03acbcd1-8f77-40fa-a29d-cfaac5860787)
+-->
