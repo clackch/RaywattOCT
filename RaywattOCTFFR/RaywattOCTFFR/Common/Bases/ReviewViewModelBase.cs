@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using log4net;
 using Newtonsoft.Json;
+using OpenCvSharp;
 using RaywattOCTFFR.Common.Annotation.Models;
 using RaywattOCTFFR.Common.Dialog;
 using RaywattOCTFFR.Common.Messages;
@@ -11,9 +12,12 @@ using RaywattOCTFFR.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
+using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using static RaywattOCT.RayCoreWrapper;
+using RaywattOCTFFR.Common.Util;
 
 namespace RaywattOCTFFR.Common.Bases
 {
@@ -24,6 +28,8 @@ namespace RaywattOCTFFR.Common.Bases
         protected readonly SqlManager _sqlManager;
 
         protected IDialogService _dialogService;
+
+        protected CancellationTokenSource? _cts;
 
         [ObservableProperty]
         private PrevStatus _prevStatus;
@@ -139,6 +145,21 @@ namespace RaywattOCTFFR.Common.Bases
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
+        }
+
+        public override void OnNavigated(object sender, object navigatedEventArgs)
+        {
+            _log.Debug("OnNavigated");
+            base.OnNavigated(sender, navigatedEventArgs);
+        }
+
+        public override void OnNavigating(object sender, object navigationEventArgs)
+        {
+            _log.Debug("OnNavigating");
+            base.OnNavigating(sender, navigationEventArgs);
+
+            if (_cts != null && !_cts.IsCancellationRequested)
+                _cts?.Cancel();
         }
 
         private void ReviewTypeSwitch(string url)
@@ -350,6 +371,117 @@ namespace RaywattOCTFFR.Common.Bases
                 curPosition *= (longitudeFrameInfo.totalFrame - 1);
                 curPosition = Math.Round(curPosition);
                 MoveToFrame(RaySession.Review, (int)curPosition);
+            }
+        }
+
+        protected void LoadImageFromRaw(string path, double imageResolution, double zOffset, string colormap, int brightness, int contrast)
+        {
+            RayError result = (RayError)RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+            if (result != RayError.OK)
+            {
+                _log.Error("RaySetProperty Error");
+            }
+            SetCrossSectionBackground(RaySession.Review, Constants.CardBackgroundColor);
+            int numOfFrames = RayStartReview(path, imageResolution, zOffset);
+
+            if (numOfFrames < (int)RayError.OK)
+            {
+                // To-Do: Error
+                _log.Error("numOfFrames :" + numOfFrames + " < (int)RayError.OK");
+                _log.Error("Image Path : " + path);
+
+                return;
+            }
+            else
+            {
+                // Wait for Review to start
+                for (int i = 0; i < 100; i++)
+                {
+                    if ((RayScannerState)RayGetProperty(Property.CurrentState) == RayScannerState.Review)
+                        break;
+                    Thread.Sleep(5);
+                }
+            }
+            Thread.Sleep(100);
+
+            CommonUtil.SetColormap(colormap);
+
+            result = (RayError)RaySetProperty(Property.Brightness, brightness);
+            if (result != RayError.OK)
+            {
+                _log.Error("RaySetProperty Error");
+            }
+            result = (RayError)RaySetProperty(Property.Contrast, contrast);
+            if (result != RayError.OK)
+            {
+                _log.Error("RaySetProperty Error");
+            }
+
+            DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current = 0;
+            DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total = 0;
+            DeviceStatus.IsOCTImagingDone = false;
+
+            GetImageInfo(RaySession.Review);
+
+            IndicatorLongitude.IsVisible = Visibility.Visible;
+        }
+
+        protected async Task<int> CountFramesAsync(IImageService service, string path)
+        {
+            _cts = new CancellationTokenSource();
+            DeviceStatus.IsOCTImagingDone = false;
+
+            try
+            {
+                DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current = 0;
+                DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total = await service.CountFramesAsync(path, _cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                _log.Debug("OperationCanceledException");
+            }
+            finally
+            {
+                DeviceStatus.IsOCTImagingDone = true;
+                _cts?.Cancel();
+                _cts?.Dispose();
+            }
+
+            return DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total;
+        }
+
+        protected async Task StreamEnumerableAsync(IImageService service, string path)
+        {
+            _cts = new CancellationTokenSource();
+            CrossSectionImages = new ObservableCollection<Mat>();
+            DeviceStatus.IsOCTImagingDone = false;
+
+            try
+            {
+                int numOfFrames = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total;
+
+                await foreach (var (idx, mat) in service.StreamEnumerableAsync(path, _cts.Token))
+                {
+                    var cloned = mat.Clone();
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        CrossSectionImages.Add(cloned);
+                        imgLongitude = BuildLongitude(CrossSectionImages, numOfFrames, 0);
+                        longitudeFrameInfo = new FrameInfo((CrossSectionImages.Count << 16) | numOfFrames);
+                        DrawLongitudeImage();
+                        IndicatorLongitude.IsVisible = Visibility.Visible;
+                    }, System.Windows.Threading.DispatcherPriority.Background);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                _log.Debug("OperationCanceledException");
+            }
+            finally
+            {
+                DeviceStatus.IsOCTImagingDone = true;
+                _cts?.Cancel();
+                _cts?.Dispose();
             }
         }
     }

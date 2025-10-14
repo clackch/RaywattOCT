@@ -264,6 +264,9 @@ namespace RaywattOCTFFR.Common.Bases
 
         protected virtual bool MoveToFrame(RaySession session, int nFrame)
         {
+            if (nFrame < 0)
+                return false;
+
             Mat img = new Mat();
 
             if (CrossSectionImages != null && CrossSectionImages.Count > 0)

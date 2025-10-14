@@ -131,6 +131,7 @@ namespace RaywattOCTFFR
             services.AddTransient<IPasswordService, PasswordService>();
             services.AddTransient(typeof(IdleMonitorService));
             services.AddTransient(typeof(TiffService));
+            services.AddTransient(typeof(DicomService));
 
             return services.BuildServiceProvider();
         }
