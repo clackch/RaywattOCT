@@ -2849,7 +2849,6 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 		case CatheterState::FindingSheath:
 		{
 			int nSheathPosition = m_pImagingRealtime->GetSheathPosition();
-			double FFTscore = m_pImagingRealtime->GetFFTHL();
 			int nDelayLinePos = m_pLaserModule->GetPosition(eStepMotorIndex::DelayLine);
 			m_vCalibrationInfo.push_back(std::make_pair(nSheathPosition, nDelayLinePos));
 			PLOGI.printf("FindingSheath - %d, %d", nSheathPosition, nDelayLinePos);
