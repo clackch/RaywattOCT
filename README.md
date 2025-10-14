@@ -12,36 +12,45 @@ Intravascular OCT System Development Project
 
 ## [Database]
 
-Install PostgreSQL
-* Windows x86, x64 v14.5 [installer](https://www.postgresql.org/download/windows/)
-* Port : 5432
-* 환경 변수 PATH 에 PostgreSQL (C:\Program Files\PostgreSQL\14\bin) 추가
-* PW : 1111
+**Install PostgreSQL**
+1. PostgreSQL 다운로드
+   - [링크](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads) 접속    
+   - 최신 버전 중 Windows x86-64 탭 다운로드
+2. 설치 및 설정    
+   * 다운 바든 설치 파일 실행 하여 설치  
+   * Port 설정: 5432
+   * 시스템환경 변수 PATH 추가
+     * 변수: PostgreSQL
+     * 값: C:\Program Files\PostgreSQL\14\bin
+   * 비밀번호 설정: 1111   
 
+<!--
 테이블 설계서(2023.09.14 Updated)
 [테이블 설계서_20230914.xlsx](https://github.com/Raywatt/RaywattOCT/files/12605239/_20230914.xlsx)
+-->
 
-Database Initial Setting
-1. Tablespace를 위한 폴더 생성 (C:\Tablespace)
+**Database Initial Setting**
+1. Tablespace를 위한 폴더 생성 
+   - 위치: C:\Tablespace
 2. SQL 파일이 있는 폴더로 이동
+3. 해당 위치에서 **명령 프롬프트** 실행
 3. 아래 sql script 를 차례대로 실행
 
-    (a) ```> psql --dbname=postgres --username=postgres --file=".\Prerequisite.sql"```
+    (a) ```psql --dbname=postgres --username=postgres --file=".\Prerequisite.sql"```
 
-    (b) PostgreSQL 설치 시, 입력한 기본 계정 암호 입력
+    (b) PostgreSQL 설치 시, 입력한 기본 계정 암호 입력  (비밀번호: 1111)
 
-    (c) ```> psql --dbname=rv_database --username=rv_user --file=".\DDL.sql"```
+    (c) ```psql --dbname=rv_database --username=rv_user --file=".\DDL.sql"```
 
     (d) rv_user 암호 (raywatt) 입력
 
-    (e) ```> psql --dbname=rv_database --username=rv_user --file=".\DML.sql"```
+    (e) ```psql --dbname=rv_database --username=rv_user --file=".\DML.sql"```
 
     (f) rv_user 암호 (raywatt) 입력
 
-* DB Table 변경 시에는 (c) ~ (f) 만 실행
-
-* DB Export/Import 방법
-
+4. 변경 내용 추가 방법  
+      (a) DB Table 변경 할 시, 3번 항목의 (c) ~ (f) 실행
+5. Import/Export 방법
 ![image](https://github.com/Raywatt/RaywattOCT/assets/110812182/01b59980-fc50-487e-bf83-46a3f7d2fc51)
 
 (Tool에서 Import/Export 기능 불가 시 [링크](https://velog.io/@myway00/Postgre-error-Utility-file-not-found.-Please-correct-the-Binary-Path-in-the-Preferences-dialog-오류-해결-1분만-투자하면-해결-ㅆㄱㄴ) 참고)
@@ -51,12 +60,13 @@ Database Initial Setting
 
 ## [CUDA]
 
-* CUDA Toolkit 11.8.0 Download(https://developer.nvidia.com/cuda-11-8-0-download-archive?target_os=Windows&target_arch=x86_64&target_version=11&target_type=exe_local) & 설치
+1. [링크](https://developer.nvidia.com/cuda-11-8-0-download-archive?target_os=Windows&target_arch=x86_64&target_version=11&target_type=exe_local) 접속 
+2. **CUDA Toolkit 11.8.0** Download 및 설치 수행
 <!--* CUDA Toolkit 11.8.0 Download(https://pytorch.org/get-started/locally/) & 설치 -->
 
 ## [Axsun]
 
-Download & Install OCT Host
+**Download & Install OCT Host** 
 1. [OCT Host (.exe)](https://docs.axsun.com/axsun-technologies-knowledge-base/other/downloads) 다운로드 후 설치 (ver 1.17.15)
 2. DLL Register
 
@@ -69,46 +79,65 @@ Download & Install OCT Host
     (d) ```C:\Program Files\Axsun\Axsun OCT Control\AxsunOCTControl.tlb``` 파일 생성 확인
 
 ## [DAQ]
-* ATS9371_Driver_V7.11.1.exe(https://www.alazartech.com/en/product/ats9371/4/) 파일 설치
+1. DAQ Model에 맞게 Driver를 설치   
+   - Board에 표시 된 Model 정보 확인  
+2. ATS9371  
+   - [링크](https://www.alazartech.com/en/product/ats9371/4/) 접속
+   - Drivers 항목에 **ATS9371 x86_64 driver for Windows** 다운 로드  
+  (만약 찾기 어려울 시 해당 [링크](https://www.alazartech.com/en/download/product/16729/55/ats9371-x8664-driver-for-windows/7-13-9/) 접속)
+   - 다운 로드 후, 설치 실행
+3. ATS9364
+   - [링크](https://www.alazartech.com/en/product/ats9364/661/) 접속
+   - Drivers 항목에 **ATS9364 x86_64 driver for Windows** 다운 로드  
+  (만약 찾기 어려울 시 해당 [링크](https://www.alazartech.com/en/download/product/16728/672/ats9364-x8664-driver-for-windows/7-13-9/) 접속)
+   - 다운 로드 후, 설치 실행
 
 ## [Python]
 
 1. Python Download & Install
-   - https://www.python.org/downloads/
+   - [링크](https://www.python.org/downloads/) 접속
+   - 최신 버전 다운로드 및 설치  
 
     ※ 설치 시, 환경변수 추가 (Add Python 3.XX to PATH 선택)
 2. Python Package Install
-   - cmd에서 pip install numpy pillow scipy imageio pywin32 실행
+   - 명령 프롬프트에서 ```pip install numpy pillow scipy imageio pywin32``` 실행
      
      ※ 인터넷 연결이 안되어 있을 경우 처리방안
      
      [인터넷 없는 환경 package 설치.docx](https://github.com/user-attachments/files/18434123/package.docx)
 
 3. 환경 변수 추가
-   - 시스템 변수에 PYTHON_DLL - C:\Users\Raywatt\AppData\Local\Programs\Python\Python312\python312.dll 추가
-
-     ※ 경로 및 Python dll은 해당 PC에 맞춰서 적용![Uploading 11757@3x.png…]()
+   - 시스템 변수에 등록  
+   - 변수명: PYTHON_DLL
+   - 값: C:\Users\Raywatt\AppData\Local\Programs\Python\\**{Python312}\\{python312.dll}** 추가  
+   ※ **{Python312}\\{python312.dll}** 은 Python dll에 맞게 경로 적용
 
 4. 코드 복사
-   - RaywattExt\Python\ImageProcess.py 파일을 runtime에 복사
+   - RaywattOCT\RaywattExt\Python\ImageProcess.py 파일을 C:\Raywatt\system\runtime에 복사
 
 ## [Font]
 
-Download & Install Font
-1. [Pretendard](https://github.com/orioncactus/pretendard) 최신 버전 다운로드 후 압축 해제
-2. /Pretendard/public/static/alternative/Pretendard-Bold / Pretendard-Medium / Pretendard-Regular / Pretendard-SemiBold.ttf 실행, 설치
+**Download & Install Font**
+1. [Pretendard](https://github.com/orioncactus/pretendard) 접속
+2. 최신 버전 다운로드 후 압축 해제
+3. 설치
+   - /Pretendard/public/static/alternative/Pretendard-Bold.ttf
+   - /Pretendard/public/static/alternative/Pretendard-Medium.ttf
+   - /Pretendard/public/static/alternative/Pretendard-Regular.ttf
+   - /Pretendard/public/static/alternative/Pretendard-SemiBold.ttf
 
-설치확인 방법
-1. 설정 > 개인 설정 > 글꼴
+**설치 확인 방법**
+1. Window 설정 -> 개인 설정 > 글꼴
 2. Pretendard 검색
 3. 확인
 
 ## [Cursor]
-Download & Create Folder, Copy/Paste
-1. [cursor.zip](https://github.com/user-attachments/files/21361471/cursor.zip) 다운로드 후 압축 해제
-2. C:\Raywatt\system\image\cursor 폴더 생성 및 복사/붙여넣기
+**Download & Create Folder, Copy/Paste**
+1. [cursor.zip](https://github.com/user-attachments/files/21361471/cursor.zip) 다운로드
+2. 압축 해제
+2. 압축 해제한 cursor 폴더를 ```C:\Raywatt\system\image``` 으로 이동  
 
-Windows Default Mouse Cursor Setting (※ 필요 시 진행)
+**(필요시 진행)Windows Default Mouse Cursor Setting**
 1. 설정-> Bluethooth 및 장치 -> 마우스
 2. 관련설정 -> 더 많은 마우스 설정
 3. 포인터
@@ -118,22 +147,24 @@ Windows Default Mouse Cursor Setting (※ 필요 시 진행)
 1. Windows 검색창에 "시스템 환경 변수 편집"을 검색 후 클릭
 2. "고급"탭에서 하단 "환경 변수" 버튼 클릭
 3. "시스템 변수"항목 중 변수 이름 : Path(or PATH) 더블클릭
-4. "환경 변수 편집" 창이 뜨면 "새로 만들기"를 클릭한 후 C:\Raywatt\system\3rdparty를 추가
+4. "환경 변수 편집" 창이 뜨면 "새로 만들기"를 클릭한 후 C:\Raywatt\system\asdf를 추가
 5. 적용까지 완료 하면 OK
 
-## [3rdparty]
-Download & Copy/Paste
-1. (https://github.com/Raywatt/RaywattOCT/issues/170) 에서 Raywatt One-Drive 링크 접속
-2. 3rdparty 폴더를 다운로드 한 후, 폴더 자체를 C:\Raywatt\system에 추가
-
 ## [Executable file]
-1. Visual Studio Debug/Release Solution Clean > Release Build
-2. RaywattApp에서 bin 폴더를 외장 저장장치에 복사 및 폴더명 변경(bin -> runtime)
-3. runtime 폴더에서 Release/Debug 폴더 삭제
-4. 외장 장치에서 장비 PC의 C:\Raywatt\system 경로에 runtime 폴더 복사 (※ C:\Raywatt\system\runtime)
+1. RaywattApp Project를 Release Build 수행
+2. bin 폴더를 외장 저장장치에 복사
+3. 폴더명 변경(bin -> runtime)
+4. runtime 폴더에서 Release/Debug 폴더 삭제
+5. 외장 장치에서 장비 PC의 C:\Raywatt\system 경로에 runtime 폴더 복사 (※ C:\Raywatt\system\runtime)
+
+## [3rdparty]
+**Download & Copy/Paste**
+1. Raywatt One-Drive [링크](https://raywatt-my.sharepoint.com/personal/jeansu_kim_raywatt_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fjeansu%5Fkim%5Fraywatt%5Fcom%2FDocuments%2F%EA%B3%B5%EC%9C%A0%2Fdevelopment&ga=1) 접속
+2. 3rdparty 폴더를 다운로드
+3. 다운 받은 3rdparty 폴더를 C:\Raywatt\system에 옮기기
 
 ## [FrameGrabber]
-1. (https://github.com/Raywatt/RaywattOCT/issues/170) 에서 Raywatt One-Drive 링크 접속
+1. Raywatt One-Drive 링크 접속
 2. FrameGrabber 폴더를 다운로드 한 후, 폴더를 C:\Raywatt에 추가
 3. https://github.com/Raywatt/RaywattOCT/issues/209#issue-2097526663 에서 라이브러리 및 매뉴얼 다운로드
 4. 매뉴얼 파일의 목차 1, 2번 진행
@@ -234,5 +265,5 @@ Download & Copy/Paste
 ## 설정 후, 꼭 확인해야 하는 항목 (App Test)
 
 - Manual Calibration 실행해서 ML 기능 확인
-  - 첫 실행이면 C:\Raywatt\system\3rdparty\model\yolo에서 engine 파일이 실행일자로 생성되었는지 확인
+  - 첫 실행이면 C:\Raywatt\system\asdf\model\yolo에서 engine 파일이 실행일자로 생성되었는지 확인
 - Tiff 저장 기능 확인
