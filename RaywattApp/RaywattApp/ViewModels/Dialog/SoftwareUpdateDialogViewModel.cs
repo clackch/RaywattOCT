@@ -3,6 +3,7 @@ using log4net;
 using RaywattApp.Common.Dialog;
 using RaywattApp.Models;
 using RaywattApp.Services;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -16,16 +17,25 @@ namespace RaywattApp.ViewModels.Dialog
         private readonly UsbDetectionService _usbDetectionService;
 
         [ObservableProperty]
+        private string _currentVersion = "N/A";
+
+        [ObservableProperty]
         private string _statusMessage = "Checking USB device...";
 
         [ObservableProperty]
-        private ObservableCollection<UpdateItem> _updateItems = new ObservableCollection<UpdateItem>();
+        private ObservableCollection<UpdateItem> _firmwareUpdateItems = new ObservableCollection<UpdateItem>();
+
+        [ObservableProperty]
+        private UpdateItem _selectedFirmware;
 
         [ObservableProperty]
         private string _usbDriveName = "";
 
         [ObservableProperty]
-        private bool _hasUsbFiles = false;
+        private bool _hasAvailableUpdates = true;
+
+        [ObservableProperty]
+        private bool _canUpdate = true;
 
         public SoftwareUpdateDialogViewModel()
         {
@@ -37,83 +47,141 @@ namespace RaywattApp.ViewModels.Dialog
         {
             if (parameter is Dictionary<string, object> data)
             {
-                Title = data.ContainsKey("title") ? data["title"].ToString() : "Software Update";
-            }
+                try
+                {
+                    if (data.ContainsKey("title"))
+                    {
+                        Title = data["title"].ToString();
+                    }
 
-            CheckUsbState();
+                    if (data.ContainsKey("currentVersion"))
+                    {
+                        CurrentVersion = data["currentVersion"].ToString();
+                    }
+
+                    LoadAndFilterFirmwareItems();
+                }
+                catch (Exception ex)
+                {
+                    _log.Error($"Error setting parameters: {ex.Message}", ex);
+                    StatusMessage = "An error occurred";
+                    HasAvailableUpdates = false;
+                    CanUpdate = false;
+                }
+            }
         }
 
-        private void CheckUsbState()
+        private void LoadAndFilterFirmwareItems()
         {
             try
             {
-                bool hasUsb = _usbDetectionService.HasUsbDrive();
-                
-                if (hasUsb)
+                // USB에서 펌웨어 목록 가져오기
+                var allFirmwareItems = _usbDetectionService.GetUsbFirmwareItems();
+                _log.Debug($"Found {allFirmwareItems.Count} firmware items on USB");
+
+                if (!allFirmwareItems.Any())
                 {
-                    var updateItems = _usbDetectionService.GetUsbUpdateItems();
-                    UsbDriveName = _usbDetectionService.GetUsbDriveName();
+                    StatusMessage = "Latest Version";
+                    HasAvailableUpdates = false;
+                    CanUpdate = false;
+                    return;
+                }
 
-                    UpdateItems.Clear();
-                    foreach (var updateItem in updateItems)
+                // 현재 버전 객체 생성
+                var currentFirmware = new UpdateItem(CurrentVersion, "", DateTime.Now);
+
+                // 현재보다 새로운 버전만 필터링
+                var newerVersions = allFirmwareItems
+                    .Where(item => item.IsNewerThan(currentFirmware))
+                    .OrderByDescending(item => item.Version)
+                    .ToList();
+
+                _log.Debug($"Available updates (newer than current): {newerVersions.Count}");
+
+                FirmwareUpdateItems.Clear();
+
+                if (newerVersions.Any())
+                {
+                    foreach (var item in newerVersions)
                     {
-                        UpdateItems.Add(updateItem);
+                        FirmwareUpdateItems.Add(item);
                     }
 
-                    if (UpdateItems.Any())
-                    {
-                        StatusMessage = $"Found {UpdateItems.Count} update(s) on USB drive ({UsbDriveName}).";
-                        HasUsbFiles = true;
-                    }
-                    else
-                    {
-                        StatusMessage = "No update files found on USB drive.";
-                        HasUsbFiles = false;
-                    }
+                    // 가장 최신 버전을 자동 선택
+                    SelectedFirmware = FirmwareUpdateItems.First();
+                    HasAvailableUpdates = true;
+                    CanUpdate = true;
+                    StatusMessage = string.Empty;
+
+                    _log.Debug($"Loaded {newerVersions.Count} newer firmware versions");
                 }
                 else
                 {
-                    StatusMessage = "USB drive not found. Please connect a USB drive.";
-                    HasUsbFiles = false;
-                    UpdateItems.Clear();
+                    HasAvailableUpdates = false;
+                    CanUpdate = false;
+                    StatusMessage = "Latest Version";
+                    _log.Debug("No newer firmware versions available");
                 }
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                _log.Error($"Error checking USB: {ex.Message}", ex);
-                StatusMessage = $"Error checking USB: {ex.Message}";
-                HasUsbFiles = false;
-                UpdateItems.Clear();
+                _log.Error($"Error loading firmware items: {ex.Message}", ex);
+                StatusMessage = "An error occurred";
+                HasAvailableUpdates = false;
+                CanUpdate = false;
+            }
+        }
+
+        partial void OnSelectedFirmwareChanged(UpdateItem value)
+        {
+            if (value != null)
+            {
+                CanUpdate = true;
+                _log.Debug($"Selected firmware changed: v{value.Version}");
+            }
+            else
+            {
+                CanUpdate = false;
             }
         }
 
         protected override void AnswerYes(IDialogWindow dialog)
         {
-            _log.Debug("AnswerYes");
-            
-            DialogResults dialogResults = new();
-            dialogResults.DialogAnswer = DialogResults.Answer.Yes;
-            dialogResults.DialogReturn = new Dictionary<string, object>
+            if (SelectedFirmware == null)
             {
-                { "updateItems", UpdateItems.ToList() },
-                { "usbDriveName", UsbDriveName },
-                { "shouldUpdate", true }
+                _log.Warn("No firmware selected for update");
+                return;
+            }
+
+            _log.Debug($"User confirmed update to firmware version {SelectedFirmware.Version}");
+
+            DialogResults dialogResults = new DialogResults
+            {
+                DialogAnswer = DialogResults.Answer.Yes,
+                DialogReturn = new Dictionary<string, object>
+                {
+                    { "shouldUpdate", true },
+                    { "selectedFirmware", SelectedFirmware },
+                    { "usbDriveName", UsbDriveName }
+                }
             };
-            
+
             CloseDialogWithResult(dialog, dialogResults);
         }
 
         protected override void AnswerNo(IDialogWindow dialog)
         {
-            _log.Debug("AnswerNo");
-            
-            DialogResults dialogResults = new();
-            dialogResults.DialogAnswer = DialogResults.Answer.No;
-            dialogResults.DialogReturn = new Dictionary<string, object>
+            _log.Debug("User canceled firmware update");
+
+            DialogResults dialogResults = new DialogResults
             {
-                { "shouldUpdate", false }
+                DialogAnswer = DialogResults.Answer.No,
+                DialogReturn = new Dictionary<string, object>
+                {
+                    { "shouldUpdate", false }
+                }
             };
-            
+
             CloseDialogWithResult(dialog, dialogResults);
         }
     }

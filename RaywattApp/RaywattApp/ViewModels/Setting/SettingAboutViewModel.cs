@@ -150,55 +150,54 @@ namespace RaywattApp.ViewModels.Setting
 
             try
             {
-                bool hasUsbDrive = _usbDetectionService.HasUsbDrive();
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
 
-                if (hasUsbDrive)
+                if (!_usbDetectionService.HasUsbDrive())
                 {
-                    _log.Debug("USB drive detected");
+                    _log.Debug("USB drive not found");
 
-                    // Show modal dialog if USB drive is available
-                    Dictionary<string, object> parameter = new Dictionary<string, object>();
-                    parameter["title"] = _l10n["Software Update"];
+                    
+                    parameter["title"] = _l10n["Information"];
+                    parameter["message"] = "USB drive not found. Please connect a USB drive and try again.";
 
-                    var result = _dialogService.OpenDialog(new SoftwareUpdateDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                    _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                    return;
+                }
 
-                    if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
-                    {
-                        _log.Debug("User selected software update");
+                _log.Debug("USB drive detected");
+
+                parameter["title"] = _l10n["Firmware Update"];
+                parameter["currentVersion"] = FirmwareVersion;
+
+                var result = _dialogService.OpenDialog(new SoftwareUpdateDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
+                {
+                    _log.Debug("User selected software update");
                         
-                        Dictionary<string, object> returnData = (Dictionary<string, object>)result.DialogReturn;
-                        bool shouldUpdate = (bool)returnData["shouldUpdate"];
+                    Dictionary<string, object> returnData = (Dictionary<string, object>)result.DialogReturn;
+                    bool shouldUpdate = (bool)returnData["shouldUpdate"];
                         
-                        if (shouldUpdate)
-                        {
-                            //var updateItems = returnData["updateItems"];
-                            var usbDriveName = returnData["usbDriveName"].ToString();
-                            
-                            _log.Debug($"Starting update - USB Drive: {usbDriveName}");
-                            
-                            // TODO[haeun]: 여기서 펌웨어 업데이트 또는 소프트웨어 업데이트 작업을 수행
-                            
-                            Dictionary<string, object> successParameter = new Dictionary<string, object>();
-                            successParameter["title"] = _l10n["Information"];
-                            successParameter["message"] = _l10n["Software update initiated successfully"];
-                            _dialogService.OpenDialog(new AlertDialogControl(), successParameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-                        }
-                    }
-                    else
+                    if (shouldUpdate)
                     {
-                        _log.Debug("User canceled software update");
+                        //var updateItems = returnData["updateItems"];
+                        var usbDriveName = returnData["usbDriveName"].ToString();
+                            
+                        _log.Debug($"Starting update - USB Drive: {usbDriveName}");
+                            
+                        // TODO[haeun]: 여기서 펌웨어 업데이트 또는 소프트웨어 업데이트 작업을 수행
+                            
+                        Dictionary<string, object> successParameter = new Dictionary<string, object>();
+                        successParameter["title"] = _l10n["Information"];
+                        successParameter["message"] = _l10n["Software update initiated successfully"];
+                        _dialogService.OpenDialog(new AlertDialogControl(), successParameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
                     }
                 }
                 else
                 {
-                    _log.Debug("USB drive not found");
-
-                    Dictionary<string, object> parameter = new Dictionary<string, object>();
-                    parameter["title"] = _l10n["Information"];
-                    parameter["message"] = "USB drive not found. Please connect a USB drive and try again.";
-                    
-                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                    _log.Debug("User canceled software update");
                 }
+              
             }
             catch (Exception ex)
             {
@@ -221,13 +220,13 @@ namespace RaywattApp.ViewModels.Setting
                 
                 if (isBootMode)
                 {
-                    FirmwareVersion = $"(Boot Mode) {major}.{minor}.{patch}";
+                    FirmwareVersion = $"(Boot_){major}.{minor}.{patch}";
                 }
                 else
                 {
                     FirmwareVersion = $"{major}.{minor}.{patch}";
                 }
-                
+
                 _log.Debug($"Firmware version loaded: {FirmwareVersion}");
             }
             catch (Exception ex)

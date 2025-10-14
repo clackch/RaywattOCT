@@ -9,89 +9,89 @@
              mc:Ignorable="d" 
              Width="{Binding DialogWidth}" Height="{Binding DialogHeight}">
 
-	<Border CornerRadius="10"
+    <Border CornerRadius="10"
             Background="{DynamicResource GrayscaleGray6Brush}"
             BorderBrush="{DynamicResource GrayscaleGray7Brush}"
             Width="{x:Static const:Constants.SoftwareUpdateDialogWidth}"
-            Height="{x:Static const:Constants.SoftwareUpdateDialogHeight}" >
-		
-		<Grid>
-			<Grid.RowDefinitions>
-				<RowDefinition Height="21"/>
-				<RowDefinition Height="Auto"/>
-				<RowDefinition Height="10"/>
-				<RowDefinition Height="*"/>
-				<RowDefinition Height="70"/>
-			</Grid.RowDefinitions>
+            Height="{x:Static const:Constants.SoftwareUpdateDialogHeight}">
 
-			<!-- Title -->
-			<StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,10,0,10">
-				<Label Style="{DynamicResource Pretendard-Medium-16}" Content="{Binding Title}" Foreground="{DynamicResource GrayscaleGray3Brush}" HorizontalAlignment="Center"/>
-			</StackPanel>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="21"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="70"/>
+            </Grid.RowDefinitions>
 
-			<!-- Content -->
-			<StackPanel Grid.Row="3" Margin="20">
-				<!-- Status Message -->
-				<StackPanel HorizontalAlignment="Center" Margin="0,0,0,20">
-					<Label Style="{DynamicResource Pretendard-Medium-14}" Content="{Binding StatusMessage}" Foreground="{DynamicResource GrayscaleWhiteBrush}" HorizontalAlignment="Center"/>
-				</StackPanel>
+            <!-- Title -->
+            <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,10,0,0">
+                <Label Style="{DynamicResource Pretendard-Medium-22}" 
+				       Content="{Binding Title}" 
+				       Foreground="{DynamicResource GrayscaleWhiteBrush}" 
+				       HorizontalAlignment="Center"/>
+            </StackPanel>
 
-				<!-- Files List -->
-				<Grid Visibility="{Binding HasUsbFiles, Converter={StaticResource BoolToVisibilityConverter}}">
-					<Grid.RowDefinitions>
-						<RowDefinition Height="Auto"/>
-						<RowDefinition Height="*"/>
-					</Grid.RowDefinitions>
+            <!-- Content -->
+            <StackPanel Grid.Row="2" Margin="20">
+                <!-- Current Version Info -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,10">
+                    <Label Style="{DynamicResource Pretendard-Medium-16}" 
+					       Content="Current Version: " 
+					       Foreground="{DynamicResource GrayscaleGray3Brush}"/>
+                    <Label Style="{DynamicResource Pretendard-Medium-16}" 
+					       Content="{Binding CurrentVersion}" 
+					       Foreground="{DynamicResource GrayscaleWhiteBrush}"/>
+                </StackPanel>
 
-					<Label Grid.Row="0" Style="{DynamicResource Pretendard-Medium-12}" Content="발견된 파일:" Foreground="{DynamicResource GrayscaleGray3Brush}" Margin="0,0,0,10"/>
-
-                    <Border Grid.Row="1" CornerRadius="5" MaxHeight="250">
-                        <ScrollViewer VerticalScrollBarVisibility="Auto">
-                            <ListBox ItemsSource="{Binding UpdateItems}" Background="Transparent" BorderThickness="0" SelectionMode="Single" HorizontalContentAlignment="Stretch">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid Margin="5">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <TextBlock Grid.Column="0" 
-                                                       Text="{Binding Name}"
-                                                       Foreground="{DynamicResource GrayscaleWhiteBrush}"
-                                                       VerticalAlignment="Center"/>
-
-                                            <TextBlock Grid.Column="1" 
-                                                       Text="{Binding LastModified}"
-                                                       Foreground="{DynamicResource GrayscaleGray3Brush}"
-                                                       VerticalAlignment="Center"/>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                        </ScrollViewer>
+                <!-- Available Firmware Versions -->
+                <Grid Visibility="{Binding HasAvailableUpdates, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Border Grid.Row="1" 
+                            CornerRadius="5" 
+                            BorderBrush="{DynamicResource GrayscaleGray7Brush}" 
+                            BorderThickness="1"
+                            MinHeight="300"
+                            MaxHeight="300">
+                        <DataGrid ItemsSource="{Binding FirmwareUpdateItems}" 
+                                  SelectedItem="{Binding SelectedFirmware}"
+                                  Style="{StaticResource DataGridDialog}" 
+                                  RowStyle="{StaticResource DataGridRowDialog}" 
+                                  ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}"
+                                  AutoGenerateColumns="False"
+                                  SelectionMode="Single"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  IsReadOnly="True">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Width="*" Binding="{Binding Version}" Header="Version" CellStyle="{StaticResource DataGridCellTooltip}"/>
+                                <DataGridTextColumn Width="*" Binding="{Binding LastModified, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Header="Last Modified" CellStyle="{StaticResource DataGridCellTooltip}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
                     </Border>
                 </Grid>
+                
+                <!-- No Updates Available Message -->
+                <StackPanel Visibility="{Binding HasAvailableUpdates, Converter={StaticResource BoolToVisibilityReverseConverter}}" 
+				            HorizontalAlignment="Center" >
+                    <Label Style="{DynamicResource Pretendard-Medium-16}" 
+					       Content="{Binding StatusMessage}" 
+					       Foreground="{DynamicResource GrayscaleGray3Brush}" 
+					       HorizontalAlignment="Center" Margin="120"/>
+                </StackPanel>
+            </StackPanel>
 
-				<!-- No USB Message -->
-				<StackPanel Visibility="{Binding HasUsbFiles, Converter={StaticResource BoolToVisibilityReverseConverter}}" HorizontalAlignment="Center">
-					<Image Source="{svgc:SvgImage Source=/res/icon/alertError.svg}" Width="60" Height="60" Margin="0,20,0,20"/>
-				</StackPanel>
-			</StackPanel>
-
-			<!-- Buttons -->
-			<StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center">
-				<Button Style="{StaticResource OutlinedBtnType3-Large}"
-                        Command="{Binding NoCommand}"
-                        CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"
-                        Content="{Binding [Cancel], Source={StaticResource L10N}}"
-                        Margin="0,0,10,0"/>
-				<Button Style="{StaticResource ContainedBtnType1-Large-Wide}"
-                        Command="{Binding YesCommand}"
-                        CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"
-                        Content="{Binding [Software Update], Source={StaticResource L10N}}"
-                        IsEnabled="{Binding HasUsbFiles}"/>
-			</StackPanel>
-		</Grid>
-	</Border>
+            <!-- Buttons -->
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Style="{StaticResource OutlinedBtnType3-Large}"
+				        Command="{Binding NoCommand}"
+				        CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"
+				        Content="{Binding [Cancel], Source={StaticResource L10N}}"
+				        Margin="0,0,10,0"/>
+                <Button Style="{StaticResource ContainedBtnType1-Large-Wide}"
+				        Command="{Binding YesCommand}"
+				        CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"
+				        Content="{Binding [Update], Source={StaticResource L10N}}"
+				        IsEnabled="{Binding CanUpdate}"/>
+            </StackPanel>
+        </Grid>
+    </Border>
 </UserControl>

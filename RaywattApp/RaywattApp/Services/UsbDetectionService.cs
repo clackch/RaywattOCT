@@ -33,7 +33,7 @@ namespace RaywattApp.Services
 
         public UsbDetectionService()
         {
-            _log.Debug("UsbDetectionService initialized");
+            _log.Debug("UsbDetectionService");
         }
 
         public void RegisterForDeviceNotification(IntPtr windowHandle)
@@ -83,13 +83,11 @@ namespace RaywattApp.Services
             }
         }
 
-        public List<UpdateItem> GetUsbUpdateItems()
+        public List<UpdateItem> GetUsbFirmwareItems()
         {
             try
             {
-                _log.Debug("GetUsbUpdateItems");
-
-                // 사용 가능한 드라이브 중 USB 드라이브 찾기
+                // USB 드라이브 찾기
                 var usbDrives = DriveInfo.GetDrives()
                     .Where(drive => drive.DriveType == DriveType.Removable && drive.IsReady)
                     .ToList();
@@ -101,48 +99,57 @@ namespace RaywattApp.Services
                     return new List<UpdateItem>();
                 }
 
+                // TODO[haeun]: 여러 개 USB 드라이브 중에서 선택하도록 수정
                 var usbDrive = usbDrives.First();
                 _log.Debug($"Using USB drive: {usbDrive.Name}");
 
-                var directories = usbDrive.RootDirectory.EnumerateDirectories();
+                string firmwarePath = Path.Combine(usbDrive.RootDirectory.FullName, "Firmware");
 
-                var directoryItems = new List<UpdateItem>();
-                foreach (var directory in directories)
+                if (!Directory.Exists(firmwarePath))
+                {
+                    _log.Warn($"Firmware folder not found at: {firmwarePath}");
+                    return new List<UpdateItem>();
+                }
+
+                _log.Debug($"Firmware folder found at: {firmwarePath}");
+
+                var firmwareItems = new List<UpdateItem>();
+                var directories = Directory.GetDirectories(firmwarePath);
+
+                foreach (var dir in directories)
                 {
                     try
                     {
-                        _log.Debug($"Directory found: {directory.FullName}");
+                        string dirName = Path.GetFileName(dir);
 
-                        // 폴더 내 파일 개수 계산 (선택사항)
-                        int fileCount = 0;
-                        try
+                        // 폴더 안에 .bin 파일이 있는지 확인
+                        var binFiles = Directory.GetFiles(dir, "*.bin");
+
+                        if (binFiles.Length == 0)
                         {
-                            fileCount = Directory.GetFiles(directory.FullName, "*", SearchOption.AllDirectories).Length;
-                        }
-                        catch (Exception ex)
-                        {
-                            _log.Warn($"Cannot count files in directory {directory.Name}: {ex.Message}");
+                            _log.Warn($"No .bin files found in {dirName}, skipping");
+                            continue;
                         }
 
-                        directoryItems.Add(new UpdateItem(
-                            directory.Name,           // moduleAndVersion
-                            directory.Name,           // name
-                            directory.FullName,       // filePath
-                            directory.LastWriteTime   // lastModified
+                        // UpdateItem 생성 (폴더명을 버전으로 사용)
+                        firmwareItems.Add(new UpdateItem(
+                            dirName,                          // version (폴더명)
+                            dir,                              // filePath (버전 폴더 경로)
+                            Directory.GetLastWriteTime(dir)   // lastModified
                         ));
                     }
                     catch (Exception ex)
                     {
-                        _log.Warn($"Error processing directory {directory.Name}: {ex.Message}");
+                        _log.Warn($"Error processing directory {dir}: {ex.Message}");
                     }
                 }
 
-                _log.Debug($"Found {directoryItems.Count} directories in USB drive");
-                return directoryItems;
+                _log.Debug($"Total firmware items found: {firmwareItems.Count}");
+                return firmwareItems;
             }
             catch (Exception ex)
             {
-                _log.Error($"Error getting USB directories: {ex.Message}", ex);
+                _log.Error($"Error getting USB firmware items: {ex.Message}", ex);
                 return new List<UpdateItem>();
             }
         }

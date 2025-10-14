@@ -18,13 +18,17 @@
                 <StackPanel Height="30"/>
                 <Label Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Software Version], Source={StaticResource L10N}}"/>
                 <StackPanel Height="10"/>
-                <Label Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding SoftwareVersion}"/>
+                <Grid>
+                    <Label Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding SoftwareVersion}"/>
+                    <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding SoftwareUpdateCommand}" Content="{Binding [Software Update], Source={StaticResource L10N}}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                </Grid>
                 <StackPanel Height="30"/>
                 <Label Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Firmware Version], Source={StaticResource L10N}}"/>
                 <StackPanel Height="10"/>
-                <Label Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding FirmwareVersion}"/>
-                <StackPanel Height="20"/>
-                <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding SoftwareUpdateCommand}" Content="{Binding [Software Update], Source={StaticResource L10N}}" HorizontalAlignment="Left"/>
+                <Grid>
+                    <Label Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding FirmwareVersion}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding SoftwareUpdateCommand}" Content="{Binding [Firmware Update], Source={StaticResource L10N}}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                </Grid>
             </StackPanel>
         </Border>
     </Grid>
