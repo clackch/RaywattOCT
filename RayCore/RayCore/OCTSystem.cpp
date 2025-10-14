@@ -1684,6 +1684,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CLaserModule* pLaserModule = pSystem->m_pLaserModule;
+	CConfiguration& config = CConfiguration::GetInstance();
 	int nTargetPos = 0;
 	RayError autoCalibError = RayError::OK;
 
@@ -1739,9 +1740,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			}
 		}
 
-		int isThisSeverance = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("isThisSeverance"), 0, _T(".\\raycore.ini"));
-
-		if (isThisSeverance == 0) {
+		if (config.laserModule.autoCalibrationForSeverance == 0) {
 			std::vector<std::pair<int, int>> minList; // pair<motor loc, index>
 			for (int i = 0; i < gradient.size() - 1; i++)
 			{
