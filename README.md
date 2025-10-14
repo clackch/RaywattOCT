@@ -1,8 +1,7 @@
 # RaywattOCT
-Intravascular OCT System Development Project
-
+Intravascular OCT System Development Project   
+작성일: 2025-10-14
 ***
-
 # Setting
 ## [CommunityToolkit]
 
@@ -109,8 +108,8 @@ Intravascular OCT System Development Project
 3. 환경 변수 추가
    - 시스템 변수에 등록  
    - 변수명: PYTHON_DLL
-   - 값: C:\Users\Raywatt\AppData\Local\Programs\Python\\**{Python312}\\{python312.dll}** 추가  
-   ※ **{Python312}\\{python312.dll}** 은 Python dll에 맞게 경로 적용
+   - 값: C:\Users\Raywatt\AppData\Local\Programs\Python\\**{PythonXXX}\\{pythonXXX.dll}** 추가  
+   ※ **{PythonXXX}\\{pythonXXX.dll}** 은 Python dll에 맞게 경로 적용
 
 4. 코드 복사
    - RaywattOCT\RaywattExt\Python\ImageProcess.py 파일을 C:\Raywatt\system\runtime에 복사
@@ -126,7 +125,7 @@ Intravascular OCT System Development Project
    - /Pretendard/public/static/alternative/Pretendard-Regular.ttf
    - /Pretendard/public/static/alternative/Pretendard-SemiBold.ttf
 
-**설치 확인 방법**
+**설치 확인**
 1. Window 설정 -> 개인 설정 > 글꼴
 2. Pretendard 검색
 3. 확인
@@ -144,10 +143,10 @@ Intravascular OCT System Development Project
     - 찾아보기에서 cur 파일
 
 ## [Environment Variable]
-1. Windows 검색창에 "시스템 환경 변수 편집"을 검색 후 클릭
-2. "고급"탭에서 하단 "환경 변수" 버튼 클릭
-3. "시스템 변수"항목 중 변수 이름 : Path(or PATH) 더블클릭
-4. "환경 변수 편집" 창이 뜨면 "새로 만들기"를 클릭한 후 C:\Raywatt\system\asdf를 추가
+1. Windows 검색창에 **"시스템 환경 변수 편집"** 을 검색 후 클릭
+2. "고급"탭에서 하단 **"환경 변수"** 버튼 클릭
+3. **"시스템 변수"** 항목 중 변수 이름 : Path(or PATH) 더블클릭
+4. **"환경 변수 편집"** 창이 뜨면 "새로 만들기"를 클릭한 후 C:\Raywatt\system\3rdparty에 추가
 5. 적용까지 완료 하면 OK
 
 ## [Executable file]
@@ -164,10 +163,22 @@ Intravascular OCT System Development Project
 3. 다운 받은 3rdparty 폴더를 C:\Raywatt\system에 옮기기
 
 ## [FrameGrabber]
-1. Raywatt One-Drive 링크 접속
+1. Raywatt One-Drive [링크](https://raywatt-my.sharepoint.com/personal/jeansu_kim_raywatt_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fjeansu%5Fkim%5Fraywatt%5Fcom%2FDocuments%2F%EA%B3%B5%EC%9C%A0%2Fdevelopment&ga=1) 접속
 2. FrameGrabber 폴더를 다운로드 한 후, 폴더를 C:\Raywatt에 추가
 3. https://github.com/Raywatt/RaywattOCT/issues/209#issue-2097526663 에서 라이브러리 및 매뉴얼 다운로드
 4. 매뉴얼 파일의 목차 1, 2번 진행
+
+## [RJ Firmware]
+
+RJ Firmware 설치 안되어있으면 설치 필요   
+1. ```RJTestGUI.exe``` 실행
+2. Setup 버튼 클릭 하여 연결
+3. F/W Download 탭 이동  
+4. 조회를 통하여 현재 F/W 버전 확인
+5. 최신 F/W 업데이트 필요 시, 파일 선택 버튼 클릭 및 파일 선택
+   - 파일 확장자: ```.bin```  
+   (※ F/W 파일은 Raywatt3YsPark 프로젝트에서 관리) 
+6. 다운로드 버튼 실행
 
 ## [Windows]
 1. 사용자 계정 추가
@@ -253,6 +264,60 @@ Intravascular OCT System Development Project
        (3) 설정 화면 (※ BARCO 모니터의 경우, 설정 화면이 안 보이는 경우가 있어 다른 모니터 이용하는 편이 좋음)
        (4) SETTING > Boot > Full Screen Logo Display (Enabled -> Disabled 변경) > Exit
 
+
+## 설정 후, 꼭 확인해야 하는 항목 (App Test)
+
+- Manual Calibration 실행해서 ML 기능 확인
+  - 첫 실행 후, ```C:\Raywatt\system\3rdparty\model\yolo```에서 engine 파일이 실행일자로 생성되었는지 확인
+- Tiff 저장 기능 확인
+<!--
+- DataBase
+   - Configuration Table 확인 (업데이트 날짜: 2025-10-14)
+      | classification | key          | value       | buffer                           |
+      |----------------|---------------|-------------|---------------------------------|
+      | AutoPB         | Count         | 2           |                                 |
+      | AutoPB         | LumenMax      | 70          |                                 |
+      | AutoPB         | LumenMin      | 2           |                                 |
+      | AutoPB         | ShowGuide     | N           |                                 |
+      | AutoPB         | SNR           | 1           | Raywatt;                        |
+      | L10N           | en-US         | Y           |                                 |
+      | L10N           | ko-KR         | N           |                                 |
+      | LocalHost      | AeTitle       |             |                                 |
+      | LogoutTime     | PreTime       | 57          |                                 |
+      | LogoutTime     | TotalTime     | 60          |                                 |
+      | Password       | ExpiryDay     | 90          |                                 |
+      | Password       | MaxCount      | 5           |                                 |
+      | Password       | WaitSecond    | 30          |                                 |
+      | Present        | brightness    | 0           |                                 |
+      | Present        | contrast      | 20          |                                 |
+      | Present        | FoV           | 10.0        |                                 |
+      | RefralIndex    | AIR           | 1           | Refractive Index - Air          |
+      | RefralIndex    | CONT          | 1.44        | Refractive Index - Contrast     |
+      | RefralIndex    | SALI          | 1.333       | Refractive Index - Saline       |
+      | Terms&Cond     | AgreeYN       | [null]      | [null]                          |
+      | TestMode       | AIFFR         | Y           | Raywatt;                        |
+      | TestMode       | AutoPB        | Y           | Raywatt;                        |
+      | TestMode       | CertIgnore    | Y           | Raywatt;                        |
+      | TestMode       | Compensate    | Y           | Raywatt;                        |
+      | TestMode       | FG            | Y           | Raywatt;                        |
+      | TestMode       | Power         | Y           | Raywatt;                        |
+      | TestMode       | RJ            | Y           | Raywatt;                        |
+      | TestMode       | Sidebranch    | Y           | Raywatt;                        |-->
+- raycore.ini 파일
+   - 위치: C:\Raywatt\system\runtime
+   - 파라미터 변경 하기전, 프로그램을 종료 후 변경
+   - 주요 확인 필요한 파라미터
+      - LaserModule: 레이저 sweep 및 광학 제어
+      - StepMotor: 
+         - UnLoadDistance: 체결 관련 파라미터 (Default 값: 9650)   
+         (※ 시스템 마다 체결 조절이 상이할수 있으므로 변경하며 최적의 값 입력)
+      - BLDCMotor: BLDC 관련 파라미터
+         - VelocityPullback: BLDC 회전 속도 제어  
+         (※ 만약 400rpm이 불가능한 RJ라면 속도를 줄여서 맞는 rpm으로 설정)
+      - Catheter: Cather 검사 관련 파라미터
+         - CatheterRFID: Catheter의 RFID를 사용하지 않을 시, 0으로 설정
+         (※ 사용시, 1로 설정)
+
 ## Local 환경 설정 참고
 
 - App 종료 시, Power Off/Switch User가 호출되지 않도록 설정 방법(https://github.com/Raywatt/RaywattOCT/pull/173#issue-1892013269)
@@ -260,10 +325,3 @@ Intravascular OCT System Development Project
   ※ 아래와 같이 buffer 컬럼에 본인 windows의 계정 추가 필요
   
   ![image](https://github.com/Raywatt/RaywattOCT/assets/110812182/03acbcd1-8f77-40fa-a29d-cfaac5860787)
-
-
-## 설정 후, 꼭 확인해야 하는 항목 (App Test)
-
-- Manual Calibration 실행해서 ML 기능 확인
-  - 첫 실행이면 C:\Raywatt\system\asdf\model\yolo에서 engine 파일이 실행일자로 생성되었는지 확인
-- Tiff 저장 기능 확인
