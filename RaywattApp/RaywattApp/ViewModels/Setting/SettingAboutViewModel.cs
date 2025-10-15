@@ -10,8 +10,6 @@ using System.Configuration;
 using System.Windows.Input;
 using RaywattApp.Models;
 using System;
-using System.Windows;
-using System.Windows.Interop;
 using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels.Setting
@@ -22,9 +20,7 @@ namespace RaywattApp.ViewModels.Setting
 
         private readonly SqlManager _sqlManager;
         private readonly UsbDetectionService _usbDetectionService;
-        private IDialogService _dialogService;
-        private IntPtr _windowHandle;
-        private HwndSource _hwndSource;
+        private readonly IDialogService _dialogService;
 
         private ICommand _softwareUpdateCommand;
         public ICommand SoftwareUpdateCommand
@@ -51,7 +47,7 @@ namespace RaywattApp.ViewModels.Setting
 
             SoftwareName = ConfigurationManager.AppSettings.Get("SoftwareName");
             SoftwareVersion = ConfigurationManager.AppSettings.Get("SoftwareVersion");
-            
+
             // 펌웨어 버전 읽기
             LoadFirmwareVersion();
 
@@ -63,85 +59,25 @@ namespace RaywattApp.ViewModels.Setting
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             _log.Debug("OnNavigated");
-            RegisterUsbDetection();
+            _usbDetectionService.RegisterUsbDetection();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
             _log.Debug("OnNavigating");
-            UnregisterUsbDetection();
-        }
-
-        private void RegisterUsbDetection()
-        {
-            try
-            {
-                var mainWindow = Application.Current.MainWindow;
-                if (mainWindow != null)
-                {
-                    var windowHelper = new WindowInteropHelper(mainWindow);
-                    _windowHandle = windowHelper.Handle;
-                    
-                    if (_windowHandle != IntPtr.Zero)
-                    {
-                        _usbDetectionService.RegisterForDeviceNotification(_windowHandle);
-                        
-                        // Windows 메시지 후킹 추가
-                        _hwndSource = HwndSource.FromHwnd(_windowHandle);
-                        if (_hwndSource != null)
-                        {
-                            _hwndSource.AddHook(WndProc);
-                            _log.Debug("USB device notification registered successfully");
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.Error($"Error registering USB detection: {ex.Message}", ex);
-            }
-        }
-
-        private void UnregisterUsbDetection()
-        {
-            try
-            {
-                if (_hwndSource != null)
-                {
-                    _hwndSource.RemoveHook(WndProc);
-                    _hwndSource = null;
-                    _log.Debug("USB device notification unregistered");
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.Error($"Error unregistering USB detection: {ex.Message}", ex);
-            }
-        }
-
-        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
-        {
-            // USB 장치 변경 메시지 처리
-            _usbDetectionService.ProcessWindowMessage(msg, wParam, lParam);
-            return IntPtr.Zero;
+            _usbDetectionService.UnregisterUsbDetection();
         }
 
         private void OnUsbDeviceArrived()
         {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                _log.Debug("USB device arrived event received in SettingAboutViewModel");
-                // 필요시 UI 업데이트나 추가 로직 처리
-            });
+            _log.Debug("USB device arrived event received in SettingAboutViewModel");
+            // 필요시 UI 업데이트나 추가 로직 처리
         }
 
         private void OnUsbDeviceRemoved()
         {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                _log.Debug("USB device removed event received in SettingAboutViewModel");
-                // 필요시 UI 업데이트나 추가 로직 처리
-            });
+            _log.Debug("USB device removed event received in SettingAboutViewModel");
+            // 필요시 UI 업데이트나 추가 로직 처리
         }
 
         public void SoftwareUpdate()
@@ -156,7 +92,6 @@ namespace RaywattApp.ViewModels.Setting
                 {
                     _log.Debug("USB drive not found");
 
-                    
                     parameter["title"] = _l10n["Information"];
                     parameter["message"] = "USB drive not found. Please connect a USB drive and try again.";
 
@@ -174,19 +109,18 @@ namespace RaywattApp.ViewModels.Setting
                 if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
                 {
                     _log.Debug("User selected software update");
-                        
+
                     Dictionary<string, object> returnData = (Dictionary<string, object>)result.DialogReturn;
                     bool shouldUpdate = (bool)returnData["shouldUpdate"];
-                        
+
                     if (shouldUpdate)
                     {
-                        //var updateItems = returnData["updateItems"];
                         var usbDriveName = returnData["usbDriveName"].ToString();
-                            
+
                         _log.Debug($"Starting update - USB Drive: {usbDriveName}");
-                            
+
                         // TODO[haeun]: 여기서 펌웨어 업데이트 또는 소프트웨어 업데이트 작업을 수행
-                            
+
                         Dictionary<string, object> successParameter = new Dictionary<string, object>();
                         successParameter["title"] = _l10n["Information"];
                         successParameter["message"] = _l10n["Software update initiated successfully"];
@@ -197,17 +131,17 @@ namespace RaywattApp.ViewModels.Setting
                 {
                     _log.Debug("User canceled software update");
                 }
-              
+
             }
             catch (Exception ex)
             {
                 _log.Error($"Error occurred during software update: {ex.Message}", ex);
-                
+
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["title"] = _l10n["Error"];
                 parameter["message"] = $"An error occurred during software update: {ex.Message}";
                 parameter["error"] = true;
-                
+
                 var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
             }
         }
@@ -217,7 +151,7 @@ namespace RaywattApp.ViewModels.Setting
             try
             {
                 RayGetRJFirmwareVersion(out int major, out int minor, out int patch, out bool isBootMode);
-                
+
                 if (isBootMode)
                 {
                     FirmwareVersion = $"(Boot_){major}.{minor}.{patch}";
@@ -236,7 +170,7 @@ namespace RaywattApp.ViewModels.Setting
             }
         }
 
-        // IDisposable 패턴 구현하여 리소스 정리
+        // IDisposable 패턴 구현
         private bool _disposed = false;
 
         protected virtual void Dispose(bool disposing)
@@ -245,8 +179,6 @@ namespace RaywattApp.ViewModels.Setting
             {
                 if (disposing)
                 {
-                    UnregisterUsbDetection();
-                    
                     if (_usbDetectionService != null)
                     {
                         _usbDetectionService.DeviceArrived -= OnUsbDeviceArrived;

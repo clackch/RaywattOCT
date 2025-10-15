@@ -4,68 +4,82 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Windows;
+using System.Windows.Interop;
 
 namespace RaywattApp.Services
 {
-    public class UsbDetectionService
+    public class UsbDetectionService : IDisposable
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(UsbDetectionService));
 
         private const int WM_DEVICECHANGE = 0x0219;
         private const int DBT_DEVICEARRIVAL = 0x8000;
         private const int DBT_DEVICEREMOVECOMPLETE = 0x8004;
-        private const int DBT_DEVTYP_VOLUME = 0x00000002;
+
+        private IntPtr _windowHandle;
+        private HwndSource _hwndSource;
+        private bool _disposed = false;
 
         public event Action DeviceArrived;
         public event Action DeviceRemoved;
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        private static extern IntPtr RegisterDeviceNotification(IntPtr recipient, IntPtr notificationFilter, int flags);
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct DEV_BROADCAST_DEVICEINTERFACE
-        {
-            public int dbcc_size;
-            public int dbcc_devicetype;
-            public int dbcc_reserved;
-        }
 
         public UsbDetectionService()
         {
             _log.Debug("UsbDetectionService");
         }
 
-        public void RegisterForDeviceNotification(IntPtr windowHandle)
+        public void RegisterUsbDetection()
         {
-            _log.Debug("Registering for USB device notifications");
-
-            // USB 장치 알림을 위한 필터 설정
-            DEV_BROADCAST_DEVICEINTERFACE deviceInterface = new DEV_BROADCAST_DEVICEINTERFACE
+            try
             {
-                dbcc_size = Marshal.SizeOf(typeof(DEV_BROADCAST_DEVICEINTERFACE)),
-                dbcc_devicetype = DBT_DEVTYP_VOLUME,
-                dbcc_reserved = 0
-            };
+                var mainWindow = Application.Current.MainWindow;
+                if (mainWindow != null)
+                {
+                    var windowHelper = new WindowInteropHelper(mainWindow);
+                    _windowHandle = windowHelper.Handle;
 
-            IntPtr buffer = Marshal.AllocHGlobal(deviceInterface.dbcc_size);
-            Marshal.StructureToPtr(deviceInterface, buffer, true);
-
-            IntPtr result = RegisterDeviceNotification(windowHandle, buffer, 0);
-
-            if (result != IntPtr.Zero)
-            {
-                _log.Debug("USB device notification registration successful");
+                    if (_windowHandle != IntPtr.Zero)
+                    {
+                        _hwndSource = HwndSource.FromHwnd(_windowHandle);
+                        if (_hwndSource != null)
+                        {
+                            _hwndSource.AddHook(WndProc);
+                            _log.Debug("USB device notification registered successfully");
+                        }
+                    }
+                }
             }
-            else
+            catch (Exception ex)
             {
-                _log.Error("Failed to register for USB device notifications");
+                _log.Error($"Error registering USB detection: {ex.Message}", ex);
             }
-
-            Marshal.FreeHGlobal(buffer);
         }
 
-        public void ProcessWindowMessage(int msg, IntPtr wParam, IntPtr lParam)
+        public void UnregisterUsbDetection()
+        {
+            try
+            {
+                if (_hwndSource != null)
+                {
+                    _hwndSource.RemoveHook(WndProc);
+                    _hwndSource = null;
+                    _log.Debug("USB device notification unregistered");
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Error unregistering USB detection: {ex.Message}", ex);
+            }
+        }
+
+        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            ProcessWindowMessage(msg, wParam, lParam);
+            return IntPtr.Zero;
+        }
+
+        private void ProcessWindowMessage(int msg, IntPtr wParam, IntPtr lParam)
         {
             if (msg == WM_DEVICECHANGE)
             {
@@ -73,21 +87,36 @@ namespace RaywattApp.Services
                 {
                     case DBT_DEVICEARRIVAL:
                         _log.Debug("USB Drive detected - Device arrival event");
-                        DeviceArrived?.Invoke();
+                        OnDeviceArrived();
                         break;
                     case DBT_DEVICEREMOVECOMPLETE:
                         _log.Debug("USB Drive removed - Device removal event");
-                        DeviceRemoved?.Invoke();
+                        OnDeviceRemoved();
                         break;
                 }
             }
+        }
+
+        private void OnDeviceArrived()
+        {
+            Application.Current?.Dispatcher.Invoke(() =>
+            {
+                DeviceArrived?.Invoke();
+            });
+        }
+
+        private void OnDeviceRemoved()
+        {
+            Application.Current?.Dispatcher.Invoke(() =>
+            {
+                DeviceRemoved?.Invoke();
+            });
         }
 
         public List<UpdateItem> GetUsbFirmwareItems()
         {
             try
             {
-                // USB 드라이브 찾기
                 var usbDrives = DriveInfo.GetDrives()
                     .Where(drive => drive.DriveType == DriveType.Removable && drive.IsReady)
                     .ToList();
@@ -99,7 +128,6 @@ namespace RaywattApp.Services
                     return new List<UpdateItem>();
                 }
 
-                // TODO[haeun]: 여러 개 USB 드라이브 중에서 선택하도록 수정
                 var usbDrive = usbDrives.First();
                 _log.Debug($"Using USB drive: {usbDrive.Name}");
 
@@ -121,8 +149,6 @@ namespace RaywattApp.Services
                     try
                     {
                         string dirName = Path.GetFileName(dir);
-
-                        // 폴더 안에 .bin 파일이 있는지 확인
                         var binFiles = Directory.GetFiles(dir, "*.bin");
 
                         if (binFiles.Length == 0)
@@ -131,11 +157,10 @@ namespace RaywattApp.Services
                             continue;
                         }
 
-                        // UpdateItem 생성 (폴더명을 버전으로 사용)
                         firmwareItems.Add(new UpdateItem(
-                            dirName,                          // version (폴더명)
-                            dir,                              // filePath (버전 폴더 경로)
-                            Directory.GetLastWriteTime(dir)   // lastModified
+                            dirName,
+                            dir,
+                            Directory.GetLastWriteTime(dir)
                         ));
                     }
                     catch (Exception ex)
@@ -190,6 +215,29 @@ namespace RaywattApp.Services
                 _log.Error($"Error checking for USB drive: {ex.Message}", ex);
                 return false;
             }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    UnregisterUsbDetection();
+                }
+                _disposed = true;
+            }
+        }
+
+        ~UsbDetectionService()
+        {
+            Dispose(false);
         }
     }
 }
