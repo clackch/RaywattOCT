@@ -1960,17 +1960,36 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			Sleep(50);
 		}
 		auto const& sheathInfo = pSystem->m_vCalibrationInfo;
-		int validSheathCount = 0, idealRow = 35;
+		int validSheathCount = 0, needAdjustCount = 0, idealRow = 30;
+		float avgDiff = 0.0f;
 		for(auto const& val : sheathInfo)
 		{
 			PLOGI.printf("sheath check - row : %d", val.first);
-			if (abs(val.first - idealRow) < 10) {
+			int diffIdeal = val.first - idealRow;
+			if (abs(diffIdeal) < 20) {
 				validSheathCount++;
+				if (diffIdeal > 5) {
+					needAdjustCount++;
+					avgDiff += diffIdeal;
+				}
+				else if (diffIdeal < -5) {
+					needAdjustCount--;
+					avgDiff += diffIdeal;
+				}
 				//PLOGI.printf("sheath check - true");
 			}
 		}
-		if(validSheathCount > sheathInfo.size()/2)
+		if (validSheathCount > sheathInfo.size() / 2) {
+			if (abs(needAdjustCount) > sheathInfo.size() / 2) {
+				avgDiff /= abs(needAdjustCount);
+				int adjustDir = (needAdjustCount > 0) ? -1 : 1;
+				int adjustStep = avgDiff * adjustDir * 3; 
+				PLOGI.printf("sheath adjustment - dir : %d, step : %d", needAdjustCount, adjustStep);
+				nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, adjustStep);
+				pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
+			}
 			autoCalibError = RayError::OK;
+		}
 		else
 			autoCalibError = RayError::AutoCalibError;
 

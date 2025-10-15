@@ -542,7 +542,7 @@ void COCTImaging::CalculateMagnitude(cv::Mat img) {
 int i = 0;
 void COCTImaging::CheckSheathPixels(cv::Mat img)
 {
-	//i++;
+	i++;
 	// 1. 클론 이미지 생성
 	cv::Mat cloneImg = img.clone();
 	cv::rotate(cloneImg, cloneImg, cv::ROTATE_90_COUNTERCLOCKWISE);
@@ -562,7 +562,7 @@ void COCTImaging::CheckSheathPixels(cv::Mat img)
 	cv::Mat result;
 	cv::matchTemplate(cloneImg, autoCalibPatch, result, cv::TM_CCOEFF_NORMED);
 
-	int maxRowVal = INT_MIN, maxRowIdx = 0;
+	/*int maxRowVal = INT_MIN, maxRowIdx = 0;
 	for(int y = 0; y < result.rows; y++)
 	{
 		float rowSum = 0;
@@ -576,15 +576,20 @@ void COCTImaging::CheckSheathPixels(cv::Mat img)
 			maxRowIdx = y;
 		}
 		PLOGI.printf("row %d, sum: %f", y, rowSum);
-	}
-	if (maxRowVal < 1000) {
-		PLOGI.printf("CheckSheathPixels - maxRowVal is too small: %d", maxRowVal);
+	}*/
+
+	cv::Mat mask = result != 1.0f;
+	double maxVal; cv::Point maxLoc;
+	cv::minMaxLoc(result, nullptr, &maxVal, nullptr, &maxLoc, mask);
+
+	if (maxVal < 0.7) {
+		PLOGI.printf("CheckSheathPixels - maxRowVal is too small: %d", maxVal);
 		m_nPixelNum = 0;
 	}
 	//PLOGI.printf("check the time - pixelCount: %d", pixelCount);
 	else
 	{
-		m_nPixelNum = maxRowIdx;
+		m_nPixelNum = maxLoc.y;
 	}
 }
 
