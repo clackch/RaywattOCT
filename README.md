@@ -49,7 +49,7 @@ Intravascular OCT System Development Project
 
 4. 변경 내용 추가 방법  
       (a) DB Table 변경 할 시, 3번 항목의 (c) ~ (f) 실행
-5. Import/Export 방법
+5. Import/Export 방법  
 ![image](https://github.com/Raywatt/RaywattOCT/assets/110812182/01b59980-fc50-487e-bf83-46a3f7d2fc51)
 
 (Tool에서 Import/Export 기능 불가 시 [링크](https://velog.io/@myway00/Postgre-error-Utility-file-not-found.-Please-correct-the-Binary-Path-in-the-Preferences-dialog-오류-해결-1분만-투자하면-해결-ㅆㄱㄴ) 참고)
@@ -171,9 +171,11 @@ Intravascular OCT System Development Project
 ## [RJ Firmware]
 
 RJ Firmware 설치 안되어있으면 설치 필요   
-1. ```RJTestGUI.exe``` 실행
+1. ```RJTestGUI.exe``` 실행  
+<img src="./Document/img/RJ_Firmware_Test_GUI.png" width="50%">
 2. Setup 버튼 클릭 하여 연결
 3. F/W Download 탭 이동  
+<img src="./Document/img/RJ_Firmware_Test_GUI_FW.png" width="50%">
 4. 조회를 통하여 현재 F/W 버전 확인
 5. 최신 F/W 업데이트 필요 시, 파일 선택 버튼 클릭 및 파일 선택
    - 파일 확장자: ```.bin```  
@@ -327,3 +329,8 @@ RJ Firmware 설치 안되어있으면 설치 필요
   
   ![image](https://github.com/Raywatt/RaywattOCT/assets/110812182/03acbcd1-8f77-40fa-a29d-cfaac5860787)
 -->
+## [FGServer]
+1. IDEA Auto-SYNC 설치  
+![image](/img/RJ_Firmware_Test_GUI.png)
+2. Angiosetup 설치
+3. .Net framework 8.0 설치
