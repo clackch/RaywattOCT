@@ -168,6 +168,7 @@ RayError COCTSystem::Start() {
 	m_pImagingLiveView->Start();
 
 	m_pAcqDevice = new CATSDevice(config.acquisition);
+	m_pRJController->SetCatheterUsage(config.catheter.catheterUsage);
 
 	return RayError::OK;
 }
@@ -2161,7 +2162,6 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 
 	if (pSystem->m_pThreadRotaryJunction->isRun) {
 		pSystem->m_bFirstLoad = true;
-		pRJController->SetCatheterUsage(config.catheter.catheterUsage);
 		pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::LoadCatheter);
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loading);
 	}
