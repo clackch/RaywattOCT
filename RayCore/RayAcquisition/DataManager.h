@@ -31,7 +31,8 @@ public:
 	enum class ExtraData : UCHAR {
 		None = 0x00,
 		Dispersion = 0x01,
-		Background = 0x02
+		Background = 0x02,
+		RFID = 0x04
 	};
 
 public:

@@ -1394,6 +1394,17 @@ RayError COCTSystem::SetRefractiveIndex(double value)
 	return RayError::OK;
 }
 
+
+RFIDProtocol::SRFIDState COCTSystem::GetRFIDData() {
+	RFIDProtocol::SRFIDState rfidState;
+	RFIDProtocol::getCurRFIDData(&rfidState);
+	return rfidState;
+}
+
+UINT COCTSystem::GetRFIDUID(BYTE* pBuff) {
+	return m_pRJController->GetRFIDUID(pBuff);
+}
+
 /*
 * threadService
 */
@@ -1575,6 +1586,7 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 
 	IImaging::Setting settingPullback = pSystem->m_pImagingPullback->GetSetting();
 	UCHAR extraData = (UCHAR)OCTHeader::ExtraData::Dispersion;
+	extraData |= (UCHAR)OCTHeader::ExtraData::RFID;
 	if (type == ImagingType::LabImaging)
 	{
 		extraData |= (UCHAR)OCTHeader::ExtraData::Background;
@@ -1590,6 +1602,11 @@ UINT COCTSystem::threadSaveRaw(LPVOID param) {
 		USHORT* pBackgroundData = ((CLabImaging*)pImaging)->GetBackground();
 		pDataWriter->WriteExtraData(pBackgroundData, settingPullback.nBufferSize * sizeof(USHORT));
 	}
+
+	//RFID hardwareuid+customuid
+	unsigned char rfidUID[MAX_PATH];
+	int uidL = pSystem->GetRFIDUID(rfidUID);
+	pDataWriter->WriteExtraData(rfidUID, uidL * sizeof(unsigned char));
 
 	for (nFrame = 0; nFrame < nNumOfSamples && pSystem->m_pThreadSaveRaw->isRun; nFrame++) {
 		pDataWriter->WriteFrame(nFrame);
@@ -2011,6 +2028,13 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 		pDataWriter->AddExtraData(OCTHeader::ExtraData::Background, 
 			((CLabImaging*)pSystem->m_pImagingPullback)->GetBackground(), settingPullback.nBufferSize * sizeof(USHORT));
 	}
+
+
+	//RFID hardwareuid+customuid
+	unsigned char rfidUID[MAX_PATH];
+	int uidL = pSystem->GetRFIDUID(rfidUID);
+	pDataWriter->AddExtraData(OCTHeader::ExtraData::RFID, rfidUID, uidL * sizeof(unsigned char));
+
 	pDataWriter->StartRecording();
 	pSystem->m_pAcqDevice->SetWriter(pDataWriter);
 
@@ -2115,6 +2139,13 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 	std::vector<std::vector<std::string>> loadCommands = pSystem->readLoadSequence();
 
 	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterLoading);
+
+	//test
+
+	/*pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::LoadCatheter);
+	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loading);
+	pSystem->postMessage(WM_NOTIFY_ERROR_OCCURED, (WPARAM)RayError::CatheterNotValid);
+	return NO_ERROR;*/
 
 	if (pRJController->IsConnected()) {
 		pRJController->changeSMProfileToLoadUnload();

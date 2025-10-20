@@ -200,6 +200,8 @@ public:
 	double GetLumenSnrThreshold();
 	RayError SetLumenSnrThreshold(double value);
 	RayError SetRefractiveIndex(double value);
+	RFIDProtocol::SRFIDState GetRFIDData();
+	UINT GetRFIDUID(BYTE* pBuff);
 
 private:
 	// Main Thread

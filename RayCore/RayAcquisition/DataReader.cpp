@@ -120,7 +120,13 @@ OCTHeader CDataReader::ReadHeader(tstring strFilePath)
 					PLOGI.printf("Background ExtraData Size = %d", nSize);
 				}
 			}
-
+			if (header.extraData & (UCHAR)OCTHeader::ExtraData::RFID) {
+				int nSize = (8) * sizeof(unsigned char);
+				if (readExtraData(hFile, OCTHeader::ExtraData::RFID, nSize)) {
+					m_nHeaderSize += nSize;
+					PLOGI.printf("RFID data Size = %d", nSize);
+				}
+			}
 			long long offset = header.width * header.height * header.frames * (int)header.dataType * (int)header.channels;
 			long offsetL = 0xFFFFFFFF & offset;
 			long offsetH = 0xFFFFFFFF & (offset >> 32);
