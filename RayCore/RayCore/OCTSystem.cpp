@@ -39,6 +39,10 @@ COCTSystem::COCTSystem() {
 	catheterRFID = config.catheter.catheterRFID;
 
 	SetLogger(config.logRootPath);
+	if (config.laserModule.autoCalibrationForSeverance != 0)
+		PLOGI.printf("auto Calibration is set for Severance");
+	else
+		PLOGI.printf("auto Calibration is set for General");
 }
 
 /*
@@ -1826,7 +1830,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 				}
 			}
 			avgGradient /= (double)(gradient.size() - 2);
-			PLOGI.printf("avgGradient : %f, maxGradient : %d, diff : %d", avgGradient, abs(gradient[maxIndex]), abs(info[maxIndex].second - Loc));
+			//PLOGI.printf("avgGradient : %f, maxGradient : %d, diff : %d", avgGradient, abs(gradient[maxIndex]), abs(info[maxIndex].second - Loc));
 
 			int maxGradientCheck = abs(gradient[maxIndex - 1]);
 			if (maxGradientCheck < abs(gradient[maxIndex]))
