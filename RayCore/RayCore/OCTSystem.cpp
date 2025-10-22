@@ -1828,35 +1828,36 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 				}
 			}
 			avgGradient /= (double)(gradient.size() - 2);
-			PLOGI.printf("avgGradient : %f, maxGradient : %d, diff : %d", avgGradient, abs(gradient[maxIndex]), abs(info[maxIndex].second - Loc));
+			//PLOGI.printf("avgGradient : %f, maxGradient : %d, diff : %d", avgGradient, abs(gradient[maxIndex]), abs(info[maxIndex].second - Loc));
 
 			int maxGradientCheck = abs(gradient[maxIndex - 1]);
 			if (maxGradientCheck < abs(gradient[maxIndex]))
 				maxGradientCheck = abs(gradient[maxIndex]);
-			//if (abs(info[maxIndex].second - Loc) < 600 /* ±2 frame 정도의 step 차이 */
-			//	|| abs(info[maxIndex].second - Loc) < 1500 && abs(gradient[maxIndex - 1]) > avgGradient * 3)
-			//	Loc = info[maxIndex].second;
-			//else {
-			//	// min 위치와 max 위치가 너무 멀리 떨어져 있는 경우 올바르지 않은 위치로 간주
-			//	int valDist = 10000000; // min 좌우의 값 차이가 유효할 정도로 큰지 확인하기 위한 임계값
-			//	int adjustVal = 200; // min loc에서 올바른 위치 이동하기 위한 보정값
-
-			//	int nowIndex = minIndex;
-			//	if (abs(info[nowIndex - 2].first - info[nowIndex + 2].first) < valDist) {
-			//		if (nowIndex - 2 >= 0 && nowIndex + 1 < gradient.size() &&
-			//			abs(gradient[nowIndex - 2] - gradient[nowIndex - 1]) > abs(gradient[nowIndex] - gradient[nowIndex + 1]))
-			//			Loc += adjustVal;
-			//		else
-			//			Loc -= adjustVal;
-			//	}
-			//	else {
-			//		if (info[nowIndex - 2].first > info[nowIndex + 2].first) {
-			//			Loc += adjustVal;
-			//		}
-			//		else
-			//			Loc -= adjustVal;
-			//	}
-			//}
+			/* 세브란스 장비와 일반 장비 둘 다 동일하게 적용하기 위해 사용했던 로직. 현재는 분기 처리로 대체
+			if (abs(info[maxIndex].second - Loc) < 600 //±2 frame 정도의 step 차이
+				|| abs(info[maxIndex].second - Loc) < 1500 && abs(gradient[maxIndex - 1]) > avgGradient * 3)
+				Loc = info[maxIndex].second;
+			else {
+				// min 위치와 max 위치가 너무 멀리 떨어져 있는 경우 올바르지 않은 위치로 간주
+				int valDist = 10000000; // min 좌우의 값 차이가 유효할 정도로 큰지 확인하기 위한 임계값
+				int adjustVal = 200; // min loc에서 올바른 위치 이동하기 위한 보정값
+				int nowIndex = minIndex;
+				if (abs(info[nowIndex - 2].first - info[nowIndex + 2].first) < valDist) {
+					if (nowIndex - 2 >= 0 && nowIndex + 1 < gradient.size() &&
+						abs(gradient[nowIndex - 2] - gradient[nowIndex - 1]) > abs(gradient[nowIndex] - gradient[nowIndex + 1]))
+						Loc += adjustVal;
+					else
+						Loc -= adjustVal;
+				}
+				else {
+					if (info[nowIndex - 2].first > info[nowIndex + 2].first) {
+						Loc += adjustVal;
+					}
+					else
+						Loc -= adjustVal;
+				}
+			}
+			*/
 			Loc = info[maxIndex].second;
 		}
 		
@@ -1921,12 +1922,6 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 				int nowRow = pSystem->m_vCalibrationInfo.at(i).first;
 				if (abs(nowRow - idealRow) < minDiff)
 				{
-					//if (i > 0 && i < pSystem->m_vCalibrationInfo.size() - 1) {		// 가장자리 프레임이 아닌 경우에만 고려
-					//	int beforeGradient = pSystem->m_vCalibrationInfo.at(i).first - pSystem->m_vCalibrationInfo.at(i - 1).first;
-					//	int afterGradient = pSystem->m_vCalibrationInfo.at(i + 1).first - pSystem->m_vCalibrationInfo.at(i).first;
-					//	if (beforeGradient > 0 && afterGradient < 0)		// noise에 의한 극댓값인 경우는 제외
-					//		continue;
-					//}
 					closestIdx = i;
 					minDiff = abs(nowRow - idealRow);
 				}

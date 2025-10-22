@@ -562,22 +562,6 @@ void COCTImaging::CheckSheathPixels(cv::Mat img)
 	cv::Mat result;
 	cv::matchTemplate(cloneImg, autoCalibPatch, result, cv::TM_CCOEFF_NORMED);
 
-	/*int maxRowVal = INT_MIN, maxRowIdx = 0;
-	for(int y = 0; y < result.rows; y++)
-	{
-		float rowSum = 0;
-		for(int x = 0; x < result.cols; x++)
-		{
-			rowSum += result.at<float>(y, x);
-		}
-		if(maxRowVal < rowSum)
-		{
-			maxRowVal = rowSum;
-			maxRowIdx = y;
-		}
-		PLOGI.printf("row %d, sum: %f", y, rowSum);
-	}*/
-
 	cv::Mat mask = result != 1.0f;
 	double maxVal; cv::Point maxLoc;
 	cv::minMaxLoc(result, nullptr, &maxVal, nullptr, &maxLoc, mask);
@@ -590,6 +574,25 @@ void COCTImaging::CheckSheathPixels(cv::Mat img)
 	else
 	{
 		m_nPixelNum = maxLoc.y;
+
+		/* section을 나눠 sheath 파악 안정성 추가
+		m_nPixelNum = 0;
+		int validCount = 0, sectionDivision = 4, height = result.rows, width = result.cols / sectionDivision;
+		for(int i =0; i < sectionDivision; i++)
+		{
+			cv::Mat section = result(cv::Rect(i * width, 0, width, height));
+			cv::Mat sectionMask = section != 1.0f;
+			cv::Point sectionMaxLoc;
+			cv::minMaxLoc(section, nullptr, nullptr, nullptr, &sectionMaxLoc, sectionMask);
+			if(std::abs(sectionMaxLoc.y - maxLoc.y) < 15)
+			{
+				m_nPixelNum += sectionMaxLoc.y;
+				validCount++;
+			}
+		}
+		if(validCount > 0)
+			m_nPixelNum /= validCount;
+		*/
 	}
 }
 
