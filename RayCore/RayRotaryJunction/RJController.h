@@ -4,6 +4,7 @@
 #include "RFIDProtocol.h"
 #include "MotorController.h"
 #include "WriteTaskController.h"
+#include "FirmwareUpdate.h"
 #include <vector>
 #include <iomanip>
 #define ENABLE_RFID		false
@@ -104,6 +105,15 @@ private:
 	WriteTaskController* m_resendManager;
 	SFWVersionInfo m_fwVersionInfo;
 
+	// Firmware Download Members
+	eFWDownloadState m_fwDownloadState;
+	int m_fwDownloadProgress;
+	int m_fwDownloadIndex;
+	UINT m_fwDownloadSequence;
+	std::vector<BYTE> m_fwImageBuffer;
+	FWProgressCallback m_fwProgressCallback;
+	FWStatusCallback m_fwStatusCallback;
+
 public:
 	CRJController();
 	virtual ~CRJController();
@@ -154,6 +164,13 @@ public:
 	void changeSMProfileToPullback();
 	void changeSMProfileToLoadUnload();
 	void DisableStepMotors();
+
+	// Firmware Download Public Methods
+	bool StartFWDownload(const char* filepath);
+	bool CancelFWDownload();
+	eFWDownloadState GetFWDownloadStatus(int* progress = nullptr);
+	void SetFWProgressCallback(FWProgressCallback callback);
+	void SetFWStatusCallback(FWStatusCallback callback);
   
 protected:
 	void initSetting();
@@ -166,9 +183,17 @@ protected:
 	bool displayLCD(eLCDImage image);
 	void RxPacketRFIDGetState(BYTE* buff, RFID_ReadType type = DEFAULT);
 	void RxPacketGetVersion(BYTE* buff);
+	void RxPacketFWDownload(BYTE* buff, int size);
 	void parseSMPacket(BYTE*packet, int size);
 	virtual void handlePacket();
 	virtual bool writeMotor(BYTE* packet, int size);
 	void resendPacket(eFID fid);
 	void resendAllSaved();
+
+	// Firmware Download Private Methods
+	bool ValidateFWFile(const char* filepath, SFirmwareMetadata& metadata);
+	bool LoadFirmwareData(const char* filepath);
+	bool SendFWDownloadStart();
+	bool SendFWDataChunk();
+	bool SendFWDownloadEnd(bool success);
 };

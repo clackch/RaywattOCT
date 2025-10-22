@@ -154,6 +154,12 @@ public:
 	void* GetGuidewireRadius(int nFrame);
 	void GetRJFirmwareVersion(int* major, int* minor, int* patch, bool* isBootMode);
 	
+	// Firmware Download
+	bool StartFWDownload(const char* filepath);
+	bool CancelFWDownload();
+	void SetFWProgressCallback(FWProgressCallback callback);
+	void SetFWStatusCallback(FWStatusCallback callback);
+	
 	//Property
 	RayScannerState GetCurrentState() { return m_curState; }
 	double GetBrightness();

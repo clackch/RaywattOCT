@@ -171,6 +171,7 @@ xcopy "$(ProjectDir)*Protocol.h" "$(TargetDir)include\" /y /d</Command>
     <ClInclude Include="COMConnection.h" />
     <ClInclude Include="CommonProtocol.h" />
     <ClInclude Include="Connection.h" />
+    <ClInclude Include="FirmwareUpdate.h" />
     <ClInclude Include="LaserModule.h" />
     <ClInclude Include="LaserController.h" />
     <ClInclude Include="MotorController.h" />

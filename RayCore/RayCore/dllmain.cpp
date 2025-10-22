@@ -285,6 +285,22 @@ _declspec(dllexport) void RayGetRJFirmwareVersion(int* major, int* minor, int* p
     octSystem.GetRJFirmwareVersion(major, minor, patch, isBootMode);
 }
 
+_declspec(dllexport) void RayFWSetProgressCallback(FWProgressCallback callback) {
+    octSystem.SetFWProgressCallback(callback);
+}
+
+_declspec(dllexport) void RayFWSetStatusCallback(FWStatusCallback callback) {
+    octSystem.SetFWStatusCallback(callback);
+}
+
+_declspec(dllexport) bool RayFWStartDownload(const char* filepath) {
+    return octSystem.StartFWDownload(filepath);
+}
+
+_declspec(dllexport) bool RayFWCancelDownload() {
+    return octSystem.CancelFWDownload();
+}
+
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
                        LPVOID lpReserved

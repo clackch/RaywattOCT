@@ -15,6 +15,24 @@
 #define DATA_IDX	6
 #define HEADER_LEN	8
 
+// Firmware Download Protocol Commands
+#define REQ_DOWNLOAD_CANCEL		0x00
+#define REQ_DOWNLOAD_BEGIN		0x01
+#define REQ_DOWNLOAD_END		0x02
+#define REQ_DOWNLOAD_BODY		0x03
+#define RSP_DOWNLOAD_DONE		0x0A
+#define RSP_DOWNLOAD_ING		0x0B
+#define RSP_DOWNLOAD_PAUSE		0x0C
+#define RSP_DOWNLOAD_FAIL		0x0D
+#define RSP_DOWNLOAD_READY		0x0E
+
+// Firmware Download Constants
+#define FW_CHUNK_SIZE		240		// Maximum data chunk size per packet
+#define FW_MIN_FILE_SIZE	16		// Minimum file size (metadata)
+#define FW_METADATA_SIZE	16		// Size of metadata at end of file
+#define FW_FLASH_START		0x08010000
+#define FW_FLASH_END		0x08080000
+
 enum class eCOMM_RJ : BYTE {
 	COMM_SUCCESS = 0
 	, COMM_CSUM_FAIL
@@ -40,6 +58,7 @@ enum class eFID : BYTE {
 	, FID_SET_AUTO_PERIOD = 0x11
 	, FID_GET_VERSION = 0x12
 	, FID_FW_DOWNLOAD = 0x13
+	, FID_CPU_RESET = 0x14
 	, FID_SM_GET_CONFIG = 0x20
 	, FID_SM_SET_CONFIG
 	, FID_SM_GET_STATE

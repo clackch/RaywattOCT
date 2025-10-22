@@ -1,5 +1,7 @@
 #pragma once
 #include "define.h"
+#include "FirmwareUpdate.h"
+
 /*
 * 
 * DLL Interface
@@ -59,4 +61,8 @@ extern "C" {
 	_declspec(dllexport) void* RayGetGuidewireRadius(int nFrame);
 	_declspec(dllexport) void RayGetRJFirmwareVersion(int* major, int* minor, int* patch, bool* isBootMode);
 
+	_declspec(dllexport) void RayFWSetProgressCallback(FWProgressCallback callback);
+	_declspec(dllexport) void RayFWSetStatusCallback(FWStatusCallback callback);
+	_declspec(dllexport) bool RayFWStartDownload(const char* filepath);
+	_declspec(dllexport) bool RayFWCancelDownload();
 }

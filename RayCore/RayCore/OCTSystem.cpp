@@ -3103,3 +3103,44 @@ LRESULT COCTSystem::OnMsgNotifyErrorOccured(WPARAM wParam, LPARAM lParam) {
 
 	return NOERROR;
 }
+
+/*
+* StartFWDownload
+*/
+bool COCTSystem::StartFWDownload(const char* filepath) {
+	if (m_pRJController == nullptr) {
+		PLOGI.printf("RJ Controller is null");
+		return false;
+	}
+
+	return m_pRJController->StartFWDownload(filepath);
+}
+
+/*
+* CancelFWDownload
+*/
+bool COCTSystem::CancelFWDownload() {
+	if (m_pRJController == nullptr) {
+		return false;
+	}
+
+	return m_pRJController->CancelFWDownload();
+}
+
+/*
+* SetFWProgressCallback
+*/
+void COCTSystem::SetFWProgressCallback(FWProgressCallback callback) {
+	if (m_pRJController != nullptr) {
+		m_pRJController->SetFWProgressCallback(callback);
+	}
+}
+
+/*
+* SetFWStatusCallback
+*/
+void COCTSystem::SetFWStatusCallback(FWStatusCallback callback) {
+	if (m_pRJController != nullptr) {
+		m_pRJController->SetFWStatusCallback(callback);
+	}
+}
