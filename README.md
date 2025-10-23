@@ -295,19 +295,19 @@ RJ Firmware 설치 안되어있으면 설치 필요
 1. 파일 다운로드  
    FGserver 구성하기 위한 프로그램 다운로드 [링크](https://raywatt-my.sharepoint.com/:f:/p/hwjung/EsxTLO5CRJZBqd7qlC1Q6AgB_PljjmaMyENd5mxoNW8HMQ?e=HDUJqY) 접속  
 
-2. IDEA Auto-SYNC 설치 
-   - IDEA.3.6.017.REL 폴더 안에 ```Install_IDEA.exe``` 실행하여 설치 진행  
-   <img src="./Document/img/IDEA_SETUP.png" width="10%">  
+2. IDEA Auto-SYNC 설치  
+   - IDEA.3.6.017.REL 폴더 안에 ```Install_IDEA.exe``` 실행하여 설치 진행    
+      <img src="./Document/img/IDEA_SETUP.png" width="10%">  
    - 설치 완료 후, 설치 파일 확인  (Auto-Sync)  
-    <img src="./Document/img/AutoSync.png" width="30%">    
-   - 현재(2025-10-23)기준 최신 버전 확인
-      - [링크](https://www.fi-llc.com/support) 접속
+      <img src="./Document/img/AutoSync.png" width="30%">  
+   - 현재(2025-10-23)기준 최신 버전 확인  
+      - [링크](https://www.fi-llc.com/support) 접속  
 3. Angiosetup 설치  
    - 폴더 ```[20250822]Angio Install file``` 접속   
    - Setup.exe 실행하여 설치  
-<img src="./Document/img/AangioSetup.png" width="30%">
+      <img src="./Document/img/AangioSetup.png" width="30%">  
    - 설치가 완료 되면 바탕화면에 바로가기 생성 확인   
-<img src="./Document/img/AngioSetup_ShortCup.png" width="10%">
-4. ```.Net framework 8.0``` 설치 
-   - AngioSetup을 실행 하기 위해선 .Net Framework 8.0 설치 필요
-   - [링크](https://dotnet.microsoft.com/ko-kr/download/dotnet/8.0) 에서 해당 버전을 받아 설치
+      <img src="./Document/img/AngioSetup_ShortCup.png" width="10%">  
+4. .Net framework 8.0 설치  
+   - AngioSetup을 실행 하기 위해선 .Net Framework 8.0 설치 필요  
+   - [링크](https://dotnet.microsoft.com/ko-kr/download/dotnet/8.0) 에서 해당 버전을 받아 설치  
