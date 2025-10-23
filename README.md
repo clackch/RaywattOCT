@@ -49,7 +49,7 @@ Intravascular OCT System Development Project
 
 4. 변경 내용 추가 방법  
       (a) DB Table 변경 할 시, 3번 항목의 (c) ~ (f) 실행
-5. Import/Export 방법
+5. Import/Export 방법  
 ![image](https://github.com/Raywatt/RaywattOCT/assets/110812182/01b59980-fc50-487e-bf83-46a3f7d2fc51)
 
 (Tool에서 Import/Export 기능 불가 시 [링크](https://velog.io/@myway00/Postgre-error-Utility-file-not-found.-Please-correct-the-Binary-Path-in-the-Preferences-dialog-오류-해결-1분만-투자하면-해결-ㅆㄱㄴ) 참고)
@@ -136,7 +136,7 @@ Intravascular OCT System Development Project
 2. 압축 해제
 2. 압축 해제한 cursor 폴더를 ```C:\Raywatt\system\image``` 으로 이동  
 
-**(필요시 진행)Windows Default Mouse Cursor Setting**
+**(필요시 진행) Windows Default Mouse Cursor Setting**
 1. 설정-> Bluethooth 및 장치 -> 마우스
 2. 관련설정 -> 더 많은 마우스 설정
 3. 포인터
@@ -169,35 +169,28 @@ Intravascular OCT System Development Project
 4. 매뉴얼 파일의 목차 1, 2번 진행
 
 ## [RJ Firmware]
-
 RJ Firmware 설치 안되어있으면 설치 필요   
-1. ```RJTestGUI.exe``` 실행
+1. ```RJTestGUI.exe``` 실행  
+<img src="./Document/img/RJ_Firmware_Test_GUI.png" width="35%">
 2. Setup 버튼 클릭 하여 연결
 3. F/W Download 탭 이동  
-4. 조회를 통하여 현재 F/W 버전 확인
-5. 최신 F/W 업데이트 필요 시, 파일 선택 버튼 클릭 및 파일 선택
+<img src="./Document/img/RJ_Firmware_Test_GUI_FW.png" width="35%">
+4. 조회를 통하여 현재 F/W 버전 확인   
+5. 최신 F/W 업데이트 필요 시, ```파일 선택``` 버튼 클릭 및 파일 선택   
    - 파일 확장자: ```.bin```  
-   (※ F/W 파일은 Raywatt3YsPark 프로젝트에서 관리) 
-6. 다운로드 버튼 실행
+   (※ F/W 파일은 Raywatt3YsPark 프로젝트에서 관리)  
+6. ```다운로드``` 버튼 실행   
 
 ## [Windows]
-1. 사용자 계정 추가
-   
+1. 사용자 계정 추가  
    (a) 제어판 > 사용자 계정 > 사용자 계정 > 다른 계정 관리 > PC 설정에서 새 사용자 추가 > 계정 추가 > 이 사람의 로그인 정보를 가지고 있지 않습니다. > Microsoft 계정 없이 사용자 추가
-   
    (b) 사용자 이름 : FASTER / 암호 : faster / 보안 질문 1,2,3 답변 : raywatt
-
-2. 사용자 계정 설정
-   
-   (a) 설정 > 개인 설정 > 색 - 폭풍 선택 (※ Raywatt, FASTER 모두 적용)
-
-   (b) 설정 > 개인 설정 > 잠금 화면 - 로그인 화면에 잠금 화면 배경 그림 표시 (켬 -> 끔) (※ Raywatt, FASTER 모두 적용)
-
-   (c) Font 설정 (※ Raywatt, FASTER 모두 적용)
-
-   (d) [raywattLogoAccount.zip](https://github.com/Raywatt/RaywattOCT/files/12602861/raywattLogoAccount.zip) 다운로드 및 설정 > 계정 사진 변경 > 찾아보기 - 다운받은 이미지 선택 (※ Raywatt, FASTER 모두 적용)
-
-   (e) 마우스 포인터 설정 (※ FASTER에 적용)
+2. 사용자 계정 설정  
+   (a) 설정 > 개인 설정 > 색 - 폭풍 선택 (※ Raywatt, FASTER 모두 적용)  
+   (b) 설정 > 개인 설정 > 잠금 화면 - 로그인 화면에 잠금 화면 배경 그림 표시 (켬 -> 끔) (※ Raywatt, FASTER 모두 적용)  
+   (c) Font 설정 (※ Raywatt, FASTER 모두 적용)  
+   (d) [raywattLogoAccount.zip](https://github.com/Raywatt/RaywattOCT/files/12602861/raywattLogoAccount.zip) 다운로드 및 설정 > 계정 사진 변경 > 찾아보기 - 다운받은 이미지 선택 (※ Raywatt, FASTER 모두 적용)  
+   (e) 마우스 포인터 설정 (※ FASTER에 적용)  
 
 3. PC 설정
 
@@ -268,46 +261,17 @@ RJ Firmware 설치 안되어있으면 설치 필요
 ## 설정 후, 꼭 확인해야 하는 항목 (App Test)
 
 - Manual Calibration 실행해서 ML 기능 확인
-  - 첫 실행 후, ```C:\Raywatt\system\3rdparty\model\yolo```에서 engine 파일이 실행일자로 생성되었는지 확인
-- Tiff 저장 기능 확인
-<!--
-- DataBase
-   - Configuration Table 확인 (업데이트 날짜: 2025-10-14)
-      | classification | key          | value       | buffer                           |
-      |----------------|---------------|-------------|---------------------------------|
-      | AutoPB         | Count         | 2           |                                 |
-      | AutoPB         | LumenMax      | 70          |                                 |
-      | AutoPB         | LumenMin      | 2           |                                 |
-      | AutoPB         | ShowGuide     | N           |                                 |
-      | AutoPB         | SNR           | 1           | Raywatt;                        |
-      | L10N           | en-US         | Y           |                                 |
-      | L10N           | ko-KR         | N           |                                 |
-      | LocalHost      | AeTitle       |             |                                 |
-      | LogoutTime     | PreTime       | 57          |                                 |
-      | LogoutTime     | TotalTime     | 60          |                                 |
-      | Password       | ExpiryDay     | 90          |                                 |
-      | Password       | MaxCount      | 5           |                                 |
-      | Password       | WaitSecond    | 30          |                                 |
-      | Present        | brightness    | 0           |                                 |
-      | Present        | contrast      | 20          |                                 |
-      | Present        | FoV           | 10.0        |                                 |
-      | RefralIndex    | AIR           | 1           | Refractive Index - Air          |
-      | RefralIndex    | CONT          | 1.44        | Refractive Index - Contrast     |
-      | RefralIndex    | SALI          | 1.333       | Refractive Index - Saline       |
-      | Terms&Cond     | AgreeYN       | [null]      | [null]                          |
-      | TestMode       | AIFFR         | Y           | Raywatt;                        |
-      | TestMode       | AutoPB        | Y           | Raywatt;                        |
-      | TestMode       | CertIgnore    | Y           | Raywatt;                        |
-      | TestMode       | Compensate    | Y           | Raywatt;                        |
-      | TestMode       | FG            | Y           | Raywatt;                        |
-      | TestMode       | Power         | Y           | Raywatt;                        |
-      | TestMode       | RJ            | Y           | Raywatt;                        |
-      | TestMode       | Sidebranch    | Y           | Raywatt;                        |-->
+  - 첫 실행 후, ```C:\Raywatt\system\3rdparty\model\yolo```에서 engine 파일이 생성되었는지 확인  
+      - 파일명
+         - detect.engine.NVIDIAGeForceRTX4060LaptopGPU.fp16.1.1
+         - segment.engine.NVIDIAGeForceRTX4060LaptopGPU.fp16.1.1
+<!-- - Tiff 저장 기능 확인 -->
 - raycore.ini 파일
    - 위치: C:\Raywatt\system\runtime
    - 파라미터 변경 하기전, 프로그램을 종료 후 변경
    - 주요 확인 필요한 파라미터
-      - LaserModule: 레이저 sweep 및 광학 제어
+      - LaserModule: 레이저 sweep 및 광학 제어  
+         - DelayLine: 시스템 마다 설정 값 확인 필요
       - StepMotor: 
          - UnLoadDistance: 체결 관련 파라미터 (Default 값: 9650)   
          (※ 시스템 마다 체결 조절이 상이할수 있으므로 변경하며 최적의 값 입력)
@@ -327,3 +291,23 @@ RJ Firmware 설치 안되어있으면 설치 필요
   
   ![image](https://github.com/Raywatt/RaywattOCT/assets/110812182/03acbcd1-8f77-40fa-a29d-cfaac5860787)
 -->
+## [FGServer]
+1. 파일 다운로드  
+   FGserver 구성하기 위한 프로그램 다운로드 [링크](https://raywatt-my.sharepoint.com/:f:/p/hwjung/EsxTLO5CRJZBqd7qlC1Q6AgB_PljjmaMyENd5mxoNW8HMQ?e=HDUJqY) 접속  
+
+2. IDEA Auto-SYNC 설치 
+   - IDEA.3.6.017.REL 폴더 안에 ```Install_IDEA.exe``` 실행하여 설치 진행  
+   <img src="./Document/img/IDEA_SETUP.png" width="10%">  
+   - 설치 완료 후, 설치 파일 확인  (Auto-Sync)  
+    <img src="./Document/img/AutoSync.png" width="30%">    
+   - 현재(2025-10-23)기준 최신 버전 확인
+      - [링크](https://www.fi-llc.com/support) 접속
+3. Angiosetup 설치  
+   - 폴더 ```[20250822]Angio Install file``` 접속   
+   - Setup.exe 실행하여 설치  
+<img src="./Document/img/AangioSetup.png" width="30%">
+   - 설치가 완료 되면 바탕화면에 바로가기 생성 확인   
+<img src="./Document/img/AngioSetup_ShortCup.png" width="10%">
+4. ```.Net framework 8.0``` 설치 
+   - AngioSetup을 실행 하기 위해선 .Net Framework 8.0 설치 필요
+   - [링크](https://dotnet.microsoft.com/ko-kr/download/dotnet/8.0) 에서 해당 버전을 받아 설치
