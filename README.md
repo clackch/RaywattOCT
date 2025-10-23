@@ -300,6 +300,8 @@ RJ Firmware 설치 안되어있으면 설치 필요
    <img src="./Document/img/IDEA_SETUP.png" width="10%">  
    - 설치 완료 후, 설치 파일 확인  (Auto-Sync)  
     <img src="./Document/img/AutoSync.png" width="30%">    
+   - 현재(2025-10-23)기준 최신 버전 확인
+      - [링크](https://www.fi-llc.com/support) 접속
 3. Angiosetup 설치  
    - 폴더 ```[20250822]Angio Install file``` 접속   
    - Setup.exe 실행하여 설치  
