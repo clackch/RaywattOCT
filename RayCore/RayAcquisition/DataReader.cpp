@@ -1,6 +1,7 @@
 #include "Config.h"
 #include "DataReader.h"
 #include <fstream>
+#include <iomanip>
 
 CDataReader::CDataReader() {
 	m_nDataSize = 0;
@@ -122,9 +123,20 @@ OCTHeader CDataReader::ReadHeader(tstring strFilePath)
 			}
 			if (header.extraData & (UCHAR)OCTHeader::ExtraData::RFID) {
 				int nSize = (8) * sizeof(unsigned char);
+				std::vector<unsigned char> rfidData(nSize);
 				if (readExtraData(hFile, OCTHeader::ExtraData::RFID, nSize)) {
 					m_nHeaderSize += nSize;
 					PLOGI.printf("RFID data Size = %d", nSize);
+
+					auto dataPtr = mapExtraData[OCTHeader::ExtraData::RFID];
+
+					std::ostringstream oss;
+					oss << std::hex << std::uppercase << std::setfill('0');
+					for (int i = 0; i < nSize; i++) {
+						oss << std::setw(2) << static_cast<int>(dataPtr[i]) << " ";
+					}
+
+					PLOGI.printf("RFID (hex): %s", oss.str().c_str());
 				}
 			}
 			long long offset = header.width * header.height * header.frames * (int)header.dataType * (int)header.channels;
