@@ -113,6 +113,15 @@ namespace RaywattOCT
             Compare
         }
 
+        public enum FirmwareUpdateState : int
+        {
+            Idle = 0,
+            Downloading = 1,
+            Success = 2,
+            Failed = 3,
+            Cancelled = 4
+        }
+
         public class FrameInfo {
             public int curFrame;
             public int totalFrame;
@@ -131,6 +140,13 @@ namespace RaywattOCT
         public delegate void CallbackFunction(int request, int response, int param);
         public delegate void CallbackFunctionWithImage(int session, IntPtr data, int width, int height, int channel, int frameInfo, double intensity);
         public delegate void CallbackFunctionForDetection(int frame);
+
+        // Firmware update callback delegates
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void FWProgressCallback(int progress);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void FWStatusCallback(int state);
 
         [DllImport("RayCore.dll")]
         public static extern int RayStartSystem();
@@ -228,5 +244,18 @@ namespace RaywattOCT
         public static extern IntPtr RayGetGuidewireRadius(int nFrame);
         [DllImport("RayCore.dll")]
         public static extern void RayGetRJFirmwareVersion(out int major, out int minor, out int patch, out bool isBootMode);
+        
+        // Firmware update APIs
+        [DllImport("RayCore.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void RayFWSetProgressCallback(FWProgressCallback callback);
+        
+        [DllImport("RayCore.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void RayFWSetStatusCallback(FWStatusCallback callback);
+        
+        [DllImport("RayCore.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        public static extern bool RayFWStartDownload([MarshalAs(UnmanagedType.LPStr)] string filepath);
+        
+        [DllImport("RayCore.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool RayFWCancelDownload();
     }
 }

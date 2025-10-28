@@ -108,41 +108,70 @@ namespace RaywattApp.ViewModels.Setting
 
                 if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
                 {
-                    _log.Debug("User selected software update");
+                    _log.Debug("User selected firmware update");
 
                     Dictionary<string, object> returnData = (Dictionary<string, object>)result.DialogReturn;
                     bool shouldUpdate = (bool)returnData["shouldUpdate"];
 
                     if (shouldUpdate)
                     {
-                        var usbDriveName = returnData["usbDriveName"].ToString();
+                        var selectedFirmware = (UpdateItem)returnData["selectedFirmware"];
+                        var firmwareFilePath = selectedFirmware.FilePath;
 
-                        _log.Debug($"Starting update - USB Drive: {usbDriveName}");
+                        _log.Debug($"Starting firmware update - File: {firmwareFilePath}");
 
-                        // TODO[haeun]: 여기서 펌웨어 업데이트 또는 소프트웨어 업데이트 작업을 수행
+                        // 펌웨어 업데이트 프로그레스 다이얼로그 표시
+                        Dictionary<string, object> progressParameter = new Dictionary<string, object>();
+                        progressParameter["title"] = _l10n["Firmware Update"];
+                        progressParameter["firmwareFilePath"] = firmwareFilePath;
 
-                        Dictionary<string, object> successParameter = new Dictionary<string, object>();
-                        successParameter["title"] = _l10n["Information"];
-                        successParameter["message"] = _l10n["Software update initiated successfully"];
-                        _dialogService.OpenDialog(new AlertDialogControl(), successParameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                        var progressDialog = _dialogService.OpenDialog(new FirmwareUpdateProgressDialogControl(), progressParameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                        // 업데이트 완료 후 결과 처리
+                        if (progressDialog != null && progressDialog.DialogReturn is Dictionary<string, object> progressResult)
+                        {
+                            bool updateCompleted = (bool)progressResult["updateCompleted"];
+                            var finalState = (FirmwareUpdateState)progressResult["finalState"];
+
+                            _log.Debug($"Firmware update finished - Completed: {updateCompleted}, State: {finalState}");
+
+                            if (updateCompleted && finalState == FirmwareUpdateState.Success)
+                            {
+                                // 펌웨어 버전 다시 읽기
+                                LoadFirmwareVersion();
+
+                                Dictionary<string, object> successParameter = new Dictionary<string, object>();
+                                successParameter["title"] = _l10n["Information"];
+                                successParameter["message"] = _l10n["Firmware update completed successfully"] + "\n" + _l10n["Please restart the device"];
+                                _dialogService.OpenDialog(new AlertDialogControl(), successParameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                            }
+                            else if (finalState == FirmwareUpdateState.Failed)
+                            {
+                                Dictionary<string, object> errorParameter = new Dictionary<string, object>();
+                                errorParameter["title"] = _l10n["Error"];
+                                errorParameter["message"] = _l10n["Firmware update failed"] + "\n" + _l10n["Please try again or contact support"];
+                                errorParameter["error"] = true;
+                                _dialogService.OpenDialog(new AlertDialogControl(), errorParameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                            }
+                        }
                     }
                 }
                 else
                 {
-                    _log.Debug("User canceled software update");
+                    _log.Debug("User canceled firmware update");
                 }
 
             }
             catch (Exception ex)
             {
-                _log.Error($"Error occurred during software update: {ex.Message}", ex);
+                _log.Error($"Error occurred during firmware update: {ex.Message}", ex);
 
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
                 parameter["title"] = _l10n["Error"];
-                parameter["message"] = $"An error occurred during software update: {ex.Message}";
+                parameter["message"] = $"An error occurred during firmware update: {ex.Message}";
                 parameter["error"] = true;
 
-                var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
             }
         }
 
