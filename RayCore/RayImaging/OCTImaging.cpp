@@ -574,9 +574,9 @@ void COCTImaging::CheckSheathPixels(cv::Mat img)
 	//PLOGI.printf("check the time - pixelCount: %d", pixelCount);
 	else
 	{
-		m_nPixelNum = maxLoc.y;
+		//m_nPixelNum = maxLoc.y;
 
-		/* section을 나눠 sheath 파악 안정성 추가
+		/* section을 나눠 sheath 파악 안정성 추가*/
 		m_nPixelNum = 0;
 		int validCount = 0, sectionDivision = 4, height = result.rows, width = result.cols / sectionDivision;
 		for(int i =0; i < sectionDivision; i++)
@@ -593,7 +593,7 @@ void COCTImaging::CheckSheathPixels(cv::Mat img)
 		}
 		if(validCount > 0)
 			m_nPixelNum /= validCount;
-		*/
+		
 	}
 }
 
