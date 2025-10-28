@@ -149,8 +149,10 @@ namespace RaywattOCTFFR.ViewModels.File
         private void MoveNextPage()
         {
             FileImport.PatientCase.CatheterSize = CatheterSize;
+            FileImport.PatientCase.SheathDiameter = CatheterSize / 3.0;
             FileImport.PatientCase.PullbackLength = PullbackLength.ToString();
             FileImport.PatientCase.IsDistalToProximal = IsDistalToProximal;
+            FileImport.PatientCase.ZOffset = 0;
 
             Dictionary<string, Object> parameter = new Dictionary<string, Object>();
             parameter["fileImport"] = FileImport;

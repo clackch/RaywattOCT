@@ -168,6 +168,8 @@ namespace RaywattOCTFFR.ViewModels.File
             timer.Tick += new EventHandler(CheckDrive);
             timer.Start();
 
+            ImportType = Constants.ImportTypeDicom;
+
             GetDrive();
         }
 

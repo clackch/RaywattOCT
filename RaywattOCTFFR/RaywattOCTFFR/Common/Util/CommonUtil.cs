@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Runtime.InteropServices;
-using static RaywattOCT.RayCoreWrapper;
+using static RaywattOCT.RayCoreFFRWrapper;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Size = OpenCvSharp.Size;
@@ -977,15 +977,7 @@ namespace RaywattOCTFFR.Common.Util
         {
             if (!isAdmin)
             {
-                RayError result;
-
-                result = (RayError)RayDisconnectDevices();
-                if (result != RayError.OK)
-                {
-                    _log.Error("RayDisconnectDevices Error");
-                }
-
-                result = (RayError)RayStopSystem();
+				RayError result = (RayError)RayStopSystem();
                 if (result != RayError.OK)
                 {
                     _log.Error("RayStopSystem Error");
@@ -1864,21 +1856,18 @@ namespace RaywattOCTFFR.Common.Util
             double pxDiameter = (sheathDiameter / Constants.ImageResolution) * imageSize / Constants.OCTImageSize;
             Mat imgSheath = new Mat(imageSize, imageSize, MatType.CV_8UC4);
             Point center = new Point(imgSheath.Width / 2, imgSheath.Height / 2);
-            int thickness = 1;
+            int thickness = 2;
             int radius = (int)(pxDiameter / 2) + thickness;
 
             imgSheath.SetTo(new Scalar(0x00, 0x00, 0x00, 0x00));
-            imgSheath.Circle(center, radius, new Scalar(0x60, 0xd7, 0x1e, 0xff), thickness, LineTypes.AntiAlias);
+            Scalar lineColor = new Scalar(0x60, 0xd7, 0x1e, 0xff);
+            var axes = new Size(radius, radius);
 
-            for (int i = 1; i < 6; i += 2)
+            int arcLen = 60;
+            for (int i = 0; i < 6; i += 2)
             {
-                imgSheath.Ellipse(center,
-                    new OpenCvSharp.Size(imgSheath.Width / 2, imgSheath.Height / 2),
-                    0,
-                    i * 60,
-                    i * 60 + 60,
-                    new Scalar(0x00, 0x00, 0x00, 0x00),
-                    -1);
+                int start = i * 60;
+                Cv2.Ellipse(imgSheath, center, axes, 0, start, start + arcLen, lineColor, thickness, LineTypes.AntiAlias);
             }
 
             BitmapSource bitmap = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgSheath);
@@ -2257,6 +2246,11 @@ namespace RaywattOCTFFR.Common.Util
             }
 
             return filePath;
+        }
+
+        public static double GetZOffsetScale(int zOffset)
+        {
+            return (10 + zOffset) / 10.0;
         }
     }
 }

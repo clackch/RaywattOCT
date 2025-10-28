@@ -16,8 +16,10 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
-using static RaywattOCT.RayCoreWrapper;
+using static RaywattOCT.RayCoreFFRWrapper;
 using RaywattOCTFFR.Common.Util;
+using System.Windows.Markup;
+using System.Windows.Media.Imaging;
 
 namespace RaywattOCTFFR.Common.Bases
 {
@@ -31,11 +33,13 @@ namespace RaywattOCTFFR.Common.Bases
 
         protected CancellationTokenSource? _cts;
 
+        protected bool isEndReview = true;
+
         [ObservableProperty]
         private PrevStatus _prevStatus;
 
         [ObservableProperty]
-        private ReviewStatus _reviewStatus;
+        private ReviewStatus _reviewStatus = new ReviewStatus();
 
         [ObservableProperty]
         private Patient _patient;
@@ -72,6 +76,9 @@ namespace RaywattOCTFFR.Common.Bases
 
         [ObservableProperty]
         private Indicator _indicatorLongitude;
+
+        [ObservableProperty]
+        private FileImport _fileImport = new FileImport();
 
         private ICommand _reviewTypeSwitchCommand;
         public ICommand ReviewTypeSwitchCommand
@@ -483,6 +490,64 @@ namespace RaywattOCTFFR.Common.Bases
                 _cts?.Cancel();
                 _cts?.Dispose();
             }
+        }
+
+        protected void InitializeImportData(Dictionary<string, Object> data)
+        {
+            if (data.TryGetValue("reviewStatus", out var reviewStatusObj) && reviewStatusObj is ReviewStatus reviewStatusData)
+            {
+                ReviewStatus = reviewStatusData;
+            }
+
+            if (Constants.ImportTypeTiff.Equals(FileImport.PatientCase.ImportType) || Constants.ImportTypeDicom.Equals(FileImport.PatientCase.ImportType))
+            {
+                if (data.TryGetValue("crossSectionImages", out var crossSectionImagesObj) && crossSectionImagesObj is ObservableCollection<Mat> crossSectionImagestData)
+                {
+                    CrossSectionImages = crossSectionImagestData;
+                }
+                if (data.TryGetValue("longitudeImage", out var longitudeImageObj) && longitudeImageObj is BitmapSource longitudeImageData)
+                {
+                    LongitudeImage = longitudeImageData;
+                }
+                if (data.TryGetValue("longitudeFrameInfo", out var longitudeFrameInfoObj) && longitudeFrameInfoObj is FrameInfo longitudeFrameInfoData)
+                {
+                    longitudeFrameInfo = longitudeFrameInfoData;
+                }
+            }
+            else if (Constants.ImportTypeRaw.Equals(FileImport.PatientCase.ImportType))
+            {
+                RayError result = (RayError)RaySetProperty(Property.Brightness, FileImport.PatientCase.Brightness);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
+            }
+
+            DeviceStatus.ReviewImageInfo imageInfo = DeviceStatus.ReviewImageInfos[(int)RaySession.Review];
+            MoveToFrame(RaySession.Review, imageInfo.Current);
+            updateNavigator(imageInfo.Current, imageInfo.Total);
+            IndicatorLongitude.IsVisible = Visibility.Visible;
+            IndicatorLongitude.IsEnabled = true;
+
+            if (ReviewStatus.IsPlay)
+            {
+                Playback();
+            }
+        }
+
+        protected void MoveImportPage(string page)
+        {
+            Dictionary<string, Object> parameter = new Dictionary<string, Object>();
+            parameter["reviewStatus"] = ReviewStatus;
+            parameter["initializeImport"] = true;
+            parameter["fileImport"] = FileImport;
+            if (Constants.ImportTypeTiff.Equals(FileImport.PatientCase.ImportType) || Constants.ImportTypeDicom.Equals(FileImport.PatientCase.ImportType))
+            {
+                parameter["crossSectionImages"] = CrossSectionImages;
+                parameter["longitudeImage"] = LongitudeImage;
+                parameter["longitudeFrameInfo"] = longitudeFrameInfo;
+            }
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(page) { Parameter = parameter });
         }
     }
 }

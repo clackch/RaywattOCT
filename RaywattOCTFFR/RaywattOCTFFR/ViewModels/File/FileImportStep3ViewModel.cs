@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using log4net;
+﻿using log4net;
 using RaywattOCTFFR.Common.Bases;
 using RaywattOCTFFR.Common.Dialog;
 using RaywattOCTFFR.Models;
@@ -7,7 +6,7 @@ using RaywattOCTFFR.Services;
 using System.Collections.Generic;
 using System;
 using System.Windows.Navigation;
-using static RaywattOCT.RayCoreWrapper;
+using static RaywattOCT.RayCoreFFRWrapper;
 using CommunityToolkit.Mvvm.Messaging;
 using RaywattOCTFFR.Common.Messages;
 using System.Windows;
@@ -17,7 +16,7 @@ namespace RaywattOCTFFR.ViewModels.File
 {
     public partial class FileImportStep3ViewModel : ReviewViewModelBase
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(FileImportStep2ViewModel));
+        private static readonly ILog _log = LogManager.GetLogger(typeof(FileImportStep3ViewModel));
 
         private readonly SqlManager _sqlManager;
 
@@ -26,9 +25,6 @@ namespace RaywattOCTFFR.ViewModels.File
         private TiffService _tiffService;
 
         private DicomService _dicomService;
-
-        [ObservableProperty]
-        private FileImport _fileImport = new FileImport();
 
         public FileImportStep3ViewModel(SqlManager sqlManager, IDialogService dialogService, TiffService tiffService, DicomService dicomService)
         {
@@ -40,10 +36,6 @@ namespace RaywattOCTFFR.ViewModels.File
             _dialogService = dialogService;
             _tiffService = tiffService;
             _dicomService = dicomService;
-
-            ReviewStatus = new ReviewStatus();
-
-            CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault);
 
             IndicatorLongitude = new Indicator();
             IndicatorLongitude.X = Constants.LongitudeIndicatorWidth / 2;
@@ -64,22 +56,31 @@ namespace RaywattOCTFFR.ViewModels.File
                 if (data.TryGetValue("fileImport", out var fileImportObj) && fileImportObj is FileImport fileImportData)
                 {
                     FileImport = fileImportData;
-                    string path = Constants.TempPath + "\\" + FileImport.PatientCase.Image;
 
-                    if (Constants.ImportTypeRaw.Equals(FileImport.PatientCase.ImportType))
+                    if (data.TryGetValue("initializeImport", out var initializeImportObj) && initializeImportObj is bool initializeImportData && initializeImportData)
                     {
-                        LoadImageFromRaw(path, FileImport.PatientCase.ImageResolution, FileImport.PatientCase.ZOffset, FileImport.PatientCase.Colormap, FileImport.PatientCase.Brightness, FileImport.PatientCase.Contrast);
-                        FileImport.PatientCase.NumOfFrames = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total;
+                        InitializeImportData(data);                        
                     }
-                    else if (Constants.ImportTypeTiff.Equals(FileImport.PatientCase.ImportType))
+                    else
                     {
-                        _ = LoadFromImageAsync(_tiffService, path);
-                    }
-                    else if (Constants.ImportTypeDicom.Equals(FileImport.PatientCase.ImportType))
-                    {
-                        _ = LoadFromImageAsync(_dicomService, path);
-                    }    
-                    Playback();
+                        string path = Constants.TempPath + "\\" + FileImport.PatientCase.Image;
+
+                        if (Constants.ImportTypeRaw.Equals(FileImport.PatientCase.ImportType))
+                        {
+                            LoadImageFromRaw(path, FileImport.PatientCase.ImageResolution, FileImport.PatientCase.ZOffset, FileImport.PatientCase.Colormap, FileImport.PatientCase.Brightness, FileImport.PatientCase.Contrast);
+                            FileImport.PatientCase.NumOfFrames = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total;
+                        }
+                        else if (Constants.ImportTypeTiff.Equals(FileImport.PatientCase.ImportType))
+                        {
+                            _ = LoadFromImageAsync(_tiffService, path);
+                        }
+                        else if (Constants.ImportTypeDicom.Equals(FileImport.PatientCase.ImportType))
+                        {
+                            _ = LoadFromImageAsync(_dicomService, path);
+                        }
+
+                        Playback();
+                    }                    
                 }
             }
         }
@@ -89,10 +90,13 @@ namespace RaywattOCTFFR.ViewModels.File
             _log.Debug("OnNavigating");
             base.OnNavigating(sender, navigationEventArgs);
 
-            if (Constants.ImportTypeRaw.Equals(FileImport.PatientCase.ImportType))
+            if (this.isEndReview)
             {
-                RayEndReview();
-                DeviceStatus.IsOCTImagingDone = true;
+                if (Constants.ImportTypeRaw.Equals(FileImport.PatientCase.ImportType))
+                {
+                    RayEndReview();
+                    DeviceStatus.IsOCTImagingDone = true;
+                }
             }
         }
 
@@ -108,6 +112,10 @@ namespace RaywattOCTFFR.ViewModels.File
         protected override void Next()
         {
             _log.Debug("Next");
+
+            this.isEndReview = false;
+
+            MoveImportPage(Constants.FileImportStep4Page);
         }
 
         private async Task LoadFromImageAsync(IImageService service, string path)
