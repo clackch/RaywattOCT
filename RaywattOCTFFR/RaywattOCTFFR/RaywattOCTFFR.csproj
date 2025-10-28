@@ -1257,7 +1257,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\RayCoreWrapper\RayCoreWrapper\RayCoreWrapper.csproj" />
+    <ProjectReference Include="..\..\RayCoreFFRWrapper\RayCoreFFRWrapper\RayCoreFFRWrapper.csproj" />
   </ItemGroup>
 
   <ItemGroup>

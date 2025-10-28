@@ -5,10 +5,10 @@ VisualStudioVersion = 17.3.32811.315
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RaywattOCTFFR", "RaywattOCTFFR\RaywattOCTFFR.csproj", "{84D4959B-ED67-4ECB-B7D4-6F166A0BA81E}"
 	ProjectSection(ProjectDependencies) = postProject
-		{2418544F-9F02-478B-BFDC-C01788E11140} = {2418544F-9F02-478B-BFDC-C01788E11140}
+		{03CC7335-7D73-789C-C77A-010B9F0568B3} = {03CC7335-7D73-789C-C77A-010B9F0568B3}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RayCoreWrapper", "..\RayCoreWrapper\RayCoreWrapper\RayCoreWrapper.csproj", "{2418544F-9F02-478B-BFDC-C01788E11140}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RayCoreFFRWrapper", "..\RayCoreFFRWrapper\RayCoreFFRWrapper\RayCoreFFRWrapper.csproj", "{03CC7335-7D73-789C-C77A-010B9F0568B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,10 +20,10 @@ Global
 		{84D4959B-ED67-4ECB-B7D4-6F166A0BA81E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84D4959B-ED67-4ECB-B7D4-6F166A0BA81E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84D4959B-ED67-4ECB-B7D4-6F166A0BA81E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2418544F-9F02-478B-BFDC-C01788E11140}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2418544F-9F02-478B-BFDC-C01788E11140}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2418544F-9F02-478B-BFDC-C01788E11140}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2418544F-9F02-478B-BFDC-C01788E11140}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03CC7335-7D73-789C-C77A-010B9F0568B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03CC7335-7D73-789C-C77A-010B9F0568B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03CC7335-7D73-789C-C77A-010B9F0568B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03CC7335-7D73-789C-C77A-010B9F0568B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
