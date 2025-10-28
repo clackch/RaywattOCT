@@ -1888,7 +1888,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			int idealRow = 180;		// 2차 진행 시에 내경이 위치해야 한다고 가정하는 이상적인 row 위치
 
 			int expectedRow = pSystem->m_vCalibrationInfo.at(0).first;
-			int errorThreshold = 15; // 2차 탐색의 step별 row 이동 범위 threshold
+			int errorThresholdPlus = 15, errorThresholdMinus = 5; // 2차 탐색의 step별 row 이동 범위 threshold
 			int minusMove = 35; // 외경을 내경으로 판단한 경우 보정값
 			/*for (int i = 1; i < pSystem->m_vCalibrationInfo.size(); i++) {
 				int rowMoving = pSystem->m_vCalibrationInfo.at(i).first - expectedRow;
@@ -1901,14 +1901,14 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			for(auto& val : pSystem->m_vCalibrationInfo)
 			{
 				int rowMoving = val.first - expectedRow;
-				if (rowMoving > errorThreshold) {
+				if (rowMoving > errorThresholdPlus) {
 					val.first -= minusMove;
 				}
 				expectedRow = val.first;
 			}
 			for (int i = pSystem->m_vCalibrationInfo.size() - 1; i >= 0; i--) {
 				int rowMoving = pSystem->m_vCalibrationInfo.at(i).first - expectedRow;
-				if (rowMoving > errorThreshold) {
+				if (rowMoving > errorThresholdMinus) {
 					pSystem->m_vCalibrationInfo.at(i).first -= minusMove;
 				}
 				expectedRow = pSystem->m_vCalibrationInfo.at(i).first;
