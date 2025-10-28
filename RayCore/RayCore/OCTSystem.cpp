@@ -1934,7 +1934,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 
 			// 1-3. Move to calibrated position
 			int adjustMotorStep = 480; // 내경에서 외경까지의 거리 180 step + reflection 배제를 위해 움직였던 거리 300 step
-			nTargetPos = nZOffset - adjustMotorStep - (pSystem->autoCalibrationFranch * 1.5);
+			nTargetPos = nZOffset - adjustMotorStep;
 			//PLOGI.printf("Target Position : %d", nTargetPos);
 
 			if (minDiff > 50) // 내경 위치가 너무 이상적인 위치에서 멀리 떨어져 있는 경우 보정 실패로 간주
@@ -1955,7 +1955,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			Sleep(50);
 		}
 		auto const& sheathInfo = pSystem->m_vCalibrationInfo;
-		int validSheathCount = 0, needAdjustCount = 0, idealRow = 25 - pSystem->autoCalibrationFranch / 3;
+		int validSheathCount = 0, needAdjustCount = 0, idealRow = 25;
 		float avgDiff = 0.0f;
 		for(auto const& val : sheathInfo)
 		{
@@ -1983,6 +1983,8 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 				nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, adjustStep);
 				pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 			}
+			nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, -(pSystem->autoCalibrationFranch * 1.5));
+			pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 			autoCalibError = RayError::OK;
 		}
 		else
