@@ -128,6 +128,7 @@ void COCTImaging::PostProcess(cv::Mat image) {
 	{
 		CheckSheathPixels(image);
 	}
+	//cv::imwrite("sheath.tif", image);
 
 	cv::cvtColor(image, imageResultColor, cv::COLOR_GRAY2RGB);
 

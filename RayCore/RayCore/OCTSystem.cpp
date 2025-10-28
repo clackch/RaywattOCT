@@ -1933,8 +1933,8 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			PLOGI.printf("second calibration. ZOffset Position : %d, row : %d, diff : %d", nZOffset, pSystem->m_vCalibrationInfo.at(closestIdx).first, minDiff);
 
 			// 1-3. Move to calibrated position
-			int adjustMotorStep = 450; // 내경에서 외경까지의 거리 150 step + reflection 배제를 위해 움직였던 거리 300 step
-			nTargetPos = nZOffset - adjustMotorStep - pSystem->autoCalibrationFranch;
+			int adjustMotorStep = 480; // 내경에서 외경까지의 거리 180 step + reflection 배제를 위해 움직였던 거리 300 step
+			nTargetPos = nZOffset - adjustMotorStep - (pSystem->autoCalibrationFranch * 1.5);
 			//PLOGI.printf("Target Position : %d", nTargetPos);
 
 			if (minDiff > 50) // 내경 위치가 너무 이상적인 위치에서 멀리 떨어져 있는 경우 보정 실패로 간주
@@ -1955,7 +1955,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			Sleep(50);
 		}
 		auto const& sheathInfo = pSystem->m_vCalibrationInfo;
-		int validSheathCount = 0, needAdjustCount = 0, idealRow = 30;
+		int validSheathCount = 0, needAdjustCount = 0, idealRow = 25 - pSystem->autoCalibrationFranch / 3;
 		float avgDiff = 0.0f;
 		for(auto const& val : sheathInfo)
 		{
