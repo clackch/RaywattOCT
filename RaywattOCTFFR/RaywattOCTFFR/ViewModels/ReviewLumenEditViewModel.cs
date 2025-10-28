@@ -5,7 +5,7 @@ using RaywattOCTFFR.Models;
 using RaywattOCTFFR.Services;
 using System;
 using System.Collections.Generic;
-using static RaywattOCT.RayCoreWrapper;
+using static RaywattOCT.RayCoreFFRWrapper;
 using System.Windows.Navigation;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;

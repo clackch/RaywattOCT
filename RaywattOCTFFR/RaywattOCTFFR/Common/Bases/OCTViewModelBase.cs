@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using static RaywattOCT.RayCoreWrapper;
+using static RaywattOCT.RayCoreFFRWrapper;
 using Point = OpenCvSharp.Point;
 
 namespace RaywattOCTFFR.Common.Bases

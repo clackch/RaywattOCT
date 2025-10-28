@@ -13,7 +13,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Navigation;
 using System.Windows.Threading;
-using static RaywattOCT.RayCoreWrapper;
+using static RaywattOCT.RayCoreFFRWrapper;
 
 namespace RaywattOCTFFR.ViewModels
 {

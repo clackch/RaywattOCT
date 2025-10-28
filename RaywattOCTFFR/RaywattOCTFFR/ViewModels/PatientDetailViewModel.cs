@@ -14,7 +14,7 @@ using RaywattOCTFFR.Common.Paging;
 using System.Windows.Controls;
 using RaywattOCTFFR.Views.Dialog;
 using RaywattOCTFFR.Common.Dialog;
-using static RaywattOCT.RayCoreWrapper;
+using static RaywattOCT.RayCoreFFRWrapper;
 using System.Threading;
 using RaywattOCTFFR.Common.Util;
 

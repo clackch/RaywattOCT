@@ -11,7 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Input;
 using System.Windows.Navigation;
-using static RaywattOCT.RayCoreWrapper;
+using static RaywattOCT.RayCoreFFRWrapper;
 
 namespace RaywattOCTFFR.ViewModels
 {

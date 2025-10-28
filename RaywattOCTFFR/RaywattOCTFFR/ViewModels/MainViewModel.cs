@@ -14,7 +14,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Input;
-using static RaywattOCT.RayCoreWrapper;
+using static RaywattOCT.RayCoreFFRWrapper;
 using System.Threading.Tasks;
 
 namespace RaywattOCTFFR.ViewModels

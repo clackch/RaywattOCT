@@ -9,7 +9,7 @@ using System;
 using System.Windows.Input;
 using System.Windows.Navigation;
 using RaywattOCTFFR.Common.Dialog;
-using static RaywattOCT.RayCoreWrapper;
+using static RaywattOCT.RayCoreFFRWrapper;
 using RaywattOCTFFR.Common.Annotation.Models;
 using System.Windows;
 using Newtonsoft.Json;
@@ -23,7 +23,6 @@ using RaywattOCTFFR.Common.Annotation.Util;
 using System.Runtime.InteropServices;
 using System.Windows.Media.Imaging;
 using RaywattOCTFFR.Views.Dialog;
-using System.Windows.Media;
 
 namespace RaywattOCTFFR.ViewModels
 {
