@@ -4,7 +4,6 @@
 #include "RFIDProtocol.h"
 #include "MotorController.h"
 #include "WriteTaskController.h"
-#include "FirmwareUpdate.h"
 #include <vector>
 #include <iomanip>
 #define ENABLE_RFID		false
@@ -24,6 +23,27 @@
 #define RFID_MAX_COUNT					5
 #define RFID_MANUFACTURER				"RAYWATT"
 #define RFID_MANUFACTURER_LEN			7
+
+// Firmware Download State
+enum class eFWDownloadState : BYTE {
+	Idle = 0,
+	Downloading,
+	Success,
+	Failed,
+	Cancelled
+};
+
+// Firmware Metadata Structure (last 16 bytes of firmware file)
+struct SFirmwareMetadata {
+	UINT hwver;		// Hardware version
+	UINT fwver;		// Firmware version
+	UINT chkver;	// Checksum verification: ((hwver & 0xffff) << 16) + fwver
+	UINT length;	// Flash address (0x08010000 ~ 0x08080000)
+};
+
+// Callback function types
+typedef void (*FWProgressCallback)(int progress);			// Progress: 0~100
+typedef void (*FWStatusCallback)(eFWDownloadState state);	// State change callback
 
 enum class eRJState {
 	None = 0,
@@ -105,7 +125,6 @@ private:
 	WriteTaskController* m_resendManager;
 	SFWVersionInfo m_fwVersionInfo;
 
-	// Firmware Download Members
 	eFWDownloadState m_fwDownloadState;
 	int m_fwDownloadProgress;
 	int m_fwDownloadIndex;
@@ -165,10 +184,8 @@ public:
 	void changeSMProfileToLoadUnload();
 	void DisableStepMotors();
 
-	// Firmware Download Public Methods
 	bool StartFWDownload(const char* filepath);
 	bool CancelFWDownload();
-	eFWDownloadState GetFWDownloadStatus(int* progress = nullptr);
 	void SetFWProgressCallback(FWProgressCallback callback);
 	void SetFWStatusCallback(FWStatusCallback callback);
   
@@ -190,7 +207,6 @@ protected:
 	void resendPacket(eFID fid);
 	void resendAllSaved();
 
-	// Firmware Download Private Methods
 	bool ValidateFWFile(const char* filepath, SFirmwareMetadata& metadata);
 	bool LoadFirmwareData(const char* filepath);
 	bool SendFWDownloadStart();

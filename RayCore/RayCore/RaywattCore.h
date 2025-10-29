@@ -1,6 +1,9 @@
 #pragma once
 #include "define.h"
-#include "FirmwareUpdate.h"
+
+enum class eFWDownloadState : unsigned char;
+typedef void (*FWProgressCallback)(int progress);
+typedef void (*FWStatusCallback)(eFWDownloadState state);
 
 /*
 * 
@@ -59,8 +62,8 @@ extern "C" {
 	_declspec(dllexport) void* RayGetGuidewirePoints(int nFrame);
 	_declspec(dllexport) int RayGetNumOfGuidewirePoints(int nFrame);
 	_declspec(dllexport) void* RayGetGuidewireRadius(int nFrame);
-	_declspec(dllexport) void RayGetRJFirmwareVersion(int* major, int* minor, int* patch, bool* isBootMode);
 
+	_declspec(dllexport) void RayGetRJFirmwareVersion(int* major, int* minor, int* patch, bool* isBootMode);
 	_declspec(dllexport) void RayFWSetProgressCallback(FWProgressCallback callback);
 	_declspec(dllexport) void RayFWSetStatusCallback(FWStatusCallback callback);
 	_declspec(dllexport) bool RayFWStartDownload(const char* filepath);
