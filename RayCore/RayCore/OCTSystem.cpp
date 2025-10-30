@@ -550,17 +550,22 @@ RayError COCTSystem::RestartReview()
 */
 RayError COCTSystem::StartLiveView()
 {
+	PLOGI.printf("StartLiveView");
+
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 		if (m_pRJController->GetState() == eRJState::Error) return RayError::RotaryJunctionError;
-		m_pImagingLiveView->Start();
+		int res = m_pImagingLiveView->Start();
+		PLOGI.printf("Start Thread : %d", res);
 
 		CConfiguration& config = CConfiguration::GetInstance();
 
 		m_pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_LIVEVIEW);
 		m_pRJController->PerformRun(config.bldcMotor.velocityLiveView);
 
+		PLOGI.printf("laserOnOff");
 		laserOnOff(true);
+		PLOGI.printf("restartAcqDevice");
 		restartAcqDevice(m_pImagingLiveView);
 
 		return RayError::OK;
@@ -1395,6 +1400,43 @@ RayError COCTSystem::SetRefractiveIndex(double value)
 	config.imaging.distPerPixel = config.measurement.GetAxialResolutionScale();
 	m_pImagingPullback->SetDistPerPixel(config.imaging.distPerPixel);
 	m_pImagingLiveView->SetDistPerPixel(config.imaging.distPerPixel);
+
+	return RayError::OK;
+}
+
+int COCTSystem::GetVelocityPullback()
+{
+	CConfiguration& config = CConfiguration::GetInstance();
+	
+	return config.bldcMotor.velocityPullback;
+}
+
+RayError COCTSystem::SetVelocityPullback(int value)
+{
+	PLOGI.printf("Set Velocity Pullback (%d)", value);
+
+	CConfiguration& config = CConfiguration::GetInstance();
+
+	if (config.WriteInt(_T("BLDCMotor"), _T("VelocityPullback"), value))
+		config.bldcMotor.velocityPullback = value;
+
+	if (m_pImagingPullback != nullptr) {
+		m_pImagingPullback->Stop();
+		delete m_pImagingPullback;
+		m_pImagingPullback = nullptr;
+	}
+
+	IImaging::Setting settingPullback = config.imaging;
+	settingPullback.Set(settingPullback.nAScan, floor((double)config.acquisition.nLaserSpeed / ((double)config.bldcMotor.velocityPullback / 60.f)));
+	PLOGI.printf("Pullback setting: LaserSpeed=%ld, Velocity=%ldrpm, NumOfAlines=%ld", config.acquisition.nLaserSpeed, config.bldcMotor.velocityPullback, settingPullback.nBScan);
+	m_pImagingPullback = CImagingSession::CreateColorImaging(this, settingPullback, nullptr, ImagingType::Default);
+	if (!m_pImagingPullback) {
+		PLOGI.printf("Failed to create imaging pullback");
+		return RayError::WrongSession;
+	}
+	m_pImagingPullback->SetSession(SESSION_REALTIME);
+	int res = m_pImagingPullback->Start();
+	PLOGI.printf("Start Thread : %d", res);
 
 	return RayError::OK;
 }
@@ -2592,7 +2634,15 @@ int COCTSystem::startAcqDevice() {
 * stopAcqDevice
 */
 int COCTSystem::stopAcqDevice() {
-	m_pAcqDevice->StopAcquisition();
+	if (m_pAcqDevice == nullptr) {
+		PLOGI.printf("m_pAcqDevice nullptr");
+	}
+	else {
+		PLOGI.printf("m_pAcqDevice not null");
+		m_pAcqDevice->StopAcquisition();
+		PLOGI.printf("StopAcquisition done");
+	}
+	
 
 	return NOERROR;
 }
@@ -2601,16 +2651,21 @@ int COCTSystem::stopAcqDevice() {
 * restartAcqDevice
 */
 int COCTSystem::restartAcqDevice(COCTImaging* pImaging) {
+	PLOGI.printf("restartAcqDevice func");
 	stopAcqDevice();
+	PLOGI.printf("1");
 
 	m_pImagingRealtime = pImaging;
-
+	PLOGI.printf("2");
 	IImaging::Setting imaging = pImaging->GetSetting();
+	PLOGI.printf("3");
 	CATSDevice::Setting acquire = ((CATSDevice *)m_pAcqDevice)->GetSetting();
+	PLOGI.printf("imaging.nAScan : %d, imaging.nBScan : %d", imaging.nAScan, imaging.nBScan);
 	acquire.nAScan = imaging.nAScan;
 	acquire.nBScan = imaging.nBScan;
 	((CATSDevice*)m_pAcqDevice)->SetSetting(acquire);
-	m_pAcqDevice->SetImaging(pImaging);
+	m_pAcqDevice->SetImaging(pImaging);	
+	PLOGI.printf("SetImaging");
 
 	return startAcqDevice();
 }

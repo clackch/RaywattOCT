@@ -69,11 +69,21 @@
                 <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Margin="520,5,0,0" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=Compensate}">
                     <Button Style="{DynamicResource BtnForTest}" Command="{Binding SaveVTIFileTestCommand}" Width="100" Height="15" FontSize="9" Content="Save3DVITFile"/>
                 </StackPanel>
+                <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="520,5,0,5" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=VelocityPB}">
+                    <Button Style="{DynamicResource BtnForTest}" Command="{Binding VelocityPullbackTestCommand}" Width="100" Height="15" FontSize="9" Content="PB Velocity"/>
+                </StackPanel>
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" Margin="800,0,0,0" Visibility="{Binding IsAutoPullbackTest, Converter={StaticResource BoolToVisibilityConverter}}">
                     <Label Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource AdditionalColor2Brush}" Content="{Binding [Auto Pullback], Source={StaticResource L10N}}" HorizontalAlignment="Center"/>
                     <StackPanel Orientation="Horizontal">
                         <Button Style="{DynamicResource BtnForTest2}" Command="{Binding AutopullbackOnCommmand}" Width="40" Height="15" FontSize="9" Content="On"/>
                         <Button Style="{DynamicResource BtnForTest2}" Command="{Binding AutopullbackOffCommmand}" Width="40" Height="15" FontSize="9" Content="Off"/>
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" Margin="890,0,0,0" Visibility="{Binding IsVelocityPullbackTest, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Label Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource AdditionalColor2Brush}" Content="{Binding [Pullback Velocity], Source={StaticResource L10N}}" HorizontalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox Width="35" FontSize="8" Text="{Binding VelocityPullback}" Background="Black" Foreground="White"/>
+                        <Button Style="{DynamicResource BtnForTest2}" Command="{Binding SetVelocityPullbackCommmand}" Width="40" Height="15" FontSize="9" Content="Set"/>
                     </StackPanel>
                 </StackPanel>
             </Grid>

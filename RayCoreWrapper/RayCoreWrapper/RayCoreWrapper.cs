@@ -60,7 +60,8 @@ namespace RaywattOCT
             LumenThresholdMax,
             LumenSnrThreshold,
             ShowLumenGuide,
-            RefractiveIndex
+            RefractiveIndex,
+            VelocityPullback
         }
 
         public enum RayCallbackRequest : int

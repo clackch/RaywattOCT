@@ -163,6 +163,17 @@ void CConfiguration::SaveBLDCMotorSettings() {
 	::WritePrivateProfileString(_T("BLDCMotor"), _T("SettleDown"), strValue.c_str(), configFilePath.c_str());
 }
 
+int CConfiguration::ReadInt(const tstring& section, const tstring& key, int def) const
+{
+	return ::GetPrivateProfileInt(section.c_str(), key.c_str(), def, configFilePath.c_str());
+}
+
+bool CConfiguration::WriteInt(const tstring& section, const tstring& key, int value) const
+{
+	tstring s = std::to_wstring((long long)value);
+	return ::WritePrivateProfileString(section.c_str(), key.c_str(), s.c_str(), configFilePath.c_str()) != FALSE;
+}
+
 double CConfiguration::GetLoadCatheterTime() {
 	return catheter.rotationTime;
 }
