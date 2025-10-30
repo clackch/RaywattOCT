@@ -140,18 +140,18 @@ namespace RaywattApp.ViewModels.Setting
                                 // 펌웨어 버전 다시 읽기
                                 LoadFirmwareVersion();
 
-                                Dictionary<string, object> successParameter = new Dictionary<string, object>();
-                                successParameter["title"] = _l10n["Information"];
-                                successParameter["message"] = _l10n["Firmware update completed successfully"] + "\n" + _l10n["Please restart the device"];
-                                _dialogService.OpenDialog(new AlertDialogControl(), successParameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                                //Dictionary<string, object> successParameter = new Dictionary<string, object>();
+                                //successParameter["title"] = _l10n["Information"];
+                                //successParameter["message"] = _l10n["Firmware update completed successfully"] + "\n" + _l10n["Please restart the device"];
+                                //_dialogService.OpenDialog(new AlertDialogControl(), successParameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
                             }
                             else if (finalState == FirmwareUpdateState.Failed)
                             {
-                                Dictionary<string, object> errorParameter = new Dictionary<string, object>();
-                                errorParameter["title"] = _l10n["Error"];
-                                errorParameter["message"] = _l10n["Firmware update failed"] + "\n" + _l10n["Please try again or contact support"];
-                                errorParameter["error"] = true;
-                                _dialogService.OpenDialog(new AlertDialogControl(), errorParameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                                //Dictionary<string, object> errorParameter = new Dictionary<string, object>();
+                                //errorParameter["title"] = _l10n["Error"];
+                                //errorParameter["message"] = _l10n["Firmware update failed"] + "\n" + _l10n["Please try again or contact support"];
+                                //errorParameter["error"] = true;
+                                //_dialogService.OpenDialog(new AlertDialogControl(), errorParameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
                             }
                         }
                     }

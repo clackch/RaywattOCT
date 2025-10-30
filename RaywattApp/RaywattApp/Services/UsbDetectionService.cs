@@ -157,10 +157,14 @@ namespace RaywattApp.Services
                             continue;
                         }
 
+                        // 첫 번째 .bin 파일의 전체 경로 사용
+                        string binFilePath = binFiles[0];
+                        _log.Debug($"Found firmware binary: {binFilePath}");
+
                         firmwareItems.Add(new UpdateItem(
                             dirName,
-                            dir,
-                            Directory.GetLastWriteTime(dir)
+                            binFilePath,
+                            File.GetLastWriteTime(binFilePath)
                         ));
                     }
                     catch (Exception ex)
