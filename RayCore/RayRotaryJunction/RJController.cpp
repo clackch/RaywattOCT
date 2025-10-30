@@ -1136,8 +1136,14 @@ SFWVersionInfo& CRJController::GetFWVersionInfo() {
 
 	int written = m_pConnection->Write(serialPacket, packetLength);
 
-	Sleep(300);
+	Sleep(400);
 	
+	PLOGI.printf("FW Version: %s %d.%d.%d",
+		m_fwVersionInfo.isBootMode ? "Boot" : "Main",
+		m_fwVersionInfo.major,
+		m_fwVersionInfo.minor,
+		m_fwVersionInfo.patch);
+
 	return m_fwVersionInfo;
 }
 
@@ -1392,7 +1398,7 @@ bool CRJController::StartFWDownload(const char* filepath) {
 	m_fwDownloadState = eFWDownloadState::Downloading;
 	m_fwDownloadProgress = 0;
 	m_fwDownloadIndex = 0;
-	m_fwDownloadSequence = 0;
+	m_fwDownloadSequence = 1; // Start from sequence 1
 
 	// Notify state change
 	if (m_fwStatusCallback != nullptr) {
@@ -1423,6 +1429,9 @@ bool CRJController::CancelFWDownload() {
 	SendFWDownloadEnd(false);
 
 	m_fwDownloadState = eFWDownloadState::Cancelled;
+	m_fwDownloadIndex = 0;
+	m_fwDownloadSequence = 0;
+	m_fwDownloadProgress = 0;
 	m_fwImageBuffer.clear();
 
 	if (m_fwStatusCallback != nullptr) {
@@ -1442,20 +1451,17 @@ void CRJController::RxPacketFWDownload(BYTE* buff, int size) {
 		return;
 	}
 
-	if (size < 1) {
-		PLOGI.printf("RxPacketFWDownload: invalid packet size");
-		return;
-	}
-
 	BYTE response = buff[DATA_IDX];
 
 	switch (response) {
 	case REQ_DOWNLOAD_CANCEL:
 		PLOGI.printf("Firmware download cancelled");
 		m_fwDownloadState = eFWDownloadState::Cancelled;
+		m_fwDownloadIndex = 0;
 		m_fwDownloadSequence = 0;
+		m_fwDownloadProgress = 0;
 		m_fwImageBuffer.clear();
-		
+
 		if (m_fwStatusCallback != nullptr) {
 			m_fwStatusCallback(m_fwDownloadState);
 		}
@@ -1466,6 +1472,7 @@ void CRJController::RxPacketFWDownload(BYTE* buff, int size) {
 		if (!SendFWDataChunk()) {
 			PLOGI.printf("Failed to send first chunk");
 			m_fwDownloadState = eFWDownloadState::Failed;
+			m_fwImageBuffer.clear();
 			if (m_fwStatusCallback != nullptr) {
 				m_fwStatusCallback(m_fwDownloadState);
 			}
@@ -1477,12 +1484,23 @@ void CRJController::RxPacketFWDownload(BYTE* buff, int size) {
 		if (m_fwDownloadIndex >= (int)m_fwImageBuffer.size()) {
 			PLOGI.printf("All firmware data sent, sending end command");
 			SendFWDownloadEnd(true);
+
+			m_fwDownloadState = eFWDownloadState::Success;
+			m_fwDownloadProgress = 100;
+			m_fwImageBuffer.clear();
+
+			if (m_fwProgressCallback != nullptr) {
+				m_fwProgressCallback(100);
+			}
+			if (m_fwStatusCallback != nullptr) {
+				m_fwStatusCallback(m_fwDownloadState);
+			}
 		} else {
 			if (!SendFWDataChunk()) {
 				PLOGI.printf("Failed to send firmware chunk");
 				m_fwDownloadState = eFWDownloadState::Failed;
 				m_fwImageBuffer.clear();
-				
+
 				if (m_fwStatusCallback != nullptr) {
 					m_fwStatusCallback(m_fwDownloadState);
 				}
