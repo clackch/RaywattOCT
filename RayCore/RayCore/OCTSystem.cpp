@@ -581,6 +581,12 @@ RayError COCTSystem::StopLiveView()
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 		if (m_pRJController->GetState() == eRJState::Error) return RayError::RotaryJunctionError;
+
+		if (m_pImagingRealtime != m_pImagingLiveView) {
+			PLOGI.printf("m_pImagingRealtime != m_pImagingLiveView");
+			restartAcqDevice(m_pImagingLiveView);
+		}			
+
 		m_pImagingLiveView->Stop();
 		Sleep(500);
 
