@@ -555,17 +555,14 @@ RayError COCTSystem::StartLiveView()
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 		if (m_pRJController->GetState() == eRJState::Error) return RayError::RotaryJunctionError;
-		int res = m_pImagingLiveView->Start();
-		PLOGI.printf("Start Thread : %d", res);
+		m_pImagingLiveView->Start();
 
 		CConfiguration& config = CConfiguration::GetInstance();
 
 		m_pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_LIVEVIEW);
 		m_pRJController->PerformRun(config.bldcMotor.velocityLiveView);
 
-		PLOGI.printf("laserOnOff");
 		laserOnOff(true);
-		PLOGI.printf("restartAcqDevice");
 		restartAcqDevice(m_pImagingLiveView);
 
 		return RayError::OK;
@@ -578,6 +575,8 @@ RayError COCTSystem::StartLiveView()
 */
 RayError COCTSystem::StopLiveView()
 {
+	PLOGI.printf("StopLiveView");
+
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 		if (m_pRJController->GetState() == eRJState::Error) return RayError::RotaryJunctionError;
@@ -1441,8 +1440,7 @@ RayError COCTSystem::SetVelocityPullback(int value)
 		return RayError::WrongSession;
 	}
 	m_pImagingPullback->SetSession(SESSION_REALTIME);
-	int res = m_pImagingPullback->Start();
-	PLOGI.printf("Start Thread : %d", res);
+	m_pImagingPullback->Start();
 
 	return RayError::OK;
 }
@@ -2640,15 +2638,7 @@ int COCTSystem::startAcqDevice() {
 * stopAcqDevice
 */
 int COCTSystem::stopAcqDevice() {
-	if (m_pAcqDevice == nullptr) {
-		PLOGI.printf("m_pAcqDevice nullptr");
-	}
-	else {
-		PLOGI.printf("m_pAcqDevice not null");
-		m_pAcqDevice->StopAcquisition();
-		PLOGI.printf("StopAcquisition done");
-	}
-	
+	m_pAcqDevice->StopAcquisition();	
 
 	return NOERROR;
 }
@@ -2657,21 +2647,16 @@ int COCTSystem::stopAcqDevice() {
 * restartAcqDevice
 */
 int COCTSystem::restartAcqDevice(COCTImaging* pImaging) {
-	PLOGI.printf("restartAcqDevice func");
 	stopAcqDevice();
-	PLOGI.printf("1");
 
 	m_pImagingRealtime = pImaging;
-	PLOGI.printf("2");
+
 	IImaging::Setting imaging = pImaging->GetSetting();
-	PLOGI.printf("3");
 	CATSDevice::Setting acquire = ((CATSDevice *)m_pAcqDevice)->GetSetting();
-	PLOGI.printf("imaging.nAScan : %d, imaging.nBScan : %d", imaging.nAScan, imaging.nBScan);
 	acquire.nAScan = imaging.nAScan;
 	acquire.nBScan = imaging.nBScan;
 	((CATSDevice*)m_pAcqDevice)->SetSetting(acquire);
 	m_pAcqDevice->SetImaging(pImaging);	
-	PLOGI.printf("SetImaging");
 
 	return startAcqDevice();
 }
