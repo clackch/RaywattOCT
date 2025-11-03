@@ -2638,7 +2638,7 @@ int COCTSystem::startAcqDevice() {
 * stopAcqDevice
 */
 int COCTSystem::stopAcqDevice() {
-	m_pAcqDevice->StopAcquisition();	
+	m_pAcqDevice->StopAcquisition();
 
 	return NOERROR;
 }
@@ -2656,7 +2656,7 @@ int COCTSystem::restartAcqDevice(COCTImaging* pImaging) {
 	acquire.nAScan = imaging.nAScan;
 	acquire.nBScan = imaging.nBScan;
 	((CATSDevice*)m_pAcqDevice)->SetSetting(acquire);
-	m_pAcqDevice->SetImaging(pImaging);	
+	m_pAcqDevice->SetImaging(pImaging);
 
 	return startAcqDevice();
 }
