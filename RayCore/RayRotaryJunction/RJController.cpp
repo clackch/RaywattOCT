@@ -1000,7 +1000,7 @@ void CRJController::handlePacket() {
 		RxPacketGetVersion(&m_vPacket[0]);
 		break;
 	case eFID::FID_FW_DOWNLOAD:
-		RxPacketFWDownload(&m_vPacket[0], dataLength);
+		RxPacketFWDownload(&m_vPacket[0]);
 		break;
 	default:
 		break;
@@ -1380,7 +1380,7 @@ bool CRJController::StartFWDownload(const char* filepath) {
 	if (!ValidateFWFile(filepath, metadata)) {
 		m_fwDownloadState = eFWDownloadState::Failed;
 		if (m_fwStatusCallback != nullptr) {
-			m_fwStatusCallback(m_fwDownloadState);
+			m_fwStatusCallback(static_cast<int>(m_fwDownloadState));
 		}
 		return false;
 	}
@@ -1389,7 +1389,7 @@ bool CRJController::StartFWDownload(const char* filepath) {
 	if (!LoadFirmwareData(filepath)) {
 		m_fwDownloadState = eFWDownloadState::Failed;
 		if (m_fwStatusCallback != nullptr) {
-			m_fwStatusCallback(m_fwDownloadState);
+			m_fwStatusCallback(static_cast<int>(m_fwDownloadState));
 		}
 		return false;
 	}
@@ -1402,7 +1402,7 @@ bool CRJController::StartFWDownload(const char* filepath) {
 
 	// Notify state change
 	if (m_fwStatusCallback != nullptr) {
-		m_fwStatusCallback(m_fwDownloadState);
+		m_fwStatusCallback(static_cast<int>(m_fwDownloadState));
 	}
 
 	// Send start command
@@ -1410,7 +1410,7 @@ bool CRJController::StartFWDownload(const char* filepath) {
 		PLOGI.printf("Failed to send firmware download start command");
 		m_fwDownloadState = eFWDownloadState::Failed;
 		if (m_fwStatusCallback != nullptr) {
-			m_fwStatusCallback(m_fwDownloadState);
+			m_fwStatusCallback(static_cast<int>(m_fwDownloadState));
 		}
 		return false;
 	}
@@ -1435,15 +1435,15 @@ bool CRJController::CancelFWDownload() {
 	m_fwImageBuffer.clear();
 
 	if (m_fwStatusCallback != nullptr) {
-		m_fwStatusCallback(m_fwDownloadState);
+		m_fwStatusCallback(static_cast<int>(m_fwDownloadState));
 	}
 
 	return true;
 }
 
-void CRJController::RxPacketFWDownload(BYTE* buff, int size) {
-	if (size < (5 + HEADER_LEN)) {
-		PLOGI.printf("RxPacketFWDownload Packet length error rxlen = %d", size);
+void CRJController::RxPacketFWDownload(BYTE* buff) {
+	if (m_vPacket.size() < (5 + HEADER_LEN)) {
+		PLOGI.printf("RxPacketFWDownload Packet length error rxlen = %d", static_cast<int>(m_vPacket.size()));
 		return;
 	}
 
@@ -1463,7 +1463,7 @@ void CRJController::RxPacketFWDownload(BYTE* buff, int size) {
 		m_fwImageBuffer.clear();
 
 		if (m_fwStatusCallback != nullptr) {
-			m_fwStatusCallback(m_fwDownloadState);
+			m_fwStatusCallback(static_cast<int>(m_fwDownloadState));
 		}
 		break;
 
@@ -1474,7 +1474,7 @@ void CRJController::RxPacketFWDownload(BYTE* buff, int size) {
 			m_fwDownloadState = eFWDownloadState::Failed;
 			m_fwImageBuffer.clear();
 			if (m_fwStatusCallback != nullptr) {
-				m_fwStatusCallback(m_fwDownloadState);
+				m_fwStatusCallback(static_cast<int>(m_fwDownloadState));
 			}
 		}
 		break;
@@ -1493,7 +1493,7 @@ void CRJController::RxPacketFWDownload(BYTE* buff, int size) {
 				m_fwProgressCallback(100);
 			}
 			if (m_fwStatusCallback != nullptr) {
-				m_fwStatusCallback(m_fwDownloadState);
+				m_fwStatusCallback(static_cast<int>(m_fwDownloadState));
 			}
 		} else {
 			if (!SendFWDataChunk()) {
@@ -1502,7 +1502,7 @@ void CRJController::RxPacketFWDownload(BYTE* buff, int size) {
 				m_fwImageBuffer.clear();
 
 				if (m_fwStatusCallback != nullptr) {
-					m_fwStatusCallback(m_fwDownloadState);
+					m_fwStatusCallback(static_cast<int>(m_fwDownloadState));
 				}
 			}
 		}
@@ -1522,7 +1522,7 @@ void CRJController::RxPacketFWDownload(BYTE* buff, int size) {
 			m_fwProgressCallback(100);
 		}
 		if (m_fwStatusCallback != nullptr) {
-			m_fwStatusCallback(m_fwDownloadState);
+			m_fwStatusCallback(static_cast<int>(m_fwDownloadState));
 		}
 		break;
 
@@ -1535,7 +1535,7 @@ void CRJController::RxPacketFWDownload(BYTE* buff, int size) {
 		m_fwImageBuffer.clear();
 		
 		if (m_fwStatusCallback != nullptr) {
-			m_fwStatusCallback(m_fwDownloadState);
+			m_fwStatusCallback(static_cast<int>(m_fwDownloadState));
 		}
 		break;
 	}

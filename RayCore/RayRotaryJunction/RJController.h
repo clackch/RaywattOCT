@@ -43,7 +43,7 @@ struct SFirmwareMetadata {
 
 // Callback function types
 typedef void (*FWProgressCallback)(int progress);			// Progress: 0~100
-typedef void (*FWStatusCallback)(eFWDownloadState state);	// State change callback
+typedef void (*FWStatusCallback)(int state);	// State change callback
 
 enum class eRJState {
 	None = 0,
@@ -200,7 +200,7 @@ protected:
 	bool displayLCD(eLCDImage image);
 	void RxPacketRFIDGetState(BYTE* buff, RFID_ReadType type = DEFAULT);
 	void RxPacketGetVersion(BYTE* buff);
-	void RxPacketFWDownload(BYTE* buff, int size);
+	void RxPacketFWDownload(BYTE* buff);
 	void parseSMPacket(BYTE*packet, int size);
 	virtual void handlePacket();
 	virtual bool writeMotor(BYTE* packet, int size);

@@ -3,7 +3,7 @@
 
 enum class eFWDownloadState : unsigned char;
 typedef void (*FWProgressCallback)(int progress);
-typedef void (*FWStatusCallback)(eFWDownloadState state);
+typedef void (*FWStatusCallback)(int state);
 
 /*
 * 
