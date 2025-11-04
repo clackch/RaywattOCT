@@ -547,7 +547,7 @@ void COCTImaging::CheckSheathPixels(cv::Mat img)
 	// 1. 클론 이미지 생성
 	cv::Mat cloneImg = img.clone();
 	cv::rotate(cloneImg, cloneImg, cv::ROTATE_90_COUNTERCLOCKWISE);
-	cv::imwrite("CheckSheathPixels_origin" + std::to_string(i) + ".tif", cloneImg);
+	//cv::imwrite("CheckSheathPixels_origin" + std::to_string(i) + ".tif", cloneImg);
 	if (cloneImg.type() == CV_8U)
 		cloneImg.convertTo(cloneImg, CV_32F, 1.0 / 255.0);
 	else if (cloneImg.type() == CV_32F) {}

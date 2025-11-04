@@ -82,8 +82,6 @@ protected:
 	int m_nZOffset;
 	int m_nPixelNum;
 
-	int m_delayLineMovingDirection = 1;
-
 	cv::Ptr<cv::CLAHE> clahe;
 
 	AutoCalibrationMathod m_FindingSheathMathod;
@@ -134,7 +132,6 @@ public:
 	int GetPixelNum() { return m_nPixelNum; }
 	void SetPatchImage(cv::Mat Patch) { if(autoCalibPatch.empty()) autoCalibPatch = Patch.clone(); }
 	void SetZOffset(int nOffset) { m_nZOffset = nOffset; }
-	void SetDelayLineMovingDirection(int direction) { m_delayLineMovingDirection = direction; }
 
 	static void SetImageCompensation(bool ImageCompensated);
 	static void SetImageCompensationControlWindow(bool ImageCompensationControlWindowOn, Setting setting);
