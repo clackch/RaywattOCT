@@ -1881,40 +1881,70 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
 			pSystem->m_pImagingLiveView->SetAutoCalibrationMathod(AutoCalibrationMathod::Disable);
-			const int nSheathPosition = CConfiguration::GetInstance().measurement.nSheathPosition;
 
-			int minDiff = INT_MAX;
-			int closestIdx = pSystem->m_vCalibrationInfo.size() - 1;	// 내경이 row 180 위치에 가장 가까운 프레임 Index
-			int idealRow = 180;		// 2차 진행 시에 내경이 위치해야 한다고 가정하는 이상적인 row 위치
+			for(auto& val : pSystem->m_vCalibrationInfo)
+			{
+				PLOGI.printf("Calibration Info - Row : %d, Motor Pos : %d", val.first, val.second);
+			}
+
+			// 선형회귀를 이용한 기울기 계산
+			int sumIndex = 0, sumRow = 0, sumMult = 0; double sumIndexSq = 0.0;
+			int validCount = pSystem->m_vCalibrationInfo.size(), distanceThreshold = 60;
+			for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
+				if(i > 0 && pSystem->m_vCalibrationInfo.at(i).first - pSystem->m_vCalibrationInfo.at(i - 1).first > distanceThreshold
+					|| pSystem->m_vCalibrationInfo.at(i).first > 398) {
+					validCount--;
+					continue;
+				}
+				sumIndex += i;
+				sumRow += pSystem->m_vCalibrationInfo.at(i).first;
+				sumMult += i * pSystem->m_vCalibrationInfo.at(i).first;
+				sumIndexSq += (double)(i * i);
+			}
+			double numerator = (double)(validCount * sumMult) - (double)(sumIndex * sumRow);
+			double denominator = (double)(validCount * sumIndexSq) - (double)(sumIndex * sumIndex);
+			double slope = (denominator == 0.0) ? 0 : numerator / denominator;
+			PLOGI.printf("sheath slope : %f", slope);
+
+			slope = (slope > 10) ? 4 : slope; // 임시 고정값
+
+			// MAD 기법을 이용한 이상치 제거
+			//std::vector<std::pair<double, double>> slopes;
+
 
 			int expectedRow = pSystem->m_vCalibrationInfo.at(0).first;
 			int errorThresholdPlus = 15, errorThresholdMinus = 5; // 2차 탐색의 step별 row 이동 범위 threshold
 			int minusMove = 35; // 외경을 내경으로 판단한 경우 보정값
-			/*for (int i = 1; i < pSystem->m_vCalibrationInfo.size(); i++) {
-				int rowMoving = pSystem->m_vCalibrationInfo.at(i).first - expectedRow;
-				if (rowMoving > errorThreshold) {
-					pSystem->m_vCalibrationInfo.at(i).first -= minusMove;
-				}
-				expectedRow = pSystem->m_vCalibrationInfo.at(i).first;
-				PLOGI.printf("find sheath at row %d", expectedRow);
-			}*/
+			
+			// plus direction check
 			for(auto& val : pSystem->m_vCalibrationInfo)
 			{
 				int rowMoving = val.first - expectedRow;
 				if (rowMoving > errorThresholdPlus) {
-					val.first -= minusMove;
+					if(slope == 0)
+						val.first -= minusMove;
+					else
+						val.first = expectedRow + (int)slope;
 				}
 				expectedRow = val.first;
+				PLOGI.printf("find sheath at the first row %d", expectedRow);
 			}
+			// minus direction check
 			for (int i = pSystem->m_vCalibrationInfo.size() - 1; i >= 0; i--) {
 				int rowMoving = pSystem->m_vCalibrationInfo.at(i).first - expectedRow;
 				if (rowMoving > errorThresholdMinus) {
-					pSystem->m_vCalibrationInfo.at(i).first -= minusMove;
+					if(slope == 0)
+						pSystem->m_vCalibrationInfo.at(i).first -= minusMove;
+					else
+						pSystem->m_vCalibrationInfo.at(i).first = expectedRow - (int)slope;
 				}
 				expectedRow = pSystem->m_vCalibrationInfo.at(i).first;
-				PLOGI.printf("find sheath at row %d", expectedRow);
+				PLOGI.printf("find sheath at the second row %d", expectedRow);
 			}
 			
+			int minDiff = INT_MAX;
+			int closestIdx = pSystem->m_vCalibrationInfo.size() - 1;	// 내경이 row 180 위치에 가장 가까운 프레임 Index
+			int idealRow = 180;		// 2차 진행 시에 내경이 위치해야 한다고 가정하는 이상적인 row 위치
 
 			// 내경이 이상적인 위치(idealRow)에 가장 가까운 프레임 탐색
 			for (int i = pSystem->m_vCalibrationInfo.size() - 1; i >= 0; i--)
