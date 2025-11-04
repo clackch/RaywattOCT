@@ -11,7 +11,7 @@ namespace RaywattApp.Common.Converters
         {
             if(values == null || values[0] == null || values[1] == null || values.Length != 2) return new Thickness(0, 0, 0, 0);
 
-            double dValue = (double)values[1] / (int.Parse(values[0].ToString()) / 100);
+            double dValue = (double)values[1] / (int.Parse(values[0].ToString()) / 10);
 
             if (parameter != null)
             {

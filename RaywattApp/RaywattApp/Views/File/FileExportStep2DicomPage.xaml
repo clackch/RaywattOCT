@@ -89,7 +89,7 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Margin="20,28,0,8" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Export Size], Source={StaticResource L10N}}"/>
-                        <Label Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Margin="0,28,0,8" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Destination], Source={StaticResource L10N}}"/>
+                        <Label Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Margin="0,28,0,8" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Destination], Source={StaticResource L10N}}" Visibility="{Binding ., Converter={StaticResource RV200ToVisibilityReverseConverter}}"/>
                     </Grid>
                     <Grid Grid.Row="1" >
                         <Grid.ColumnDefinitions>
@@ -100,7 +100,7 @@
                             <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding ExportSize}"/>
                             <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding ExportSizeUnit}" Margin="5,0,0,0"/>
                         </StackPanel>
-                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Visibility="{Binding ., Converter={StaticResource RV200ToVisibilityReverseConverter}}">
                             <StackPanel>
                                 <RadioButton IsChecked="{Binding IsPacs, Converter={StaticResource BoolToEnableReverseConverter}}" Content="{Binding [External Drive], Source={StaticResource L10N}}"/>
                             </StackPanel>

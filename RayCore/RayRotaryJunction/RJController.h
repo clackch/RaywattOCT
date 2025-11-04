@@ -19,7 +19,7 @@
 
 #define RFID_REPLY_DATA_IDX				4
 #define RFID_REPLY_LENGTH_IDX			1
-#define RFID_MAX_COUNT					5
+#define RFID_MAX_COUNT					99
 #define RFID_MANUFACTURER				"RAYWATT"
 #define RFID_MANUFACTURER_LEN			7
 

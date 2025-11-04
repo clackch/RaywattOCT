@@ -39,6 +39,10 @@ COCTSystem::COCTSystem() {
 	catheterRFID = config.catheter.catheterRFID;
 
 	SetLogger(config.logRootPath);
+	if (config.laserModule.autoCalibrationForSeverance != 0)
+		PLOGI.printf("auto Calibration is set for Severance");
+	else
+		PLOGI.printf("auto Calibration is set for General");
 }
 
 /*
@@ -170,6 +174,7 @@ RayError COCTSystem::Start() {
 	loadAutoCalibPatch();
 
 	m_pAcqDevice = new CATSDevice(config.acquisition);
+	m_pRJController->SetCatheterUsage(config.catheter.catheterUsage);
 
 	return RayError::OK;
 }
@@ -1686,6 +1691,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 
 	COCTSystem* pSystem = (COCTSystem*)param;
 	CLaserModule* pLaserModule = pSystem->m_pLaserModule;
+	CConfiguration& config = CConfiguration::GetInstance();
 	int nTargetPos = 0;
 	RayError autoCalibError = RayError::OK;
 
@@ -1741,9 +1747,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			}
 		}
 
-		int isThisSeverance = CUtility::GetPrivateProfileIntEx(_T("AutoCalibration"), _T("isThisSeverance"), 0, _T(".\\raycore.ini"));
-
-		if (isThisSeverance == 0) {
+		if (config.laserModule.autoCalibrationForSeverance == 0) {
 			std::vector<std::pair<int, int>> minList; // pair<motor loc, index>
 			for (int i = 0; i < gradient.size() - 1; i++)
 			{
@@ -2251,7 +2255,6 @@ UINT COCTSystem::threadLoadCatheter(LPVOID param) {
 
 	if (pSystem->m_pThreadRotaryJunction->isRun) {
 		pSystem->m_bFirstLoad = true;
-		pRJController->SetCatheterUsage(config.catheter.catheterUsage);
 		pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::LoadCatheter);
 		pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loading);
 	}
@@ -3226,6 +3229,8 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 			}
 		}
 		else {
+			RFIDProtocol::initState(false);
+			m_pRJController->ReadRFID();
 			m_pRJController->UpdateState(eRJState::Loading);
 		}
 		break;
