@@ -134,7 +134,7 @@ namespace RaywattApp.ViewModels
                 Dictionary<string, object> param = new Dictionary<string, object>();
                 param["title"] = _l10n["Information"];
                 param["message"] = _l10n["Invalid format for patient information."];
-                _dialogService.OpenDialog(new ConfirmDialogControl(), param, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                _dialogService.OpenDialog(new AlertDialogControl(), param, Constants.ApplicationWidth, Constants.ApplicationHeight);
                 return;
             }
 
@@ -163,7 +163,7 @@ namespace RaywattApp.ViewModels
 
         private bool ValidateSelectedPatient(bool hasFirstname)
         {
-            if (SelectedPatient.Id == null || SelectedPatient.Birthdate == null || SelectedPatient.Gender == null || SelectedPatient.Lastname == null)
+            if (SelectedPatient.Id == null || SelectedPatient.Gender == null || SelectedPatient.Lastname == null)
                 return false;
 
             if (hasFirstname && SelectedPatient.Firstname == string.Empty)
