@@ -34,7 +34,7 @@
                 <RowDefinition Height="*" />
                 <RowDefinition Height="57.5"/>
             </Grid.RowDefinitions>
-            <Border Grid.Row="1" Grid.Column="1" CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}">
+            <Border Grid.Row="1" Grid.Column="1" CornerRadius="10" Background="{DynamicResource GrayscaleGray7Brush}">
                 <Grid Margin="40,56,40,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>

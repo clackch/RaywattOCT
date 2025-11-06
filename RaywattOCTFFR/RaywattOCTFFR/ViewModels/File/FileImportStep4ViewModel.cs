@@ -48,7 +48,7 @@ namespace RaywattOCTFFR.ViewModels.File
             IndicatorLongitude = new Indicator();
             IndicatorLongitude.X = Constants.LongitudeIndicatorWidth / 2;
             IndicatorLongitude.IsVisible = Visibility.Collapsed;
-            IndicatorLongitude.IsEnabled = false;
+            IndicatorLongitude.IsEnabled = true;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -64,14 +64,15 @@ namespace RaywattOCTFFR.ViewModels.File
                 if (data.TryGetValue("fileImport", out var fileImportObj) && fileImportObj is FileImport fileImportData)
                 {
                     FileImport = fileImportData;
+                    PatientCase = FileImport.PatientCase;
 
                     InitializeImportData(data);
 
-                    this.zOffset = FileImport.PatientCase.ZOffset;
+                    this.zOffset = PatientCase.ZOffset;
 
-                    DrawSheathIndicator(FileImport.PatientCase.SheathDiameter * CommonUtil.GetZOffsetScale(FileImport.PatientCase.ZOffset));
+                    DrawSheathIndicator(PatientCase.SheathDiameter * CommonUtil.GetZOffsetScale(PatientCase.ZOffset));
 
-                    CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault) * CommonUtil.GetZOffsetScale(FileImport.PatientCase.ZOffset);
+                    CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault) * CommonUtil.GetZOffsetScale(PatientCase.ZOffset);
                 }
             }
         }
@@ -83,7 +84,7 @@ namespace RaywattOCTFFR.ViewModels.File
 
             if (this.isEndReview)
             {
-                if (Constants.ImportTypeRaw.Equals(FileImport.PatientCase.ImportType))
+                if (Constants.ImportTypeRaw.Equals(PatientCase.ImportType))
                 {
                     RayEndReview();
                 }
@@ -105,7 +106,7 @@ namespace RaywattOCTFFR.ViewModels.File
 
             this.isEndReview = false;
 
-            FileImport.PatientCase.ZOffset = this.zOffset;
+            PatientCase.ZOffset = this.zOffset;
 
             MoveImportPage(Constants.FileImportStep5Page);
         }
@@ -118,7 +119,7 @@ namespace RaywattOCTFFR.ViewModels.File
 
             this.zOffset += sign;
 
-            double sheathDiameter = FileImport.PatientCase.SheathDiameter * CommonUtil.GetZOffsetScale(this.zOffset);
+            double sheathDiameter = PatientCase.SheathDiameter * CommonUtil.GetZOffsetScale(this.zOffset);
 
             if(sheathDiameter > 0.5 && sheathDiameter < 3)
             {                
@@ -137,7 +138,7 @@ namespace RaywattOCTFFR.ViewModels.File
 
             this.zOffset = 0;
 
-            DrawSheathIndicator(FileImport.PatientCase.SheathDiameter);
+            DrawSheathIndicator(PatientCase.SheathDiameter);
         }
     }
 }

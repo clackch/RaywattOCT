@@ -41,10 +41,6 @@ namespace RaywattOCTFFR.ViewModels
 
         private bool isLumenProfileInit;
 
-        private double originSectionProximalX;
-
-        private double originSectionDistalX;
-
         private string originProcedure;
 
         private double convertedFoV;
@@ -82,9 +78,6 @@ namespace RaywattOCTFFR.ViewModels
 
         [ObservableProperty]
         private Indicator _indicatorLongitude;
-
-        [ObservableProperty]
-        private Section _section;
 
         private int outFrameNumber;
         public int OutFrameNumber

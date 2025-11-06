@@ -36,11 +36,11 @@
                     <ColumnDefinition Width="380"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="32.5" />
+                    <RowDefinition Height="26.5" />
                     <RowDefinition Height="*" />
-                    <RowDefinition Height="32.5"/>
+                    <RowDefinition Height="26.5"/>
                 </Grid.RowDefinitions>
-                <Border Grid.Row="1" Grid.Column="1" CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}">
+                <Border Grid.Row="1" Grid.Column="1" CornerRadius="10" Background="{DynamicResource GrayscaleGray7Brush}">
                     <Grid Margin="0,56,0,0">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
@@ -66,10 +66,10 @@
                                     <StackPanel Orientation="Horizontal">
                                         <Label Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Total Frame:], Source={StaticResource L10N}}" HorizontalAlignment="Left"/>
                                         <StackPanel Width="5"/>
-                                        <Label Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding FileImport.PatientCase.NumOfFrames}" HorizontalAlignment="Left"/>
+                                        <Label Style="{DynamicResource Pretendard-Medium-24}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding PatientCase.NumOfFrames}" HorizontalAlignment="Left"/>
                                     </StackPanel>
                                     <StackPanel Height="238"/>
-                                    <Border HorizontalAlignment="Left" CornerRadius="10" Height="50" Background="{StaticResource GrayscaleGray7Brush}" Width="180">
+                                    <Border HorizontalAlignment="Left" CornerRadius="10" Height="50" Background="{StaticResource GrayscaleGray8Brush}" Width="180">
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" IsEnabled="{Binding IndicatorLongitude.IsEnabled}">
                                             <component:IconRepeatButton Style="{DynamicResource IconRepeatButton}" Icon="prev" Width="24" Height="21.3" Command="{Binding CmdPlayback}" CommandParameter="prev" />
                                             <StackPanel Width="40"/>
@@ -102,11 +102,11 @@
                                     </Grid>
                                 </Grid>
                             </Grid>
-                            <StackPanel Height="165">
-                                <StackPanel Height="20"/>
+                            <StackPanel Height="177">
+                                <StackPanel Height="36"/>
                                 <StackPanel Orientation="Horizontal">
                                     <Grid Width="40" VerticalAlignment="Center">
-                                        <Label Content="{Binding FileImport.PatientCase.IsDistalToProximal, Converter={StaticResource DtoPConverter}}" Style="{DynamicResource Pretendard-Medium-16}" HorizontalContentAlignment="Center" Foreground="{StaticResource GrayscaleGray3Brush}"/>
+                                        <Label Content="{Binding PatientCase.IsDistalToProximal, Converter={StaticResource DtoPConverter}}" Style="{DynamicResource Pretendard-Medium-16}" HorizontalContentAlignment="Center" Foreground="{StaticResource GrayscaleGray3Brush}"/>
                                     </Grid>
                                     <Grid x:Name="longitude" Width="{x:Static const:Constants.LongitudeWidth}">
                                         <i:Interaction.Triggers>
@@ -162,10 +162,10 @@
                                         </Canvas>
                                     </Grid>
                                     <Grid Width="40" VerticalAlignment="Center">
-                                        <Label Content="{Binding FileImport.PatientCase.IsDistalToProximal, Converter={StaticResource DtoPReverseConverter}}" Style="{DynamicResource Pretendard-Medium-16}" HorizontalContentAlignment="Center" Foreground="{StaticResource GrayscaleGray3Brush}"/>
+                                        <Label Content="{Binding PatientCase.IsDistalToProximal, Converter={StaticResource DtoPReverseConverter}}" Style="{DynamicResource Pretendard-Medium-16}" HorizontalContentAlignment="Center" Foreground="{StaticResource GrayscaleGray3Brush}"/>
                                     </Grid>
                                 </StackPanel>
-                                <ContentControl Template="{DynamicResource LongitudeScaleBar}" Height="20" Width="{x:Static const:Constants.LongitudeWidth}" Tag="{Binding FileImport.PatientCase.PullbackLength}"/>
+                                <ContentControl Template="{DynamicResource LongitudeScaleBar}" Height="20" Width="{x:Static const:Constants.LongitudeWidth}" Tag="{Binding PatientCase.PullbackLength}"/>
                                 <StackPanel Height="20"/>
                             </StackPanel>
                         </StackPanel>
