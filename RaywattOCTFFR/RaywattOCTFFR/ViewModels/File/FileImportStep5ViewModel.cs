@@ -28,24 +28,12 @@ namespace RaywattOCTFFR.ViewModels.File
         private IDialogService _dialogService;
 
         private CallbackFunctionForDetection cbMlData;
-        public CallbackFunctionForDetection CBMlData => (this.cbMlData) ?? (this.cbMlData = new CallbackFunctionForDetection(OnRecvMlData));
+        public CallbackFunctionForDetection CbMlData => (this.cbMlData) ?? (this.cbMlData = new CallbackFunctionForDetection(OnRecvMlData));
 
         private bool isMlDataFrontDone;
 
         [ObservableProperty]
         private Zoom _zoom = new Zoom();
-
-        [ObservableProperty]
-        private List<LumenContour> _lumenContours;
-
-        [ObservableProperty]
-        private List<LumenSidebranch> _lumenSidebranches;
-
-        [ObservableProperty]
-        private List<LumenStent> _lumenStents;
-
-        [ObservableProperty]
-        private List<LumenGuidewire> _lumenGuidewires;
 
         [ObservableProperty]
         private List<double> _guideWireRadiusList;
@@ -63,6 +51,12 @@ namespace RaywattOCTFFR.ViewModels.File
             IndicatorLongitude.X = Constants.LongitudeIndicatorWidth / 2;
             IndicatorLongitude.IsVisible = Visibility.Collapsed;
             IndicatorLongitude.IsEnabled = false;
+
+            Section = new Section();
+            Section.Proximal.IsVisible = Visibility.Visible;
+            Section.Distal.IsVisible = Visibility.Visible;
+
+            DeviceStatus.IsLumenLoaded = false;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -78,20 +72,25 @@ namespace RaywattOCTFFR.ViewModels.File
                 if (data.TryGetValue("fileImport", out var fileImportObj) && fileImportObj is FileImport fileImportData)
                 {
                     FileImport = fileImportData;
+                    PatientCase = FileImport.PatientCase;
 
                     InitializeImportData(data);
 
                     StopPlayback();
 
-                    DrawSheathIndicator(FileImport.PatientCase.SheathDiameter * CommonUtil.GetZOffsetScale(FileImport.PatientCase.ZOffset));
+                    DrawSheathIndicator(PatientCase.SheathDiameter * CommonUtil.GetZOffsetScale(PatientCase.ZOffset));
 
-                    CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault) * CommonUtil.GetZOffsetScale(FileImport.PatientCase.ZOffset);
+                    CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault) * CommonUtil.GetZOffsetScale(PatientCase.ZOffset);
+
+                    Section.Proximal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionProximal, PatientCase.NumOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveCenterWidth);
+                    Section.Distal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionDistal, PatientCase.NumOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth);
+                    Section.CalcMean(LumenContours, PatientCase.SectionProximal, PatientCase.SectionDistal);
 
                     InitializeMlData();
 
-                    if (Constants.ImportTypeRaw.Equals(FileImport.PatientCase.ImportType))
+                    if (Constants.ImportTypeRaw.Equals(PatientCase.ImportType))
                     {
-                        RayError result = (RayError)RayRegisterDetectionCallback(Marshal.GetFunctionPointerForDelegate(CBMlData));
+                        RayError result = (RayError)RayRegisterDetectionCallback(Marshal.GetFunctionPointerForDelegate(CbMlData));
                         if (result != RayError.OK)
                         {
                             _log.Error("RayRegisterDetectionCallback Error");
@@ -112,7 +111,7 @@ namespace RaywattOCTFFR.ViewModels.File
             _log.Debug("OnNavigating");
             base.OnNavigating(sender, navigationEventArgs);
 
-            if (Constants.ImportTypeRaw.Equals(FileImport.PatientCase.ImportType))
+            if (Constants.ImportTypeRaw.Equals(PatientCase.ImportType))
             {
                 RayError result = (RayError)RayUnregisterDetectionCallback();
                 if (result != RayError.OK)
@@ -145,7 +144,7 @@ namespace RaywattOCTFFR.ViewModels.File
 
         private void OnRecvMlData(int frame)
         {
-            if (LumenContours == null || LumenContours.Count != FileImport.PatientCase.NumOfFrames || frame <= 0)
+            if (LumenContours == null || LumenContours.Count != PatientCase.NumOfFrames || frame <= 0)
                 return;
 
             if (!this.isMlDataFrontDone)
@@ -163,7 +162,24 @@ namespace RaywattOCTFFR.ViewModels.File
             Application.Current.Dispatcher.Invoke(() =>
             {
                 MoveToFrame((int)RaySession.Review, frame);
+
+                if (PatientCase.NumOfFrames - 1 == frame)
+                {
+                    SetLumenProfileInit();
+                    MinimalValueChanged();
+                    Section.Proximal.IsEnabled = true;
+                    Section.Distal.IsEnabled = true;
+                    IndicatorLongitude.IsEnabled = true;
+                }
+
+                DrawLumenProfile(frame);
             });
+
+            if (PatientCase.NumOfFrames - 1 == frame)
+            {
+                DeviceStatus.IsLumenLoaded = true;
+                Playback();
+            }
         }
 
         private async void MlDataProcess()
@@ -194,8 +210,22 @@ namespace RaywattOCTFFR.ViewModels.File
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     MoveToFrame((int)RaySession.Review, idx);
+
+                    if (idx == total - 1)
+                    {
+                        SetLumenProfileInit();
+                        MinimalValueChanged();
+                        Section.Proximal.IsEnabled = true;
+                        Section.Distal.IsEnabled = true;
+                        IndicatorLongitude.IsEnabled = true;
+                    }
+
+                    DrawLumenProfile(idx);
                 });
             }
+
+            DeviceStatus.IsLumenLoaded = true;
+            Playback();
         }
 
         private Mat ConvertTo8BitGray(Mat src)
@@ -254,7 +284,7 @@ namespace RaywattOCTFFR.ViewModels.File
             LumenGuidewires = new List<LumenGuidewire>();
             GuideWireRadiusList = new List<double>();
 
-            for (int i = 0; i < FileImport.PatientCase.NumOfFrames; i++)
+            for (int i = 0; i < PatientCase.NumOfFrames; i++)
             {
                 //lumen
                 LumenContour lumenContour = new LumenContour();

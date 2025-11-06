@@ -18,8 +18,8 @@ using System.Windows;
 using System.Windows.Input;
 using static RaywattOCT.RayCoreFFRWrapper;
 using RaywattOCTFFR.Common.Util;
-using System.Windows.Markup;
 using System.Windows.Media.Imaging;
+using System.Linq;
 
 namespace RaywattOCTFFR.Common.Bases
 {
@@ -34,6 +34,10 @@ namespace RaywattOCTFFR.Common.Bases
         protected CancellationTokenSource? _cts;
 
         protected bool isEndReview = true;
+
+        protected double originSectionProximalX;
+
+        protected double originSectionDistalX;
 
         [ObservableProperty]
         private PrevStatus _prevStatus;
@@ -76,6 +80,21 @@ namespace RaywattOCTFFR.Common.Bases
 
         [ObservableProperty]
         private Indicator _indicatorLongitude;
+
+        [ObservableProperty]
+        private Section _section;
+
+        [ObservableProperty]
+        private List<LumenContour> _lumenContours;
+
+        [ObservableProperty]
+        private List<LumenSidebranch> _lumenSidebranches;
+
+        [ObservableProperty]
+        private List<LumenStent> _lumenStents;
+
+        [ObservableProperty]
+        private List<LumenGuidewire> _lumenGuidewires;
 
         [ObservableProperty]
         private FileImport _fileImport = new FileImport();
@@ -323,25 +342,71 @@ namespace RaywattOCTFFR.Common.Bases
                 }
 
                 double indicatorX = indicator.PointLongitudeX - indicator.Coordinate.X - indicator.IndicatorDiff;
-                double indicatorCenterX = indicatorX + Constants.LongitudeIndicatorWidth / 2;
 
-                if (indicatorCenterX < 0)
+                if (indicator.IsSectionIndicator)
                 {
-                    indicator.X = 0 - Constants.LongitudeIndicatorWidth / 2;
-                    indicator.CenterX = 0;
-                    setCurrentFrame(0);
-                }
-                else if (indicatorCenterX > Constants.LongitudeWidth)
-                {
-                    indicator.X = Constants.LongitudeWidth - Constants.LongitudeIndicatorWidth / 2;
-                    indicator.CenterX = Constants.LongitudeWidth;
-                    setCurrentFrame(Constants.LongitudeWidth);
+                    double sectionIndicatorCenter = Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth;
+
+                    if (indicator.IsSectionProximal && (indicatorX >= Section.Distal.X - sectionIndicatorCenter))
+                    {
+                        indicator.X = Section.Distal.X - sectionIndicatorCenter;
+                        setCurrentFrame(indicator.X + Constants.SectionIndicatorMoveCenterWidth);
+                        return;
+                    }
+
+                    if (!indicator.IsSectionProximal && (indicatorX <= Section.Proximal.X + sectionIndicatorCenter))
+                    {
+                        indicator.X = Section.Proximal.X + sectionIndicatorCenter;
+                        setCurrentFrame(indicator.X + Constants.SectionIndicatorMoveCenterWidth);
+                        return;
+                    }
+
+                    if (indicatorX < -Constants.SectionIndicatorMoveCenterWidth)
+                    {
+                        indicator.X = -Constants.SectionIndicatorMoveCenterWidth;
+                    }
+                    else if (indicatorX > Constants.LongitudeWidth - sectionIndicatorCenter)
+                    {
+                        indicator.X = Constants.LongitudeWidth - sectionIndicatorCenter;
+                    }
+                    else
+                    {
+                        indicator.X = indicatorX;
+                    }
+
+                    setCurrentFrame(indicator.X + Constants.SectionIndicatorMoveCenterWidth);
+                    
+                    if (IsChangedLumenProfileValue())
+                    {
+                        imglumenProfile = null;
+                        imglumenProfileExtra = null;
+                        MinimalValueChanged();
+                        DrawLumenProfile(longitudeFrameInfo.curFrame - 1);
+                        SetLumenProfileValue();
+                    }
                 }
                 else
                 {
-                    indicator.X = indicatorX;
-                    indicator.CenterX = indicatorCenterX;
-                    setCurrentFrame(indicatorCenterX);
+                    double indicatorCenterX = indicatorX + Constants.LongitudeIndicatorWidth / 2;
+
+                    if (indicatorCenterX < 0)
+                    {
+                        indicator.X = 0 - Constants.LongitudeIndicatorWidth / 2;
+                        indicator.CenterX = 0;
+                        setCurrentFrame(0);
+                    }
+                    else if (indicatorCenterX > Constants.LongitudeWidth)
+                    {
+                        indicator.X = Constants.LongitudeWidth - Constants.LongitudeIndicatorWidth / 2;
+                        indicator.CenterX = Constants.LongitudeWidth;
+                        setCurrentFrame(Constants.LongitudeWidth);
+                    }
+                    else
+                    {
+                        indicator.X = indicatorX;
+                        indicator.CenterX = indicatorCenterX;
+                        setCurrentFrame(indicatorCenterX);
+                    }
                 }
             }
         }
@@ -499,7 +564,7 @@ namespace RaywattOCTFFR.Common.Bases
                 ReviewStatus = reviewStatusData;
             }
 
-            if (Constants.ImportTypeTiff.Equals(FileImport.PatientCase.ImportType) || Constants.ImportTypeDicom.Equals(FileImport.PatientCase.ImportType))
+            if (Constants.ImportTypeTiff.Equals(PatientCase.ImportType) || Constants.ImportTypeDicom.Equals(PatientCase.ImportType))
             {
                 if (data.TryGetValue("crossSectionImages", out var crossSectionImagesObj) && crossSectionImagesObj is ObservableCollection<Mat> crossSectionImagestData)
                 {
@@ -514,9 +579,9 @@ namespace RaywattOCTFFR.Common.Bases
                     longitudeFrameInfo = longitudeFrameInfoData;
                 }
             }
-            else if (Constants.ImportTypeRaw.Equals(FileImport.PatientCase.ImportType))
+            else if (Constants.ImportTypeRaw.Equals(PatientCase.ImportType))
             {
-                RayError result = (RayError)RaySetProperty(Property.Brightness, FileImport.PatientCase.Brightness);
+                RayError result = (RayError)RaySetProperty(Property.Brightness, PatientCase.Brightness);
                 if (result != RayError.OK)
                 {
                     _log.Error("RaySetProperty Error");
@@ -526,13 +591,83 @@ namespace RaywattOCTFFR.Common.Bases
             DeviceStatus.ReviewImageInfo imageInfo = DeviceStatus.ReviewImageInfos[(int)RaySession.Review];
             MoveToFrame(RaySession.Review, imageInfo.Current);
             updateNavigator(imageInfo.Current, imageInfo.Total);
-            IndicatorLongitude.IsVisible = Visibility.Visible;
-            IndicatorLongitude.IsEnabled = true;
+            IndicatorLongitude.IsVisible = Visibility.Visible;            
 
             if (ReviewStatus.IsPlay)
             {
                 Playback();
             }
+        }
+
+        protected void DrawLumenProfile(int totalFrame)
+        {
+            int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, PatientCase.NumOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveCenterWidth);
+            int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, PatientCase.NumOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth);
+
+            imglumenProfile = CommonUtil.MakeLumenProfileImageOneByOne(imglumenProfile, LumenContours, LumenSidebranches, LumenStents, PatientCase.AppositionThreshold, frameProximal, frameDistal, false, totalFrame);
+            DrawLumenProfileImage();
+        }
+
+        protected void SetLumenProfileInit()
+        {
+            imglumenProfile = null;
+            int proximalIdx = 0;
+            int distalIdx = 0;
+
+            int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, PatientCase.NumOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveCenterWidth);
+            int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, PatientCase.NumOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth);
+
+            int count = frameDistal - frameProximal + 1;
+            var mlaSubset = LumenContours.GetRange(frameProximal, count).Where(x => x.Area > 0);
+            if (mlaSubset.Any())
+            {
+                double mla = mlaSubset.Min(x => x.Area);
+                int mlaIdx = LumenContours.GetRange(frameProximal, count).FindIndex(x => x.Area == mla) + frameProximal;
+
+                int frameDiff = (int)(Constants.PreLesionLengthInitValue * PatientCase.NumOfFrames / int.Parse(PatientCase.PullbackLength));
+                proximalIdx = mlaIdx - frameDiff > 0 ? mlaIdx - frameDiff : 0;
+                distalIdx = mlaIdx + frameDiff < PatientCase.NumOfFrames ? mlaIdx + frameDiff : PatientCase.NumOfFrames - 1;
+            }
+            else
+            {
+                proximalIdx = 0;
+                distalIdx = PatientCase.NumOfFrames - 1;
+            }
+
+            if (proximalIdx >= 0)
+                Section.Proximal.X = CommonUtil.GetPositionFromFrame(proximalIdx, PatientCase.NumOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveCenterWidth);
+            if (distalIdx >= 0)
+                Section.Distal.X = CommonUtil.GetPositionFromFrame(distalIdx, PatientCase.NumOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth);
+
+            SetLumenProfileValue();
+        }
+
+        private void SetLumenProfileValue()
+        {
+            this.originSectionProximalX = Section.Proximal.X;
+            this.originSectionDistalX = Section.Distal.X;
+        }
+
+        private bool IsChangedLumenProfileValue()
+        {
+            if (this.originSectionProximalX != Section.Proximal.X || this.originSectionDistalX != Section.Distal.X)
+                return true;
+            else
+                return false;
+        }
+
+        protected void MinimalValueChanged()
+        {
+            int frameProximal = CommonUtil.GetFrameFromPosition(Section.Proximal.X, PatientCase.NumOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveCenterWidth);
+            int frameDistal = CommonUtil.GetFrameFromPosition(Section.Distal.X, PatientCase.NumOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth);
+
+            Section.VisibleMlaMld(false);
+            Section.VislbleMsaMinExp(false);
+
+            if (Section.SetMlaMld(LumenContours, frameProximal, frameDistal, PatientCase.NumOfFrames, Constants.LongitudeWidth, PatientCase.PullbackLength))
+                Section.VisibleMlaMld(true);
+            else
+                Section.VisibleMlaMld(false);
         }
 
         protected void MoveImportPage(string page)
@@ -541,7 +676,7 @@ namespace RaywattOCTFFR.Common.Bases
             parameter["reviewStatus"] = ReviewStatus;
             parameter["initializeImport"] = true;
             parameter["fileImport"] = FileImport;
-            if (Constants.ImportTypeTiff.Equals(FileImport.PatientCase.ImportType) || Constants.ImportTypeDicom.Equals(FileImport.PatientCase.ImportType))
+            if (Constants.ImportTypeTiff.Equals(PatientCase.ImportType) || Constants.ImportTypeDicom.Equals(PatientCase.ImportType))
             {
                 parameter["crossSectionImages"] = CrossSectionImages;
                 parameter["longitudeImage"] = LongitudeImage;

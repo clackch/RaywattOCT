@@ -56,6 +56,7 @@ namespace RaywattOCTFFR.ViewModels.File
                 if (data.TryGetValue("fileImport", out var fileImportObj) && fileImportObj is FileImport fileImportData)
                 {
                     FileImport = fileImportData;
+                    PatientCase = FileImport.PatientCase;
 
                     if (data.TryGetValue("initializeImport", out var initializeImportObj) && initializeImportObj is bool initializeImportData && initializeImportData)
                     {
@@ -63,18 +64,19 @@ namespace RaywattOCTFFR.ViewModels.File
                     }
                     else
                     {
-                        string path = Constants.TempPath + "\\" + FileImport.PatientCase.Image;
+                        string path = Constants.TempPath + "\\" + PatientCase.Image;
 
-                        if (Constants.ImportTypeRaw.Equals(FileImport.PatientCase.ImportType))
+                        if (Constants.ImportTypeRaw.Equals(PatientCase.ImportType))
                         {
-                            LoadImageFromRaw(path, FileImport.PatientCase.ImageResolution, FileImport.PatientCase.ZOffset, FileImport.PatientCase.Colormap, FileImport.PatientCase.Brightness, FileImport.PatientCase.Contrast);
-                            FileImport.PatientCase.NumOfFrames = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total;
+                            LoadImageFromRaw(path, PatientCase.ImageResolution, PatientCase.ZOffset, PatientCase.Colormap, PatientCase.Brightness, PatientCase.Contrast);
+                            PatientCase.NumOfFrames = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total;
+                            PatientCase.SectionDistal = PatientCase.NumOfFrames - 1;
                         }
-                        else if (Constants.ImportTypeTiff.Equals(FileImport.PatientCase.ImportType))
+                        else if (Constants.ImportTypeTiff.Equals(PatientCase.ImportType))
                         {
                             _ = LoadFromImageAsync(_tiffService, path);
                         }
-                        else if (Constants.ImportTypeDicom.Equals(FileImport.PatientCase.ImportType))
+                        else if (Constants.ImportTypeDicom.Equals(PatientCase.ImportType))
                         {
                             _ = LoadFromImageAsync(_dicomService, path);
                         }
@@ -92,7 +94,7 @@ namespace RaywattOCTFFR.ViewModels.File
 
             if (this.isEndReview)
             {
-                if (Constants.ImportTypeRaw.Equals(FileImport.PatientCase.ImportType))
+                if (Constants.ImportTypeRaw.Equals(PatientCase.ImportType))
                 {
                     RayEndReview();
                     DeviceStatus.IsOCTImagingDone = true;
@@ -120,7 +122,8 @@ namespace RaywattOCTFFR.ViewModels.File
 
         private async Task LoadFromImageAsync(IImageService service, string path)
         {
-            FileImport.PatientCase.NumOfFrames = await CountFramesAsync(service, path);
+            PatientCase.NumOfFrames = await CountFramesAsync(service, path);
+            PatientCase.SectionDistal = PatientCase.NumOfFrames - 1;
             await StreamEnumerableAsync(service, path);
         }
 
