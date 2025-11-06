@@ -43,14 +43,30 @@
 					       Foreground="{DynamicResource GrayscaleWhiteBrush}"/>
                 </StackPanel>
 
+                <!-- USB Drive Selection -->
+                <StackPanel Margin="0,0,0,10">
+                    <Label Style="{DynamicResource Pretendard-Medium-16}" 
+					       Content="{Binding [Select Drive], Source={StaticResource L10N}}" 
+					       Foreground="{DynamicResource GrayscaleGray3Brush}"
+					       Margin="0,0,0,5"/>
+                    <ComboBox Style="{DynamicResource ComboBoxDialog}" 
+					          Width="560"
+					          ItemsSource="{Binding ExternalDriveComboBox}" 
+					          SelectedValue="{Binding SelectedExternalDrive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+					          SelectedValuePath="Key" 
+					          DisplayMemberPath="Value" 
+					          IsEnabled="{Binding IsEnableExternalDrive}" 
+					          Tag="{Binding [No Drive], Source={StaticResource L10N}}" 
+					          HorizontalAlignment="Left"/>
+                </StackPanel>
+
                 <!-- Available Firmware Versions -->
                 <Grid Visibility="{Binding HasAvailableUpdates, Converter={StaticResource BoolToVisibilityConverter}}">
                     <Border Grid.Row="1" 
                             CornerRadius="5" 
                             BorderBrush="{DynamicResource GrayscaleGray7Brush}" 
                             BorderThickness="1"
-                            MinHeight="300"
-                            MaxHeight="300">
+                            MinHeight="300">
                         <DataGrid ItemsSource="{Binding FirmwareUpdateItems}" 
                                   SelectedItem="{Binding SelectedFirmware}"
                                   Style="{StaticResource DataGridDialog}" 

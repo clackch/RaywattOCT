@@ -10,6 +10,8 @@ using System.Configuration;
 using System.Windows.Input;
 using RaywattApp.Models;
 using System;
+using System.IO;
+using System.Linq;
 using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels.Setting
@@ -19,7 +21,6 @@ namespace RaywattApp.ViewModels.Setting
         private static readonly ILog _log = LogManager.GetLogger(typeof(SettingAboutViewModel));
 
         private readonly SqlManager _sqlManager;
-        private readonly UsbDetectionService _usbDetectionService;
         private readonly IDialogService _dialogService;
 
         private ICommand _softwareUpdateCommand;
@@ -43,41 +44,41 @@ namespace RaywattApp.ViewModels.Setting
 
             _sqlManager = sqlManager;
             _dialogService = dialogService;
-            _usbDetectionService = new UsbDetectionService();
 
             SoftwareName = ConfigurationManager.AppSettings.Get("SoftwareName");
             SoftwareVersion = ConfigurationManager.AppSettings.Get("SoftwareVersion");
 
             // 펌웨어 버전 읽기
             LoadFirmwareVersion();
-
-            // USB 이벤트 등록
-            _usbDetectionService.DeviceArrived += OnUsbDeviceArrived;
-            _usbDetectionService.DeviceRemoved += OnUsbDeviceRemoved;
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             _log.Debug("OnNavigated");
-            _usbDetectionService.RegisterUsbDetection();
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
         {
             _log.Debug("OnNavigating");
-            _usbDetectionService.UnregisterUsbDetection();
         }
 
-        private void OnUsbDeviceArrived()
+        private bool HasUsbDrive()
         {
-            _log.Debug("USB device arrived event received in SettingAboutViewModel");
-            // 필요시 UI 업데이트나 추가 로직 처리
-        }
+            try
+            {
+                var usbDrives = DriveInfo.GetDrives()
+                    .Where(drive => drive.DriveType == DriveType.Removable && drive.IsReady)
+                    .ToList();
 
-        private void OnUsbDeviceRemoved()
-        {
-            _log.Debug("USB device removed event received in SettingAboutViewModel");
-            // 필요시 UI 업데이트나 추가 로직 처리
+                bool hasUsb = usbDrives.Any();
+                _log.Debug($"Has USB drive: {hasUsb}");
+                return hasUsb;
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Error checking for USB drive: {ex.Message}", ex);
+                return false;
+            }
         }
 
         public void SoftwareUpdate()
@@ -88,7 +89,7 @@ namespace RaywattApp.ViewModels.Setting
             {
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
 
-                if (!_usbDetectionService.HasUsbDrive())
+                if (!HasUsbDrive())
                 {
                     _log.Debug("USB drive not found");
 
@@ -139,19 +140,6 @@ namespace RaywattApp.ViewModels.Setting
                             {
                                 // 펌웨어 버전 다시 읽기
                                 LoadFirmwareVersion();
-
-                                //Dictionary<string, object> successParameter = new Dictionary<string, object>();
-                                //successParameter["title"] = _l10n["Information"];
-                                //successParameter["message"] = _l10n["Firmware update completed successfully"] + "\n" + _l10n["Please restart the device"];
-                                //_dialogService.OpenDialog(new AlertDialogControl(), successParameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
-                            }
-                            else if (finalState == FirmwareUpdateState.Failed)
-                            {
-                                //Dictionary<string, object> errorParameter = new Dictionary<string, object>();
-                                //errorParameter["title"] = _l10n["Error"];
-                                //errorParameter["message"] = _l10n["Firmware update failed"] + "\n" + _l10n["Please try again or contact support"];
-                                //errorParameter["error"] = true;
-                                //_dialogService.OpenDialog(new AlertDialogControl(), errorParameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
                             }
                         }
                     }
@@ -160,7 +148,6 @@ namespace RaywattApp.ViewModels.Setting
                 {
                     _log.Debug("User canceled firmware update");
                 }
-
             }
             catch (Exception ex)
             {
@@ -197,30 +184,6 @@ namespace RaywattApp.ViewModels.Setting
                 _log.Error($"Error loading firmware version: {ex.Message}", ex);
                 FirmwareVersion = "N/A";
             }
-        }
-
-        // IDisposable 패턴 구현
-        private bool _disposed = false;
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    if (_usbDetectionService != null)
-                    {
-                        _usbDetectionService.DeviceArrived -= OnUsbDeviceArrived;
-                        _usbDetectionService.DeviceRemoved -= OnUsbDeviceRemoved;
-                    }
-                }
-                _disposed = true;
-            }
-        }
-
-        ~SettingAboutViewModel()
-        {
-            Dispose(false);
         }
     }
 }

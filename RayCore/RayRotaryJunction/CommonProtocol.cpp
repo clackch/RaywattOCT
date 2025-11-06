@@ -46,7 +46,6 @@ bool ICommonProtocol::parseSerialPacket() {
 						sliceUntilSTX(idxETX);
 					}
 					else {
-						PLOGI.printf("Checksum mismatch: FID=0x%02X, expected=0x%02X, got=0x%02X", m_vPacket[FID_IDX], checksum, m_vPacket[length - 2]); // Tmp debug log
 						sliceUntilSTX(1);
 					}
 				}
