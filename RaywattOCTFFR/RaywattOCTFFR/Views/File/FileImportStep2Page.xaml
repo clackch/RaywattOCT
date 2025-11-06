@@ -31,7 +31,7 @@
                 <RowDefinition Height="*" />
                 <RowDefinition Height="57.5"/>
             </Grid.RowDefinitions>
-            <Border Grid.Row="1" Grid.Column="1" CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}">
+            <Border Grid.Row="1" Grid.Column="1" CornerRadius="10" Background="{DynamicResource GrayscaleGray7Brush}">
                 <Grid Margin="40,56,40,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
@@ -47,7 +47,7 @@
                             <RowDefinition Height="20"/>
                             <RowDefinition Height="70"/><!-- 5 -->
                             <RowDefinition Height="16"/>
-                            <RowDefinition Height="54"/>
+                            <RowDefinition Height="70"/>
                             <RowDefinition Height="40"/>
                             <RowDefinition Height="24"/>
                             <RowDefinition Height="20"/><!-- 10 -->
@@ -102,9 +102,20 @@
                                 <Label Grid.Column="2" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="㎜" Margin="5,0,0,0"/>
                             </Grid>
                         </Grid>
-                        <StackPanel Grid.Row="7" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Longitudinal Direction], Source={StaticResource L10N}}" VerticalAlignment="Center"/>
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="32,0,0,0">
+
+                        <Grid Grid.Row="7">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="24"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="6"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Label Grid.Row="0" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Longitudinal Direction], Source={StaticResource L10N}}"/>
+                            <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                                 <StackPanel>
                                     <RadioButton IsChecked="{Binding IsDistalToProximal, Converter={StaticResource BoolToEnableConverter}}" Content="{Binding [Distal to Proximal], Source={StaticResource L10N}}" />
                                 </StackPanel>
@@ -112,8 +123,21 @@
                                     <RadioButton IsChecked="{Binding IsDistalToProximal, Converter={StaticResource BoolToEnableReverseConverter}}" Content="{Binding [Proximal to Distal], Source={StaticResource L10N}}" />
                                 </StackPanel>
                             </StackPanel>
-                        </StackPanel>
-                        <Label Grid.Row="9" Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Input Information], Source={StaticResource L10N}}"/>
+                            <Label Grid.Row="0" Grid.Column="2" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Vessel], Source={StaticResource L10N}}"/>
+                            <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                <StackPanel>
+                                    <RadioButton IsChecked="{Binding FileImport.PatientCase.Vessel, Converter={StaticResource RadioButtonConverter}, ConverterParameter=$002}" Content="{Binding [LAD], Source={StaticResource L10N}}" />
+                                </StackPanel>
+                                <StackPanel Margin="28,0,0,0">
+                                    <RadioButton IsChecked="{Binding FileImport.PatientCase.Vessel, Converter={StaticResource RadioButtonConverter}, ConverterParameter=$005}" Content="{Binding [LCX], Source={StaticResource L10N}}" />
+                                </StackPanel>
+                                <StackPanel Margin="28,0,0,0">
+                                    <RadioButton IsChecked="{Binding FileImport.PatientCase.Vessel, Converter={StaticResource RadioButtonConverter}, ConverterParameter=$008}" Content="{Binding [RCA], Source={StaticResource L10N}}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+
+                        <Label Grid.Row="9" Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Patient Information], Source={StaticResource L10N}}"/>
                         <Label Grid.Row="11" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [ID], Source={StaticResource L10N}}"/>
                         <TextBox Grid.Row="13" Style="{DynamicResource TextBoxValidator}" Text="{Binding FileImport.Patient.Id, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter ID], Source={StaticResource L10N}}" ToolTip="{Binding FileImport.Patient.ValidateId}" HorizontalAlignment="Left" Width="528" VerticalAlignment="Top"/>
                         <Grid Grid.Row="15">

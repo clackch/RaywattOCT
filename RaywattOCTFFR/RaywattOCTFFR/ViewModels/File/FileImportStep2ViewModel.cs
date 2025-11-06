@@ -12,6 +12,7 @@ using RaywattOCTFFR.Services;
 using RaywattOCTFFR.Views.Dialog;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Input;
 using System.Windows.Navigation;
 
@@ -27,6 +28,9 @@ namespace RaywattOCTFFR.ViewModels.File
 
         [ObservableProperty]
         private FileImport _fileImport = new FileImport();
+
+        [ObservableProperty]
+        private IList<Code> _vesselList;
 
         private double _catheterSize = 2.6;
         public double CatheterSize
@@ -70,6 +74,10 @@ namespace RaywattOCTFFR.ViewModels.File
             {
                 GenderComboBox.Add(gender.Key, _l10n[gender.Value]);
             }
+
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "VESS";
+            VesselList = _sqlManager.SelectCode(sqlParameters);
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -89,6 +97,10 @@ namespace RaywattOCTFFR.ViewModels.File
                         PullbackLength = pullbackLength;
                     IsDistalToProximal = FileImport.PatientCase.IsDistalToProximal;
                     SelectedGender = FileImport.Patient.Gender;
+
+                    var vessel = FileImport.PatientCase.Vessel;
+                    var isValid = vessel != null && CodeDefinition.Codes["VESS"].ContainsKey(vessel);
+                    FileImport.PatientCase.Vessel = !isValid || vessel is "$000" or "$001" ? "$002" : VesselList.FirstOrDefault(x => x.Key == vessel)?.Buffer1 ?? "$002";
 
                     FileImport.Patient.PropertyChanged += Patient_PropertyChanged;
                 }
@@ -170,6 +182,7 @@ namespace RaywattOCTFFR.ViewModels.File
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["title"] = _l10n["File Import"];
+            parameter["isSkipConfirmation"] = true;
             parameter["fileImport"] = importfiles;
             parameter["path"] = FileImport.FilePath;
             var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
@@ -180,6 +193,7 @@ namespace RaywattOCTFFR.ViewModels.File
             }
             else
             {
+                CommonUtil.DeleteFolder(Constants.TempPath);
                 return false;
             }
         }
