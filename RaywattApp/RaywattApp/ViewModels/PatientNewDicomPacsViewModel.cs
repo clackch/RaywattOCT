@@ -163,7 +163,7 @@ namespace RaywattApp.ViewModels
 
         private bool ValidateSelectedPatient(bool hasFirstname)
         {
-            if (SelectedPatient.Id == null || SelectedPatient.Gender == null || SelectedPatient.Lastname == null)
+            if (SelectedPatient.Id == null || SelectedPatient.Lastname == null)
                 return false;
 
             if (hasFirstname && SelectedPatient.Firstname == string.Empty)
