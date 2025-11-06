@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using RaywattOCTFFR.Services;
 using Newtonsoft.Json.Linq;
+using CommunityToolkit.Mvvm.Input;
+using System.Windows.Input;
 
 namespace RaywattOCTFFR.ViewModels.Dialog
 {
@@ -59,15 +61,32 @@ namespace RaywattOCTFFR.ViewModels.Dialog
         [ObservableProperty]
         private bool _isSuccess = true;
 
+        [ObservableProperty]
+        private bool _isSkipConfirmation;
+
+        private ICommand _loadedCommand;
+        public ICommand LoadedCommand
+        {
+            get { return this._loadedCommand ?? (this._loadedCommand = new RelayCommand<IDialogWindow>(Loaded)); }
+        }
+
         public FileCopyDialogViewModel(SqlManager sqlManager)
         {
             _sqlManager = sqlManager;
+        }
+
+        private void Loaded(IDialogWindow dialog)
+        {
+            _log.Debug("Loaded");
+
+            popupDialog = dialog;
         }
 
         public override void SetParameter(object parameter)
         {
             Dictionary<string, Object> data = (Dictionary<string, Object>)parameter;
             Title = data["title"].ToString();
+            IsSkipConfirmation = (bool)data["isSkipConfirmation"];
 
             //Export
             if (data.TryGetValue("fileImport", out var importObj) && importObj is Dictionary<string, string> importFiles)//Import
@@ -101,6 +120,14 @@ namespace RaywattOCTFFR.ViewModels.Dialog
             }
 
             EnableDone = true;
+
+            if (IsSkipConfirmation)
+            {
+                if (IsSuccess)
+                    AnswerOK(popupDialog);
+                else
+                    IsSkipConfirmation = false;
+            }
         }
 
         private async Task InsertData(IList<Patient> patients, string path, string annotationPath, Action<double> progressCallback, double progress, Action<string> progressTextCallback)

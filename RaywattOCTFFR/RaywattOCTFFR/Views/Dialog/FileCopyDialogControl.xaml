@@ -35,7 +35,7 @@
                 <ProgressBar Value="{Binding Progress}" Width="412" Height="24"/>
             </StackPanel>
 
-            <StackPanel Grid.Row="5">
+            <StackPanel Grid.Row="5" Visibility="{Binding IsSkipConfirmation, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                 <Button Style="{StaticResource ContainedBtnType1-Large-Short}" Visibility="{Binding IsSuccess, Converter={StaticResource BoolToVisibilityConverter}}" IsEnabled="{Binding EnableDone}" Command="{Binding OKCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
                 <Button Style="{StaticResource ContainedBtnType1-Large-Short}" Visibility="{Binding IsSuccess, Converter={StaticResource BoolToVisibilityReverseConverter}}" IsEnabled="{Binding EnableDone}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}"/>
             </StackPanel>

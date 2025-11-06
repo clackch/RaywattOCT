@@ -1,4 +1,6 @@
-﻿using RaywattOCTFFR.ViewModels.Dialog;
+﻿using RaywattOCTFFR.Common.Dialog;
+using RaywattOCTFFR.ViewModels.Dialog;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace RaywattOCTFFR.Views.Dialog
@@ -12,6 +14,23 @@ namespace RaywattOCTFFR.Views.Dialog
         {
             InitializeComponent();
             DataContext = App.Current.Services.GetService(typeof(FileCopyDialogViewModel));
+
+            this.Loaded += OnLoaded;
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            var vm = this.DataContext as FileCopyDialogViewModel;
+
+            if (vm?.LoadedCommand != null)
+            {
+                var window = Window.GetWindow(this) as IDialogWindow;
+
+                if (vm.LoadedCommand.CanExecute(window))
+                {
+                    vm.LoadedCommand.Execute(window);
+                }
+            }
         }
     }
 }

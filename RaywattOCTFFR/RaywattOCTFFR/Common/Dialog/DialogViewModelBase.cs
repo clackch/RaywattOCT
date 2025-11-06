@@ -11,6 +11,8 @@ namespace RaywattOCTFFR.Common.Dialog
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(DialogViewModelBase));
 
+        protected IDialogWindow popupDialog;
+
         protected readonly DynamicResource _l10n;
         public string? Title { get; set; }
 
