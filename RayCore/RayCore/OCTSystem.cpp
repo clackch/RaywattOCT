@@ -908,9 +908,9 @@ void* COCTSystem::GetGuidewireRadius(int nFrame) {
 }
 
 /*
-* GetRJFirmwareVersion
+* GetRJFWVersion
 */
-void COCTSystem::GetRJFirmwareVersion(int* major, int* minor, int* patch, bool* isBootMode) {
+void COCTSystem::GetRJFWVersion(int* major, int* minor, int* patch, bool* isBootMode) {
 	if (m_pRJController != nullptr) {
 		const SFWVersionInfo& fwInfo = m_pRJController->GetFWVersionInfo();
 		if (major) *major = fwInfo.major;
@@ -920,6 +920,26 @@ void COCTSystem::GetRJFirmwareVersion(int* major, int* minor, int* patch, bool* 
 	}
 	else {
 		// RJ Controller가 없을 때 기본값
+		if (major) *major = 0;
+		if (minor) *minor = 0;
+		if (patch) *patch = 0;
+		if (isBootMode) *isBootMode = false;
+	}
+}
+
+/*
+* GetCMFWVersion
+*/
+void COCTSystem::GetCMFWVersion(int* major, int* minor, int* patch, bool* isBootMode) {
+	if (m_pLaserModule != nullptr) {
+		const SFWVersionInfo& fwInfo = m_pLaserModule->GetFWVersionInfo();
+		if (major) *major = fwInfo.major;
+		if (minor) *minor = fwInfo.minor;
+		if (patch) *patch = fwInfo.patch;
+		if (isBootMode) *isBootMode = fwInfo.isBootMode;
+	}
+	else {
+		// Laser Module이 없을 때 기본값
 		if (major) *major = 0;
 		if (minor) *minor = 0;
 		if (patch) *patch = 0;
@@ -3105,9 +3125,9 @@ LRESULT COCTSystem::OnMsgNotifyErrorOccured(WPARAM wParam, LPARAM lParam) {
 }
 
 /*
-* StartFWDownload
+* StartRJFWDownload
 */
-bool COCTSystem::StartFWDownload(const char* filepath) {
+bool COCTSystem::StartRJFWDownload(const char* filepath) {
 	if (m_pRJController == nullptr) {
 		PLOGI.printf("RJ Controller is null");
 		return false;
@@ -3117,9 +3137,9 @@ bool COCTSystem::StartFWDownload(const char* filepath) {
 }
 
 /*
-* CancelFWDownload
+* CancelRJFWDownload
 */
-bool COCTSystem::CancelFWDownload() {
+bool COCTSystem::CancelRJFWDownload() {
 	if (m_pRJController == nullptr) {
 		return false;
 	}
@@ -3128,19 +3148,60 @@ bool COCTSystem::CancelFWDownload() {
 }
 
 /*
-* SetFWProgressCallback
+* SetRJFWProgressCallback
 */
-void COCTSystem::SetFWProgressCallback(FWProgressCallback callback) {
+void COCTSystem::SetRJFWProgressCallback(FWProgressCallback callback) {
 	if (m_pRJController != nullptr) {
 		m_pRJController->SetFWProgressCallback(callback);
 	}
 }
 
 /*
-* SetFWStatusCallback
+* SetRJFWStatusCallback
 */
-void COCTSystem::SetFWStatusCallback(FWStatusCallback callback) {
+void COCTSystem::SetRJFWStatusCallback(FWStatusCallback callback) {
 	if (m_pRJController != nullptr) {
 		m_pRJController->SetFWStatusCallback(callback);
+	}
+}
+
+/*
+* StartCMFWDownload
+*/
+bool COCTSystem::StartCMFWDownload(const char* filepath) {
+	if (m_pLaserModule == nullptr) {
+		PLOGI.printf("Laser Module is null");
+		return false;
+	}
+
+	return m_pLaserModule->StartFWDownload(filepath);
+}
+
+/*
+* CancelCMFWDownload
+*/
+bool COCTSystem::CancelCMFWDownload() {
+	if (m_pLaserModule == nullptr) {
+		return false;
+	}
+
+	return m_pLaserModule->CancelFWDownload();
+}
+
+/*
+* SetCMFWProgressCallback
+*/
+void COCTSystem::SetCMFWProgressCallback(FWProgressCallback callback) {
+	if (m_pLaserModule != nullptr) {
+		m_pLaserModule->SetFWProgressCallback(callback);
+	}
+}
+
+/*
+* SetCMFWStatusCallback
+*/
+void COCTSystem::SetCMFWStatusCallback(FWStatusCallback callback) {
+	if (m_pLaserModule != nullptr) {
+		m_pLaserModule->SetFWStatusCallback(callback);
 	}
 }

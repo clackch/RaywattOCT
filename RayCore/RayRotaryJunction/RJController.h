@@ -24,27 +24,6 @@
 #define RFID_MANUFACTURER				"RAYWATT"
 #define RFID_MANUFACTURER_LEN			7
 
-// Firmware Download State
-enum class eFWDownloadState : BYTE {
-	Idle = 0,
-	Downloading,
-	Success,
-	Failed,
-	Cancelled
-};
-
-// Firmware Metadata Structure (last 16 bytes of firmware file)
-struct SFirmwareMetadata {
-	UINT hwver;		// Hardware version
-	UINT fwver;		// Firmware version
-	UINT chkver;	// Checksum verification: ((hwver & 0xffff) << 16) + fwver
-	UINT length;	// Flash address (0x08010000 ~ 0x08080000)
-};
-
-// Callback function types
-typedef void (*FWProgressCallback)(int progress);			// Progress: 0~100
-typedef void (*FWStatusCallback)(int state);	// State change callback
-
 enum class eRJState {
 	None = 0,
 	Initializing,
@@ -81,13 +60,6 @@ enum RFID_AnswerType
 	FAILED,
 	ANSWERED,
 	PROCEEDING
-};
-
-struct SFWVersionInfo {
-	bool isBootMode;
-	BYTE major;
-	BYTE minor;
-	BYTE patch;
 };
 
 class CMessageService;

@@ -152,14 +152,21 @@ public:
 	void* GetGuidewirePoints(int nFrame);
 	int GetNumOfGuidewirePoints(int nFrame);
 	void* GetGuidewireRadius(int nFrame);
-	void GetRJFirmwareVersion(int* major, int* minor, int* patch, bool* isBootMode);
-	
-	// Firmware Download
-	bool StartFWDownload(const char* filepath);
-	bool CancelFWDownload();
-	void SetFWProgressCallback(FWProgressCallback callback);
-	void SetFWStatusCallback(FWStatusCallback callback);
-	
+
+	// RJ Board Firmware
+	void GetRJFWVersion(int* major, int* minor, int* patch, bool* isBootMode);
+	bool StartRJFWDownload(const char* filepath);
+	bool CancelRJFWDownload();
+	void SetRJFWProgressCallback(FWProgressCallback callback);
+	void SetRJFWStatusCallback(FWStatusCallback callback);
+
+	// CM Board Firmware
+	void GetCMFWVersion(int* major, int* minor, int* patch, bool* isBootMode);
+	bool StartCMFWDownload(const char* filepath);
+	bool CancelCMFWDownload();
+	void SetCMFWProgressCallback(FWProgressCallback callback);
+	void SetCMFWStatusCallback(FWStatusCallback callback);
+
 	//Property
 	RayScannerState GetCurrentState() { return m_curState; }
 	double GetBrightness();

@@ -33,6 +33,35 @@
 #define FW_FLASH_START		0x08010000
 #define FW_FLASH_END		0x08080000
 
+// Firmware Download State
+enum class eFWDownloadState : BYTE {
+	Idle = 0,
+	Downloading,
+	Success,
+	Failed,
+	Cancelled
+};
+
+// Firmware Metadata Structure (last 16 bytes of firmware file)
+struct SFirmwareMetadata {
+	UINT hwver;		// Hardware version
+	UINT fwver;		// Firmware version
+	UINT chkver;	// Checksum verification: ((hwver & 0xffff) << 16) + fwver
+	UINT length;	// Flash address (0x08010000 ~ 0x08080000)
+};
+
+// Firmware Version Info
+struct SFWVersionInfo {
+	bool isBootMode;
+	BYTE major;
+	BYTE minor;
+	BYTE patch;
+};
+
+// Callback function types
+typedef void (*FWProgressCallback)(int progress);		// Progress: 0~100
+typedef void (*FWStatusCallback)(int state);			// State change callback
+
 enum class eCOMM_RJ : BYTE {
 	COMM_SUCCESS = 0
 	, COMM_CSUM_FAIL

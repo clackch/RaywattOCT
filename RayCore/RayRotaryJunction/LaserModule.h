@@ -2,6 +2,7 @@
 #include "Config.h"
 #include "CommonProtocol.h"
 #include "MotorController.h"
+#include <vector>
 
 #define MAX_VOLTAGE_RAW_VALUE			4095
 #define CM_SM_SPEED_DEFAULT				1000
@@ -26,6 +27,15 @@ private:
 	bool m_isSMMoving[2];
 	bool m_bPhotoSensor[6];
 
+	SFWVersionInfo m_fwVersionInfo;
+	eFWDownloadState m_fwDownloadState;
+	int m_fwDownloadProgress;
+	int m_fwDownloadIndex;
+	UINT m_fwDownloadSequence;
+	std::vector<BYTE> m_fwImageBuffer;
+	FWProgressCallback m_fwProgressCallback;
+	FWStatusCallback m_fwStatusCallback;
+
 public:
 	CLaserModule();
 	virtual ~CLaserModule();
@@ -47,6 +57,13 @@ public:
 
 	bool AutoStatePeriod(USHORT interval);
 	bool StopStepMotors();
+
+	bool StartFWDownload(const char* filepath);
+	bool CancelFWDownload();
+	void SetFWProgressCallback(FWProgressCallback callback);
+	void SetFWStatusCallback(FWStatusCallback callback);
+	SFWVersionInfo& GetFWVersionInfo();
+
 protected:
 	static UINT threadReadPacket(LPVOID param);
 	void initSetting();
@@ -54,5 +71,13 @@ protected:
 	void parseSMPacket(BYTE* packet, int size);
 	void setVOAVLD();
 	virtual void handlePacket();
+
+	void RxPacketGetVersion(BYTE* buff);
+	void RxPacketFWDownload(BYTE* buff);
+	bool ValidateFWFile(const char* filepath, SFirmwareMetadata& metadata);
+	bool LoadFirmwareData(const char* filepath);
+	bool SendFWDownloadStart();
+	bool SendFWDataChunk();
+	bool SendFWDownloadEnd(bool success);
 };
 

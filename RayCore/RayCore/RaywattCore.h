@@ -63,9 +63,17 @@ extern "C" {
 	_declspec(dllexport) int RayGetNumOfGuidewirePoints(int nFrame);
 	_declspec(dllexport) void* RayGetGuidewireRadius(int nFrame);
 
-	_declspec(dllexport) void RayGetRJFirmwareVersion(int* major, int* minor, int* patch, bool* isBootMode);
-	_declspec(dllexport) void RayFWSetProgressCallback(FWProgressCallback callback);
-	_declspec(dllexport) void RayFWSetStatusCallback(FWStatusCallback callback);
-	_declspec(dllexport) bool RayFWStartDownload(const char* filepath);
-	_declspec(dllexport) bool RayFWCancelDownload();
+	// RJ Board Firmware APIs
+	_declspec(dllexport) void RayGetRJFWVersion(int* major, int* minor, int* patch, bool* isBootMode);
+	_declspec(dllexport) void RayRJFWSetProgressCallback(FWProgressCallback callback);
+	_declspec(dllexport) void RayRJFWSetStatusCallback(FWStatusCallback callback);
+	_declspec(dllexport) bool RayRJFWStartDownload(const char* filepath);
+	_declspec(dllexport) bool RayRJFWCancelDownload();
+
+	// CM Board Firmware APIs
+	_declspec(dllexport) void RayGetCMFWVersion(int* major, int* minor, int* patch, bool* isBootMode);
+	_declspec(dllexport) void RayCMFWSetProgressCallback(FWProgressCallback callback);
+	_declspec(dllexport) void RayCMFWSetStatusCallback(FWStatusCallback callback);
+	_declspec(dllexport) bool RayCMFWStartDownload(const char* filepath);
+	_declspec(dllexport) bool RayCMFWCancelDownload();
 }
