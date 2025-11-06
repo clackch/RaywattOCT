@@ -64,16 +64,16 @@ extern "C" {
 	_declspec(dllexport) void* RayGetGuidewireRadius(int nFrame);
 
 	// RJ Board Firmware APIs
-	_declspec(dllexport) void RayGetRJFWVersion(int* major, int* minor, int* patch, bool* isBootMode);
-	_declspec(dllexport) void RayRJFWSetProgressCallback(FWProgressCallback callback);
-	_declspec(dllexport) void RayRJFWSetStatusCallback(FWStatusCallback callback);
-	_declspec(dllexport) bool RayRJFWStartDownload(const char* filepath);
-	_declspec(dllexport) bool RayRJFWCancelDownload();
+	_declspec(dllexport) void RayGetRJVersion(int* major, int* minor, int* patch, bool* isBootMode);
+	_declspec(dllexport) void RayRJSetProgressCallback(FWProgressCallback callback);
+	_declspec(dllexport) void RayRJSetStatusCallback(FWStatusCallback callback);
+	_declspec(dllexport) bool RayRJStartDownload(const char* filepath);
+	_declspec(dllexport) bool RayRJCancelDownload();
 
 	// CM Board Firmware APIs
-	_declspec(dllexport) void RayGetCMFWVersion(int* major, int* minor, int* patch, bool* isBootMode);
-	_declspec(dllexport) void RayCMFWSetProgressCallback(FWProgressCallback callback);
-	_declspec(dllexport) void RayCMFWSetStatusCallback(FWStatusCallback callback);
-	_declspec(dllexport) bool RayCMFWStartDownload(const char* filepath);
-	_declspec(dllexport) bool RayCMFWCancelDownload();
+	_declspec(dllexport) void RayGetCMVersion(int* major, int* minor, int* patch, bool* isBootMode);
+	_declspec(dllexport) void RayCMSetProgressCallback(FWProgressCallback callback);
+	_declspec(dllexport) void RayCMSetStatusCallback(FWStatusCallback callback);
+	_declspec(dllexport) bool RayCMStartDownload(const char* filepath);
+	_declspec(dllexport) bool RayCMCancelDownload();
 }

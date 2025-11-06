@@ -53,8 +53,8 @@ namespace RaywattApp.ViewModels.Dialog
             _statusCallback = OnStatusCallback;
 
             // Register callbacks with DLL
-            RayFWSetProgressCallback(_progressCallback);
-            RayFWSetStatusCallback(_statusCallback);
+            RayRJSetProgressCallback(_progressCallback);
+            RayRJSetStatusCallback(_statusCallback);
         }
 
         public override void SetParameter(object parameter)
@@ -153,7 +153,7 @@ namespace RaywattApp.ViewModels.Dialog
                 Progress = 0;
                 CurrentState = FirmwareUpdateState.Idle;
 
-                bool success = RayFWStartDownload(firmwareFilePath);
+                bool success = RayRJStartDownload(firmwareFilePath);
 
                 if (!success)
                 {
@@ -182,7 +182,7 @@ namespace RaywattApp.ViewModels.Dialog
             {
                 try
                 {
-                    bool cancelled = RayFWCancelDownload();
+                    bool cancelled = RayRJCancelDownload();
                     if (cancelled)
                     {
                         _log.Debug("Firmware update cancelled successfully");

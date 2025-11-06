@@ -281,36 +281,36 @@ _declspec(dllexport) void* RayGetGuidewireRadius(int nFrame) {
     return octSystem.GetGuidewireRadius(nFrame);
 }
 
-_declspec(dllexport) void RayGetRJFWVersion(int* major, int* minor, int* patch, bool* isBootMode) {
-    octSystem.GetRJFWVersion(major, minor, patch, isBootMode);
+_declspec(dllexport) void RayGetRJVersion(int* major, int* minor, int* patch, bool* isBootMode) {
+    octSystem.GetRJVersion(major, minor, patch, isBootMode);
 }
-_declspec(dllexport) void RayRJFWSetProgressCallback(FWProgressCallback callback) {
-    octSystem.SetRJFWProgressCallback(callback);
+_declspec(dllexport) void RayRJSetProgressCallback(FWProgressCallback callback) {
+    octSystem.SetRJProgressCallback(callback);
 }
-_declspec(dllexport) void RayRJFWSetStatusCallback(FWStatusCallback callback) {
-    octSystem.SetRJFWStatusCallback(callback);
+_declspec(dllexport) void RayRJSetStatusCallback(FWStatusCallback callback) {
+    octSystem.SetRJStatusCallback(callback);
 }
-_declspec(dllexport) bool RayRJFWStartDownload(const char* filepath) {
-    return octSystem.StartRJFWDownload(filepath);
+_declspec(dllexport) bool RayRJStartDownload(const char* filepath) {
+    return octSystem.StartRJDownload(filepath);
 }
-_declspec(dllexport) bool RayRJFWCancelDownload() {
-    return octSystem.CancelRJFWDownload();
+_declspec(dllexport) bool RayRJCancelDownload() {
+    return octSystem.CancelRJDownload();
 }
 
-_declspec(dllexport) void RayGetCMFWVersion(int* major, int* minor, int* patch, bool* isBootMode) {
-    octSystem.GetCMFWVersion(major, minor, patch, isBootMode);
+_declspec(dllexport) void RayGetCMVersion(int* major, int* minor, int* patch, bool* isBootMode) {
+    octSystem.GetCMVersion(major, minor, patch, isBootMode);
 }
-_declspec(dllexport) void RayCMFWSetProgressCallback(FWProgressCallback callback) {
-    octSystem.SetCMFWProgressCallback(callback);
+_declspec(dllexport) void RayCMSetProgressCallback(FWProgressCallback callback) {
+    octSystem.SetCMProgressCallback(callback);
 }
-_declspec(dllexport) void RayCMFWSetStatusCallback(FWStatusCallback callback) {
-    octSystem.SetCMFWStatusCallback(callback);
+_declspec(dllexport) void RayCMSetStatusCallback(FWStatusCallback callback) {
+    octSystem.SetCMStatusCallback(callback);
 }
-_declspec(dllexport) bool RayCMFWStartDownload(const char* filepath) {
-    return octSystem.StartCMFWDownload(filepath);
+_declspec(dllexport) bool RayCMStartDownload(const char* filepath) {
+    return octSystem.StartCMDownload(filepath);
 }
-_declspec(dllexport) bool RayCMFWCancelDownload() {
-    return octSystem.CancelCMFWDownload();
+_declspec(dllexport) bool RayCMCancelDownload() {
+    return octSystem.CancelCMDownload();
 }
 
 BOOL APIENTRY DllMain( HMODULE hModule,

@@ -1415,6 +1415,9 @@ bool CRJController::StartFWDownload(const char* filepath) {
 		return false;
 	}
 
+	PLOGI.printf("Waiting for bootloader transition and flash erase..."); // tmp
+	Sleep(2500);
+
 	PLOGI.printf("Firmware download started: %s", filepath);
 	return true;
 }

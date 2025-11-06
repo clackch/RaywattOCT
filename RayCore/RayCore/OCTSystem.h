@@ -154,18 +154,18 @@ public:
 	void* GetGuidewireRadius(int nFrame);
 
 	// RJ Board Firmware
-	void GetRJFWVersion(int* major, int* minor, int* patch, bool* isBootMode);
-	bool StartRJFWDownload(const char* filepath);
-	bool CancelRJFWDownload();
-	void SetRJFWProgressCallback(FWProgressCallback callback);
-	void SetRJFWStatusCallback(FWStatusCallback callback);
+	void GetRJVersion(int* major, int* minor, int* patch, bool* isBootMode);
+	bool StartRJDownload(const char* filepath);
+	bool CancelRJDownload();
+	void SetRJProgressCallback(FWProgressCallback callback);
+	void SetRJStatusCallback(FWStatusCallback callback);
 
 	// CM Board Firmware
-	void GetCMFWVersion(int* major, int* minor, int* patch, bool* isBootMode);
-	bool StartCMFWDownload(const char* filepath);
-	bool CancelCMFWDownload();
-	void SetCMFWProgressCallback(FWProgressCallback callback);
-	void SetCMFWStatusCallback(FWStatusCallback callback);
+	void GetCMVersion(int* major, int* minor, int* patch, bool* isBootMode);
+	bool StartCMDownload(const char* filepath);
+	bool CancelCMDownload();
+	void SetCMProgressCallback(FWProgressCallback callback);
+	void SetCMStatusCallback(FWStatusCallback callback);
 
 	//Property
 	RayScannerState GetCurrentState() { return m_curState; }

@@ -166,7 +166,7 @@ namespace RaywattApp.ViewModels.Setting
         {
             try
             {
-                RayGetRJFirmwareVersion(out int major, out int minor, out int patch, out bool isBootMode);
+                RayGetRJVersion(out int major, out int minor, out int patch, out bool isBootMode);
 
                 if (isBootMode)
                 {
