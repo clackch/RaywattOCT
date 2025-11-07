@@ -47,7 +47,6 @@ protected:
 	cv::Mat matYMap;
 	cv::Mat imatXMap;  // circle image -> inverse circular -> Rotate CounterClock 90 -> Circluar -> Rotate_ClockWise 90
 	cv::Mat imatYMap;
-	std::vector<cv::Point> inversedContourYPoints;
 
 	cv::Mat imageResult;
 	cv::Mat imageResultColor;
@@ -125,11 +124,13 @@ public:
 	void* GetCalibrationData();
 	void CircularizeImage(cv::Mat& src, cv::Mat& dst);
 	void InverseCircularizeImage(cv::Mat& src, cv::Mat& dst);
-	void EraseStentOutLier(cv::Mat& stent);
-	void SetLumenContourOffset(const std::vector<cv::Point>& lumenContour);
 	void GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& centerPoints, std::vector<float>& radius);
 
-	virtual void SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int& angleNum, std::vector<int>& startAngle, std::vector<int>& endAngle, int frameNum);
+	void SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int& angleNum, std::vector<int>& startAngle, std::vector<int>& endAngle, int frameNum);
+	double GetTheta(cv::Point vector1, cv::Point vector2);
+	cv::Point2f RotatePoint(const cv::Point2f& point, const cv::Point2f& center);
+	cv::Point2f matXY(const cv::Point2f& point, int m_nWidth, int m_nHeight);
+	cv::Point2f rotatePoint_CCW90(const cv::Point2f& point, const cv::Point2f& center);
 
 	int GetSheathPosition() { return m_nSheathPosition; }
 	int GetPixelNum() { return m_nPixelNum; }
@@ -169,7 +170,6 @@ protected:
 	double euclidean_distance(cv::Point2f pt1, cv::Point2f pt2);
 	std::vector<int> find_outliers(const std::vector<int>& y_values);
 	static void on_trackbar(int, void*);
-	void GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBoundary);
 	void GetGuideWireCircleEdgePoints(cv::Mat image, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& edgePoints);
 	void GetGuideWireShadowPointAngles(cv::Mat image, std::vector<cv::Point> edgePoints, std::vector<double>& theta);
 	void InterpolateEdgePoints(std::vector<cv::Point>& edgePoints);

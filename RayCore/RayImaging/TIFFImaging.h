@@ -8,7 +8,6 @@ private:
 	cv::Mat imageConvert;	// role of OCTImaging::imageResult
 	cv::Mat imageOrigin;
 	cv::Mat imageMask;
-	std::vector<cv::Point> inversedContourYPoints;
 
 public:
 	CTIFFImaging(Setting, CMessageService*);
@@ -17,18 +16,5 @@ public:
 	void Initialize();
 	virtual void Process(char* fringes);
 	virtual void PostProcess(cv::Mat image);
-	virtual cv::Mat GetProcessedImage() { return imageConvert; }
-	virtual void SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int& angleNum, std::vector<int>& startAngle, std::vector<int>& endAngle, int frameNum);
-	virtual void initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale);
-	virtual void InverseCircularizeImage(cv::Mat& src, cv::Mat& dst);
-	virtual void EraseStentOutLier(cv::Mat& stent);
-	virtual void SetLumenContourOffset(std::vector<cv::Point> lumenContour);
-
-protected:
-	void GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBoundary);
-	double GetTheta(cv::Point vector1, cv::Point vector2);
-	cv::Point2f RotatePoint(const cv::Point2f& point, const cv::Point2f& center);
-	cv::Point2f matXY(const cv::Point2f& point, int m_nWidth, int m_nHeight);
-	cv::Point2f rotatePoint_CCW90(const cv::Point2f& point, const cv::Point2f& center);
 };
 

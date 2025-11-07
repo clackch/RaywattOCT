@@ -285,6 +285,7 @@ _declspec(dllexport) void* RayGetCalciumAngles(int nFrame) {
 }
 _declspec(dllexport) int RayGetCalciumLength(int nFrame) {
     return octSystem.GetCalciumLength(nFrame);
+}
 _declspec(dllexport) void* RayGetGuidewireRadius(int nFrame) {
     return octSystem.GetGuidewireRadius(nFrame);
 }

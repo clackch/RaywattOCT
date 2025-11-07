@@ -1213,12 +1213,10 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		std::vector<std::vector<cv::Point>> vContours;
 		if (!validContour.empty()) {
 			vContours.push_back(validContour);
-			pImaging->SetLumenContourOffset(validContour);
 		}
 		else {
 			vContours.clear();
 			vContours.push_back(vEmptyLumen);
-			pImaging->SetLumenContourOffset(vEmptyLumen);
 		}
 
 		//Test
@@ -1271,8 +1269,6 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 				(int)(vStents[row].x + vStents[row].width / 2),
 				(int)(vStents[row].y + vStents[row].height / 2));
 		}
-
-		//pImaging->EraseStentOutLier(mStent);
 
 		vStent.push_back(mStent);
 
