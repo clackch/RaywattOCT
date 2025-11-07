@@ -1771,7 +1771,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			}
 			if (contingencyMax.second > 0/*maxList.empty()*/) {
 				maxList.push_back({ abs(info[contingencyMax.second].second - Loc), contingencyMax.second });
-				PLOGI.printf("local max contingency selected. Loc : %d, Value : %d", info[contingencyMax.second].second, info[contingencyMax.second].first);
+				//PLOGI.printf("local max contingency selected. Loc : %d, Value : %d", info[contingencyMax.second].second, info[contingencyMax.second].first);
 			}
 			std::sort(maxList.begin(), maxList.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
 				return a.first < b.first; // minLoc과의 거리 기준 오름차순 정렬
