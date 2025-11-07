@@ -3146,6 +3146,8 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 			}
 		}
 		else {
+			RFIDProtocol::initState(false);
+			m_pRJController->ReadRFID();
 			m_pRJController->UpdateState(eRJState::Loading);
 		}
 		break;
