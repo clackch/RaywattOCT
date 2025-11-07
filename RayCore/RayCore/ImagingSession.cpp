@@ -363,6 +363,29 @@ int CImagingSession::GetNumOfGuidewirePoints(int nFrame){
 	return mat.cols * mat.rows;
 }
 
+void* CImagingSession::GetCalciumAngles(int nFrame) {
+	if (m_vCalcium.size() <= nFrame) return nullptr;
+
+	Calcium calcium = m_vCalcium.at(nFrame);
+	int length = calcium.angleNum * 2;
+	int* calciumAngles = new int[length];
+	for (int i = 0; i < calcium.angleNum; i++) {
+		calciumAngles[i * 2] = calcium.startAngle[i];
+		calciumAngles[i * 2 + 1] = calcium.endAngle[i];
+		int angle_size = calcium.endAngle[i] - calcium.startAngle[i];
+		if (angle_size < 0)angle_size += 360;
+		PLOGI.printf("nFrame %d-%d : AngleSize %d = endAngle %d - starAngle %d", nFrame, i, angle_size, calcium.endAngle[i], calcium.startAngle[i]);
+	}
+	return calciumAngles;
+}
+
+int CImagingSession::GetCalciumLength(int nFrame) {
+	if (m_vCalcium.size() <= nFrame) return 0;
+
+	int length = m_vCalcium.at(nFrame).angleNum;
+	return length;
+}
+
 bool CImagingSession::LoadZOffset(const char* strDataFilePath) {
 	std::string strPath(strDataFilePath);
 	std::string strZOffsetFilePath = strPath.substr(0, strPath.size() - 3).append("cal");
@@ -1138,6 +1161,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	std::vector<std::vector<cv::Mat>>& vSidebranch = pSession->m_vSidebranch;
 	std::vector<cv::Mat>& vStent = pSession->m_vStent;
 	std::vector<cv::Mat>& vGuidewire = pSession->m_vGuidewire;
+	std::vector<Calcium>& vCalcium = pSession->m_vCalcium;
 	std::vector<std::vector<float>>& vGuidewireRadius = pSession->m_vGuidewireRadius;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 	cv::Mat circleImage, imgZOffset, enhancedImage;
@@ -1161,6 +1185,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	vSidebranch.clear();
 	vStent.clear();
 	vGuidewire.clear();
+	vCalcium.clear();
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadObjectDetection->isRun; nFrame++) {
 		std::map<int, cv::Mat>::iterator it = pSession->m_mapImageWithoutCompensation.find(nFrame);
 		if (it == pSession->m_mapImageWithoutCompensation.end()) {
@@ -1184,12 +1209,10 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		std::vector<std::vector<cv::Point>> vContours;
 		if (!validContour.empty()) {
 			vContours.push_back(validContour);
-			pImaging->SetLumenContourOffset(validContour);
 		}
 		else {
 			vContours.clear();
 			vContours.push_back(vEmptyLumen);
-			pImaging->SetLumenContourOffset(vEmptyLumen);
 		}
 
 		//Test
@@ -1243,8 +1266,6 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 				(int)(vStents[row].y + vStents[row].height / 2));
 		}
 
-		//pImaging->EraseStentOutLier(mStent);
-
 		vStent.push_back(mStent);
 
 		//guidewire
@@ -1272,6 +1293,16 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 			vGuidewire.push_back(mGuidewire);
 			vGuidewireRadius.push_back(std::vector<float>(1));
 		}
+
+		//calcium
+		cv::Mat contourCalcium = learning->FindCalcium(circleImage);
+
+		std::vector<std::vector<cv::Point>> vCalciumContours;
+		cv::findContours(contourCalcium, vCalciumContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+		Calcium calcium;
+		pImaging->SetCalciumAngle(vCalciumContours, calcium.angleNum, calcium.startAngle, calcium.endAngle, nFrame);
+		vCalcium.push_back(calcium);
 
 		pSession->m_pMsg->postMessage(WM_PROCESS_DETECTION, nSession, nFrame);
 	}

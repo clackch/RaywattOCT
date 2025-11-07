@@ -2035,21 +2035,55 @@ namespace RaywattApp.Common.Util
                     Tuple<double, double> nonCalciumArea = nonCalciumAngleList[i];
                     double nonCalciumStart = nonCalciumArea.Item1;
                     double nonCalciumEnd = nonCalciumArea.Item1 + nonCalciumArea.Item2;
-                    if (calciumStart >= nonCalciumStart && calciumEnd <= nonCalciumEnd)
+                    if (calciumEnd > 360)
                     {
-                        nonCalciumAngleList.RemoveAt(i);
-                        if (calciumStart > nonCalciumStart)
+                        double segmentStart = calciumStart;
+                        double segmentEnd = 360;
+                        for (int j = nonCalciumAngleList.Count - 1; j >= 0; j--)
                         {
-                            Tuple<double, double> splitArea = new Tuple<double, double>(nonCalciumStart, calciumStart - nonCalciumStart);
-                            nonCalciumAngleList.Add(splitArea);
+                            nonCalciumArea = nonCalciumAngleList[i];
+                            nonCalciumStart = nonCalciumArea.Item1;
+                            nonCalciumEnd = nonCalciumArea.Item1 + nonCalciumArea.Item2;
+                            if (segmentStart >= nonCalciumStart && segmentEnd <= nonCalciumEnd)
+                            {
+                                nonCalciumAngleList.RemoveAt(i);
+                                if (segmentStart > nonCalciumStart)
+                                {
+                                    Tuple<double, double> splitArea = new Tuple<double, double>(nonCalciumStart, segmentStart - nonCalciumStart);
+                                    nonCalciumAngleList.Add(splitArea);
+                                }
+                                if (segmentEnd < nonCalciumEnd)
+                                {
+                                    Tuple<double, double> splitArea = new Tuple<double, double>(segmentEnd, nonCalciumEnd - segmentEnd);
+                                    nonCalciumAngleList.Add(splitArea);
+                                }
+                                break;
+                            }
                         }
-                        if (calciumEnd < nonCalciumEnd)
+                        segmentStart = 0;
+                        segmentEnd = calciumEnd - 360;
+                        for (int j = nonCalciumAngleList.Count - 1; j >= 0; j--)
                         {
-                            Tuple<double, double> splitArea = new Tuple<double, double>(calciumEnd, nonCalciumEnd - calciumEnd);
-                            nonCalciumAngleList.Add(splitArea);
+                            nonCalciumArea = nonCalciumAngleList[i];
+                            nonCalciumStart = nonCalciumArea.Item1;
+                            nonCalciumEnd = nonCalciumArea.Item1 + nonCalciumArea.Item2;
+                            if (segmentStart >= nonCalciumStart && segmentEnd <= nonCalciumEnd)
+                            {
+                                nonCalciumAngleList.RemoveAt(i);
+                                if (segmentStart > nonCalciumStart)
+                                {
+                                    Tuple<double, double> splitArea = new Tuple<double, double>(nonCalciumStart, segmentStart - nonCalciumStart);
+                                    nonCalciumAngleList.Add(splitArea);
+                                }
+                                if (segmentEnd < nonCalciumEnd)
+                                {
+                                    Tuple<double, double> splitArea = new Tuple<double, double>(segmentEnd, nonCalciumEnd - segmentEnd);
+                                    nonCalciumAngleList.Add(splitArea);
+                                }
+                                break;
+                            }
                         }
-
-                        break;
+                        continue;
                     }
                 }
             }
@@ -2059,8 +2093,8 @@ namespace RaywattApp.Common.Util
                 imgCalcium.Ellipse(center,
                     new OpenCvSharp.Size(imgCalcium.Width / 2, imgCalcium.Height / 2),
                     0,
-                    calciumArea.Item1,
-                    calciumArea.Item1 + calciumArea.Item2,
+                    calciumArea.Item1 - 90, // 반시계 방향으로 90도만큼 이동)
+                    (calciumArea.Item1 + calciumArea.Item2) - 90,
                     new Scalar(0x00, 0x00, 0x00, 0x00),
                     -1);
             }

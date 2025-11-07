@@ -57,5 +57,6 @@ extern "C" {
 	_declspec(dllexport) void* RayGetGuidewirePoints(int nFrame);
 	_declspec(dllexport) int RayGetNumOfGuidewirePoints(int nFrame);
 	_declspec(dllexport) void* RayGetGuidewireRadius(int nFrame);
-
+	_declspec(dllexport) void* RayGetCalciumAngles(int nFrame);
+	_declspec(dllexport) int RayGetCalciumLength(int nFrame);
 }

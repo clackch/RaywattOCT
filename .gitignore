@@ -52,6 +52,9 @@ vc*_p.c
 *.tlb
 *.log
 *.tlog
+*.onnx
+*.engine
+*.pt
 
 # Temporary Directories
 .vs

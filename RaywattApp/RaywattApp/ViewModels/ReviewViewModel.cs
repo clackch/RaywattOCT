@@ -877,6 +877,49 @@ namespace RaywattApp.ViewModels
                     }
                 }
             }
+
+            int calciumLength = RayGetCalciumLength(frameInfo);
+            if (calciumLength > 0)
+            {
+                IntPtr calciumAngles = RayGetCalciumAngles(frameInfo);
+                if (calciumAngles == IntPtr.Zero)
+                {
+                    return;
+                }
+
+                int arrayLength = calciumLength * 2;
+                int[] angleArr = new int[arrayLength];
+                Marshal.Copy(calciumAngles, angleArr, 0, arrayLength);
+
+                double maxSize = 0;
+                LumenContours[frameInfo].Calcium = new Calcium();
+                LumenContours[frameInfo].Calcium.List = new List<Tuple<double, double>>();
+
+                for (int i = 0; i < calciumLength; i++)
+                {
+                    int startAngle = angleArr[i * 2];
+                    int endAngle = angleArr[i * 2 + 1];
+                    double angleSize = endAngle - startAngle;
+                    if (angleSize < 0) angleSize += 360;
+                    LumenContours[frameInfo].Calcium.List.Add(new Tuple<double, double>(startAngle, angleSize));
+                    LumenContours[frameInfo].Calcium.TotalAngle += (int)angleSize;
+
+                    maxSize = angleSize > maxSize ? angleSize : maxSize;
+                }
+
+                // TODO - 임시 데이터이므로, Thickness에 대한 값 설정 필요
+                LumenContours[frameInfo].Calcium.MaxThickness = Math.Round(LumenContours[frameInfo].Calcium.TotalAngle / 200.0, 2);
+                LumenContours[frameInfo].Calcium.MaxThicknessDegree = maxSize * 1.5;
+            }
+            else
+            {
+                LumenContours[frameInfo].Calcium = new Calcium();
+                LumenContours[frameInfo].Calcium.List = new List<Tuple<double, double>>();
+                LumenContours[frameInfo].Calcium.List.Add(new Tuple<double, double>(0, 0));
+                LumenContours[frameInfo].Calcium.TotalAngle = 0;
+                LumenContours[frameInfo].Calcium.MaxThickness = 0;
+                LumenContours[frameInfo].Calcium.MaxThicknessDegree = 0;
+            }
         }
 
         //TODO - Calcium 테스트 데이터 만드는 함수 (추후 삭제 필요)

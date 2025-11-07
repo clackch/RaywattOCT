@@ -15,8 +15,10 @@ void CRayYolo::Initialize(bool useGPU){
 		// codesonar suppr C dangerous-function-cast
 		SAFE_LOAD_DLL_FUNC(InitializeSegment, pInitializeSegment);
 		SAFE_LOAD_DLL_FUNC(InitializeDetect, pInitializeDetect);
+		SAFE_LOAD_DLL_FUNC(InitializeCalciumSegment, pInitializeCalciumSegment);
 		SAFE_LOAD_DLL_FUNC(GetSegmentObjects, pGetSegmentObjects);
 		SAFE_LOAD_DLL_FUNC(GetDetectObjects, pGetDetectObjects);
+		SAFE_LOAD_DLL_FUNC(GetCalciumSegmentObjects, pGetCalciumSegmentObjects);
 
 		m_yoloSegment = InitializeSegment();
 		m_yoloDetect = InitializeDetect();
@@ -45,6 +47,13 @@ std::vector<cv::Rect2f> CRayYolo::FindStent(cv::Mat image)
 std::vector<cv::Rect2f> CRayYolo::FindGuidewire()
 {
 	return m_vGuidewire;
+}
+
+cv::Mat CRayYolo::FindCalcium(cv::Mat image) {
+
+	CalciumSegmentObjects(image);
+
+	return m_mapCalcium;
 }
 
 void CRayYolo::SegmentObjects(cv::Mat image)
@@ -82,5 +91,17 @@ void CRayYolo::DetectObjects(cv::Mat image)
 		else if (iterDetect->first == 1) {
 			m_vGuidewire = iterDetect->second;
 		}
+	}
+}
+
+void CRayYolo::CalciumSegmentObjects(cv::Mat image)
+{
+	std::map<int, cv::Mat>* mapCalciumSegment = static_cast<std::map<int, cv::Mat>*>(GetCalciumSegmentObjects(m_yoloCalciumSegment, image));
+
+	m_mapCalcium.release();
+
+	std::map<int, cv::Mat>::iterator iterCalciumSegment;
+	for (iterCalciumSegment = mapCalciumSegment->begin(); iterCalciumSegment != mapCalciumSegment->end(); iterCalciumSegment++) {
+		m_mapCalcium = iterCalciumSegment->second;
 	}
 }
