@@ -5,14 +5,13 @@
 
 class CDataWriter : public IDataManager
 {
-private:
+protected:
 	char* m_pRecordBuffer;
 	unsigned int m_nBufferSize;
 	unsigned int m_nElementSize;
 
 	bool m_isRecording;
 	HANDLE m_hRecordingFile;
-
 public:
 	CDataWriter();
 	virtual ~CDataWriter();

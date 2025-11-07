@@ -39,34 +39,80 @@ namespace RayCoreWrapper
             DICOMDIRRecodeLoadFail = -8
         }
 
-        [DllImport("makedcmDLL.dll")]
+        public enum DicomNetRWError : int
+        {
+            Normal = 0,
+            InitializeFail = -1,
+            NetworkInitFail = -2,
+            AssociationFail = -3,
+            EchoFail = -4,
+            FindFail = -5,
+            StoreFail = -6,
+            NoPresentationConterxt = -7,
+            NoUncompressedPC = -8,
+            NoSOPClass = -9,
+            FileLoadFail = -10,
+            TLSProfileFail = -11,
+            NoConnection = -12,
+            NoSCU = -13,
+            UnknownError = -99,
+        }
+
+        public enum ServerType
+        {
+            PACS,
+            MWL,
+            BOTH,
+            UNKNOWN
+        }
+
+        [DllImport("DcmUtility.dll")]
         public static extern DicomRWError DicomStart();
-        [DllImport("makedcmDLL.dll")]
+        [DllImport("DcmUtility.dll")]
         public static extern DicomRWError DicomImageStart(int numberOfFrames);
-        [DllImport("makedcmDLL.dll")]
+        [DllImport("DcmUtility.dll")]
         public static extern DicomRWError DicomAddImage(int width, int height, IntPtr pixelData);
-        [DllImport("makedcmDLL.dll")]
+        [DllImport("DcmUtility.dll")]
         public static extern DicomRWError DicomImageFinish();
-        [DllImport("makedcmDLL.dll")]
+        [DllImport("DcmUtility.dll")]
         public static extern DicomRWError DicomStartProperty();
-        [DllImport("makedcmDLL.dll")]
+        [DllImport("DcmUtility.dll")]
         public static extern DicomRWError DicomAddProperty(int tag, string value, int bufLen = 0);
-        [DllImport("makedcmDLL.dll")]
+        [DllImport("DcmUtility.dll")]
         public static extern DicomRWError DicomStartSequenceProperty(int numberOfItems);
-        [DllImport("makedcmDLL.dll")]
+        [DllImport("DcmUtility.dll")]
         public static extern DicomRWError DicomAddSequenceProperty(int itemnum, int tag, string value);
-        [DllImport("makedcmDLL.dll")]
+        [DllImport("DcmUtility.dll")]
         public static extern DicomRWError DicomSave(string path);
-        [DllImport("makedcmDLL.dll")]
+        [DllImport("DcmUtility.dll")]
         public static extern DICOMDIRRWError DICOMDIRInputFolder(string path);
-        [DllImport("makedcmDLL.dll")]
+        [DllImport("DcmUtility.dll")]
         public static extern DICOMDIRRWError DICOMDIRInputFile(string path);
-        [DllImport("makedcmDLL.dll")]
+        [DllImport("DcmUtility.dll")]
         public static extern DICOMDIRRWError DICOMDIRWrite();
-        [DllImport("makedcmDLL.dll")]
+        [DllImport("DcmUtility.dll")]
         public static extern long DicomApprSize();
 
         [DllImport("HessianMatrixDll.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void useFrangi2d(IntPtr imageData, out IntPtr outputData, int width, int height, int channels, out int outwidth, out int outheight, out int outchannels);
+
+        [DllImport("DcmUtility.dll")]
+        public static extern IntPtr CreateDcmClient();
+        [DllImport("DcmUtility.dll")]
+        public static extern void DestroyDcmClient(IntPtr client);
+        [DllImport("DcmUtility.dll")]
+        public static extern int TestConnection(IntPtr client, string appTitle, string hostname, int port, string peerAppTitle, bool usePeerVerification, out bool requiresTLS, out ServerType serverType, out IntPtr caFilePath);
+        [DllImport("DcmUtility.dll")]
+        public static extern int Initialize(IntPtr client, string appTitle, string hostname, int port, string peerAppTitle, bool useTLS, bool usePeerVerification, string caFilePath);
+        [DllImport("DcmUtility.dll")]
+        public static extern int Echo(IntPtr client);
+        [DllImport("DcmUtility.dll")]
+        public static extern IntPtr FindPatients(IntPtr client, string patientId, string patientName, out int count);
+        [DllImport("DcmUtility.dll")]
+        public static extern IntPtr FindWorklist(IntPtr client, string patientId, string patientName, string accessionNumber, string modality, string scheduledStationAET, string startDate, string endDate, string requestedProcedureId, out int count);
+        [DllImport("DcmUtility.dll")]
+        public static extern int StoreFile(IntPtr client, string filename);
+        [DllImport("DcmUtility.dll")]
+        public static extern void FreeMemory(IntPtr ptr);
     }
 }

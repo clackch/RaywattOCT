@@ -4,6 +4,7 @@
 #include "FGServer.h"
 #include "FrameGrabber.h"
 #include <ws2tcpip.h>
+#include "Repository.h"
 
 enum PacketType {
 	Image,
@@ -84,6 +85,8 @@ private:
 	int imagePacketSize;
 	bool Chp_selected;
 	int retryCount;
+	std::vector<unsigned char> croppedBuffer;
+	Repository repo;
 
 	// thread
 	bool receiveCmdThreadRunning = true;

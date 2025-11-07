@@ -1,0 +1,53 @@
+﻿<UserControl x:Class="RaywattOCTFFR.Common.Annotation.DrawListUtil"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:component="clr-namespace:RaywattOCTFFR.Views.Component"
+             xmlns:const="clr-namespace:RaywattOCTFFR.Common.Bases"
+             mc:Ignorable="d" 
+             x:Name="UserControl"
+             d:DesignHeight="647" d:DesignWidth="240">
+    <UserControl.Resources>
+        <Style TargetType="Label">
+            <Setter Property="Margin" Value="0"/>            
+            <Setter Property="Padding" Value="0"/>            
+            <Setter Property="FontFamily" Value="Pretendard"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Foreground" Value="{DynamicResource SideMenuTitleBrush}"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource SideCardBackgroundBrush}" HorizontalAlignment="Center">
+        <StackPanel Width="199" Orientation="Vertical">
+            <StackPanel Height="26"/>
+            <Label Content="{Binding [Area], Source={StaticResource L10N}}"/>
+            <StackPanel Height="8"/>
+            <DataGrid ItemsSource="{Binding CurrAreaGeometries, ElementName=UserControl}" Height="199" Style="{StaticResource DataGridMeasurement}" RowStyle="{StaticResource DataGridRowMeasurement}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderMeasurementArea}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Width="32" CellStyle="{StaticResource DataGridCellTooltip}" Binding="{Binding Group, Converter={StaticResource GroupNameConverter}}" Header="{Binding [No.], Source={StaticResource L10N}}"/>
+                    <DataGridTextColumn Width="33.6" CellStyle="{StaticResource DataGridCellTooltip}" Binding="{Binding Area, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleArea}}" Header="{Binding [Area(㎟)], Source={StaticResource L10N}}"/>
+                    <DataGridTextColumn Width="40" CellStyle="{StaticResource DataGridCellTooltip}" Binding="{Binding MeanDiameter, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}" Header="{Binding [Mean Diam.(㎜)], Source={StaticResource L10N}}"/>
+                    <DataGridTextColumn Width="33.6" CellStyle="{StaticResource DataGridCellTooltip}" Binding="{Binding MinDiameter.value, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}" Header="{Binding [Min Diam.(㎜)], Source={StaticResource L10N}}"/>
+                    <DataGridTextColumn Width="37.6" CellStyle="{StaticResource DataGridCellTooltip}" Binding="{Binding MaxDiameter.value, StringFormat={}{0:N2}, Converter={StaticResource UnitConverter}, ConverterParameter={x:Static const:Constants.ScaleLength}}" Header="{Binding [Max Diam.(㎜)], Source={StaticResource L10N}}"/>
+                    <DataGridTemplateColumn Width="22.2" CellStyle="{StaticResource DataGridCellMeasurementDelete}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Style="{DynamicResource DataGridDeleteMeasurement}" Click="delete_Area" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}, Path=CurrentItem}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel Height="12"/>
+            <Grid>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <component:IconButton Style="{DynamicResource IconButton}" Icon="pagingPrev" Click="move_Frame" CommandParameter="prev"/>
+                    <StackPanel Width="7"/>
+                    <component:IconButton Style="{DynamicResource IconButton}" Icon="pagingNext" Click="move_Frame" CommandParameter="next"/>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</UserControl>

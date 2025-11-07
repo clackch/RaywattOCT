@@ -92,14 +92,14 @@ namespace RaywattApp.ViewModels
                 PatientCase = (PatientCase)data["patientCase"];
                 ReviewStatus = (ReviewStatus)data["reviewStatus"];
 
-                Zoom.SetFieldOfView(Constants.DefaultFoV / 5);
+                Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
 
                 SetCrossSectionBackground(RaySession.Review, Constants.CardBackgroundColor);
 
                 GetImageInfo(RaySession.Review);
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
 
-                DrawSheathIndicator();
+                DrawSheathIndicator(PatientCase.SheathDiameter);
             }
         }
 
@@ -191,7 +191,11 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("RestartReview");
 
-            RayRestartReview();
+            RayError result = (RayError)RayRestartReview();
+            if (result != RayError.OK)
+            {
+                _log.Error("RayRestartReview Error");
+            }
 
             DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current = 0;
             ReviewStatus.IsRestartLumenDetection = true;

@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using static RaywattOCT.RayCoreWrapper;
 using RaywattOCT;
 using RaywattApp.Common.Angio;
+using System.Linq;
 
 namespace RaywattApp.ViewModels
 {
@@ -23,6 +24,8 @@ namespace RaywattApp.ViewModels
         private readonly SqlManager _sqlManager;
         private readonly AngioManager _angioManager;
 
+        private IList<Code> pullbackTypes;
+
         [ObservableProperty]
         private PrevStatus _prevStatus;
 
@@ -31,6 +34,15 @@ namespace RaywattApp.ViewModels
 
         [ObservableProperty]
         private PatientCase _patientCase;
+
+        [ObservableProperty]
+        private string _pbLength;
+
+        [ObservableProperty]
+        private string _pbSpeed;
+
+        [ObservableProperty]
+        private string _pbTime;
 
         [ObservableProperty]
         private Zoom _zoom = new Zoom(Constants.CrossSectionConfirmSize);
@@ -55,8 +67,16 @@ namespace RaywattApp.ViewModels
 
             _sqlManager = sqlManager;
             _angioManager = angioManager;
-            
-            RayLaserOnOff(false);
+
+            RayError result = (RayError)RayLaserOnOff(false);
+            if (result != RayError.OK)
+            {
+                _log.Error("RayLaserOnOff Error");
+            }
+
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "PBTY";
+            pullbackTypes = _sqlManager.SelectCode(sqlParameters);
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -76,10 +96,23 @@ namespace RaywattApp.ViewModels
                 Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
 
                 GetImageInfo(RaySession.Review);
-                RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+                RayError result = (RayError)RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
 
                 MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
                 Playback();
+
+                Code pullback = pullbackTypes.FirstOrDefault(x => x.Key == PatientCase.PullbackType);
+                if (pullback != null)
+                {
+                    string[] temp = pullback.Buffer1.Split("|");
+                    PbLength = temp[0];
+                    PbSpeed = temp[1];
+                    PbTime = temp[2];
+                }
             }
 
             _angioManager.ReadyToRecv = false;
@@ -98,13 +131,24 @@ namespace RaywattApp.ViewModels
             DeviceStatus.IsSaveRawDataDone = true;
             DeviceStatus.IsLumenSaved = true;
             DeviceStatus.IsOCTImagingDone = true;
-            DeviceStatus.IsPullbackDone = false;
+
+            _angioManager.threadOnRedoPullback = true;
+            if (_angioManager.threadFuncSaveAngioFrames != null)
+                _angioManager.threadFuncSaveAngioFrames.Join();
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = Patient;
             parameter["prevStatus"] = PrevStatus;
             parameter["patientCase"] = PatientCase;
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
+
+            if (DeviceStatus.CatheterStatus == Constants.CatheterStatusFailed)
+            {
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingCatheterFailPage) { Parameter = parameter });
+            }
+            else
+            {
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingSetupPage) { Parameter = parameter });
+            }                
         }
 
         private void Confirm()
@@ -120,17 +164,32 @@ namespace RaywattApp.ViewModels
             //    _log.Debug("RayUnloadCatheter - " + result);
             //}
 
-            RaySetSession(RaySession.Review);
+            RayError result = (RayError)RaySetSession(RaySession.Review);
+            if (result != RayError.OK)
+            {
+                _log.Error("RaySetSession Error");
+            }
             int numOfFrames = (int) RayGetProperty(Property.ImageDepth);
 
-            RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+            result = (RayError)RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
+            if (result != RayError.OK)
+            {
+                _log.Error("RaySetProperty Error");
+            }
+
+            _angioManager.StartSaveAngioFrames();
+            _angioManager.fromRecording = true;
 
             //초기값 설정
             PatientCase.Id = Patient.Id + "_" + DateTime.Now.ToString("yyyyMMddHHmmss");
             PatientCase.PatientId = Patient.Id;
             PatientCase.NumOfFrames = numOfFrames;
-            PatientCase.AngioYn = DeviceStatus.IsAngioInitialized;
             PatientCase.IndicatorDegree = 90;
+            PatientCase.AngioYn = false;
+            if (_angioManager.isChpFileConnected == 1 && DeviceStatus.IsAngioConnected) 
+            {
+                PatientCase.AngioYn = true;
+            }
 
             Dictionary<string, Object> sqlParameters = new Dictionary<string, Object>();
             sqlParameters["id"] = PatientCase.Id;
@@ -165,6 +224,8 @@ namespace RaywattApp.ViewModels
             sqlParameters["section_proximal"] = PatientCase.SectionProximal;
             PatientCase.SectionDistal = PatientCase.NumOfFrames - 1;
             sqlParameters["section_distal"] = PatientCase.SectionDistal;
+            sqlParameters["guidewire_radius"] = PatientCase.GuidewireRadius;
+            sqlParameters["create_date"] = PatientCase.CreateDate;
 
             int nRows = _sqlManager.InsertPatientCase(sqlParameters);
 

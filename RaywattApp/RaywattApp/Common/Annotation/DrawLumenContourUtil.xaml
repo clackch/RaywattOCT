@@ -56,6 +56,15 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+        <Style TargetType="Polygon" x:Key="SbStylePolygon">
+            <Setter Property="Stroke" Value="Blue"/>
+            <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThickness}}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsContourMouseOver, Source={x:Reference UserControl}}" Value="True">
+                    <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThicknessBold}}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
         <Style TargetType="Path" x:Key="StylePath">
             <Setter Property="StrokeThickness" Value="{Binding Zoom.ScaleX, Source={x:Reference UserControl}, Converter={StaticResource ScaleConverter}, ConverterParameter={x:Static const:Constants.AnnotationStrokeThickness}}"/>
             <Setter Property="Stroke" Value="White"/>

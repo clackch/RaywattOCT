@@ -17,7 +17,10 @@ namespace RaywattOCT
             InvalidArgument,
             WrongState,
             WrongSession,
-            InvalidFunctionCall
+            InvalidFunctionCall,
+            HomingFailed,
+            RotaryJunctionError,
+            AutoCalibError
         };
 
         public enum Property : int
@@ -39,8 +42,6 @@ namespace RaywattOCT
             ImageChannels,
             ImageDepth,
             ImageResolution,
-            ImageThreshold,
-            ImageRoi,
             ImageCompensation,
             ImageCompensationControlWindow,
             FieldOfView,
@@ -53,7 +54,13 @@ namespace RaywattOCT
             SheathDiameter,
             TestMode,
             ZOffset,
-            PullbackStartTime
+            PullbackStartTime,
+            AutoPullback,
+            LumenThresholdMin,
+            LumenThresholdMax,
+            LumenSnrThreshold,
+            ShowLumenGuide,
+            RefractiveIndex
         }
 
         public enum RayCallbackRequest : int
@@ -97,7 +104,8 @@ namespace RaywattOCT
             UnloadCatheter,
             ValidateCatheter,
             InitializeRotaryJunction,
-            CleanRotaryJunction
+            CleanRotaryJunction,
+            EnableCatheter
         };
 
         public enum RaySession : int
@@ -122,12 +130,6 @@ namespace RaywattOCT
             }
         };
 
-        public static string ConfigFilePath = "./raycore.ini";
-        public static double BrightnessMin = 0.0f;
-        public static double BrightnessMax = 100.0f;
-        public static double ContrastMin = 0.5f;
-        public static double ContrastMax = 3.0f;
-
         public delegate void CallbackFunction(int request, int response, int param);
         public delegate void CallbackFunctionWithImage(int session, IntPtr data, int width, int height, int channel, int frameInfo, double intensity);
         public delegate void CallbackFunctionForDetection(int frame);
@@ -136,6 +138,8 @@ namespace RaywattOCT
         public static extern int RayStartSystem();
         [DllImport("RayCore.dll")]
         public static extern int RayStopSystem();
+        [DllImport("RayCore.dll")]
+        public static extern int RayInitSystem();
         [DllImport("RayCore.dll")]
         public static extern int RayRegisterCallback(IntPtr cb);
         [DllImport("RayCore.dll")]
@@ -195,6 +199,8 @@ namespace RaywattOCT
         [DllImport("RayCore.dll")]
         public static extern int RayStartLumenDetection();
         [DllImport("RayCore.dll")]
+        public static extern int RaySetConfigPath(string filePath);
+        [DllImport("RayCore.dll")]
         public static extern int RayOpenImage(string filePath, double imageResolution, double zOffset);
         [DllImport("RayCore.dll")]
         public static extern int RayCloseImage();
@@ -224,5 +230,7 @@ namespace RaywattOCT
         public static extern IntPtr RayGetCalciumAngles(int nFrame);
         [DllImport("RayCore.dll")]
         public static extern int RayGetCalciumLength(int nFrame);
+        public static extern IntPtr RayGetGuidewireRadius(int nFrame);
+
     }
 }

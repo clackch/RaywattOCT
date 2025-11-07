@@ -5,10 +5,14 @@
 
 #define MAX_VOLTAGE_RAW_VALUE			4095
 #define CM_SM_SPEED_DEFAULT				1000
-#define CM_SM_SPEED_MAX					10000
+#define CM_SM_SPEED_MAX					9000
 #define CM_SM_SPEED_AUTO				2500
+#define CM_SM_SPEED_AUTO_1ST			5000
+#define CM_SM_SPEED_AUTO_2ND			250
 #define DELAYLINE_BACKWARD_POSITION		(-50)
 #define DELAYLINE_FORWARD_POSITION		(50)
+#define DELAY_LINE_HOMING_WORKS			1 
+#define DELAY_LINE_UPPER_END_POSITION	90000
 
 class CLaserModule
 	: public CMotorController,
@@ -20,7 +24,7 @@ private:
 	int m_nStepSpeed[2];
 	unsigned short m_nVOA, m_nVLD;
 
-	int m_nActualPosition[2];
+	int m_nActualPosition[2]; // 0 : Polarization Stepmotor, 1 : Delayline Stepmotor
 	bool m_isSMMoving[2];
 	bool m_bPhotoSensor[6];
 
@@ -41,6 +45,7 @@ public:
 	int MoveRelative(eStepMotorIndex idxMotor, int nOffset);
 	void SetVOA(unsigned short voa);
 	void SetVLD(unsigned short vld);
+	void PrintPhotoSensor();
 
 	bool AutoStatePeriod(USHORT interval);
 	bool StopStepMotors();

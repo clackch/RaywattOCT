@@ -5,7 +5,7 @@ class CSerialPort {
 public:     
 	CSerialPort();     
 	~CSerialPort(); 
-private:     
+private:  
 	bool	m_isOpen;
 	HANDLE  m_hComm;    
 	DCB     m_dcb;     

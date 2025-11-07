@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Runtime.InteropServices;
 using static RaywattOCT.RayCoreWrapper;
+using static RaywattOCT.Ray3DWrapper;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Size = OpenCvSharp.Size;
@@ -27,6 +28,14 @@ using RaywattApp.Common.Messages;
 using Newtonsoft.Json;
 using RaywattApp.Common.Angio;
 using System.Xml;
+using Python.Runtime;
+using FFMpegCore;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using RayCoreWrapper;
+using System.Diagnostics;
+using System.Globalization;
+using RaywattApp.Services;
 
 namespace RaywattApp.Common.Util
 {
@@ -34,13 +43,18 @@ namespace RaywattApp.Common.Util
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(CommonUtil));
 
-        public static bool isVTIFileSave = false;
+        private static bool _isVTIFileSave;
+
+        public static bool IsVTIFileSave
+        {
+            get => _isVTIFileSave;
+            set => _isVTIFileSave = value;
+        }
 
         public static bool ValidateText(string input)
         {
-            var regex = new Regex(@"^[a-zA-Z0-9ㄱ-ㅎ가-힣\s,.]+$");
-
-            if (input.Length == 0) 
+            var regex = new Regex(@"^[a-zA-Z0-9ㄱ-ㅎ가-힣\s,.-]+$");
+            if (input.Length == 0)
                 return true;
 
             return regex.IsMatch(input);
@@ -48,7 +62,7 @@ namespace RaywattApp.Common.Util
 
         public static bool ValidateId(string input)
         {
-            var regex = new Regex(@"^[a-zA-Z0-9]+$");
+            var regex = new Regex(@"^[a-zA-Z0-9_\-\.]+$");
 
             if (input.Length == 0)
                 return true;
@@ -68,12 +82,10 @@ namespace RaywattApp.Common.Util
 
         public static bool ValidateRealNumber(string input)
         {
-            var regex = new Regex(@"^[-+]?\d*\.?\d*$");
+            if (string.IsNullOrEmpty(input)) 
+                return false;
 
-            if (input.Length == 0)
-                return true;
-
-            return regex.IsMatch(input);
+            return double.TryParse(input, NumberStyles.Float | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out _);
         }
 
         public static Mat ByteMemoryToCvMat(IntPtr data, int width, int height, int ch)
@@ -169,12 +181,12 @@ namespace RaywattApp.Common.Util
                             {
                                 string[] strings = new string[10];
                                 int cnt = contents.Length / 10;
-                                for(int i = 0; i < 9; i++)
+                                for (int i = 0; i < 9; i++)
                                 {
                                     strings[i] = contents.Substring(i * cnt, cnt);
                                 }
                                 strings[9] = contents.Substring(9 * cnt);
-                               
+
                                 foreach (string ch in strings)
                                 {
                                     await Task.Run(() =>
@@ -288,13 +300,16 @@ namespace RaywattApp.Common.Util
 
         public static void RenameFolder(string oldPath, string newPath)
         {
-            if(oldPath != newPath)
+            if (oldPath != newPath)
                 Directory.Move(oldPath, newPath);
         }
 
         public static void DeleteFolder(string path)
         {
-            Directory.Delete(path, true);
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, true);
+            }            
         }
 
         public static async Task CopyFiles(Dictionary<string, string> files, Action<double> progressCallback, double progressSize, Action<string> progressTextCallback)
@@ -329,7 +344,11 @@ namespace RaywattApp.Common.Util
 
         public static async Task<Mat> ConvertImage(string filePath, double imageResolution, int zOffset, double degree, List<Mat> convertedImages, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
         {
-            RayOpenImage(filePath, imageResolution, zOffset);
+            RayError result = (RayError)RayOpenImage(filePath, imageResolution, zOffset);
+            if (result != RayError.OK)
+            {
+                _log.Error("RayOpenImage Error");
+            }
 
             int numOfFrames = (int)RayGetProperty(Property.ImageDepth);
             int width = (int)RayGetProperty(Property.ImageWidth);
@@ -358,7 +377,11 @@ namespace RaywattApp.Common.Util
             IntPtr data = RayGetLongitudeData(degree);
             Mat imgLongitude = CommonUtil.ByteMemoryToCvMat(data, width, height, channels);
 
-            RayCloseImage();
+            result = (RayError)RayCloseImage();
+            if (result != RayError.OK)
+            {
+                _log.Error("RayCloseImage Error");
+            }
 
             return imgLongitude;
         }
@@ -387,7 +410,7 @@ namespace RaywattApp.Common.Util
             dialog.Height = originHeight;
 
             int totalCnt = imgCrossSections.Count;
-            if(exportIndices != null)
+            if (exportIndices != null)
                 totalCnt = exportIndices.Count;
 
             for (int i = 0; i < totalCnt; i++)
@@ -453,7 +476,8 @@ namespace RaywattApp.Common.Util
             return convertedImages;
         }
 
-        public static Mat MakeImageForExport(Mat crossSection, Mat? longitude, Mat? lumenProfile, Mat? angio, out List<Tuple<Rect, Size2f>> region) {
+        public static Mat MakeImageForExport(Mat crossSection, Mat? longitude, Mat? lumenProfile, Mat? angio, out List<Tuple<Rect, Size2f>> region)
+        {
             Mat imgExport = new Mat();
             imgExport.Create((int)Constants.ApplicationHeight, (int)Constants.ApplicationWidth, MatType.CV_8UC3);
             imgExport.SetTo(0x00);
@@ -569,7 +593,7 @@ namespace RaywattApp.Common.Util
         {
             if (lumenContours == null || lumenContours.Count <= 0) return null;
 
-            if(imglumenProfile == null)
+            if (imglumenProfile == null)
             {
                 imglumenProfile = MakeLumenProfileImage(lumenContours, lumenSidebranches, lumenStents, appositionThreshold, frameProximal, frameDistal, isPostCase, currentFrame);
             }
@@ -590,7 +614,7 @@ namespace RaywattApp.Common.Util
 
             int position = 0;
 
-            if(curFrame != 0)
+            if (curFrame != 0)
                 position = curFrame * 2 - 1;
 
             if (area > 0)
@@ -623,9 +647,9 @@ namespace RaywattApp.Common.Util
             if (isPostCase && lumenStent.Points != null && lumenStent.IsStent)
             {
                 //MalApposition
-                foreach(double appositionLength in lumenStent.AppositionLength)
+                foreach (double appositionLength in lumenStent.AppositionLength)
                 {
-                    if(CommonUtil.IsMalApposition(appositionLength, appositionThreshold))
+                    if (CommonUtil.IsMalApposition(appositionLength, appositionThreshold))
                     {
                         Cv2.Line(imglumenProfile, new Point(position, yStart), new Point(position, yStart + lumenArea), new Scalar(0x3f, 0x41, 0x76));
                         if (!isEdge)
@@ -655,24 +679,33 @@ namespace RaywattApp.Common.Util
             //Side Branch
             if (lumenSidebranch.Points != null && lumenSidebranch.Points.Count > 0)
             {
-                int sbThickness = 5;
-                if(lumenArea/2 < sbThickness)
-                    sbThickness = lumenArea/2 - 1;
-
-                if (curFrame >= frameProximal && curFrame <= frameDistal)
+                if (!lumenSidebranch.IsCalcOverlapping)
                 {
-                    Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - sbThickness), new Point(position, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0xe4, 0xe4, 0xe4));
-                    if (!isEdge)
-                        Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - sbThickness), new Point(position + 1, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0xe4, 0xe4, 0xe4));
+                    lumenSidebranch.IsOverlapping = IsTargetPolygonOverlapping(lumenSidebranch.Points, lumenContour.Points);
+                    lumenSidebranch.IsCalcOverlapping = true;
                 }
-                else
+
+                if (lumenSidebranch.IsOverlapping)
                 {
-                    Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - sbThickness), new Point(position, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0x7d, 0x7d, 0x7d));
-                    if (!isEdge)
-                        Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - sbThickness), new Point(position + 1, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0x7d, 0x7d, 0x7d));
+                    int sbThickness = 5;
+                    if (lumenArea / 2 < sbThickness)
+                        sbThickness = lumenArea / 2 - 1;
+
+                    if (curFrame >= frameProximal && curFrame <= frameDistal)
+                    {
+                        Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - sbThickness), new Point(position, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0xe4, 0xe4, 0xe4));
+                        if (!isEdge)
+                            Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - sbThickness), new Point(position + 1, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0xe4, 0xe4, 0xe4));
+                    }
+                    else
+                    {
+                        Cv2.Line(imglumenProfile, new Point(position, imglumenProfile.Rows / 2 - sbThickness), new Point(position, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0x7d, 0x7d, 0x7d));
+                        if (!isEdge)
+                            Cv2.Line(imglumenProfile, new Point(position + 1, imglumenProfile.Rows / 2 - sbThickness), new Point(position + 1, imglumenProfile.Rows / 2 + sbThickness), new Scalar(0x7d, 0x7d, 0x7d));
+                    }
                 }
             }
-            
+
             return imglumenProfile;
         }
 
@@ -715,9 +748,9 @@ namespace RaywattApp.Common.Util
             if (colorFrames.Contains(curFrame))
             {
                 Cv2.Line(imglumenProfile, new Point(position, 0), new Point(position, imglumenProfile.Rows), isPreCase ? new Scalar(0xeb, 0xfe, 0x75) : new Scalar(0x00, 0xd8, 0xff));
-                if(!isEdge)
+                if (!isEdge)
                     Cv2.Line(imglumenProfile, new Point(position + 1, 0), new Point(position + 1, imglumenProfile.Rows), isPreCase ? new Scalar(0xeb, 0xfe, 0x75) : new Scalar(0x00, 0xd8, 0xff));
-            }                
+            }
 
             return imglumenProfile;
         }
@@ -726,7 +759,7 @@ namespace RaywattApp.Common.Util
         {
             List<int> calciumList = new List<int>();
 
-            for(int i = 0; i<lumenContours.Count; i++)
+            for (int i = 0; i < lumenContours.Count; i++)
             {
                 if (lumenContours[i].Calcium == null)
                     continue;
@@ -771,12 +804,13 @@ namespace RaywattApp.Common.Util
         public static async Task SaveVideo(List<Mat> images, string rootPath, string fileName, string format, double fps, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
         {
             string filePath = rootPath + "\\" + fileName + "." + format.ToLower();
+            string tempPath = ".\\temp.mp4";
 
             if (images == null || images.Count == 0) return;
 
             Size szVideo = images[0].Size();
 
-            VideoWriter videoWriter = new VideoWriter(filePath, FourCC.H264, fps, szVideo);
+            VideoWriter videoWriter = new VideoWriter(tempPath, FourCC.H264, fps, szVideo);
             if (videoWriter != null)
             {
                 int totalNum = images.Count;
@@ -791,6 +825,18 @@ namespace RaywattApp.Common.Util
                 }
                 videoWriter.Release();
             }
+
+            // FFmpeg 명령 구성 및 실행
+            // FourCC.H264 압축 사용하면, 비트레이트가 해상도/FPS/복잡성에 따라 달라져서 12Mbps로 변경 처리해서 예상 용량에 맞추기 위함(정확하게 12Mbps로 맞춰지지는 않음)
+            await FFMpegArguments
+                .FromFileInput(tempPath)
+                .OutputToFile(filePath, true, options => options
+                .WithCustomArgument("-b:v 12M") // 비디오 비트레이트 명시적 설정
+                .ForceFormat("mp4"))
+                .ProcessAsynchronously();
+
+            if (System.IO.File.Exists(tempPath))
+                System.IO.File.Delete(tempPath);
         }
 
         public static async Task SaveMultipleFrames(List<Mat> images, string rootPath, string fileName, string format, Action<double> progressCallback, double progress, Action<string> progressTextCallback)
@@ -835,22 +881,138 @@ namespace RaywattApp.Common.Util
             }
         }
 
-        /*
-         * https://github.com/Raywatt/Sejong/issues/27
-         */
-        public static double GetVideoSize(int width, int height, double frameRate, double targetMbps, double frameNum)
+        public static void TiffProcessByPython(List<Mat> images, string rootPath, string fileName, string format, CancellationTokenSource _cancellationTokenSource)
         {
-            int numOfChannel = 3;
-            int bytesPerRow = width * numOfChannel;
-            double totalBytes = bytesPerRow * height * frameNum;
+            string filePath = rootPath + "\\" + fileName + "." + format.ToLower();
 
-            double eachImageSize = totalBytes / frameNum;
-            double needBitrate = eachImageSize * frameRate * 8 / (1024 * 1024) /* MB */;
-            double compressionRatio = needBitrate / targetMbps;
-            double compressedImages = totalBytes / compressionRatio;
-            double fileSize = compressedImages;
+            if (images == null || images.Count == 0) return;
 
-            return fileSize;
+            string pythonDLL = Environment.GetEnvironmentVariable("PYTHON_DLL");
+            if (!System.IO.File.Exists(pythonDLL))
+            {
+                _log.Error($"Error: Python DLL not found at {pythonDLL}");
+                return;
+            }
+            Runtime.PythonDLL = pythonDLL;
+
+            try
+            {
+                PythonEngine.Initialize();
+                using (Py.GIL())
+                {
+                    dynamic sys = Py.Import("sys");
+                    sys.path.append(".\\"); // Python 모듈 검색 경로에 디렉터리 추가
+                    _log.Debug($"sys.path: {sys.path}");
+
+                    // Python 모듈 가져오기
+                    dynamic script = Py.Import("ImageProcess");
+
+                    // Mat 리스트를 Python으로 전달
+                    int width, height;
+                    var pyMatList = ConvertMatListToPython(ProcessMatList(images, out width, out height));
+                    string result = script.process_images(pyMatList, width, height, filePath);
+                    _log.Debug($"Python function returned: {result}");
+
+                    _cancellationTokenSource.Cancel();
+                }
+            }
+            catch (Python.Runtime.PythonException ex)
+            {
+                _log.Error($"Python Error: {ex.Message}");
+                _log.Error($"Traceback: {ex.StackTrace}");
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Error: {ex.Message}");
+            }
+            finally
+            {
+                PythonEngine.Shutdown();
+            }
+        }
+
+        private static dynamic ConvertMatListToPython(List<byte[]> matList)
+        {
+            var pythonList = new Python.Runtime.PyList();
+            dynamic np = Py.Import("numpy");
+
+            foreach (var mat in matList)
+            {
+                // NumPy 배열로 변환해서 Python 리스트에 추가
+                pythonList.Append(np.array(mat));
+            }
+            return pythonList;
+        }
+
+        private static List<byte[]> ProcessMatList(List<Mat> matList, out int width, out int height)
+        {
+            var byteList = new List<byte[]>();
+            width = 0;
+            height = 0;
+
+            try
+            {
+                foreach (var mat in matList)
+                {
+                    if (mat.Empty())
+                    {
+                        _log.Debug("Skipped empty Mat.");
+                        continue;
+                    }
+
+                    // Mat 크기 확인
+                    width = mat.Width;
+                    height = mat.Height;
+
+                    // Mat 데이터를 byte[]로 변환 (BGR -> RGB 변환 포함)
+                    byte[] byteData = ConvertMatToByteArray(mat);
+                    if (byteData != null)
+                    {
+                        byteList.Add(byteData);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Error processing Mat list: {ex.Message}");
+            }
+
+            return byteList;
+        }
+
+        private static byte[] ConvertMatToByteArray(Mat mat)
+        {
+            try
+            {
+                // OpenCV에서 Mat 객체를 BGR -> RGB로 변환
+                Mat rgbMat = new Mat();
+                Cv2.CvtColor(mat, rgbMat, ColorConversionCodes.BGR2RGB);
+
+                // byte[]로 변환
+                byte[] byteData = new byte[rgbMat.Rows * rgbMat.Cols * rgbMat.Channels()];
+                Marshal.Copy(rgbMat.Data, byteData, 0, byteData.Length);
+
+                return byteData;
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Error converting Mat to byte array: {ex.Message}");
+                return null;
+            }
+        }
+
+        public static double GetVideoSize(double frameRate, double targetMbps, double frameNum)
+        {
+            // 동영상 길이 (초)
+            double videoDuration = frameNum / frameRate;
+
+            // 비트레이트 (bps로 변환)
+            double bitrateBps = targetMbps * 1_000_000;
+
+            // 예상 파일 크기 (바이트)
+            double totalBytes = (bitrateBps * videoDuration) / 8;
+
+            return totalBytes;
         }
 
         public static async Task CopyStream(Stream from, Stream to, Action<long> progress)
@@ -865,9 +1027,9 @@ namespace RaywattApp.Common.Util
 
                 while (total_read < from.Length)
                 {
-                    int read = await from.ReadAsync(buffer, 0, buffer_size);
+                    int read = await from.ReadAsync(buffer.AsMemory(0, buffer_size));
 
-                    await to.WriteAsync(buffer, 0, read);
+                    await to.WriteAsync(buffer.AsMemory(0, read));
 
                     total_read += read;
 
@@ -1047,12 +1209,12 @@ namespace RaywattApp.Common.Util
             {
                 temp[1] = temp[1].Replace("㎜", "").Replace("㎟", "");
 
-                for(int i = temp[1].Length; i < digits; i++)
+                for (int i = temp[1].Length; i < digits; i++)
                 {
                     text = text + "0";
                 }
             }
-            else if(temp != null && temp.Length == 1 && digits > 0)
+            else if (temp != null && temp.Length == 1 && digits > 0)
             {
                 text += ".";
 
@@ -1071,13 +1233,13 @@ namespace RaywattApp.Common.Util
             return textBlock.DesiredSize;
         }
 
-        public static void Exit(DeviceStatus? deviceStatus = null, AngioManager? angioManager = null, bool isShutdown = false)
+        public static void Exit(DeviceStatus? deviceStatus = null, AngioManager? angioManager = null, bool isShutdown = false, bool isAdmin = false)
         {
             if (deviceStatus != null)
             {
                 deviceStatus.IsPowerOff = true;
-
                 deviceStatus.IsPaused = true;
+
                 while (!deviceStatus.CanExit)
                 {
                     Thread.Sleep(50);
@@ -1087,33 +1249,97 @@ namespace RaywattApp.Common.Util
             if (angioManager != null)
                 angioManager.CloseAngioManager();
 
-            Thread threadReadyPullback = new Thread(() => ThreadExit(deviceStatus, isShutdown));
+            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.OutsetLoginPage));
+
+            Thread threadReadyPullback = new Thread(() => ThreadExit(deviceStatus, isShutdown, isAdmin));
             threadReadyPullback.Start();
         }
 
-        private static void ThreadExit(DeviceStatus? deviceStatus, bool isShutdown)
+        private static void ForceShutdown()
         {
-            RayDisconnectDevices();
-            RayStopSystem();
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "shutdown",
+                    Arguments = "/s /f /t 0",
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                });
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"ForceShutdown Error: {ex.Message}");
+            }
+        }
 
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientListPage));
+        private static void ThreadExit(DeviceStatus? deviceStatus, bool isShutdown, bool isAdmin)
+        {
+            if (!isAdmin)
+            {
+                RayError result;
 
+                result = (RayError)RayDisconnectDevices();
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayDisconnectDevices Error");
+                }
+
+                result = (RayError)RayStopSystem();
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayStopSystem Error");
+                }
+
+                int ray3DResult = ODSOCT_DeleteDll();
+                if (ray3DResult == 0)
+                {
+                    _log.Error("ODSOCT_DeleteDll Error");
+                }
+
+                if(deviceStatus != null)
+                {
+                    deviceStatus.IsServiceStarted = false;
+                    deviceStatus.IsDeviceConnected = false;
+                }
+            }
+            
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
-                System.Windows.Application.Current.MainWindow.Close();
-
-                if(deviceStatus == null)
+                if (deviceStatus == null)
                 {
-                    Win32Helper.Shutdown();
+                    ForceShutdown();
                 }
-                else if(!CommonUtil.IsTestMode(deviceStatus.TestMode, "Power"))
-                {
-                    if(isShutdown)
-                        Win32Helper.Shutdown();
+                else if (isShutdown)
+                {                    
+                    if (CommonUtil.IsTestMode(deviceStatus.TestMode, "Power"))
+                    {
+                        System.Windows.Application.Current.Shutdown();
+                    }
                     else
-                        Win32Helper.LogOff();
+                    {
+                        ForceShutdown();
+                    }
                 }
-            });                        
+                else
+                {
+                    if (CommonUtil.IsRV200())
+                    {
+                        if (CommonUtil.IsTestMode(deviceStatus.TestMode, "Power"))
+                        {
+                            System.Windows.Application.Current.Shutdown();
+                        }
+                        else
+                        {
+                            Win32Helper.LogOff();
+                        }                            
+                    }
+                    else
+                    {
+                        deviceStatus.IsPowerOff = false;
+                    }
+                }
+            });
         }
 
         public static string LumenContoursToJson(List<LumenContour> lumenContours)
@@ -1121,7 +1347,7 @@ namespace RaywattApp.Common.Util
             StringBuilder sb = new StringBuilder();
             StringWriter sw = new StringWriter(sb);
 
-            using (JsonWriter writer = new JsonTextWriter(sw))
+            using (JsonTextWriter writer = new JsonTextWriter(sw))
             {
                 string strPoint;
 
@@ -1363,7 +1589,7 @@ namespace RaywattApp.Common.Util
                         if (reader.TokenType == JsonToken.PropertyName)
                             currentProperty = reader.Value.ToString();
 
-                        if(reader.Depth == 2)
+                        if (reader.Depth == 2)
                         {
                             if (nameof(lumenContour.MlContour).Equals(currentProperty))
                             {
@@ -1416,17 +1642,17 @@ namespace RaywattApp.Common.Util
             StringBuilder sb = new StringBuilder();
             StringWriter sw = new StringWriter(sb);
 
-            using (JsonWriter writer = new JsonTextWriter(sw))
+            using (JsonTextWriter writer = new JsonTextWriter(sw))
             {
                 writer.WriteStartArray();
-                
+
                 foreach (CoRegistration coRegistration in coRegistrations)
                 {
                     //Tracking Points (Proximal, Distal and additional connetion Points)
                     writer.WriteStartObject();
                     writer.WritePropertyName(nameof(coRegistration.TrackPoints));
                     writer.WriteStartArray();
-                    
+                  
                     foreach(System.Windows.Point point in  coRegistration.TrackPoints)
                     {
                         string strPoint = (int)point.X + "," + (int)point.Y;
@@ -1476,21 +1702,21 @@ namespace RaywattApp.Common.Util
 
             string currentProperty = string.Empty;
 
-            while(reader.Read())
+            while (reader.Read())
             {
-                if(reader.Depth == 1 && reader.TokenType == JsonToken.StartObject)
+                if (reader.Depth == 1 && reader.TokenType == JsonToken.StartObject)
                 {
                     CoRegistration coRegistration = new CoRegistration();
 
-                    while(reader.Read())
+                    while (reader.Read())
                     {
-                        if(reader.Depth == 1 && reader.TokenType == JsonToken.EndObject)
+                        if (reader.Depth == 1 && reader.TokenType == JsonToken.EndObject)
                         {
                             coRegistrations.Add(coRegistration);
                             break;
                         }
 
-                        if(reader.TokenType == JsonToken.PropertyName)
+                        if (reader.TokenType == JsonToken.PropertyName)
                         {
                             currentProperty = reader.Value.ToString();
                         }
@@ -1531,105 +1757,101 @@ namespace RaywattApp.Common.Util
         {
             if (contourList == null) return;
 
-            int frameSize = sizeBuffer.Width * sizeBuffer.Height;
+            double sx = (double)sizeBuffer.Width / sizeContour.Width;
+            double sy = (double)sizeBuffer.Height / sizeContour.Height;
+
             for (int i = 0; i < contourList.Count; i++)
             {
-                Mat imgLumen = new Mat(sizeContour, MatType.CV_8UC1);
-                Mat imgResize = new Mat(sizeBuffer, MatType.CV_8UC1);
-                List<List<Point>> contours = new List<List<Point>>();
-                List<Point> contour = new List<Point>();
-                foreach (System.Windows.Point point in contourList[i].Points)
+                using var img = WrapSliceAsMat(buffer, i, sizeBuffer);
+                img.SetTo(Scalar.Black);
+
+                if (contourList[i].Points == null || contourList[i].Points.Count == 0) continue;
+
+                var scaled = new List<Point>(contourList[i].Points.Count);
+                foreach (var p in contourList[i].Points)
                 {
-                    contour.Add(new OpenCvSharp.Point(point.X, point.Y));
-                }
-                if (contour.Count > 0)
-                {
-                    contours.Add(contour);
+                    scaled.Add(new Point((int)Math.Round(p.X * sx), (int)Math.Round(p.Y * sy)));
                 }
 
-                imgLumen.SetTo(Scalar.Black);
-                if (contours.Count > 0)
-                {
-                    Cv2.DrawContours(imgLumen, contours, -1, Scalar.White, -1);
-                }
-                Cv2.Resize(imgLumen, imgResize, imgResize.Size());
-                Cv2.Blur(imgResize, imgResize, new Size(13, 13) /* 필터 크기 */, new Point(-1, -1) /* 필터 중심*/);
-
-                Buffer.MemoryCopy((void*)imgResize.Data, (void*)(IntPtr.Add(buffer, i * frameSize)), frameSize, frameSize);
+                Cv2.FillPoly(img, new[] { scaled.ToArray() }, Scalar.White);
+                Cv2.GaussianBlur(img, img, new Size(5,5), 1.0);
             }
         }
         unsafe public static void StentsToMemory(List<LumenStent>? stentList, Size sizeContour, IntPtr buffer, Size sizeBuffer)
         {
             if (stentList == null) return;
-            
-            int frameSize = sizeBuffer.Width * sizeBuffer.Height;
+
+            double sx = (double)sizeBuffer.Width / sizeContour.Width;
+            double sy = (double)sizeBuffer.Height / sizeContour.Height;
+            int rx = 5;
+            int ry = 5;
+
             for (int i = 0; i < stentList.Count; i++)
             {
-                Mat imgLumen = new Mat(sizeContour, MatType.CV_8UC1);
-                Mat imgResize = new Mat(sizeBuffer, MatType.CV_8UC1);
-                Point[][] contours;
-                List<Point> contour = new List<Point>();
+                if (stentList[i].Points == null || !stentList[i].IsStent) continue;
 
-                if (stentList[i].Points == null || !stentList[i].IsStent)
-                    continue;
+                using var img = WrapSliceAsMat(buffer, i, sizeBuffer);
+                img.SetTo(Scalar.Black);
 
-                imgLumen.SetTo(Scalar.Black);
-
-                foreach (System.Windows.Point point in stentList[i].Points)
+                foreach (var p in stentList[i].Points)
                 {
-                    //TODO - 실제 스텐트 두께에 맞춰서 Size( , )를 설정해 주어야 함.
-                    imgLumen.Ellipse(new OpenCvSharp.Point(point.X, point.Y), new Size(5, 5), 0, 0, 360, Scalar.White, 1);
+                    var q = new Point((int)Math.Round(p.X * sx), (int)Math.Round(p.Y * sy));
+                    var r = new Size((int)Math.Round(rx * sx), (int)Math.Round(ry * sy));
+                    img.Ellipse(q, r, 0, 0, 360, Scalar.White, -1);
                 }
-                
-                Mat binary = new Mat();
-                Cv2.Threshold(imgLumen, binary, 128, 255, ThresholdTypes.Binary);
 
-                Cv2.FindContours(binary, out contours, out HierarchyIndex[] hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
-
-                Cv2.DrawContours(imgLumen, contours, -1, Scalar.White, 1);
-
-                Cv2.Resize(imgLumen, imgResize, imgResize.Size());
-                Cv2.Blur(imgResize, imgResize, new Size(7, 7) /* 필터 크기 */, new Point(-1, -1) /* 필터 중심*/);
-                Buffer.MemoryCopy((void*)imgResize.Data, (void*)(IntPtr.Add(buffer, i * frameSize)), frameSize, frameSize);
+                 Cv2.GaussianBlur(img, img, new Size(3,3), 0.8);
             }
         }
 
-        unsafe public static void GuideWireToMemory(List<LumenGuidewire>? guidewireList, Size sizeContour, IntPtr buffer, Size sizeBuffer)
+        unsafe public static void GuideWireToMemory(List<LumenGuidewire>? guidewireList, Size sizeContour, IntPtr buffer, Size sizeBuffer, double radius)
         {
-            if (guidewireList == null) return;
+            if (guidewireList == null)
+            {
+                _log.Debug("GuideWireList is empty");
+                return;
+            }
 
-            int frameSize = sizeBuffer.Width * sizeBuffer.Height;
+            double sx = (double)sizeBuffer.Width / sizeContour.Width;
+            double sy = (double)sizeBuffer.Height / sizeContour.Height;
+
             for (int i = 0; i < guidewireList.Count; i++)
             {
-                Mat imgLumen = new Mat(sizeContour, MatType.CV_8UC1);
-                Mat imgResize = new Mat(sizeBuffer, MatType.CV_8UC1);
-                Point[][] contours;
-                List<Point> contour = new List<Point>();
+                using var img = WrapSliceAsMat(buffer, i, sizeBuffer);
+                img.SetTo(Scalar.Black);
 
-                imgLumen.SetTo(Scalar.Black);
+                if (guidewireList[i].Points == null || guidewireList[i].Points.Count == 0) continue;
 
-                if (guidewireList[i].Points == null)
-                    continue;
+                var prev = new Point(int.MinValue, int.MinValue);
 
-                foreach (System.Windows.Point point in guidewireList[i].Points)
+                foreach (var pt in guidewireList[i].Points)
                 {
-                    //TODO - 실제 Guidewire 반지름에 맞춰서 Size( , )를 설정해 주어야 함.
-                    imgLumen.Ellipse(new OpenCvSharp.Point(point.X, point.Y), new Size(50, 50), 0, 0, 360, Scalar.White, 1);
+                    var cur = (pt.X == 0 || pt.Y == 0) && prev.X != int.MinValue
+                        ? prev
+                        : new Point((int)Math.Round(pt.X * sx), (int)Math.Round(pt.Y * sy));
+
+                    int r = (int)Math.Round(radius * (sx + sy) * 0.5);
+                    if (r < 1) r = 1;
+
+                    if (prev.X != int.MinValue)
+                    {
+                        Cv2.Line(img, prev, cur, Scalar.White, Math.Max(1, r * 2));
+                    }
+
+                    Cv2.Circle(img, cur, r, Scalar.White, -1);
+
+                    prev = cur;
                 }
-
-                Mat binary = new Mat();
-                Cv2.Threshold(imgLumen, binary, 128, 255, ThresholdTypes.Binary);
-
-                Cv2.FindContours(binary, out contours, out HierarchyIndex[] hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
-
-                Cv2.DrawContours(imgLumen, contours, -1, Scalar.White, 1);
-
-                Cv2.Resize(imgLumen, imgResize, imgResize.Size());
-
-                Cv2.Blur(imgResize, imgResize, new Size(7, 7) /* 필터 크기 */, new Point(-1, -1) /* 필터 중심*/);
-                Buffer.MemoryCopy((void*)imgResize.Data, (void*)(IntPtr.Add(buffer, i * frameSize)), frameSize, frameSize);
             }
         }
+
+        static Mat WrapSliceAsMat(IntPtr buffer, int i, Size sizeBuffer)
+        {
+            int frameSize = sizeBuffer.Width * sizeBuffer.Height;
+            IntPtr dst = IntPtr.Add(buffer, i * frameSize);
+            return new Mat(sizeBuffer.Height, sizeBuffer.Width, MatType.CV_8UC1, dst);
+        }
+
         private static System.Windows.Point StrToPoint(string str)
         {
             string[] temp = str.Split(",");
@@ -1906,7 +2128,7 @@ namespace RaywattApp.Common.Util
             for (int i = 0; i < pointList.Count; i++)
             {
                 cvPoints[i] = new OpenCvSharp.Point(Convert.ToInt32(Math.Round(pointList[i].X)), Convert.ToInt32(Math.Round(pointList[i].Y)));
-            }                       
+            }
 
             if (cvPoints.Length > 0)
             {
@@ -2039,12 +2261,12 @@ namespace RaywattApp.Common.Util
 
                     if (lumenStents[i].Points.Count > 0 && !isValid)
                         isValid = true;
-                }                    
+                }
             }
 
             if (!isValid)
                 return false;
-            
+
             List<(List<int> sequence, int startIndex, int endIndex)> sequences = new List<(List<int> sequence, int startIndex, int endIndex)>();
             List<int> currentSequence = new List<int>();
             int startIndex = -1;
@@ -2123,14 +2345,14 @@ namespace RaywattApp.Common.Util
             proximal = largestSequence.startIndex;
             distal = largestSequence.endIndex;
 
-            for(int i = proximal; i <= distal; i++)
+            for (int i = proximal; i <= distal; i++)
             {
                 lumenStents[i].IsStent = true;
             }
 
             return true;
         }
-      
+
         public static BitmapSource DrawSheathIndicator(int imageSize, double sheathDiameter)
         {
             double pxDiameter = (sheathDiameter / Constants.ImageResolution) * imageSize / Constants.OCTImageSize;
@@ -2141,8 +2363,8 @@ namespace RaywattApp.Common.Util
 
             imgSheath.SetTo(new Scalar(0x00, 0x00, 0x00, 0x00));
             imgSheath.Circle(center, radius, new Scalar(0x60, 0xd7, 0x1e, 0xff), thickness, LineTypes.AntiAlias);
-            
-            for (int i = 1; i<6; i+=2)
+
+            for (int i = 1; i < 6; i += 2)
             {
                 imgSheath.Ellipse(center,
                     new OpenCvSharp.Size(imgSheath.Width / 2, imgSheath.Height / 2),
@@ -2159,35 +2381,41 @@ namespace RaywattApp.Common.Util
 
         public static void SetColormap(string? colorCode)
         {
+            _log.Debug("SetColormap : " + colorCode);
+
             if (colorCode == null)
                 return;
 
+            RayError result = RayError.OK;
+
             if ("GRGR".Equals(colorCode))
             {
-                RaySetProperty(Property.Colormap, 0);
+                result = (RayError)RaySetProperty(Property.Colormap, 0);
             }
             else if ("GRAY".Equals(colorCode))
             {
-                RaySetProperty(Property.Colormap, 1);
+                result = (RayError)RaySetProperty(Property.Colormap, 1);
             }
             else if ("ORNG".Equals(colorCode))
             {
-                RaySetProperty(Property.Colormap, 2);
+                result = (RayError)RaySetProperty(Property.Colormap, 2);
+            }
+
+            if (result != RayError.OK)
+            {
+                _log.Error("RaySetProperty SetColormap Error");
             }
         }
 
         public static bool IsTestMode(Dictionary<string, bool> testMode, string key)
         {
-            if (!testMode.ContainsKey(key))
-                return false;
-
-            return testMode[key];
+            return testMode.TryGetValue(key, out var result) && result;
         }
 
         public static void ReadAngioParams(PatientCase patientCase)
         {
             string file = patientCase.Image;
-            string paramsFile = file.Substring(0, file.Length - 3) + "params";
+            string paramsFile = string.Concat(file.AsSpan(0, file.Length - 3), "params");
 
             string directory = Path.Combine(Constants.DataRootPath, patientCase.PatientId);
             string paramsPath = Path.Combine(directory, paramsFile);
@@ -2206,7 +2434,7 @@ namespace RaywattApp.Common.Util
         public static void ReadAngioImages(PatientCase patientCase, List<Mat>? angioFrames = null)
         {
             string file = patientCase.Image;
-            string angioFile = file.Substring(0, file.Length - 3) + "angioframes";
+            string angioFile = string.Concat(file.AsSpan(0, file.Length - 3), "angioframes");
 
             string directory = Path.Combine(Constants.DataRootPath, patientCase.PatientId);
             string angioPath = Path.Combine(directory, angioFile);
@@ -2236,7 +2464,7 @@ namespace RaywattApp.Common.Util
                 }
             }
         }
-      
+
         public static ImageSource ConvertMatsToImageSource(Mat mat)
         {
             using (var stream = new MemoryStream())
@@ -2428,7 +2656,7 @@ namespace RaywattApp.Common.Util
 
             return thresholdImg;
         }
-      
+
         public static double GetRoundScale(double value)
         {
             return Math.Round(value, 5);
@@ -2462,5 +2690,252 @@ namespace RaywattApp.Common.Util
 
             return true;
         }
+
+        public static LocalHost GetNetworkInfo()
+        {
+            LocalHost localHost = new LocalHost();
+            localHost.Hostname = Environment.MachineName;
+
+            foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (nic.OperationalStatus == OperationalStatus.Up && nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                {
+                    _log.Debug($"Network Adapter: {nic.Description}");
+                    localHost.AdapterName = nic.Description;
+                    _log.Debug($"MAC Address: {nic.GetPhysicalAddress()}");
+
+                    IPInterfaceProperties ipProperties = nic.GetIPProperties();
+
+                    //DHCP 여부 확인
+                    bool isDhcpEnabled = ipProperties.GetIPv4Properties().IsDhcpEnabled;
+                    _log.Debug($"DHCP?: {(isDhcpEnabled ? "DHCP" : "Static IP")}");
+                    localHost.IsManual = !isDhcpEnabled;
+
+                    foreach (UnicastIPAddressInformation ip in ipProperties.UnicastAddresses)
+                    {
+                        if (ip.Address.AddressFamily == AddressFamily.InterNetwork) // IPv4만 가져오기
+                        {
+                            _log.Debug($"IP Address: {ip.Address}");
+                            localHost.IpAddress = ip.Address.ToString();
+                            _log.Debug($"Subnet Mask: {ip.IPv4Mask}");
+                            localHost.SubnetMask = ip.IPv4Mask.ToString();
+                        }
+                    }
+
+                    foreach (GatewayIPAddressInformation gateway in ipProperties.GatewayAddresses)
+                    {
+                        _log.Debug($"Default Gateway: {gateway.Address}");
+                        localHost.DefaultGateway = gateway.Address.ToString();
+                    }
+
+                    if (ipProperties.DnsAddresses.Count > 0)
+                    {
+                        _log.Debug($"Preferred Dns Server: {ipProperties.DnsAddresses[0]}");
+                        localHost.PreferredDnsServer = ipProperties.DnsAddresses[0].ToString();
+                    }
+
+                    if (ipProperties.DnsAddresses.Count > 1)
+                    {
+                        _log.Debug($"Alternate Dns Server: {ipProperties.DnsAddresses[1]}");
+                        localHost.AlternateDnsServer = ipProperties.DnsAddresses[1].ToString();
+                    }
+                    else
+                    {
+                        _log.Debug($"Alternate Dns Server: (Not set)");
+                    }
+
+                    break;
+                }
+            }
+
+            return localHost;
+        }
+
+        public static void ParseDicomName(string dicomName, out string lastname, out string firstname)
+        {
+            lastname = string.Empty;
+            firstname = string.Empty;
+
+            if (string.IsNullOrWhiteSpace(dicomName))
+                return;
+
+            string[] nameParts = dicomName.Split('^');
+
+            if (nameParts.Length > 0)
+                lastname = nameParts[0];
+
+            if (nameParts.Length > 1)
+                firstname = nameParts[1];
+        }
+
+        public static string GetDicomResultMessage(RayExportWrapper.DicomNetRWError resultCode)
+        {
+            switch (resultCode)
+            {
+                case RayExportWrapper.DicomNetRWError.Normal:
+                    return "Operation completed successfully.";
+                case RayExportWrapper.DicomNetRWError.InitializeFail:
+                    return "Initialization failed. Please check the configuration.";
+                case RayExportWrapper.DicomNetRWError.NetworkInitFail:
+                    return "Failed to initialize network. Please check your network connection.";
+                case RayExportWrapper.DicomNetRWError.AssociationFail:
+                    return "Failed to establish DICOM association with the server.";
+                case RayExportWrapper.DicomNetRWError.EchoFail:
+                    return "DICOM Echo test failed. Please verify the server status.";
+                case RayExportWrapper.DicomNetRWError.FindFail:
+                    return "Failed to perform query (Find).";
+                case RayExportWrapper.DicomNetRWError.StoreFail:
+                    return "Failed to store/send image (Store).";
+                case RayExportWrapper.DicomNetRWError.NoPresentationConterxt:
+                    return "No supported Presentation Contexts found.";
+                case RayExportWrapper.DicomNetRWError.NoUncompressedPC:
+                    return "No uncompressed Presentation Contexts available.";
+                case RayExportWrapper.DicomNetRWError.NoSOPClass:
+                    return "Unsupported SOP Class.";
+                case RayExportWrapper.DicomNetRWError.FileLoadFail:
+                    return "Failed to load the file.";
+                case RayExportWrapper.DicomNetRWError.TLSProfileFail:
+                    return "TLS security profile error.";
+                case RayExportWrapper.DicomNetRWError.NoConnection:
+                    return "No connection to the server.";
+                case RayExportWrapper.DicomNetRWError.NoSCU:
+                    return "No SCU (Service Class User) is configured.";
+                case RayExportWrapper.DicomNetRWError.UnknownError:
+                default:
+                    return "An unknown error has occurred.";
+            }
+        }
+
+        // List<Point> → PathGeometry 변환
+        public static PathGeometry CreatePolygonGeometry(List<System.Windows.Point> points)
+        {
+            var figure = new PathFigure
+            {
+                StartPoint = points[0],
+                IsClosed = true,
+                IsFilled = true
+            };
+
+            for (int i = 1; i < points.Count; i++)
+            {
+                figure.Segments.Add(new LineSegment(points[i], true));
+            }
+
+            return new PathGeometry(new[] { figure });
+        }
+
+        // 두 도형이 겹치는지 확인
+        public static bool ArePolygonsOverlapping(List<System.Windows.Point> polygon1, List<System.Windows.Point> polygon2)
+        {
+            if (polygon1 == null || polygon1.Count < 3 || polygon2 == null || polygon2.Count < 3)
+                return false;
+
+            var geom1 = CreatePolygonGeometry(polygon1);
+            var geom2 = CreatePolygonGeometry(polygon2);
+
+            var intersect = Geometry.Combine(geom1, geom2, GeometryCombineMode.Intersect, null);
+            return !intersect.IsEmpty();
+        }
+
+        // 여러 도형 중 하나라도 겹치는지 확인
+        public static bool IsTargetPolygonOverlapping(List<List<System.Windows.Point>> polygons, List<System.Windows.Point> targetPolygon)
+        {
+            foreach (var polygon in polygons)
+            {
+                if (ArePolygonsOverlapping(polygon, targetPolygon))
+                    return true;
+            }
+            return false;
+        }
+      
+        public static string GenerateRandomPassword(int length = 8)
+        {
+            char[] PasswordChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()".ToCharArray();
+        
+            var password = new StringBuilder();
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                byte[] buffer = new byte[sizeof(uint)];
+                for (int i = 0; i < length; i++)
+                {
+                    rng.GetBytes(buffer);
+                    uint num = BitConverter.ToUInt32(buffer, 0);
+                    password.Append(PasswordChars[num % PasswordChars.Length]);
+                }
+            }
+            return password.ToString();
+        }
+
+        public static bool IsRV200()
+        {
+            if ("RV200".Equals(System.Configuration.ConfigurationManager.AppSettings.Get("ModelVersion")))
+                return true;
+            else
+                return false;
+        }
+
+        public static int SetAutuPullback(SqlManager sqlManager)
+        {
+            _log.Debug("SetAutoPullback");
+
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "AutoPB";
+            IList<Configuration> autoPullback = sqlManager.SelectConfiguration(sqlParameters);
+
+            int triggerTargetCount = 0;
+            RayError result;
+
+            foreach (var item in autoPullback)
+            {
+                var key = item.Key;
+                _log.Debug(key + ": " + item.Value);
+
+                if (String.IsNullOrWhiteSpace(item.Value))
+                    continue;
+
+                switch (key)
+                {
+                    case "LumenMin":
+                        result = (RayError)RaySetProperty(Property.LumenThresholdMin, double.Parse(item.Value) / 100);
+                        if (result != RayError.OK)
+                        {
+                            _log.Error("RaySetProperty Error");
+                        }
+                        break;
+                    case "LumenMax":
+                        result = (RayError)RaySetProperty(Property.LumenThresholdMax, double.Parse(item.Value) / 100);
+                        if (result != RayError.OK)
+                        {
+                            _log.Error("RaySetProperty Error");
+                        }
+                        break;
+                    case "SNR":
+                        result = (RayError)RaySetProperty(Property.LumenSnrThreshold, double.Parse(item.Value));
+                        if (result != RayError.OK)
+                        {
+                            _log.Error("RaySetProperty Error");
+                        }
+                        break;
+                    case "Count":
+                        triggerTargetCount = int.Parse(item.Value);
+                        break;
+                    case "ShowGuide":
+                        if(!String.IsNullOrWhiteSpace(item.Buffer) && item.Buffer.Contains(Environment.UserName))
+                        {
+                            result = (RayError)RaySetProperty(Property.ShowLumenGuide, item.Value == "Y" ? 1.0 : 0.0);
+                            if (result != RayError.OK)
+                            {
+                                _log.Error("RaySetProperty Error");
+                            }
+                        }                        
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return triggerTargetCount;
+        }
+
     }
 }

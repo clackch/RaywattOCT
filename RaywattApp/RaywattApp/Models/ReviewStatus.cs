@@ -17,7 +17,7 @@ namespace RaywattApp.Models
         private bool _isLumenProfile = true;
 
         [ObservableProperty]
-        private bool _isContourStentOn = true;
+        private bool _isContourStentOn = false;
 
         [ObservableProperty]
         private bool _isMeasurementOn = false;

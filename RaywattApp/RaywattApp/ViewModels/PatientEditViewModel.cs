@@ -158,6 +158,8 @@ namespace RaywattApp.ViewModels
 
             if (nRows == 1)
             {
+                _sqlManager.UpdatePatientCaseId(sqlParameters);
+
                 CommonUtil.RenameFolder(Constants.DataRootPath + "\\" + Patient.Id.Trim(), Constants.DataRootPath + "\\" + PatientEdit.Id);
 
                 Dictionary<string, object> parameter = new Dictionary<string, object>();
@@ -166,6 +168,10 @@ namespace RaywattApp.ViewModels
                 SetDetailStatusInit();
                 parameter["prevStatus"] = PrevStatus;
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientDetailPage) { Parameter = parameter });
+            }
+            else
+            {
+                _log.Error("Update Error");
             }
         }
 
@@ -210,7 +216,7 @@ namespace RaywattApp.ViewModels
             return true;
         }
 
-        private void CopyPatient(Patient src, Patient dest)
+        private static void CopyPatient(Patient src, Patient dest)
         {
             _log.Debug("CopyPatient");
 

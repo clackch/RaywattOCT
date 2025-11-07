@@ -76,7 +76,16 @@ namespace RaywattApp.ViewModels.Dialog
         public double Degree
         {
             get { return degree; }
-            set { degree = value; OnPropertyChanged(nameof(Degree)); RaySetProperty(Property.LongitudeDegree, degree); }
+            set 
+            { 
+                degree = value; 
+                OnPropertyChanged(nameof(Degree));
+                RayError result = (RayError)RaySetProperty(Property.LongitudeDegree, degree);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
+            }
         }
 
         [ObservableProperty]
@@ -105,6 +114,9 @@ namespace RaywattApp.ViewModels.Dialog
 
         [ObservableProperty]
         private List<LumenSidebranch> _lumenSidebranches = new List<LumenSidebranch>();
+
+        [ObservableProperty]
+        private bool _isDrawLumenSideBranch = false;
 
         [ObservableProperty]
         private List<LumenStent> _lumenStents = new List<LumenStent>();
@@ -202,6 +214,9 @@ namespace RaywattApp.ViewModels.Dialog
             Section = new Section();
             Section.Proximal.IsVisible = Visibility.Visible;
             Section.Distal.IsVisible = Visibility.Visible;
+
+            if (CommonUtil.IsTestMode(DeviceStatus.TestMode, "Sidebranch"))
+                IsDrawLumenSideBranch = true;
         }
 
         public double SetInitialize(PatientCase patientCase, List<Mat> crossSections, Mat lMode, FileExport fileExport)
@@ -329,13 +344,12 @@ namespace RaywattApp.ViewModels.Dialog
             CrossSectionClipRadius = CrossSectionImageSize / 2;
             CrossSectionClipCenter = new Point(CrossSectionClipRadius, CrossSectionClipRadius);
 
-            double sheathDiameter = RayGetProperty(Property.SheathDiameter);
-            SheathIndicator = CommonUtil.DrawSheathIndicator((int)CrossSectionImageSize, sheathDiameter);
+            SheathIndicator = CommonUtil.DrawSheathIndicator((int)CrossSectionImageSize, patientCase.SheathDiameter);
 
             return ImagePartWidth + TextPartWidth;
         }
 
-        public void SetFinalize()
+        public static void SetFinalize()
         {
 
         }
@@ -346,7 +360,7 @@ namespace RaywattApp.ViewModels.Dialog
 
             if (FileExport.AngioView && PatientCase.AngioYn)
             {
-                double ratio = (double)PatientCase.AngioFrame.AngioImage.Count / crossSections.Count() * frameNumber ;
+                double ratio = (double)PatientCase.AngioFrame.AngioImage.Count / crossSections.Count * frameNumber ;
                 int currentAngioFrameNumber = (int)ratio;
                 AngioImage = (BitmapSource)angioImages[currentAngioFrameNumber];
             }
@@ -389,7 +403,7 @@ namespace RaywattApp.ViewModels.Dialog
             return bitmap;
         }
 
-        private Mat GenerateMask(Mat image)
+        private static Mat GenerateMask(Mat image)
         {
             Mat mask = image.EmptyClone();
             OpenCvSharp.Point center = new OpenCvSharp.Point(mask.Width / 2, mask.Height / 2);
@@ -487,10 +501,7 @@ namespace RaywattApp.ViewModels.Dialog
             for (int i = 0; i < this.crossSections.Count; i++)
             {
                 Measurement measurement = new Measurement();
-                measurement.FrameNumber = i;
-                measurement.AreaGeometries = new ObservableCollection<AreaGeometry>();
-                measurement.LengthGeometries = new ObservableCollection<LengthGeometry>();
-                measurement.TextGeometries = new List<TextGeometry>();
+                measurement.FrameNumber = i;                
                 Measurements.Add(measurement);
             }
 

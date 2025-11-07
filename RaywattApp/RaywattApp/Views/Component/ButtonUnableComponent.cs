@@ -5,19 +5,19 @@ namespace RaywattApp.Views.Component
 {
     public class ButtonUnableComponent : Button
     {
-        public static DependencyProperty IsSaveRawDataDoneProperty = DependencyProperty.Register("IsSaveRawDataDone", typeof(bool), typeof(ButtonUnableComponent));
-        public bool IsSaveRawDataDone { get => (bool)GetValue(IsSaveRawDataDoneProperty); set => SetValue(IsSaveRawDataDoneProperty, value); }
+        public static readonly DependencyProperty IsFirstProperty = DependencyProperty.Register("IsFirst", typeof(bool), typeof(ButtonUnableComponent));
+        public bool IsFirst { get => (bool)GetValue(IsFirstProperty); set => SetValue(IsFirstProperty, value); }
 
-        public static DependencyProperty IsLumenLoadedProperty = DependencyProperty.Register("IsLumenLoaded", typeof(bool), typeof(ButtonUnableComponent));
-        public bool IsLumenLoaded { get => (bool)GetValue(IsLumenLoadedProperty); set => SetValue(IsLumenLoadedProperty, value); }
+        public static readonly DependencyProperty IsSecondProperty = DependencyProperty.Register("IsSecond", typeof(bool), typeof(ButtonUnableComponent));
+        public bool IsSecond { get => (bool)GetValue(IsSecondProperty); set => SetValue(IsSecondProperty, value); }
 
-        public static DependencyProperty IsLumenSavedProperty = DependencyProperty.Register("IsLumenSaved", typeof(bool), typeof(ButtonUnableComponent));
-        public bool IsLumenSaved { get => (bool)GetValue(IsLumenSavedProperty); set => SetValue(IsLumenSavedProperty, value); }
+        public static readonly DependencyProperty IsThirdProperty = DependencyProperty.Register("IsThird", typeof(bool), typeof(ButtonUnableComponent));
+        public bool IsThird { get => (bool)GetValue(IsThirdProperty); set => SetValue(IsThirdProperty, value); }
 
-        public static DependencyProperty IsOCTImagingDoneProperty = DependencyProperty.Register("IsOCTImagingDone", typeof(bool), typeof(ButtonUnableComponent));
-        public bool IsOCTImagingDone { get => (bool)GetValue(IsOCTImagingDoneProperty); set => SetValue(IsOCTImagingDoneProperty, value); }
+        public static readonly DependencyProperty IsFourthProperty = DependencyProperty.Register("IsFourth", typeof(bool), typeof(ButtonUnableComponent));
+        public bool IsFourth { get => (bool)GetValue(IsFourthProperty); set => SetValue(IsFourthProperty, value); }
 
-        public static DependencyProperty IsImageProcessingDoneProperty = DependencyProperty.Register("IsImageProcessingDone", typeof(bool), typeof(ButtonUnableComponent));
-        public bool IsImageProcessingDone { get => (bool)GetValue(IsImageProcessingDoneProperty); set => SetValue(IsImageProcessingDoneProperty, value); }
+        public static readonly DependencyProperty IsFifthProperty = DependencyProperty.Register("IsFifth", typeof(bool), typeof(ButtonUnableComponent));
+        public bool IsFifth { get => (bool)GetValue(IsFifthProperty); set => SetValue(IsFifthProperty, value); }
     }
 }

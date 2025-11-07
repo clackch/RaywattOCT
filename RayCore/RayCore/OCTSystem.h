@@ -29,11 +29,12 @@ class COCTSystem : public CMessageService
 private:
 	enum class CatheterState {
 		Unloaded = 0,
-		Loaded,
+		Loading,
 		Enable,
 		FindingSheath,
 		FindingPeak,
-		Calibrated
+		Calibrated,
+		CheckSheath
 	};
 
 	// Thread
@@ -68,7 +69,7 @@ private:
 
 	// Rotary Junction
 	CRJController* m_pRJController;
-	bool m_bFirstLoad;	// To-Do: RFID ø¨µø«ÿº≠ µø¿œ«— ƒ´≈◊≈Õ ¿Áø¨∞·Ω√ø°µµ FirstLoad ∑Œ ¿ŒΩƒµ«∞‘ ºˆ¡§ « ø‰
+	bool m_bFirstLoad;	// To-Do: RFID Ïó∞ÎèôÌï¥ÏÑú ÎèôÏùºÌïú Ïπ¥ÌÖåÌÑ∞ Ïû¨Ïó∞Í≤∞ÏãúÏóêÎèÑ FirstLoad Î°ú Ïù∏ÏãùÎêòÍ≤å ÏàòÏ†ï ÌïÑÏöî
 
 	// Laser Module
 	CLaserModule* m_pLaserModule;
@@ -78,9 +79,15 @@ private:
 	RayScannerState m_curState;
 	CatheterState m_cathState;
 
-	// Auto Pullback (Flushing Detection)
-	double m_fReferenceIntensity[4];
-	double m_fCurrentIntensity[4];
+	// Init
+	bool m_bInit;
+
+	// Auto Pullback
+	bool m_bAutoPullbackOnOff;
+	double m_fLumenThresholdMin;
+	double m_fLumenThresholdMax;
+	double m_fLumenSrnThreshold;
+	bool m_bShowLumenGuide;
 
 	//Property
 	double m_fBrightness;
@@ -88,13 +95,13 @@ private:
 	double m_fDegree;
 	double m_fColormap;
 	cv::Scalar m_backgroundColor;	// for longitude image
-	double m_fImageThreshold = 99.99;
 	bool m_bImageCompensation = true;
 	bool m_bImageCompensationControlWindow;
-	double m_fImageRoi = 2.f;
 	double m_fFieldOfView;
 	bool m_isTestMode;
 	double m_fPullbackStartTime; // XXX.XXX sec
+	int autoCalibrationFranch = 0; // 0 for 2.6, 60 for 1.7
+	int catheterRFID;
 
 public:
 	COCTSystem();
@@ -104,6 +111,7 @@ public:
 	// Call from dll only
 	RayError Start();
 	RayError Stop();
+	RayError Init();
 	RayError RegisterCallback(FunctionPtr cb);
 	RayError UnregisterCallback();
 	RayError ConnectDevices();
@@ -131,6 +139,7 @@ public:
 	RayError UnregisterDetectionCallback();
 	void* GetVolumeData(void* pLumenContours = nullptr);
 	RayError StartLumenDetection();
+	RayError SetConfigPath(char* strPath);
 	RayError OpenImage(char* strFilePath, double imageResolution, double zOffset);
 	RayError CloseImage();
 	void* GetImageData(int nFrame);
@@ -146,6 +155,7 @@ public:
 	int GetNumOfGuidewirePoints(int nFrame);
 	void* GetCalciumAngles(int nFrame);
 	int GetCalciumLength(int nFrame);
+	void* GetGuidewireRadius(int nFrame);
 	
 	//Property
 	RayScannerState GetCurrentState() { return m_curState; }
@@ -170,10 +180,6 @@ public:
 	UINT GetLongitudeImageHeight();
 	UINT GetLongitudeImageChannels();
 	RayError SetSheathDiameter(double value);
-	double GetImageThreshold();
-	RayError SetImageThreshold(double value);
-	double GetImageRoi();
-	RayError SetImageRoi(double value);
 	bool GetImageCompensation();
 	RayError SetImageCompensation(bool value);
 	RayError SetImageCompensationControlWindow(bool value);
@@ -184,6 +190,18 @@ public:
 	bool IsTestMode() { return m_isTestMode; }
 	void SetPullbackStartTime(double value) { m_fPullbackStartTime = value; }
 	double GetPullbackStartTime() { return m_fPullbackStartTime; }
+	int GetPullbackType(int pullbackDistance, int pullbackSpeed);
+	double GetAutoPullback();
+	RayError SetAutoPullback(double value);
+	double GetLumenThresholdMin();
+	RayError SetLumenThresholdMin(double value);
+	double GetLumenThresholdMax();
+	RayError SetLumenThresholdMax(double value);
+	double GetShowLumenGuide();
+	RayError SetShowLumenGuide(double value);
+	double GetLumenSnrThreshold();
+	RayError SetLumenSnrThreshold(double value);
+	RayError SetRefractiveIndex(double value);
 
 private:
 	// Main Thread
@@ -201,6 +219,7 @@ private:
 	static UINT threadValidateCatheter(LPVOID param);
 	static UINT threadManualLoadCatheter(LPVOID param);
 	static UINT threadCleanRotaryJunction(LPVOID param);
+	static UINT threadRFIDValidation(LPVOID param);
 
 	// Imaging & Device
 	bool checkConnection();
@@ -217,10 +236,10 @@ private:
 	void setBrightnessContrastAllSessions();
 	void redrawCutView();
 	void laserOnOff(bool isOn);
-	bool waitForStepMotors(bool& runFlag);
+	bool waitForStepMotors(bool& runFlag, bool log = false);
 	bool waitForStepMotors(eStepMotorIndex idxMotor, bool& runFlag);
-	void calculateIntensity(cv::Mat image);
 	std::vector<std::vector<std::string>> readLoadSequence();
+	void autoCalibrationInit(LPVOID param);
 
 protected:
 	LRESULT OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam);

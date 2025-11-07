@@ -1,6 +1,7 @@
 #include "TIFFImaging.h"
 #include "LookUpTable.h"
 #include <cmath>
+#include <string>
 
 CTIFFImaging::CTIFFImaging(Setting setting, CMessageService* pMsg)
 	: COCTImaging(setting, pMsg) 
@@ -22,17 +23,17 @@ void CTIFFImaging::Initialize()
 	imageMask.create(m_setting.nBScan, m_setting.nAScan, CV_8UC1);
 	memset(imageMask.data, 0x00, m_setting.nBScan * m_setting.nAScan);
 	cv::circle(imageMask, cv::Point(imageMask.cols / 2, imageMask.rows / 2), imageMask.cols / 2, cv::Scalar(0xff, 0xff, 0xff), -1);
+
+	releaseInversedCircularizeMap();
+	initInversedCircularizeMap(m_setting.nAScan, m_setting.nBScan, m_setting.nAScan, m_setting.nBScan, m_setting.nAScan, 2.0f);
+	releaseCircularizeMap();
 	initCircularizeMap(m_setting.nAScan, m_setting.nBScan, m_setting.nAScan, m_setting.nBScan, m_setting.nAScan, 2.0f);
 }
 
 void CTIFFImaging::Process(char* fringes)
-{ // 여기 Process로 들어온다.
-	m_end = std::chrono::system_clock::now();
-	CLookUpTable& lut = CLookUpTable::GetInstance();
+{
 	cv::Mat imgTIFF(cv::Size(m_setting.nBScan, m_setting.nAScan), CV_8UC1, fringes);
 	imageConvert = imgTIFF.clone();
-
-	m_start = m_end;
 
 	InverseCircularizeImage(imageConvert, imageConvert);
 
@@ -42,6 +43,8 @@ void CTIFFImaging::Process(char* fringes)
 void CTIFFImaging::PostProcess(cv::Mat image)
 {
 	const bool bColor = m_bColor;
+
+	findSheath(image);
 
 	cv::cvtColor(image, imageCircle, cv::COLOR_GRAY2RGB);
 	if (bColor) {
@@ -59,7 +62,6 @@ void CTIFFImaging::PostProcess(cv::Mat image)
 
 	CircularizeImage(imageCircle, imageCircle);
 }
-
 
 void CTIFFImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale) {
 	COCTImaging::initCircularizeMap(diameter, srcHeight, srcWidth, dstHeight, dstWidth, scale);

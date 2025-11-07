@@ -149,6 +149,24 @@ namespace RaywattApp.Common.Annotation
         public static readonly DependencyProperty CurrentLumenStentProperty =
             DependencyProperty.Register("CurrentLumenStent", typeof(LumenStent), typeof(DrawLumenContourUtil), new PropertyMetadata(null));
 
+        public List<LumenSidebranch> LumenSidebranches
+        {
+            get { return (List<LumenSidebranch>)GetValue(LumenSidebranchesProperty); }
+            set { SetValue(LumenSidebranchesProperty, value); }
+        }
+
+        public static readonly DependencyProperty LumenSidebranchesProperty =
+            DependencyProperty.Register("LumenSidebranches", typeof(List<LumenSidebranch>), typeof(DrawLumenContourUtil), new PropertyMetadata(null));
+
+        public bool IsDrawLumenSideBranch
+        {
+            get { return (bool)GetValue(IsDrawLumenSideBranchProperty); }
+            set { this.SetValue(IsDrawLumenSideBranchProperty, value); }
+        }
+
+        private static readonly DependencyProperty IsDrawLumenSideBranchProperty =
+            DependencyProperty.Register("IsDrawLumenSideBranch", typeof(bool), typeof(DrawLumenContourUtil), new PropertyMetadata(default(bool)));
+
         public double AppositionThreshold
         {
             get { return (double)GetValue(AppositionThresholdProperty); }
@@ -249,7 +267,7 @@ namespace RaywattApp.Common.Annotation
                 foreach(LumenContour lumenContour in drawUtil.LumenContours)
                 {
                     Stack<LumenContourHistory> stack = new Stack<LumenContourHistory>();
-                    stack.Push(drawUtil.CopyLumenContourToHistory(lumenContour));
+                    stack.Push(CopyLumenContourToHistory(lumenContour));
                     drawUtil.lumenContourHistory.Add(stack);
                 }
 
@@ -270,6 +288,10 @@ namespace RaywattApp.Common.Annotation
                 {
                     drawUtil.DrawLumenContour(drawUtil.LumenContours[frameNumber], drawUtil.LumenStents[frameNumber], drawUtil.AppositionThreshold, drawUtil.IsEditOn);
                 }
+                
+                //for Sidebranch (Test code)
+                if (drawUtil.IsDrawLumenSideBranch && drawUtil.LumenSidebranches != null)
+                    drawUtil.DrawLumenSidebranch(drawUtil.LumenSidebranches[frameNumber]);
 
                 //for Empty Lumen
                 if (drawUtil.IsEditOn && drawUtil.LumenContours[frameNumber].Points.Count == 0)
@@ -628,7 +650,7 @@ namespace RaywattApp.Common.Annotation
             {
                 Polygon polygon = new Polygon();
                 polygon.Style = (Style)this.Resources["StylePolygon"];
-                foreach (Point point in pointList.GetRange(0, pointList.Count - 1))
+                foreach (Point point in pointList.GetRange(0, pointList.Count))
                 {
                     polygon.Points.Add(point);
                 }
@@ -641,6 +663,25 @@ namespace RaywattApp.Common.Annotation
                     DrawDiameter(lumenContour.MinDiameter.point1, lumenContour.MinDiameter.point2, constMinDiameter);
                     DrawDiameter(lumenContour.MaxDiameter.point1, lumenContour.MaxDiameter.point2, constMaxDiameter);
                 }
+            }
+        }
+
+        private void DrawLumenSidebranch(LumenSidebranch lumenSidebranch)
+        {
+            _log.Debug("DrawLumenSidebranch");
+
+            if (lumenSidebranch == null || lumenSidebranch.Points == null || lumenSidebranch.Points.Count == 0)
+                return;
+
+            foreach(List<Point> pointList in lumenSidebranch.Points)
+            {
+                Polygon polygon = new Polygon();
+                polygon.Style = (Style)this.Resources["SbStylePolygon"];
+                foreach (Point point in pointList.GetRange(0, pointList.Count - 1))
+                {
+                    polygon.Points.Add(point);
+                }
+                this.canvas.Children.Add(polygon);
             }
         }
 
@@ -777,7 +818,7 @@ namespace RaywattApp.Common.Annotation
             return true;
         }
 
-        private PathGeometry GetPathGeometry(List<Point> points)
+        private static PathGeometry GetPathGeometry(List<Point> points)
         {
             _log.Debug("GetPathGeometry");
 
@@ -979,7 +1020,7 @@ namespace RaywattApp.Common.Annotation
             }
         }
 
-        private LumenContourHistory CopyLumenContourToHistory(LumenContour lumenContour)
+        private static LumenContourHistory CopyLumenContourToHistory(LumenContour lumenContour)
         {
             LumenContourHistory lumenContourHistory = new LumenContourHistory();
             lumenContourHistory.points = lumenContour.Points;

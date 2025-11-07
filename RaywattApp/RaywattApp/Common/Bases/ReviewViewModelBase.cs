@@ -139,6 +139,7 @@ namespace RaywattApp.Common.Bases
             parameter["patientCase"] = PatientCase;
             parameter["prevStatus"] = PrevStatus;
             parameter["reviewStatus"] = ReviewStatus;
+
             WeakReferenceMessenger.Default.Send(new NavigationMessage(url) { Parameter = parameter });
         }
 

@@ -30,6 +30,8 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private Zoom _zoom = new Zoom();
 
+        private bool isMoveLiveView;
+
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         private ICommand _cmdBack;
@@ -71,7 +73,7 @@ namespace RaywattApp.ViewModels
                 this.PrevStatus = (PrevStatus)data["prevStatus"];
                 PatientCase = (PatientCase)data["patientCase"];
 
-                Zoom.SetFieldOfView(Constants.DefaultFoV / 5);
+                Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
 
                 timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.UpdateImageInterval);
                 timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
@@ -86,12 +88,22 @@ namespace RaywattApp.ViewModels
 
             if (timerUpdateImage.IsEnabled)
                 timerUpdateImage.Stop();
-        }
 
+            if (!this.isMoveLiveView)
+            {
+                RayError result = (RayError)RayStopLiveView();
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayStopLiveView Error");
+                }
+            }
+        }
 
         private void Back()
         {
             _log.Debug("Back");
+
+            this.isMoveLiveView = true;
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["patient"] = this.Patient;
@@ -103,12 +115,23 @@ namespace RaywattApp.ViewModels
         private void ManualZoomIn(bool zoomIn)
         {
             _log.Debug("ManualZoomIn : " + ((zoomIn) ? "IN" : "OUT"));
-            
-            RayManualCalibration(zoomIn);
+
+            RayError result = (RayError)RayManualCalibration(zoomIn);
+            if (result != RayError.OK && result != RayError.DeviceBusy)
+            {
+                _log.Error("RayManualCalibration Error : " + result);
+            }
         }
 
-        private void AutoCalibration() {
-            RayAutoCalibration();
+        private void AutoCalibration() 
+        {
+            _log.Debug("AutoCalibration");
+
+            RayError result = (RayError)RayAutoCalibration();
+            if (result != RayError.OK)
+            {
+                _log.Error("RayAutoCalibration Error");
+            }
             DeviceStatus.CanExecuteCalibration = false;
         }
 

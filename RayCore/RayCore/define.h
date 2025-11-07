@@ -20,7 +20,10 @@ enum class RayError {
 	InvalidArgument,
 	WrongState,
 	WrongSession,
-	InvalidFunctionCall
+	InvalidFunctionCall,
+	HomingFailed,
+	RotaryJunctionError,
+	AutoCalibError
 };
 
 enum class RayProperty {
@@ -41,8 +44,6 @@ enum class RayProperty {
 	ImageChannels,
 	ImageDepth,
 	ImageResolution,
-	ImageThreshold,
-	ImageRoi,
 	ImageCompensation,
 	ImageCompensationControlWindow,
 	FieldOfView,
@@ -54,8 +55,14 @@ enum class RayProperty {
 	PullbackSpeed,
 	SheathDiameter,
 	TestMode,
-  ZOffset,
-  PullbackStartTime
+	ZOffset,
+	PullbackStartTime,
+	AutoPullback,
+	LumenThresholdMin,
+	LumenThresholdMax,
+	LumenSnrThreshold,
+	ShowLumenGuide,
+	RefractiveIndex
 };
 
 enum class RayCallbackRequest {
@@ -96,7 +103,8 @@ enum class RayWorkItem {
 	UnloadCatheter,
 	ValidateCatheter,
 	InitializeRotaryJunction,
-	CleanRotaryJunction
+	CleanRotaryJunction,
+	EnableCatheter
 };
 
 enum class RaySession {

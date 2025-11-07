@@ -8,12 +8,15 @@ namespace RaywattApp.Models
     {
         public class ReviewImageInfo
         {
-            public int Width = 0;
-            public int Height = 0;
-            public int Channels = 0;
-            public int Total = 0;
-            public int Current = 0;
+            public int Width;
+            public int Height;
+            public int Channels;
+            public int Total;
+            public int Current;
         };
+
+        [ObservableProperty]
+        private string _loginID = string.Empty;
 
         [ObservableProperty]
         private bool _isPowerOff = false;
@@ -40,7 +43,10 @@ namespace RaywattApp.Models
         private bool _isAngioInitialized = false;
 
         [ObservableProperty]
-        private bool _isPullbackDone = false;
+        private bool _isRecordingDone = true;
+
+        [ObservableProperty]
+        private bool _isPullbackDone = true;
 
         [ObservableProperty]
         private bool _isLumenDetected = false;
@@ -74,9 +80,6 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private CathRoom _selectedCathRoom;
-
-        [ObservableProperty]
-        private double _imageIntensity;
 
         [ObservableProperty]
         private bool _enhancedLUT;

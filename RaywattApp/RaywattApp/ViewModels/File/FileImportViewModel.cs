@@ -17,7 +17,6 @@ using RaywattApp.Common.Dialog;
 using RaywattApp.Services;
 using RaywattApp.Views.Dialog;
 using System.Linq;
-using OpenCvSharp;
 using System.Management;
 
 namespace RaywattApp.ViewModels.File
@@ -38,7 +37,7 @@ namespace RaywattApp.ViewModels.File
 
         private string externalDrive;
 
-        private bool externDriveInit = false;
+        private bool externDriveInit;
 
         private DirectoryProvider directoryProvider;
 
@@ -297,8 +296,9 @@ namespace RaywattApp.ViewModels.File
                                     destPath = destPath.Substring(0, destPath.Length - 3);
 
                                     List<string> extensions = new List<string> { Constants.AngioImageExtension, Constants.AngioParmasExtension };
-                                    string fileName = patientCase.Image.Substring(0, patientCase.Image.Length - Constants.AngioImageExtension.Length - 1) + ".";
-                                    string srcFilePath = patientCase.ImageFullPath.Substring(0, patientCase.ImageFullPath.Length - Constants.AngioImageExtension.Length - 1) + ".";
+                                    string fileName = string.Concat(patientCase.Image.AsSpan(0, patientCase.Image.Length - Constants.AngioImageExtension.Length - 1), ".");
+                                    string srcFilePath = string.Concat(patientCase.ImageFullPath.AsSpan(0, patientCase.ImageFullPath.Length - Constants.AngioImageExtension.Length - 1), ".");
+
                                     foreach (string ext in extensions)
                                     {
                                         importfiles.Add(srcPath + ext, destPath + ext);
@@ -448,7 +448,7 @@ namespace RaywattApp.ViewModels.File
 
             if (result.Item1)
             {
-                IList<Patient> patients = new List<Patient>();
+                List<Patient> patients = new List<Patient>();
 
                 string json = result.Item2;
                 if (!String.IsNullOrEmpty(json))
@@ -466,7 +466,7 @@ namespace RaywattApp.ViewModels.File
                         patient.Lastname = GetStrValue(patientObj, "Lastname");
                         patient.Firstname = GetStrValue(patientObj, "Firstname");
                         patient.Name = patient.Firstname + ", " + patient.Lastname;
-                        patient.Birthdate = GetDateValue(patientObj, "Birthdate");
+                        patient.Birthdate = GetDateValueNullable(patientObj, "Birthdate");
                         patient.Gender = GetStrValue(patientObj, "Gender");
                         patient.CreateDate = GetDateValue(patientObj, "CreateDate");
                         patient.UpdateDate = GetDateValue(patientObj, "UpdateDate");
@@ -517,6 +517,7 @@ namespace RaywattApp.ViewModels.File
                             patientCase.StrCoRegistration = GetStrValue(caseObj, "StrCoRegistration");
                             patientCase.CreateDate = GetDateValue(caseObj, "CreateDate");
                             patientCase.UpdateDate = GetDateValue(caseObj, "UpdateDate");
+                            patientCase.GuidewireRadius = GetDoubleValue(caseObj, "GuidewireRadius");
 
                             patient.PatientCaseList.Add(patientCase);
                         }
@@ -530,7 +531,10 @@ namespace RaywattApp.ViewModels.File
                 PatientList = null;
                 PatientCaseList = null;
 
-                _log.Error("File Decrypt Error");
+                Dictionary<string, object> parameter = new Dictionary<string, object>();
+                parameter["title"] = _l10n["Information"];
+                parameter["message"] = _l10n["The file format is invalid."];
+                var pupupResult = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.FileImportDialogWidth, Constants.FileImportDialogHeight);
             }
         }
 
@@ -548,7 +552,7 @@ namespace RaywattApp.ViewModels.File
             }
         }
 
-        private string GetStrValue(JObject obj, string key)
+        private static string GetStrValue(JObject obj, string key)
         {
             if (!obj.ContainsKey(key))
                 return "";
@@ -556,7 +560,7 @@ namespace RaywattApp.ViewModels.File
             return obj[key].ToString();
         }
 
-        private DateTime GetDateValue(JObject obj, string key)
+        private static DateTime GetDateValue(JObject obj, string key)
         {
             if (!obj.ContainsKey(key))
                 return DateTime.Now;
@@ -564,7 +568,21 @@ namespace RaywattApp.ViewModels.File
             return Convert.ToDateTime(obj[key]);
         }
 
-        private long GetLongValue(JObject obj, string key)
+        private DateTime? GetDateValueNullable(JObject obj, string key)
+        {
+            if (!obj.ContainsKey(key))
+                return DateTime.Now;
+
+            if (String.IsNullOrEmpty(obj[key].ToString()))
+                return null;
+
+            if (obj[key].Equals("null"))
+                return null;
+
+            return Convert.ToDateTime(obj[key]);
+        }
+
+        private static long GetLongValue(JObject obj, string key)
         {
             if (!obj.ContainsKey(key))
                 return 0;
@@ -572,7 +590,7 @@ namespace RaywattApp.ViewModels.File
             return (long)obj[key];
         }
 
-        private double GetDoubleValue(JObject obj, string key)
+        private static double GetDoubleValue(JObject obj, string key)
         {
             if (!obj.ContainsKey(key))
                 return 0;
@@ -580,7 +598,7 @@ namespace RaywattApp.ViewModels.File
             return (double)obj[key];
         }
 
-        private int GetIntValue(JObject obj, string key)
+        private static int GetIntValue(JObject obj, string key)
         {
             if (!obj.ContainsKey(key))
                 return 0;
@@ -588,7 +606,7 @@ namespace RaywattApp.ViewModels.File
             return (int)obj[key];
         }
 
-        private bool GetBoolValue(JObject obj, string key)
+        private static bool GetBoolValue(JObject obj, string key)
         {
             if (!obj.ContainsKey(key))
                 return false;

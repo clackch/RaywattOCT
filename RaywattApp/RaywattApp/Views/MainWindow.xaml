@@ -30,15 +30,15 @@
                     <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="home" Margin="14,9,0,9" Command="{Binding HomeCommand}" Visibility="{Binding IsHome, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="setting" Margin="0,9,6,9" Command="{Binding SettingCommand}" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
-                    <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="power" Margin="0,9,12,9" Command="{Binding ExitCommand}" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                    <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="setting" Margin="0,9,6,9" Command="{Binding SettingCommand}" Visibility="{Binding IsSetting, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                    <component:IconButton Style="{DynamicResource IconButtonLarge}" Icon="power" Margin="0,9,12,9" Command="{Binding ExitCommand}" Visibility="{Binding IsExit, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                 </StackPanel>
             </Grid>
             <Grid Grid.Row="2">
                 <Image Style="{DynamicResource RaywattSmall_Icon}"/>
                 <StackPanel Margin="130,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" Orientation="Horizontal">
                     <component:IconButton Style="{DynamicResource IconButton}" Icon="angioIndicator" Margin="0" Command="{Binding AngioIndicatorCommand}" IsEnabled="{Binding DeviceStatus.IsAngioConnected, Converter={StaticResource BoolToEnableConverter}}"/>
-                    <component:IconButton Style="{DynamicResource IconButton}" Icon="catheterIndicator" Margin="6,0,0,0" Command="{Binding CatheterIndicatorCommand}" IsEnabled="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusLoaded}}"/>
+                    <component:IconButton Style="{DynamicResource IconButton}" Icon="catheterIndicator" Margin="6,0,0,0" Command="{Binding CatheterIndicatorCommand}" IsEnabled="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusEnable}}"/>
                 </StackPanel>
                 <StackPanel MinWidth="130" VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal" Visibility="{Binding DeviceStatus.CatheterStatus, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.CatheterStatusLoading}}">
                     <ProgressBar Style="{DynamicResource HomeCatheterProgressBar}" Value="{Binding CatheterProgress}" Width="72" Height="20" Visibility="{Binding IsHome, Converter={StaticResource BoolToVisibilityConverter}}"/>
@@ -59,42 +59,21 @@
                 <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Margin="310,5,0,0" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=RJ}">
                     <Button Style="{DynamicResource BtnForTest}" Command="{Binding CatheterConnectTestCommmand}" Width="100" Height="15" FontSize="9" Content="Catheter Connect"/>
                 </StackPanel>
-                <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="310,0,0,5" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=Image}">
-                    <Button Style="{DynamicResource BtnForTest}" Command="{Binding ImageAnalysisTestCommmand}" Width="100" Height="15" FontSize="9" Content="Image Analysis"/>
+                <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="310,0,0,5" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=AutoPB}">
+                    <Button Style="{DynamicResource BtnForTest}" Command="{Binding AutopullbackTestCommmand}" Width="100" Height="15" FontSize="9" Content="Auto Pullback"/>
                 </StackPanel>
                 <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Margin="420,5,0,0" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=Compensate}">
                     <Button Style="{DynamicResource BtnForTest}" Command="{Binding CompensationTestCommand}" Width="100" Height="15" FontSize="9" Content="Compensation"/>
-                </StackPanel>
-                <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Margin="870,5,0,0" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=Compensate}">
                     <Button Style="{DynamicResource BtnForTest}" Command="{Binding CompensationWindowTestCommand}" Width="100" Height="15" FontSize="9" Content="CompensationWindow"/>
                 </StackPanel>
-                <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="870,0,0,5" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=Compensate}">
+                <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Margin="520,5,0,0" IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=Compensate}">
                     <Button Style="{DynamicResource BtnForTest}" Command="{Binding SaveVTIFileTestCommand}" Width="100" Height="15" FontSize="9" Content="Save3DVITFile"/>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="800,0,0,0" Visibility="{Binding IsImageAnalysisTest, Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" Margin="800,0,0,0" Visibility="{Binding IsAutoPullbackTest, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Label Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource AdditionalColor2Brush}" Content="{Binding [Auto Pullback], Source={StaticResource L10N}}" HorizontalAlignment="Center"/>
                     <StackPanel Orientation="Horizontal">
-                        <Button Style="{DynamicResource BtnForTest2}" Command="{Binding ImageAnalysisToggleCommmand}" Width="50" Height="15" FontSize="9" Content="Intensity"/>
-                        <StackPanel Width="5"/>
-                        <Label Content="{Binding DeviceStatus.ImageIntensity}" Width="30" Height="15" FontSize="9" VerticalContentAlignment="Center" Foreground="White"/>
-                    </StackPanel>
-                    <StackPanel Width="10"/>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Visibility="{Binding IsImageAnalysisToggle, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Label Content="Threshold" Width="40" Height="15" FontSize="9" VerticalContentAlignment="Center" Foreground="White"/>
-                                <StackPanel Width="5"/>
-                                <TextBox Width="30" Text="{Binding ImageThreshold, UpdateSourceTrigger=PropertyChanged}" Height="15" FontSize="9" Foreground="White" Background="Transparent" BorderThickness="0"/>
-                                <StackPanel Width="5"/>
-                                <Button Style="{DynamicResource BtnForTest2}" Command="{Binding ImageAnalysisReloadCommmand}" Width="40" Height="15" FontSize="9" Content="Reload"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Label Content="ROI" Width="40" Height="15" FontSize="9" VerticalContentAlignment="Center" Foreground="White"/>
-                                <StackPanel Width="5"/>
-                                <TextBox Width="30" Text="{Binding ImageRoi}" Height="15" FontSize="9" Foreground="White" Background="Transparent" BorderThickness="0"/>
-                                <StackPanel Width="5"/>
-                                <Button Style="{DynamicResource BtnForTest2}" Command="{Binding ImageAnalysisApplyCommmand}" Width="40" Height="15" FontSize="9" Content="Apply"/>
-                            </StackPanel>
-                        </StackPanel>
+                        <Button Style="{DynamicResource BtnForTest2}" Command="{Binding AutopullbackOnCommmand}" Width="40" Height="15" FontSize="9" Content="On"/>
+                        <Button Style="{DynamicResource BtnForTest2}" Command="{Binding AutopullbackOffCommmand}" Width="40" Height="15" FontSize="9" Content="Off"/>
                     </StackPanel>
                 </StackPanel>
             </Grid>

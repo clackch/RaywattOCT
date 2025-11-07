@@ -13,6 +13,9 @@ _declspec(dllexport) RayError RayStartSystem() {
 _declspec(dllexport) RayError RayStopSystem() {
     return octSystem.Stop();
 }
+_declspec(dllexport) RayError RayInitSystem() {
+    return octSystem.Init();
+}
 _declspec(dllexport) RayError RayRegisterCallback(FunctionPtr cb) {
     return octSystem.RegisterCallback(cb);
 }
@@ -106,19 +109,13 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
         config.bldcMotor.velocityPullback = value;
         break;
     case RayProperty::PullbackDistance:
-        config.stepMotor.pullbackDistance = (value >= 95) ? 95 : value;
+        config.stepMotor.pullbackDistance = value;
         break;
     case RayProperty::PullbackSpeed:
         config.stepMotor.pullbackSpeed = value;
         break;
     case RayProperty::SheathDiameter:
         octSystem.SetSheathDiameter(value);
-        break;
-    case RayProperty::ImageThreshold:
-        octSystem.SetImageThreshold(value);
-        break;
-    case RayProperty::ImageRoi:
-        octSystem.SetImageRoi(value);
         break;
     case RayProperty::ImageCompensation:
         octSystem.SetImageCompensation(value);
@@ -137,6 +134,24 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
         break;
     case RayProperty::PullbackStartTime:
         octSystem.SetPullbackStartTime(value);
+        break;
+    case RayProperty::AutoPullback:
+        octSystem.SetAutoPullback(value);
+        break;
+    case RayProperty::LumenThresholdMin:
+        octSystem.SetLumenThresholdMin(value);
+        break;
+    case RayProperty::LumenThresholdMax:
+        octSystem.SetLumenThresholdMax(value);
+        break;
+    case RayProperty::LumenSnrThreshold:
+        octSystem.SetLumenSnrThreshold(value);
+        break;
+    case RayProperty::ShowLumenGuide:
+        octSystem.SetShowLumenGuide(value);
+        break;
+    case RayProperty::RefractiveIndex:
+        octSystem.SetRefractiveIndex(value);
         break;
     default:
         return RayError::InvalidArgument;
@@ -192,11 +207,7 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
     case RayProperty::PullbackSpeed:
         return config.stepMotor.pullbackSpeed;
     case RayProperty::SheathDiameter:
-        return config.measurement.fSheathRadius * 2;
-    case RayProperty::ImageThreshold:
-        return octSystem.GetImageThreshold();
-    case RayProperty::ImageRoi:
-        return octSystem.GetImageRoi();
+        return config.measurement.GetSheathRadius() * 2;
     case RayProperty::ImageCompensation:
         return octSystem.GetImageCompensation();
     case RayProperty::FieldOfView:
@@ -205,6 +216,16 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return (double) octSystem.IsTestMode();
     case RayProperty::PullbackStartTime:
         return octSystem.GetPullbackStartTime();
+    case RayProperty::AutoPullback:
+        return octSystem.GetAutoPullback();
+    case RayProperty::LumenThresholdMin:
+        return octSystem.GetLumenThresholdMin();
+    case RayProperty::LumenThresholdMax:
+        return octSystem.GetLumenThresholdMax();
+    case RayProperty::LumenSnrThreshold:
+        return octSystem.GetLumenSnrThreshold();
+    case RayProperty::ShowLumenGuide:
+        return octSystem.GetShowLumenGuide();
     default:
         return (int)RayError::InvalidArgument;
     }
@@ -217,6 +238,9 @@ _declspec(dllexport) RayError RayStartLumenDetection() {
     return octSystem.StartLumenDetection();
 }
 
+_declspec(dllexport) RayError RaySetConfigPath(char* strPath) {
+    return octSystem.SetConfigPath(strPath);
+}
 _declspec(dllexport) RayError RayOpenImage(char* strFilePath, double imageResolution, double zOffset) {
     return octSystem.OpenImage(strFilePath, imageResolution, zOffset);
 }
@@ -261,6 +285,8 @@ _declspec(dllexport) void* RayGetCalciumAngles(int nFrame) {
 }
 _declspec(dllexport) int RayGetCalciumLength(int nFrame) {
     return octSystem.GetCalciumLength(nFrame);
+_declspec(dllexport) void* RayGetGuidewireRadius(int nFrame) {
+    return octSystem.GetGuidewireRadius(nFrame);
 }
 
 BOOL APIENTRY DllMain( HMODULE hModule,

@@ -86,15 +86,15 @@ namespace RaywattApp.ViewModels.File
             if (FileExport.Material == Constants.ExportMaterialPullback)
             {
                 foreach (PatientCase patientCase in PatientCases)
-                {
-                    frameSize = GetFrameSize(patientCase.AngioYn);
+                {                    
                     int numOfFrames = patientCase.NumOfFrames;
                     if (FileExport.Pullback == Constants.ExportPullbackAVI)
                     {
-                        ExportSize += frameSize * numOfFrames * 1024;
+                        ExportSize += CommonUtil.GetVideoSize(10, 12, numOfFrames);//10fps, 12Mbps
                     }
                     else
                     {
+                        frameSize = GetFrameSize();
                         ExportSize += frameSize * numOfFrames;
                     }
                 }
@@ -110,42 +110,21 @@ namespace RaywattApp.ViewModels.File
             UpdateFileSize(ExportSize);
         }
 
-        private double GetFrameSize(bool angioYn = false)
+        private double GetFrameSize()
         {
             double frameSize = 0;
+            double height = Constants.ExportHeight;
+            double width = Constants.ExportLongitudeWidth;
 
-            if(FileExport.Material == Constants.ExportMaterialPullback && FileExport.Pullback == Constants.ExportPullbackAVI)
-            {
-                //Export 한 파일 대상으로 경험적으로 찾은 수치
-                if (!FileExport.AngioView && !FileExport.Longitude && !FileExport.MeasureAuto && !FileExport.MeasureManual)//Cross Section Only
-                {
-                    frameSize = 145;
-                }
-                else if((FileExport.Longitude || (FileExport.AngioView && angioYn)) && (FileExport.MeasureAuto || FileExport.MeasureManual))//Check All, Longitude + Measure, Angio + Measure
-                {
-                    frameSize = 240;
-                }
-                else if((FileExport.Longitude || (FileExport.AngioView && angioYn)) && (!FileExport.MeasureAuto && !FileExport.MeasureManual))//Longitude, Angio (Measure X)
-                {
-                    frameSize = 170;
-                }
-                else
-                {
-                    frameSize = 255;
-                }
-            }
+            if (FileExport.MeasureAuto || FileExport.MeasureManual)
+                width = Constants.ExportWidth;
+            else if (!FileExport.AngioView && !FileExport.Longitude && !FileExport.MeasureAuto && !FileExport.MeasureManual)
+                width = Constants.ExportCrossSectionBig;
+
+            if(FileExport.StillFrame == Constants.ExportStillFrameTIFF || FileExport.Pullback == Constants.ExportPullbackTIFF)
+                frameSize = height * width;
             else
-            {
-                double height = Constants.ExportHeight;
-                double width = Constants.ExportLongitudeWidth;
-
-                if (FileExport.MeasureAuto || FileExport.MeasureManual)
-                    width = Constants.ExportWidth;
-                else if (!FileExport.AngioView && !FileExport.Longitude && !FileExport.MeasureAuto && !FileExport.MeasureManual)
-                    width = Constants.ExportCrossSectionBig;
-
                 frameSize = height * width * 3.0;
-            }
 
             return frameSize;
         }

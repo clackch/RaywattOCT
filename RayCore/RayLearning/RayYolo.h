@@ -4,6 +4,16 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 
+#define SAFE_LOAD_DLL_FUNC(name, type)                  \
+    {                                                   \
+        FARPROC proc = GetProcAddress(m_hDll, #name);   \
+        if (!proc) {                                    \
+            printf("Failed to load: %s\n", #name);      \
+            return;                                     \
+        }                                               \
+        name = reinterpret_cast<type>(proc);            \
+    }
+
 typedef void* (*pInitializeSegment)();
 typedef void* (*pInitializeDetect)();
 typedef void* (*pInitializeCalciumSegment)();

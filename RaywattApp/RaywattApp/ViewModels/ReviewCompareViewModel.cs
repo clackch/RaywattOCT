@@ -186,6 +186,8 @@ namespace RaywattApp.ViewModels
 
                 Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
 
+                CrossSectionCompareScale = (1 / Constants.ImageResolution) * (Constants.CrossSectionCompareSize / Constants.OCTImageSize);
+
                 if (ReviewStatus.SelectedPatientCase == null)
                 {
                     GetPatientCase(true);
@@ -193,7 +195,7 @@ namespace RaywattApp.ViewModels
                     if (ReviewStatus.SelectedPatientCase != null)
                     {
                         RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath, ReviewStatus.SelectedPatientCase.ImageResolution, ReviewStatus.SelectedPatientCase.ZOffset);
-                        ZoomCompare.SetFieldOfView(Constants.OCTImageSize * ReviewStatus.SelectedPatientCase.ImageResolution / PatientCase.FieldOfView);
+                        ZoomCompare.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
                         DeviceStatus.IsOCTImagingCompareDone = false;
                         Thread.Sleep(500);
                     }
@@ -205,7 +207,7 @@ namespace RaywattApp.ViewModels
                 else
                 {
                     GetPatientCase(false, ReviewStatus.SelectedPatientCase.LumenContours, ReviewStatus.SelectedPatientCase.LumenSidebranches, ReviewStatus.SelectedPatientCase.LumenStents, ReviewStatus.SelectedPatientCase.LumenGuidewires);
-                    ZoomCompare.SetFieldOfView(Constants.OCTImageSize * ReviewStatus.SelectedPatientCase.ImageResolution / PatientCase.FieldOfView);
+                    ZoomCompare.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
                 }
 
                 SetCrossSectionBackground(RaySession.Review, Constants.BackgroundColor);
@@ -320,10 +322,14 @@ namespace RaywattApp.ViewModels
                 LumenContourCommand = Constants.LumenContourClear;
                 HideLumenProfileCompare();
 
-                RayEndCompare();
+                RayError result = (RayError)RayEndCompare();
+                if (result != RayError.OK)
+                {
+                    _log.Error("RayEndCompare Error");
+                }
                 DeviceStatus.ReviewImageInfos[(int)RaySession.Compare].Current = 0;
                 RayStartCompare(ReviewStatus.SelectedPatientCase.ImageFullPath, ReviewStatus.SelectedPatientCase.ImageResolution, ReviewStatus.SelectedPatientCase.ZOffset);
-                ZoomCompare.SetFieldOfView(Constants.OCTImageSize * ReviewStatus.SelectedPatientCase.ImageResolution / PatientCase.FieldOfView);
+                ZoomCompare.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
                 DeviceStatus.IsOCTImagingCompareDone = false;
                 Thread.Sleep(500);
 

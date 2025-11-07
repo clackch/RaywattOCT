@@ -377,7 +377,7 @@ namespace RaywattApp.Services
             return nRows;
         }
 
-        private object GetDbValue(string field, IDataReader row)
+        private static object GetDbValue(string field, IDataReader row)
         {
             for (int i = 0; i < row.FieldCount; i++)
             {
@@ -388,7 +388,7 @@ namespace RaywattApp.Services
             return null;
         }
 
-        private void PrintLog(string commandText, Dictionary<string, Object> commandParameters)
+        private static void PrintLog(string commandText, Dictionary<string, Object> commandParameters)
         {
             _log.Debug("Query : " + commandText.Replace("\r\n", " ").Replace("  ", ""));
             if (commandParameters != null)

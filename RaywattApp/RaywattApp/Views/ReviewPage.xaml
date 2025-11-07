@@ -40,7 +40,12 @@
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [2D], Source={StaticResource L10N}}" IsChecked="True" IsEnabled="False"/>
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [3D], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.Review3dPage}" IsEnabled="{Binding ReviewStatus.IsNoPullback, Converter={StaticResource BoolToEnableReverseConverter}}"/>
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [Compare], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewComparePage}" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$002|$003}"/>
-                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrSettingPage}"/>
+                    <StackPanel IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=AIFFR}">
+                        <StackPanel.Visibility>
+                            <Binding RelativeSource="{RelativeSource Self}" Path="IsEnabled" Converter="{StaticResource BoolToVisibilityConverter}"/>
+                        </StackPanel.Visibility>
+                        <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrSettingPage}" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}"/>
+                    </StackPanel>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                     <component:IconButton Style="{StaticResource IconButton}" Icon="editLumenContourSimple" Width="42" Height="42" Command="{Binding EditLumenContourCommand}"/>
@@ -529,7 +534,7 @@
                         </RectangleGeometry>
                     </Grid.Clip>
                     <Grid>
-                        <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" LumenStents="{Binding LumenStents}" CurrentLumenStent="{Binding CurrentLumenStent, Mode=TwoWay}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" Zoom="{Binding ReviewStatus.Zoom}" FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" InCommand="{Binding LumenContourCommand, Mode=TwoWay}">
+                        <annotation:DrawLumenContourUtil LumenContours="{Binding LumenContours}" CurrentLumenContour="{Binding CurrentLumenContour, Mode=TwoWay}" LumenStents="{Binding LumenStents}" CurrentLumenStent="{Binding CurrentLumenStent, Mode=TwoWay}" LumenSidebranches="{Binding LumenSidebranches}" IsDrawLumenSideBranch="{Binding IsDrawLumenSideBranch}" AppositionThreshold="{Binding PatientCase.AppositionThreshold}" Zoom="{Binding ReviewStatus.Zoom}" FrameNumber="{Binding FrameNumber}" IsDrawOn="{Binding ReviewStatus.IsContourStentOn}" IsEditOn="False" InCommand="{Binding LumenContourCommand, Mode=TwoWay}">
                             <annotation:DrawLumenContourUtil.RenderTransform>
                                 <TransformGroup>
                                     <TranslateTransform X="{Binding ReviewStatus.Zoom.ZoomTranslateX, Converter={StaticResource CrossSectionTranslateReverseConverter}}" Y="{Binding ReviewStatus.Zoom.ZoomTranslateY, Converter={StaticResource CrossSectionTranslateReverseConverter}}"/>
@@ -558,7 +563,7 @@
                             </RectangleGeometry.Rect>
                         </RectangleGeometry>
                     </Grid.Clip>
-                    <Grid>
+                    <Grid Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}">
                         <annotation:DrawUtil Zoom="{Binding ReviewStatus.Zoom}" IsDrawOn="{Binding ReviewStatus.IsMeasurementOn}" MeasureUIElements="{Binding PatientCase.MeasureUIElements}" Measurements="{Binding Measurements}" IsMeasureInit="{Binding ReviewStatus.IsMeasureInit}" FrameNumberForInit="{Binding FrameNumberForInit}" FrameNumber="{Binding FrameNumber}" InCommand="{Binding MeasurementCommand, Mode=TwoWay}" CommandOff="{Binding MeasurementCommandOff, Mode=TwoWay}" IsHitTestVisible="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEnabled="{Binding IndicatorCrossSection.IsCaptured, Converter={StaticResource InverseBooleanConverter}}" IsEditOn="True" Visibility="Collapsed">
                             <annotation:DrawUtil.RenderTransform>
                                 <TransformGroup>
@@ -697,14 +702,14 @@
                                             </StackPanel>
                                         </Grid>
                                         <Grid Grid.Row="7" Margin="0,0,0,0" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}">
-                                            <component:ButtonUnableComponent Grid.Row="1" Style="{StaticResource OutlinedBtnType1-Medium}" Height="26" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding CoRegistrationCommand}" Content="{Binding [Co-Registration], Source={StaticResource L10N}}" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="{Binding DeviceStatus.IsOCTImagingDone}" IsImageProcessingDone="{Binding ReviewStatus.IsImageProcessingDone}">
+                                            <component:ButtonUnableComponent Grid.Row="1" Style="{StaticResource OutlinedBtnType1-Medium}" Height="26" Visibility="{Binding ReviewStatus.IsAngioOn, Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding CoRegistrationCommand}" Content="{Binding [Co-Registration], Source={StaticResource L10N}}" IsFirst="{Binding DeviceStatus.IsSaveRawDataDone}" IsSecond="{Binding DeviceStatus.IsLumenLoaded}" IsThird="{Binding DeviceStatus.IsLumenSaved}" IsFourth="{Binding DeviceStatus.IsOCTImagingDone}" IsFifth="{Binding ReviewStatus.IsImageProcessingDone}">
                                                 <component:ButtonUnableComponent.IsEnabled>
                                                     <MultiBinding Converter="{StaticResource ComponentUnableConverter}">
-                                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
-                                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenLoaded"/>
-                                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsLumenSaved"/>
-                                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsOCTImagingDone"/>
-                                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsImageProcessingDone"/>
+                                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFirst"/>
+                                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSecond"/>
+                                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsThird"/>
+                                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFourth"/>
+                                                        <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsFifth"/>
                                                     </MultiBinding>
                                                 </component:ButtonUnableComponent.IsEnabled>
                                             </component:ButtonUnableComponent>
@@ -733,7 +738,7 @@
                                                 <Label Grid.Row="2" Grid.Column="0" Content="{Binding [Contrast], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleGray4Brush}" Style="{DynamicResource Pretendard-Medium-12}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                                 <Slider Grid.Row="2" Grid.Column="1" Style="{DynamicResource SliderSimpleTooltip}" Value="{Binding Contrast}" Maximum="100" Minimum="0" TickFrequency="1" IsSnapToTickEnabled="True" LargeChange="1" SmallChange="1" VerticalAlignment="Center" IsEnabled="{Binding DeviceStatus.IsOCTImagingDone}"/>
                                                 <Label Grid.Row="3" Grid.Column="0" Content="{Binding [Field of View], Source={StaticResource L10N}}" Foreground="{DynamicResource GrayscaleGray4Brush}" Style="{DynamicResource Pretendard-Medium-12}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                                <Slider Grid.Row="3" Grid.Column="1" Style="{DynamicResource SliderSimpleTooltip}" Value="{Binding FieldOfView}" Maximum="10.0" Minimum="5.0" TickFrequency="1.0" IsSnapToTickEnabled="True" LargeChange="1.0" SmallChange="1.0" VerticalAlignment="Center" IsEnabled="{Binding DeviceStatus.IsOCTImagingDone}"/>
+                                                <Slider Grid.Row="3" Grid.Column="1" Style="{DynamicResource SliderSimpleTooltip}" Value="{Binding FieldOfView}" Maximum="{x:Static const:Constants.MaximumFoV}" Minimum="{x:Static const:Constants.MinimumFoV}" TickFrequency="1.0" IsSnapToTickEnabled="True" LargeChange="1.0" SmallChange="1.0" VerticalAlignment="Center" IsEnabled="{Binding DeviceStatus.IsOCTImagingDone}"/>
                                             </Grid>
                                         </StackPanel>
                                         <Grid Grid.Row="9" Margin="0,12,0,0" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -810,17 +815,18 @@
                                 <Grid Grid.Row="1">
                                     <Grid Width="192" Visibility="{Binding ReviewStatus.IsMeasurementOn, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                                         <Grid.RowDefinitions>
-                                            <RowDefinition Height="24"/>
+                                            <RowDefinition Height="16"/>
                                             <RowDefinition Height="26"/>
-                                            <RowDefinition Height="22"/>
+                                            <RowDefinition Height="30"/>
                                             <RowDefinition/>
                                         </Grid.RowDefinitions>
                                         <Grid Grid.Row="1">
                                             <Label Style="{DynamicResource ProcedureLabel}" Content="{Binding PatientCase.Procedure, Converter={StaticResource CodeConverter}, ConverterParameter='PROC'}" Tag="{Binding PatientCase.Procedure}" HorizontalAlignment="Left"/>
                                             <component:IconButton Style="{DynamicResource IconButton}" Icon="editSimple" Command="{Binding EditCaseCommand}" Content="{Binding [Edit], Source={StaticResource L10N}}" HorizontalAlignment="Right"/>
                                         </Grid>
+                                        <Label Grid.Row="2" Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource GrayscaleGray4Brush}" Content="{Binding PatientCase.CreateDate, StringFormat=t, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" HorizontalAlignment="Left" Margin="0,5,0,0"/>
                                         <StackPanel Grid.Row="3">
-                                            <Label Content="{Binding Patient.Name}" Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
+                                            <Label Content="{Binding Patient.Name}" Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource CaseInfoFirstBrush}"/>
                                             <StackPanel Height="9"/>
                                             <!-- design guide : 12px -->
                                             <Separator Height="1" Background="{DynamicResource SeparatorBrush}"/>
@@ -1309,12 +1315,12 @@
 
                         <StackPanel Grid.Column="0" Orientation="Vertical">
                             <StackPanel Height="76"/>
-                            <Label Content="P" Style="{DynamicResource Pretendard-Semibold-20}" HorizontalAlignment="Center" Foreground="#fcfcfc" Opacity="0.5"/>
+                            <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" HorizontalAlignment="Center" Foreground="#fcfcfc" Opacity="0.5"/>
                         </StackPanel>
                         <Grid Grid.Column="2">
                             <StackPanel Orientation="Vertical">
                                 <StackPanel Height="76"/>
-                                <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" HorizontalAlignment="Center" Foreground="#fcfcfc" Opacity="0.5"/>
+                                <Label Content="P" Style="{DynamicResource Pretendard-Semibold-20}" HorizontalAlignment="Center" Foreground="#fcfcfc" Opacity="0.5"/>
                             </StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>

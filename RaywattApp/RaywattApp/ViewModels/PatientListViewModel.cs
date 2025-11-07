@@ -265,7 +265,30 @@ namespace RaywattApp.ViewModels
 
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["prevStatus"] = GetListStatus();
-            WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientNewPage) {  Parameter = parameter });
+
+            if (CommonUtil.IsRV200())
+            {
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientNewPage) { Parameter = parameter });
+            }
+            else
+            {
+                var result = _dialogService.OpenDialog(new NewPatientDialogControl(), null, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
+                {
+                    Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
+                    bool isManual = (bool)data["isManual"];
+
+                    if (isManual)
+                    {
+                        WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientNewPage) { Parameter = parameter });
+                    }
+                    else
+                    {
+                        WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientNewDicomPage) { Parameter = parameter });
+                    }
+                }
+            }
         }
 
         private PrevStatus GetListStatus()

@@ -1,6 +1,7 @@
 #include "Config.h"
 #include "DataWriter.h"
 #include "Utility.h"
+#include <fstream>
 
 CDataWriter::CDataWriter() {
 	m_pRecordBuffer = NULL;
@@ -47,22 +48,53 @@ void CDataWriter::StartSave(tstring strFilePath) {
 		strFilePath.c_str(), GENERIC_WRITE,
 		FILE_SHARE_READ, NULL, CREATE_ALWAYS,
 		FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+
+
 }
 void CDataWriter::WriteHeader(OCTHeader::Type type, OCTHeader::DataType dataType, OCTHeader::Channels ch, int width, int height, UCHAR extraData) {
 	std::vector<char> vHeader = createHeader(type, dataType, ch, width, height, m_nNumOfSamples, extraData);
 
 	DWORD dwBytesWrote = 0;
-	WriteFile(m_hRecordingFile, vHeader.data(), vHeader.size(), &dwBytesWrote, NULL);
+	if (m_hRecordingFile == INVALID_HANDLE_VALUE) {
+		PLOGI.printf("Create RecordingFile Error");
+		return;
+	}
+
+	int err = WriteFile(m_hRecordingFile, vHeader.data(), vHeader.size(), &dwBytesWrote, NULL);
+	if (err == 0) {
+		PLOGI.printf("Raw Data Writing Error : %d", err);
+	}
 }
 void CDataWriter::WriteExtraData(void* pExtraData, long nSize) {
 	DWORD dwBytesWrote = 0;
-	WriteFile(m_hRecordingFile, pExtraData, nSize, &dwBytesWrote, NULL);
+
+	if (m_hRecordingFile == INVALID_HANDLE_VALUE) {
+		PLOGI.printf("Create RecordingFile Error");
+		return;
+	}
+
+	if (pExtraData == nullptr) {
+		PLOGI.printf("ExtraData is null");
+		return;
+	}
+
+	int err = WriteFile(m_hRecordingFile, pExtraData, nSize, &dwBytesWrote, NULL);
+	if (err == 0) {
+		PLOGI.printf("Extra Data Writing Error : %d", err);
+	}
+	
 }
 bool CDataWriter::WriteFrame(int nFrame) {
-	char* pBuffer = (char *) GetSample(nFrame);
+	char* pBuffer = (char*)GetSample(nFrame);
 	if (pBuffer == NULL) return false;
 
 	DWORD dwBytesWrote = 0;
+
+	if (m_hRecordingFile == INVALID_HANDLE_VALUE) {
+		PLOGI.printf("Create RecordingFile Error");
+		return false;
+	}
+
 	if (!WriteFile(m_hRecordingFile, pBuffer, m_nElementSize, &dwBytesWrote, NULL))
 	{
 		printf("Failed to write acquisition data to file: (LastError = 0x%08X)\n", GetLastError());
@@ -74,24 +106,45 @@ bool CDataWriter::WriteFrame(int nFrame) {
 void CDataWriter::WriteEOF() {
 	OCTHeader::Bit flag = OCTHeader::Bit::EoF;
 	DWORD dwBytesWrote = 0;
-	WriteFile(m_hRecordingFile, &flag, sizeof(flag), &dwBytesWrote, NULL);
+
+	if (m_hRecordingFile == INVALID_HANDLE_VALUE) {
+		PLOGI.printf("Create RecordingFile Error");
+		return;
+	}
+
+	int err = WriteFile(m_hRecordingFile, &flag, sizeof(flag), &dwBytesWrote, NULL);
+	if (err == 0) {
+		PLOGI.printf("End of File Data Writing Error : %d", err);
+	}
 }
 void CDataWriter::StopSave() {
-	CloseHandle(m_hRecordingFile);
-	m_hRecordingFile = NULL;
+	if (m_hRecordingFile != INVALID_HANDLE_VALUE) {
+		CloseHandle(m_hRecordingFile);
+		m_hRecordingFile = INVALID_HANDLE_VALUE;
+	}
 }
 
 char* CDataWriter::GetSample(int nFrame) {
 	if (nFrame >= m_nNumOfSamples) return NULL;
 
-	unsigned long long ulOffset = (m_nNumOfSamples - nFrame - 1) * (unsigned long long) m_nElementSize;	// Get Sample from Proximal to Distal
+	//unsigned long long ulOffset = (m_nNumOfSamples - nFrame - 1) * (unsigned long long) m_nElementSize;	// Get Sample from Proximal to Distal
+	unsigned long long ulOffset = (nFrame) * (unsigned long long) m_nElementSize;	// Get Sample from Distal to Proximal
 	return (m_pRecordBuffer + ulOffset);
 }
 
 void CDataWriter::AddFrame(void* pFrame) {
-	if (m_isRecording == false) return;
-	if (m_nNumOfSamples >= m_nBufferSize) return;
-	if (pFrame == nullptr) return;
+	if (m_isRecording == false) {
+		PLOGI.printf("m_isRecording is False");
+		return;
+	}
+	if (m_nNumOfSamples >= m_nBufferSize) {
+		PLOGI.printf("m_nNumOfSamples is too big");
+		return;
+	}
+	if (pFrame == nullptr) {
+		PLOGI.printf("pFrame is Null");
+		return;
+	}
 
 	unsigned long long ulOffset = (unsigned long long) m_nNumOfSamples * (unsigned long long) m_nElementSize;
 	memcpy(m_pRecordBuffer + ulOffset, pFrame, m_nElementSize);

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "RaywattOCTFFR": {
+      "commandName": "Project",
+      "workingDirectory": ".\\bin\\"
+    }
+  }
+}

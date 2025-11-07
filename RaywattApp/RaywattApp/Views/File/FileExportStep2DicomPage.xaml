@@ -10,7 +10,7 @@
       Title="FileExportStep2DicomPage">
 
     <Border CornerRadius="10" Background="{DynamicResource GrayscaleGray6Brush}" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray7Brush}">
-        <Grid>
+        <Grid IsEnabled="{Binding IsChecking, Converter={StaticResource BoolToEnableReverseConverter}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="29"/>
                 <ColumnDefinition/>
@@ -78,51 +78,112 @@
             <Border Grid.Row="6" Grid.Column="1" CornerRadius="10" Background="{DynamicResource GrayscaleGray7Brush}">
                 <Grid >
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="55"/>
-                        <RowDefinition Height="1"/>
-                        <RowDefinition Height="63"/>
-                        <RowDefinition Height="27"/>
-                        <RowDefinition Height="54"/>
-                        <RowDefinition Height="57"/>
+                        <RowDefinition Height="59"/>
+                        <RowDefinition Height="39"/>
+                        <RowDefinition Height="21"/>
+                        <RowDefinition Height="138"/>
                     </Grid.RowDefinitions>
-                    <Label Grid.Row="0" Style="{DynamicResource Pretendard-Medium-16}" Margin="20,28,0,8" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Export Size], Source={StaticResource L10N}}"/>
-                    <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}" Width="760" Height="1"/>
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="20,16,0,28" >
-                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding ExportSize}"/>
-                        <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding ExportSizeUnit}" Margin="5,0,0,0"/>
-                    </StackPanel>
-                    <StackPanel Grid.Row="3">
-                        <Label Style="{DynamicResource Pretendard-Medium-16}" Margin="20,0,0,8" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Select Drive], Source={StaticResource L10N}}"/>
-                    </StackPanel>
-                    <Grid Grid.Row="4">
+                    <Grid Grid.Row="0" >
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="192"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Grid.Column="0" Style="{DynamicResource ComboBoxDialog}" Width="280" ItemsSource="{Binding ExternalDriveComboBox}" SelectedValue="{Binding SelectedExternalDrive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectedValuePath="Key" DisplayMemberPath="Value" IsEnabled="{Binding IsEnableExternalDrive}" Tag="{Binding [No Drive], Source={StaticResource L10N}}" Margin="20,0,0,0"/>
-                        <TextBox Grid.Column="1" Style="{DynamicResource TextBoxWithCorner}" Width="386" IsReadOnly="True" Text="{Binding FileExport.ExternalDrivePath}" Tag="{Binding [Select Destination Path], Source={StaticResource L10N}}" Margin="12,0,0,0"/>
-                        <Button Grid.Column="2" Style="{StaticResource OutlinedBtnType1}" Width="72" Height="54" Command="{Binding ExternalDrivePathCommand}" Content="{Binding [Path], Source={StaticResource L10N}}" IsEnabled="{Binding IsEnableExternalDrive}" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                        <Label Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Margin="20,28,0,8" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Export Size], Source={StaticResource L10N}}"/>
+                        <Label Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Margin="0,28,0,8" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Destination], Source={StaticResource L10N}}" Visibility="{Binding ., Converter={StaticResource RV200ToVisibilityReverseConverter}}"/>
                     </Grid>
-                    <Grid Grid.Row="5">
+                    <Grid Grid.Row="1" >
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="160"/>
-                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="192"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="20,10,0,0" >
-                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Total], Source={StaticResource L10N}}"/>
-                            <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
-                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding ExternalDriveTotalSize}"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [GB], Source={StaticResource L10N}}" Margin="5,0,0,0"/>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="20,5,0,0">
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding ExportSize}"/>
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding ExportSizeUnit}" Margin="5,0,0,0"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Visibility="{Binding ., Converter={StaticResource RV200ToVisibilityReverseConverter}}">
+                            <StackPanel>
+                                <RadioButton IsChecked="{Binding IsPacs, Converter={StaticResource BoolToEnableReverseConverter}}" Content="{Binding [External Drive], Source={StaticResource L10N}}"/>
+                            </StackPanel>
+                            <StackPanel Margin="39,0,0,0">
+                                <RadioButton IsChecked="{Binding IsPacs}" Content="{Binding [PACS], Source={StaticResource L10N}}"/>
                             </StackPanel>
                         </StackPanel>
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,10,0,0" HorizontalAlignment="Right">
-                            <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Free], Source={StaticResource L10N}}"/>
-                            <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
-                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding ExternalDriveAvailableFreeSpace}"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [GB], Source={StaticResource L10N}}" Margin="5,0,0,0"/>
+                    </Grid>
+                    <Separator Grid.Row="2" Background="{DynamicResource GrayscaleGray5Brush}" Width="760" Height="1" VerticalAlignment="Top"/>
+                    <Grid Grid.Row="3" Visibility="{Binding IsPacs, Converter={StaticResource BoolToVisibilityReverseConverter}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="27"/>
+                            <RowDefinition Height="54"/>
+                            <RowDefinition Height="57"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Row="0">
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Margin="20,0,0,8" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Select Drive], Source={StaticResource L10N}}"/>
+                        </StackPanel>
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <ComboBox Grid.Column="0" Style="{DynamicResource ComboBoxDialog}" Width="280" ItemsSource="{Binding ExternalDriveComboBox}" SelectedValue="{Binding SelectedExternalDrive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectedValuePath="Key" DisplayMemberPath="Value" IsEnabled="{Binding IsEnableExternalDrive}" Tag="{Binding [No Drive], Source={StaticResource L10N}}" Margin="20,0,0,0"/>
+                            <TextBox Grid.Column="1" Style="{DynamicResource TextBoxWithCorner}" Width="386" IsReadOnly="True" Text="{Binding FileExport.ExternalDrivePath}" Tag="{Binding [Select Destination Path], Source={StaticResource L10N}}" Margin="12,0,0,0"/>
+                            <Button Grid.Column="2" Style="{StaticResource OutlinedBtnType1}" Width="72" Height="54" Command="{Binding ExternalDrivePathCommand}" Content="{Binding [Path], Source={StaticResource L10N}}" IsEnabled="{Binding IsEnableExternalDrive}" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                        </Grid>
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="160"/>
+                                <ColumnDefinition Width="140"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="20,10,0,0" >
+                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Total], Source={StaticResource L10N}}"/>
+                                <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding ExternalDriveTotalSize}"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [GB], Source={StaticResource L10N}}" Margin="5,0,0,0"/>
+                                </StackPanel>
                             </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,10,0,0" HorizontalAlignment="Right">
+                                <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Free], Source={StaticResource L10N}}"/>
+                                <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding ExternalDriveAvailableFreeSpace}"/>
+                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [GB], Source={StaticResource L10N}}" Margin="5,0,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                    <Grid Grid.Row="3" Visibility="{Binding IsPacs, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="39"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Row="0">
+                            <Label Style="{DynamicResource Pretendard-Medium-16}" Margin="20,0,0,8" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Select PACS Server], Source={StaticResource L10N}}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Top" Margin="20,0,0,0">
+                            <Button Style="{StaticResource OutlinedBtnType4-Large}" Width="140" Command="{Binding SelectPacsCommand}" Content="{Binding [Select], Source={StaticResource L10N}}"/>
+                            <Grid Margin="32,0,0,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="150"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Row="0" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [AE Title], Source={StaticResource L10N}}"/>
+                                <Label Grid.Row="1" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding SelectedDicomServer.AeTitle}" VerticalAlignment="Bottom" Margin="0,0,8,0"/>
+                                <Label Grid.Row="0" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Hostname], Source={StaticResource L10N}}"/>
+                                <Label Grid.Row="1" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding SelectedDicomServer.Hostname}" VerticalAlignment="Bottom" Margin="0,0,8,0"/>
+                                <Label Grid.Row="0" Grid.Column="2" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [IP], Source={StaticResource L10N}}"/>
+                                <Label Grid.Row="1" Grid.Column="2" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding SelectedDicomServer.IpAddress}" VerticalAlignment="Bottom" Margin="0,0,8,0"/>
+                                <Label Grid.Row="0" Grid.Column="3" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Port], Source={StaticResource L10N}}"/>
+                                <Label Grid.Row="1" Grid.Column="3" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding SelectedDicomServer.Port}" VerticalAlignment="Bottom" Margin="0,0,8,0"/>
+                                <Label Grid.Row="0" Grid.Column="4" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Comment], Source={StaticResource L10N}}"/>
+                                <Label Grid.Row="1" Grid.Column="4" Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding SelectedDicomServer.Comment}" VerticalAlignment="Bottom"/>
+                            </Grid>
                         </StackPanel>
                     </Grid>
                 </Grid>
@@ -142,6 +203,8 @@
                     <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding ExportCommand}" Content="{Binding [Export], Source={StaticResource L10N}}"/>
                 </StackPanel>
             </Grid>
+
+            <ContentControl Grid.Column="1" Grid.RowSpan="9" Template="{DynamicResource Loading}" Visibility="{Binding IsChecking, Converter={StaticResource BoolToVisibilityConverter}}"/>
         </Grid>
     </Border>
 </Page>

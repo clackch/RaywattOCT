@@ -53,39 +53,49 @@ class IDataManager
 {
 protected:
 	int m_nNumOfSamples;
-	std::map<OCTHeader::ExtraData, void *> mapExtraData;
+	std::map<OCTHeader::ExtraData, uint8_t*> mapExtraData;
+
 public:
-	IDataManager() { m_nNumOfSamples = 0; }
+	IDataManager() { m_nNumOfSamples = 0;}
 	virtual ~IDataManager() {
-		std::map<OCTHeader::ExtraData, void*>::iterator it = mapExtraData.begin();
-		while (it != mapExtraData.end())
-		{
-			delete[] it->second;
-			it++;
+		for (auto& kv : mapExtraData) {
+			delete[] kv.second;
 		}
 		mapExtraData.clear();
 	}
 
-	int GetNumOfSamples() { return m_nNumOfSamples; }
+	int GetNumOfSamples() const { return m_nNumOfSamples; }
+
 	virtual char* GetSample(int nIndex) = 0;
 	virtual void AddFrame(void* pFrame) = 0;
 
-	void AddExtraData(OCTHeader::ExtraData extraData, void* pData, int nSize) { 
-		std::map<OCTHeader::ExtraData, void*>::iterator it = mapExtraData.find(extraData);
+	void AddExtraData(OCTHeader::ExtraData extraData, void* pData, int nSize) {
+		auto it = mapExtraData.find(extraData);
 		if (it != mapExtraData.end()) {
 			delete[] it->second;
 			mapExtraData.erase(it);
 		}
-		void* pCopyData = new char[nSize];
-		memcpy(pCopyData, pData, nSize);
-		mapExtraData.insert(std::make_pair(extraData, pCopyData));
-	}
-	void* GetExtraData(OCTHeader::ExtraData extraData) {
-		std::map<OCTHeader::ExtraData, void*>::iterator it = mapExtraData.find(extraData);
-		if (it != mapExtraData.end()) {
-			return it->second;
+		if (nSize <= 0 || pData == nullptr) {
+			PLOGI.printf("Invalid ExtraData input (nullptr or size <= 0)");
+			return;
 		}
-		return nullptr;
+		if (static_cast<size_t>(nSize) > (size_t(2) << 30)) {
+			PLOGI.printf("Allocation Size too big");
+			return;
+		}
+
+		uint8_t* buf = new (std::nothrow) uint8_t[static_cast<size_t>(nSize)];
+		if (!buf) {
+			PLOGI.printf("Allocation failed");
+			return;
+		}
+		std::memcpy(buf, pData, static_cast<size_t>(nSize));
+		mapExtraData[extraData] = buf;
+	}
+
+	// raw pointer
+	uint8_t* GetExtraData(OCTHeader::ExtraData extraData) {
+		auto it = mapExtraData.find(extraData);
+		return (it != mapExtraData.end()) ? it->second : nullptr;
 	}
 };
-

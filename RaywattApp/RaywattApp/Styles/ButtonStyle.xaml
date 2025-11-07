@@ -710,18 +710,18 @@
     </Style>
 
     <Style TargetType="ToggleButton" x:Key="LiveToggleBtn" BasedOn="{StaticResource Pretendard-Medium-14}">
-        <Setter Property="Width" Value="79"/>
-        <Setter Property="Height" Value="32"/>
+        <Setter Property="Width" Value="98"/>
+        <Setter Property="Height" Value="36"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToggleButton">
                     <Grid>
-                        <Border x:Name="hoverBorder" CornerRadius="12" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="Transparent" BorderThickness="4" BorderBrush="Transparent"/>
-                        <Border x:Name="outsideBorder" CornerRadius="12" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="{DynamicResource AdditionalColor6Brush}" BorderThickness="4" BorderBrush="Transparent"/>
-                        <Grid Margin="4">
-                            <Label x:Name="text" Content="{TemplateBinding Content}" VerticalAlignment="Center" Margin="8,0,0,0" Foreground="{DynamicResource GrayscaleBlackBrush}"/>
-                            <Border x:Name="border" CornerRadius="8" Width="28" Height="16" Background="{DynamicResource GrayscaleGray8Brush}" BorderThickness="0" Margin="39,4,4,4">
-                                <Image x:Name="icon" Source="{svgc:SvgImage Source=/res/button/toggle/live.svg}" Width="12" Height="12" HorizontalAlignment="Left" Margin="2"/>
+                        <Border x:Name="hoverBorder" CornerRadius="18" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="Transparent"/>
+                        <Border x:Name="outsideBorder" CornerRadius="18" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="{DynamicResource AdditionalColor6Brush}"/>
+                        <Grid>
+                            <Label x:Name="text" Content="{TemplateBinding Content}" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{DynamicResource GrayscaleBlackBrush}"/>
+                            <Border x:Name="border" CornerRadius="12" Width="48" Height="24" Background="{DynamicResource GrayscaleGray8Brush}" BorderThickness="0" Margin="39,4,4,4">
+                                <Image x:Name="icon" Source="{svgc:SvgImage Source=/res/button/toggle/live.svg}" Width="18" Height="18" HorizontalAlignment="Left" Margin="3"/>
                             </Border>
                         </Grid>
                     </Grid>
@@ -800,7 +800,7 @@
                 <ControlTemplate TargetType="ToggleButton">
                     <Border CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}">
                         <StackPanel Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Image x:Name="icon" Source="{svgc:SvgImage Source=/res/icon/flyThroughDtoP.svg}" Height="20" Margin="10,0,0,0"/>
+                            <Image x:Name="icon" Source="{svgc:SvgImage Source=/res/icon/flyThroughPtoD.svg}" Height="20" Margin="10,0,0,0"/>
                             <Label Content="{TemplateBinding Content}" VerticalAlignment="Center" Margin="6,0,0,0" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
                             <Grid Margin="8,0,8,0">
                                 <Border x:Name="hoverBorder" CornerRadius="8" Width="34" Height="22" Background="Transparent" BorderThickness="2" BorderBrush="Transparent"/>
@@ -822,7 +822,7 @@
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="toggleIcon" Property="Source" Value="{svgc:SvgImage Source=/res/button/toggle/small_active.svg}"/>
                             <Setter TargetName="toggleIcon" Property="HorizontalAlignment" Value="Right"/>
-                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/icon/flyThroughPtoD.svg}"/>
+                            <Setter TargetName="icon" Property="Source" Value="{svgc:SvgImage Source=/res/icon/flyThroughDtoP.svg}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

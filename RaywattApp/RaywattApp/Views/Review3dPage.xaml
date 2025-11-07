@@ -39,7 +39,12 @@
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [2D], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewPage}"/>
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [3D], Source={StaticResource L10N}}" IsChecked="True" IsEnabled="False"/>
                     <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [Compare], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewComparePage}" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$002|$003}"/>
-                    <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrSettingPage}"/>
+                    <StackPanel IsEnabled="{Binding DeviceStatus.TestMode, Converter={StaticResource IsTestModeConverter}, ConverterParameter=AIFFR}">
+                        <StackPanel.Visibility>
+                            <Binding RelativeSource="{RelativeSource Self}" Path="IsEnabled" Converter="{StaticResource BoolToVisibilityConverter}"/>
+                        </StackPanel.Visibility>
+                        <ToggleButton Style="{DynamicResource TabToggleBtn}" Content="{Binding [AI FFR], Source={StaticResource L10N}}" Command="{Binding ReviewTypeSwitchCommand}" CommandParameter="{x:Static const:Constants.ReviewFfrSettingPage}" Visibility="{Binding PatientCase.Procedure, Converter={StaticResource ProcedureVisibilityConverter}, ConverterParameter=$001}"/>
+                    </StackPanel>
                 </StackPanel>
             </Grid>
 
@@ -106,7 +111,7 @@
                                     <ContentControl Template="{DynamicResource Loading}" Visibility="{Binding IsRendering, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                                 </Border>
                                 <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                                    <ToggleButton Style="{DynamicResource FlyThroughToggleBtn}" Content="{Binding [P to D], Source={StaticResource L10N}}" IsChecked="{Binding IsPtoD}" IsEnabled="{Binding IsRendering}"/>
+                                    <ToggleButton Style="{DynamicResource FlyThroughToggleBtn}" Content="{Binding [D to P], Source={StaticResource L10N}}" IsChecked="{Binding IsPtoD}" IsEnabled="{Binding IsRendering}"/>
                                     <StackPanel Width="6"/>
                                     <component:IconToggleButton Style="{DynamicResource ToggleButtonWithText}" Icon="sideBranchView" Content="{Binding [Side Branch View], Source={StaticResource L10N}}" IsChecked="{Binding IsSideBranchView}" IsEnabled="{Binding IsRendering}" Visibility="Hidden"/>
                                 </StackPanel>
@@ -206,12 +211,12 @@
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
                             <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="12,0,0,0">
-                                <Label Content="P" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" Opacity="0.5"/>
+                                <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" Opacity="0.5"/>
                             </StackPanel>
                             <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,12,0">
                                 <Image Height="150" Source="{svgc:SvgImage Source=/res/icon/indicator3d.svg}"/>
                                 <StackPanel Width="5"/>
-                                <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" VerticalAlignment="Center" Opacity="0.5"/>
+                                <Label Content="P" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" VerticalAlignment="Center" Opacity="0.5"/>
                             </StackPanel>
                             <Grid Grid.Row="0" Grid.Column="1">
                                 <Grid>

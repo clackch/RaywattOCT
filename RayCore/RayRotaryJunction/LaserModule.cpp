@@ -58,8 +58,13 @@ bool CLaserModule::ReadPosition() {
 
 	BYTE serialPacket[MAX_PATH];
 
-	int packetLength;
+	int packetLength = 0;
 	getSerialPacket(eFID::FID_SM_GET_STATE, 0, serialPacket, packetLength);
+
+	if (packetLength < 2) {
+		PLOGI.printf("packetLength too small");
+		return false;
+	}
 
 	BYTE checksum = calcChecksum(serialPacket, packetLength - 2);
 	serialPacket[packetLength - 2] = checksum;
@@ -114,7 +119,7 @@ bool CLaserModule::Move(eStepMotorIndex idxMotor, int posStep, bool delay, char 
 	else {
 		m_nStepPosition[(int)idxMotor - 1] = posStep;
 		m_isSMMoving[(int)idxMotor - 1] = true;
-		sensorStop[(int)idxMotor - 1] = sensor;
+		sensorStop[(int)idxMotor - 1] = sensor; // sensor == 2 : DelayLine upperside, sensor == 3 : DelayLine downside
 	}
 
 	BYTE serialPacket[MAX_PATH];
@@ -161,7 +166,6 @@ int CLaserModule::MoveRelative(eStepMotorIndex idxMotor, int nOffset) {
 	int index = (int)idxMotor - 1;
 	int actualPosition = m_nActualPosition[index];
 
-	int nLastTargetPos = m_nStepPosition[index];
 	int nPosition = actualPosition + nOffset;
 
 	Move(idxMotor, nPosition);
@@ -175,6 +179,9 @@ void CLaserModule::SetVOA(unsigned short voa) {
 void CLaserModule::SetVLD(unsigned short vld) {
 	m_nVLD = vld;
 	setVOAVLD();
+}
+void CLaserModule::PrintPhotoSensor() {
+	PLOGI.printf("PhotoSensor: %d %d %d", m_bPhotoSensor[0], m_bPhotoSensor[1], m_bPhotoSensor[2]);
 }
 bool CLaserModule::AutoStatePeriod(USHORT interval) {
 	if (!m_initMotor) return false;
@@ -287,7 +294,6 @@ void CLaserModule::parseAutoReportPacket(BYTE* packet, int size) {
 	memcpy(&m_nVOA, packet + offset, sizeof(unsigned short));
 	offset += sizeof(unsigned short) * 2;	// voa output (2byte), voa input (2byte)
 	memcpy(&m_nVLD, packet + offset, sizeof(unsigned short));
-	offset += sizeof(unsigned short) * 2;	// vld output (2byte), vld input (2byte)
 }
 void CLaserModule::parseSMPacket(BYTE* packet, int size) {
 	int offset = 0;

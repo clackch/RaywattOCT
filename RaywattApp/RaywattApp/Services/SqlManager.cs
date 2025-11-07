@@ -135,8 +135,7 @@ namespace RaywattApp.Services
             else
             {
                 commandText = SqlQuery.GetQuery("SelectPatient");
-            }
-            
+            }           
 
             return _databaseService.GetDatas<Patient>(commandText, sqlParameters);
         }
@@ -159,6 +158,17 @@ namespace RaywattApp.Services
             commandTextExtra += "ORDER BY id";
 
             commandText = commandText + commandTextExtra;
+
+            return _databaseService.GetDatas<Patient>(commandText, sqlParameters);
+        }
+
+        public IList<Patient> SelectPatient(Dictionary<string, object> sqlParameters)
+        {
+            _log.Debug("SelectPatient");
+
+            string commandText;
+
+            commandText = SqlQuery.GetQuery("SelectPatient");
 
             return _databaseService.GetDatas<Patient>(commandText, sqlParameters);
         }
@@ -330,6 +340,15 @@ namespace RaywattApp.Services
             return _databaseService.UpdateData(commandText, sqlParameters);
         }
 
+        public int UpdatePatientCaseId(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpdatePatientCaseId");
+
+            string commandText = SqlQuery.GetQuery("UpdatePatientCaseId");
+
+            return _databaseService.UpdateData(commandText, sqlParameters);
+        }
+
         public int UpsertPatientCase(Dictionary<string, Object> sqlParameters)
         {
             _log.Debug("UpsertPatientCase");
@@ -378,20 +397,20 @@ namespace RaywattApp.Services
             return _databaseService.InsertData(commandText, sqlParameters);
         }
 
-        public IList<StringModel> SelectPatientCaseFfrPlaque(Dictionary<string, Object> sqlParameters)
+        public IList<StringModel> SelectPatientCaseFfr(Dictionary<string, Object> sqlParameters)
         {
-            _log.Debug("SelectPatientCaseFfrPlaque");
+            _log.Debug("SelectPatientCaseFfr");
 
-            string commandText = SqlQuery.GetQuery("SelectPatientCaseFfrPlaque");
+            string commandText = SqlQuery.GetQuery("SelectPatientCaseFfr");
 
             return _databaseService.GetDatas<StringModel>(commandText, sqlParameters);
         }
 
-        public int UpdatePatientCaseFfrPlaque(Dictionary<string, Object> sqlParameters)
+        public int UpdatePatientCaseFfr(Dictionary<string, Object> sqlParameters)
         {
-            _log.Debug("UpdatePatientCaseFfrPlaque");
+            _log.Debug("UpdatePatientCaseFfr");
 
-            string commandText = SqlQuery.GetQuery("UpdatePatientCaseFfrPlaque");
+            string commandText = SqlQuery.GetQuery("UpdatePatientCaseFfr");
 
             return _databaseService.InsertData(commandText, sqlParameters);
         }
@@ -491,9 +510,162 @@ namespace RaywattApp.Services
         }
 
         /**
+         * Dicom Server
+         */
+        public IList<DicomServer> SelectDicomServer(Dictionary<string, Object> sqlParameters = null)
+        {
+            _log.Debug("SelectDicomServer");
+
+            string commandText;
+
+            if (sqlParameters == null)
+            {
+                commandText = SqlQuery.GetQuery("SelectDicomServer");
+            }
+            else
+            {
+                if (sqlParameters.ContainsKey("server_type"))
+                    commandText = SqlQuery.GetQuery("SelectDicomServerByType");
+
+                else if (sqlParameters.ContainsKey("id"))
+                    commandText = SqlQuery.GetQuery("SelectDicomServerExcludeId");
+
+                else
+                    commandText = SqlQuery.GetQuery("SelectDicomServer");
+            }                
+
+            return _databaseService.GetDatas<DicomServer>(commandText, sqlParameters);
+        }
+
+        public int InsertDicomServer(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("InsertDicomServer");
+
+            string commandText = SqlQuery.GetQuery("InsertDicomServer");
+
+            return _databaseService.InsertData(commandText, sqlParameters);
+        }
+
+        public int UpdateDicomServer(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpdateDicomServer");
+
+            string commandText = SqlQuery.GetQuery("UpdateDicomServer");
+
+            return _databaseService.UpdateData(commandText, sqlParameters);
+        }
+
+        public int DeleteDicomServer(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("DeleteDicomServer");
+
+            string commandText = SqlQuery.GetQuery("DeleteDicomServer");
+
+            return _databaseService.DeleteData(commandText, sqlParameters);
+        }
+
+        /**
+         * User
+         */
+        public IList<User> SelectUserList()
+        {
+            _log.Debug("SelectUserList");
+
+            string commandText = SqlQuery.GetQuery("SelectUserList");
+
+            return _databaseService.GetDatas<User>(commandText);
+        }
+
+        public IList<User> SelectAdmin(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("SelectAdmin");
+
+            string commandText = SqlQuery.GetQuery("SelectAdmin");
+
+            return _databaseService.GetDatas<User>(commandText, sqlParameters);
+        }
+
+        public IList<User> SelectUser(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("SelectUser");
+
+            string commandText = SqlQuery.GetQuery("SelectUser");
+
+            return _databaseService.GetDatas<User>(commandText, sqlParameters);
+        }
+
+        public int UpdateTermsAgreedDateUser(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpdateTermsAgreedDateUser");
+
+            string commandText = SqlQuery.GetQuery("UpdateTermsAgreedDateUser");
+
+            return _databaseService.UpdateData(commandText, sqlParameters);
+        }
+
+        public int CountUser(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("CountUser");
+
+            string commandText = SqlQuery.GetCountQuery("SelectUser");
+
+            return _databaseService.GetDataCount(commandText, sqlParameters);
+        }
+
+        public int InsertUser(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("InsertUser");
+
+            string commandText = SqlQuery.GetQuery("InsertUser");
+
+            return _databaseService.InsertData(commandText, sqlParameters);
+        }
+
+        public int UpdateUser(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpdateUser");
+
+            string commandText = SqlQuery.GetQuery("UpdateUser");
+
+            return _databaseService.UpdateData(commandText, sqlParameters);
+        }
+
+        public int ResetPasswordUser(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("ResetPasswordUser");
+
+            string commandText = SqlQuery.GetQuery("ResetPasswordUser");
+
+            return _databaseService.UpdateData(commandText, sqlParameters);
+        }
+
+        public int DeleteUser(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("DeleteUser");
+
+            string commandText = SqlQuery.GetQuery("DeleteUser");
+
+            return _databaseService.DeleteData(commandText, sqlParameters);
+        }
+
+        /*
+        Password
+        */
+        public bool UpdatePasswordReset(Dictionary<string, Object> sqlParameters)
+        {
+            _log.Debug("UpdatePasswordReset");
+
+            var commandText = SqlQuery.GetQuery("UpdatePasswordReset");
+
+            _databaseService.UpdateData(commandText, sqlParameters);
+
+            return true;
+        }
+
+        /**
          * Extra
          */
-        private string getAdditionalCondition(Dictionary<string, Object> sqlAdditionalCondition)
+        private static string getAdditionalCondition(Dictionary<string, Object> sqlAdditionalCondition)
         {
             _log.Debug("getAddtionalCondition");
 

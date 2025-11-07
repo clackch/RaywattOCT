@@ -90,9 +90,9 @@
                                     </StackPanel>
                                     <Label Style="{DynamicResource Pretendard-Medium-12}" Foreground="{DynamicResource AdditionalColor3Brush}" Content="* Vessel type not supported." VerticalAlignment="Bottom" Margin="25,0,0,-20" Visibility="{Binding IsVesselTypeValid, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
                                 </Grid>
-                                <!-- Step 2 : Define Reference Proximal Lumen -->
-                                <StackPanel Grid.Row="1" VerticalAlignment="Center" Visibility="{Binding FfrStep, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FfrStep2}}">
-                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Step 2.], Source={StaticResource L10N}}"/>
+                                <!-- Step 3 : Define Reference Proximal Lumen -->
+                                <StackPanel Grid.Row="1" VerticalAlignment="Center" Visibility="{Binding FfrStep, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FfrStep3}}">
+                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Step 3.], Source={StaticResource L10N}}"/>
                                     <StackPanel Height="16"/>
                                     <Label Style="{DynamicResource Pretendard-Semibold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}">
                                         <Label.Content>
@@ -100,9 +100,9 @@
                                         </Label.Content>
                                     </Label>
                                 </StackPanel>
-                                <!-- Step 3 : Define Reference Distal Lumen -->
-                                <StackPanel Grid.Row="1" VerticalAlignment="Center" Visibility="{Binding FfrStep, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FfrStep3}}">
-                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Step 3.], Source={StaticResource L10N}}"/>
+                                <!-- Step 2 : Define Reference Distal Lumen -->
+                                <StackPanel Grid.Row="1" VerticalAlignment="Center" Visibility="{Binding FfrStep, Converter={StaticResource RadioButtonVisibilityConverter}, ConverterParameter={x:Static const:Constants.FfrStep2}}">
+                                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Step 2.], Source={StaticResource L10N}}"/>
                                     <StackPanel Height="16"/>
                                     <Label Style="{DynamicResource Pretendard-Semibold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}">
                                         <Label.Content>
@@ -275,7 +275,7 @@
                                 <StackPanel Height="13"/>
                                 <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
                                 <StackPanel Height="10"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Proximal Lumen Area], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Distal Lumen Area], Source={StaticResource L10N}}"/>
                                 <StackPanel Height="10"/>
                                 <Grid Height="31">
                                     <Grid.ColumnDefinitions>
@@ -288,7 +288,7 @@
                                 <StackPanel Height="13"/>
                                 <Separator Grid.Row="1" Background="{DynamicResource GrayscaleGray5Brush}"/>
                                 <StackPanel Height="10"/>
-                                <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Distal Lumen Area], Source={StaticResource L10N}}"/>
+                                <Label Style="{DynamicResource Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Proximal Lumen Area], Source={StaticResource L10N}}"/>
                                 <StackPanel Height="10"/>
                                 <Grid Height="31">
                                     <Grid.ColumnDefinitions>
@@ -364,10 +364,10 @@
                                 <RowDefinition Height="20"/>
                             </Grid.RowDefinitions>
                             <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Label Content="P" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" Opacity="0.5"/>
+                                <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" Opacity="0.5"/>
                             </StackPanel>
                             <StackPanel Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Label Content="D" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" VerticalAlignment="Center" Opacity="0.5"/>
+                                <Label Content="P" Style="{DynamicResource Pretendard-Semibold-20}" Foreground="{DynamicResource AdditionalColor7Brush}" VerticalAlignment="Center" Opacity="0.5"/>
                             </StackPanel>
                             <Grid Grid.Row="0" Grid.Column="1" >
                                 <Image Source="{Binding LumenProfileImage}" Width="{x:Static const:Constants.LongitudeFfrWidth}" Height="{x:Static const:Constants.LongitudeFfrHeight}" Stretch="Fill">

@@ -76,6 +76,9 @@ namespace RaywattApp.Common.Bases
         [ObservableProperty]
         private int _frameNumberForInit;
 
+        [ObservableProperty]
+        private AutoPullback _autoPullback;
+
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
 
         // to avoid garbage collection
@@ -93,7 +96,7 @@ namespace RaywattApp.Common.Bases
             }
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.PlaybackInterval);
-            timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
+            timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);            
         }
 
         /// <summary>
@@ -105,7 +108,11 @@ namespace RaywattApp.Common.Bases
             {
                 Playback();
             }
-            RayUnregisterImageCallback();
+            RayError result = (RayError)RayUnregisterImageCallback();
+            if (result != RayError.OK) 
+            {
+                _log.Error("RayUnregisterImageCallback Error");
+            }
         }
 
         /// <summary>
@@ -113,16 +120,21 @@ namespace RaywattApp.Common.Bases
         /// </summary>
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
-            RayRegisterImageCallback(
+            RayError result = (RayError)RayRegisterImageCallback(
                 Marshal.GetFunctionPointerForDelegate(CBCrossSection),
                 Marshal.GetFunctionPointerForDelegate(CBLongitude));
+            if (result != RayError.OK)
+            {
+                _log.Error("RayRegisterImageCallback Error");
+            }
         }
 
-        private void OnRecvCrossSection(int session, IntPtr data, int width, int height, int ch, int frameInfo, double intensity)
+        private void OnRecvCrossSection(int session, IntPtr data, int width, int height, int ch, int frameInfo, double isCleared)
         {
             Mat imgRecv = CommonUtil.ByteMemoryToCvMat(data, width, height, ch);
             imgCrossSection[session] = imgRecv;
-            DeviceStatus.ImageIntensity = intensity;
+
+            CanAutoPullback(imgRecv, isCleared == 1.0 ? true : false);
         }
 
         private void OnRecvLongitude(int session, IntPtr data, int width, int height, int ch, int frameInfo, double intensity)
@@ -194,14 +206,13 @@ namespace RaywattApp.Common.Bases
             return bitmap;
         }
 
-        protected void DrawSheathIndicator()
+        protected void DrawSheathIndicator(double sheathDiameter)
         {
-            double sheathDiameter = RayGetProperty(Property.SheathDiameter);
             SheathIndicator = CommonUtil.DrawSheathIndicator((int)Constants.CrossSectionSize, sheathDiameter);
             SheathIndicatorAngio = CommonUtil.DrawSheathIndicator((int)Constants.CrossSectionAngio, sheathDiameter);
         }
 
-        private Mat GenerateMask(Mat image)
+        private static Mat GenerateMask(Mat image)
         {
             Mat mask = image.EmptyClone();
             Point center = new Point(mask.Width / 2, mask.Height / 2);
@@ -294,6 +305,37 @@ namespace RaywattApp.Common.Bases
         protected virtual void UpdateCrossSectionImage() { }
 
         protected virtual void UpdateLumenProfile() { }
+
+        protected virtual void AutoPullbackStart() { }
+
+        private void CanAutoPullback(Mat img, bool isCleared = false)
+        {
+            if (AutoPullback == null || !AutoPullback.OnOff)
+                return;
+
+            if (AutoPullback.TriggerTargetCount == 0)
+                return;
+
+            AutoPullback.IsCleared = isCleared;
+
+            if (AutoPullback.IsCleared)
+                AutoPullback.TriggerActualCount++;
+
+            _log.Debug($"[Blood Flushing] IsCleared: {AutoPullback.IsCleared} / Trigger Count: {AutoPullback.TriggerActualCount}");
+
+            if (AutoPullback.TriggerActualCount >= AutoPullback.TriggerTargetCount)
+            {
+                _log.Debug("AutoPullback Start");
+
+                AutoPullback.OnOff = false;
+                RayError result = (RayError)RaySetProperty(Property.AutoPullback, 0.0);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
+                AutoPullbackStart();
+            }
+        }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)
         {

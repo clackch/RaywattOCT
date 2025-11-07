@@ -1,6 +1,5 @@
 #pragma once
 #include "Config.h"
-#include "CompNet.h"
 #include <opencv2/opencv.hpp>
 #include <vector>
 

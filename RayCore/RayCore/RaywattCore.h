@@ -9,6 +9,7 @@
 extern "C" {
 	_declspec(dllexport) RayError RayStartSystem();
 	_declspec(dllexport) RayError RayStopSystem();
+	_declspec(dllexport) RayError RayInitSystem();
 	_declspec(dllexport) RayError RayRegisterCallback(FunctionPtr cb);
 	_declspec(dllexport) RayError RayUnregisterCallback();
 	_declspec(dllexport) RayError RayConnectDevices();
@@ -39,7 +40,8 @@ extern "C" {
 	_declspec(dllexport) double RayGetProperty(RayProperty prop);
 	_declspec(dllexport) void* RayGetVolumeData(void* pLumenContours);
 	_declspec(dllexport) RayError RayStartLumenDetection();
-
+	
+	_declspec(dllexport) RayError RaySetConfigPath(char* strPath);
 	_declspec(dllexport) RayError RayOpenImage(char* strFilePath, double imageResolution, double zOffset);
 	_declspec(dllexport) RayError RayCloseImage();
 	_declspec(dllexport) void *RayGetImageData(int nFrame);
@@ -56,4 +58,6 @@ extern "C" {
 	_declspec(dllexport) int RayGetNumOfGuidewirePoints(int nFrame);
 	_declspec(dllexport) void* RayGetCalciumAngles(int nFrame);
 	_declspec(dllexport) int RayGetCalciumLength(int nFrame);
+	_declspec(dllexport) void* RayGetGuidewireRadius(int nFrame);
+
 }

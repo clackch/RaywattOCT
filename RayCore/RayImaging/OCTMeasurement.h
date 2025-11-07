@@ -6,24 +6,29 @@ class COCTMeasurement
 public:
 	class Setting {
 	public:
+		double fRefractiveIndex = 1.0;
 		double fAxialResolutionScale;	// um per pixel
 		int nNoiseSkip;
 		int nNoiseAverage;
-		double fSheathRadiusOnePointSix;	// mm
+		double fSheathRadiusOnePointSeven;	// mm
 		double fSheathRadiusTwoPointSix;	// mm
-		double fSheathThicknessOnePointSix;	// mm
+		double fSheathThicknessOnePointSeven;	// mm
 		double fSheathThicknessTwoPointSix;	// mm
 		double fSheathRadius;	// mm
 		double fSheathThickness;	// mm
 
 		int nSheathPosition;	// pixel
 		int nSheathThickness;	// pixel
+
+		double GetAxialResolutionScale() { return fAxialResolutionScale / fRefractiveIndex; }
+		double GetSheathRadius() { return fSheathRadius / fRefractiveIndex;}
+		double GetSheathThickness() { return fSheathThickness / fRefractiveIndex; }
 	};
 public:
 	COCTMeasurement();
 	virtual ~COCTMeasurement();
 
 	void CalculateAxialResolution(USHORT* fftData, UINT nLength, Setting setting, USHORT& nPeakValue, int& nPeakIndex, int& nLineWidth);
-	void CalculateNoisePower(USHORT* fftData, UINT nLength, Setting setting, int nPeakIndex, USHORT& nNoisePower);
+	void CalculateNoisePower(USHORT* fftData, UINT nLength, Setting setting, int nPeakIndex, USHORT& nNoisePower);	
 };
 

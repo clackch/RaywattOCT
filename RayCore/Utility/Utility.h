@@ -15,10 +15,12 @@ public:
 	std::mutex mMutex;
 	std::condition_variable sEvent;
 	bool isRun;
+	bool shouldResume;
 
 public:
 	CThread(THREADPROC threadFunc, LPVOID param) : thread(threadFunc, param) {
 		isRun = true;
+		shouldResume = false;
 	}
 
 	virtual ~CThread() {}
@@ -57,5 +59,7 @@ public:
 	static void GetCurTime(char* strTime);
 	static std::wstring StringToWstring(const std::string& var);
 	static std::string GetFileExtension(const std::string path);
+	static bool IsExist(std::string path, bool isFile);
+	static int GetPrivateProfileIntEx(LPCWSTR lpAppName, LPCWSTR lpKeyName, int nDefault, LPCWSTR lpFileName);
 };
 

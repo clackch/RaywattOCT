@@ -127,7 +127,7 @@ namespace RaywattApp.Models
 
         private double foV = 1.0f;
 
-        private double foVPosition = 0.0f;
+        private double foVPosition;
 
         private ICommand _cmdSetCaptured;
         public ICommand CmdSetCaptured
@@ -316,7 +316,7 @@ namespace RaywattApp.Models
             return true;
         }
 
-        public void Window_ManipulationStarting(ManipulationStartingEventArgs e)
+        public static void Window_ManipulationStarting(ManipulationStartingEventArgs e)
         {
             _log.Debug("Manipulation Starting");
             e.Handled = true;
@@ -353,7 +353,7 @@ namespace RaywattApp.Models
             e.Handled = true;
         }
 
-        public void Window_ManipulationCompleted(ManipulationCompletedEventArgs e)
+        public static void Window_ManipulationCompleted(ManipulationCompletedEventArgs e)
         {
             _log.Debug("Manipulation Completed");
             e.Handled = true;

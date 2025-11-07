@@ -90,7 +90,7 @@ cv::Mat CCutViewManager::DrawLongitudeImage(int nDrawSamples, double brightness,
 int CCutViewManager::GetNumOfGeneratedSamples() {
 	int nFrames = 0;
 
-	for (nFrames = 0; nFrames < m_vRecords.size(); nFrames++) {
+	for ( ; nFrames < m_vRecords.size(); nFrames++) {
 		if (m_vRecords.at(nFrames).empty()) return nFrames;
 	}
 

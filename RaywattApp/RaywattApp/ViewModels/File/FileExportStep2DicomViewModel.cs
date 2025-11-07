@@ -10,6 +10,11 @@ using System.Collections.Generic;
 using System;
 using System.Windows.Navigation;
 using RaywattApp.Common.Util;
+using CommunityToolkit.Mvvm.Input;
+using System.Windows.Input;
+using System.Linq;
+using RayCoreWrapper;
+using System.Threading.Tasks;
 
 namespace RaywattApp.ViewModels.File
 {
@@ -30,10 +35,40 @@ namespace RaywattApp.ViewModels.File
         [ObservableProperty]
         private int _frameTickFrequency;
 
+        [ObservableProperty]
+        private bool _isPacs;
+
+        [ObservableProperty]
+        private DicomServer _selectedDicomServer;
+
+        [ObservableProperty]
+        private string _localHostAeTitle;
+
+        [ObservableProperty]
+        private bool _isChecking = false;
+
+        private IntPtr dicomClient;
+
+        private ICommand _selectPacsCommand;
+        public ICommand SelectPacsCommand
+        {
+            get { return this._selectPacsCommand ?? (this._selectPacsCommand = new RelayCommand(SelectPacs)); }
+        }
+
         public FileExportStep2DicomViewModel(SqlManager sqlManager, IDialogService dialogService) : base(dialogService)
         {
             _sqlManager = sqlManager;
             _dialogService = dialogService;
+
+            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
+            sqlParameters["classification"] = "LocalHost";
+            IList<Configuration> localHost = _sqlManager.SelectConfiguration(sqlParameters);
+            if (localHost != null && localHost.Count > 0)
+            {
+                LocalHostAeTitle = localHost.FirstOrDefault(x => x.Key == "AeTitle").Value;
+            }
+
+            dicomClient = RayExportWrapper.CreateDcmClient();
         }
 
         public override void OnNavigated(object sender, object navigatedEventArgs)
@@ -47,6 +82,14 @@ namespace RaywattApp.ViewModels.File
                 FileExport = (FileExport)extraData;
                 SetCondition();
             }
+        }
+
+        public override void OnNavigating(object sender, object navigationEventArgs)
+        {
+            base.OnNavigating(sender, navigationEventArgs);
+
+            RayExportWrapper.DestroyDcmClient(dicomClient);
+            dicomClient = IntPtr.Zero;
         }
 
         private void SetCondition()
@@ -72,7 +115,7 @@ namespace RaywattApp.ViewModels.File
             {
                 foreach (PatientCase patientCase in PatientCases)
                 {
-                    ExportSize += frameSize * int.Parse(patientCase.PullbackLength);
+                    ExportSize += frameSize * patientCase.NumOfFrames;
                 }
             }
             else if(FileExport.Material == Constants.ExportMaterialBookmarked)
@@ -109,7 +152,18 @@ namespace RaywattApp.ViewModels.File
             parameter["fileExport"] = FileExport;
             parameter["patientCases"] = PatientCases;
             parameter["dicomProperty"] = GetDicomProperty();
+            parameter["isPacs"] = IsPacs;
+            if (IsPacs)
+            {
+                parameter["localHostAeTitle"] = LocalHostAeTitle;
+                parameter["selectedDicomServer"] = SelectedDicomServer;
+                parameter["usePeerVerification"] = CommonUtil.IsTestMode(DeviceStatus.TestMode, "CertIgnore") == true ? false : true;
+            }
+                
             var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter, Constants.FileExportDialogWidth, Constants.FileExportDialogHeight);
+
+            RayExportWrapper.DestroyDcmClient(dicomClient);
+            dicomClient = IntPtr.Zero;
 
             Close();
         }
@@ -135,6 +189,78 @@ namespace RaywattApp.ViewModels.File
             }
 
             return dicomProperty;
+        }
+
+        protected override async void Export()
+        {
+            if (IsPacs)
+            {
+                //Validate
+                if (SelectedDicomServer == null)
+                {
+                    Dictionary<string, object> parameter = new Dictionary<string, object>();
+                    parameter["title"] = _l10n["Information"];
+                    parameter["message"] = _l10n["Select PACS server"];
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                    return;
+                }                    
+
+                //Connection Test
+                bool res = await ConnectionTest();
+                if (!res)
+                    return;
+
+                //Dicom 파일 생성 및 로컬 저장
+                FileSave();
+            }
+            else
+            {
+                base.Export();
+            }
+        }
+
+        private async Task<bool> ConnectionTest()
+        {
+            IsChecking = true;
+            RayExportWrapper.DicomNetRWError res = await Task.Run(() => (RayExportWrapper.DicomNetRWError)RayExportWrapper.Echo(dicomClient));
+            _log.DebugFormat("Echo : {0}", res);
+            IsChecking = false;
+
+            if (res == RayExportWrapper.DicomNetRWError.NoConnection || res == RayExportWrapper.DicomNetRWError.EchoFail)
+            {
+                IsChecking = true;
+                bool usePeerVerification = CommonUtil.IsTestMode(DeviceStatus.TestMode, "CertIgnore") == true ? false : true;
+                res = await Task.Run(() => (RayExportWrapper.DicomNetRWError)RayExportWrapper.Initialize(dicomClient, LocalHostAeTitle, SelectedDicomServer.IpAddress, int.Parse(SelectedDicomServer.Port), SelectedDicomServer.AeTitle, SelectedDicomServer.TlsYn, usePeerVerification, SelectedDicomServer.CaFilePath));
+                _log.DebugFormat("Initialize : {0}", res);
+                IsChecking = false;
+
+                if (res != RayExportWrapper.DicomNetRWError.Normal)
+                {
+                    Dictionary<string, object> parameter = new Dictionary<string, object>();
+                    parameter["title"] = _l10n["Information"];
+                    parameter["message"] = CommonUtil.GetDicomResultMessage(res);
+                    var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private void SelectPacs()
+        {
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            parameter["selectedDicomServerId"] = SelectedDicomServer == null ? 0 : SelectedDicomServer.Id;
+
+            var result = _dialogService.OpenDialog(new DicomPacsDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+            if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
+            {
+                Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
+                DicomServer dicomServer = (DicomServer)data["selectedDicomServer"];
+                SelectedDicomServer = dicomServer;
+                
+            }
         }
     }
 }

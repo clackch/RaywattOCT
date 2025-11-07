@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="125.5" viewBox="0 0 32 125.5">
+    <defs>
+        <filter id="1kq2ipsm7a" x="10.5" y="11.5" width="11" height="114" filterUnits="userSpaceOnUse">
+            <feOffset dy="3"/>
+            <feGaussianBlur stdDeviation="1.5" result="blur"/>
+            <feFlood flood-opacity=".4"/>
+            <feComposite operator="in" in2="blur"/>
+            <feComposite in="SourceGraphic"/>
+        </filter>
+        <filter id="2fxo463eib" x="0" y="0" width="32" height="32" filterUnits="userSpaceOnUse">
+            <feOffset dy="3"/>
+            <feGaussianBlur stdDeviation="3" result="blur-2"/>
+            <feFlood flood-opacity=".161"/>
+            <feComposite operator="in" in2="blur-2"/>
+            <feComposite in="SourceGraphic"/>
+        </filter>
+    </defs>
+    <g data-name="그룹 9840">
+        <g style="filter:url(#1kq2ipsm7a)">
+            <path data-name="사각형 1571" transform="translate(15 13)" style="fill:#385042" d="M0 0h2v105H0z"/>
+        </g>
+        <g style="filter:url(#2fxo463eib)">
+            <g data-name="패스 2551" style="fill:#161616">
+                <path d="m7 15.187-6-5.99V3.6h12v5.597l-6 5.99z" style="stroke:none" transform="translate(9 3.4)"/>
+                <path d="M2 4.6v4.183l5 4.99 5-4.99V4.6H2m-2-2h14v7.012L7 16.6 0 9.612V2.6z" style="fill:#385042;stroke:none" transform="translate(9 3.4)"/>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -5,6 +5,7 @@
 #include "Imaging.h"
 #include <opencv2/opencv.hpp>
 #include <map>
+#include <numeric>
 
 #define FILE_EXTENSION_RAW	"bin"
 #define FILE_EXTENSION_OCT	"oct"
@@ -24,6 +25,7 @@ class CCalibration;
 class IDataManager;
 class CThread;
 class CCutViewManager;
+class IRayLearning;
 class CImagingSession
 {
 private:
@@ -49,6 +51,7 @@ private:
 	std::vector<std::vector<cv::Mat>> m_vSidebranch;
 	std::vector<cv::Mat> m_vStent;
 	std::vector<cv::Mat> m_vGuidewire;
+  std::vector<std::vector<float>> m_vGuidewireRadius;
 
 	struct Calcium {
 		int angleNum = 0;
@@ -109,11 +112,15 @@ public:
 	int GetNumOfGuidewirePoints(int nFrame);
 	void* GetCalciumAngles(int nFrame);
 	int GetCalciumLength(int nFrame);
+	void* GetGuidewireRadius(int nFrame);
 
 	bool LoadZOffset(const char* strDataFilePath);
 	void SetZOffset(int zOffset) { m_zOffset = zOffset; }
 	int GetZOffset() { return m_zOffset; }
 	int GetZOffset(int nFrame);
+
+	static std::vector<cv::Point> GetValidLumenContour(const cv::Mat& imageResultWithoutCompensation, int imgSize, const cv::Mat& centerMask, const cv::Ptr<cv::CLAHE>& clahe, COCTImaging *pImaging);
+	static int IsLumenNormal(cv::Mat image, std::vector<cv::Point> contour, double lumenThresholdMin, double lumenThresholdMax, double lumenSnrThreshold, bool showLumenGuide);
 
 private:
 	static CImagingSession* createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type);
