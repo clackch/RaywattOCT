@@ -2445,7 +2445,7 @@ void COCTSystem::autoCalibrationInit(LPVOID param) {
 }
 
 void COCTSystem::loadAutoCalibPatch() {
-	std::string patchPath = "autoCalibPatch.tif";
+	std::string patchPath = "res/matching/autoCalibPatch.tif";
 	cv::Mat patch = cv::imread(patchPath, cv::IMREAD_GRAYSCALE);
 	if(patch.empty()) {
 		PLOGI.printf("Failed to load auto calibration patch image.");
