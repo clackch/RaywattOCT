@@ -1746,7 +1746,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 					if (minVal * 1.3 < info[i + 1].first) // 최솟값의 130% 이상인 값은 제외
 						continue;
 					minList.push_back({ info[i + 1].second, i + 1 });
-					PLOGI.printf("local min found. Loc : %d, Value : %d", info[i + 1].second, info[i + 1].first);
+					//PLOGI.printf("local min found. Loc : %d, Value : %d", info[i + 1].second, info[i + 1].first);
 				}
 			}
 			std::sort(minList.begin(), minList.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
@@ -1762,7 +1762,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 				if (gradient[i] >= 0 && gradient[i + 1] < 0 && gradient[i] != -1 && gradient[i + 1] != -1) // local max
 				{
 					maxList.push_back({ distLoc, i + 1 });
-					PLOGI.printf("local max found. Loc : %d, Value : %d", info[i + 1].second, info[i + 1].first);
+					//PLOGI.printf("local max found. Loc : %d, Value : %d", info[i + 1].second, info[i + 1].first);
 				}
 				if (abs(info[i + 1].second - Loc) > minMaxDistRange ||
 					(gradient[i] > 20000000 && gradient[i + 1] > 20000000)) continue;
@@ -1783,13 +1783,12 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 				autoCalibError = RayError::AutoCalibError;
 			}
 			else {
-				//Loc = minList[0].first; // 가장 작은 local min 위치로 우선 설정
 				for(int i = 0; i < minList.size(); i++)
 				{
 					if (abs(info[minList[i].second].second - Loc) < minMaxDistRange)
 					{
 						Loc = info[minList[i].second].second;
-						PLOGI.printf("Local min selected. Loc : %d, Value : %d", info[minList[i].second].second, info[minList[i].second].first);
+						//PLOGI.printf("Local min selected. Loc : %d, Value : %d", info[minList[i].second].second, info[minList[i].second].first);
 						break;
 					}
 				}
@@ -1802,7 +1801,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 					{
 						Loc = info[maxList[i].second].second;
 						maxFound = true;
-						PLOGI.printf("Local max selected. Loc : %d, Value : %d __1", info[maxList[i].second].second, info[maxList[i].second].first);
+						//PLOGI.printf("Local max selected. Loc : %d, Value : %d __1", info[maxList[i].second].second, info[maxList[i].second].first);
 						break;
 					}
 				}
@@ -1815,7 +1814,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 						{
 							Loc = info[maxList[i].second].second;
 							maxFound = true;
-							PLOGI.printf("Local max selected. Loc : %d, Value : %d__2", info[maxList[i].second].second, info[maxList[i].second].first);
+							//PLOGI.printf("Local max selected. Loc : %d, Value : %d__2", info[maxList[i].second].second, info[maxList[i].second].first);
 							if (maxList.size() == 1)
 								Loc -= 200; // 약간 더 안쪽으로 보정
 							break;
@@ -1830,36 +1829,36 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 						{
 							Loc = info[maxList[i].second].second;
 							maxFound = true;
-							PLOGI.printf("Local max selected. Loc : %d, Value : %d__3", info[maxList[i].second].second, info[maxList[i].second].first);
+							//PLOGI.printf("Local max selected. Loc : %d, Value : %d__3", info[maxList[i].second].second, info[maxList[i].second].first);
 							break;
 						}
 					}
 				}
 
 				int valDist = 10000000;	// 조건에 맞는 local max가 없는 경우, local min 좌우의 값 차이가 유효할 정도로 큰지 확인하기 위한 임계값
-				int adjustValPlus = 700, adjustValMinus = 200;	// 조건에 맞는 local max가 없는 경우, local min에서 local max로 이동하기 위한 보정값
+				int adjustVal = 200;	// 조건에 맞는 local max가 없는 경우, local min에서 local max로 이동하기 위한 보정값
 				if (!maxFound) {
-					PLOGI.printf("Cannot find Local max");
+					//PLOGI.printf("Cannot find Local max");
 					int nowIndex = minList[0].second;
 					if (abs(info[nowIndex - 2].first - info[nowIndex + 2].first) < valDist) {
 						if (nowIndex - 2 >= 0 && nowIndex + 1 < gradient.size() &&
 							abs(gradient[nowIndex - 2] - gradient[nowIndex - 1]) < abs(gradient[nowIndex] - gradient[nowIndex + 1])) {
-							Loc += adjustValMinus;
-							PLOGI.printf("2 steps away frames are inValid, so we are using gradients: plus");
+							Loc += adjustVal;
+							//PLOGI.printf("2 steps away frames are inValid, so we are using gradients: plus");
 						}
 						else {
-							Loc -= adjustValMinus;
-							PLOGI.printf("2 steps away frames are inValid, so we are using gradients: minus");
+							Loc -= adjustVal;
+							//PLOGI.printf("2 steps away frames are inValid, so we are using gradients: minus");
 						}
 					}
 					else {
 						if (info[nowIndex - 2].first > info[nowIndex + 2].first) {
-							Loc += adjustValMinus;
-							PLOGI.printf("2 steps away frames are valid, so we are using values: plus");
+							Loc += adjustVal;
+							//PLOGI.printf("2 steps away frames are valid, so we are using values: plus");
 						}
 						else {
-							Loc -= adjustValMinus;
-							PLOGI.printf("2 steps away frames are valid, so we are using values: minus");
+							Loc -= adjustVal;
+							//PLOGI.printf("2 steps away frames are valid, so we are using values: minus");
 						}
 					}
 				}
