@@ -231,17 +231,17 @@ RJ Firmware 설치 안되어있으면 설치 필요
    관련 링크: https://url.kr/fsv46g
 
 8. Shell Launcher (고정 프로그램)
-   
+
    (a) 제어판 > 프로그램 > 프로그램 및 기능 > Windows 기능 켜기/끄기 > Device Lockdown(디바이스 잠금) > Shell Launcher(셸 시작 관리자) 체크
-   
+
    (b) 관리자 권한 PowerShell 실행 > `Set-ExecutionPolicy Unrestricted` 입력 후 `Y`
 
-   (c) [ShellLauncher.zip](https://github.com/user-attachments/files/18777482/ShellLauncher.zip) 다운로드 및 `ShellLauncher_enable.ps1` 실행
-   
-       ※ ShellLauncher_enable.ps1에서 스케줄러에 등록된 RaywattApp을 실행하게 설정
-   
+   (c) [ShellLauncher.zip](https://github.com/Raywatt/RaywattOCT/files/12583810/ShellLauncher.zip) 다운로드 및 `ShellLauncher_enable.ps1` 실행
+
+       ※ ShellLauncher_enable.ps1에서 C:\Raywatt\system\runtime\RaywattApp.exe를 실행하게 설정
+
        ※ 설정이 잘 못되었을 경우, ShellLauncher_disable.ps1 실행해서 설정 내용 해제 가능
-   
+
    (d) 스크립트 실행 (경고 발생)
 
 9. 부팅 로고 변경
