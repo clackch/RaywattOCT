@@ -12,6 +12,7 @@ INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES (
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Password', 'ExpiryDay', '90', '');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Password', 'MaxCount', '5', '');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Password', 'WaitSecond', '30', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Institute', 'Info', '', '');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('AutoPB', 'LumenMin', '2', '');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('AutoPB', 'LumenMax', '70', '');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('AutoPB', 'SNR', '1', '');
