@@ -210,7 +210,7 @@ void CRaywattLabDlg::updateBrightnessContrast(CLabImaging* pImaging) {
 	double brightness = ((double)posB / rangeSliderB[1]) * (rangeB[1] - rangeB[0]) + rangeB[0];
 	double contrast = ((double)posC / rangeSliderC[1]) * (rangeC[1] - rangeC[0]) + rangeC[0];
 
-	if(pImaging != nullptr) pImaging->SetBrightnessContrast(brightness, contrast);
+	pImaging->SetBrightnessContrast(brightness, contrast);
 
 	AfxGetApp()->WriteProfileInt(_T("RECENT_SETTING"), _T("BRIGHTNESS"), posB);
 	AfxGetApp()->WriteProfileInt(_T("RECENT_SETTING"), _T("CONTRAST"), posC);
@@ -225,7 +225,7 @@ void CRaywattLabDlg::updateLevel(CLabImaging* pImaging) {
 	const int low = m_sliderLowLevel.GetPos();
 	const int high = m_sliderHighLevel.GetPos();
 
-	if (pImaging != nullptr) pImaging->SetLevel(low, high);
+	pImaging->SetLevel(low, high);
 
 	AfxGetApp()->WriteProfileInt(_T("RECENT_SETTING"), _T("LOWLEVEL"), low);
 	AfxGetApp()->WriteProfileInt(_T("RECENT_SETTING"), _T("HIGHLEVEL"), high);
@@ -263,9 +263,9 @@ CString CRaywattLabDlg::splitFileName(CString strFilePath) {
 }
 CLabImaging* CRaywattLabDlg::createImaging(IImaging::Setting imaging) {
 	CLabImaging* pImaging = new CLabImaging(imaging, this);
-	CCalibration* calibration = new CCalibration(imaging.nAScan, imaging.nFFTLength);
-	bool result = calibration->Initialize(m_strCurCalibration);
 
+	CCalibration* calibration = new CCalibration(imaging.nAScan, imaging.nFFTLength);
+	calibration->Initialize(m_strCurCalibration);
 	USHORT* background = readBackground(BACKGROUND_FILEPATH, imaging);
 
 	pImaging->Initialize(calibration, background);
@@ -553,6 +553,8 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_RADIO_GRAY, &CRaywattLabDlg::OnBnClickedRadioGray)
 	ON_BN_CLICKED(IDC_RADIO_GREEN, &CRaywattLabDlg::OnBnClickedRadioGreen)
 	ON_BN_CLICKED(IDC_RADIO_ORANGE, &CRaywattLabDlg::OnBnClickedRadioOrange)
+	ON_BN_CLICKED(IDC_BUTTON_INIT_FRINGE, &CRaywattLabDlg::OnBnClickedInitFringeData)
+	ON_BN_CLICKED(IDC_BUTTON_SAVE_FRINGE, &CRaywattLabDlg::OnBnClickedAddFringeData)
 END_MESSAGE_MAP()
 
 LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
@@ -674,9 +676,7 @@ BOOL CRaywattLabDlg::OnInitDialog()
 
 	CLookUpTable& lut = CLookUpTable::GetInstance();
 	lut.Load("LUT_green.csv");
-	lut.Load("LUT_gray.csv");
 	lut.Load("LUT_abbott.csv");
-	lut.Load("LUT_enhanced.csv");
 
 	m_largeMonitorMode = false;
 	m_showScope = false;
@@ -701,6 +701,7 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	initToggleButton(m_btnPlayData, IDC_BUTTON_PLAY_LOADED_DATA, _T("Play"), _T("Pause"));
 	initToggleButton(m_btnSaveData, IDC_BUTTON_SAVE_DATA, _T("Save Data"), _T("Done"));
 	initToggleButton(m_btnOpenRotaryJunction, IDC_BUTTON_OPEN_ROTARY_JUNCTION, _T("Setting"), _T("Close"));
+	initToggleButton(m_btnInitFringeData, IDC_BUTTON_INIT_FRINGE, _T("Init"), _T("Save"));
 
 	m_strPatientPath = AfxGetApp()->GetProfileString(_T("RECENT_SETTING"), _T("PATIENT_PATH"), _T(""));
 	updatePatientDataList();
@@ -750,15 +751,12 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	int goodClockEnd = config.imaging.nAScan;
 
 	m_pImagingRealtime = createImaging(config.imaging);
+	m_pImagingRealtime->SetGoodClockRange(goodClockStart, goodClockEnd);
+	m_pImagingRealtime->Start();
+
 	m_pImagingSimulate = createImaging(config.imaging);
-
-	if (m_pImagingRealtime != nullptr && m_pImagingSimulate != nullptr) {
-		m_pImagingRealtime->SetGoodClockRange(goodClockStart, goodClockEnd);
-		m_pImagingRealtime->Start();
-
-		m_pImagingSimulate->SetGoodClockRange(goodClockStart, goodClockEnd);
-		m_pImagingSimulate->Start();
-	}
+	m_pImagingSimulate->SetGoodClockRange(goodClockStart, goodClockEnd);
+	m_pImagingSimulate->Start();
 
 	int nBufferSize = config.acquisition.nAScan * config.acquisition.nBScan;
 
@@ -995,7 +993,6 @@ void CRaywattLabDlg::OnBnClickedButtonLoadSelectedData()
 	int result = NOERROR;
 	bool dataLoaded = m_btnLoadData.pushed;
 	bool dataPlayed = m_btnPlayData.pushed;
-	CConfiguration& config = CConfiguration::GetInstance();
 
 	if (dataLoaded) {
 		result = m_pSimDevice->StopAcquisition();
@@ -1020,16 +1017,6 @@ void CRaywattLabDlg::OnBnClickedButtonLoadSelectedData()
 			m_pImagingSimulate->Stop();
 			delete m_pImagingSimulate;
 		}
-		PLOGI.printf("setting.distPerPixel: %f", setting.distPerPixel);
-		setting.applyCompensation = config.imaging.applyCompensation;
-		setting.exponentialFactor = config.imaging.exponentialFactor;
-		setting.brightnessControl = config.imaging.brightnessControl;
-		setting.energyThreshold = config.imaging.energyThreshold;
-		setting.applyGammaCorrection = config.imaging.applyGammaCorrection;
-		setting.GCAlpha = config.imaging.GCAlpha;
-		setting.intensityThreshold = config.imaging.intensityThreshold;
-
-		setting.distPerPixel = (setting.distPerPixel == 0.f) ? 4.9f : setting.distPerPixel;
 		m_pImagingSimulate = createImaging(setting);
 		m_pImagingSimulate->Start();
 
@@ -1249,7 +1236,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveTif()
 	strTifPath.Replace(strTifPath.Right(3), _T("tif"));
 
 	CDataReader* pReader = new CDataReader();
-	IImaging::Setting setting = m_pImagingSimulate->GetSetting(); // initReader(strDataPath.GetBuffer(), pReader);
+	IImaging::Setting setting = initReader(strDataPath.GetBuffer(), pReader);
 
 	CLabImaging* pImaging = createImaging(setting);
 	pImaging->SetImageCompensation(m_chkCompensation);
@@ -1259,7 +1246,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveTif()
 	for (int i = 0; i < pReader->GetNumOfSamples(); i++) {
 		pImaging->SetZOffset(m_vZOffset.at(i));
 		pImaging->Process(pReader->GetSample(i));		
-		cv::Mat imgRect = getFoVImage(pImaging->GetProcessedImage(), 10.f);
+		cv::Mat imgRect = getFoVImage(pImaging->GetProcessedImage(), 9000.f);
 		pImaging->PostProcess(imgRect);
 
 		tiffWriter.SaveFrame(((isCircle) ? pImaging->GetCircleImage() : pImaging->GetRectangleImage()));
@@ -1687,7 +1674,6 @@ void CRaywattLabDlg::OnBnClickedCheckCompensation()
 
 	if (m_pImagingSimulate == nullptr) return;
 	m_pImagingSimulate->SetImageCompensation(m_chkCompensation);
-	IImaging::Setting setting = m_pImagingSimulate->GetSetting();
 
 	if (m_chkCompensation) {
 		CUtility::StartThread(threadCompensationParamWindow, m_pThreadCompParamWin, this);
@@ -1767,4 +1753,61 @@ void CRaywattLabDlg::OnBnClickedRadioOrange()
 
 	if (m_pImagingRealtime != nullptr) m_pImagingRealtime->SetColor(true);
 	if (m_pImagingSimulate != nullptr) m_pImagingSimulate->SetColor(true);
+}
+
+
+void CRaywattLabDlg::OnBnClickedInitFringeData() {
+	// 1) 먼저 토글
+	
+	const bool isSaving = m_btnInitFringeData.pushed;
+	PLOGI.printf("DataSaving (after toggle) = %d\n", isSaving ? 1 : 0);
+
+	if (!isSaving) {
+		// 절대경로 권장 (작업폴더 혼동 방지)
+		wchar_t path[MAX_PATH];
+		GetModuleFileNameW(nullptr, path, MAX_PATH);
+		PathRemoveFileSpecW(path);
+		wcscat_s(path, L"\\fringe_raw_chA.bin");
+
+		errno = 0;
+		if (_wfopen_s(&m_fpRaw, path, L"wb") != 0 || !m_fpRaw) {
+			PLOGI.printf("ERROR: fopen %ws failed (errno=%d, GetLastError=%lu)\n",
+				path, errno, GetLastError());
+		}
+		else {
+			PLOGI.printf("Opened %ws for write\n", path);
+		}
+	}
+	else {
+		if (m_fpRaw) {
+			fflush(m_fpRaw);
+			_commit(_fileno(m_fpRaw)); // 선택
+			fclose(m_fpRaw);
+			m_fpRaw = nullptr;
+			PLOGI.printf("saving Done\n");
+		}
+	}
+
+	toggleButton(this, m_btnInitFringeData);
+}
+
+
+void CRaywattLabDlg::OnBnClickedAddFringeData() {
+	if (!m_fpRaw) { PLOGI.printf("Skip: file not open\n"); return; }
+
+	const int nAScan = 1152;
+	const int nBScan = 2504; // 실제 ScopeData 라인 수와 일치해야 함!
+	const size_t bytesPerFrame = size_t(nAScan) * size_t(nBScan) * sizeof(uint16_t);
+
+	// 소스 포인터
+	const void* p = m_pImagingRealtime->GetFringesBuffer(); // uint16[nAScan*nBScan]
+	if (!p) { PLOGI.printf("ERROR: ScopeData null\n"); return; }
+
+	clearerr(m_fpRaw);
+	errno = 0;
+	size_t wrote = fwrite(p, 1, bytesPerFrame, m_fpRaw);
+	if (wrote != bytesPerFrame) {
+		PLOGI.printf("Warning: raw write short (%zu/%zu), errno=%d, ferror=%d, GetLastError=%lu\n",
+			wrote, bytesPerFrame, errno, ferror(m_fpRaw), GetLastError());
+	}
 }

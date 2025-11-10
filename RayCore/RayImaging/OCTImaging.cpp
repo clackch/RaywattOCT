@@ -11,6 +11,24 @@
 #include <math.h>
 #include <cmath>
 #include <numeric>
+#include <atomic>
+#include <limits>
+#include <mutex>
+#include <ippcore.h>
+
+// ====== 파일 상단 또는 cpp 전역 ======
+static std::once_flag g_ippOnce;
+static std::atomic<bool> g_loggedHilbertRunDetail{ false };
+static std::atomic<bool> g_loggedMaps{ false };
+
+static inline const char* IppHintName(IppHintAlgorithm h) {
+	switch (h) {
+	case ippAlgHintNone:    return "None";
+	case ippAlgHintFast:    return "Fast";
+	case ippAlgHintAccurate:return "Accurate";
+	default:                return "Unknown";
+	}
+}
 
 float EXPONENTIAL_FACTOR = -1.00f;
 float BRIGHTNESS_CONTROL = -1.00f;
@@ -64,11 +82,8 @@ COCTImaging::COCTImaging(Setting setting, CMessageService* pMsg) {
 	fringes32fAverage = nullptr;
 
 	fFFTResult = nullptr;
-	fOutput = nullptr;
 
-	fftSpecFirst = nullptr;
-	fftSpecSecond = nullptr;
-	ifftSpec = nullptr;
+	fftSpec = nullptr;
 
 	m_bInvert = false;
 	m_bColor = false;
@@ -90,10 +105,19 @@ COCTImaging::~COCTImaging() {
 }
 
 void COCTImaging::Initialize(CCalibration* calibration) {
+	this->calibration = calibration;
+
+	m_setting.nOutputLength = calibration->nSignal; // nOut
+	int orderOut = 0, NfftOut = 1;
+	while (NfftOut < m_setting.nOutputLength) { NfftOut <<= 1; ++orderOut; }
+	fftOutLen_ = NfftOut;                           // <<< 추가: 실제 FFT 길이 저장
+
 	releaseMemory();
 	allocateMemory();
 
-	this->calibration = calibration;
+	CFFTSpecFactory& fac = CFFTSpecFactory::Instance();
+	fftSpec = fac.GetSpecC(orderOut, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
+	fftWorkBufSize = fac.GetBufferC(fftSpec);
 
 	releaseCircularizeMap();
 	initCircularizeMap(m_setting.nOutputLength, m_setting.nBScan, m_setting.nOutputLength, m_setting.nCircleSize, m_setting.nCircleSize, 2.0f);
@@ -262,19 +286,12 @@ void COCTImaging::allocateMemory() {
 	imageResultWithoutCompensation.create(nBScan, nOutputLength, CV_8UC1);
 
 	fFFTResult = ippsMalloc_32f(nOutputLength * nBScan);
-	fOutput = ippsMalloc_32f(nOutputLength * nBScan);
-
 	// Prepare FFT
 	CFFTSpecFactory& factory = CFFTSpecFactory::Instance();
-	fftSpecFirst = factory.GetSpecR(nFFTOrder, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
-	fftFirstWorkBufSize = factory.GetBufferR(fftSpecFirst);
-
-	ifftSpec = factory.GetSpecC(nFFTOrder, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
-	fftIFFTWorkBufSize = factory.GetBufferC(ifftSpec);
-
-	fftSpecSecond = factory.GetSpecC(nFFTOrder - 1, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
-	fftSecondWorkBufSize = factory.GetBufferC(fftSpecSecond);
+	fftSpec = factory.GetSpecC(nFFTOrder - 1, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
+	fftWorkBufSize = factory.GetBufferC(fftSpec);
 }
+
 void COCTImaging::releaseMemory() {
 	if (fringes32f) { ippsFree(fringes32f); fringes32f = nullptr; }
 	if (fringes32fAverage) { ippsFree(fringes32fAverage); fringes32fAverage = nullptr; }
@@ -285,7 +302,6 @@ void COCTImaging::releaseMemory() {
 	imageResultWithoutCompensation.release();
 
 	ippsRelease((void*&)fFFTResult);
-	ippsRelease((void*&)fOutput);
 }
 void COCTImaging::initCircularizeMap(int diameter, int srcHeight, int srcWidth, int dstHeight, int dstWidth, double scale) {
 	int circOffset = 0;
@@ -360,96 +376,172 @@ void COCTImaging::generateBackground(Ipp16u* fringes) {
 
 	ippsMulC_32f_I(1.0f / ((float)nHeight), fringes32fAverage, nWidth);
 }
-void COCTImaging::fftProcessing(const Ipp32f* fringes32f) {
+
+void COCTImaging::fftProcessing(const Ipp32f* fringes32f)
+{
 	const int numDynamic = 1;
 	const int numThreads = 8;
-	const int nAScan = m_setting.nAScan, nBScan = m_setting.nBScan;
-	const int nFFTLength = m_setting.nFFTLength;
-	const int nOutputLength = m_setting.nOutputLength;
 
+	const int nAScan = m_setting.nAScan;   // 실수 입력 길이
+	const int nBScan = m_setting.nBScan;
+	const int nOut = calibration->nSignal; // map/disp 길이(보통 nAScan/2)
+	const int fftN = fftOutLen_;
+
+	assert(fftN >= nOut && "fftOutLen_ must be >= calibration->nSignal");
+	assert(fringes32f != nullptr && "input fringe pointer must be valid");
+
+	// 윈도우/평균 벡터 존재/길이 체크: 프로덕션이면 assert 대신 fallback 권장
+	if (!calibration->window) {
+		PLOGW.printf("[fftProcessing] window is null -> using unity window");
+	}
+	if (!fringes32fAverage) {
+		PLOGW.printf("[fftProcessing] fringes32fAverage is null -> using zeros");
+	}
+
+
+	// 한 번만 지표 로그
+	if (!g_loggedMaps.load()) {
+		int idxMin = INT_MAX, idxMax = INT_MIN;
+		float wMin = std::numeric_limits<float>::infinity();
+		float wMax = -std::numeric_limits<float>::infinity();
+		for (int j = 0; j < nOut; ++j) {
+			idxMin = std::min(idxMin, calibration->indexMap[j]);
+			idxMax = std::max(idxMax, calibration->indexMap[j]);
+			wMin = std::min(wMin, calibration->weightMap[j]);
+			wMax = std::max(wMax, calibration->weightMap[j]);
+		}
+		PLOGI.printf("[fftProcessing] Sizes: nAScan=%d, nBScan=%d, nOut=%d", nAScan, nBScan, nOut);
+		PLOGI.printf("[fftProcessing] indexMap range=[%d..%d] (expected 0..%d), weightMap range=[%.6f..%.6f] (expected 0..1)",
+			idxMin, idxMax, nAScan - 2, wMin, wMax);
+		PLOGI.printf("[fftProcessing] window ptr=%p (first=%.6f, last=%.6f)",
+			calibration->window,
+			(double)calibration->window[0],
+			(double)calibration->window[nAScan - 1]);
+		g_loggedMaps.store(true);
+	}
+
+	// carrier f0 한 번만 추정 -> demod 톤 생성
+	static bool toneReady = false;
+	static std::vector<Ipp32fc> s_tone;
+	static double s_f0norm = 0.0;
+
+	if (calibration->useComplex && !toneReady) {
+		s_f0norm = EstimateCarrierF0Norm(fringes32f,
+			fringes32fAverage,
+			calibration->window,
+			nAScan, nBScan);
+		s_f0norm = std::max(0.005, std::min(0.45, s_f0norm)); // clamp
+		MakeDemodTone(s_tone, s_f0norm, nAScan);
+		PLOGI.printf("[Demod] useComplex=1, f0(norm)=%.4f, bin=%d/%d, toneLen=%zu",
+			s_f0norm, (int)std::round(s_f0norm * nAScan), nAScan, s_tone.size());
+		toneReady = true;
+	}
+
+	// --- Hilbert 준비 (길이 관련 상세 로그) ---
+	const IppHintAlgorithm kHilbertAlg = ippAlgHintFast; // 필요시 Accurate로 변경
+	int hilbertSpecSize = 0, hilbertBufSize = 0;
+	IppStatus st = ippsHilbertGetSize_32f32fc(nAScan, kHilbertAlg,
+		&hilbertSpecSize, &hilbertBufSize);
+	if (st != ippStsNoErr) {
+		PLOGI.printf("[HilbertGetSize] err=%d, nAScan=%d, alg=%s",
+			(int)st, nAScan, IppHintName(kHilbertAlg));
+		return;
+	}
+	PLOGI.printf("[HilbertGetSize] OK: spec=%d bytes, work=%d bytes, nAScan=%d, alg=%s",
+		hilbertSpecSize, hilbertBufSize, nAScan, IppHintName(kHilbertAlg));
+
+	// FFT work buf 사이즈는 Initialize()에서 계산됨
+	PLOGI.printf("[FFT] fftWorkBufSize(second)=%d, fftSpec(ptr)=%p", (int)fftWorkBufSize, fftSpec);
+
+	// --- 스레드 컨텍스트 할당 ---
 	std::vector<FFTThreadContext> threadContexts(numThreads);
-	
-	// 스레드별 FFTSpec 및 버퍼 할당 및 초기화
 	for (int t = 0; t < numThreads; ++t) {
 		auto& ctx = threadContexts[t];
 
-		// Window buffer
-		ctx.fBuffer_Window = ippsMalloc_32f(nFFTLength);
-		ippsZero_32f(ctx.fBuffer_Window, nFFTLength);
+		ctx.fBuffer_Window = ippsMalloc_32f(nAScan);  ippsZero_32f(ctx.fBuffer_Window, nAScan);
+		ctx.fcAnalytic = ippsMalloc_32fc(nAScan); ippsZero_32fc(ctx.fcAnalytic, nAScan);
+		ctx.fcK = ippsMalloc_32fc(fftOutLen_);   ippsZero_32fc(ctx.fcK, fftOutLen_);
+		ctx.hilbertSpec = (IppsHilbertSpec*)ippsMalloc_8u(hilbertSpecSize);
+		ctx.hilbertWorkBuf = ippsMalloc_8u(hilbertBufSize);
+		ctx.fftWorkBufSecond = ippsMalloc_8u(fftWorkBufSize);
 
-		// FFT buffers
-		ctx.fcBuffer_FFT = ippsMalloc_32fc(nFFTLength);
-		ippsZero_32fc(ctx.fcBuffer_FFT, nFFTLength);
-		ctx.fcBuffer_IFFT = ippsMalloc_32fc(nFFTLength);
-
-		// Work buffers
-		ctx.fftWorkBufFirst = ippsMalloc_8u(fftFirstWorkBufSize);
-		ctx.fftWorkBufIFFT = ippsMalloc_8u(fftIFFTWorkBufSize);
-		ctx.fftWorkBufSecond = ippsMalloc_8u(fftSecondWorkBufSize);
+		st = ippsHilbertInit_32f32fc(nAScan, kHilbertAlg,
+			ctx.hilbertSpec, ctx.hilbertWorkBuf);
+		if (st != ippStsNoErr) {
+			PLOGI.printf("[HilbertInit] err=%d (thread=%d) nAScan=%d, spec=%p, work=%p, alg=%s",
+				(int)st, t, nAScan, ctx.hilbertSpec, ctx.hilbertWorkBuf, IppHintName(kHilbertAlg));
+		}
 	}
 
-	// Process Frame
-	// To-Do : enable openmp, check shared variables
 	omp_set_dynamic(numDynamic);
 	omp_set_num_threads(numThreads);
-	//#pragma omp parallel
+
+#pragma omp parallel for
+	for (int i = 0; i < nBScan; ++i)
 	{
-		//#pragma omp for firstprivate(fBuffer_Window,fBuffer_BackgroundFringes,fcBuffer_FFT,fcBuffer_IFFT,j)
-		#pragma omp parallel for
-		for (int i = 0; i < nBScan; i++)
-		{
-			int tid = omp_get_thread_num();
-			auto& ctx = threadContexts[tid];
-			{
-				// 1. Background Subtract
-				ippsCopy_32f(fringes32f + i * nAScan, ctx.fBuffer_Window, nAScan);
-				ippsSub_32f_I(fringes32fAverage, ctx.fBuffer_Window, nAScan);  // I의 의미:자기 자신에 이처리를 해서, 결과를 얻는다.
+		auto& ctx = threadContexts[omp_get_thread_num()];
+		assert(fftOutLen_ >= nOut);
+		// 1) 배경 제거 + 윈도
+		ippsCopy_32f(fringes32f + i * nAScan, ctx.fBuffer_Window, nAScan);
+		ippsSub_32f_I(fringes32fAverage, ctx.fBuffer_Window, nAScan);
+		ippsMul_32f_I(calibration->window, ctx.fBuffer_Window, nAScan);
 
-				// 2. Apply Window
-				ippsMul_32f_I(calibration->window, ctx.fBuffer_Window, nFFTLength);
-
-				// 3. First FFT
-				ippsFFTFwd_RToPerm_32f_I(ctx.fBuffer_Window, fftSpecFirst, ctx.fftWorkBufFirst); // http://software.intel.com/sites/products/documentation/hpc/ipp/ipps/ipps_ch7/ch7_packed_formats.html#Perm
-				ippsConjPerm_32fc(ctx.fBuffer_Window, ctx.fcBuffer_FFT, nFFTLength);
-
-				// 4. Zero Pad & Reorder (1 | 2 | 0 | 0)
-				ippsZero_32fc(ctx.fcBuffer_IFFT, nFFTLength);
-				ippsCopy_32fc(ctx.fcBuffer_FFT, ctx.fcBuffer_IFFT, nOutputLength);
-				if (calibration->IsInit()) {
-					// 5. Inverse FFT
-					ippsFFTInv_CToC_32fc_I(ctx.fcBuffer_IFFT, ifftSpec, ctx.fftWorkBufIFFT);
-
-					// 6. Interpolation
-					ippsZero_32fc(ctx.fcBuffer_FFT, nOutputLength);
-					for (int j = 0; j < nAScan / 2; j++) {
-						ctx.fcBuffer_FFT[j].re = (calibration->weightMap[j] * ctx.fcBuffer_IFFT[calibration->indexMap[j]].re + (1.0f - calibration->weightMap[j]) * ctx.fcBuffer_IFFT[calibration->indexMap[j] + 1].re);
-						ctx.fcBuffer_FFT[j].im = (calibration->weightMap[j] * ctx.fcBuffer_IFFT[calibration->indexMap[j]].im + (1.0f - calibration->weightMap[j]) * ctx.fcBuffer_IFFT[calibration->indexMap[j] + 1].im);
-					}
-
-					// 7. Numerical Dispersion Compensation
-					ippsMul_32fc_I((Ipp32fc*)calibration->dispersion, ctx.fcBuffer_FFT, nAScan / 2);
-
-					// 8. FFT Again
-					ippsFFTFwd_CToC_32fc_I(ctx.fcBuffer_FFT, fftSpecSecond, ctx.fftWorkBufSecond);
-				}
-				else {
-					ippsZero_32fc(ctx.fcBuffer_FFT, nFFTLength);
-					ippsCopy_32fc(ctx.fcBuffer_IFFT, ctx.fcBuffer_FFT, nOutputLength);
-				}
-
-				// 9. Extract Magnitude
-				ippsPowerSpectr_32fc(ctx.fcBuffer_FFT, fFFTResult + i * nOutputLength, nOutputLength);
+		// 2) Hilbert (x + j·H{x})
+		st = ippsHilbert_32f32fc(ctx.fBuffer_Window, ctx.fcAnalytic,
+			ctx.hilbertSpec, ctx.hilbertWorkBuf);
+		if (st != ippStsNoErr) {
+			// 상세 로그는 최초 1회만
+			if (!g_loggedHilbertRunDetail.exchange(true)) {
+				PLOGI.printf("[HilbertRun] err=%d at line=%d (thread=%d)", (int)st, i, omp_get_thread_num());
+				PLOGI.printf("[HilbertRun] ptrs: src=%p(dst len=%d) dst=%p(spec len=%d) spec=%p work=%p",
+					ctx.fBuffer_Window, nAScan, ctx.fcAnalytic, nAScan, ctx.hilbertSpec, ctx.hilbertWorkBuf);
+				// 입력 일부 샘플 덤프(앞쪽 4개)
+				PLOGI.printf("[HilbertRun] src[0..3]={%.6f, %.6f, %.6f, %.6f}",
+					(double)ctx.fBuffer_Window[0],
+					(double)ctx.fBuffer_Window[1],
+					(double)ctx.fBuffer_Window[2],
+					(double)ctx.fBuffer_Window[3]);
 			}
+			continue; // 해당 라인은 스킵하고 다음 라인 진행
 		}
-	} // end parallel region
 
+		// 3) Demodulation (optional)
+		if (calibration->useComplex && !s_tone.empty() && (int)s_tone.size() == nAScan) {
+			ippsMul_32fc_I(s_tone.data(), ctx.fcAnalytic, nAScan);
+		}
+
+		// 4) k-보간
+		for (int j = 0; j < nOut; ++j) {
+			int k = calibration->indexMap[j];
+			if (k < 0) k = 0; else if (k > nAScan - 2) k = nAScan - 2;
+			float alpha = calibration->weightMap[j];
+			Ipp32fc a = ctx.fcAnalytic[k];
+			Ipp32fc b = ctx.fcAnalytic[k + 1];
+			
+			ctx.fcK[j].re = (1.f - alpha) * a.re + alpha * b.re;
+			ctx.fcK[j].im = (1.f - alpha) * a.im + alpha * b.im;
+		}
+
+		if (fftN > nOut) ippsZero_32fc(ctx.fcK + nOut, fftN - nOut);
+
+		// 분산 보정은 실제 데이터 구간만
+		ippsMul_32fc_I((Ipp32fc*)calibration->dispersion, ctx.fcK, nOut);
+
+		// FFT는 스펙 길이(fftN) 기준으로 in-place
+		ippsFFTFwd_CToC_32fc_I(ctx.fcK, fftSpec, ctx.fftWorkBufSecond);
+
+		// 파워는 화면 폭(nOut) 만큼만 기록
+		ippsPowerSpectr_32fc(ctx.fcK, fFFTResult + i * nOut, nOut);
+	}
+
+	// 해제
 	for (int t = 0; t < numThreads; ++t) {
 		auto& ctx = threadContexts[t];
 		ippsFree(ctx.fBuffer_Window);
-		ippsFree(ctx.fcBuffer_FFT);
-		ippsFree(ctx.fcBuffer_IFFT);
-		ippsFree(ctx.fftWorkBufFirst);
-		ippsFree(ctx.fftWorkBufIFFT);
+		ippsFree(ctx.fcAnalytic);
+		ippsFree(ctx.fcK);
+		ippsFree(ctx.hilbertWorkBuf);
+		ippsFree(ctx.hilbertSpec);
 		ippsFree(ctx.fftWorkBufSecond);
 	}
 }
@@ -461,6 +553,50 @@ void COCTImaging::computeLogarithm(Ipp32f* src, Ipp32f* dst) {
 	ippsLn_32f(src, dst, nOutputLength * nBScan);
 	ippsMulC_32f(dst, log10(exp(1)) * 10, dst, nOutputLength * nBScan);
 }
+
+double COCTImaging::EstimateCarrierF0Norm(const Ipp32f* fringes32f, const Ipp32f* meanRow, const float* window, int nAScan, int nBScan)
+{
+	// 평균 A-scan 만들기 (최대 64줄 샘플)
+	const int numProbe = std::min(nBScan, 64);
+	const int step = std::max(1, nBScan / numProbe);
+	cv::Mat avg(1, nAScan, CV_32F, cv::Scalar(0));
+	for (int i = 0, cnt = 0; i < nBScan && cnt < numProbe; i += step, ++cnt) {
+		const float* src = fringes32f + i * nAScan;
+		for (int k = 0; k < nAScan; ++k) avg.at<float>(0, k) += src[k];
+	}
+	avg *= (1.0f / (float)numProbe);
+
+	// DC 제거 + 윈도우
+	for (int k = 0; k < nAScan; ++k) {
+		float v = avg.at<float>(0, k) - meanRow[k];
+		avg.at<float>(0, k) = v * window[k];
+	}
+
+	// DFT로 스펙트럼 크기 (OpenCV는 임의 길이 지원)
+	cv::Mat spec;
+	cv::dft(avg, spec, cv::DFT_COMPLEX_OUTPUT);
+	int dcExcl = std::max(2, nAScan / 50); // DC ±2% 제외
+	int bestK = dcExcl; float best = 0.f;
+
+	for (int k = dcExcl; k < nAScan / 2; ++k) {
+		cv::Vec2f c = spec.at<cv::Vec2f>(0, k);
+		float m = std::hypot(c[0], c[1]);
+		if (m > best) { best = m; bestK = k; }
+	}
+	return (double)bestK / (double)nAScan; // [0..0.5)
+}
+
+void COCTImaging::MakeDemodTone(std::vector<Ipp32fc>& tone, double f0norm, int nAScan)
+{
+	tone.resize(nAScan);
+	const double w = 2.0 * M_PI * f0norm;
+	for (int n = 0; n < nAScan; ++n) {
+		double a = w * n;
+		tone[n].re = (Ipp32f)std::cos(a);   // exp(-j 2π f0 n)
+		tone[n].im = (Ipp32f)-std::sin(a);
+	}
+}
+
 
 void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 	const int nBScan = m_setting.nBScan;

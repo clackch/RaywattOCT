@@ -24,6 +24,7 @@
 #define IDC_RADIO_IMAGE_RECTANGLE       1018
 #define IDC_RADIO_COLOR_BLACK           1019
 #define IDC_RADIO_COLOR_WHITE           1020
+#define IDC_BUTTON_LOAD_SELECTED_DATA3  1021
 #define IDC_BUTTON_CLOSE_SHUTTER        1022
 #define IDC_SLIDER_BRIGHTNESS           1023
 #define IDC_SLIDER_CONTRAST             1024
@@ -106,6 +107,8 @@
 #define IDC_RADIO_GRAY                  1106
 #define IDC_RADIO_GREEN                 1107
 #define IDC_RADIO_ORANGE                1108
+#define IDC_BUTTON_INIT_FRINGE          1109
+#define IDC_BUTTON_SAVE_FRINGE          1110
 
 // Next default values for new objects
 // 

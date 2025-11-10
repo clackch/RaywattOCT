@@ -17,6 +17,7 @@
 #pragma comment(lib, "ippi")
 #pragma comment(lib, "ipps")
 #pragma comment(lib, "ippvm")
+#pragma comment(lib, "ippcore")
 #pragma comment(lib, "libusb-1.0.lib")
 #pragma comment (lib, "tiff.lib")
 

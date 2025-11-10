@@ -62,6 +62,8 @@ private:
 	ToggleButton m_btnPlayData;
 	ToggleButton m_btnSaveData;
 	ToggleButton m_btnOpenRotaryJunction;
+	ToggleButton m_btnAddFringeData;
+	ToggleButton m_btnInitFringeData;
 	CStatic m_pictOCTImage;
 	ScopeView m_scopeView;
 	ScopeView m_scopeViewFFT;
@@ -109,6 +111,8 @@ private:
 
 	BOOL m_chkCompensation;
 	CThread* m_pThreadCompParamWin;
+
+	FILE* m_fpRaw;
 
 // 생성입니다.
 public:
@@ -208,4 +212,6 @@ public:
 	afx_msg void OnBnClickedRadioGray();
 	afx_msg void OnBnClickedRadioGreen();
 	afx_msg void OnBnClickedRadioOrange();
+	afx_msg void OnBnClickedInitFringeData();
+	afx_msg void OnBnClickedAddFringeData();
 };
