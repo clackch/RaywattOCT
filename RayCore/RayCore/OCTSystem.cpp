@@ -1867,7 +1867,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		else {
 			// for severance
 			int maxLaplacian = INT_MIN;
-			int maxIndex = 0; double avgGradient = 0.0;
+			int maxIndex = 1; double avgGradient = 0.0;
 			for (int i = 2; i < gradient.size(); i++) {
 				if (gradient[i] == -1 || gradient[i - 1] == -1)
 					continue;
