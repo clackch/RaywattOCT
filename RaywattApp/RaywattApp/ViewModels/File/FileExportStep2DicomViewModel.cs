@@ -181,7 +181,7 @@ namespace RaywattApp.ViewModels.File
 
             if (CommonUtil.IsRV200())
             {
-                // Terms&Cond
+                // Terms&Cond (RV200)
                 var termsParams = new Dictionary<string, object>
                 {
                     ["classification"] = "Terms&Cond"
@@ -194,7 +194,7 @@ namespace RaywattApp.ViewModels.File
             }
             else
             {
-                // Institute
+                // Institute (RV201)
                 var instituteParams = new Dictionary<string, object>
                 {
                     ["classification"] = "Institute"
