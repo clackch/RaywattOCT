@@ -152,13 +152,33 @@ namespace RaywattApp.ViewModels
             SelectedPatient.Firstname = firstname;
             SelectedPatient.HasFirstname = (firstname != string.Empty);
 
-            if (!ValidateSelectedPatient(SelectedPatient.HasFirstname))
+            if (ValidateSelectedPatient(SelectedPatient.HasFirstname))
             {
-                Dictionary<string, object> param = new Dictionary<string, object>();
-                param["title"] = _l10n["Information"];
-                param["message"] = _l10n["Invalid format for patient information."];
-                _dialogService.OpenDialog(new ConfirmDialogControl(), param, Constants.ApplicationWidth, Constants.ApplicationHeight);
-                return;
+                Dictionary<string, object> confirmParam = new Dictionary<string, object>();
+                confirmParam["title"] = _l10n["Information"];
+                confirmParam["message"] = _l10n["Invalid format for patient information. Enter manually?"];
+                var confirmResult = _dialogService.OpenDialog(new ConfirmDialogControl(), confirmParam, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                if (confirmResult == null || confirmResult.DialogAnswer != DialogResults.Answer.Yes)
+                {
+                    return;
+                }
+
+                Dictionary<string, object> inputParam = new Dictionary<string, object>();
+                inputParam["patient"] = SelectedPatient;
+                var inputResult = _dialogService.OpenDialog(new PatientInputDialogControl(), inputParam, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                if (inputResult == null || inputResult.DialogAnswer != DialogResults.Answer.Yes)
+                {
+                    return;
+                }
+
+                Dictionary<string, Object> data = (Dictionary<string, Object>)inputResult.DialogReturn;
+                SelectedPatient.Id = data["id"].ToString();
+                SelectedPatient.Firstname = data["firstname"].ToString();
+                SelectedPatient.Lastname = data["lastname"].ToString();
+                SelectedPatient.Birthdate = (DateTime?)data["birthdate"];
+                SelectedPatient.Gender = data["gender"].ToString();
             }
 
             bool isExist = false;
