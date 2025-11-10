@@ -179,13 +179,26 @@ namespace RaywattApp.ViewModels.File
                 dicomProperty.Add(temp.ReturnString, temp.ReturnString2);
             }
 
-            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
-            sqlParameters["classification"] = "Terms&Cond";
-            IList<Configuration> tnCs = _sqlManager.SelectConfiguration(sqlParameters);
-            if (tnCs != null || tnCs.Count == 1)
+            // Terms&Cond
+            var termsParams = new Dictionary<string, object>
             {
-                //Institution Name
-                dicomProperty.Add("00080080", tnCs[0].Buffer);
+                ["classification"] = "Terms&Cond"
+            };
+            IList<Configuration> tnCs = _sqlManager.SelectConfiguration(termsParams);
+            if (tnCs != null && tnCs.Count > 0)
+            {
+                dicomProperty["00080080"] = tnCs[0].Buffer;
+            }
+
+            // Institute
+            var instituteParams = new Dictionary<string, object>
+            {
+                ["classification"] = "Institute"
+            };
+            IList<Configuration> institute = _sqlManager.SelectConfiguration(instituteParams);
+            if (institute != null && institute.Count > 0)
+            {
+                dicomProperty["00080070"] = institute[0].Value;
             }
 
             return dicomProperty;

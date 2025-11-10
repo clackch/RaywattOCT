@@ -719,7 +719,7 @@ namespace RaywattApp.ViewModels.Dialog
             //(0008, 0064)	Conversion Type	-	U	CS
             RayExportWrapper.DicomAddProperty(0x00080064, dicomProperty["00080064"], 0);
             //(0008, 0070)	Manufacturer	-	M, C, U	LO
-            RayExportWrapper.DicomAddProperty(0x00080070, ConfigurationManager.AppSettings.Get("Manufacturer"), 0);
+            RayExportWrapper.DicomAddProperty(0x00080070, dicomProperty["00080070"], 0);
             //(0008, 0080)	Institution Name	-	M	LO
             RayExportWrapper.DicomAddProperty(0x00080080, dicomProperty["00080080"], 0);
             //(0008, 0090)	Referring Physician's Name	-	C	PN
