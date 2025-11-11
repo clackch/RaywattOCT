@@ -617,7 +617,7 @@ namespace RaywattApp.ViewModels
                 }
                 else
                 {
-                    parameter["message"] = _l10n["The value is out of range.\n(over 24000)"];
+                    parameter["message"] = _l10n["The value is out of range.\n(over 24038)"];
                     VelocityPullback = 24038;
                 }
                 _dialogService.OpenDialog(new ConfirmDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
