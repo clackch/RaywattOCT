@@ -405,6 +405,65 @@ int CImagingSession::GetZOffset(int nFrame) {
 
 }
 
+void CImagingSession::CalculateZOffset(int nFrame, const cv::Mat autoCalibPatch) {
+	if (m_vZOffset.size() == nFrame || autoCalibPatch.empty()) return;
+	m_vZOffset.assign(nFrame, 0);
+	for(int nowFrame = 0; nowFrame < nFrame; nowFrame++) {
+		std::map<int, cv::Mat>::iterator it = m_mapImage.find(nowFrame);
+		if (it == m_mapImage.end()) {
+			PLOGI.printf("CalculateZOffset: frame %d is not processed yet.", nowFrame);
+			return;
+		}
+		cv::Rect roi(0, 0, it->second.cols, it->second.rows/2);
+		cv::Mat img = it->second(roi).clone();
+
+		cv::rotate(img, img, cv::ROTATE_90_COUNTERCLOCKWISE);
+		//cv::imwrite("CheckSheathPixels_origin" + std::to_string(i) + ".tif", img);
+		if (img.type() == CV_8U)
+			img.convertTo(img, CV_32F, 1.0 / 255.0);
+		else if (img.type() == CV_32F) {}
+		else {
+			PLOGI.printf("CalculateZOffset: Unsupported image type");
+		}
+
+		cv::Mat result;
+		cv::matchTemplate(img, autoCalibPatch, result, cv::TM_CCOEFF_NORMED);
+
+		cv::Mat mask = result != 1.0f;
+		double maxVal; cv::Point maxLoc;
+		cv::minMaxLoc(result, nullptr, &maxVal, nullptr, &maxLoc, mask);
+
+		int nowRow = 0, idealRow = 25;
+		if (maxVal < 0.7) {
+			PLOGI.printf("CalculateZOffset: maxRowVal is too small - %d", maxVal);
+			return;
+		}
+		else
+		{
+			/* section을 나눠 sheath 파악 안정성 추가*/
+			int validCount = 0, sectionDivision = 6, height = result.rows, width = result.cols / sectionDivision;
+			for (int i = 0; i < sectionDivision; i++)
+			{
+				cv::Mat section = result(cv::Rect(i * width, 0, width, height));
+				cv::Mat sectionMask = section != 1.0f;
+				cv::Point sectionMaxLoc;
+				cv::minMaxLoc(section, nullptr, &maxVal, nullptr, &sectionMaxLoc, sectionMask);
+				if (std::abs(sectionMaxLoc.y - maxLoc.y) < 15 && maxVal > 0.7)
+				{
+					nowRow += sectionMaxLoc.y;
+					validCount++;
+					PLOGI.printf("Valid");
+				}
+			}
+			if (validCount > 0)
+				nowRow /= validCount;
+			else
+				return;
+		}
+		m_vZOffset[nowFrame] = idealRow - nowRow;
+	}
+}
+
  void* CImagingSession::GetGuidewireRadius(int nFrame) {
 	if (m_vGuidewireRadius.size() <= nFrame) return 0;
 

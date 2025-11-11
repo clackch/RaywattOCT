@@ -108,6 +108,7 @@ public:
 	void SetZOffset(int zOffset) { m_zOffset = zOffset; }
 	int GetZOffset() { return m_zOffset; }
 	int GetZOffset(int nFrame);
+	void CalculateZOffset(int nFrame, const cv::Mat autoCalibPatch);
 
 	static std::vector<cv::Point> GetValidLumenContour(const cv::Mat& imageResultWithoutCompensation, int imgSize, const cv::Mat& centerMask, const cv::Ptr<cv::CLAHE>& clahe, COCTImaging *pImaging);
 	static int IsLumenNormal(cv::Mat image, std::vector<cv::Point> contour, double lumenThresholdMin, double lumenThresholdMax, double lumenSnrThreshold, bool showLumenGuide);

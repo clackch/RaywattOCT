@@ -144,6 +144,7 @@ public:
 	RayError OpenImage(char* strFilePath, double imageResolution, double zOffset);
 	RayError CloseImage();
 	void* GetImageData(int nFrame);
+	RayError SetZOffsetPerFrame(int nFrame);
 	void* GetLongitudeData(double fDegree);
 	void* GetLumenContour(int nFrame);
 	int GetNumOfLumenContourPoints(int nFrame);

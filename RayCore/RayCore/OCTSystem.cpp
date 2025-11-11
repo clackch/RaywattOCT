@@ -812,6 +812,25 @@ void* COCTSystem::GetImageData(int nFrame) {
 }
 
 /*
+* SetZOffsetPerFrame 
+*/
+RayError COCTSystem::SetZOffsetPerFrame(int nFrame) {
+	if (m_openedSession != nullptr) return RayError::WrongState;
+	else {
+		if (m_curSession == SESSION_UNKNOWN || m_reviewSession[m_curSession] == nullptr) {
+			PLOGI.printf("Session #%d is not started.", m_curSession);
+			return RayError::WrongState;
+		}
+		if (m_reviewSession[m_curSession]->IsProcessed(nFrame)) {
+			m_reviewSession[m_curSession]->CalculateZOffset(nFrame, m_autoCalibPatch);
+			return RayError::OK;
+		}
+	}
+
+	return RayError::WrongState;
+}
+
+/*
 * GetLongitudeData
 */
 void* COCTSystem::GetLongitudeData(double fDegree) {
