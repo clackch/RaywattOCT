@@ -392,6 +392,21 @@ namespace RaywattApp.ViewModels
                 for (int i = 0; i < count; i++)
                 {
                     var dicomWorklist = Marshal.PtrToStructure<DicomWorklist>(current);
+
+                    _log.Debug($"[{i}] PatientID: [{dicomWorklist.PatientId}]");
+                    _log.Debug($"[{i}] PatientName: [{dicomWorklist.PatientName}]");
+                    _log.Debug($"[{i}] PatientSex: [{dicomWorklist.PatientSex}]");
+                    _log.Debug($"[{i}] PatientBirthDate: [{dicomWorklist.PatientBirthDate}]");
+                    _log.Debug($"[{i}] PatientBirthTime: [{dicomWorklist.PatientBirthTime}]");
+                    _log.Debug($"[{i}] PatientAge: [{dicomWorklist.PatientAge}]");
+                    _log.Debug($"[{i}] AccessionNumber: [{dicomWorklist.AccessionNumber}]");
+                    _log.Debug($"[{i}] Modality: [{dicomWorklist.Modality}]");
+                    _log.Debug($"[{i}] ReferencedSOPClassUID: [{dicomWorklist.ReferencedSOPClassUID}]");
+                    _log.Debug($"[{i}] ReferencedSOPInstanceUID: [{dicomWorklist.ReferencedSOPInstanceUID}]");
+                    _log.Debug($"[{i}] IssuerOfPatientID: [{dicomWorklist.IssuerOfPatientID}]");
+                    _log.Debug($"[{i}] TypeOfPatientID: [{dicomWorklist.TypeOfPatientID}]");
+                    _log.Debug($"[{i}] PatientComments: [{dicomWorklist.PatientComments}]");
+
                     Worklists.Add(dicomWorklist);
 
                     current += Marshal.SizeOf<DicomWorklist>();
