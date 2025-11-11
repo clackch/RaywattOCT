@@ -408,6 +408,7 @@ int CImagingSession::GetZOffset(int nFrame) {
 void CImagingSession::CalculateZOffset(int nFrame, const cv::Mat autoCalibPatch) {
 	if (m_vZOffset.size() == nFrame || autoCalibPatch.empty()) return;
 	m_vZOffset.assign(nFrame, 0);
+	PLOGI.printf("CalculateZOffset: start for %d frames.", nFrame);
 	for(int nowFrame = 0; nowFrame < nFrame; nowFrame++) {
 		std::map<int, cv::Mat>::iterator it = m_mapImage.find(nowFrame);
 		if (it == m_mapImage.end()) {
@@ -448,6 +449,7 @@ void CImagingSession::CalculateZOffset(int nFrame, const cv::Mat autoCalibPatch)
 				cv::Mat sectionMask = section != 1.0f;
 				cv::Point sectionMaxLoc;
 				cv::minMaxLoc(section, nullptr, &maxVal, nullptr, &sectionMaxLoc, sectionMask);
+				PLOGI.printf("CalculateZOffset: x %d, y %d, value %lf", sectionMaxLoc.x, sectionMaxLoc.y, maxVal);
 				if (std::abs(sectionMaxLoc.y - maxLoc.y) < 15 && maxVal > 0.7)
 				{
 					nowRow += sectionMaxLoc.y;
@@ -461,6 +463,7 @@ void CImagingSession::CalculateZOffset(int nFrame, const cv::Mat autoCalibPatch)
 				return;
 		}
 		m_vZOffset[nowFrame] = idealRow - nowRow;
+		PLOGI.printf("CalculateZOffset: frame %d, nowRow %d, idealRow %d, zOffset %d", nowFrame, nowRow, idealRow, m_vZOffset[nowFrame]);
 	}
 }
 
