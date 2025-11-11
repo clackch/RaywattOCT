@@ -201,6 +201,8 @@ public:
 	double GetLumenSnrThreshold();
 	RayError SetLumenSnrThreshold(double value);
 	RayError SetRefractiveIndex(double value);
+	int GetVelocityPullback();
+	RayError SetVelocityPullback(int value);
 
 private:
 	// Main Thread

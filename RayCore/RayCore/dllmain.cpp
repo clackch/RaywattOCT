@@ -153,6 +153,9 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
     case RayProperty::RefractiveIndex:
         octSystem.SetRefractiveIndex(value);
         break;
+    case RayProperty::VelocityPullback:
+        octSystem.SetVelocityPullback(value);
+        break;
     default:
         return RayError::InvalidArgument;
     }
@@ -226,6 +229,8 @@ _declspec(dllexport) double RayGetProperty(RayProperty prop) {
         return octSystem.GetLumenSnrThreshold();
     case RayProperty::ShowLumenGuide:
         return octSystem.GetShowLumenGuide();
+    case RayProperty::VelocityPullback:
+        return octSystem.GetVelocityPullback();
     default:
         return (int)RayError::InvalidArgument;
     }

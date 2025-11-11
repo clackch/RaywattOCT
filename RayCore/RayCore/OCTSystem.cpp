@@ -552,6 +552,8 @@ RayError COCTSystem::RestartReview()
 */
 RayError COCTSystem::StartLiveView()
 {
+	PLOGI.printf("StartLiveView");
+
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 		if (m_pRJController->GetState() == eRJState::Error) return RayError::RotaryJunctionError;
@@ -575,9 +577,17 @@ RayError COCTSystem::StartLiveView()
 */
 RayError COCTSystem::StopLiveView()
 {
+	PLOGI.printf("StopLiveView");
+
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 		if (m_pRJController->GetState() == eRJState::Error) return RayError::RotaryJunctionError;
+
+		if (m_pImagingRealtime != m_pImagingLiveView) {
+			PLOGI.printf("m_pImagingRealtime != m_pImagingLiveView");
+			restartAcqDevice(m_pImagingLiveView);
+		}			
+
 		m_pImagingLiveView->Stop();
 		Sleep(500);
 
@@ -1397,6 +1407,42 @@ RayError COCTSystem::SetRefractiveIndex(double value)
 	config.imaging.distPerPixel = config.measurement.GetAxialResolutionScale();
 	m_pImagingPullback->SetDistPerPixel(config.imaging.distPerPixel);
 	m_pImagingLiveView->SetDistPerPixel(config.imaging.distPerPixel);
+
+	return RayError::OK;
+}
+
+int COCTSystem::GetVelocityPullback()
+{
+	CConfiguration& config = CConfiguration::GetInstance();
+	
+	return config.bldcMotor.velocityPullback;
+}
+
+RayError COCTSystem::SetVelocityPullback(int value)
+{
+	PLOGI.printf("Set Velocity Pullback (%d)", value);
+
+	CConfiguration& config = CConfiguration::GetInstance();
+
+	if (config.WriteInt(_T("BLDCMotor"), _T("VelocityPullback"), value))
+		config.bldcMotor.velocityPullback = value;
+
+	if (m_pImagingPullback != nullptr) {
+		m_pImagingPullback->Stop();
+		delete m_pImagingPullback;
+		m_pImagingPullback = nullptr;
+	}
+
+	IImaging::Setting settingPullback = config.imaging;
+	settingPullback.Set(settingPullback.nAScan, floor((double)config.acquisition.nLaserSpeed / ((double)config.bldcMotor.velocityPullback / 60.f)));
+	PLOGI.printf("Pullback setting: LaserSpeed=%ld, Velocity=%ldrpm, NumOfAlines=%ld", config.acquisition.nLaserSpeed, config.bldcMotor.velocityPullback, settingPullback.nBScan);
+	m_pImagingPullback = CImagingSession::CreateColorImaging(this, settingPullback, nullptr, ImagingType::Default);
+	if (!m_pImagingPullback) {
+		PLOGI.printf("Failed to create imaging pullback");
+		return RayError::WrongSession;
+	}
+	m_pImagingPullback->SetSession(SESSION_REALTIME);
+	m_pImagingPullback->Start();
 
 	return RayError::OK;
 }

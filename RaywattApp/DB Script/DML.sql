@@ -29,6 +29,7 @@ INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES (
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'Compensate', 'Y', 'Raywatt;');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'CertIgnore', 'Y', 'Raywatt;');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'AIFFR', 'Y', 'Raywatt;');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'VelocityPB', 'Y', 'Raywatt;');
 
 -- rv_schema.code
 DELETE FROM rv_schema.code;
