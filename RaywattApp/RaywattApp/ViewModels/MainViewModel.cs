@@ -606,6 +606,23 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("SetVelocityPullback : " + VelocityPullback);
 
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            if (VelocityPullback < 4800 || VelocityPullback > 24038)
+            {
+                parameter["title"] = _l10n["Information"];
+                if (VelocityPullback < 4800)
+                {
+                    parameter["message"] = _l10n["The value is out of range.\n(under 4800)"];
+                    VelocityPullback = 4800;
+                }
+                else
+                {
+                    parameter["message"] = _l10n["The value is out of range.\n(over 24000)"];
+                    VelocityPullback = 24038;
+                }
+                _dialogService.OpenDialog(new ConfirmDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+            }
+
             RayError result = (RayError)RaySetProperty(Property.VelocityPullback, VelocityPullback);
             if (result != RayError.OK)
             {
