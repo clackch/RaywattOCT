@@ -22,6 +22,7 @@ void CRayYolo::Initialize(bool useGPU){
 
 		m_yoloSegment = InitializeSegment();
 		m_yoloDetect = InitializeDetect();
+		m_yoloCalciumSegment = InitializeCalciumSegment();
 	}
 }
 
