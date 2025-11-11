@@ -51,6 +51,7 @@ void PullbackLengthManager::CutPullbackLength(int pullbackType, int rotationSpee
 	// 400rps 기준 배율 (예: 200rps면 0.5)
 	double rotationFactor = (double)rotationSpeed / 24038.0;
 	extraFrameNum = QuantizeExtraFrames(extraFrameNum, rotationFactor);
+	PLOGI.printf("QuantizeExtraFrames Done");
 
 	SkipFrames(stopFrames, pullbackType, rotationRatio, extraFrameNum);
 }
@@ -69,8 +70,8 @@ void PullbackLengthManager::SkipFrames(int stopRecordedFrames, int pullbackType,
 		const int n = m_nNumOfSamples;
 		const int halfLenForRange = std::max(0, extraFrameNum);
 
-		// 1) thresholdScale 이분탐색으로 skip 수를 target에 근접
-		double lo = 0.0, hi = 1.0;     // 경험적 범위 (필요시 조정)
+		// thresholdScale 이분탐색
+		double lo = 0, hi = 5;
 		MaskResult bestRes;
 		int bestDiff = INT_MAX;
 
@@ -95,7 +96,7 @@ void PullbackLengthManager::SkipFrames(int stopRecordedFrames, int pullbackType,
 			}
 		}
 
-		// 2) 균등 간격 보정으로 정확히 targetSkip 달성
+		// 균등 간격 보정으로 정확히 targetSkip 달성
 		int curSkip = bestRes.skipCount;
 		auto& mask = bestRes.keepMask;
 
@@ -141,7 +142,7 @@ void PullbackLengthManager::SkipFrames(int stopRecordedFrames, int pullbackType,
 			distribute_toggle(curSkip - extraFrameNum, /*toSkip=*/false);
 		}
 
-		// 안전 마무리(혹시 잔차가 남으면 선형으로 맞춤)
+		// 잔차가 남으면 선형으로 맞춤
 		if (curSkip != extraFrameNum) {
 			if (curSkip < extraFrameNum) {
 				for (int i = leftGuard; i < rightGuard && curSkip < extraFrameNum; ++i) toggle_to_skip(i);
