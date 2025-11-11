@@ -203,6 +203,8 @@ public:
 	RayError SetRefractiveIndex(double value);
 	int GetVelocityPullback();
 	RayError SetVelocityPullback(int value);
+	RayError ResetBLDC();
+	RayError RunAndStopBLDC(int value);
 
 private:
 	// Main Thread

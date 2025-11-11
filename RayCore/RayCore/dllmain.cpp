@@ -156,6 +156,13 @@ _declspec(dllexport) RayError RaySetProperty(RayProperty prop, double value) {
     case RayProperty::VelocityPullback:
         octSystem.SetVelocityPullback(value);
         break;
+    case RayProperty::ResetBLDC:
+        octSystem.ResetBLDC();
+        break;
+    case RayProperty::RunAndStopBLDC:
+        octSystem.RunAndStopBLDC(value);
+        break;
+
     default:
         return RayError::InvalidArgument;
     }

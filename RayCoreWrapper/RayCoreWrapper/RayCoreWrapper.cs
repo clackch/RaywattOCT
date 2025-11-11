@@ -61,7 +61,9 @@ namespace RaywattOCT
             LumenSnrThreshold,
             ShowLumenGuide,
             RefractiveIndex,
-            VelocityPullback
+            VelocityPullback,
+            ResetBLDC,
+            RunAndStopBLDC
         }
 
         public enum RayCallbackRequest : int

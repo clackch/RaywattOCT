@@ -79,6 +79,8 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private int _velocityPullback;
 
+        private bool RunBLDC = true;
+
         private ICommand _homeCommand;
         public ICommand HomeCommand
         {
@@ -187,6 +189,20 @@ namespace RaywattApp.ViewModels
         public ICommand SetVelocityPullbackCommmand
         {
             get { return this._setVelocityPullback ?? (this._setVelocityPullback = new RelayCommand(SetVelocityPullback)); }
+        }
+
+        //Test
+        private ICommand _reSetBLDC;
+        public ICommand ReSetBLDCCommand
+        {
+            get { return this._reSetBLDC ?? (this._reSetBLDC = new RelayCommand(ReSetBLDC)); }
+        }
+
+        //Test
+        private ICommand _runAndStopBLDC;
+        public ICommand RunAndStopBLDCCommand
+        {
+            get { return this._runAndStopBLDC ?? (this._runAndStopBLDC = new RelayCommand(RunAndStopBLDC)); }
         }
 
         // to avoid garbage collection
@@ -627,6 +643,40 @@ namespace RaywattApp.ViewModels
             if (result != RayError.OK)
             {
                 _log.Error("RaySetProperty Error");
+            }
+        }
+
+        private void ReSetBLDC()
+        {
+            _log.Debug("ReSetBLDC");
+            
+            RayError result = (RayError)RaySetProperty(Property.ResetBLDC, 0);
+            if (result != RayError.OK)
+            {
+                _log.Error("ReSetBLDC Error");
+            }
+        }
+
+        private void RunAndStopBLDC()
+        {
+            _log.Debug("RunAndStopBLDC");
+
+            RayError result;
+
+            if (RunBLDC)
+            {
+                result = (RayError)RaySetProperty(Property.RunAndStopBLDC, 0);
+            }
+            else
+            {
+                result = (RayError)RaySetProperty(Property.RunAndStopBLDC, 1);
+            }
+
+            RunBLDC = !RunBLDC;
+
+            if (result != RayError.OK)
+            {
+                _log.Error("RunAndStopBLDC Error");
             }
         }
 

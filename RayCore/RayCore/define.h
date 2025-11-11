@@ -63,7 +63,9 @@ enum class RayProperty {
 	LumenSnrThreshold,
 	ShowLumenGuide,
 	RefractiveIndex,
-	VelocityPullback
+	VelocityPullback,
+	ResetBLDC,
+	RunAndStopBLDC
 };
 
 enum class RayCallbackRequest {

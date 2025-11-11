@@ -1447,6 +1447,64 @@ RayError COCTSystem::SetVelocityPullback(int value)
 	return RayError::OK;
 }
 
+RayError COCTSystem::ResetBLDC()
+{
+	if (!m_pRJController) {
+		PLOGI.printf("Failed to create m_pRJController");
+		return RayError::RotaryJunctionError;
+	}
+
+	if (m_pRJController->IsConnected()){
+		bool result = true;
+
+		result &= m_pRJController->SwitchOff();
+		result &= m_pRJController->SwitchOn();
+
+		if (!result) {
+			PLOGI.printf("Failed to reset RJ BLDC");
+			return RayError::RotaryJunctionError;
+		}
+
+		return RayError::OK;
+	}
+
+	PLOGI.printf("m_pRJController->IsConnected() false");
+	return RayError::RotaryJunctionError;
+}
+
+RayError COCTSystem::RunAndStopBLDC(int value)
+{
+	
+	if (!m_pRJController) {
+		PLOGI.printf("Failed to create m_pRJController");
+		return RayError::RotaryJunctionError;
+	}
+
+	if (m_pRJController->IsConnected()) {
+
+		bool result = false;
+
+		if (value == 1) {
+			int speed = 12000;
+			result = m_pRJController->PerformRun(speed);
+		}
+		else {
+			int speed = 0;
+			result = m_pRJController->PerformRun(speed);
+		}
+
+		if (!result) {
+			PLOGI.printf("Failed to RunAndStopBLDC RJ BLDC");
+			return RayError::RotaryJunctionError;
+		}
+
+		return RayError::OK;
+
+	}
+	PLOGI.printf("m_pRJController->IsConnected() false");
+	return RayError::RotaryJunctionError;
+}
+
 /*
 * threadService
 */
