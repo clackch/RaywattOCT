@@ -86,7 +86,7 @@
                         <Button Style="{DynamicResource BtnForTest2}" Command="{Binding SetVelocityPullbackCommmand}" Width="40" Height="15" FontSize="9" Content="Set"/>
                     </StackPanel>
                 </StackPanel>
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" Margin="990,0,0,0" Visibility="Hidden">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" Margin="990,0,0,0" Visibility="Visible">
                     <StackPanel Orientation="Vertical">
                         <Button Style="{DynamicResource BtnForTest2}" Command="{Binding ReSetBLDCCommand}" Width="80" Height="15" FontSize="9" Content="BLDC Reset"/>
                         <Button Style="{DynamicResource BtnForTest2}" Command="{Binding RunAndStopBLDCCommand}" Width="80" Height="15" FontSize="9" Content="BLDC Run/Stop"/>
