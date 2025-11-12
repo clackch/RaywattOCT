@@ -718,18 +718,10 @@ namespace RaywattApp.ViewModels.Dialog
             RayExportWrapper.DicomAddProperty(0x00080060, dicomProperty["00080060"], 0);
             //(0008, 0064)	Conversion Type	-	U	CS
             RayExportWrapper.DicomAddProperty(0x00080064, dicomProperty["00080064"], 0);
-
-            if (CommonUtil.IsRV200())
-            {
-                //(0008, 0080)	Institution Name	-	M	LO (RV200)
-                RayExportWrapper.DicomAddProperty(0x00080080, dicomProperty["00080080"], 0);
-            }
-            else
-            {
-                //(0008, 0070)	Manufacturer	-	M, C, U	LO (RV201)
-                RayExportWrapper.DicomAddProperty(0x00080070, dicomProperty["00080070"], 0);
-            }
-
+            //(0008, 0070)	Manufacturer	-	M, C, U	LO (RV201)
+            RayExportWrapper.DicomAddProperty(0x00080070, dicomProperty["00080070"], 0);
+            //(0008, 0080)	Institution Name	-	M	LO (RV200)
+            RayExportWrapper.DicomAddProperty(0x00080080, dicomProperty["00080080"], 0);
             //(0008, 0090)	Referring Physician's Name	-	C	PN
             RayExportWrapper.DicomAddProperty(0x00080090, patientCase.PhysicianName, 0);
             //(0008, 0201)	Timezone Offset From UTC	-	C	SH
