@@ -152,7 +152,7 @@ namespace RaywattApp.ViewModels
             SelectedPatient.Firstname = firstname;
             SelectedPatient.HasFirstname = (firstname != string.Empty);
 
-            if (ValidateSelectedPatient(SelectedPatient.HasFirstname))
+            if (!ValidateSelectedPatient(SelectedPatient.HasFirstname))
             {
                 Dictionary<string, object> confirmParam = new Dictionary<string, object>();
                 confirmParam["title"] = _l10n["Information"];
