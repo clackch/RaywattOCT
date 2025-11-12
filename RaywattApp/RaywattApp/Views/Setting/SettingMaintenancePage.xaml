@@ -19,6 +19,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="30"/>
                     <RowDefinition Height="54"/>
+                    <RowDefinition Height="54"/>                
                     <RowDefinition/>
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="28,0,28,0">
@@ -26,6 +27,12 @@
                 </StackPanel>
                 <StackPanel Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Margin="0,0,28,0">
                     <Button Grid.Column="2" Style="{StaticResource OutlinedBtnType3}" Width="200" Height="54" Command="{Binding RJCleanModeOnOffCommand}" Content="{Binding BtnName}" IsEnabled="{Binding DeviceStatus.IsCleaningDone}"/>
+                </StackPanel>
+                <StackPanel Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Margin="28,0,28,0">
+                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Multi Monitor], Source={StaticResource L10N}}"/>
+                </StackPanel>
+                <StackPanel Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Margin="0,0,28,0">
+                    <Button Grid.Column="2" Style="{StaticResource OutlinedBtnType3}" Width="200" Height="54" Command="{Binding MuliMonitorSetCommand}" Content="{Binding BtnNameMonitorSet}" IsEnabled="{Binding IsMuliMonitorSetBntEnable}"/>                    
                 </StackPanel>
             </Grid>
         </Border>
