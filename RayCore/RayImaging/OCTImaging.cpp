@@ -155,9 +155,22 @@ void COCTImaging::PostProcess(cv::Mat image) {
 }
 void COCTImaging::ApplyZOffset(const cv::Mat& src, cv::Mat& dst, int zOffset) {
 	cv::Mat img = src.clone();
+	dst.create(img.size(), img.type());
+	dst.setTo(cv::Scalar::all(0));
 
-	cv::Mat translation_matrix = (cv::Mat_<double>(2, 3) << 1, 0, zOffset * -1, 0, 1, 0);
-	cv::warpAffine(img, dst, translation_matrix, img.size());
+	if (zOffset > 0) {
+		cv::Rect srcR(zOffset, 0, img.cols - zOffset, img.rows);
+		cv::Rect dstR(0, 0, img.cols - zOffset, img.rows);
+		img(srcR).copyTo(dst(dstR));
+	}
+	else if (zOffset < 0) {
+		cv::Rect srcR(0, 0, img.cols + zOffset, img.rows);
+		cv::Rect dstR(-zOffset, 0, img.cols + zOffset, img.rows);
+		img(srcR).copyTo(dst(dstR));
+	}
+	else {
+		img.copyTo(dst);
+	}
 }
 int COCTImaging::Start() {
 	BOOL result = FALSE;
