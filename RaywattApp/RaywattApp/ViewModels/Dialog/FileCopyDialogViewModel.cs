@@ -340,20 +340,53 @@ namespace RaywattApp.ViewModels.Dialog
                     var files = Directory.GetFiles(Constants.DicomTempFolderPath)
                         .Where(f => System.IO.Path.GetFileName(f).StartsWith(Constants.ExportDicomPrefix, StringComparison.OrdinalIgnoreCase)).ToList();
 
-                    int count = files.Count;
+                    int totalCount = files.Count;
+                    int currentIndex = 0;
+                    const int MAX_RETRY = 2;
+                    const int RETRY_DELAY_MS = 500;
+
+                    _log.Debug($"C-STORE transfer started: Total {totalCount} file(s)");
 
                     foreach (var file in files)
                     {
-                        _log.Debug(file);
+                        currentIndex++;
+                        int retryCount = 0;
+                        bool success = false;
 
-                        res = await Task.Run(() => (RayExportWrapper.DicomNetRWError)RayExportWrapper.StoreFile(dicomClient, file));
-                        _log.DebugFormat("StoreFile : {0}", res);
+                        string fileName = System.IO.Path.GetFileName(file);
 
-                        if (res == RayExportWrapper.DicomNetRWError.Normal)
+                        _log.Debug($"File transfer started: {fileName} ({currentIndex}/{totalCount})");
+                        _log.Debug($"File path: {file}");
+
+                        while (retryCount < MAX_RETRY && !success)
                         {
-                            Progress = Progress + progressConvert / count;
+                            retryCount++;
+
+                            _log.Debug($"Transfer attempt: {retryCount}/{MAX_RETRY}");
+
+                            res = await Task.Run(() => (RayExportWrapper.DicomNetRWError)RayExportWrapper.StoreFile(dicomClient, file));
+
+                            if (res == RayExportWrapper.DicomNetRWError.Normal)
+                            {
+                                success = true;
+                                Progress = Progress + progressConvert / totalCount;
+                                _log.Debug($"Store succeeded: {fileName}");
+                                _log.Debug(CommonUtil.GetDicomResultMessage(res));
+                            }
+                            else
+                            {
+                                _log.Debug(CommonUtil.GetDicomResultMessage(res));
+                                _log.Debug($"Attempt: {retryCount}/{MAX_RETRY}");
+
+                                if (retryCount < MAX_RETRY)
+                                {
+                                    await Task.Delay(RETRY_DELAY_MS);
+                                }
+                            }
+
                         }
-                        else
+
+                        if (!success)
                         {
                             isDicomError = true;
                             ProgressText = CommonUtil.GetDicomResultMessage(res);
