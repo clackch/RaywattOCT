@@ -447,11 +447,6 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f)
 			(int)st, nAScan, IppHintName(kHilbertAlg));
 		return;
 	}
-	PLOGI.printf("[HilbertGetSize] OK: spec=%d bytes, work=%d bytes, nAScan=%d, alg=%s",
-		hilbertSpecSize, hilbertBufSize, nAScan, IppHintName(kHilbertAlg));
-
-	// FFT work buf 사이즈는 Initialize()에서 계산됨
-	PLOGI.printf("[FFT] fftWorkBufSize(second)=%d, fftSpec(ptr)=%p", (int)fftWorkBufSize, fftSpec);
 
 	// --- 스레드 컨텍스트 할당 ---
 	std::vector<FFTThreadContext> threadContexts(numThreads);
