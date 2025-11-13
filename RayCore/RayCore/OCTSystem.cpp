@@ -2110,7 +2110,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 
 		pSystem->m_pImagingLiveView->SetAutoCalibrationMathod(AutoCalibrationMathod::Disable);
 		
-#if 0
+#if 1
 		// 2. Start Finding Peak
 		pSystem->m_vCalibrationInfo.clear();
 		pSystem->m_cathState = CatheterState::FindingPeak;
@@ -2119,7 +2119,8 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		nTargetPos = pLaserModule->Move(eStepMotorIndex::Polarization, 0);
 		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
 
-		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::Polarization, 3240);
+		int polarizationRange = -1600;
+		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::Polarization, polarizationRange);
 		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
 
 		// 2-2. Find Max Peak
@@ -2134,6 +2135,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 
 		// 2-3. Move to calibrated position
 		nTargetPos = nMaxPeakPos;
+		PLOGI.printf("Polarization Calibrated Position : %d, Peak Value : %d", nTargetPos, nMaxPeak);
 		pLaserModule->Move(eStepMotorIndex::Polarization, nTargetPos);
 		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
 #endif
@@ -2823,6 +2825,7 @@ int COCTSystem::connectRotaryJunction() {
 #ifdef DELAY_LINE_HOMING_WORKS
 			m_pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX);
 			m_pLaserModule->Current(eStepMotorIndex::DelayLine, DELAY_LINE_UPPER_END_POSITION);
+			m_pLaserModule->Current(eStepMotorIndex::Polarization, POLARIZATION_UPPER_END_POSITION);
 
 			Sleep(500);
 
@@ -2852,8 +2855,32 @@ int COCTSystem::connectRotaryJunction() {
 			}
 			m_pLaserModule->PrintPhotoSensor();
 
+			PLOGI.printf("Polarization Homing start =========================================");
+			m_pLaserModule->Move(eStepMotorIndex::Polarization, 0, false, static_cast<char>(0x01));
+
+			Sleep(500);
+
+			while (m_pLaserModule->IsMoving(eStepMotorIndex::Polarization)) {
+				Sleep(50);
+			}
+			m_pLaserModule->PrintPhotoSensor();
+
+			m_pLaserModule->Current(eStepMotorIndex::Polarization, 0);
+
+			Sleep(500);
+
+			PLOGI.printf("Move to %d =========================================", config.laserModule.polarPosition);
+			m_pLaserModule->Move(eStepMotorIndex::Polarization, -config.laserModule.polarPosition);
+
+			Sleep(500);
+
+			while (m_pLaserModule->IsMoving(eStepMotorIndex::Polarization)) {
+				Sleep(50);
+			}
+			m_pLaserModule->PrintPhotoSensor();
+
 			m_pLaserModule->Current(eStepMotorIndex::DelayLine, config.laserModule.delayPosition);
-			m_pLaserModule->Move(eStepMotorIndex::Polarization, config.laserModule.polarPosition);
+			m_pLaserModule->Current(eStepMotorIndex::Polarization, -config.laserModule.polarPosition);
 #endif
 		}
 		else
@@ -2982,8 +3009,7 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 			int nSheathPosition = m_pImagingRealtime->GetSheathPosition();
 			int nDelayLinePos = m_pLaserModule->GetPosition(eStepMotorIndex::DelayLine);
 			m_vCalibrationInfo.push_back(std::make_pair(nSheathPosition, nDelayLinePos));
-			PLOGI.printf("FindingSheath - %d, %d", nSheathPosition, nDelayLinePos);
-			//PLOGI.printf("FindingSheath - %lf, %d", FFTscore, nDelayLinePos);
+			//PLOGI.printf("FindingSheath - %d, %d", nSheathPosition, nDelayLinePos);
 		}
 			break;
 		case CatheterState::CheckSheath: 
@@ -2999,11 +3025,11 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 
 			USHORT nPeakValue;
 			int nPeakIndex, nLineWidth;
-			measurement.CalculateAxialResolution(((CLabImaging *)m_pImagingRealtime)->GetScopeFFTData(), config.imaging.nOutputLength, config.measurement, nPeakValue, nPeakIndex, nLineWidth);
+			measurement.CalculateAxialResolution(((CLabImaging *)m_pImagingRealtime)->GetScopeData(), config.imaging.nAScan, config.measurement, nPeakValue, nPeakIndex, nLineWidth);
 
 			int nPolarizationPos = m_pLaserModule->GetPosition(eStepMotorIndex::Polarization);
 			m_vCalibrationInfo.push_back(std::make_pair(nPeakValue, nPolarizationPos));
-			//PLOGI.printf("FindingPeak - %d, %d", nPeakValue, nPolarizationPos);
+			PLOGI.printf("FindingPeak - %d, %d", nPeakValue, nPolarizationPos);
 		}
 			break;
 		default:
