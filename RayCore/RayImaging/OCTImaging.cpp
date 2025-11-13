@@ -401,24 +401,40 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f)
 
 	// 한 번만 지표 로그
 	if (!g_loggedMaps.load()) {
+		int violations = 0;
+		float prev = (float)calibration->indexMap[0] + calibration->weightMap[0];
+		for (int j = 1; j < nOut; ++j) {
+			float cur = (float)calibration->indexMap[j] + calibration->weightMap[j];
+			if (cur + 1e-6f < prev) ++violations;   // ← epsilon
+			prev = cur;
+		}
+		if (violations > 0) {
+			PLOGW.printf("[fftProcessing] map monotonicity violations = %d (check Calibration.dat)", violations);
+		}
+
 		int idxMin = INT_MAX, idxMax = INT_MIN;
-		float wMin = std::numeric_limits<float>::infinity();
-		float wMax = -std::numeric_limits<float>::infinity();
+		float wMin = FLT_MAX, wMax = -FLT_MAX;
 		for (int j = 0; j < nOut; ++j) {
 			idxMin = std::min(idxMin, calibration->indexMap[j]);
 			idxMax = std::max(idxMax, calibration->indexMap[j]);
 			wMin = std::min(wMin, calibration->weightMap[j]);
 			wMax = std::max(wMax, calibration->weightMap[j]);
 		}
-		PLOGI.printf("[fftProcessing] Sizes: nAScan=%d, nBScan=%d, nOut=%d", nAScan, nBScan, nOut);
-		PLOGI.printf("[fftProcessing] indexMap range=[%d..%d] (expected 0..%d), weightMap range=[%.6f..%.6f] (expected 0..1)",
+		PLOGI.printf("[fftProcessing] indexMap range=[%d..%d] (expected 0..%d), weightMap range=[%.6f..%.6f]",
 			idxMin, idxMax, nAScan - 2, wMin, wMax);
-		PLOGI.printf("[fftProcessing] window ptr=%p (first=%.6f, last=%.6f)",
-			calibration->window,
-			(double)calibration->window[0],
-			(double)calibration->window[nAScan - 1]);
+
+		if (calibration->window) {
+			PLOGI.printf("[fftProcessing] window ptr=%p (first=%.6f, last=%.6f)",
+				calibration->window,
+				(double)calibration->window[0],
+				(double)calibration->window[nAScan - 1]);
+		}
+		else {
+			PLOGI.printf("[fftProcessing] window ptr=%p (no window loaded; unity window assumed)", calibration->window);
+		}
 		g_loggedMaps.store(true);
 	}
+
 
 	// carrier f0 한 번만 추정 -> demod 톤 생성
 	static bool toneReady = false;
@@ -587,7 +603,7 @@ void COCTImaging::MakeDemodTone(std::vector<Ipp32fc>& tone, double f0norm, int n
 	const double w = 2.0 * M_PI * f0norm;
 	for (int n = 0; n < nAScan; ++n) {
 		double a = w * n;
-		tone[n].re = (Ipp32f)std::cos(a);   // exp(-j 2π f0 n)
+		tone[n].re = (Ipp32f)std::cos(a);
 		tone[n].im = (Ipp32f)-std::sin(a);
 	}
 }

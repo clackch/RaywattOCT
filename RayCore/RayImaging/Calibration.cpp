@@ -127,6 +127,20 @@ bool CCalibration::readCalibration(LPCTSTR calibrationFileName)
         weightMap[j] = std::min(std::max(weightMap[j], 0.0f), 1.0f);
     }
 
+    for (int j = 0; j < nSignal; ++j) {
+        const float re = dispersion[j].re, im = dispersion[j].im;
+        const float mag2 = re * re + im * im;
+        if (mag2 > 0.f) {
+            const float inv = 1.0f / std::sqrt(mag2);
+            dispersion[j].re = re * inv;
+            dispersion[j].im = im * inv;
+        }
+        else {
+            dispersion[j].re = 1.f; // fallback
+            dispersion[j].im = 0.f;
+        }
+    }
+
     // 참고 로그
     const int expectedN = nAScan;  // demod/analytic 기준
     if ((int)hdr.N != expectedN) {
