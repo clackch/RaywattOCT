@@ -37,6 +37,10 @@ int CATSDevice::InitDevice() {
 		PLOGI.printf("AlazarGetBoardKind: %d (ATS9371)", type);
 		m_admaFlags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT | ADMA_FIFO_ONLY_STREAMING;
 	}
+	else if (type == ATS9373) {
+		PLOGI.printf("AlazarGetBoardKind: %d (ATS9373)", type);
+		m_admaFlags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT;
+	}
 	else {	/*ATS9364*/
 		PLOGI.printf("AlazarGetBoardKind: %d (ATS9364)", type);
 		m_admaFlags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT;
@@ -218,7 +222,7 @@ BOOL CATSDevice::calibrateBoard(HANDLE boardHandle)
 	retCode = AlazarSetTriggerTimeOut(boardHandle, triggerTimeout_clocks);
 	PLOGI.printf("AlazarSetTriggerTimeOut -- %s", AlazarErrorToText(retCode));
 
-	retCode = AlazarConfigureAuxIO(boardHandle, AUX_OUT_TRIGGER, AUX_OUT_TRIGGER);
+	retCode = AlazarConfigureAuxIO(boardHandle, AUX_IN_TRIGGER_ENABLE, TRIGGER_SLOPE_POSITIVE);
 	PLOGI.printf("AlazarConfigureAuxIO -- %s", AlazarErrorToText(retCode));
 
 	retCode = AlazarBeforeAsyncRead(boardHandle, CHANNEL_A, (long) -1 * preTriggerSamples,
@@ -268,14 +272,8 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	// - select clock source INTERNAL_CLOCK and sample rate SAMPLE_RATE_100MSPS
 	// - select clock source FAST_EXTERNAL_CLOCK, sample rate SAMPLE_RATE_USER_DEF, and connect a
 	//   100 MHz signal to the EXT CLK BNC connector.
-	double dutyCycle = 0.5f;	// maximum 50%
-	U32 srcClock = INTERNAL_CLOCK;
-	U32 rate = SAMPLE_RATE_1000MSPS;
-
-	if (useKClock) {
-		srcClock = FAST_EXTERNAL_CLOCK;
-		rate = SAMPLE_RATE_USER_DEF;
-	}
+	U32 srcClock = FAST_EXTERNAL_CLOCK;
+	U32 rate = SAMPLE_RATE_4000MSPS;
 
 	retCode = AlazarSetCaptureClock(boardHandle,
 		srcClock,
@@ -363,7 +361,7 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 
 	// TODO: Configure AUX I/O connector as required
 	
-	retCode = AlazarConfigureAuxIO(boardHandle, AUX_OUT_TRIGGER, AUX_OUT_TRIGGER);
+	retCode = AlazarConfigureAuxIO(boardHandle, AUX_IN_TRIGGER_ENABLE, TRIGGER_SLOPE_POSITIVE);
 	if (retCode != ApiSuccess)
 	{
 		PLOGI.printf("Error: AlazarConfigureAuxIO failed -- %s\n", AlazarErrorToText(retCode));
@@ -371,7 +369,7 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	}
 
 	// Ignore Bad Clock when using K-Clock
-	if (useKClock) {
+	if (false) {
 		// (goodClock + badClock) <= triggerCycleTime(=0.000010)
 		double triggerCycleTime, triggerPulseWidth;
 		retCode = AlazarOCTIgnoreBadClock(m_hATSBoard, TRUE, secGoodClkDuration, secBadClkDuration, &triggerCycleTime, &triggerPulseWidth);
