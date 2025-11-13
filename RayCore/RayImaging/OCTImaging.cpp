@@ -1541,56 +1541,130 @@ void COCTImaging::GetAcuteAngleToXAxis(cv::Vec2d vector1, cv::Vec2d vector2, dou
 	angle = std::acos(cosTheta);
 }
 
-void COCTImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours, int& angleNum, std::vector<int>& startAngle, std::vector<int>& endAngle, int frameNum) {
+#include <chrono>
 
-	if (calciumContours.empty())return;
+void COCTImaging::SetCalciumAngle(std::vector<std::vector<cv::Point>> calciumContours,
+	int& angleNum,
+	std::vector<int>& startAngle,
+	std::vector<int>& endAngle,
+	int frameNum)
+{
+	std::chrono::system_clock::time_point m_start, m_end;
+	m_end = std::chrono::system_clock::now();
+	std::chrono::milliseconds total_time = std::chrono::duration_cast<std::chrono::milliseconds>(m_end - m_start);
+	double m_fps = 1000.f / total_time.count();
 
-	// 컨투어 그리기
-	cv::Mat contourImage = cv::Mat::zeros(imageCircle.size(), CV_8UC1);
-	cv::drawContours(contourImage, calciumContours, -1, cv::Scalar(255), cv::FILLED);
+	startAngle.clear();
+	endAngle.clear();
+	angleNum = 0;
 
-	cv::Mat contourRectImg;
-	InverseCircularizeImage(contourImage, contourRectImg);
+	if (calciumContours.empty())
+		return;
 
-	std::vector<std::vector<cv::Point>> rectangleCalciumContours;
-	cv::findContours(contourRectImg, rectangleCalciumContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-	std::vector<cv::Point> startAnglePoint;
-	std::vector<cv::Point> endAnglePoint;
-	for (const auto& contour : rectangleCalciumContours) {
-		cv::Rect rect = cv::boundingRect(contour);
-		if (rect.height * rect.width <= 500)continue;
-		startAnglePoint.push_back(cv::Point(rect.x + rect.width / 2, rect.y + rect.height));
-		endAnglePoint.push_back(cv::Point(rect.x + rect.width / 2, rect.y));
+	cv::Point2d center(m_nWidth / 2.0, m_nHeight / 2.0);
+
+	const double MIN_AREA = 500.0;       // 너무 작은 칼슘 무시
+	const double MIN_ANGLE_SPAN = 1.0;   // 1도 이하는 잡음으로 무시
+
+	for (const auto& contour : calciumContours)
+	{
+		double area = cv::contourArea(contour);
+		if (area <= MIN_AREA)
+			continue;
+
+		// 1) 컨투어의 모든 점을 중심 기준 각도(0~360)로 변환
+		std::vector<double> angles;
+		angles.reserve(contour.size());
+
+		for (const auto& pt : contour)
+		{
+			// GetTheta는 0도 = 12시, 시계방향 증가" 를 반환한다고 가정
+			double theta = GetTheta(pt, center);   // [0, 360) 범위
+			if (theta < 0.0)   theta += 360.0;
+			if (theta >= 360.0) theta -= 360.0;
+			angles.push_back(theta);
+		}
+
+		if (angles.empty())
+			continue;
+
+		// 2) 각도들을 정렬 후, 가장 큰 gap을 찾아
+		//    "가장 큰 gap을 제외한 나머지"를 하나의 연속된 arc로 간주
+		std::sort(angles.begin(), angles.end());
+		int n = static_cast<int>(angles.size());
+		double maxGap = -1.0;
+		int maxGapIdx = -1;
+
+		for (int i = 0; i < n; ++i)
+		{
+			double a1 = angles[i];
+			double a2 = (i + 1 < n) ? angles[i + 1] : angles[0] + 360.0;
+			double gap = a2 - a1;
+			if (gap > maxGap)
+			{
+				maxGap = gap;
+				maxGapIdx = i;
+			}
+		}
+
+		if (maxGapIdx < 0)
+			continue;
+
+		// 가장 큰 gap 다음부터, gap 직전까지가 실제 calcium arc
+		double arcStart = angles[(maxGapIdx + 1) % n];
+		double arcEnd = angles[maxGapIdx];
+
+		if (arcEnd < arcStart)
+			arcEnd += 360.0;   //  예: 350~10도, 350~370도로 취급
+
+		double span = arcEnd - arcStart;
+		if (span < MIN_ANGLE_SPAN)
+			continue;
+
+		// 3) 0도(=12시)를 기준으로 잘라야 하는 경우 처리
+		//    - arcEnd <= 360 : 0 안 넘음, 그대로 사용
+		//    - arcEnd >  360 : 0을 넘어서 wrap, [start,360], [0, arcEnd-360] 두 개로 분할
+		if (arcEnd <= 360.0)
+		{
+			int s = static_cast<int>(std::round(arcStart));
+			int e = static_cast<int>(std::round(arcEnd));
+			startAngle.push_back(s);
+			endAngle.push_back(e);
+		}
+		else
+		{
+			// 첫번째 조각: [arcStart, 360]
+			double arcEnd1 = 360.0;
+			double span1 = arcEnd1 - arcStart;
+
+			if (span1 >= MIN_ANGLE_SPAN)
+			{
+				int s1 = static_cast<int>(std::round(arcStart));
+				int e1 = 360;
+				startAngle.push_back(s1);
+				endAngle.push_back(e1);
+			}
+
+			// 두번째 조각: [0, arcEnd-360]
+			double arcStart2 = 0.0;
+			double arcEnd2 = arcEnd - 360.0;
+			double span2 = arcEnd2 - arcStart2;
+
+			if (span2 >= MIN_ANGLE_SPAN)
+			{
+				int s2 = 0;
+				int e2 = static_cast<int>(std::round(arcEnd2));
+				startAngle.push_back(s2);
+				endAngle.push_back(e2);
+			}
+		}
 	}
 
-	cv::Point center(m_nWidth / 2, m_nHeight / 2);
-	cv::Point standard(m_nWidth / 2, 0);
+	PLOGI.printf("m_fps = %.4lf", m_fps);
 
-	cv::Mat tissue = imageCircle.clone();
-
-	if (tissue.channels() == 1) {
-		cv::cvtColor(tissue, tissue, cv::COLOR_GRAY2BGR);
-	}
-	cv::Point test;
-	PLOGI.printf("startAnglePoint.size() = %d", startAnglePoint.size());
-	for (int i = 0; i < startAnglePoint.size(); i++) {
-		PLOGI.printf("startAnglePointX = %d, startAnglePointY = %d", startAnglePoint[i].x, startAnglePoint[i].y);
-		startAnglePoint[i] = matXY(startAnglePoint[i], m_nWidth, m_nHeight);
-		test = startAnglePoint[i];
-		endAnglePoint[i] = matXY(endAnglePoint[i], m_nWidth, m_nHeight);
-		PLOGI.printf("tempX = %d, tmpY = %d", startAnglePoint[i].x, startAnglePoint[i].y);
-
-	}
-	for (int i = 0; i < startAnglePoint.size(); i++) {
-		double sAngle = GetTheta(startAnglePoint[i], center);
-		double eAngle = GetTheta(endAnglePoint[i], center);
-		PLOGI.printf("Start_Angle = %lf, end_Angle = %lf", sAngle, eAngle);
-		startAngle.push_back(sAngle);
-		endAngle.push_back(eAngle);
-	}
-
-	angleNum = startAnglePoint.size();
+	angleNum = static_cast<int>(startAngle.size());
 }
+
 
 
 double COCTImaging::GetTheta(cv::Point point, cv::Point center) {

@@ -2021,80 +2021,49 @@ namespace RaywattApp.Common.Util
             imgCalcium.SetTo(new Scalar(0x00, 0x00, 0x00, 0x00));
             imgCalcium.Circle(center, radius, new Scalar(b, g, r, 0xff), thickness, LineTypes.AntiAlias);
 
+            // 처음에는 0~360 전체가 non-calcium
             List<Tuple<double, double>> nonCalciumAngleList = new List<Tuple<double, double>>
             {
-                new Tuple<double, double>(0, 360)
+                Tuple.Create(0.0, 360.0)
             };
 
             foreach (var calciumArea in calciumAngleList)
             {
                 double calciumStart = calciumArea.Item1;
                 double calciumEnd = calciumArea.Item1 + calciumArea.Item2;
-                for (int i = nonCalciumAngleList.Count - 1; i >= 0; i--)
+
+                if (calciumArea.Item2 <= 0)
+                    continue;
+
+                if (calciumEnd <= 360)
                 {
-                    Tuple<double, double> nonCalciumArea = nonCalciumAngleList[i];
-                    double nonCalciumStart = nonCalciumArea.Item1;
-                    double nonCalciumEnd = nonCalciumArea.Item1 + nonCalciumArea.Item2;
-                    if (calciumEnd > 360)
-                    {
-                        double segmentStart = calciumStart;
-                        double segmentEnd = 360;
-                        for (int j = nonCalciumAngleList.Count - 1; j >= 0; j--)
-                        {
-                            nonCalciumArea = nonCalciumAngleList[i];
-                            nonCalciumStart = nonCalciumArea.Item1;
-                            nonCalciumEnd = nonCalciumArea.Item1 + nonCalciumArea.Item2;
-                            if (segmentStart >= nonCalciumStart && segmentEnd <= nonCalciumEnd)
-                            {
-                                nonCalciumAngleList.RemoveAt(i);
-                                if (segmentStart > nonCalciumStart)
-                                {
-                                    Tuple<double, double> splitArea = new Tuple<double, double>(nonCalciumStart, segmentStart - nonCalciumStart);
-                                    nonCalciumAngleList.Add(splitArea);
-                                }
-                                if (segmentEnd < nonCalciumEnd)
-                                {
-                                    Tuple<double, double> splitArea = new Tuple<double, double>(segmentEnd, nonCalciumEnd - segmentEnd);
-                                    nonCalciumAngleList.Add(splitArea);
-                                }
-                                break;
-                            }
-                        }
-                        segmentStart = 0;
-                        segmentEnd = calciumEnd - 360;
-                        for (int j = nonCalciumAngleList.Count - 1; j >= 0; j--)
-                        {
-                            nonCalciumArea = nonCalciumAngleList[i];
-                            nonCalciumStart = nonCalciumArea.Item1;
-                            nonCalciumEnd = nonCalciumArea.Item1 + nonCalciumArea.Item2;
-                            if (segmentStart >= nonCalciumStart && segmentEnd <= nonCalciumEnd)
-                            {
-                                nonCalciumAngleList.RemoveAt(i);
-                                if (segmentStart > nonCalciumStart)
-                                {
-                                    Tuple<double, double> splitArea = new Tuple<double, double>(nonCalciumStart, segmentStart - nonCalciumStart);
-                                    nonCalciumAngleList.Add(splitArea);
-                                }
-                                if (segmentEnd < nonCalciumEnd)
-                                {
-                                    Tuple<double, double> splitArea = new Tuple<double, double>(segmentEnd, nonCalciumEnd - segmentEnd);
-                                    nonCalciumAngleList.Add(splitArea);
-                                }
-                                break;
-                            }
-                        }
-                        continue;
-                    }
+                    // wrap 안 됨: [start, end] 그대로 빼기
+                    SubtractSegment(nonCalciumAngleList, calciumStart, calciumEnd);
+                }
+                else
+                {
+                    // wrap: [start, 360], [0, end-360] 두 조각으로 쪼개서 빼기
+                    double segmentStart1 = calciumStart;
+                    double segmentEnd1 = 360.0;
+                    SubtractSegment(nonCalciumAngleList, segmentStart1, segmentEnd1);
+
+                    double segmentStart2 = 0.0;
+                    double segmentEnd2 = calciumEnd - 360.0;
+                    SubtractSegment(nonCalciumAngleList, segmentStart2, segmentEnd2);
                 }
             }
 
-            foreach (var calciumArea in nonCalciumAngleList)
+            // 남은 non-calcium 구간은 투명으로 지워서 칼슘 구간만 남기기
+            foreach (var area in nonCalciumAngleList)
             {
+                double start = area.Item1;
+                double end = area.Item1 + area.Item2;
+
                 imgCalcium.Ellipse(center,
                     new OpenCvSharp.Size(imgCalcium.Width / 2, imgCalcium.Height / 2),
                     0,
-                    calciumArea.Item1 - 90, // 반시계 방향으로 90도만큼 이동)
-                    (calciumArea.Item1 + calciumArea.Item2) - 90,
+                    start - 90,
+                    end - 90,
                     new Scalar(0x00, 0x00, 0x00, 0x00),
                     -1);
             }
@@ -2102,6 +2071,42 @@ namespace RaywattApp.Common.Util
             BitmapSource bitmap = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToBitmapSource(imgCalcium);
             return bitmap;
         }
+
+        private static void SubtractSegment(List<Tuple<double, double>> nonCalciumAngleList,
+                                    double segmentStart,
+                                    double segmentEnd)
+        {
+            for (int i = nonCalciumAngleList.Count - 1; i >= 0; i--)
+            {
+                var nonCalciumArea = nonCalciumAngleList[i];
+                double nonCalciumStart = nonCalciumArea.Item1;
+                double nonCalciumEnd = nonCalciumArea.Item1 + nonCalciumArea.Item2;
+
+                // segment가 이 nonCalcium 구간 안에 완전히 포함될 때만 처리
+                if (segmentStart >= nonCalciumStart && segmentEnd <= nonCalciumEnd)
+                {
+                    nonCalciumAngleList.RemoveAt(i);
+
+                    // 왼쪽 남는 구간
+                    if (segmentStart > nonCalciumStart)
+                    {
+                        nonCalciumAngleList.Add(
+                            Tuple.Create(nonCalciumStart, segmentStart - nonCalciumStart));
+                    }
+
+                    // 오른쪽 남는 구간
+                    if (segmentEnd < nonCalciumEnd)
+                    {
+                        nonCalciumAngleList.Add(
+                            Tuple.Create(segmentEnd, nonCalciumEnd - segmentEnd));
+                    }
+
+                    break;
+                }
+            }
+        }
+
+
 
         public static OpenCvSharp.Point[][] GetLumenContours(List<System.Windows.Point> pointList)
         {
