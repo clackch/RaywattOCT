@@ -3029,7 +3029,7 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 
 			int nPolarizationPos = m_pLaserModule->GetPosition(eStepMotorIndex::Polarization);
 			m_vCalibrationInfo.push_back(std::make_pair(nPeakValue, nPolarizationPos));
-			PLOGI.printf("FindingPeak - %d, %d", nPeakValue, nPolarizationPos);
+			//PLOGI.printf("FindingPeak - %d, %d", nPeakValue, nPolarizationPos);
 		}
 			break;
 		default:
