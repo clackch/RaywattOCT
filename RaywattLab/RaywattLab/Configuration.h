@@ -14,7 +14,9 @@ public:
 		int voaValue;
 		int vldValue;
 		int delayPosition;
+		int delayPositionOnePointSeven;
 		int polarPosition;
+		int autoCalibrationForSeverance;
 	};
 
 	class StepMotorSetting {
@@ -22,6 +24,10 @@ public:
 		TCHAR port[MAX_PATH];
 		int pullbackDistance;
 		int pullbackSpeed;
+		int noPullbackTime;
+		int SMPullbackProfile;
+		int unLoadDistance;
+		int homingSpeed;
 	};
 
 	class BLDCMotorSetting {
@@ -38,6 +44,10 @@ public:
 		int rotationTime;	// To-Do: remove
 		bool manualLoad;
 		int length;			// 2.6fr -> 1.6fr
+		bool catheterValidationOnOff;
+		bool catheterAutoCalibrationOnOff;
+		int  catheterUsage;
+		int catheterRFID;
 	};
 
 	class Volume {
@@ -51,10 +61,11 @@ private:
 	CConfiguration(const CConfiguration& ref) {};
 	CConfiguration& operator=(const CConfiguration& ref) {};
 	~CConfiguration();
-
+	
 public:
 	bool isInit;
 	tstring configFilePath;
+	tstring configPath;
 
 	IAcquisitionDevice::Setting acquisition;
 	IImaging::Setting imaging;
@@ -68,13 +79,17 @@ public:
 	int shutterSerial;
 public:
 	static CConfiguration& GetInstance();
-
-	bool IsInit() { return isInit; }
+	
+	void SetPath(tstring configPath);
+	bool IsInit(){ return isInit; }
 	void Initialize(tstring configFile);
 
 	void SaveLaserModuleSettings();
 	void SaveStepMotorSettings();
 	void SaveBLDCMotorSettings();
+
+	int ReadInt(const tstring& section, const tstring& key, int def = 0) const;
+	bool WriteInt(const tstring& section, const tstring& key, int value) const;
 
 	//Property
 	double GetLoadCatheterTime();

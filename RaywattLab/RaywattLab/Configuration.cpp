@@ -4,18 +4,23 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-CConfiguration::CConfiguration() :
+CConfiguration::CConfiguration():
 	isInit(false)
 {
 }
 
-CConfiguration::~CConfiguration()
+CConfiguration::~CConfiguration() 
 {
 }
 
 CConfiguration& CConfiguration::GetInstance() {
 	static CConfiguration pInstance;
 	return pInstance;
+}
+
+void CConfiguration::SetPath(tstring configPath)
+{
+	this->configPath = configPath;
 }
 
 void CConfiguration::Initialize(tstring configFile)
@@ -25,17 +30,19 @@ void CConfiguration::Initialize(tstring configFile)
 	configFilePath = configFile;
 
 	// [Measurement]
-	this->measurement.fAxialResolutionScale = getPrivateProfileFloat(_T("Measurement"), _T("AxialResolutionScale"), 8.3, configFilePath.c_str());
+	this->measurement.fAxialResolutionScale = getPrivateProfileFloat(_T("Measurement"), _T("AxialResolutionScale"), 4.938, configFilePath.c_str());
 	this->measurement.nNoiseSkip = ::GetPrivateProfileInt(_T("Measurement"), _T("NoiseSkip"), 300, configFilePath.c_str());
 	this->measurement.nNoiseAverage = ::GetPrivateProfileInt(_T("Measurement"), _T("NoiseAverage"), 100, configFilePath.c_str());
-
-	this->measurement.fSheathRadiusOnePointSeven = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius1.6"), 0.28, configFilePath.c_str());
-	this->measurement.fSheathRadiusTwoPointSix = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius2.6"), 0.43, configFilePath.c_str());
-	this->measurement.fSheathThicknessOnePointSeven = getPrivateProfileFloat(_T("Measurement"), _T("SheathThickness1.6"), 0.045, configFilePath.c_str());
-	this->measurement.fSheathThicknessTwoPointSix = getPrivateProfileFloat(_T("Measurement"), _T("SheathThickness2.6"), 0.1, configFilePath.c_str());
+	
+	this->measurement.fSheathRadiusOnePointSeven = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius1.7"), 0.28, configFilePath.c_str());
+	this->measurement.fSheathRadiusTwoPointSix = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius2.6"), 0.43, configFilePath.c_str());	
+	this->measurement.fSheathThicknessOnePointSeven = getPrivateProfileFloat(_T("Measurement"), _T("SheathThickness1.7"), 0.045, configFilePath.c_str());
+	this->measurement.fSheathThicknessTwoPointSix = getPrivateProfileFloat(_T("Measurement"), _T("SheathThickness2.6"), 0.1, configFilePath.c_str());	
 	this->measurement.fSheathRadius = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius"), 0.43, configFilePath.c_str());
-	this->measurement.nSheathPosition = measurement.fSheathRadius * 1000.f / measurement.fAxialResolutionScale;
-
+	if (measurement.GetAxialResolutionScale() > 0) {
+		this->measurement.nSheathPosition = measurement.GetSheathRadius() * 1000.f / measurement.GetAxialResolutionScale();
+	}
+	
 	// [Imaging]
 	int nAScan = ::GetPrivateProfileInt(_T("Imaging"), _T("AScan"), 1920, configFilePath.c_str());
 	int nBScan = ::GetPrivateProfileInt(_T("Imaging"), _T("BScan"), 500, configFilePath.c_str());
@@ -44,6 +51,7 @@ void CConfiguration::Initialize(tstring configFile)
 	this->imaging.highLevel = getPrivateProfileFloat(_T("Imaging"), _T("HighLevel"), 65.0f, configFilePath.c_str());
 	this->imaging.brightness = getPrivateProfileFloat(_T("Imaging"), _T("Brightness"), 0.f, configFilePath.c_str());
 	this->imaging.contrast = getPrivateProfileFloat(_T("Imaging"), _T("Contrast"), 0.875f, configFilePath.c_str());
+	this->imaging.distPerPixel = measurement.GetAxialResolutionScale();
 
 	// [Acquisition]
 	this->acquisition.nAScan = imaging.nAScan;
@@ -62,13 +70,19 @@ void CConfiguration::Initialize(tstring configFile)
 	this->laserModule.voaValue = ::GetPrivateProfileInt(_T("LaserModule"), _T("VOA"), 2960, configFilePath.c_str());
 	this->laserModule.vldValue = ::GetPrivateProfileInt(_T("LaserModule"), _T("VLD"), 2000, configFilePath.c_str());
 	this->laserModule.delayPosition = ::GetPrivateProfileInt(_T("LaserModule"), _T("DelayLine"), 0, configFilePath.c_str());
+	this->laserModule.delayPositionOnePointSeven = ::GetPrivateProfileInt(_T("LaserModule"), _T("delayPositionOnePointSeven"), 0, configFilePath.c_str());
 	this->laserModule.polarPosition = ::GetPrivateProfileInt(_T("LaserModule"), _T("Polarization"), 0, configFilePath.c_str());
+	this->laserModule.autoCalibrationForSeverance = ::GetPrivateProfileInt(_T("LaserModule"), _T("AutoCalibrationForSeverance"), 0, configFilePath.c_str());
 
 	// [StepMotor]
 	::GetPrivateProfileString(_T("StepMotor"), _T("Port"), _T(""), this->stepMotor.port, sizeof(this->stepMotor.port), configFilePath.c_str());
 	this->stepMotor.pullbackDistance = ::GetPrivateProfileInt(_T("StepMotor"), _T("PullbackDistance"), 10, configFilePath.c_str());
 	this->stepMotor.pullbackSpeed = ::GetPrivateProfileInt(_T("StepMotor"), _T("PullbackSpeed"), 10, configFilePath.c_str());
-
+	this->stepMotor.noPullbackTime = ::GetPrivateProfileInt(_T("StepMotor"), _T("NoPullbackTime"), 3, configFilePath.c_str());
+	this->stepMotor.SMPullbackProfile = ::GetPrivateProfileInt(_T("StepMotor"), _T("SMPullbackProfile"), 0, configFilePath.c_str());
+	this->stepMotor.unLoadDistance = ::GetPrivateProfileInt(_T("StepMotor"), _T("UnLoadDistance"), 9650, configFilePath.c_str());
+	this->stepMotor.homingSpeed= ::GetPrivateProfileInt(_T("StepMotor"), _T("HomingSpeed"), 2362, configFilePath.c_str());
+	
 	// [BLDCMotor]
 	::GetPrivateProfileString(_T("BLDCMotor"), _T("Port"), _T(""), this->bldcMotor.port, sizeof(this->bldcMotor.port), configFilePath.c_str());
 	this->bldcMotor.velocityPullback = ::GetPrivateProfileInt(_T("BLDCMotor"), _T("VelocityPullback"), 24000, configFilePath.c_str());
@@ -82,7 +96,11 @@ void CConfiguration::Initialize(tstring configFile)
 	// [Catheter]
 	this->catheter.rotationTime = ::GetPrivateProfileInt(_T("Catheter"), _T("RotationTime"), 10000, configFilePath.c_str());
 	this->catheter.manualLoad = ::GetPrivateProfileInt(_T("Catheter"), _T("ManualLoad"), 0, configFilePath.c_str());
-	this->catheter.length = ::GetPrivateProfileInt(_T("Catheter"), _T("Length1.6"), -45000, configFilePath.c_str());
+	this->catheter.length = ::GetPrivateProfileInt(_T("Catheter"), _T("Length1.7"), -45000, configFilePath.c_str());
+	this->catheter.catheterValidationOnOff = ::GetPrivateProfileInt(_T("Catheter"), _T("CatheterValidationOnOff"), 0, configFilePath.c_str());
+	this->catheter.catheterAutoCalibrationOnOff = ::GetPrivateProfileInt(_T("Catheter"), _T("CatheterAutoCalibrationOnOff"), 0, configFilePath.c_str());
+	this->catheter.catheterUsage = ::GetPrivateProfileInt(_T("Catheter"), _T("CatheterUsage"), 0, configFilePath.c_str());
+	this->catheter.catheterRFID = ::GetPrivateProfileInt(_T("Catheter"), _T("CatheterRFID"), 0, configFilePath.c_str());
 
 	// [Volume]
 	this->volume.size = ::GetPrivateProfileInt(_T("Volume"), _T("Size"), 500, configFilePath.c_str());
@@ -91,6 +109,18 @@ void CConfiguration::Initialize(tstring configFile)
 	// [Log]
 	::GetPrivateProfileString(_T("Log"), _T("LogRootPath"), _T(""), this->logRootPath, sizeof(this->logRootPath), configFilePath.c_str());
 
+	// [Compensation]
+	this->imaging.applyCompensation = ::GetPrivateProfileInt(_T("Compensation"), _T("ApplyCompensation"), 0, configFilePath.c_str());
+	this->imaging.exponentialFactor = getPrivateProfileFloat(_T("Compensation"), _T("ExponentialFactor"), 1.8f, configFilePath.c_str());
+	this->imaging.brightnessControl = getPrivateProfileFloat(_T("Compensation"), _T("BrightnessControl"), 0.7f, configFilePath.c_str());
+	this->imaging.energyThreshold = getPrivateProfileFloat(_T("Compensation"), _T("EnergyThreshold"), 0.7f, configFilePath.c_str());
+	this->imaging.applyGammaCorrection = ::GetPrivateProfileInt(_T("Compensation"), _T("ApplyGammaCorrection"), 0, configFilePath.c_str());
+	this->imaging.GCAlpha = getPrivateProfileFloat(_T("Compensation"), _T("GCAlpha"), 0.4f, configFilePath.c_str());
+	this->imaging.intensityThreshold = ::GetPrivateProfileInt(_T("Compensation"), _T("IntensityThreshold"), 255, configFilePath.c_str());
+
+	// [Sharpness]
+	this->imaging.applySharpness = ::GetPrivateProfileInt(_T("Sharpness"), _T("ApplySharpness"), 0, configFilePath.c_str());
+	
 	isInit = true;
 }
 
@@ -132,6 +162,17 @@ void CConfiguration::SaveBLDCMotorSettings() {
 
 	strValue = std::to_wstring(this->bldcMotor.settleDown);
 	::WritePrivateProfileString(_T("BLDCMotor"), _T("SettleDown"), strValue.c_str(), configFilePath.c_str());
+}
+
+int CConfiguration::ReadInt(const tstring& section, const tstring& key, int def) const
+{
+	return ::GetPrivateProfileInt(section.c_str(), key.c_str(), def, configFilePath.c_str());
+}
+
+bool CConfiguration::WriteInt(const tstring& section, const tstring& key, int value) const
+{
+	tstring s = std::to_wstring((long long)value);
+	return ::WritePrivateProfileString(section.c_str(), key.c_str(), s.c_str(), configFilePath.c_str()) != FALSE;
 }
 
 double CConfiguration::GetLoadCatheterTime() {
