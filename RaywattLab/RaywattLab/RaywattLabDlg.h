@@ -141,6 +141,7 @@ private:
 	void updateMeasurement(USHORT nPeakValue, int nPeakIndex, int nLineWidth, USHORT nNoisePower);
 	void drawGuideLine(cv::Mat image);
 	cv::Mat getFoVImage(cv::Mat image, double fov);
+	void changeCalibration(int offset);
 
 	/*
 	* threadService
@@ -188,7 +189,8 @@ public:
 	afx_msg void OnNMCustomdrawSliderFrame(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBnClickedButtonOpenRotaryJunction();
 	afx_msg void OnBnClickedButtonSaveCalibration();
-	afx_msg void OnBnClickedButtonChangeCalibration();
+	afx_msg void OnBnClickedButtonNextCalib();
+	afx_msg void OnBnClickedButtonPrevCalib();
 	afx_msg void OnBnClickedCheckBackgroundSubtract();
 	afx_msg void OnBnClickedButtonOpenCalibFolder();
 	afx_msg void OnBnClickedButtonMeasure();

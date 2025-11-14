@@ -77,6 +77,8 @@
 #define IDC_BUTTON_NEXT_CALIB           1075
 #define IDC_BUTTON_MEASURE              1076
 #define IDC_CHECK_BACKGROUND_SUBTRACT   1077
+#define IDC_BUTTON_NEXT_CALIB2          1078
+#define IDC_BUTTON_PREV_CALIB           1078
 #define IDC_EDIT_CUR_CALIBRATION        1079
 #define IDC_BUTTON_SAVE_TIF             1080
 #define IDC_CHECK_INIT_MOTOR            1081

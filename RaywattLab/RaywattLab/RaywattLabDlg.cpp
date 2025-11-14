@@ -51,7 +51,7 @@ CRaywattLabDlg::CRaywattLabDlg(CWnd* pParent /*=nullptr*/)
 	m_pFrameBuffer = nullptr;
 
 	m_strCalibPath = _T("");
-	m_nCurCalibIndex = 0;
+	m_nCurCalibIndex = -1;
 	m_pThreadPullback = nullptr;
 	m_strCurCalibration = _T(".\\CALIBRATION.dat");
 
@@ -379,6 +379,28 @@ cv::Mat CRaywattLabDlg::getFoVImage(cv::Mat image, double fov) {
 
 	return imgFov;
 }
+void CRaywattLabDlg::changeCalibration(int offset) {
+	if (m_vCalibList.empty()) return;
+
+	m_nCurCalibIndex += offset;
+	if (m_nCurCalibIndex < 0) {
+		m_nCurCalibIndex = m_vCalibList.size() - 1;
+	}
+	else if (m_nCurCalibIndex >= m_vCalibList.size()) {
+		m_nCurCalibIndex = 0;
+	}
+
+	CConfiguration& config = CConfiguration::GetInstance();
+
+	CString strCurFile = m_vCalibList.at(m_nCurCalibIndex);
+	CCalibration* calibration = new CCalibration(config.imaging.nAScan, config.imaging.nFFTLength);
+	calibration->Initialize(strCurFile.GetBuffer());
+	m_pImagingRealtime->ChangeCalibration(calibration);
+	m_pImagingSimulate->ChangeCalibration(calibration);
+	m_strCurCalibration = strCurFile.GetBuffer();
+
+	GetDlgItem(IDC_EDIT_CUR_CALIBRATION)->SetWindowText(strCurFile.Right(strCurFile.GetLength() - m_strCalibPath.GetLength() - 1));
+}
 
 
 /*
@@ -532,7 +554,8 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_OPEN_ROTARY_JUNCTION, &CRaywattLabDlg::OnBnClickedButtonOpenRotaryJunction)
 	ON_BN_CLICKED(IDC_BUTTON_ADMIN_INITIALIZE, &CRaywattLabDlg::OnBnClickedButtonAdminInitialize)
 	ON_BN_CLICKED(IDC_BUTTON_SAVE_CALIBRATION, &CRaywattLabDlg::OnBnClickedButtonSaveCalibration)
-	ON_BN_CLICKED(IDC_BUTTON_NEXT_CALIB, &CRaywattLabDlg::OnBnClickedButtonChangeCalibration)
+	ON_BN_CLICKED(IDC_BUTTON_NEXT_CALIB, &CRaywattLabDlg::OnBnClickedButtonNextCalib)
+	ON_BN_CLICKED(IDC_BUTTON_PREV_CALIB, &CRaywattLabDlg::OnBnClickedButtonPrevCalib)
 	ON_BN_CLICKED(IDC_CHECK_BACKGROUND_SUBTRACT, &CRaywattLabDlg::OnBnClickedCheckBackgroundSubtract)
 	ON_BN_CLICKED(IDC_BUTTON_OPEN_CALIB_FOLDER, &CRaywattLabDlg::OnBnClickedButtonOpenCalibFolder)
 	ON_BN_CLICKED(IDC_BUTTON_MEASURE, &CRaywattLabDlg::OnBnClickedButtonMeasure)
@@ -785,7 +808,7 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	GetDlgItem(IDC_EDIT_BSCAN)->SetWindowText(strBuffer);
 
 	m_vCalibList.clear();
-	m_nCurCalibIndex = 0;
+	m_nCurCalibIndex = -1;
 	findFileByExtension(m_strCalibPath, _T("dat"), m_vCalibList);
 
 	CUtility::StartThread(threadService, m_pThreadService, this);
@@ -1457,26 +1480,17 @@ void CRaywattLabDlg::OnBnClickedButtonSaveCalibration()
 	CUtility::StartThread(threadSaveCalibration, m_pThreadCalibration, this);
 }
 
-void CRaywattLabDlg::OnBnClickedButtonChangeCalibration()
+void CRaywattLabDlg::OnBnClickedButtonNextCalib()
 {
-	if (m_vCalibList.empty()) return;
-
-	CConfiguration& config = CConfiguration::GetInstance();
-
-	CString strCurFile = m_vCalibList.at(m_nCurCalibIndex);
-	CCalibration* calibration = new CCalibration(config.imaging.nAScan, config.imaging.nFFTLength);
-	calibration->Initialize(strCurFile.GetBuffer());
-	m_pImagingRealtime->ChangeCalibration(calibration);
-	m_pImagingSimulate->ChangeCalibration(calibration);
-	m_strCurCalibration = strCurFile.GetBuffer();
-
-	GetDlgItem(IDC_EDIT_CUR_CALIBRATION)->SetWindowText(strCurFile.Right(strCurFile.GetLength() - m_strCalibPath.GetLength() - 1));
-
-	m_nCurCalibIndex++;
-	if (m_nCurCalibIndex >= m_vCalibList.size()) {
-		m_nCurCalibIndex = 0;
-	}
+	changeCalibration(1);
 }
+
+
+void CRaywattLabDlg::OnBnClickedButtonPrevCalib()
+{
+	changeCalibration(-1);
+}
+
 
 
 void CRaywattLabDlg::OnBnClickedCheckBackgroundSubtract()
@@ -1508,7 +1522,7 @@ void CRaywattLabDlg::OnBnClickedButtonOpenCalibFolder()
 	GetDlgItem(IDC_EDIT_CALIB_PATH)->SetWindowText(m_strCalibPath);
 
 	m_vCalibList.clear();
-	m_nCurCalibIndex = 0;
+	m_nCurCalibIndex = -1;
 	findFileByExtension(m_strCalibPath, _T("dat"), m_vCalibList);
 }
 
