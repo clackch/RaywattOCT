@@ -59,7 +59,7 @@ CRaywattLabDlg::CRaywattLabDlg(CWnd* pParent /*=nullptr*/)
 	m_bStartAcquisition = false;
 
 	m_chkShowSheathGuide = false;
-	m_chkCompensation = false;
+	m_chkCompensation = true;
 	m_pThreadCompParamWin = nullptr;
 }
 
@@ -491,14 +491,15 @@ UINT CRaywattLabDlg::threadPullback(LPVOID param) {
 
 UINT CRaywattLabDlg::threadCompensationParamWindow(LPVOID param) {
 	CRaywattLabDlg* pDlg = (CRaywattLabDlg*)param;
+	CConfiguration& config = CConfiguration::GetInstance();
 
-	//pDlg->m_pImagingSimulate->SetImageCompensationControlWindow(true);
+	pDlg->m_pImagingSimulate->SetImageCompensationControlWindow(true, config.imaging);
 
 	while (pDlg->m_pThreadCompParamWin->isRun) {
 		cv::waitKey(1);
 	}
 
-	//pDlg->m_pImagingSimulate->SetImageCompensationControlWindow(false);
+	pDlg->m_pImagingSimulate->SetImageCompensationControlWindow(false, config.imaging);
 	
 	return NOERROR;
 }
@@ -1124,6 +1125,9 @@ void CRaywattLabDlg::OnBnClickedButtonSaveData()
 		strFileName.Replace(_T(".bin"), _T(".csv"));
 		CStringA fftName(strFileName);
 		m_pFFTFile = fopen(fftName, "w+");
+		strFileName.Replace(_T(".csv"), _T("_log.csv"));
+		CStringA logName(strFileName);
+		FILE* pLogFile = fopen(logName, "w+");
 
 		COCTMeasurement measurement;
 		USHORT nMaxPeak = 0, nNoisePower = 0;
@@ -1148,12 +1152,23 @@ void CRaywattLabDlg::OnBnClickedButtonSaveData()
 				}
 				fprintf(m_pFFTFile, "\n");
 			}
+			if (pLogFile != nullptr) {
+				float* pLogData = m_pImagingRealtime->GetScopeLogData();
+				for (int i = 0; i < nOutputLength; i++) {
+					fprintf(pLogFile, "%lf,", pLogData[i]);
+				}
+				fprintf(pLogFile, "\n");
+			}
 		}
 		m_pDataWriter->StopSave();
 		m_pImagingRealtime->Start();
 		if (m_pFFTFile != nullptr) {
 			fclose(m_pFFTFile);
 			m_pFFTFile = nullptr;
+		}
+		if (pLogFile != nullptr) {
+			fclose(pLogFile);
+			pLogFile = nullptr;
 		}
 
 		updateMeasurement(nMaxPeak, nMaxIndex, nMaxWidth, nNoisePower);
