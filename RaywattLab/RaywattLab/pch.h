@@ -16,7 +16,6 @@
 #pragma comment(lib, "ippi.lib")
 #pragma comment(lib, "ipps.lib")
 #pragma comment(lib, "ippvm.lib")
-#pragma comment(lib, "ippcore.lib")
 #ifndef _DEBUG
 #pragma comment (lib, "opencv_core460")
 #pragma comment (lib, "opencv_highgui460")
