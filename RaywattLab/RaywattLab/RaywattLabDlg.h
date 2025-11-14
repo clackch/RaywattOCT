@@ -69,6 +69,7 @@ private:
 	int m_radioImageColor;
 	int m_radioImageLUT;
 	BOOL m_chkShowGuide;
+	BOOL m_chkShowHist;
 	CSliderCtrl m_sliderBrightness;
 	CSliderCtrl m_sliderContrast;
 	CSliderCtrl m_sliderLowLevel;
@@ -143,6 +144,9 @@ private:
 	cv::Mat getFoVImage(cv::Mat image, double fov);
 	void changeCalibration(int offset);
 
+	cv::MatND calcHistogram(cv::Mat img);
+	cv::Mat getHistImage(cv::Mat histOrigin);
+
 	/*
 	* threadService
 	*/
@@ -182,6 +186,7 @@ public:
 	afx_msg void OnBnClickedRadioColorBlack();
 	afx_msg void OnBnClickedRadioColorWhite();
 	afx_msg void OnBnClickedCheckShowGuide();
+	afx_msg void OnBnClickedCheckShowHist();
 	afx_msg void OnNMCustomdrawSliderBrightness(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNMCustomdrawSliderContrast(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNMCustomdrawSliderLowlevel(NMHDR* pNMHDR, LRESULT* pResult);

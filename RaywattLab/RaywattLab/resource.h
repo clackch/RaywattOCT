@@ -77,7 +77,6 @@
 #define IDC_BUTTON_NEXT_CALIB           1075
 #define IDC_BUTTON_MEASURE              1076
 #define IDC_CHECK_BACKGROUND_SUBTRACT   1077
-#define IDC_BUTTON_NEXT_CALIB2          1078
 #define IDC_BUTTON_PREV_CALIB           1078
 #define IDC_EDIT_CUR_CALIBRATION        1079
 #define IDC_BUTTON_SAVE_TIF             1080
@@ -108,6 +107,7 @@
 #define IDC_RADIO_GRAY                  1106
 #define IDC_RADIO_GREEN                 1107
 #define IDC_RADIO_ORANGE                1108
+#define IDC_CHECK_SHOW_HIST             1109
 
 // Next default values for new objects
 // 
@@ -115,7 +115,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        107
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1109
+#define _APS_NEXT_CONTROL_VALUE         1110
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

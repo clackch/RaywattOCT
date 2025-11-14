@@ -72,6 +72,7 @@ void CRaywattLabDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_RADIO_COLOR_BLACK, m_radioImageColor);
 	DDX_Radio(pDX, IDC_RADIO_GRAY, m_radioImageLUT);
 	DDX_Check(pDX, IDC_CHECK_SHOW_GUIDE, m_chkShowGuide);
+	DDX_Check(pDX, IDC_CHECK_SHOW_HIST, m_chkShowHist);
 	DDX_Control(pDX, IDC_SLIDER_BRIGHTNESS, m_sliderBrightness);
 	DDX_Control(pDX, IDC_SLIDER_CONTRAST, m_sliderContrast);
 	DDX_Control(pDX, IDC_SLIDER_LOWLEVEL, m_sliderLowLevel);
@@ -403,6 +404,57 @@ void CRaywattLabDlg::changeCalibration(int offset) {
 }
 
 
+cv::MatND CRaywattLabDlg::calcHistogram(cv::Mat img) {
+	cv::MatND histOrigin;
+	const int* channel_numbers = { 0 };
+	float channel_range[] = { 0.0, 255.0 };
+	//float channel_range[] = { 0.0, 4200.0 };
+	const float* channel_ranges = channel_range;
+	int number_bins = 256;
+	//int number_bins = 4200;
+	cv::calcHist(&img, 1, channel_numbers, cv::Mat(), histOrigin, 1, &number_bins, &channel_ranges);
+	//cv::calcHist(&imgCircle2ch, 1, channel_numbers, cv::Mat(), histOrigin, 1, &number_bins, &channel_ranges);
+
+	return histOrigin;
+}
+cv::Mat CRaywattLabDlg::getHistImage(cv::Mat histOrigin) {
+	cv::MatND histogram;
+
+	int number_bins = histOrigin.size().height;
+	// plot the histogram
+	int hist_w = 512;
+	int hist_h = 256;
+	int bin_w = cvRound((double)hist_w / number_bins);
+
+	cv::Mat imgHist(hist_h, hist_w, CV_8UC1, cv::Scalar::all(0));
+	normalize(histOrigin, histogram, 0, imgHist.rows, cv::NORM_MINMAX, -1, cv::Mat());
+
+	for (int i = 0; i < number_bins; i++)
+	{
+		line(imgHist,
+			cv::Point(bin_w * (i), hist_h),
+			cv::Point(bin_w * (i), hist_h - cvRound(histogram.at<float>(i))),
+			cv::Scalar(255, 0, 0), 1, 8, 0);
+	}
+
+	double minVal, maxVal = 0.0f;
+	int minIdx, maxIdx = 0;
+	//cv::minMaxLoc(histOrigin, &minVal, &maxVal, &minIdx, &maxIdx);
+	for (int i = 1; i < number_bins; i++) {
+		if (maxVal < histOrigin.at<float>(i, 0)) {
+			maxVal = histOrigin.at<float>(i, 0);
+			maxIdx = i;
+		}
+	}
+	char strMinMax[MAX_PATH];
+	sprintf(strMinMax, "Max: %d (%.2lf)", maxIdx, maxVal);
+	cv::putText(imgHist, strMinMax, cv::Point(256, 50), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(255, 255, 255));
+
+	return imgHist;
+}
+
+
+
 /*
 * threadService
 */
@@ -577,11 +629,13 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_RADIO_GRAY, &CRaywattLabDlg::OnBnClickedRadioGray)
 	ON_BN_CLICKED(IDC_RADIO_GREEN, &CRaywattLabDlg::OnBnClickedRadioGreen)
 	ON_BN_CLICKED(IDC_RADIO_ORANGE, &CRaywattLabDlg::OnBnClickedRadioOrange)
+	ON_BN_CLICKED(IDC_CHECK_SHOW_HIST, &CRaywattLabDlg::OnBnClickedCheckShowHist)
 END_MESSAGE_MAP()
 
 LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 	CLabImaging* pImaging = (m_isRealtime) ? m_pImagingRealtime : m_pImagingSimulate;
 	cv::Mat image = (m_radioImageShape == 0) ? pImaging->GetCircleImage().clone() : pImaging->GetRectangleImage().clone();
+	cv::Mat image8bit = pImaging->GetProcessedImage();
 	Ipp16u* scopeData = pImaging->GetScopeData();
 	Ipp16u* scopeFFTData = pImaging->GetScopeFFTData();
 	CString strFrameRate = _T("");
@@ -622,6 +676,15 @@ LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 		Ipp16u* pFFTBuffer = new Ipp16u[nOutputLength];
 		memcpy(pFFTBuffer, scopeFFTData, sizeof(Ipp16u) * nOutputLength);
 		m_vFFTData.push_back(pFFTBuffer);
+	}
+
+	if (m_chkShowHist) {
+		cv::MatND histOrigin = calcHistogram(image8bit);
+		cv::Mat imgHist = getHistImage(histOrigin);
+		cv::imshow("histogram", imgHist);
+		cv::waitKey(1);
+	}
+	else {
 	}
 
 	return NOERROR;
@@ -745,6 +808,7 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	m_radioImageColor = 0;
 	m_radioImageLUT = 0;
 	m_chkShowGuide = FALSE;
+	m_chkShowHist = FALSE;
 	m_chkInitMotor = AfxGetApp()->GetProfileInt(_T("RECENT_SETTING"), _T("INIT_MOTOR"), FALSE);
 	m_chkInitStage = AfxGetApp()->GetProfileInt(_T("RECENT_SETTING"), _T("INIT_STAGE"), FALSE);
 	
@@ -1375,6 +1439,19 @@ void CRaywattLabDlg::OnBnClickedCheckShowGuide()
 {
 	UpdateData(TRUE);
 }
+
+void CRaywattLabDlg::OnBnClickedCheckShowHist()
+{
+	UpdateData(TRUE);
+
+	if (m_chkShowHist) {
+		cv::namedWindow("histogram");
+	}
+	else {
+		cv::destroyWindow("histogram");
+	}
+}
+
 
 
 
