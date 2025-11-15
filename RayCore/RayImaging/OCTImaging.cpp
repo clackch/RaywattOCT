@@ -93,6 +93,7 @@ COCTImaging::COCTImaging(Setting setting, CMessageService* pMsg) {
 	m_nTotalFrame = 0;
 
 	m_nSheathPosition = 0;
+	m_nPixelNum = 0;
 
 	m_FindingSheathMathod = AutoCalibrationMathod::Disable;
 
@@ -149,7 +150,11 @@ void COCTImaging::PostProcess(cv::Mat image) {
 	else if (m_FindingSheathMathod == AutoCalibrationMathod::FindingSheath)
 	{
 		findSheath(image);
+	}else if(m_FindingSheathMathod == AutoCalibrationMathod::CheckSheathPixelNum)
+	{
+		CheckSheathPixels(image);
 	}
+	//cv::imwrite("sheath.tif", image);
 
 	cv::cvtColor(image, imageResultColor, cv::COLOR_GRAY2RGB);
 
@@ -663,8 +668,6 @@ void COCTImaging::findSheath(Ipp32f* logaritihmData) {
 }
 
 void COCTImaging::CalculateMagnitude(cv::Mat img) {
-	auto start = std::chrono::high_resolution_clock::now();
-
 	cv::Mat edgeX, edgeY;
 	cv::Sobel(img, edgeX, CV_32F, 1, 0, 3);
 	cv::Sobel(img, edgeY, CV_32F, 0, 1, 3);
@@ -685,8 +688,67 @@ void COCTImaging::CalculateMagnitude(cv::Mat img) {
 			totalMagnitude += absEdgeMagnitude.at<uchar>(y, x);
 		}
 	}
+
+	//cv::imwrite("origin_first" + std::to_string(i) + ".png", img);
 	//PLOGI.printf("check the time - Magnitude: %d", totalMagnitude);
 	m_nSheathPosition = totalMagnitude;
+}
+
+int i = 0;
+void COCTImaging::CheckSheathPixels(cv::Mat img)
+{
+	i++;
+	// 1. 클론 이미지 생성
+	cv::Mat cloneImg = img.clone();
+	cv::rotate(cloneImg, cloneImg, cv::ROTATE_90_COUNTERCLOCKWISE);
+	//cv::imwrite("CheckSheathPixels_origin" + std::to_string(i) + ".tif", cloneImg);
+	if (cloneImg.type() == CV_8U)
+		cloneImg.convertTo(cloneImg, CV_32F, 1.0 / 255.0);
+	else if (cloneImg.type() == CV_32F) {}
+	else {
+		PLOGI.printf("CheckSheathPixels - Unsupported image type");
+	}
+	if(autoCalibPatch.empty())
+	{
+		PLOGI.printf("CheckSheathPixels - autoCalibPatch is empty");
+		return;
+	}
+
+	cv::Mat result;
+	cv::matchTemplate(cloneImg, autoCalibPatch, result, cv::TM_CCOEFF_NORMED);
+
+	cv::Mat mask = result != 1.0f;
+	double maxVal; cv::Point maxLoc;
+	cv::minMaxLoc(result, nullptr, &maxVal, nullptr, &maxLoc, mask);
+
+	if (maxVal < 0.7) {
+		PLOGI.printf("CheckSheathPixels - maxRowVal is too small: %d", maxVal);
+		m_nPixelNum = 0;
+	}
+	//PLOGI.printf("check the time - pixelCount: %d", pixelCount);
+	else
+	{
+		//m_nPixelNum = maxLoc.y;
+
+		/* section을 나눠 sheath 파악 안정성 추가*/
+		m_nPixelNum = 0;
+		int validCount = 0, sectionDivision = 4, height = result.rows, width = result.cols / sectionDivision;
+		for(int i =0; i < sectionDivision; i++)
+		{
+			cv::Mat section = result(cv::Rect(i * width, 0, width, height));
+			cv::Mat sectionMask = section != 1.0f;
+			cv::Point sectionMaxLoc;
+			cv::minMaxLoc(section, nullptr, nullptr, nullptr, &sectionMaxLoc, sectionMask);
+			if(std::abs(sectionMaxLoc.y - maxLoc.y) < 15)
+			{
+				m_nPixelNum += sectionMaxLoc.y;
+				validCount++;
+			}
+		}
+		if(validCount > 0)
+			m_nPixelNum /= validCount;
+		
+	}
 }
 
 cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {
@@ -710,57 +772,14 @@ cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {
 	return result;
 }
 
-void COCTImaging::findSheath(cv::Mat input)
-{
-	using namespace cv;
-
-	// ===== 파라미터 =====
-	const bool  ROTATE_CCW_90 = true;
-
-	// LUT Table
-	const int    TOP_BAND_WIDTH = 30;
-	const double TARGET = 0.50;
-	const double POWER_MIN = 0.60;
-	const double POWER_MAX = 12.0;
-
-	// ROI
-	const int POS_MIN = 50;
-	const int POS_MAX = 500;
-
-	// 1차 이진화(상단 ROI Top-K + 퍼센타일 바닥)
-	const int    FIRST_H_ROI_TOPK = 200; // ROI 내부 상단 높이
-	const int    FIRST_EXPECTED_BAND_THICK_PX = 50;  // 예상 상단 밝은 밴드 두께
-	const double FIRST_ROI_PERCENTILE_FLOOR = 80;  // 퍼센타일 바닥
-
-	// 형태학
-	const int KSIZE = 5;
-	const int ERODE_ITER = 1;
-	const int DILATE_ITER = 1;
-
-	// 하단 라인 노이즈 제거(최대 공백 비율 Threshold)
-	const double BOTTOM_ZERO_GAP_FRAC = 0.27;
-
-	// 후보 선택 규칙
-	const int THICK_MIN = 5;
-	const int THICK_MAX = 40;
-	const int ADJ_DIFF_MAX = THICK_MAX - THICK_MIN;;
-
-	// 2차 이진화(Top-K만 사용)
-	const int SECOND_TARGET_THICK_PX = (THICK_MAX+ THICK_MIN)/2 * 2; // 기본: 이전과 동일한 감도
-	const int SECOND_PIXELS_PER_THICK_UNIT = 2504;
-
-	// 유효성 검사(ROI 내부 평균 대비 밝기 상승/점유율)
-	const double VALID_MIN_DELTA = 7.0;
-	const double VALID_MIN_OCCUPANCY = 0.02;
-	const int    VALID_BG_MARGIN = 5;
-
-	// ===== 0) 단일채널 8U로 정규화 =====
-	Mat gray;
+void COCTImaging::findSheath(cv::Mat input) {
+	i++;
+	cv::Mat gray;
 	if (input.channels() == 3) {
-		cvtColor(input, gray, COLOR_BGR2GRAY);
+		cvtColor(input, gray, cv::COLOR_BGR2GRAY);
 	}
 	else if (input.channels() == 4) {
-		Mat bgr; cvtColor(input, bgr, COLOR_BGRA2BGR); cvtColor(bgr, gray, COLOR_BGR2GRAY);
+		cv::Mat bgr; cvtColor(input, bgr, cv::COLOR_BGRA2BGR); cvtColor(bgr, gray, cv::COLOR_BGR2GRAY);
 	}
 	else {
 		if (input.type() == CV_8UC1) gray = input.clone();
@@ -771,209 +790,52 @@ void COCTImaging::findSheath(cv::Mat input)
 		}
 	}
 
-	// ===== 1) 회전 =====
-	if (ROTATE_CCW_90) rotate(gray, gray, ROTATE_90_COUNTERCLOCKWISE);
+	cv::rotate(gray, gray, cv::ROTATE_90_COUNTERCLOCKWISE);
+	cv::Mat tmp = gray.clone();
+	cv::threshold(gray, gray, 0, 255, cv::THRESH_OTSU);
 
-	// ===== 2) 영상 개선 (LUT 테이블 적용) =====
-	{
-		double Xd; minMaxLoc(gray, nullptr, &Xd);
-		int X = std::max(1, (int)std::round(Xd));
-		double p = 1.0;
-		if (X > TOP_BAND_WIDTH) {
-			double a = (double)(X - TOP_BAND_WIDTH) / (double)X;
-			double t = clamp_v(TARGET, 1e-3, 0.999);
-			p = std::log(t) / std::log(a);
-			p = clamp_v(p, POWER_MIN, POWER_MAX);
-		}
-		std::vector<uchar> lut(256);
-		for (int i = 0; i < 256; ++i) {
-			double u = std::min(i, X) / (double)X;
-			double y = std::pow(u, p) * 255.0;
-			y = clamp_v(y, 0.0, 255.0);
-			lut[i] = (uchar)round_to_even(y);
-		}
-		Mat lutMat(1, 256, CV_8U, lut.data());
-		LUT(gray, lutMat, gray);
-	}
+	int nowRow = 0, beforeRow = -1, startRow = 100;
+	int thickCount = 0, beforeThickCount = -1, sheathThickness = 15;
+	int rowGap = -1;
 
-	// ===== 3) ROI 적용 =====
-	const int Hfull = gray.rows;
-	const int Wfull = gray.cols;
-	int roi_y0 = clamp_v(POS_MIN, 0, Hfull);
-	int roi_y1 = clamp_v(POS_MAX + 1, 0, Hfull);
-	if (roi_y1 <= roi_y0) { roi_y0 = 0; roi_y1 = Hfull; }
-	Mat pre_roi = gray.rowRange(roi_y0, roi_y1).clone();
-
-	// ===== 4) 1차 이진화 (ROI 내부 상단 Top-K + Percentile floor) =====
-	Mat bin1_roi(pre_roi.size(), CV_8U, Scalar(0));
-	{
-		const int H = std::min(FIRST_H_ROI_TOPK, pre_roi.rows);
-		if (H > 0) {
-			int hist[256] = { 0 };
-			for (int r = 0; r < H; ++r) {
-				const uchar* p = pre_roi.ptr<uchar>(r);
-				for (int c = 0; c < pre_roi.cols; ++c) ++hist[p[c]];
+	for (int i = startRow; i < startRow + 300; i++) {
+		int pixelCount = 0;
+		bool isThereHighPixel = false;
+		for (int x = 0; x < gray.cols; x++) {
+			if (gray.at<uchar>(i, x) == 255)
+				pixelCount++;
+			if (tmp.at<uchar>(i, x) > 175) {
+				isThereHighPixel = true;
 			}
-			const int roiPix = H * pre_roi.cols;
-
-			// Top-K
-			int K1 = clamp_v(FIRST_EXPECTED_BAND_THICK_PX * pre_roi.cols, 1, roiPix);
-			int cum = 0, t_topk = 0;
-			for (int v = 255; v >= 0; --v) { cum += hist[v]; if (cum >= K1) { t_topk = v; break; } }
-
-			// Percentile floor
-			int target = (int)std::floor(FIRST_ROI_PERCENTILE_FLOOR * 0.01 * roiPix);
-			target = clamp_v(target, 1, roiPix);
-			int ac = 0, t_floor = 0;
-			for (int v = 0; v <= 255; ++v) { ac += hist[v]; if (ac >= target) { t_floor = v; break; } }
-
-			int t1 = std::max(t_topk, t_floor);
-			threshold(pre_roi, bin1_roi, std::max(0, t1 - 1), 255, THRESH_BINARY); // src>t1
 		}
-	}
-
-	// ===== 5) Morphology =====
-	const int k = (KSIZE % 2 == 1) ? KSIZE : (KSIZE + 1);
-	Mat kernel = getStructuringElement(MORPH_ELLIPSE, Size(k, k));
-	erode(bin1_roi, bin1_roi, kernel, Point(-1, -1), ERODE_ITER);
-	dilate(bin1_roi, bin1_roi, kernel, Point(-1, -1), DILATE_ITER);
-
-	// ===== 6) 하단 라인 노이즈 제거(라인 내 최대 공백이 BOTTOM_ZERO_GAP_FRAC 이상인 라인 제거)
-	{
-		const int w = bin1_roi.cols;
-		const int thr = (int)std::ceil(BOTTOM_ZERO_GAP_FRAC * w);
-		for (int y = bin1_roi.rows - 1; y >= 0; --y) {
-			const uchar* row = bin1_roi.ptr<uchar>(y);
-			int max_run = 0, run = 0;
-			for (int x = 0; x < w; ++x) {
-				if (row[x] == 0) { ++run; if (run > max_run) max_run = run; }
-				else { run = 0; }
-			}
-			if (max_run >= thr) {
-				std::memset(bin1_roi.ptr<uchar>(y), 0, (size_t)w);
-			}
-			else {
+		nowRow = i;
+		if (pixelCount > gray.cols * 0.7 && pixelCount != gray.cols && isThereHighPixel) {
+			thickCount++;
+			if (thickCount > sheathThickness) {
+				nowRow -= sheathThickness;
+				PLOGI.printf("find sheath at row %d, pixelCount: %d", nowRow, pixelCount);
 				break;
 			}
-		}
-	}
-
-	// ===== 7) Row-Mean 치환 =====
-	Mat rowMean_roi(bin1_roi.size(), CV_8U);
-#pragma omp parallel for schedule(static)
-	for (int r = 0; r < bin1_roi.rows; ++r) {
-		const uchar* src = bin1_roi.ptr<uchar>(r);
-		int sum = 0;
-		for (int c = 0; c < bin1_roi.cols; ++c) sum += src[c];
-		double m = (double)sum / (double)bin1_roi.cols;
-		const uchar v = (uchar)round_to_even(m);
-		uchar* dst = rowMean_roi.ptr<uchar>(r);
-		std::memset(dst, v, (size_t)bin1_roi.cols * sizeof(uchar));
-	}
-
-	// ===== 8) 2차 이진화 (Top-K) =====
-	Mat second_roi(rowMean_roi.size(), CV_8U, Scalar(0));
-	{
-		int hist2[256] = { 0 };
-		for (int r = 0; r < rowMean_roi.rows; ++r) {
-			const uchar* p = rowMean_roi.ptr<uchar>(r);
-			for (int c = 0; c < rowMean_roi.cols; ++c) ++hist2[p[c]];
-		}
-		const int roiPix2 = rowMean_roi.rows * rowMean_roi.cols;
-
-		long long K2_raw = 1LL * SECOND_TARGET_THICK_PX * SECOND_PIXELS_PER_THICK_UNIT;
-		int K2 = clamp_v((int)std::min<long long>(K2_raw, roiPix2), 1, roiPix2);
-
-		int cum = 0, t2 = 0;
-		for (int v = 255; v >= 0; --v) { cum += hist2[v]; if (cum >= K2) { t2 = v; break; } }
-
-		threshold(rowMean_roi, second_roi, std::max(0, t2 - 1), 255, THRESH_BINARY); // src>t2
-	}
-
-	// ===== 9) 연결요소 → 후보/선택 =====
-	Mat labels, stats, centroids;
-	int n = connectedComponentsWithStats((second_roi > 0), labels, stats, centroids, 8, CV_32S);
-
-	struct Comp { int left, top, width, height, area, bottom; double centerY; };
-	std::vector<Comp> candidates; candidates.reserve(std::max(0, n - 1));
-	for (int i = 1; i < n; ++i) {
-		int x = stats.at<int>(i, CC_STAT_LEFT);
-		int y = stats.at<int>(i, CC_STAT_TOP);
-		int w = stats.at<int>(i, CC_STAT_WIDTH);
-		int h = stats.at<int>(i, CC_STAT_HEIGHT);
-		int a = stats.at<int>(i, CC_STAT_AREA);
-		if (w <= 0 || h <= 0 || a <= 0) continue;
-		if (h < THICK_MIN || h > THICK_MAX) continue;
-		candidates.push_back({ x, y, w, h, a, y + h - 1, y + h * 0.5 });
-	}
-
-	std::sort(candidates.begin(), candidates.end(),
-		[](const Comp& a, const Comp& b) { return a.top < b.top; });
-
-	std::vector<Comp> paired_lowers;
-	if (candidates.size() >= 2) {
-		paired_lowers.reserve(candidates.size());
-		for (size_t i = 0; i + 1 < candidates.size(); ++i) {
-			const Comp& c1 = candidates[i];
-			const Comp& c2 = candidates[i + 1];
-			if (std::abs(c1.height - c2.height) <= ADJ_DIFF_MAX)
-				paired_lowers.push_back((c1.bottom >= c2.bottom) ? c1 : c2);
-		}
-	}
-
-	bool has_raw = false;
-	Comp chosen_roi_comp{};
-	for (const auto& c : paired_lowers) {
-		if (!has_raw || c.bottom > chosen_roi_comp.bottom) { chosen_roi_comp = c; has_raw = true; }
-	}
-
-	// ===== 10) 유효성 검사 (ROI 내부 평균/점유율 기준) =====
-	bool has_final = false;
-	Comp chosen_global{};
-	if (has_raw) {
-		const int Hroi = pre_roi.rows;
-		int y = chosen_roi_comp.top, h = chosen_roi_comp.height;
-		int y0 = clamp_v(y, 0, Hroi), y1 = clamp_v(y + h, 0, Hroi);
-		if (y1 > y0) {
-			Mat band_mask = (second_roi.rowRange(y0, y1) > 0);
-			Mat band_pre = pre_roi.rowRange(y0, y1);
-
-			double occ = (double)countNonZero(band_mask) / band_mask.total();
-			// 평균(마스크 적용)
-			Scalar mean_band_sc = (countNonZero(band_mask) > 0) ?
-				cv::mean(band_pre, band_mask) : cv::mean(band_pre);
-
-			int m = VALID_BG_MARGIN;
-			int up0 = clamp_v(y0 - h - m, 0, Hroi), up1 = clamp_v(y0 - m, 0, Hroi);
-			int dn0 = clamp_v(y1 + m, 0, Hroi), dn1 = clamp_v(y1 + h + m, 0, Hroi);
-
-			Scalar mean_bg_sc;
-			if (up1 > up0 || dn1 > dn0) {
-				std::vector<Mat> bgs;
-				if (up1 > up0) bgs.push_back(pre_roi.rowRange(up0, up1));
-				if (dn1 > dn0) bgs.push_back(pre_roi.rowRange(dn0, dn1));
-				Mat bg; vconcat(bgs, bg);
-				mean_bg_sc = cv::mean(bg);
-			}
-			else {
-				mean_bg_sc = cv::mean(pre_roi);
-			}
-
-			double delta = mean_band_sc[0] - mean_bg_sc[0];
-			if (occ >= VALID_MIN_OCCUPANCY && delta >= VALID_MIN_DELTA) {
-				has_final = true;
-				chosen_global = chosen_roi_comp;
-				// ROI → 전역좌표 오프셋
-				chosen_global.top += roi_y0;
-				chosen_global.bottom += roi_y0;
-				chosen_global.centerY += roi_y0;
+			if ((thickCount > 5 && beforeRow >= 0) || beforeThickCount > 5) {
+				rowGap = (nowRow - thickCount + 1) - (beforeRow + beforeThickCount);
+				if (rowGap < 5 && rowGap > 0 && beforeThickCount + rowGap + thickCount > sheathThickness) {
+					nowRow = beforeRow;
+					PLOGI.printf("find sheath at row %d, pixelCount: %d", nowRow, pixelCount);
+					break;
+				}
 			}
 		}
+		else {
+			beforeRow = nowRow - thickCount;
+			beforeThickCount = thickCount;
+			thickCount = 0;
+		}
 	}
 
-	// ===== 11) 최종 후보 선정 =====
-	int sheathPos = has_final ? (int)std::round(chosen_global.centerY) : -1;
-	m_nSheathPosition = sheathPos;	
+	//cv::line(tmp, cv::Point(0, nowRow), cv::Point(tmp.cols - 1, nowRow), cv::Scalar(255, 0, 0), 2);
+	//cv::imwrite("origin" + std::to_string(i) + ".tif", tmp);
+	m_nSheathPosition = nowRow;
+	//cv::imwrite("binary" + std::to_string(i) + ".tif", gray);
 }
 
 // 정규화를 위한 함수
@@ -1248,7 +1110,7 @@ void COCTImaging::logarithmic_contrast_stretching(cv::Mat& img, float lower_perc
 	const float eps = 1e-8f;
 	const float invWidth = (BINS - 1) / (vmax - vmin + eps);
 
-	std::vector<std::vector<uint32_t>> localH(nt, std::vector<uint32_t>(BINS, 0u));
+	std::vector<std::vector<uint32_t>> localH(nt, std::vector<uint32_t>(BINS));		// 0으로 채워져 초기화.
 
 #pragma omp parallel for schedule(static)
 	for (int i = 0; i < rows; ++i) {
@@ -1267,7 +1129,7 @@ void COCTImaging::logarithmic_contrast_stretching(cv::Mat& img, float lower_perc
 		}
 	}
 
-	std::vector<uint32_t> hist(BINS, 0u);
+	std::vector<uint32_t> hist(BINS);
 	for (int t = 0; t < nt; ++t) {
 		const auto& h = localH[t];
 		for (int b = 0; b < BINS; ++b) hist[b] += h[b];
@@ -1547,7 +1409,7 @@ void COCTImaging::EraseStentOutLier(cv::Mat& stent) {
 	blackImage.release();
 }
 
-void COCTImaging::SetLumenContourOffset(std::vector<cv::Point> lumenContour) {
+void COCTImaging::SetLumenContourOffset(const std::vector<cv::Point>& lumenContour) {
 	if (lumenContour.empty()) {
 		return;
 	}
@@ -1560,7 +1422,8 @@ void COCTImaging::SetLumenContourOffset(std::vector<cv::Point> lumenContour) {
 
 	cv::Mat blackImage = cv::Mat::zeros(height, width, CV_8UC1);
 
-	cv::drawContours(blackImage, lumenContours, -1, cv::Scalar(255), 1);
+	if (lumenContour.size() > 2)
+		cv::drawContours(blackImage, lumenContours, -1, cv::Scalar(255), 1);
 
 	cv::remap(blackImage, blackImage, imatXMap, imatYMap, cv::INTER_LINEAR);
 
@@ -1606,7 +1469,11 @@ void COCTImaging::GetLumenOffsetPoints(std::vector<cv::Point>& lumenOffsetBounda
 	}
 }
 
-void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& centerPoints, std::vector<float>& radius) {
+void COCTImaging::GetGuideWireCenterPoint(cv::Mat image,
+	std::vector<cv::Rect2f> GuideWires,
+	std::vector<cv::Point>& centerPoints,
+	std::vector<float>& radius)
+{
 	if (GuideWires.empty()) {
 		return;
 	}
@@ -1614,7 +1481,6 @@ void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f>
 	radius.clear();
 
 	std::vector<cv::Point> edgePoints; // GuideWire에서 sheath 중심에 가장 가까운 점
-	// codesonar suppr C buffer-underrun
 	std::vector<double> theta;
 
 	cv::Mat grayImage;
@@ -1630,9 +1496,7 @@ void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f>
 	}
 
 	GetGuideWireCircleEdgePoints(grayImage, GuideWires, edgePoints);
-
 	InterpolateEdgePoints(edgePoints);
-
 	GetGuideWireShadowPointAngles(grayImage, edgePoints, theta);
 
 	if (theta.empty()) {
@@ -1646,32 +1510,42 @@ void COCTImaging::GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f>
 	int centerX = image.cols / 2;
 	int centerY = image.rows / 2;
 
-	for (int i = 0; i < edgePoints.size(); i++) {
-		int XDirection, YDirection;
-		double centerToEdgePointDistance, guideWireRadius, angle;
-		if (edgePoints[i].x == -1) {
+	for (size_t i = 0; i < edgePoints.size(); i++) {
+		int XDirection = 0, YDirection = 0;
+		double guideWireRadius = -1.0, angle = 0.0;
 
-		}
-		else {
-			cv::Vec2d edgeVector = cv::Vec2d(edgePoints[i].x - centerX, edgePoints[i].y - centerY);
-			centerToEdgePointDistance = std::sqrt((centerX - edgePoints[i].x) * (centerX - edgePoints[i].x) + (centerY - edgePoints[i].y) * (centerY - edgePoints[i].y));
-			guideWireRadius = std::abs(centerToEdgePointDistance * std::sin(theta[i]) / (1 - std::sin(theta[i]))); // radius = magnitude
+		if (edgePoints[i].x != -1 && edgePoints[i].y != -1 && i < theta.size()) {
+			cv::Vec2d edgeVector(edgePoints[i].x - centerX, edgePoints[i].y - centerY);
+			double centerToEdgePointDistance = std::sqrt(
+				(double)(centerX - edgePoints[i].x) * (centerX - edgePoints[i].x) +
+				(double)(centerY - edgePoints[i].y) * (centerY - edgePoints[i].y));
+
+			if (std::abs(1 - std::sin(theta[i])) > 1e-9) {
+				guideWireRadius = std::abs(centerToEdgePointDistance * std::sin(theta[i]) /
+					(1 - std::sin(theta[i])));
+			}
+			else {
+				guideWireRadius = -1.0;
+			}
 
 			cv::Vec2d unitVector = edgeVector[0] > 0 ? cv::Vec2d(1, 0) : cv::Vec2d(-1, 0);
-
 			GetAcuteAngleToXAxis(edgeVector, unitVector, angle);
 
-			XDirection = edgeVector[0] / std::abs(edgeVector[0]);
-			YDirection = edgeVector[1] / std::abs(edgeVector[1]);
+			if (edgeVector[0] != 0) XDirection = edgeVector[0] / std::abs(edgeVector[0]);
+			if (edgeVector[1] != 0) YDirection = edgeVector[1] / std::abs(edgeVector[1]);
 		}
 
-		centerPoints.push_back(cv::Point((int)(edgePoints[i].x + XDirection * guideWireRadius * std::cos(angle)),
+		centerPoints.push_back(cv::Point(
+			(int)(edgePoints[i].x + XDirection * guideWireRadius * std::cos(angle)),
 			(int)(edgePoints[i].y + YDirection * guideWireRadius * std::sin(angle))));
-		radius.push_back(guideWireRadius);
+		radius.push_back((float)guideWireRadius);
 	}
 }
 
-void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& edgePoints) {
+void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage,
+	std::vector<cv::Rect2f> GuideWires,
+	std::vector<cv::Point>& edgePoints)
+{
 	int paddingSize = 1;
 	for (const auto& rect : GuideWires) {
 		if (rect.width == 0 && rect.height == 0) {
@@ -1686,11 +1560,8 @@ void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv
 		double sigma = 100.0;
 
 		cv::Mat mask(height, width, CV_8UC1);
-
-		for (int y = 0 ; y < height; ++y)
-		{
-			for (int x = 0 ; x < width; ++x)
-			{
+		for (int y = 0; y < height; ++y) {
+			for (int x = 0; x < width; ++x) {
 				double dx = x - centerX;
 				double dy = y - centerY;
 				double distanceSquared = dx * dx + dy * dy;
@@ -1703,46 +1574,54 @@ void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv
 
 		cv::Mat filtered;
 		cv::Mat floatImage, floatMask;
-
 		grayImage.convertTo(floatImage, CV_32F, 1.0 / 255.0);
 		mask.convertTo(floatMask, CV_32F, 1.0 / 255.0);
-
 		cv::multiply(floatImage, floatMask, filtered);
-
 		filtered.convertTo(filtered, CV_8U, 255.0);
 
 		// top 3 pixels에 대한 Mask 작업을 위한 Roi Padding 설정
-		if (rect.x - paddingSize < 0 || rect.y - paddingSize < 0 || rect.x + rect.width + paddingSize > filtered.cols || rect.y + rect.height + paddingSize > filtered.rows) {
+		if (rect.x - paddingSize < 0 || rect.y - paddingSize < 0 ||
+			rect.x + rect.width + paddingSize > filtered.cols ||
+			rect.y + rect.height + paddingSize > filtered.rows) {
 			continue;
 		}
 
-		cv::Rect roiRect(rect.x - paddingSize, rect.y - paddingSize, rect.width + paddingSize * 2, rect.height + paddingSize * 2);
+		int rx = std::max(0, cvFloor(rect.x) - paddingSize);
+		int ry = std::max(0, cvFloor(rect.y) - paddingSize);
+		int rw = std::min(filtered.cols - rx, cvCeil(rect.width) + 2 * paddingSize);
+		int rh = std::min(filtered.rows - ry, cvCeil(rect.height) + 2 * paddingSize);
+		if (rw <= 0 || rh <= 0) continue;
+
+		cv::Rect roiRect(rx, ry, rw, rh);
 		cv::Mat roi = filtered(roiRect);
 
 		cv::Mat roiInt;
-		if (roi.type() != CV_8U) {
-			roi.convertTo(roiInt, CV_8U);
-		}
-		else {
-			roiInt = roi;
-		}
+		if (roi.type() != CV_8U) roi.convertTo(roiInt, CV_8U);
+		else roiInt = roi;
+
+		int orw = std::max(0, std::min(cvCeil(rect.width), roiInt.cols - paddingSize));
+		int orh = std::max(0, std::min(cvCeil(rect.height), roiInt.rows - paddingSize));
+		if (orw <= 0 || orh <= 0) continue;
+
+		cv::Rect originalRoiRect(paddingSize, paddingSize, orw, orh);
+		if ((originalRoiRect & cv::Rect(0, 0, roiInt.cols, roiInt.rows)) != originalRoiRect) continue;
 
 		// Roi Padding 없는 기존 GuideWire Rectangle Roi
-		cv::Rect originalRoiRect(paddingSize, paddingSize, rect.width, rect.height);
 		cv::Mat originalRoi = roiInt(originalRoiRect);
 
 		std::vector<std::pair<int, cv::Point>> pixelValues;
 		for (int y = 0; y < originalRoi.rows; y++) {
 			for (int x = 0; x < originalRoi.cols; x++) {
-				pixelValues.emplace_back(originalRoi.at<unsigned char>(y, x), cv::Point(x, y));
+				pixelValues.emplace_back(originalRoi.at<uchar>(y, x), cv::Point(x, y));
 			}
 		}
-		std::sort(pixelValues.begin(), pixelValues.end(), [](const std::pair<int, cv::Point>& a, const std::pair<int, cv::Point>& b) {
-			return a.first > b.first;
-			});
+		if (pixelValues.empty()) continue;
+
+		std::sort(pixelValues.begin(), pixelValues.end(),
+			[](auto& a, auto& b) { return a.first > b.first; });
 
 		std::vector<cv::Point> top3Points;
-		for (int i = 0; i < 30 && i < pixelValues.size(); i++) {
+		for (int i = 0; i < 30 && i < (int)pixelValues.size(); i++) {
 			top3Points.push_back(pixelValues[i].second);
 		}
 
@@ -1753,23 +1632,22 @@ void COCTImaging::GetGuideWireCircleEdgePoints(cv::Mat grayImage, std::vector<cv
 			int startY = pt.y;
 			int width = paddingSize * 2 + 1;
 			int height = paddingSize * 2 + 1;
-
 			cv::Rect region(startX, startY, width, height);
-			cv::Mat regionMat = roiInt(region);
+			region &= cv::Rect(0, 0, roiInt.cols, roiInt.rows); // 경계 체크
+			if (region.width <= 0 || region.height <= 0) continue;
 
+			cv::Mat regionMat = roiInt(region);
 			int sum = cv::sum(regionMat)[0];
 			int regionAvg = (int)((double)sum / (region.width * region.height));
-
 			avgValues.emplace_back(regionAvg, pt);
 		}
+		if (avgValues.empty()) continue;
 
 		auto maxAvgIt = std::max_element(avgValues.begin(), avgValues.end(),
-			[](const std::pair<int, cv::Point>& a, const std::pair<int, cv::Point>& b) {
-				return a.first < b.first;
-			});
+			[](auto& a, auto& b) { return a.first < b.first; });
 
 		if (maxAvgIt != avgValues.end()) {
-			cv::Point maxAvgPoint = maxAvgIt->second + cv::Point(rect.x, rect.y);
+			cv::Point maxAvgPoint = maxAvgIt->second + cv::Point((int)rect.x, (int)rect.y);
 			edgePoints.push_back(maxAvgPoint);
 		}
 	}
@@ -1878,22 +1756,19 @@ void COCTImaging::GetGuideWireShadowPointAngles(cv::Mat grayImage, std::vector<c
 
 		double angle = 360.0 / m_nHeight * 45;
 
-		if (angle >= 20.0 || angle <= 10.0) { // Error 값 처리
+		if (!(angle >= 10.0 && angle <= 20.0)) { // Error 값 처리
 			angle = 15.0; // Normal 값으로 Set
 		}
 
-		double tmp_theta = angle * CV_PI / 180;
+		double tmp_theta = angle * CV_PI / 180.0;
 		theta.push_back(tmp_theta);
 	}
 }
 
 void COCTImaging::InterpolateEdgePoints(std::vector<cv::Point>& edgePoints) {
-	int n = edgePoints.size();
-
-	for (int i = 0; i < n; ++i)
-	{
-		if (edgePoints[i].x == -1 || edgePoints[i].y == -1)
-		{
+	int n = (int)edgePoints.size();
+	for (int i = 0; i < n; ++i) {
+		if (edgePoints[i].x == -1 || edgePoints[i].y == -1) {
 			// 앞뒤에서 유효한 값을 찾음
 			int prev = i - 1;
 			int next = i + 1;
@@ -1904,27 +1779,16 @@ void COCTImaging::InterpolateEdgePoints(std::vector<cv::Point>& edgePoints) {
 			// 다음 유효한 포인트 찾기
 			while (next < n && (edgePoints[next].x == -1 || edgePoints[next].y == -1)) next++;
 
-			if (prev >= 0 && next < n)
-			{
+			if (prev >= 0 && next < n && next != prev) {
 				// 선형 보간
-				cv::Point p1 = edgePoints[prev];
-				cv::Point p2 = edgePoints[next];
-
 				float alpha = float(i - prev) / float(next - prev);
-				int interpX = static_cast<int>((1 - alpha) * p1.x + alpha * p2.x);
-				int interpY = static_cast<int>((1 - alpha) * p1.y + alpha * p2.y);
-
+				int interpX = (int)((1 - alpha) * edgePoints[prev].x + alpha * edgePoints[next].x);
+				int interpY = (int)((1 - alpha) * edgePoints[prev].y + alpha * edgePoints[next].y);
 				edgePoints[i] = cv::Point(interpX, interpY);
 			}
 			// 양쪽 중 한 쪽만 유효할 경우: 가장 가까운 값으로 대체
-			else if (prev >= 0)
-			{
-				edgePoints[i] = edgePoints[prev];
-			}
-			else if (next < n)
-			{
-				edgePoints[i] = edgePoints[next];
-			}
+			else if (prev >= 0) edgePoints[i] = edgePoints[prev];
+			else if (next < n) edgePoints[i] = edgePoints[next];
 			// 둘 다 없으면 (끝에서 전부 -1): 무시하거나 (0,0) 처리
 		}
 	}
@@ -1938,9 +1802,11 @@ void COCTImaging::GetCircularizeTransformPoint(cv::Point src, cv::Point& dst) {
 	int dy = diameter / 2;
 
 	// 좌표 변환 값
-	double r = (diameter - src.x) / 2;
-	double theta = 360 / diameter * src.y;
-	double scale = 1 / std::abs(std::cos(theta));
+	double r = (diameter - src.x) / 2.0;
+	double theta = (2.0 * CV_PI / diameter) * src.y;
+
+	double cosTheta = std::cos(theta);
+	double scale = (std::abs(cosTheta) > 1e-9) ? 1.0 / std::abs(cosTheta) : 1.0;
 
 	// 좌표변환 식
 	int fx = (int)std::round(scale * r * std::cos(theta) + dx);
@@ -1954,11 +1820,18 @@ void COCTImaging::GetAcuteAngleToXAxis(cv::Vec2d vector1, cv::Vec2d vector2, dou
 	double vector1Magnitude = std::sqrt(vector1[0] * vector1[0] + vector1[1] * vector1[1]);
 	double vector2Magnitude = std::sqrt(vector2[0] * vector2[0] + vector2[1] * vector2[1]);
 
+	if (vector1Magnitude < 1e-12 || vector2Magnitude < 1e-12) {
+		angle = 0.0;
+		return;
+	}
+
 	// 벡터와 X축 간의 내적 계산
 	double dotProduct = vector1[0] * vector2[0] + vector1[1] * vector2[1];
 
 	// 코사인 각도 계산
 	double cosTheta = dotProduct / (vector1Magnitude * vector2Magnitude);
+	if (cosTheta > 1.0) cosTheta = 1.0;
+	else if (cosTheta < -1.0) cosTheta = -1.0;
 
 	// 각도 계산 (라디안)
 	angle = std::acos(cosTheta);

@@ -6,7 +6,6 @@
 #include "WriteTaskController.h"
 #include <vector>
 #include <iomanip>
-#define ENABLE_RFID		false
 
 // position: step, speed: step/s
 #define PULLBACK_MAX_DISTANCE			100		/* mm */	
@@ -20,7 +19,7 @@
 
 #define RFID_REPLY_DATA_IDX				4
 #define RFID_REPLY_LENGTH_IDX			1
-#define RFID_MAX_COUNT					5
+#define RFID_MAX_COUNT					99
 #define RFID_MANUFACTURER				"RAYWATT"
 #define RFID_MANUFACTURER_LEN			7
 
@@ -36,7 +35,8 @@ enum class eRJState {
 	Loaded,
 	Unloading,
 	Unloaded,
-	Error
+	Error,
+	RFIDError
 };
 
 enum RFID_ReadType
@@ -96,6 +96,7 @@ private:
 
 	WriteTaskController* m_resendManager;
 
+	int catheterUsage;
 public:
 	CRJController();
 	virtual ~CRJController();
@@ -131,6 +132,8 @@ public:
 	bool GetRFIDStep();
 	bool GetIsTagging();
 	void findCorrectKey();
+	void SetCatheterUsage(int usage) { catheterUsage = usage; }
+	int GetCatheterUsage() { return catheterUsage;}
 
 	UINT GetRFIDUID(BYTE* pRFIDUID); 
 	int GetRFIDCountCurrentState();
@@ -145,6 +148,7 @@ public:
 	void changeSMProfileToPullback();
 	void changeSMProfileToLoadUnload();
 	void DisableStepMotors();
+	void moveDelaylineToRFIDPosition();
   
 protected:
 	void initSetting();

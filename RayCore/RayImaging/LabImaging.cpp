@@ -10,6 +10,7 @@ CLabImaging::CLabImaging(Setting setting, CMessageService* pMsg)
 
 	scopeData = nullptr;
 	scopeFFTData = nullptr;
+	scopeLogData = nullptr;
 
 	subtract = false;
 
@@ -24,6 +25,7 @@ CLabImaging::~CLabImaging() {
 
 	if(scopeData != nullptr) delete[] scopeData;
 	if (scopeFFTData != nullptr) delete[] scopeFFTData;
+	if (scopeLogData != nullptr) delete[] scopeLogData;
 
 	imageRectangle.release();
 }
@@ -63,6 +65,7 @@ void CLabImaging::Initialize(CCalibration* calibration, USHORT* backgroundData) 
 	scopeData = new USHORT[allocSize];
 	allocSize = static_cast<size_t>(nOutputLength) * 2;
 	scopeFFTData = new USHORT[allocSize];
+	scopeLogData = new float[allocSize];
 
 	imageRectangle.create(nOutputLength, nBScan, CV_8UC3);
 
@@ -149,6 +152,8 @@ void CLabImaging::generateScopeData(Ipp32f* output, Ipp16u* scope) {
 	ippsSubC_32f(output, m_setting.lowLevel, temp, nOutputLength);
 	ippsMulC_32f_I(USHRT_MAX / m_setting.highLevel, temp, nOutputLength);
 	ippsConvert_32f16u_Sfs(temp, scope, nOutputLength, ippRndNear, 0);
+
+	memcpy(scopeLogData, output, sizeof(float) * nOutputLength);
 
 	delete[] temp;
 }

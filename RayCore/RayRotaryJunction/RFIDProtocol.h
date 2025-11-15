@@ -59,6 +59,7 @@ public:
 		int aCNT;
 		int aStep;
 		bool findingKey = false;
+		bool receiveTotalState = false;
 		RFIDErrorState errorState = UNANSWERED;
 	};
 private:
@@ -90,7 +91,7 @@ public:
 	static void printStateData(SRFIDState stateData);
 	static bool getFindingKeyStatus();
 	static void setFindingKeyStatus(bool status);
-	static bool getRFIDErrorState();
+	static RFIDErrorState getRFIDErrorState();
 	static void setRFIDErrorState(RFIDErrorState status);
 	static RFIDMessageData::Data* getMessageData(eFID fid);
 	static void deleteMessageData(eFID fid);

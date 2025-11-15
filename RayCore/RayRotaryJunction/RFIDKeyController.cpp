@@ -13,20 +13,37 @@ bool RFIDKeyController::isDuplicate(BYTE* arr, size_t len) {
 
 void RFIDKeyController::readKeys() {
 	std::ifstream keyFile(keyFilePath, std::ios::in);
-	if (!keyFile.is_open()) return;
+	if (!keyFile.is_open()) {
+		writeKeysFile();
+		std::ifstream keyFile(keyFilePath, std::ios::in);
+		if (!keyFile.is_open()) return;
+	}
 	std::string line;
 	while (std::getline(keyFile, line)) {
 		if (line.empty()) continue;
 		std::vector<BYTE> key;
+		bool valid = true;
 		for (int i = 0; i < KEY_LEN; ++i) {
 			std::string hexByte = line.substr(i * 2, 2); 
-			BYTE byteVal = static_cast<BYTE>(std::stoi(hexByte, nullptr, 16));
-			key.push_back(byteVal);
+			try {
+				int intByte = std::stoi(hexByte, nullptr, 16);
+				if (intByte < 0 || intByte > 255) {
+					valid = false;
+					break;
+				}
+				key.push_back(static_cast<BYTE>(intByte));
+			}
+			catch (const std::exception&) {
+				valid = false;
+				break;
+			}
 		}
+		if (!valid) continue;
 		keys.push_back(key);
 	}
 	keyFile.close();
 }
+
 void RFIDKeyController::addKey(BYTE* key) {
 	if (isDuplicate(key, KEY_LEN)) return;
 	std::ofstream logFile(keyFilePath, std::ios::app);
@@ -45,20 +62,37 @@ void RFIDKeyController::addKey(BYTE* key) {
 	}
 	keys.push_back(tnsKey);
 }
+
 void RFIDKeyController::loadFirstKey(BYTE* key) {
+	if (!key) return;
+
+	std::fill_n(key, KEY_LEN, static_cast<BYTE>(0));
+
 	if (keys.empty()) {
 		readKeys();
 	}
 	if (keys.empty()) {
-		memset(key, 0x00, KEY_LEN);
 		return;
 	}
-	std::vector<BYTE> firstKey = keys.at(0);
-	for (int i = 0; i < KEY_LEN; i++) {
-		key[i] = firstKey[i];
-	}
+	const std::vector<BYTE>& firstKey = keys.front();
+	if (firstKey.size() != KEY_LEN) return;
+	std::copy_n(firstKey.data(), KEY_LEN, key);
 }
 
-std::vector<std::vector<BYTE>> RFIDKeyController::getKeys() {
+const std::vector<std::vector<BYTE>>& RFIDKeyController::getKeys() {
 	return keys;
+}
+
+void RFIDKeyController::writeKeysFile() {
+	std::ifstream keyFile(keyFilePath, std::ios::in);
+	if (!keyFile.is_open()) {
+		std::ofstream newFile(keyFilePath);
+		if (!newFile.is_open()) {
+			return;
+		}
+		newFile.close();
+		BYTE key[KEY_LEN] = DEFAULT_KEY;
+		addKey(key);
+	}
+	return;
 }

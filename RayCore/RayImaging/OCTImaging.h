@@ -27,7 +27,8 @@ struct FFTThreadContext {
 enum class AutoCalibrationMathod {
 	Disable = 0,
 	FindingMinMagnitude,
-	FindingSheath
+	FindingSheath,
+	CheckSheathPixelNum
 };
 
 class COCTImaging : public IImaging
@@ -46,6 +47,7 @@ protected:
 	cv::Mat matYMap;
 	cv::Mat imatXMap;  // circle image -> inverse circular -> Rotate CounterClock 90 -> Circluar -> Rotate_ClockWise 90
 	cv::Mat imatYMap;
+	cv::Mat autoCalibPatch;
 	std::vector<cv::Point> inversedContourYPoints;
 
 	cv::Mat imageResult;
@@ -74,9 +76,8 @@ protected:
 	int m_nSheathPosition;
 	int m_nSheathSearchRange;
 	int m_nZOffset;
+	int m_nPixelNum;
 	int fftOutLen_ = 0;
-
-	int m_delayLineMovingDirection = 1;
 
 	cv::Ptr<cv::CLAHE> clahe;
 
@@ -105,6 +106,7 @@ public:
 		m_setting.lowLevel = low;
 		m_setting.highLevel = high;
 	}
+	void SetDistPerPixel(double distPerPixel) { m_setting.distPerPixel = distPerPixel; }
 	virtual void SetFrameInfo(int nCurFrame, int nTotalFrame) {
 		m_nCurFrame = nCurFrame;
 		m_nTotalFrame = nTotalFrame;
@@ -120,12 +122,13 @@ public:
 	void CircularizeImage(cv::Mat& src, cv::Mat& dst);
 	void InverseCircularizeImage(cv::Mat& src, cv::Mat& dst);
 	void EraseStentOutLier(cv::Mat& stent);
-	void SetLumenContourOffset(std::vector<cv::Point> lumenContour);
+	void SetLumenContourOffset(const std::vector<cv::Point>& lumenContour);
 	void GetGuideWireCenterPoint(cv::Mat image, std::vector<cv::Rect2f> GuideWires, std::vector<cv::Point>& centerPoints, std::vector<float>& radius);
 
 	int GetSheathPosition() { return m_nSheathPosition; }
+	int GetPixelNum() { return m_nPixelNum; }
+	void SetPatchImage(cv::Mat Patch) { if(autoCalibPatch.empty()) autoCalibPatch = Patch.clone(); }
 	void SetZOffset(int nOffset) { m_nZOffset = nOffset; }
-	void SetDelayLineMovingDirection(int direction) { m_delayLineMovingDirection = direction; }
 
 	static void SetImageCompensation(bool ImageCompensated);
 	static void SetImageCompensationControlWindow(bool ImageCompensationControlWindowOn, Setting setting);
@@ -149,6 +152,7 @@ protected:
 	void generateImage(Ipp32f* logaritihmData, bool bInvert);
 	void findSheath(Ipp32f* logaritihmData);
 	void CalculateMagnitude(cv::Mat img);
+	void CheckSheathPixels(cv::Mat img);
 	void findSheath(cv::Mat input);
 	std::vector<double> normalize(const std::vector<double>& values, double scale = 1.0);
 	void drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color);

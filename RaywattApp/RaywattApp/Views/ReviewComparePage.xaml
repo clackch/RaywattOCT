@@ -222,8 +222,21 @@
                             <Label Content="1 ㎜" Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
                             <StackPanel Height="2"/>
                             <Grid>
-                                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Left"/>
-                                <Separator Width="{Binding CrossSectionCompareScale}" Height="1" Margin="0"/>
+                                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Left">
+                                    <Separator.RenderTransform>
+                                        <TransformGroup>
+                                            <TranslateTransform X="{Binding ZoomCompare.ScaleX, Converter={StaticResource ScaleBarScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}"/>
+                                        </TransformGroup>
+                                    </Separator.RenderTransform>
+                                </Separator>
+                                <Separator Width="{Binding CrossSectionCompareScale}" Height="1" Margin="0">
+                                    <Separator.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="{Binding ZoomCompare.ScaleX, Converter={StaticResource CrossSectionScaleConverter},ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}"/>
+                                            <TranslateTransform X="{Binding ZoomCompare.ScaleX, Converter={StaticResource ScaleBarScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}"/>
+                                        </TransformGroup>
+                                    </Separator.RenderTransform>
+                                </Separator>
                                 <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Right"/>
                             </Grid>
                         </StackPanel>
@@ -429,8 +442,21 @@
                             <Label Content="1 ㎜" Style="{DynamicResource Pretendard-Medium-10}" Foreground="{DynamicResource SideMenuTitleBrush}" HorizontalAlignment="Center"/>
                             <StackPanel Height="2"/>
                             <Grid>
-                                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Left"/>
-                                <Separator Width="{Binding CrossSectionCompareScale}" Height="1" Margin="0"/>
+                                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Left">
+                                    <Separator.RenderTransform>
+                                        <TransformGroup>
+                                            <TranslateTransform X="{Binding ZoomCompare.ScaleX, Converter={StaticResource ScaleBarScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}"/>
+                                        </TransformGroup>
+                                    </Separator.RenderTransform>
+                                </Separator>
+                                <Separator Width="{Binding CrossSectionCompareScale}" Height="1" Margin="0">
+                                    <Separator.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="{Binding ZoomCompare.ScaleX, Converter={StaticResource CrossSectionScaleConverter},ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}"/>
+                                            <TranslateTransform X="{Binding ZoomCompare.ScaleX, Converter={StaticResource ScaleBarScaleConverter}, ConverterParameter={x:Static const:Constants.CrossSectionCompareSize}}"/>
+                                        </TransformGroup>
+                                    </Separator.RenderTransform>
+                                </Separator>
                                 <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="5" Width="1" Margin="0" HorizontalAlignment="Right"/>
                             </Grid>
                         </StackPanel>

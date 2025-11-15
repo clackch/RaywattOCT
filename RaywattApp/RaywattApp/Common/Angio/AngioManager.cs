@@ -413,6 +413,7 @@ namespace RaywattApp.Common.Angio
                 }
                 fs.Close();
                 threadOnSaveFinished = true;
+                angioSaveBuffer.Clear(); // init buffer after saved
                 _log.Debug("Angio buffer successfully saved.");
             }
             catch (Exception ex)

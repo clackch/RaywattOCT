@@ -4,7 +4,6 @@ using OpenCvSharp;
 using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media.Imaging;
@@ -77,13 +76,10 @@ namespace RaywattApp.Common.Bases
         [ObservableProperty]
         private int _frameNumberForInit;
 
-        private readonly Queue<bool> autoPullbackTriggerCandidateQueue = new Queue<bool>();
-
-        private int autoPullbackTriggerCount;
+        [ObservableProperty]
+        private AutoPullback _autoPullback;
 
         private DispatcherTimer timerUpdateImage = new DispatcherTimer(DispatcherPriority.Render);
-
-        private BloodClearingInferencer bloodClearingInferencer;
 
         // to avoid garbage collection
         private CallbackFunctionWithImage cbCrossSection;
@@ -100,10 +96,7 @@ namespace RaywattApp.Common.Bases
             }
 
             timerUpdateImage.Interval = TimeSpan.FromMilliseconds(Constants.PlaybackInterval);
-            timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);
-
-            bloodClearingInferencer = new BloodClearingInferencer();
-            
+            timerUpdateImage.Tick += new EventHandler(timerFuncUpdateImage);            
         }
 
         /// <summary>
@@ -141,7 +134,7 @@ namespace RaywattApp.Common.Bases
             Mat imgRecv = CommonUtil.ByteMemoryToCvMat(data, width, height, ch);
             imgCrossSection[session] = imgRecv;
 
-            AutoPullback(imgRecv, isCleared == 1.0 ? true : false);
+            CanAutoPullback(imgRecv, isCleared == 1.0 ? true : false);
         }
 
         private void OnRecvLongitude(int session, IntPtr data, int width, int height, int ch, int frameInfo, double intensity)
@@ -287,9 +280,6 @@ namespace RaywattApp.Common.Bases
             DeviceStatus.ReviewImageInfo imageInfo = DeviceStatus.ReviewImageInfos[(int)session];
             Mat img = CommonUtil.ByteMemoryToCvMat(data, imageInfo.Width, imageInfo.Height, imageInfo.Channels);
 
-            //Test
-            AutoPullback(img);
-
             imgCrossSection[(int)session] = img;
             DeviceStatus.ReviewImageInfos[(int)session].Current = nFrame;
 
@@ -318,52 +308,33 @@ namespace RaywattApp.Common.Bases
 
         protected virtual void AutoPullbackStart() { }
 
-        private void AutoPullback(Mat img, bool isCleared = false)
+        private void CanAutoPullback(Mat img, bool isCleared = false)
         {
-            if (!DeviceStatus.AutoPullbackOnOff)
+            if (AutoPullback == null || !AutoPullback.OnOff)
                 return;
 
-            if (DeviceStatus.AutoPullbackModel)//Lumen Detection Model
-            {
-                _log.Debug($"[Lumen Detection Model - Blood Flushing] Label: {isCleared} / Trigger Count: {this.autoPullbackTriggerCount}");
-
-                DeviceStatus.AutoPullbackIsImageCleared = isCleared;
-            }
-            else//Flush Detection Model
-            {
-                var (flushIsCleared, logits, ms) = bloodClearingInferencer.Predict(img);
-
-                _log.Debug($"[Flush Detection Model- Blood Flushing] Label: {flushIsCleared} / Time: {ms:F2} ms / Logits: {string.Join(", ", logits)} / Trigger Count: {this.autoPullbackTriggerCount}");
-
-                DeviceStatus.AutoPullbackIsImageCleared = (flushIsCleared == 1) ? true : false;
-            }
-
-            if (DeviceStatus.AutoPullbackTriggerCount == 0)
+            if (AutoPullback.TriggerTargetCount == 0)
                 return;
 
-            this.autoPullbackTriggerCandidateQueue.Enqueue(DeviceStatus.AutoPullbackIsImageCleared);
-            if (DeviceStatus.AutoPullbackIsImageCleared)
-                this.autoPullbackTriggerCount++;
+            AutoPullback.IsCleared = isCleared;
 
-            if(this.autoPullbackTriggerCandidateQueue.Count > DeviceStatus.AutoPullbackTriggerCandidate)
-            {
-                bool removed = this.autoPullbackTriggerCandidateQueue.Dequeue();
-                if (removed)
-                    this.autoPullbackTriggerCount--;
-            }
+            if (AutoPullback.IsCleared)
+                AutoPullback.TriggerActualCount++;
 
-            if(this.autoPullbackTriggerCount >= DeviceStatus.AutoPullbackTriggerCount)
+            _log.Debug($"[Blood Flushing] IsCleared: {AutoPullback.IsCleared} / Trigger Count: {AutoPullback.TriggerActualCount}");
+
+            if (AutoPullback.TriggerActualCount >= AutoPullback.TriggerTargetCount)
             {
                 _log.Debug("AutoPullback Start");
 
-                RaySetProperty(Property.AutoPullback, 0.0);
-                DeviceStatus.AutoPullbackOnOff = false;
-                DeviceStatus.AutoPullbackIsImageCleared = false;
-                this.autoPullbackTriggerCount = 0;
-                this.autoPullbackTriggerCandidateQueue.Clear();
-
+                AutoPullback.OnOff = false;
+                RayError result = (RayError)RaySetProperty(Property.AutoPullback, 0.0);
+                if (result != RayError.OK)
+                {
+                    _log.Error("RaySetProperty Error");
+                }
                 AutoPullbackStart();
-            }          
+            }
         }
 
         private void timerFuncUpdateImage(object sender, EventArgs e)

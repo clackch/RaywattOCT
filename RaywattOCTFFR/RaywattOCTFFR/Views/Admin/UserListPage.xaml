@@ -1,0 +1,77 @@
+﻿<Page x:Class="RaywattOCTFFR.Views.Admin.UserListPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:RaywattOCTFFR.Views.Admin"
+      xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+      xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
+      xmlns:component="clr-namespace:RaywattOCTFFR.Views.Component"
+      mc:Ignorable="d" 
+      d:DesignHeight="1080" d:DesignWidth="1920"
+      Background="{DynamicResource GrayscaleGray8Brush}"
+      Title="UserListPage">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Height="60">
+            
+        </Grid>
+
+        <StackPanel Grid.Row="1" Margin="60,0,60,0">
+            <StackPanel Height="40"/>
+            <StackPanel Height="164" Orientation="Horizontal">
+                <Image Source="{svgc:SvgImage Source=/res/icon/fasterWhite.svg}" Width="284" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                <StackPanel Width="68"/>
+                <StackPanel Width="608">
+                    <StackPanel Orientation="Horizontal" Height="26">
+                        <Label Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [Institute Info.], Source={StaticResource L10N}}"/>
+                        <StackPanel Width="16"/>
+                        <component:IconButton Style="{DynamicResource IconButton}" Icon="edit" HorizontalAlignment="Right" Command="{Binding EditInstituteCommand}"/>
+                    </StackPanel>
+                    <StackPanel Height="8"/>
+                    <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Institute.Name}"/>
+                    <StackPanel Height="19"/>
+                    <Label Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding Institute.Comment}"/>
+                </StackPanel>
+                <StackPanel>
+                    <Button Style="{StaticResource OutlinedBtnType1-Large}" Margin="0,30,0,0" Command="{Binding ChangeAdminPasswordCommand}" Content="{Binding [Password Change], Source={StaticResource L10N}}"/>
+                </StackPanel>
+            </StackPanel>
+            <Separator Background="{DynamicResource GrayscaleGray5Brush}"/>
+            <StackPanel Height="38"/>
+            <Grid Height="42">
+                <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [User Management], Source={StaticResource L10N}}"/>
+                <Button Style="{StaticResource OutlinedBtnType1-Large}" HorizontalAlignment="Right" Command="{Binding AddUserCommand}" Content="{Binding [Add User], Source={StaticResource L10N}}"/>
+            </Grid>
+            <StackPanel Height="20"/>
+            <DataGrid Height="540" ItemsSource="{Binding Users}" Name="users" Style="{StaticResource DataGridBasic}" RowStyle="{StaticResource DataGridRowDialog}">
+                <DataGrid.InputBindings>
+                    <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding EditUserCommand}" CommandParameter="{Binding ElementName=users, Path=CurrentItem}"/>
+                </DataGrid.InputBindings>
+                <DataGrid.Columns>
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding Id}" Header="{Binding [ID], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="2*" Binding="{Binding Comment}" Header="{Binding [Comment], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding Password}" Header="{Binding [Password], Source={StaticResource L10N}}" />
+                    <DataGridTemplateColumn CellStyle="{StaticResource DataGridCellCheckbox}" Width="*" Header="{Binding [Password Reset], Source={StaticResource L10N}}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox Style="{StaticResource DataGridDisplayCheckBox}" IsChecked="{Binding PasswordReset}" IsEnabled="False" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding PasswordChangedAt, Converter={StaticResource DateTimeMinToEmptyConverter}, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Password Changed At], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltipWrap}" Width="*" Binding="{Binding TermsAgreedAt, Converter={StaticResource DateTimeMinToEmptyConverter}, StringFormat=g, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Terms Agreed At], Source={StaticResource L10N}}" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+        </StackPanel>
+
+        <Grid Grid.Row="2" Height="40" Background="{DynamicResource GrayscaleBlackBrush}"/>
+    </Grid>
+</Page>

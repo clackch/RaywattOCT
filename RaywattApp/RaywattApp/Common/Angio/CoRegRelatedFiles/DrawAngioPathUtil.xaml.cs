@@ -589,7 +589,7 @@ namespace RaywattApp.Common.Angio.CoRegRelatedFiles
         // Spline
         private void AddSplineCurvePoints(List<Point> points, int frameIndex, int lineIndex)
         {
-            List<Point> curvePointFs = SplineCurve.GetSplinePoints(points, points.Count() * 2/* Spline 곡선을 점 몇개로 표현할 지 설정*/);
+            List<Point> curvePointFs = SplineCurve.GetSplinePoints(points, points.Count * 2/* Spline 곡선을 점 몇개로 표현할 지 설정*/);
             
             foreach (Point curvexy in curvePointFs)
             {

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="348.254" height="317.306" viewBox="0 0 348.254 317.306">
+    <g data-name="그룹 10193">
+        <g data-name="그룹 10181" transform="translate(-379.96 -274.054)">
+            <circle data-name="타원 254" cx="5" cy="5" r="5" transform="translate(484 401)" style="fill:#1ed760"/>
+            <circle data-name="타원 256" cx="5" cy="5" r="5" transform="translate(479 486)" style="fill:#1ed760"/>
+            <path data-name="패스 3177" d="m-5070 46.248 33.974-33.975h77.966" transform="rotate(180 -2274 287.124)" style="stroke:#1ed760;fill:none"/>
+            <path data-name="패스 3180" d="m-5070 62.133 49.858-49.859h192.182" transform="rotate(180 -2224 301.566)" style="stroke:#1ed760;fill:none"/>
+            <path data-name="패스 3185" d="M-5085.733 101h66.4" transform="translate(5526.591 258.5)" style="stroke-dasharray:1;stroke-width:.5px;stroke:#1ed760;fill:none"/>
+            <path data-name="패스 3178" d="M-5085.733 101h32.994" transform="translate(5538.739 305)" style="stroke-dasharray:1;stroke-width:.5px;stroke:#1ed760;fill:none"/>
+            <path data-name="패스 3183" d="M-5075 117.415h30.647" transform="translate(5523.353 373.585)" style="stroke-dasharray:1;stroke-width:.5px;stroke:#1ed760;fill:none"/>
+            <g data-name="타원 261" transform="translate(617 536)" style="fill:#161616;stroke:#1ed760">
+                <circle cx="5" cy="5" r="5" style="stroke:none"/>
+                <circle cx="5" cy="5" r="4.5" style="fill:none"/>
+            </g>
+            <g data-name="타원 260" transform="translate(517 523)" style="fill:#161616;stroke:#1ed760">
+                <circle cx="5" cy="5" r="5" style="stroke:none"/>
+                <circle cx="5" cy="5" r="4.5" style="fill:none"/>
+            </g>
+            <path data-name="패스 3184" d="m-5102.121 20.536 29.251-29.252h164.991" transform="rotate(180 -2256.111 284.591)" style="stroke-dasharray:1;stroke-width:.5px;stroke:#1ed760;fill:none"/>
+        </g>
+        <g data-name="그룹 10180" transform="translate(-379.96 -274.054)">
+            <circle data-name="타원 253" cx="5" cy="5" r="5" transform="translate(636 458)" style="fill:#1ed760"/>
+            <circle data-name="타원 258" cx="5" cy="5" r="5" transform="translate(639 515)" style="fill:#1ed760"/>
+            <g data-name="그룹 10178">
+                <circle data-name="타원 259" cx="5" cy="5" r="5" transform="translate(561 319)" style="fill:#1ed760"/>
+                <path data-name="패스 3172" d="m-5070 61.72 49.445-49.446 112.77.021" transform="translate(5636 262.28)" style="stroke:#1ed760;fill:none"/>
+            </g>
+            <path data-name="패스 3173" d="M-5053 163h36.944" transform="translate(5693 300)" style="stroke:#1ed760;fill:none"/>
+            <path data-name="패스 3179" d="M-5053 163h49.395" transform="translate(5693 357.5)" style="stroke:#1ed760;fill:none"/>
+            <path data-name="패스 3174" d="M-5085.733 101h68.81" transform="translate(5694 298)" style="stroke-dasharray:1;stroke-width:.5px;stroke:#1ed760;fill:none"/>
+            <path data-name="패스 3175" d="M-5075 117.415h57.5" transform="translate(5694.574 300)" style="stroke-dasharray:1;stroke-width:.5px;stroke:#1ed760;fill:none"/>
+            <path data-name="패스 3176" d="M-5075 117.415h31.624" transform="translate(5726 382)" style="stroke-dasharray:1;stroke-width:.5px;stroke:#1ed760;fill:none"/>
+            <path data-name="선 99" transform="translate(624 359.5)" style="stroke-width:.5px;stroke:#1ed760;fill:none" d="M0 0h62.5"/>
+            <g data-name="그룹 10179">
+                <path data-name="패스 3171" d="m-5070 28.273 16-16h59.487" transform="translate(5694 311.727)" style="stroke:#1ed760;fill:none"/>
+                <path data-name="패스 3181" d="m-5102.122 26.447 35.162-35.162h89.819" transform="translate(5694 300)" style="stroke-dasharray:1;stroke-width:.5px;stroke:#1ed760;fill:none"/>
+                <g data-name="타원 257" transform="translate(619 335)" style="fill:#161616;stroke:#1ed760">
+                    <circle cx="5" cy="5" r="5" style="stroke:none"/>
+                    <circle cx="5" cy="5" r="4.5" style="fill:none"/>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

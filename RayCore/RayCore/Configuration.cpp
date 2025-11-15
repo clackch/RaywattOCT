@@ -29,7 +29,7 @@ void CConfiguration::Initialize(tstring configFile)
 	configFilePath = configFile;
 
 	// [Measurement]
-	this->measurement.fAxialResolutionScale = getPrivateProfileFloat(_T("Measurement"), _T("AxialResolutionScale"), 8.3, configFilePath.c_str());
+	this->measurement.fAxialResolutionScale = getPrivateProfileFloat(_T("Measurement"), _T("AxialResolutionScale"), 4.938, configFilePath.c_str());
 	this->measurement.nNoiseSkip = ::GetPrivateProfileInt(_T("Measurement"), _T("NoiseSkip"), 300, configFilePath.c_str());
 	this->measurement.nNoiseAverage = ::GetPrivateProfileInt(_T("Measurement"), _T("NoiseAverage"), 100, configFilePath.c_str());
 	
@@ -38,8 +38,8 @@ void CConfiguration::Initialize(tstring configFile)
 	this->measurement.fSheathThicknessOnePointSeven = getPrivateProfileFloat(_T("Measurement"), _T("SheathThickness1.7"), 0.045, configFilePath.c_str());
 	this->measurement.fSheathThicknessTwoPointSix = getPrivateProfileFloat(_T("Measurement"), _T("SheathThickness2.6"), 0.1, configFilePath.c_str());	
 	this->measurement.fSheathRadius = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius"), 0.43, configFilePath.c_str());
-	if (measurement.fAxialResolutionScale > 0) {
-		this->measurement.nSheathPosition = measurement.fSheathRadius * 1000.f / measurement.fAxialResolutionScale;
+	if (measurement.GetAxialResolutionScale() > 0) {
+		this->measurement.nSheathPosition = measurement.GetSheathRadius() * 1000.f / measurement.GetAxialResolutionScale();
 	}
 	
 	// [Imaging]
@@ -50,7 +50,7 @@ void CConfiguration::Initialize(tstring configFile)
 	this->imaging.highLevel = getPrivateProfileFloat(_T("Imaging"), _T("HighLevel"), 65.0f, configFilePath.c_str());
 	this->imaging.brightness = getPrivateProfileFloat(_T("Imaging"), _T("Brightness"), 0.f, configFilePath.c_str());
 	this->imaging.contrast = getPrivateProfileFloat(_T("Imaging"), _T("Contrast"), 0.875f, configFilePath.c_str());
-	this->imaging.distPerPixel = measurement.fAxialResolutionScale;
+	this->imaging.distPerPixel = measurement.GetAxialResolutionScale();
 
 	// [Acquisition]
 	this->acquisition.nAScan = imaging.nAScan;
@@ -71,8 +71,7 @@ void CConfiguration::Initialize(tstring configFile)
 	this->laserModule.delayPosition = ::GetPrivateProfileInt(_T("LaserModule"), _T("DelayLine"), 0, configFilePath.c_str());
 	this->laserModule.delayPositionOnePointSeven = ::GetPrivateProfileInt(_T("LaserModule"), _T("delayPositionOnePointSeven"), 0, configFilePath.c_str());
 	this->laserModule.polarPosition = ::GetPrivateProfileInt(_T("LaserModule"), _T("Polarization"), 0, configFilePath.c_str());
-	this->laserModule.delayLineSMSteps = ::GetPrivateProfileInt(_T("LaserModule"), _T("DelayLineSMSteps"), 1, configFilePath.c_str());
-	this->laserModule.delayLineSMSpeed = ::GetPrivateProfileInt(_T("LaserModule"), _T("DelayLineSMSpeed"), 1, configFilePath.c_str());
+	this->laserModule.autoCalibrationForSeverance = ::GetPrivateProfileInt(_T("LaserModule"), _T("AutoCalibrationForSeverance"), 0, configFilePath.c_str());
 
 	// [StepMotor]
 	::GetPrivateProfileString(_T("StepMotor"), _T("Port"), _T(""), this->stepMotor.port, sizeof(this->stepMotor.port), configFilePath.c_str());
@@ -99,6 +98,8 @@ void CConfiguration::Initialize(tstring configFile)
 	this->catheter.length = ::GetPrivateProfileInt(_T("Catheter"), _T("Length1.7"), -45000, configFilePath.c_str());
 	this->catheter.catheterValidationOnOff = ::GetPrivateProfileInt(_T("Catheter"), _T("CatheterValidationOnOff"), 0, configFilePath.c_str());
 	this->catheter.catheterAutoCalibrationOnOff = ::GetPrivateProfileInt(_T("Catheter"), _T("CatheterAutoCalibrationOnOff"), 0, configFilePath.c_str());
+	this->catheter.catheterUsage = ::GetPrivateProfileInt(_T("Catheter"), _T("CatheterUsage"), 0, configFilePath.c_str());
+	this->catheter.catheterRFID = ::GetPrivateProfileInt(_T("Catheter"), _T("CatheterRFID"), 0, configFilePath.c_str());
 
 	// [Volume]
 	this->volume.size = ::GetPrivateProfileInt(_T("Volume"), _T("Size"), 500, configFilePath.c_str());
@@ -118,7 +119,7 @@ void CConfiguration::Initialize(tstring configFile)
 
 	// [Sharpness]
 	this->imaging.applySharpness = ::GetPrivateProfileInt(_T("Sharpness"), _T("ApplySharpness"), 0, configFilePath.c_str());
-
+	
 	isInit = true;
 }
 
@@ -160,6 +161,17 @@ void CConfiguration::SaveBLDCMotorSettings() {
 
 	strValue = std::to_wstring(this->bldcMotor.settleDown);
 	::WritePrivateProfileString(_T("BLDCMotor"), _T("SettleDown"), strValue.c_str(), configFilePath.c_str());
+}
+
+int CConfiguration::ReadInt(const tstring& section, const tstring& key, int def) const
+{
+	return ::GetPrivateProfileInt(section.c_str(), key.c_str(), def, configFilePath.c_str());
+}
+
+bool CConfiguration::WriteInt(const tstring& section, const tstring& key, int value) const
+{
+	tstring s = std::to_wstring((long long)value);
+	return ::WritePrivateProfileString(section.c_str(), key.c_str(), s.c_str(), configFilePath.c_str()) != FALSE;
 }
 
 double CConfiguration::GetLoadCatheterTime() {

@@ -51,7 +51,7 @@ CRaywattLabDlg::CRaywattLabDlg(CWnd* pParent /*=nullptr*/)
 	m_pFrameBuffer = nullptr;
 
 	m_strCalibPath = _T("");
-	m_nCurCalibIndex = 0;
+	m_nCurCalibIndex = -1;
 	m_pThreadPullback = nullptr;
 	m_strCurCalibration = _T(".\\CALIBRATION.dat");
 
@@ -59,7 +59,7 @@ CRaywattLabDlg::CRaywattLabDlg(CWnd* pParent /*=nullptr*/)
 	m_bStartAcquisition = false;
 
 	m_chkShowSheathGuide = false;
-	m_chkCompensation = false;
+	m_chkCompensation = true;
 	m_pThreadCompParamWin = nullptr;
 }
 
@@ -72,6 +72,7 @@ void CRaywattLabDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_RADIO_COLOR_BLACK, m_radioImageColor);
 	DDX_Radio(pDX, IDC_RADIO_GRAY, m_radioImageLUT);
 	DDX_Check(pDX, IDC_CHECK_SHOW_GUIDE, m_chkShowGuide);
+	DDX_Check(pDX, IDC_CHECK_SHOW_HIST, m_chkShowHist);
 	DDX_Control(pDX, IDC_SLIDER_BRIGHTNESS, m_sliderBrightness);
 	DDX_Control(pDX, IDC_SLIDER_CONTRAST, m_sliderContrast);
 	DDX_Control(pDX, IDC_SLIDER_LOWLEVEL, m_sliderLowLevel);
@@ -298,10 +299,13 @@ IImaging::Setting CRaywattLabDlg::initReader(tstring strFilePath, CDataReader* p
 	IImaging::Setting setting = config.imaging;
 
 	if (pReader != nullptr) {
-		OCTHeader header = pReader->ReadHeader(strFilePath);
-		if (header.type != OCTHeader::Type::Unknown)
-		{
-			setting.Set(header.width, header.height);
+		tstring strExt = strFilePath.substr(strFilePath.length() - 3, 3);
+		if (strExt._Equal(_T("oct"))) {
+			OCTHeader header = pReader->ReadHeader(strFilePath);
+			if (header.type != OCTHeader::Type::Unknown)
+			{
+				setting.Set(header.width, header.height);
+			}
 		}
 		pReader->Initialize(strFilePath, setting.nBufferSize);
 	}
@@ -379,6 +383,79 @@ cv::Mat CRaywattLabDlg::getFoVImage(cv::Mat image, double fov) {
 
 	return imgFov;
 }
+void CRaywattLabDlg::changeCalibration(int offset) {
+	if (m_vCalibList.empty()) return;
+
+	m_nCurCalibIndex += offset;
+	if (m_nCurCalibIndex < 0) {
+		m_nCurCalibIndex = m_vCalibList.size() - 1;
+	}
+	else if (m_nCurCalibIndex >= m_vCalibList.size()) {
+		m_nCurCalibIndex = 0;
+	}
+
+	CConfiguration& config = CConfiguration::GetInstance();
+
+	CString strCurFile = m_vCalibList.at(m_nCurCalibIndex);
+	CCalibration* calibration = new CCalibration(config.imaging.nAScan, config.imaging.nFFTLength);
+	calibration->Initialize(strCurFile.GetBuffer());
+	m_pImagingRealtime->ChangeCalibration(calibration);
+	m_pImagingSimulate->ChangeCalibration(calibration);
+	m_strCurCalibration = strCurFile.GetBuffer();
+
+	GetDlgItem(IDC_EDIT_CUR_CALIBRATION)->SetWindowText(strCurFile.Right(strCurFile.GetLength() - m_strCalibPath.GetLength() - 1));
+}
+
+
+cv::MatND CRaywattLabDlg::calcHistogram(cv::Mat img) {
+	cv::MatND histOrigin;
+	const int* channel_numbers = { 0 };
+	float channel_range[] = { 0.0, 255.0 };
+	//float channel_range[] = { 0.0, 4200.0 };
+	const float* channel_ranges = channel_range;
+	int number_bins = 256;
+	//int number_bins = 4200;
+	cv::calcHist(&img, 1, channel_numbers, cv::Mat(), histOrigin, 1, &number_bins, &channel_ranges);
+	//cv::calcHist(&imgCircle2ch, 1, channel_numbers, cv::Mat(), histOrigin, 1, &number_bins, &channel_ranges);
+
+	return histOrigin;
+}
+cv::Mat CRaywattLabDlg::getHistImage(cv::Mat histOrigin) {
+	cv::MatND histogram;
+
+	int number_bins = histOrigin.size().height;
+	// plot the histogram
+	int hist_w = 512;
+	int hist_h = 256;
+	int bin_w = cvRound((double)hist_w / number_bins);
+
+	cv::Mat imgHist(hist_h, hist_w, CV_8UC1, cv::Scalar::all(0));
+	normalize(histOrigin, histogram, 0, imgHist.rows, cv::NORM_MINMAX, -1, cv::Mat());
+
+	for (int i = 0; i < number_bins; i++)
+	{
+		line(imgHist,
+			cv::Point(bin_w * (i), hist_h),
+			cv::Point(bin_w * (i), hist_h - cvRound(histogram.at<float>(i))),
+			cv::Scalar(255, 0, 0), 1, 8, 0);
+	}
+
+	double minVal, maxVal = 0.0f;
+	int minIdx, maxIdx = 0;
+	//cv::minMaxLoc(histOrigin, &minVal, &maxVal, &minIdx, &maxIdx);
+	for (int i = 1; i < number_bins; i++) {
+		if (maxVal < histOrigin.at<float>(i, 0)) {
+			maxVal = histOrigin.at<float>(i, 0);
+			maxIdx = i;
+		}
+	}
+	char strMinMax[MAX_PATH];
+	sprintf(strMinMax, "Max: %d (%.2lf)", maxIdx, maxVal);
+	cv::putText(imgHist, strMinMax, cv::Point(256, 50), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(255, 255, 255));
+
+	return imgHist;
+}
+
 
 
 /*
@@ -491,14 +568,15 @@ UINT CRaywattLabDlg::threadPullback(LPVOID param) {
 
 UINT CRaywattLabDlg::threadCompensationParamWindow(LPVOID param) {
 	CRaywattLabDlg* pDlg = (CRaywattLabDlg*)param;
+	CConfiguration& config = CConfiguration::GetInstance();
 
-	//pDlg->m_pImagingSimulate->SetImageCompensationControlWindow(true);
+	pDlg->m_pImagingSimulate->SetImageCompensationControlWindow(true, config.imaging);
 
 	while (pDlg->m_pThreadCompParamWin->isRun) {
 		cv::waitKey(1);
 	}
 
-	//pDlg->m_pImagingSimulate->SetImageCompensationControlWindow(false);
+	pDlg->m_pImagingSimulate->SetImageCompensationControlWindow(false, config.imaging);
 	
 	return NOERROR;
 }
@@ -531,7 +609,8 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_OPEN_ROTARY_JUNCTION, &CRaywattLabDlg::OnBnClickedButtonOpenRotaryJunction)
 	ON_BN_CLICKED(IDC_BUTTON_ADMIN_INITIALIZE, &CRaywattLabDlg::OnBnClickedButtonAdminInitialize)
 	ON_BN_CLICKED(IDC_BUTTON_SAVE_CALIBRATION, &CRaywattLabDlg::OnBnClickedButtonSaveCalibration)
-	ON_BN_CLICKED(IDC_BUTTON_NEXT_CALIB, &CRaywattLabDlg::OnBnClickedButtonChangeCalibration)
+	ON_BN_CLICKED(IDC_BUTTON_NEXT_CALIB, &CRaywattLabDlg::OnBnClickedButtonNextCalib)
+	ON_BN_CLICKED(IDC_BUTTON_PREV_CALIB, &CRaywattLabDlg::OnBnClickedButtonPrevCalib)
 	ON_BN_CLICKED(IDC_CHECK_BACKGROUND_SUBTRACT, &CRaywattLabDlg::OnBnClickedCheckBackgroundSubtract)
 	ON_BN_CLICKED(IDC_BUTTON_OPEN_CALIB_FOLDER, &CRaywattLabDlg::OnBnClickedButtonOpenCalibFolder)
 	ON_BN_CLICKED(IDC_BUTTON_MEASURE, &CRaywattLabDlg::OnBnClickedButtonMeasure)
@@ -553,6 +632,7 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_RADIO_GRAY, &CRaywattLabDlg::OnBnClickedRadioGray)
 	ON_BN_CLICKED(IDC_RADIO_GREEN, &CRaywattLabDlg::OnBnClickedRadioGreen)
 	ON_BN_CLICKED(IDC_RADIO_ORANGE, &CRaywattLabDlg::OnBnClickedRadioOrange)
+	ON_BN_CLICKED(IDC_CHECK_SHOW_HIST, &CRaywattLabDlg::OnBnClickedCheckShowHist)
 	ON_BN_CLICKED(IDC_BUTTON_INIT_FRINGE, &CRaywattLabDlg::OnBnClickedInitFringeData)
 	ON_BN_CLICKED(IDC_BUTTON_SAVE_FRINGE, &CRaywattLabDlg::OnBnClickedAddFringeData)
 END_MESSAGE_MAP()
@@ -560,6 +640,7 @@ END_MESSAGE_MAP()
 LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 	CLabImaging* pImaging = (m_isRealtime) ? m_pImagingRealtime : m_pImagingSimulate;
 	cv::Mat image = (m_radioImageShape == 0) ? pImaging->GetCircleImage().clone() : pImaging->GetRectangleImage().clone();
+	cv::Mat image8bit = pImaging->GetProcessedImage();
 	Ipp16u* scopeData = pImaging->GetScopeData();
 	Ipp16u* scopeFFTData = pImaging->GetScopeFFTData();
 	CString strFrameRate = _T("");
@@ -600,6 +681,15 @@ LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
 		Ipp16u* pFFTBuffer = new Ipp16u[nOutputLength];
 		memcpy(pFFTBuffer, scopeFFTData, sizeof(Ipp16u) * nOutputLength);
 		m_vFFTData.push_back(pFFTBuffer);
+	}
+
+	if (m_chkShowHist) {
+		cv::MatND histOrigin = calcHistogram(image8bit);
+		cv::Mat imgHist = getHistImage(histOrigin);
+		cv::imshow("histogram", imgHist);
+		cv::waitKey(1);
+	}
+	else {
 	}
 
 	return NOERROR;
@@ -724,6 +814,7 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	m_radioImageColor = 0;
 	m_radioImageLUT = 0;
 	m_chkShowGuide = FALSE;
+	m_chkShowHist = FALSE;
 	m_chkInitMotor = AfxGetApp()->GetProfileInt(_T("RECENT_SETTING"), _T("INIT_MOTOR"), FALSE);
 	m_chkInitStage = AfxGetApp()->GetProfileInt(_T("RECENT_SETTING"), _T("INIT_STAGE"), FALSE);
 	
@@ -787,7 +878,7 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	GetDlgItem(IDC_EDIT_BSCAN)->SetWindowText(strBuffer);
 
 	m_vCalibList.clear();
-	m_nCurCalibIndex = 0;
+	m_nCurCalibIndex = -1;
 	findFileByExtension(m_strCalibPath, _T("dat"), m_vCalibList);
 
 	CUtility::StartThread(threadService, m_pThreadService, this);
@@ -1127,6 +1218,9 @@ void CRaywattLabDlg::OnBnClickedButtonSaveData()
 		strFileName.Replace(_T(".bin"), _T(".csv"));
 		CStringA fftName(strFileName);
 		m_pFFTFile = fopen(fftName, "w+");
+		strFileName.Replace(_T(".csv"), _T("_log.csv"));
+		CStringA logName(strFileName);
+		FILE* pLogFile = fopen(logName, "w+");
 
 		COCTMeasurement measurement;
 		USHORT nMaxPeak = 0, nNoisePower = 0;
@@ -1151,12 +1245,23 @@ void CRaywattLabDlg::OnBnClickedButtonSaveData()
 				}
 				fprintf(m_pFFTFile, "\n");
 			}
+			if (pLogFile != nullptr) {
+				float* pLogData = m_pImagingRealtime->GetScopeLogData();
+				for (int i = 0; i < nOutputLength; i++) {
+					fprintf(pLogFile, "%lf,", pLogData[i]);
+				}
+				fprintf(pLogFile, "\n");
+			}
 		}
 		m_pDataWriter->StopSave();
 		m_pImagingRealtime->Start();
 		if (m_pFFTFile != nullptr) {
 			fclose(m_pFFTFile);
 			m_pFFTFile = nullptr;
+		}
+		if (pLogFile != nullptr) {
+			fclose(pLogFile);
+			pLogFile = nullptr;
 		}
 
 		updateMeasurement(nMaxPeak, nMaxIndex, nMaxWidth, nNoisePower);
@@ -1341,6 +1446,19 @@ void CRaywattLabDlg::OnBnClickedCheckShowGuide()
 	UpdateData(TRUE);
 }
 
+void CRaywattLabDlg::OnBnClickedCheckShowHist()
+{
+	UpdateData(TRUE);
+
+	if (m_chkShowHist) {
+		cv::namedWindow("histogram");
+	}
+	else {
+		cv::destroyWindow("histogram");
+	}
+}
+
+
 
 
 void CRaywattLabDlg::OnNMCustomdrawSliderBrightness(NMHDR* pNMHDR, LRESULT* pResult)
@@ -1445,26 +1563,17 @@ void CRaywattLabDlg::OnBnClickedButtonSaveCalibration()
 	CUtility::StartThread(threadSaveCalibration, m_pThreadCalibration, this);
 }
 
-void CRaywattLabDlg::OnBnClickedButtonChangeCalibration()
+void CRaywattLabDlg::OnBnClickedButtonNextCalib()
 {
-	if (m_vCalibList.empty()) return;
-
-	CConfiguration& config = CConfiguration::GetInstance();
-
-	CString strCurFile = m_vCalibList.at(m_nCurCalibIndex);
-	CCalibration* calibration = new CCalibration(config.imaging.nAScan, config.imaging.nFFTLength);
-	calibration->Initialize(strCurFile.GetBuffer());
-	m_pImagingRealtime->ChangeCalibration(calibration);
-	m_pImagingSimulate->ChangeCalibration(calibration);
-	m_strCurCalibration = strCurFile.GetBuffer();
-
-	GetDlgItem(IDC_EDIT_CUR_CALIBRATION)->SetWindowText(strCurFile.Right(strCurFile.GetLength() - m_strCalibPath.GetLength() - 1));
-
-	m_nCurCalibIndex++;
-	if (m_nCurCalibIndex >= m_vCalibList.size()) {
-		m_nCurCalibIndex = 0;
-	}
+	changeCalibration(1);
 }
+
+
+void CRaywattLabDlg::OnBnClickedButtonPrevCalib()
+{
+	changeCalibration(-1);
+}
+
 
 
 void CRaywattLabDlg::OnBnClickedCheckBackgroundSubtract()
@@ -1496,7 +1605,7 @@ void CRaywattLabDlg::OnBnClickedButtonOpenCalibFolder()
 	GetDlgItem(IDC_EDIT_CALIB_PATH)->SetWindowText(m_strCalibPath);
 
 	m_vCalibList.clear();
-	m_nCurCalibIndex = 0;
+	m_nCurCalibIndex = -1;
 	findFileByExtension(m_strCalibPath, _T("dat"), m_vCalibList);
 }
 

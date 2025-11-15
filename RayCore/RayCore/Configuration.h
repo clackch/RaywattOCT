@@ -16,8 +16,7 @@ public:
 		int delayPosition;
 		int delayPositionOnePointSeven;
 		int polarPosition;
-		int delayLineSMSteps;
-		int delayLineSMSpeed;
+		int autoCalibrationForSeverance;
 	};
 
 	class StepMotorSetting {
@@ -47,6 +46,8 @@ public:
 		int length;			// 2.6fr -> 1.6fr
 		bool catheterValidationOnOff;
 		bool catheterAutoCalibrationOnOff;
+		int  catheterUsage;
+		int catheterRFID;
 	};
 
 	class Volume {
@@ -86,6 +87,9 @@ public:
 	void SaveLaserModuleSettings();
 	void SaveStepMotorSettings();
 	void SaveBLDCMotorSettings();
+
+	int ReadInt(const tstring& section, const tstring& key, int def = 0) const;
+	bool WriteInt(const tstring& section, const tstring& key, int value) const;
 
 	//Property
 	double GetLoadCatheterTime();

@@ -115,10 +115,10 @@ namespace RaywattApp.ViewModels.File
             {
                 foreach (PatientCase patientCase in PatientCases)
                 {
-                    ExportSize += frameSize * int.Parse(patientCase.PullbackLength);
+                    ExportSize += frameSize * patientCase.NumOfFrames;
                 }
             }
-            else if(FileExport.Material == Constants.ExportMaterialBookmarked)
+            else if (FileExport.Material == Constants.ExportMaterialBookmarked)
             {
                 ExportSize = frameSize * FileExport.BookmarkedFrames.Count;
             }
@@ -143,7 +143,7 @@ namespace RaywattApp.ViewModels.File
                     patientCase.Id = alternateId + "_" + patientCase.Id.Split("_")[1];
                     patientCase.PatientId = alternateId;
                     patientCase.PatientName = Constants.ExportAnonymous;
-                    patientCase.Birthdate = new DateTime(1900, 1, 1);                    
+                    patientCase.Birthdate = new DateTime(1900, 1, 1);
                 }
             }
 
@@ -159,7 +159,7 @@ namespace RaywattApp.ViewModels.File
                 parameter["selectedDicomServer"] = SelectedDicomServer;
                 parameter["usePeerVerification"] = CommonUtil.IsTestMode(DeviceStatus.TestMode, "CertIgnore") == true ? false : true;
             }
-                
+
             var result = _dialogService.OpenDialog(new FileCopyDialogControl(), parameter, Constants.FileExportDialogWidth, Constants.FileExportDialogHeight);
 
             RayExportWrapper.DestroyDcmClient(dicomClient);
@@ -174,18 +174,36 @@ namespace RaywattApp.ViewModels.File
 
             Dictionary<string, string> dicomProperty = new Dictionary<string, string>();
 
-            foreach(StringModel temp in dicomPropertyList)
+            foreach (StringModel temp in dicomPropertyList)
             {
                 dicomProperty.Add(temp.ReturnString, temp.ReturnString2);
             }
 
-            Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
-            sqlParameters["classification"] = "Terms&Cond";
-            IList<Configuration> tnCs = _sqlManager.SelectConfiguration(sqlParameters);
-            if (tnCs != null || tnCs.Count == 1)
+            if (CommonUtil.IsRV200())
             {
-                //Institution Name
-                dicomProperty.Add("00080080", tnCs[0].Buffer);
+                // Terms&Cond (RV200)
+                var termsParams = new Dictionary<string, object>
+                {
+                    ["classification"] = "Terms&Cond"
+                };
+                IList<Configuration> tnCs = _sqlManager.SelectConfiguration(termsParams);
+                if (tnCs != null && tnCs.Count > 0)
+                {
+                    dicomProperty["00080080"] = tnCs[0].Buffer;
+                }
+            }
+            else
+            {
+                // Institute (RV201)
+                var instituteParams = new Dictionary<string, object>
+                {
+                    ["classification"] = "Institute"
+                };
+                IList<Configuration> institute = _sqlManager.SelectConfiguration(instituteParams);
+                if (institute != null && institute.Count > 0)
+                {
+                    dicomProperty["00080080"] = institute[0].Value;
+                }
             }
 
             return dicomProperty;
@@ -203,7 +221,7 @@ namespace RaywattApp.ViewModels.File
                     parameter["message"] = _l10n["Select PACS server"];
                     var result = _dialogService.OpenDialog(new AlertDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
                     return;
-                }                    
+                }
 
                 //Connection Test
                 bool res = await ConnectionTest();
@@ -259,7 +277,7 @@ namespace RaywattApp.ViewModels.File
                 Dictionary<string, Object> data = (Dictionary<string, Object>)result.DialogReturn;
                 DicomServer dicomServer = (DicomServer)data["selectedDicomServer"];
                 SelectedDicomServer = dicomServer;
-                
+
             }
         }
     }

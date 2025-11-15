@@ -12,6 +12,7 @@ private:
 	cv::Mat imageRectangle;
 	USHORT* scopeData;
 	USHORT* scopeFFTData;
+	float* scopeLogData;
 	
 	bool subtract;
 
@@ -32,6 +33,7 @@ public:
 	cv::Mat GetRectangleImage() { return imageRectangle; }
 	USHORT* GetScopeData() { return scopeData; }
 	USHORT* GetScopeFFTData() { return scopeFFTData; }
+	float* GetScopeLogData() { return scopeLogData; }
 
 	void SetBackgroundSubtract(bool subtract) { this->subtract = subtract; }
 	void ChangeCalibration(CCalibration* pNewCalib);

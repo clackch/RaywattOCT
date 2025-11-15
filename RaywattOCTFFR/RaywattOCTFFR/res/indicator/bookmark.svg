@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="28" height="26" viewBox="0 0 28 26">
+    <defs>
+        <filter id="eyb3byreda" x="0" y="0" width="28" height="26" filterUnits="userSpaceOnUse">
+            <feOffset dy="-3"/>
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feFlood flood-opacity=".161"/>
+            <feComposite operator="in" in2="blur"/>
+            <feComposite in="SourceGraphic"/>
+        </filter>
+    </defs>
+    <g style="filter:url(#eyb3byreda)">
+        <path data-name="다각형 19" d="m5 0 5 8H0z" transform="translate(9 12)" style="fill:#1ed760"/>
+    </g>
+</svg>

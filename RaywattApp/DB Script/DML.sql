@@ -5,21 +5,31 @@ INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES (
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Terms&Cond', 'AgreeYN', 'N', '');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Present', 'brightness', '0', '');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Present', 'contrast', '20', '');
-INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Present', 'FoV', '10.0', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Present', 'FoV', '7.0', '');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('LocalHost', 'AeTitle', '', '');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('LogoutTime', 'TotalTime', '60', '');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('LogoutTime', 'PreTime', '57', '');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Password', 'ExpiryDay', '90', '');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Password', 'MaxCount', '5', '');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Password', 'WaitSecond', '30', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('Institute', 'Info', '', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('AutoPB', 'LumenMin', '2', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('AutoPB', 'LumenMax', '70', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('AutoPB', 'SNR', '1', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('AutoPB', 'Count', '2', '');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('AutoPB', 'ShowGuide', 'N', 'Raywatt;');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('RefraIndex', 'AIR', '1', 'Refractive Index - Air');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('RefraIndex', 'SALI', '1.333', 'Refractive Index - Saline');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('RefraIndex', 'CONT', '1.44', 'Refractive Index - Contrast');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'Power', 'Y', 'Raywatt;');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'RJ', 'Y', 'Raywatt;');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'FG', 'Y', 'Raywatt;');
-INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'Image', 'Y', 'Raywatt;');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'AutoPB', 'Y', 'Raywatt;');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'Sidebranch', 'Y', 'Raywatt;');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'Compensate', 'Y', 'Raywatt;');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'CertIgnore', 'Y', 'Raywatt;');
 INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'AIFFR', 'Y', 'Raywatt;');
+INSERT INTO rv_schema.configuration(classification, key, value, buffer) VALUES ('TestMode', 'VelocityPB', 'Y', 'Raywatt;');
 
 -- rv_schema.code
 DELETE FROM rv_schema.code;
@@ -34,12 +44,11 @@ INSERT INTO rv_schema.code( classification, key, value, sort_order, description,
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PBTG', 'MANL', 'Manual', 1, 'Pullback Trigger Manual', now(), now());
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('PBTG', 'AUTO', 'Auto', 2, 'Pullback Trigger Auto', now(), now());
 -- PULLBACK TYPE
-INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'HISH', 'High Resolution(50um)', '60|20|3', 1, 'Pullback Type High Resolution(50um)', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'HILO', 'High Resolution - Long(100um)', '100|40|2.5', 2, 'Pullback Type High Resolution - Long(100um)', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'STSH', 'Standard(150um)', '60|60|1', 3, 'Pullback Type Standard(150um)', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'STLO', 'Standard - Long(250um)', '100|100|1', 4, 'Pullback Type Standard - Long(250um)', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'FAST', 'Faster for specialized care(300um)', '60|120|0.5', 5, 'Pullback Type Faster for specialized care(300um)', now(), now());
-INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'NOPB', 'No Pullback', '0|0|3', 6, 'Pullback Type No Pullback', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'HISH', 'High Resolution', '60|20|3', 1, 'Pullback Type High Resolution(50um)', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'HILO', 'High Resolution - Long', '100|40|2.5', 2, 'Pullback Type High Resolution - Long(100um)', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'STSH', 'Standard', '60|60|1', 3, 'Pullback Type Standard(150um)', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'STLO', 'Standard - Long', '100|100|1', 4, 'Pullback Type Standard - Long(250um)', now(), now());
+INSERT INTO rv_schema.code( classification, key, value, buffer1, sort_order, description, create_date, update_date) VALUES ('PBTY', 'FAST', 'Faster for specialized care', '60|120|0.5', 5, 'Pullback Type Faster for specialized care(300um)', now(), now());
 -- COLORMAP
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('CLMP', 'GRGR', 'Green-gray', 1, 'Colormap Green-gray', now(), now());
 INSERT INTO rv_schema.code( classification, key, value, sort_order, description, create_date, update_date) VALUES ('CLMP', 'GRAY', 'Gray', 2, 'Colormap Gray', now(), now());

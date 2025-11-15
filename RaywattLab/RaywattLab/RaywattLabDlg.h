@@ -71,6 +71,7 @@ private:
 	int m_radioImageColor;
 	int m_radioImageLUT;
 	BOOL m_chkShowGuide;
+	BOOL m_chkShowHist;
 	CSliderCtrl m_sliderBrightness;
 	CSliderCtrl m_sliderContrast;
 	CSliderCtrl m_sliderLowLevel;
@@ -145,6 +146,10 @@ private:
 	void updateMeasurement(USHORT nPeakValue, int nPeakIndex, int nLineWidth, USHORT nNoisePower);
 	void drawGuideLine(cv::Mat image);
 	cv::Mat getFoVImage(cv::Mat image, double fov);
+	void changeCalibration(int offset);
+
+	cv::MatND calcHistogram(cv::Mat img);
+	cv::Mat getHistImage(cv::Mat histOrigin);
 
 	/*
 	* threadService
@@ -185,6 +190,7 @@ public:
 	afx_msg void OnBnClickedRadioColorBlack();
 	afx_msg void OnBnClickedRadioColorWhite();
 	afx_msg void OnBnClickedCheckShowGuide();
+	afx_msg void OnBnClickedCheckShowHist();
 	afx_msg void OnNMCustomdrawSliderBrightness(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNMCustomdrawSliderContrast(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNMCustomdrawSliderLowlevel(NMHDR* pNMHDR, LRESULT* pResult);
@@ -192,7 +198,8 @@ public:
 	afx_msg void OnNMCustomdrawSliderFrame(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBnClickedButtonOpenRotaryJunction();
 	afx_msg void OnBnClickedButtonSaveCalibration();
-	afx_msg void OnBnClickedButtonChangeCalibration();
+	afx_msg void OnBnClickedButtonNextCalib();
+	afx_msg void OnBnClickedButtonPrevCalib();
 	afx_msg void OnBnClickedCheckBackgroundSubtract();
 	afx_msg void OnBnClickedButtonOpenCalibFolder();
 	afx_msg void OnBnClickedButtonMeasure();

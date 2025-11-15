@@ -1,0 +1,73 @@
+﻿<UserControl x:Class="RaywattOCTFFR.Views.Dialog.EditCaseInfoDialogControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:behaviors="clr-namespace:RaywattOCTFFR.Common.Behaviors"  
+             xmlns:local="clr-namespace:RaywattOCTFFR.Views.Dialog"
+             xmlns:const="clr-namespace:RaywattOCTFFR.Common.Bases"
+             mc:Ignorable="d"
+             Width="{Binding DialogWidth}" Height="{Binding DialogHeight}">
+    <Border Width="{x:Static const:Constants.PatientCaseEditDialogWidth}"  Height="{x:Static const:Constants.PatientCaseEditDialogHeight}" CornerRadius="10,10,10,10" BorderThickness="0" BorderBrush="Transparent" Background="{DynamicResource GrayscaleGray6Brush}">
+        <StackPanel Orientation="Vertical" Background="Transparent">
+            <StackPanel Height="40"/>
+            <StackPanel HorizontalAlignment="Center">
+                <Label Style="{DynamicResource Pretendard-Bold-32}" Content="{Binding [Case Edit], Source={StaticResource L10N}}" Foreground="White"/>
+            </StackPanel>
+            <StackPanel Height="20"/>
+            <StackPanel Width="800" Height="414" Orientation="Horizontal">
+                <DataGrid Width="260" ItemsSource="{Binding ProcedureList}" SelectedItem="{Binding CurrentProcedure}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" FontSize="16">
+                    <b:Interaction.Behaviors>
+                        <behaviors:DataGridLoadedBehavior />
+                    </b:Interaction.Behaviors>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Value}" Header="{Binding [Procedure], Source={StaticResource L10N}}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <StackPanel Width="10"/>
+                <DataGrid Width="260" ItemsSource="{Binding VesselList}" SelectedItem="{Binding CurrentVessel}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" FontSize="16">
+                    <b:Interaction.Behaviors>
+                        <behaviors:DataGridLoadedBehavior />
+                    </b:Interaction.Behaviors>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Value}" Header="{Binding [Vessel], Source={StaticResource L10N}}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <StackPanel Width="10"/>
+                <DataGrid Width="260" ItemsSource="{Binding LocationList}" SelectedItem="{Binding CurrentLocation}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}" SelectionMode="Single" FontSize="16">
+                    <b:Interaction.Behaviors>
+                        <behaviors:DataGridLoadedBehavior />
+                    </b:Interaction.Behaviors>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding Value}" Header="{Binding [Location], Source={StaticResource L10N}}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </StackPanel>
+            <StackPanel Height="28"/>
+            <Grid Width="800">
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition Height="6"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Label Grid.Row="0" Grid.Column="0" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Accession Number], Source={StaticResource L10N}}"/>
+                <Label Grid.Row="0" Grid.Column="2" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Comment], Source={StaticResource L10N}}"/>
+                <TextBox Grid.Row="2" Grid.Column="0" Width="260" Height="54" Style="{DynamicResource TextBoxBase}" Text="{Binding PatientCase.AccessionNumber, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox Grid.Row="2" Grid.Column="2" Width="530" Height="54" Style="{DynamicResource TextBoxBase}" Text="{Binding PatientCase.Comment, UpdateSourceTrigger=PropertyChanged}"/>
+            </Grid>
+            <StackPanel Height="40"/>
+            <Separator Height="1" Background="{DynamicResource VerticalSeparatorBrush}"/>
+            <StackPanel Height="16"/>
+            <Grid Width="828">
+                <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}" HorizontalAlignment="Left"/>
+                <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}" HorizontalAlignment="Right"/>
+            </Grid>
+        </StackPanel>
+    </Border>
+</UserControl>

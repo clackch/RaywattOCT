@@ -387,6 +387,7 @@ namespace RaywattApp.ViewModels
             PatientCase.FfrFeature.PlaqueAreaList = null;
             string ffrValue = JsonConvert.SerializeObject(PatientCase.FfrFeature, Newtonsoft.Json.Formatting.Indented);
             PatientCase.FfrFeature.PlaqueAreaList = PlaqueAreaList;
+            PatientCase.FfrFeature.Result = 0;
 
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
             sqlParameters["id"] = PatientCase.Id;

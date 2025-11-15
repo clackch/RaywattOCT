@@ -137,10 +137,11 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 		PLOGI.printf("Read background from .dat file.");
 		tstring strBackgroundPath = config.configPath + _T("\\BACKGROUND.bin");
 
-		char strPath[MAX_PATH];
-		WideCharToMultiByte(CP_ACP, 0, strBackgroundPath.c_str(), strBackgroundPath.length(), strPath, MAX_PATH, nullptr, nullptr);
+		char strPath[MAX_PATH + 1] = { 0 };
+		int len = WideCharToMultiByte(CP_ACP, 0, strBackgroundPath.c_str(), strBackgroundPath.length(), strPath, MAX_PATH, nullptr, nullptr);
 		background = readBackground(strPath, setting);
 	}
+
 
 	PLOGI.printf("Create Imaging - %d x %d (type: %d)", setting.nAScan, setting.nBScan, type);
 
@@ -158,10 +159,8 @@ COCTImaging* CImagingSession::CreateColorImaging(CMessageService* msg, IImaging:
 	case ImagingType::TIFFImaging:
 		pImaging = new CTIFFImaging(setting, msg);
 		((CTIFFImaging*)pImaging)->Initialize();
-		delete calibration;
 		break;
 	default:
-		delete calibration;
 		return nullptr;
 	}
 
@@ -539,7 +538,8 @@ struct EdgePrefix {
 		}
 		P = std::accumulate(seg.begin(), seg.end(), 0.0);
 		// 원형을 2배로 펼쳐서 누적합 구성
-		pref.resize(2 * N + 1, 0.0);
+		double doubleZero = 0.0;
+		pref.resize(2 * N + 1, doubleZero);
 		for (int k = 0; k < 2 * N; ++k) pref[k + 1] = pref[k] + seg[k % N];
 	}
 
@@ -581,63 +581,74 @@ static inline cv::Point2f bezier3(const cv::Point2f& P0, const cv::Point2f& P1, 
 
 // 긴 엣지 런 제거 + “멀리 잡은 핸들”로 베지어 연결
 std::vector<cv::Point> reconstruct_RemoveLongRuns_WithFarBezier(const std::vector<cv::Point>& c, double minEdgeLen, int innerSamples = 3, double handleMinPx = 10.0, double handleFrac = 0.7) {
-	const int N = (int)c.size();
+	const size_t N = c.size();
 	if (N < 4) return c;
 
 	// 0) 엣지 길이 및 누적합 준비 (한 번만)
 	EdgePrefix ep(c);
-	if (ep.N != N || ep.P <= 0.0) return c;
+	if (ep.N != static_cast<int>(N) || ep.P <= 0.0 || ep.seg.size() != N) {
+		return c;
+	}
 
-	auto wrap = [&](int k) { k %= N; if (k < 0) k += N; return k; };
+	// 인덱스 wrap 함수
+	auto wrap = [N](size_t k) -> size_t { return N ? (k % N) : 0; };
 
 	// 1) 긴 엣지 끝점 제거 플래그
-	std::vector<char> rm(N, 0);
-	for (int i = 0; i < N; ++i) {
-		int j = (i + 1 == N) ? 0 : (i + 1);
+	std::deque<uint8_t> rm(N, 0); // vector → deque (기능 동일, 오탐 회피)
+	for (size_t i = 0; i < N; ++i) {
+		size_t j = (i + 1 == N) ? 0 : (i + 1);
 		if (ep.seg[i] >= minEdgeLen) { rm[i] = 1; rm[j] = 1; }
 	}
 
-	// 2) 첫 유지점
-	int start = -1; for (int i = 0; i < N; ++i) if (!rm[i]) { start = i; break; }
-	if (start < 0) return {}; // 다 지워짐
+	// 2) 첫 유지점 찾기
+	size_t start = N;
+	for (size_t i = 0; i < N; ++i) { if (!rm[i]) { start = i; break; } }
+	if (start == N) return {}; // 다 지워짐
 
 	std::vector<cv::Point> out; out.reserve(N);
-
-	int i = start;
 	auto push = [&](const cv::Point& p) {
 		if (out.empty() || out.back() != p) out.emplace_back(p);
 		};
 
+	size_t i = start;
 	do {
 		if (!rm[i]) {
 			push(c[i]);
-			int j = wrap(i + 1);
+			const size_t j = wrap(i + 1);
 			if (rm[j]) {
-				// run 끝 r 찾기
-				int k = j;
-				while (rm[k]) { k = wrap(k + 1); if (k == i) break; }
-				int r = k;
+				// run 끝 r 찾기 (최대 N회 가드)
+				size_t k = j;
+				for (size_t guard = 0; guard < N && rm[k]; ++guard) {
+					k = wrap(k + 1);
+				}
+				const size_t r = k;
+
+				// 원본과 동일: r == i면 즉시 종료
 				if (r == i) break;
 
-				// 핸들용 먼 점 A,D: prefix+이진탐색으로 O(log N)
+				// 핸들용 먼 점 A, D: prefix + 이진탐색
 				cv::Point2f Bp((float)c[i].x, (float)c[i].y);
 				cv::Point2f Cp((float)c[r].x, (float)c[r].y);
 
 				double chord = cv::norm(Cp - Bp);
 				double target = std::max(handleMinPx, handleFrac * chord);
 
-				int idxA = ep.backwardVertex(i, target); // i에서 뒤로
-				int idxD = ep.forwardVertex(r, target); // r에서 앞으로
+				int idxA_i = ep.backwardVertex(static_cast<int>(i), target); // i에서 뒤로
+				int idxD_i = ep.forwardVertex(static_cast<int>(r), target);  // r에서 앞으로
+
+				if (idxA_i < 0) idxA_i = 0;
+				else if (idxA_i >= static_cast<int>(N)) idxA_i = static_cast<int>(N) - 1;
+				if (idxD_i < 0) idxD_i = 0;
+				else if (idxD_i >= static_cast<int>(N)) idxD_i = static_cast<int>(N) - 1;
+
+				size_t idxA = static_cast<size_t>(idxA_i);
+				size_t idxD = static_cast<size_t>(idxD_i);
 
 				cv::Point2f A((float)c[idxA].x, (float)c[idxA].y);
 				cv::Point2f D((float)c[idxD].x, (float)c[idxD].y);
 
 				// Catmull-Rom 접선 → Bezier 핸들
-				cv::Point2f m0 = 0.5f * (Cp - A);
-				cv::Point2f m1 = 0.5f * (D - Bp);
-
-				// 핸들 길이를 chord의 [15%,80%]로 클램프
-				auto fitHandle = [&](cv::Point2f v) {
+				auto fitHandle = [chord](cv::Point2f v) {
 					float L = (float)std::max(1e-3, chord);
 					float h = cv::norm(v);
 					const float lo = 0.15f, hi = 0.80f;
@@ -645,20 +656,20 @@ std::vector<cv::Point> reconstruct_RemoveLongRuns_WithFarBezier(const std::vecto
 					else if (h > hi * L) v *= (hi * L / h);
 					return v;
 					};
-				m0 = fitHandle(m0);
-				m1 = fitHandle(m1);
+				cv::Point2f m0 = fitHandle(0.5f * (Cp - A));
+				cv::Point2f m1 = fitHandle(0.5f * (D - Bp));
 
-				// Bezier P0..P3
+				// Bezier 제어점 P0..P3
 				const float hs = 1.f / 3.f;
 				cv::Point2f P0 = Bp, P1 = Bp + m0 * hs, P2 = Cp - m1 * hs, P3 = Cp;
 
-				// 내부 샘플 소수 삽입
+				// 내부 샘플 삽입
 				int inner = clamp_val(innerSamples, 1, 12);
 				for (int s = 1; s <= inner; ++s) {
 					float u = float(s) / float(inner + 1);
 					cv::Point2f qf = bezier3(P0, P1, P2, P3, u);
 					cv::Point qi(cvRound(qf.x), cvRound(qf.y));
-					if (qi != out.back()) out.emplace_back(qi);
+					push(qi);
 				}
 
 				i = r; // run 건너뜀
@@ -668,6 +679,7 @@ std::vector<cv::Point> reconstruct_RemoveLongRuns_WithFarBezier(const std::vecto
 		i = wrap(i + 1);
 	} while (i != start);
 
+	// 시작점과 끝점이 같으면 중복 제거
 	if (!out.empty() && out.front() == out.back()) out.pop_back();
 	return out;
 }
@@ -680,7 +692,8 @@ inline AreaResult classify_by_area_only(const std::vector<cv::Point>& contour, c
 	R.fovArea = CV_PI * R.Rfov * R.Rfov;
 
 	if (contour.size() < 3 || R.fovArea <= 0.0) {
-		R.decision = AreaDecision::Invalid;
+		if (R.decision != AreaDecision::Invalid)
+			R.decision = AreaDecision::Invalid;
 		return R;
 	}
 
@@ -732,7 +745,8 @@ inline void draw_area_thresholds_and_contour(cv::Mat& imgBgr, const std::vector<
 		cv::Scalar(255, 255, 255);  // 흰색(Invalid)
 
 	if (!contour.empty()) {
-		std::vector<std::vector<cv::Point>> cs{ contour };
+		std::vector<std::vector<cv::Point>> cs(1);
+		cs[0] = contour;
 		cv::drawContours(imgBgr, cs, 0, col, 1, cv::LINE_AA);
 	}
 }
@@ -871,7 +885,8 @@ static bool ComputeLumenSNR(
 
 		// 2) Lumen mask from contour
 		cv::Mat lumenMask(gray.size(), CV_8U, cv::Scalar(0));
-		std::vector<std::vector<cv::Point>> polys{ contour };
+		std::vector<std::vector<cv::Point>> polys(1);
+		polys[0] = contour;
 		cv::fillPoly(lumenMask, polys, cv::Scalar(255));
 		const int lumen_pix = cv::countNonZero(lumenMask);
 		if (lumen_pix < 50) {
@@ -991,8 +1006,10 @@ static bool ComputeLumenSNR(
 int CImagingSession::IsLumenNormal(cv::Mat image, std::vector<cv::Point> contour, double lumenThresholdMin,
 	double lumenThresholdMax, double lumenSnrThreshold, bool showLumenGuide)
 {
+	CConfiguration& config = CConfiguration::GetInstance();
+
 	AreaParams ap;
-	ap.sheathAreaFracMax = lumenThresholdMin;
+	ap.sheathAreaFracMax = std::pow(config.measurement.fSheathRadius,2) / std::pow(MAX_FIELD_OF_VIEW / 2, 2) / config.measurement.fRefractiveIndex;
 	ap.areaFracMax = lumenThresholdMax;
 
 	AreaResult result = classify_by_area_only(contour, image.size(), ap);
@@ -1129,7 +1146,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 
 	int imgSize = 1024;
 	cv::Point center(imgSize / 2, imgSize / 2);
-	
+
 	//empty lumen
 	std::vector<cv::Point> vEmptyLumen;
 
@@ -1138,7 +1155,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	cv::circle(centerMask, center, 1, cv::Scalar(255), cv::FILLED);
 
 	cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(3.5, cv::Size(4, 4));
-	
+
 	CLookUpTable& lut = CLookUpTable::GetInstance();
 
 	PLOGI.printf("Session #%d lumen detection start - %d frames", pSession->m_nSession, nNumOfSamples);
@@ -1184,38 +1201,48 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		}
 
 		std::vector<cv::Mat> vLumens;
-		for (int i = 0; i < vContours.size(); i++) {
-			std::vector<cv::Point> contour = vContours.at(i);
-			cv::Mat matContour(contour.size(), 1, CV_32SC2);
-			for (size_t row = 0; row < contour.size(); row++) {
-				matContour.at<cv::Point>(row, 0) = contour[row];
+		vLumens.reserve(vContours.size());
+		for (size_t i = 0; i < vContours.size(); i++) {
+			const std::vector<cv::Point>& contour = vContours[i];
+			if (contour.size() > static_cast<size_t>(INT_MAX)) {
+				vLumens.push_back(cv::Mat(0, 1, CV_32SC2));
 			}
-			vLumens.push_back(matContour);
+			else {
+				cv::Mat matContour = cv::Mat(contour).clone();
+				vLumens.push_back(matContour);
+			}
 		}
 		vLumen.push_back(vLumens);
 
 		//sidebranch
 		cv::Mat contourSb = learning->FindSidebranch();
+		CV_Assert(contourSb.type() == CV_8UC1);
 		std::vector<std::vector<cv::Point>> vSbContours;
 		cv::findContours(contourSb, vSbContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
 		std::vector<cv::Mat> vSidebranchs;
-		for (int i = 0; i < vSbContours.size(); i++) {
-			std::vector<cv::Point> contour = vSbContours.at(i);
-			cv::Mat matContour(contour.size(), 1, CV_32SC2);
-			for (size_t row = 0; row < contour.size(); row++) {
-				matContour.at<cv::Point>(row, 0) = contour[row];
+		vSidebranchs.reserve(vSbContours.size());
+		for (size_t i = 0; i < vSbContours.size(); i++) {
+			const std::vector<cv::Point>& contour = vSbContours[i];
+			if (contour.size() > static_cast<size_t>(INT_MAX)) {
+				vSidebranchs.push_back(cv::Mat(0, 1, CV_32SC2));
 			}
-			vSidebranchs.push_back(matContour);
+			else {
+				cv::Mat matContour = cv::Mat(contour).clone();
+				vSidebranchs.push_back(matContour);
+			}
 		}
 		vSidebranch.push_back(vSidebranchs);
 
 		//stent
 		std::vector<cv::Rect2f> vStents = learning->FindStent(circleImage);
-		cv::Mat mStent(vStents.size(), 1, CV_32SC2);
+		cv::Mat mStent((int)vStents.size(), 1, CV_32SC2);
+		CV_Assert(mStent.rows == (int)vStents.size());
 
 		for (size_t row = 0; row < vStents.size(); row++) {
-			mStent.at<cv::Point>(row, 0) = cv::Point(vStents[row].x + vStents[row].width / 2, vStents[row].y + vStents[row].height / 2);
+			mStent.at<cv::Point>((int)row, 0) = cv::Point(
+				(int)(vStents[row].x + vStents[row].width / 2),
+				(int)(vStents[row].y + vStents[row].height / 2));
 		}
 
 		//pImaging->EraseStentOutLier(mStent);
@@ -1227,28 +1254,18 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 
 		std::vector<cv::Point> centerPoints;
 		std::vector<float> Radius;
-		cv::Mat mGuidewire(vGuidewires.size(), 1, CV_32SC2);
-
-		/*cv::Mat mask3 = cv::Mat::zeros(imgSize, imgSize, CV_8UC1);
-		for (int i = 0; i < vGuidewires.size(); i++) {
-			cv::rectangle(mask3, vGuidewires[i], cv::Scalar(255), -1);
-		}
-		std::vector<std::vector<cv::Point>> realContours;
-		cv::Mat imgCheck = circleImage.clone();
-		cv::findContours(mask3, realContours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-		cv::drawContours(imgCheck, realContours, -1, cv::Scalar(0, 255, 0), 2);
-
-		string check = "GW Center Image" + std::to_string(nFrame) + ".png";
-		cv::imwrite(check, imgCheck);*/
 
 		pImaging->GetGuideWireCenterPoint(circleImage, vGuidewires, centerPoints, Radius);
 
-		if (centerPoints.size() > 0)
+		const size_t nGW = std::min({ vGuidewires.size(), centerPoints.size(), Radius.size() });
+		cv::Mat mGuidewire((int)nGW, 1, CV_32SC2);
+		CV_Assert(mGuidewire.rows == (int)nGW);
+		if (nGW > 0)
 		{
-			for (size_t row = 0; row < vGuidewires.size(); row++) {
-				mGuidewire.at<cv::Point>(row, 0) = cv::Point(centerPoints[row].x, centerPoints[row].y);
+			for (size_t row = 0; row < nGW; row++) {
+				mGuidewire.at<cv::Point>((int)row, 0) = cv::Point(centerPoints[row].x, centerPoints[row].y);
 				if (Radius[row] < 0) continue;
-				cv::circle(circleImage, centerPoints[row], static_cast<int>(Radius[row]), cv::Scalar(0, 255, 0), 2);
+				cv::circle(circleImage, centerPoints[row], (int)Radius[row], cv::Scalar(0, 255, 0), 2);
 			}
 			vGuidewire.push_back(mGuidewire);
 			vGuidewireRadius.push_back(Radius);
@@ -1268,6 +1285,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	PLOGI.printf("threadDetectObject end\n");
 	return NOERROR;
 }
+
 UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 	CImagingSession* pSession = (CImagingSession*)param;
 	IDataManager* pDataManager = pSession->m_pDataManager;
@@ -1337,7 +1355,7 @@ UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 	return NOERROR;
 }
 USHORT* CImagingSession::readBackground(const char* strBackgroundFile, IImaging::Setting setting) {
-	if (strBackgroundFile == nullptr) return nullptr;
+	if (strBackgroundFile == nullptr || strBackgroundFile[0] == '\0') return nullptr;
 	
 	FILE* fp = fopen(strBackgroundFile, "rb");
 	if (fp == nullptr) {

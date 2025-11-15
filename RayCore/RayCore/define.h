@@ -23,6 +23,7 @@ enum class RayError {
 	InvalidFunctionCall,
 	HomingFailed,
 	RotaryJunctionError,
+	AutoCalibError
 };
 
 enum class RayProperty {
@@ -60,7 +61,9 @@ enum class RayProperty {
 	LumenThresholdMin,
 	LumenThresholdMax,
 	LumenSnrThreshold,
-	ShowLumenGuide
+	ShowLumenGuide,
+	RefractiveIndex,
+	VelocityPullback
 };
 
 enum class RayCallbackRequest {
