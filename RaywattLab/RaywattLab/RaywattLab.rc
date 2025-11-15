@@ -1,0 +1,345 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#ifndef APSTUDIO_INVOKED
+#include "targetver.h"
+#endif
+#include "afxres.h"
+#include "verrsrc.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 한국어(대한민국) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
+LANGUAGE LANG_KOREAN, SUBLANG_DEFAULT
+#pragma code_page(949)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#ifndef APSTUDIO_INVOKED\r\n"
+    "#include ""targetver.h""\r\n"
+    "#endif\r\n"
+    "#include ""afxres.h""\r\n"
+    "#include ""verrsrc.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)\r\n"
+    "LANGUAGE 18, 1\r\n"
+    "#include ""res\\RaywattLab.rc2""  // Microsoft Visual C++ AI￠?UAC ￠￥U￠￢¡I ￥i￥i¡¾￠￢￠?￠®¨u¡ⓒ ¨¡iAyCN ￠￢￠c¨uO¨o¨￢AO￠￥I￠￥U.\r\n"
+    "#include ""l.KOR\\afxres.rc""      // C¡IA¨ª ¡¾￠￢¨u¨￢ ￠?a¨uO\r\n"
+    "#if !defined(_AFXDLL)\r\n"
+    "#include ""l.KOR\\afxribbon.rc""   // MFC ￠￢￠c¨￢¡i ⓒo¡¿ AA¨¡￠c¡¤N ￠￢¡¤￠￥e ￠￢￠c¨uO¨o¨￢\r\n"
+    "#endif\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\RaywattLab.ico"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 170, 62
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "RaywattLab 정보"
+FONT 9, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,14,14,21,20
+    LTEXT           "RaywattLab, 버전 1.0",IDC_STATIC,42,14,114,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2022",IDC_STATIC,42,26,114,8
+    DEFPUSHBUTTON   "확인",IDOK,113,41,50,14,WS_GROUP
+END
+
+IDD_RAYWATTLAB_DIALOG DIALOGEX 0, 0, 957, 579
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "RaywattLab [v.1.00.01]"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_PICT_OCT_IMAGE,"Static",SS_BLACKFRAME,152,143,41,40
+    GROUPBOX        "OCT Device",IDC_STATIC,7,7,137,51
+    GROUPBOX        "Patient Data",IDC_STATIC,157,7,412,90
+    EDITTEXT        IDC_EDIT_CURRENT_PATIENT,164,18,160,14,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
+    EDITTEXT        IDC_EDIT_CURRENT_PATH,164,36,159,14,ES_AUTOHSCROLL | ES_READONLY
+    PUSHBUTTON      "...",IDC_BUTTON_OPEN_DATA_FOLDER,327,36,17,14
+    LISTBOX         IDC_LIST_PATIENT_DATA,348,17,214,71,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Load",IDC_BUTTON_LOAD_SELECTED_DATA,225,56,34,14
+    PUSHBUTTON      "Play",IDC_BUTTON_PLAY_LOADED_DATA,260,56,35,14,WS_DISABLED
+    PUSHBUTTON      "AVI",IDC_BUTTON_SAVE_VIDEO,257,73,24,14,WS_DISABLED
+    GROUPBOX        "OCT Imaging",IDC_STATIC,7,106,137,222
+    CONTROL         "Circle",IDC_RADIO_IMAGE_CIRCLE,"Button",BS_AUTORADIOBUTTON | WS_GROUP,17,121,33,10
+    CONTROL         "Rectangle",IDC_RADIO_IMAGE_RECTANGLE,"Button",BS_AUTORADIOBUTTON,58,121,48,10
+    CONTROL         "Black",IDC_RADIO_COLOR_BLACK,"Button",BS_AUTORADIOBUTTON | WS_GROUP,18,138,32,11
+    CONTROL         "White",IDC_RADIO_COLOR_WHITE,"Button",BS_AUTORADIOBUTTON,18,153,35,10
+    CONTROL         "",IDC_SLIDER_BRIGHTNESS,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,33,183,100,15
+    CONTROL         "",IDC_SLIDER_CONTRAST,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,33,215,100,15
+    LTEXT           "Brightness :",IDC_STATIC,25,170,39,8
+    LTEXT           "Contrast :",IDC_STATIC,25,205,34,8
+    PUSHBUTTON      "Save",IDC_BUTTON_SAVE_DATA,298,56,44,14,WS_DISABLED
+    PUSHBUTTON      "Setting",IDC_BUTTON_OPEN_ROTARY_JUNCTION,13,558,40,14
+    PUSHBUTTON      "Initialize",IDC_BUTTON_ADMIN_INITIALIZE,58,18,37,14
+    GROUPBOX        "Rotary Junction",IDC_STATIC,7,519,137,60
+    LTEXT           "from :",IDC_STATIC,14,530,20,8
+    LTEXT           "step :",IDC_STATIC,53,530,20,8
+    LTEXT           "count :",IDC_STATIC,90,530,25,8
+    EDITTEXT        IDC_EDIT_CALIBRATION_FROM,13,542,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_EDIT_CALIBRATION_STEP,56,542,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_EDIT_CALIBRATION_COUNT,98,542,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    PUSHBUTTON      "Save",IDC_BUTTON_SAVE_CALIBRATION,107,558,31,14,WS_DISABLED
+    EDITTEXT        IDC_EDIT_PREFIX,166,73,88,14,ES_AUTOHSCROLL
+    LTEXT           "Peak :",IDC_STATIC,14,346,21,8
+    EDITTEXT        IDC_EDIT_PEAK,37,344,36,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Line Width :",IDC_STATIC,14,364,39,8
+    EDITTEXT        IDC_EDIT_LINEWIDTH,61,360,40,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Position :",IDC_STATIC,78,346,30,8
+    EDITTEXT        IDC_EDIT_PEAK_INDEX,110,344,29,13,ES_AUTOHSCROLL | ES_READONLY
+    GROUPBOX        "Measure",IDC_STATIC,7,334,138,60
+    LTEXT           "Noise Power :",IDC_STATIC,14,377,45,8
+    EDITTEXT        IDC_EDIT_NOISE,61,375,40,14,ES_AUTOHSCROLL | ES_READONLY
+    PUSHBUTTON      ">",IDC_BUTTON_NEXT_CALIB,123,438,17,14
+    PUSHBUTTON      "Measure",IDC_BUTTON_MEASURE,108,375,36,14
+    CONTROL         "BG Subtract",IDC_CHECK_BACKGROUND_SUBTRACT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,310,55,10
+    EDITTEXT        IDC_EDIT_CUR_CALIBRATION,16,422,123,14,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EDIT_CALIB_PATH,17,438,65,14,ES_AUTOHSCROLL | ES_READONLY
+    PUSHBUTTON      "...",IDC_BUTTON_OPEN_CALIB_FOLDER,86,438,17,14
+    PUSHBUTTON      "TIF",IDC_BUTTON_SAVE_TIF,286,73,25,14,WS_DISABLED
+    PUSHBUTTON      "Pullback",IDC_BUTTON_PULLBACK,55,558,38,14
+    PUSHBUTTON      "PNG",IDC_BUTTON_SAVE_PNG,317,73,25,14,WS_DISABLED
+    CONTROL         "Show Guide",IDC_CHECK_SHOW_GUIDE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,159,100,53,10
+    CONTROL         "",IDC_SLIDER_LOWLEVEL,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,33,250,100,15
+    CONTROL         "",IDC_SLIDER_HIGHLEVEL,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,33,281,100,15
+    LTEXT           "Low Level :",IDC_STATIC,15,237,37,8
+    LTEXT           "High Level :",IDC_STATIC,15,270,38,8
+    EDITTEXT        IDC_EDIT_LOWLEVEL,56,234,40,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EDIT_HIGHLEVEL,56,268,40,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EDIT_BRIGHTNESS,66,169,40,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EDIT_CONTRAST,62,202,40,12,ES_AUTOHSCROLL | ES_READONLY
+    GROUPBOX        "Calibration",IDC_STATIC,7,404,137,55
+    LTEXT           "Frame rate :",IDC_STATIC,35,39,41,8
+    EDITTEXT        IDC_EDIT_FRAME_RATE,83,37,40,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "fps",IDC_STATIC,127,41,11,8
+    GROUPBOX        "Acquisition",IDC_STATIC,7,61,146,39
+    LTEXT           "# of Alines :",IDC_STATIC,17,78,40,8
+    EDITTEXT        IDC_EDIT_BSCAN,61,75,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    PUSHBUTTON      "Restart",IDC_BUTTON_RESTART_ACQUISITION,104,75,40,14,WS_DISABLED
+    PUSHBUTTON      "Start Acq.",IDC_BUTTON_START_ACQUISITION,96,18,45,14,WS_DISABLED
+    PUSHBUTTON      "Show Scope",IDC_BUTTON_SHOW_SCOPE,519,99,50,14
+    CONTROL         "",IDC_SLIDER_FRAME,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,160,118,410,15
+    LTEXT           "0000 / 0000",IDC_STATIC_FRAME_NUM,461,103,52,8,0,WS_EX_RIGHT
+    GROUPBOX        "Z-Offset",IDC_STATIC,7,466,137,44
+    PUSHBUTTON      "+",IDC_BUTTON_ZOFFSET_INC,71,478,33,14
+    PUSHBUTTON      "-",IDC_BUTTON_ZOFFSET_DEC,105,478,33,14
+    PUSHBUTTON      "Save",IDC_BUTTON_ZOFFSET_SAVE,101,492,37,14
+    CONTROL         "Show Sheath Guide",IDC_CHECK_SHOW_SHEATH_GUIDE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,17,495,78,10
+    CONTROL         "Compensation",IDC_CHECK_COMPENSATION,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,77,310,61,10
+    PUSHBUTTON      "prev",IDC_BUTTON_PREV_FRAME,292,100,50,12
+    PUSHBUTTON      "next",IDC_BUTTON_NEXT_FRAME,346,100,50,12
+    PUSHBUTTON      "Copy prev",IDC_BUTTON_COPY_ZOFFSET,16,478,48,14
+    CONTROL         "Gray",IDC_RADIO_GRAY,"Button",BS_AUTORADIOBUTTON | WS_GROUP,58,138,31,10
+    CONTROL         "Green",IDC_RADIO_GREEN,"Button",BS_AUTORADIOBUTTON,58,152,32,10
+    CONTROL         "Orange",IDC_RADIO_ORANGE,"Button",BS_AUTORADIOBUTTON,100,152,39,10
+    PUSHBUTTON      "Init Fringe",IDC_BUTTON_INIT_FRINGE,575,18,48,15
+    PUSHBUTTON      "Add Fringe",IDC_BUTTON_SAVE_FRINGE,575,34,48,15
+    PUSHBUTTON      "<",IDC_BUTTON_PREV_CALIB,105,438,17,14
+    CONTROL         "Show Hist",IDC_CHECK_SHOW_HIST,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,222,100,47,10
+END
+
+IDD_ROTARY_JUNCTION_DIALOG DIALOGEX 0, 0, 301, 240
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION
+CAPTION "Rotary Junction"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Zaber",IDC_STATIC,12,18,156,75
+    GROUPBOX        "Faulhaber Motor",IDC_STATIC,179,137,108,51
+    LTEXT           "Serial Port :",IDC_STATIC,24,33,38,8
+    LTEXT           "Move to Position",IDC_STATIC,24,151,54,8
+    PUSHBUTTON      "Idle",IDC_BUTTON_ZABER_IDLE,82,184,38,14,WS_DISABLED
+    EDITTEXT        IDC_EDIT_ZABER_POSITION,43,164,52,14,ES_AUTOHSCROLL
+    LTEXT           "mm",IDC_STATIC,101,168,12,8
+    PUSHBUTTON      "Move",IDC_BUTTON_ZABER_MOVE,123,166,38,14,WS_DISABLED
+    PUSHBUTTON      "Pull",IDC_BUTTON_ZABER_PULLBACK,124,184,37,14,WS_DISABLED
+    LTEXT           "Velocity :",IDC_STATIC,196,35,30,8
+    EDITTEXT        IDC_EDIT_MOTOR_VELOCITY,227,32,51,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Perform Run",IDC_BUTTON_MOTOR_PERFORM_RUN,196,150,76,14,WS_DISABLED
+    PUSHBUTTON      "Stop Motor",IDC_BUTTON_MOTOR_STOP,196,167,76,14,WS_DISABLED
+    GROUPBOX        "Delay line",IDC_STATIC,179,189,108,44
+    LTEXT           "Serial Port :",IDC_STATIC,196,73,38,8
+    PUSHBUTTON      "◀◀",IDC_BUTTON_MOVE_ZABER_BACKWARD,196,207,37,14,WS_DISABLED
+    PUSHBUTTON      "▶▶",IDC_BUTTON_MOVE_ZABER_FORWARD,235,207,37,14,WS_DISABLED
+    GROUPBOX        "Faulhaber Motor",IDC_STATIC,179,18,108,37
+    LTEXT           "mm/s",IDC_STATIC,137,72,18,8
+    EDITTEXT        IDC_EDIT_ZABER_VELOCITY,82,67,51,14,ES_AUTOHSCROLL
+    LTEXT           "mm",IDC_STATIC,137,56,12,8
+    EDITTEXT        IDC_EDIT_ZABER_DISTANCE,82,50,51,14,ES_AUTOHSCROLL
+    LTEXT           "Pullback distance",IDC_STATIC,24,50,55,8
+    GROUPBOX        "Interferometer Delay",IDC_STATIC,179,59,108,34
+    GROUPBOX        "Zaber",IDC_STATIC,14,137,156,65
+    LTEXT           "Pullback velocity",IDC_STATIC,24,69,53,8
+    GROUPBOX        "Settings",IDC_STATIC,7,7,287,111
+    GROUPBOX        "Control",IDC_STATIC,7,124,287,109
+    EDITTEXT        IDC_EDIT_PULLBACK_ZABER_PORT,82,30,42,14,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EDIT_INTERFEROMETER_ZABER_PORT,235,71,42,14,ES_AUTOHSCROLL | ES_READONLY
+    PUSHBUTTON      "Save Settings",IDC_BUTTON_SAVE_SETTINGS,114,96,82,14
+    GROUPBOX        "Shutter",IDC_STATIC,15,207,155,25
+    PUSHBUTTON      "Close",IDC_BUTTON_CLOSE_SHUTTER,110,214,50,14,WS_DISABLED
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041204b0"
+        BEGIN
+            VALUE "CompanyName", "Raywatt Inc."
+            VALUE "FileDescription", "RaywattLab"
+            VALUE "FileVersion", "1.0.0.0"
+            VALUE "InternalName", "RaywattLab.exe"
+            VALUE "LegalCopyright", "(c) Raywatt Inc.  All rights reserved."
+            VALUE "OriginalFilename", "RaywattLab.exe"
+            VALUE "ProductName", "Raywatt Lab"
+            VALUE "ProductVersion", "1.0.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x412, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 163
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 55
+    END
+
+    IDD_RAYWATTLAB_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 637
+        VERTGUIDE, 152
+        TOPMARGIN, 7
+        HORZGUIDE, 143
+        HORZGUIDE, 181
+    END
+
+    IDD_ROTARY_JUNCTION_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 233
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_ROTARY_JUNCTION_DIALOG AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_RAYWATTLAB_DIALOG AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+#endif    // 한국어(대한민국) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
+LANGUAGE 18, 1
+#include "res\RaywattLab.rc2"  // Microsoft Visual C++ AI￠?UAC ￠￥U￠￢¡I ￥i￥i¡¾￠￢￠?￠®¨u¡ⓒ ¨¡iAyCN ￠￢￠c¨uO¨o¨￢AO￠￥I￠￥U.
+#include "l.KOR\afxres.rc"      // C¡IA¨ª ¡¾￠￢¨u¨￢ ￠?a¨uO
+#if !defined(_AFXDLL)
+#include "l.KOR\afxribbon.rc"   // MFC ￠￢￠c¨￢¡i ⓒo¡¿ AA¨¡￠c¡¤N ￠￢¡¤￠￥e ￠￢￠c¨uO¨o¨￢
+#endif
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
