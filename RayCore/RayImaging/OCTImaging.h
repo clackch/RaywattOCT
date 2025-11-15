@@ -16,12 +16,12 @@ class CThread;
 class CMessageService;
 
 struct FFTThreadContext {
-	Ipp32f* fBuffer_Window = nullptr;
-	Ipp32fc* fcBuffer_FFT = nullptr;
-	Ipp32fc* fcBuffer_IFFT = nullptr;
-	Ipp8u* fftWorkBufFirst = nullptr;
-	Ipp8u* fftWorkBufIFFT = nullptr;
-	Ipp8u* fftWorkBufSecond = nullptr;
+	Ipp32f* fBuffer_Window;   // nAScan
+	Ipp32fc* fcAnalytic;       // nAScan (analytic fringe)
+	Ipp32fc* fcK;              // nOut   (k-remapped)
+	IppsHilbertSpec* hilbertSpec; // per-thread spec
+	Ipp8u* hilbertWorkBuf;       // per-thread work buffer
+	Ipp8u* fftWorkBufSecond;     // for final FFT of length nOut
 };
 
 enum class AutoCalibrationMathod {
@@ -62,13 +62,9 @@ protected:
 	// using in Gen_8bit_Image
 
 	Ipp32f* fFFTResult;
-	Ipp32f* fOutput;
-	IppsFFTSpec_R_32f* fftSpecFirst;	// first FFT
-	IppsFFTSpec_C_32fc* ifftSpec, * fftSpecSecond;	// Inverse, second FFT
+	IppsFFTSpec_C_32fc* fftSpec;	//second FFT
 
-	int fftFirstWorkBufSize;
-	int fftIFFTWorkBufSize;
-	int fftSecondWorkBufSize;
+	int fftWorkBufSize;
 
 	bool m_bInvert;
 	bool m_bColor;
@@ -81,6 +77,7 @@ protected:
 	int m_nSheathSearchRange;
 	int m_nZOffset;
 	int m_nPixelNum;
+	int fftOutLen_ = 0;
 
 	cv::Ptr<cv::CLAHE> clahe;
 
@@ -150,6 +147,8 @@ protected:
 	void generateBackground(Ipp16u* fringes);
 	void fftProcessing(const Ipp32f* fringes32f);
 	void computeLogarithm(Ipp32f* src, Ipp32f* dst);
+	double EstimateCarrierF0Norm(const Ipp32f* fringes32f, const Ipp32f* meanRow, const float* window, int nAScan, int nBScan);
+	void MakeDemodTone(std::vector<Ipp32fc>& tone, double f0norm, int nAScan);
 	void generateImage(Ipp32f* logaritihmData, bool bInvert);
 	void findSheath(Ipp32f* logaritihmData);
 	void CalculateMagnitude(cv::Mat img);

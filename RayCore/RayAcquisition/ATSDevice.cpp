@@ -166,215 +166,214 @@ char *CATSDevice::acquire(int& nCurFrame, int& nTotalFrame) {
 BOOL CATSDevice::calibrateBoard(HANDLE boardHandle)
 {
 	RETURN_CODE retCode = ApiSuccess;
-	U32 preTriggerSamples = 4096;
-	U32 postTriggerSamples = 4096;
-	U32 samplesPerRecord = preTriggerSamples + postTriggerSamples;
 
-	U16* pAcqBuffer = (U16*)VirtualAlloc(NULL, samplesPerRecord * sizeof(U16), MEM_COMMIT, PAGE_READWRITE);
+	const U32 preTriggerSamples = 4096;
+	const U32 postTriggerSamples = 4096;
+	const U32 samplesPerRecord = preTriggerSamples + postTriggerSamples;
 
-	AlazarSetRecordSize(boardHandle,
-		preTriggerSamples,
-		postTriggerSamples);
+	// 리소스들
+	U16* pAcqBuffer = nullptr;
+	OVERLAPPED  ovl = {};
+	HANDLE      hEvent = nullptr;
+	bool        asyncPrimed = false;  // AlazarBeforeAsyncRead 호출 완료 여부
+	bool        asyncReading = false;  // AlazarAsyncRead 호출 완료 여부
 
-	AlazarSetParameterUL(boardHandle, CHANNEL_A, SET_ADC_MODE, ADC_MODE_DEFAULT);
+	auto cleanup = [&]() {
+		// 비동기 읽기 중이면 중단
+		if (asyncPrimed || asyncReading) {
+			AlazarAbortAsyncRead(boardHandle);
+		}
+		// 이벤트 핸들 정리
+		if (hEvent) {
+			CloseHandle(hEvent);
+			hEvent = nullptr;
+		}
+		// 버퍼 정리
+		if (pAcqBuffer) {
+			VirtualFree(pAcqBuffer, 0, MEM_RELEASE);
+			pAcqBuffer = nullptr;
+		}
+		};
 
+	// 1) 버퍼 할당
+	pAcqBuffer = (U16*)VirtualAlloc(nullptr, samplesPerRecord * sizeof(U16),
+		MEM_COMMIT, PAGE_READWRITE);
+	if (!pAcqBuffer) {
+		PLOGI.printf("Error: VirtualAlloc failed\n");
+		cleanup();
+		return FALSE;
+	}
+
+	// 2) 레코드 크기
+	retCode = AlazarSetRecordSize(boardHandle, preTriggerSamples, postTriggerSamples);
+	PLOGI.printf("AlazarSetRecordSize -- %s\n", AlazarErrorToText(retCode));
+	if (retCode != ApiSuccess) { cleanup(); return FALSE; }
+
+	// 3) ADC 모드 기본
+	retCode = AlazarSetParameterUL(boardHandle, CHANNEL_A, SET_ADC_MODE, ADC_MODE_DEFAULT);
+	PLOGI.printf("SET_ADC_MODE DEFAULT -- %s\n", AlazarErrorToText(retCode));
+	if (retCode != ApiSuccess) { cleanup(); return FALSE; }
+
+	// 4) 캡처 클록: 내부 200MSPS (테스트용)
 	retCode = AlazarSetCaptureClock(boardHandle,
 		INTERNAL_CLOCK,
-		SAMPLE_RATE_200MSPS,
+		SAMPLE_RATE_1000MSPS,
 		CLOCK_EDGE_RISING,
 		0);
-	PLOGI.printf("AlazarSetCaptureClock 0x%x %d -- %s", INTERNAL_CLOCK, SAMPLE_RATE_200MSPS, AlazarErrorToText(retCode));
+	PLOGI.printf("SetCaptureClock INTERNAL 1000MSPS -- %s\n", AlazarErrorToText(retCode));
+	if (retCode != ApiSuccess) { cleanup(); return FALSE; }
 
+	// 5) 채널 A 입력
 	retCode = AlazarInputControlEx(boardHandle,
 		CHANNEL_A,
 		DC_COUPLING,
 		INPUT_RANGE_PM_400_MV,
 		IMPEDANCE_50_OHM);
-	PLOGI.printf("AlazarInputControlEx -- %s", AlazarErrorToText(retCode));
+	PLOGI.printf("AlazarInputControlEx -- %s\n", AlazarErrorToText(retCode));
+	if (retCode != ApiSuccess) { cleanup(); return FALSE; }
 
+	// 6) 트리거: 외부 TTL, 양의 엣지
 	retCode = AlazarSetTriggerOperation(boardHandle,
 		TRIG_ENGINE_OP_J,
-		TRIG_ENGINE_J,
-		TRIG_EXTERNAL,
-		TRIGGER_SLOPE_POSITIVE,
-		150,
-		TRIG_ENGINE_K,
-		TRIG_DISABLE,
-		TRIGGER_SLOPE_POSITIVE,
-		128);
-	PLOGI.printf("AlazarSetTriggerOperation -- %s", AlazarErrorToText(retCode));
+		TRIG_ENGINE_J, TRIG_EXTERNAL, TRIGGER_SLOPE_POSITIVE, 150,
+		TRIG_ENGINE_K, TRIG_DISABLE, TRIGGER_SLOPE_POSITIVE, 128);
+	PLOGI.printf("AlazarSetTriggerOperation -- %s\n", AlazarErrorToText(retCode));
+	if (retCode != ApiSuccess) { cleanup(); return FALSE; }
 
-	retCode = AlazarSetExternalTrigger(boardHandle,
-		DC_COUPLING,
-		ETR_TTL);
-	PLOGI.printf("AlazarSetExternalTrigger -- %s", AlazarErrorToText(retCode));
+	retCode = AlazarSetExternalTrigger(boardHandle, DC_COUPLING, ETR_TTL);
+	PLOGI.printf("AlazarSetExternalTrigger -- %s\n", AlazarErrorToText(retCode));
+	if (retCode != ApiSuccess) { cleanup(); return FALSE; }
 
+	// 7) 트리거 지연/타임아웃
 	retCode = AlazarSetTriggerDelay(boardHandle, 0);
-	PLOGI.printf("AlazarSetTriggerDelay -- %s", AlazarErrorToText(retCode));
+	PLOGI.printf("AlazarSetTriggerDelay -- %s\n", AlazarErrorToText(retCode));
+	if (retCode != ApiSuccess) { cleanup(); return FALSE; }
 
-	double triggerTimeout_sec = 0;
-	U32 triggerTimeout_clocks = (U32)(triggerTimeout_sec / 10.e-6 + 0.5);
+	retCode = AlazarSetTriggerTimeOut(boardHandle, 0); // 무기한 대기
+	PLOGI.printf("AlazarSetTriggerTimeOut -- %s\n", AlazarErrorToText(retCode));
+	if (retCode != ApiSuccess) { cleanup(); return FALSE; }
 
-	retCode = AlazarSetTriggerTimeOut(boardHandle, triggerTimeout_clocks);
-	PLOGI.printf("AlazarSetTriggerTimeOut -- %s", AlazarErrorToText(retCode));
-
+	// 8) AUX I/O (필요 시)
 	retCode = AlazarConfigureAuxIO(boardHandle, AUX_OUT_TRIGGER, AUX_OUT_TRIGGER);
-	PLOGI.printf("AlazarConfigureAuxIO -- %s", AlazarErrorToText(retCode));
+	PLOGI.printf("AlazarConfigureAuxIO -- %s\n", AlazarErrorToText(retCode));
+	if (retCode != ApiSuccess) { cleanup(); return FALSE; }
 
-	retCode = AlazarBeforeAsyncRead(boardHandle, CHANNEL_A, (long) -1 * preTriggerSamples,
-		samplesPerRecord, 1, 1,
+	// 9) 비동기 읽기 준비 (pre-trigger 포함)
+	retCode = AlazarBeforeAsyncRead(boardHandle,
+		CHANNEL_A,
+		(long)(-1 * (int)preTriggerSamples),  // pre-trigger 샘플 포함
+		samplesPerRecord,
+		1, 1,                                 // recordsPerBuffer, buffersPerAcq
 		m_admaFlags);
-	PLOGI.printf("AlazarBeforeAsyncRead(%d, %d, %d) -- %s", (-1 * preTriggerSamples), samplesPerRecord, m_admaFlags, AlazarErrorToText(retCode));
+	PLOGI.printf("AlazarBeforeAsyncRead -- %s\n", AlazarErrorToText(retCode));
+	if (retCode != ApiSuccess) { cleanup(); return FALSE; }
+	asyncPrimed = true;
 
-	OVERLAPPED overlapped;
-	AlazarAsyncRead(boardHandle, pAcqBuffer, samplesPerRecord, &overlapped);
-	PLOGI.printf("AlazarAsyncRead -- %s", AlazarErrorToText(retCode));
+	// 10) OVERLAPPED 준비
+	hEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr);
+	if (!hEvent) {
+		PLOGI.printf("Error: CreateEvent failed (GetLastError=%lu)\n", GetLastError());
+		cleanup();
+		return FALSE;
+	}
+	ZeroMemory(&ovl, sizeof(ovl));
+	ovl.hEvent = hEvent;
 
-	AlazarStartCapture(boardHandle);
+	// 11) 비동기 읽기 요청
+	retCode = AlazarAsyncRead(boardHandle, pAcqBuffer, samplesPerRecord, &ovl);
+	PLOGI.printf("AlazarAsyncRead -- %s\n", AlazarErrorToText(retCode));
+	if (retCode != ApiSuccess) { cleanup(); return FALSE; }
+	asyncReading = true;
 
+	// 12) 캡처 시작
+	retCode = AlazarStartCapture(boardHandle);
+	PLOGI.printf("AlazarStartCapture -- %s\n", AlazarErrorToText(retCode));
+	if (retCode != ApiSuccess) { cleanup(); return FALSE; }
+
+	// 13) 트리거 대기 (타임아웃 0이므로 HW 트리거를 실제로 넣어야 함)
 	AlazarTriggered(boardHandle);
 
-	AlazarAbortAsyncRead(boardHandle);
+	// (여기서 필요하면 WaitForSingleObject(ovl.hEvent, ...) 를 사용해도 되고,
+	// 캡처 파이프라인 정책에 맞춰 별도 완료 확인 로직을 넣어도 됩니다.)
 
-	VirtualFree(pAcqBuffer, 0, MEM_RELEASE);
-
+	// 14) 정리
+	cleanup();
 	return TRUE;
 }
+
+
 BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 {
 	RETURN_CODE retCode;
-	const int nAScan = m_setting.nAScan;
-	const int nLaserSpeed = m_setting.nLaserSpeed;
-	const int nAcqBufCount = m_setting.nBufferCount;
-	const int nTriggerDelaySample = m_setting.nTriggerDelaySample;
-	const bool useKClock = m_setting.bUseKClock;
-	const double secGoodClkDuration = m_setting.usGoodClockDuration * 1e-6;
-	const double secBadClkDuration = m_setting.usBadClockDuration * 1e-6;
-	const bool useDES = m_setting.bUseDES;
+	const int   nAScan = m_setting.nAScan;        // ex) 1152
+	const int   nLaserSpeed = m_setting.nLaserSpeed;   // A-line rate (Hz)
+	const int   nTriggerDelaySample = m_setting.nTriggerDelaySample;
+	const bool  useKClock = false;                   // k-clock 강제 OFF
+	const bool  useDES = m_setting.bUseDES;
 
-	// TODO: Specify the sample rate (see sample rate id below)
-	double dSamplePerSec = nAScan * nLaserSpeed;
-	dSamplePerSec = ceil((dSamplePerSec / 1000000.f)) * 1000000.f;
+	// 목표 샘플링 레이트(시간균등 fringe)
+	double samplesPerSecTarget = (double)nAScan * (double)nLaserSpeed;
+	PLOGI.printf("target samples/sec : %.3f\n", samplesPerSecTarget);
 
-	if (useDES) {
-		retCode = AlazarSetParameterUL(boardHandle, CHANNEL_A, SET_ADC_MODE, ADC_MODE_DES);
-		PLOGI.printf("Use DES Mode - %s\n", AlazarErrorToText(retCode));
-	}
+	// ADC 모드
+	retCode = AlazarSetParameterUL(boardHandle, CHANNEL_A, SET_ADC_MODE,
+		useDES ? ADC_MODE_DES : ADC_MODE_DEFAULT);
+	PLOGI.printf("ADC Mode (%s) -- %s",
+		useDES ? "DES" : "NORMAL", AlazarErrorToText(retCode));
+	if (retCode != ApiSuccess) return FALSE;
 
-	PLOGI.printf("sample per sec : %.2f\n", dSamplePerSec);
-	// TODO: Select clock parameters as required to generate this sample rate.
-	//
-	// For example: if samplesPerSec is 100.e6 (100 MS/s), then:
-	// - select clock source INTERNAL_CLOCK and sample rate SAMPLE_RATE_100MSPS
-	// - select clock source FAST_EXTERNAL_CLOCK, sample rate SAMPLE_RATE_USER_DEF, and connect a
-	//   100 MHz signal to the EXT CLK BNC connector.
+	// 샘플클록: 내부 + 프리셋 중 근접값 선택
+	U32 srcClock = INTERNAL_CLOCK;
+	U32 rateId = SAMPLE_RATE_1000MSPS;
 
-	double dutyCycle = 0.5f;	// maximum 50%
-	U32 srcClock = (useKClock) ? FAST_EXTERNAL_CLOCK : INTERNAL_CLOCK_10MHz_REF;
-	U32 rate = (useKClock) ? SAMPLE_RATE_USER_DEF : dSamplePerSec / dutyCycle;
-	retCode = AlazarSetCaptureClock(boardHandle,
-		srcClock,
-		rate,
-		CLOCK_EDGE_RISING,
-		0);
-	if (retCode != ApiSuccess)
-	{
+	retCode = AlazarSetCaptureClock(boardHandle, srcClock, rateId,
+		CLOCK_EDGE_RISING, 0);
+	if (retCode != ApiSuccess) {
 		PLOGI.printf("Error: AlazarSetCaptureClock failed -- %s\n", AlazarErrorToText(retCode));
 		return FALSE;
 	}
 
-
-	// TODO: Select channel A input parameters as required
-
-	retCode = AlazarInputControlEx(boardHandle,
-		CHANNEL_A,
-		DC_COUPLING,
-		INPUT_RANGE_PM_400_MV,
-		IMPEDANCE_50_OHM);
-	if (retCode != ApiSuccess)
-	{
+	// 입력 설정 (게인/임피던스/결합)
+	retCode = AlazarInputControlEx(boardHandle, CHANNEL_A, DC_COUPLING,
+		INPUT_RANGE_PM_400_MV, IMPEDANCE_50_OHM);
+	if (retCode != ApiSuccess) {
 		PLOGI.printf("Error: AlazarInputControlEx failed -- %s\n", AlazarErrorToText(retCode));
 		return FALSE;
 	}
 
-
-	// TODO: Select trigger inputs and levels as required
-
+	// 외부 트리거 (SOS), 양의 엣지
 	retCode = AlazarSetTriggerOperation(boardHandle,
 		TRIG_ENGINE_OP_J,
-		TRIG_ENGINE_J,
-		TRIG_EXTERNAL,
-		TRIGGER_SLOPE_POSITIVE,
-		150,
-		TRIG_ENGINE_K,
-		TRIG_DISABLE,
-		TRIGGER_SLOPE_POSITIVE,
-		128);
-	if (retCode != ApiSuccess)
-	{
+		TRIG_ENGINE_J, TRIG_EXTERNAL, TRIGGER_SLOPE_POSITIVE, 150,
+		TRIG_ENGINE_K, TRIG_DISABLE, TRIGGER_SLOPE_POSITIVE, 128);
+	if (retCode != ApiSuccess) {
 		PLOGI.printf("Error: AlazarSetTriggerOperation failed -- %s\n", AlazarErrorToText(retCode));
 		return FALSE;
 	}
 
-	// TODO: Select external trigger parameters as required
+	retCode = AlazarSetExternalTrigger(boardHandle, DC_COUPLING, ETR_TTL);
+	if (retCode != ApiSuccess) {
+		PLOGI.printf("Error: AlazarSetExternalTrigger failed -- %s\n", AlazarErrorToText(retCode));
+		return FALSE;
+	}
 
-	retCode = AlazarSetExternalTrigger(boardHandle,
-		DC_COUPLING,
-		ETR_TTL);
-
-	// TODO: Set trigger delay as required.
-
+	// 라인 시작 보정
 	retCode = AlazarSetTriggerDelay(boardHandle, nTriggerDelaySample);
-	if (retCode != ApiSuccess)
-	{
+	if (retCode != ApiSuccess) {
 		PLOGI.printf("Error: AlazarSetTriggerDelay failed -- %s\n", AlazarErrorToText(retCode));
 		return FALSE;
 	}
 
-	// TODO: Set trigger timeout as required.
-
-	// NOTE:
-	// The board will wait for a for this amount of time for a trigger event.  If a trigger event
-	// does not arrive, then
-	// the board will automatically trigger. Set the trigger timeout value to 0 to force the board
-	// to wait forever for a
-	// trigger event.
-	//
-	// IMPORTANT:
-	// The trigger timeout value should be set to zero after appropriate trigger parameters have
-	// been determined,
-	// otherwise the board may trigger if the timeout interval expires before a hardware trigger
-	// event arrives.
-
-	double triggerTimeout_sec = 0;
-	U32 triggerTimeout_clocks = (U32)(triggerTimeout_sec / 10.e-6 + 0.5);
-
-	retCode = AlazarSetTriggerTimeOut(boardHandle, triggerTimeout_clocks);
-	if (retCode != ApiSuccess)
-	{
+	// 트리거 타임아웃(0=무기한 대기)
+	retCode = AlazarSetTriggerTimeOut(boardHandle, 0);
+	if (retCode != ApiSuccess) {
 		PLOGI.printf("Error: AlazarSetTriggerTimeOut failed -- %s\n", AlazarErrorToText(retCode));
 		return FALSE;
 	}
 
-	// TODO: Configure AUX I/O connector as required
-	
-	retCode = AlazarConfigureAuxIO(boardHandle, AUX_OUT_TRIGGER, AUX_OUT_TRIGGER);
-	if (retCode != ApiSuccess)
-	{
-		PLOGI.printf("Error: AlazarConfigureAuxIO failed -- %s\n", AlazarErrorToText(retCode));
-		return FALSE;
-	}
-
-	// Ignore Bad Clock when using K-Clock
-	if (useKClock) {
-		// (goodClock + badClock) <= triggerCycleTime(=0.000010)
-		double triggerCycleTime, triggerPulseWidth;
-		retCode = AlazarOCTIgnoreBadClock(m_hATSBoard, TRUE, secGoodClkDuration, secBadClkDuration, &triggerCycleTime, &triggerPulseWidth);
-		PLOGI.printf("AlazarOCTIgnoreBadClock : %s, cycleTime : %lf, pulseWidth : %lf\n", AlazarErrorToText(retCode), triggerCycleTime, triggerPulseWidth);
-	}
-
-	return (retCode == ApiSuccess);
+	return TRUE;
 }
+
 
 BOOL CATSDevice::configureAcquisition(HANDLE boardHandle) {
 	RETURN_CODE retCode;

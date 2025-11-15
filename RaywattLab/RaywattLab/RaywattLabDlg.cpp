@@ -633,6 +633,8 @@ BEGIN_MESSAGE_MAP(CRaywattLabDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_RADIO_GREEN, &CRaywattLabDlg::OnBnClickedRadioGreen)
 	ON_BN_CLICKED(IDC_RADIO_ORANGE, &CRaywattLabDlg::OnBnClickedRadioOrange)
 	ON_BN_CLICKED(IDC_CHECK_SHOW_HIST, &CRaywattLabDlg::OnBnClickedCheckShowHist)
+	ON_BN_CLICKED(IDC_BUTTON_INIT_FRINGE, &CRaywattLabDlg::OnBnClickedInitFringeData)
+	ON_BN_CLICKED(IDC_BUTTON_SAVE_FRINGE, &CRaywattLabDlg::OnBnClickedAddFringeData)
 END_MESSAGE_MAP()
 
 LRESULT CRaywattLabDlg::OnMsgProcessOCTDone(WPARAM wParam, LPARAM lParam) {
@@ -789,6 +791,7 @@ BOOL CRaywattLabDlg::OnInitDialog()
 	initToggleButton(m_btnPlayData, IDC_BUTTON_PLAY_LOADED_DATA, _T("Play"), _T("Pause"));
 	initToggleButton(m_btnSaveData, IDC_BUTTON_SAVE_DATA, _T("Save Data"), _T("Done"));
 	initToggleButton(m_btnOpenRotaryJunction, IDC_BUTTON_OPEN_ROTARY_JUNCTION, _T("Setting"), _T("Close"));
+	initToggleButton(m_btnInitFringeData, IDC_BUTTON_INIT_FRINGE, _T("Init"), _T("Save"));
 
 	m_strPatientPath = AfxGetApp()->GetProfileString(_T("RECENT_SETTING"), _T("PATIENT_PATH"), _T(""));
 	updatePatientDataList();
@@ -1859,4 +1862,61 @@ void CRaywattLabDlg::OnBnClickedRadioOrange()
 
 	if (m_pImagingRealtime != nullptr) m_pImagingRealtime->SetColor(true);
 	if (m_pImagingSimulate != nullptr) m_pImagingSimulate->SetColor(true);
+}
+
+
+void CRaywattLabDlg::OnBnClickedInitFringeData() {
+	// 1) 먼저 토글
+	
+	const bool isSaving = m_btnInitFringeData.pushed;
+	PLOGI.printf("DataSaving (after toggle) = %d\n", isSaving ? 1 : 0);
+
+	if (!isSaving) {
+		// 절대경로 권장 (작업폴더 혼동 방지)
+		wchar_t path[MAX_PATH];
+		GetModuleFileNameW(nullptr, path, MAX_PATH);
+		PathRemoveFileSpecW(path);
+		wcscat_s(path, L"\\fringe_raw_chA.bin");
+
+		errno = 0;
+		if (_wfopen_s(&m_fpRaw, path, L"wb") != 0 || !m_fpRaw) {
+			PLOGI.printf("ERROR: fopen %ws failed (errno=%d, GetLastError=%lu)\n",
+				path, errno, GetLastError());
+		}
+		else {
+			PLOGI.printf("Opened %ws for write\n", path);
+		}
+	}
+	else {
+		if (m_fpRaw) {
+			fflush(m_fpRaw);
+			_commit(_fileno(m_fpRaw)); // 선택
+			fclose(m_fpRaw);
+			m_fpRaw = nullptr;
+			PLOGI.printf("saving Done\n");
+		}
+	}
+
+	toggleButton(this, m_btnInitFringeData);
+}
+
+
+void CRaywattLabDlg::OnBnClickedAddFringeData() {
+	if (!m_fpRaw) { PLOGI.printf("Skip: file not open\n"); return; }
+
+	const int nAScan = 1152;
+	const int nBScan = 2504; // 실제 ScopeData 라인 수와 일치해야 함!
+	const size_t bytesPerFrame = size_t(nAScan) * size_t(nBScan) * sizeof(uint16_t);
+
+	// 소스 포인터
+	const void* p = m_pImagingRealtime->GetFringesBuffer(); // uint16[nAScan*nBScan]
+	if (!p) { PLOGI.printf("ERROR: ScopeData null\n"); return; }
+
+	clearerr(m_fpRaw);
+	errno = 0;
+	size_t wrote = fwrite(p, 1, bytesPerFrame, m_fpRaw);
+	if (wrote != bytesPerFrame) {
+		PLOGI.printf("Warning: raw write short (%zu/%zu), errno=%d, ferror=%d, GetLastError=%lu\n",
+			wrote, bytesPerFrame, errno, ferror(m_fpRaw), GetLastError());
+	}
 }

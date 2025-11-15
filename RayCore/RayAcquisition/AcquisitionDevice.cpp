@@ -31,26 +31,26 @@ int IAcquisitionDevice::StopAcquisition() {
 }
 
 UINT IAcquisitionDevice::threadAcquire(LPVOID param) {
-	IAcquisitionDevice *pDevice = (IAcquisitionDevice *)param;
-	IImaging* pImaging = pDevice->m_pImaging;
-	int nCurFrame = 0;
-	int nTotalFrame = 0;
+    auto* pDevice = static_cast<IAcquisitionDevice*>(param);
+    IImaging* pImaging = pDevice->m_pImaging;
 
-	pDevice->start();
+    int nCurFrame = 0;
+    int nTotalFrame = 0;
 
-	while (pDevice->m_pThread->isRun) {
-		char *pBuffer = pDevice->acquire(nCurFrame, nTotalFrame);
-		// To-Do : need Critical Section?
-		if (pImaging != NULL && pBuffer != NULL) {
-			pImaging->DoAsyncRender(pBuffer);
-			pImaging->SetFrameInfo(nCurFrame, nTotalFrame);
-		}
+    pDevice->start();
 
-		if (pDevice->m_pWriter != NULL) {
-			pDevice->m_pWriter->AddFrame(pBuffer);
-		}
-	}
+    while (pDevice->m_pThread->isRun) {
+        char* pBuffer = pDevice->acquire(nCurFrame, nTotalFrame);
+        if (!pBuffer) continue;
+        if (pImaging) {
+            pImaging->DoAsyncRender(pBuffer);
+            pImaging->SetFrameInfo(nCurFrame, nTotalFrame);
+        }
+        if (pDevice->m_pWriter) {
+            pDevice->m_pWriter->AddFrame(pBuffer);
+        }
+    }
 
-	pDevice->stop();
-	return NOERROR;
+    pDevice->stop();
+    return NOERROR;
 }
