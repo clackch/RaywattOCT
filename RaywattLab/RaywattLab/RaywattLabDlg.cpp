@@ -299,10 +299,13 @@ IImaging::Setting CRaywattLabDlg::initReader(tstring strFilePath, CDataReader* p
 	IImaging::Setting setting = config.imaging;
 
 	if (pReader != nullptr) {
-		OCTHeader header = pReader->ReadHeader(strFilePath);
-		if (header.type != OCTHeader::Type::Unknown)
-		{
-			setting.Set(header.width, header.height);
+		tstring strExt = strFilePath.substr(strFilePath.length() - 3, 3);
+		if (strExt._Equal(_T("oct"))) {
+			OCTHeader header = pReader->ReadHeader(strFilePath);
+			if (header.type != OCTHeader::Type::Unknown)
+			{
+				setting.Set(header.width, header.height);
+			}
 		}
 		pReader->Initialize(strFilePath, setting.nBufferSize);
 	}
