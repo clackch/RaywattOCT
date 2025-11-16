@@ -32,8 +32,6 @@ CRJController::CRJController()
 	m_bButton[1] = false;
 	m_bLimitSwitch = false;
 	m_nRFIDLength = 0;
-
-	m_bManualMode = false;
 }
 
 CRJController::~CRJController()
@@ -182,7 +180,7 @@ bool CRJController::Set(eStepMotorIndex idxMotor, int velStep) {
 }
 const char* CRJController::GetStateString(eRJState state)
 {
-	const char* strState[] = { "None", "Initializing", "Disconnected", "Cleaning", "Connected", "Validating", "Loading", "WaitManualLoad", "Loaded", "Unloading", "Unloaded", "Error", "RFIDError"};
+	const char* strState[] = { "None", "Initializing", "Disconnected", "Cleaning", "Connected", "Validating", "Loading", "Loaded", "Unloading", "Unloaded", "Error", "RFIDError"};
 	return strState[(int)state];
 }
 bool CRJController::StartControl() {
@@ -513,12 +511,7 @@ UINT CRJController::threadRJState(LPVOID param) {
 			pRJController->m_bStateReceived = false;
 		}
 		else {
-			if (pRJController->m_bManualMode) {
-				pRJController->updateStateManualMode();
-			}
-			else {
-				pRJController->updateState();
-			}
+			pRJController->updateState();
 		}
 		Sleep(50);
 	}
@@ -706,81 +699,6 @@ RFID_ValidType CRJController::isValidRFID() {
 	return RFID_ValidType::VALID;
 }
 
-void CRJController::updateStateManualMode() {
-	switch (m_state) {
-	case eRJState::Initializing:
-		if (m_bLimitSwitch) {
-			m_nextState = eRJState::Error;
-		}
-		break;
-	case eRJState::Disconnected:
-		if (m_bLimitSwitch) {
-			m_nextState = eRJState::Connected;
-		}
-		break;
-	case eRJState::Connected:
-		if (m_bLimitSwitch) {
-			m_nextState = eRJState::Validating;
-		}
-		break;
-	case eRJState::Validating:
-		if (!m_bLimitSwitch) m_nextState = eRJState::Disconnected;
-		break;
-	case eRJState::Loading:
-		if (m_bButton[1]) {
-			m_nextState = eRJState::Error;
-		}
-		break;
-	case eRJState::WaitManualLoad:
-		if (m_bButton[1]) {	// Press STOP Button to confirm Loading
-			Current(eStepMotorIndex::Pullback, 0);
-			Move(eStepMotorIndex::Pullback, 500);
-			Sleep(500);
-			m_nextState = eRJState::Loaded;
-		}
-		if (m_bButton[0]) {
-			m_nextState = eRJState::Unloading;
-		}
-		break;
-	case eRJState::Loaded:
-		if (!m_bLimitSwitch || m_bButton[1]) {
-			PLOGI.printf("Error occured: limitSwitch(%d), stopButton(%d)", m_bLimitSwitch, m_bButton[1]);
-			Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
-			m_nextState = eRJState::Error;
-		}
-		if (m_bButton[0]) {
-			m_nextState = eRJState::Unloading;
-		}
-		break;
-	case eRJState::Unloading:
-		if (m_bButton[1]) {
-			m_nextState = eRJState::Error;
-		}
-		break;
-	case eRJState::Unloaded:
-		if (!m_bLimitSwitch) {
-			m_nextState = eRJState::Disconnected;
-		}
-		break;
-	case eRJState::Error:
-		if (!m_isInit) {
-			if (!m_bLimitSwitch) m_nextState = eRJState::Initializing;
-		}
-		else if (m_bButton[0]) {
-			m_nextState = eRJState::Unloading;
-		}
-		break;
-	case eRJState::RFIDError:
-		if (!m_bLimitSwitch) m_nextState = eRJState::Disconnected;
-		break;
-	default:
-		break;
-	}
-
-	if (m_state != m_nextState) {
-		updateState(m_nextState);
-	}
-}
 void CRJController::updateState(eRJState state) {
 	PLOGI.printf("state: %s", GetStateString(state));
 	switch (state) {
@@ -788,6 +706,7 @@ void CRJController::updateState(eRJState state) {
 		displayLCD(eLCDImage::LCD_IMAGE_BOOTING);
 		break;
 	case eRJState::Disconnected:
+		SwitchOff();
 	case eRJState::Unloaded:
 		m_isInit = true;
 		displayLCD(eLCDImage::LCD_IMAGE_UNLOADED);
@@ -796,6 +715,7 @@ void CRJController::updateState(eRJState state) {
 		displayLCD(eLCDImage::LCD_IMAGE_BOOTING);	// To-Do: change LCD image
 		break;
 	case eRJState::Connected:
+		SwitchOn();
 		m_nRFIDLength = 0;	// clear RFID info.
 		break;
 	case eRJState::Validating:
@@ -803,8 +723,6 @@ void CRJController::updateState(eRJState state) {
 		break;
 	case eRJState::Loading:
 		displayLCD(eLCDImage::LCD_IMAGE_LOADING);
-		break;
-	case eRJState::WaitManualLoad:
 		break;
 	case eRJState::Loaded:
 		displayLCD(eLCDImage::LCD_IMAGE_STANDBY_OFF);
