@@ -1006,8 +1006,10 @@ static bool ComputeLumenSNR(
 int CImagingSession::IsLumenNormal(cv::Mat image, std::vector<cv::Point> contour, double lumenThresholdMin,
 	double lumenThresholdMax, double lumenSnrThreshold, bool showLumenGuide)
 {
+	CConfiguration& config = CConfiguration::GetInstance();
+
 	AreaParams ap;
-	ap.sheathAreaFracMax = lumenThresholdMin;
+	ap.sheathAreaFracMax = std::pow(config.measurement.fSheathRadius,2) / std::pow(MAX_FIELD_OF_VIEW / 2, 2) / config.measurement.fRefractiveIndex;
 	ap.areaFracMax = lumenThresholdMax;
 
 	AreaResult result = classify_by_area_only(contour, image.size(), ap);

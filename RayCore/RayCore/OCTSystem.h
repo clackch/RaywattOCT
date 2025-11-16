@@ -102,6 +102,7 @@ private:
 	double m_fPullbackStartTime; // XXX.XXX sec
 	int autoCalibrationFranch = 0; // 0 for 2.6, 60 for 1.7
 	int catheterRFID;
+	cv::Mat m_autoCalibPatch;
 
 public:
 	COCTSystem();
@@ -200,6 +201,8 @@ public:
 	double GetLumenSnrThreshold();
 	RayError SetLumenSnrThreshold(double value);
 	RayError SetRefractiveIndex(double value);
+	int GetVelocityPullback();
+	RayError SetVelocityPullback(int value);
 
 private:
 	// Main Thread
@@ -238,6 +241,7 @@ private:
 	bool waitForStepMotors(eStepMotorIndex idxMotor, bool& runFlag);
 	std::vector<std::vector<std::string>> readLoadSequence();
 	void autoCalibrationInit(LPVOID param);
+	void loadAutoCalibPatch();
 
 protected:
 	LRESULT OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam);
