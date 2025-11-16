@@ -46,7 +46,6 @@ public:
 		bool catheterValidationOnOff;
 		bool catheterAutoCalibrationOnOff;
 		int  catheterUsage;
-		int catheterRFID;
 	};
 
 	class Volume {

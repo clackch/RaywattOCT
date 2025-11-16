@@ -36,8 +36,6 @@ COCTSystem::COCTSystem() {
 		config.Initialize(_T(".\\raycore.ini"));
 	}
 
-	catheterRFID = config.catheter.catheterRFID;
-
 	SetLogger(config.logRootPath);
 	if (config.laserModule.autoCalibrationForSeverance != 0)
 		PLOGI.printf("auto Calibration is set for Severance");
@@ -2223,8 +2221,10 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 
 	// 5. Homing
 	BYTE* uidRFID = new BYTE[CUSTOM_UID_LENGTH + HARDWARE_UID_LENGTH];
-	if(config.catheter.catheterRFID)
-		pRJController->IncreaseRFIDUsage(pRJController->GetRFIDUID(uidRFID), uidRFID);
+
+#if ENABLE_RFID
+	pRJController->IncreaseRFIDUsage(pRJController->GetRFIDUID(uidRFID), uidRFID);
+#endif
 
 	pRJController->changeSMProfileToLoadUnload();
 	Sleep(2000);
@@ -2267,9 +2267,12 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	}
 
 	PLOGI.printf("pRJController->GetCatheterUsage() = %d", pRJController->GetCatheterUsage());
-	if(config.catheter.catheterRFID && pRJController->GetRFIDCountCurrentState()>= pRJController->GetCatheterUsage()){
+
+#if ENABLE_RFID
+	if(pRJController->GetRFIDCountCurrentState()>= pRJController->GetCatheterUsage()){
 		pRJController->UpdateState(eRJState::Error);
 	}
+#endif
     
 	while (pSystem->m_pThreadRotaryJunction->isRun) {
 		Sleep(DELAY_FOR_STOP_THREAD);
@@ -2680,7 +2683,11 @@ UINT COCTSystem::threadRFIDValidation(LPVOID param) {
 	}
 	else if (isValid == RFID_ValidType::INVALID) {
 		PLOGI.printf("validation false");
+#if ENABLE_RFID
 		pRJController->UpdateState(eRJState::RFIDError);
+#else
+		pRJController->UpdateState(eRJState::Loading);
+#endif
 	}
 	
 	PLOGI.printf("[DONE]threadRFIDValidation");
@@ -3251,30 +3258,26 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 	case eRJState::Validating:
 	{
 		PLOGI.printf("RFID VALIDATION start");
-		if (catheterRFID) {
-			RFIDProtocol::initState(false);
-			m_pRJController->ReadRFID();
-			RFID_ValidType isValid = m_pRJController->isValidRFID();
-			CUtility::StopThread(m_pThreadRotaryJunction);
-			if (isValid == RFID_ValidType::VALID)
-			{
-				PLOGI.printf("validation true");
-				m_pRJController->UpdateState(eRJState::Loading);
-			}
-			else if (isValid == RFID_ValidType::INVALID) {
-				PLOGI.printf("validation false");
-				m_pRJController->UpdateState(eRJState::RFIDError);
-			}
-			else {
-				if (CUtility::StartThread(threadRFIDValidation, m_pThreadRotaryJunction, this)) {
-				}
-			}
-		}
-		else {
-			RFIDProtocol::initState(false);
-			m_pRJController->ReadRFID();
+		RFIDProtocol::initState(false);
+		m_pRJController->ReadRFID();
+		RFID_ValidType isValid = m_pRJController->isValidRFID();
+		CUtility::StopThread(m_pThreadRotaryJunction);
+		if (isValid == RFID_ValidType::VALID)
+		{
+			PLOGI.printf("validation true");
 			m_pRJController->UpdateState(eRJState::Loading);
 		}
+		else if (isValid == RFID_ValidType::INVALID) {
+			PLOGI.printf("validation false");
+#if ENABLE_RFID
+			m_pRJController->UpdateState(eRJState::RFIDError);
+#else
+			m_pRJController->UpdateState(eRJState::Loading);
+#endif
+		}
+		else {
+			if (CUtility::StartThread(threadRFIDValidation, m_pThreadRotaryJunction, this)) {
+			}
 		break;
 	}
 	case eRJState::Loading:
