@@ -128,6 +128,7 @@ void COCTImaging::PostProcess(cv::Mat image) {
 	{
 		CheckSheathPixels(image);
 	}
+	//cv::imwrite("sheath.tif", image);
 
 	cv::cvtColor(image, imageResultColor, cv::COLOR_GRAY2RGB);
 
@@ -539,61 +540,60 @@ void COCTImaging::CalculateMagnitude(cv::Mat img) {
 	m_nSheathPosition = totalMagnitude;
 }
 
+int i = 0;
 void COCTImaging::CheckSheathPixels(cv::Mat img)
 {
-	// LUT Table
-	const int    TOP_BAND_WIDTH = 30;
-	const double TARGET = 0.50;
-	const double POWER_MIN = 0.60;
-	const double POWER_MAX = 12.0;
-
+	i++;
 	// 1. 클론 이미지 생성
 	cv::Mat cloneImg = img.clone();
-	cv::rotate(cloneImg, cloneImg, cv::ROTATE_180);
+	cv::rotate(cloneImg, cloneImg, cv::ROTATE_90_COUNTERCLOCKWISE);
+	//cv::imwrite("CheckSheathPixels_origin" + std::to_string(i) + ".tif", cloneImg);
+	if (cloneImg.type() == CV_8U)
+		cloneImg.convertTo(cloneImg, CV_32F, 1.0 / 255.0);
+	else if (cloneImg.type() == CV_32F) {}
+	else {
+		PLOGI.printf("CheckSheathPixels - Unsupported image type");
+	}
+	if(autoCalibPatch.empty())
+	{
+		PLOGI.printf("CheckSheathPixels - autoCalibPatch is empty");
+		return;
+	}
 
-	// 2. Otsu 이진화
-	cv::Mat binaryImg;
-	cv::threshold(cloneImg, binaryImg, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+	cv::Mat result;
+	cv::matchTemplate(cloneImg, autoCalibPatch, result, cv::TM_CCOEFF_NORMED);
 
-	// 3. 흰 픽셀 수 카운팅
-	int nowRow = 0;
-	int startCol = 30, endCol = 100;
-	int InnerSheathThickness = 15, outerSheathThickness = 3;
-	int pixelCount = 0;
-	for (int y = 0; y < binaryImg.rows; y++) {
-		int thickCount = 0;
-		int innerSheath = 0, outerSheath = 0;
-		for (int x = startCol; x < endCol; x++) {
-			if (binaryImg.at<uchar>(y, x) == 255) {
-				thickCount++;
-				if (thickCount > InnerSheathThickness) {
-					innerSheath = x - InnerSheathThickness;
-					break;
-				}
-			}
-		}
-		for (int x = innerSheath + 40; x < innerSheath + 60; x++) {
-			if (binaryImg.at<uchar>(y, x) == 255) {
-				thickCount++;
-				if (thickCount > outerSheathThickness) {
-					outerSheath = x - outerSheathThickness;
-					break;
-				}
-			}
-			else {
-				thickCount = 0;
-			}
-		}
-		if (outerSheath - innerSheath > 30 && outerSheath - innerSheath < 50) {
-			pixelCount++;
-		}
+	cv::Mat mask = result != 1.0f;
+	double maxVal; cv::Point maxLoc;
+	cv::minMaxLoc(result, nullptr, &maxVal, nullptr, &maxLoc, mask);
+
+	if (maxVal < 0.7) {
+		PLOGI.printf("CheckSheathPixels - maxRowVal is too small: %d", maxVal);
+		m_nPixelNum = 0;
 	}
 	//PLOGI.printf("check the time - pixelCount: %d", pixelCount);
-	if (pixelCount > binaryImg.rows - 100) {
-		m_nPixelNum = 1;
-	}
-	else {
-		m_nPixelNum = -1;
+	else
+	{
+		//m_nPixelNum = maxLoc.y;
+
+		/* section을 나눠 sheath 파악 안정성 추가*/
+		m_nPixelNum = 0;
+		int validCount = 0, sectionDivision = 4, height = result.rows, width = result.cols / sectionDivision;
+		for(int i =0; i < sectionDivision; i++)
+		{
+			cv::Mat section = result(cv::Rect(i * width, 0, width, height));
+			cv::Mat sectionMask = section != 1.0f;
+			cv::Point sectionMaxLoc;
+			cv::minMaxLoc(section, nullptr, nullptr, nullptr, &sectionMaxLoc, sectionMask);
+			if(std::abs(sectionMaxLoc.y - maxLoc.y) < 15)
+			{
+				m_nPixelNum += sectionMaxLoc.y;
+				validCount++;
+			}
+		}
+		if(validCount > 0)
+			m_nPixelNum /= validCount;
+		
 	}
 }
 
@@ -619,6 +619,7 @@ cv::Mat COCTImaging::ReCircularize(const cv::Mat& img) {
 }
 
 void COCTImaging::findSheath(cv::Mat input) {
+	i++;
 	cv::Mat gray;
 	if (input.channels() == 3) {
 		cvtColor(input, gray, cv::COLOR_BGR2GRAY);
@@ -639,10 +640,9 @@ void COCTImaging::findSheath(cv::Mat input) {
 	cv::Mat tmp = gray.clone();
 	cv::threshold(gray, gray, 0, 255, cv::THRESH_OTSU);
 
-	int nowRow = 0;
-	int startRow = 100;
-	int sheathThickness = 15;
-	int thickCount = 0;
+	int nowRow = 0, beforeRow = -1, startRow = 100;
+	int thickCount = 0, beforeThickCount = -1, sheathThickness = 15;
+	int rowGap = -1;
 
 	for (int i = startRow; i < startRow + 300; i++) {
 		int pixelCount = 0;
@@ -650,7 +650,7 @@ void COCTImaging::findSheath(cv::Mat input) {
 		for (int x = 0; x < gray.cols; x++) {
 			if (gray.at<uchar>(i, x) == 255)
 				pixelCount++;
-			if (tmp.at<uchar>(i, x) > 200) {
+			if (tmp.at<uchar>(i, x) > 175) {
 				isThereHighPixel = true;
 			}
 		}
@@ -659,10 +659,21 @@ void COCTImaging::findSheath(cv::Mat input) {
 			thickCount++;
 			if (thickCount > sheathThickness) {
 				nowRow -= sheathThickness;
+				PLOGI.printf("find sheath at row %d, pixelCount: %d", nowRow, pixelCount);
 				break;
+			}
+			if ((thickCount > 5 && beforeRow >= 0) || beforeThickCount > 5) {
+				rowGap = (nowRow - thickCount + 1) - (beforeRow + beforeThickCount);
+				if (rowGap < 5 && rowGap > 0 && beforeThickCount + rowGap + thickCount > sheathThickness) {
+					nowRow = beforeRow;
+					PLOGI.printf("find sheath at row %d, pixelCount: %d", nowRow, pixelCount);
+					break;
+				}
 			}
 		}
 		else {
+			beforeRow = nowRow - thickCount;
+			beforeThickCount = thickCount;
 			thickCount = 0;
 		}
 	}

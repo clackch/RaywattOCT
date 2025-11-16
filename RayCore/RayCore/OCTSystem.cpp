@@ -171,6 +171,8 @@ RayError COCTSystem::Start() {
 	m_pImagingLiveView->SetSession(SESSION_REALTIME);
 	m_pImagingLiveView->Start();
 
+	loadAutoCalibPatch();
+
 	m_pAcqDevice = new CATSDevice(config.acquisition);
 	m_pRJController->SetCatheterUsage(config.catheter.catheterUsage);
 
@@ -550,6 +552,8 @@ RayError COCTSystem::RestartReview()
 */
 RayError COCTSystem::StartLiveView()
 {
+	PLOGI.printf("StartLiveView");
+
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 		if (m_pRJController->GetState() == eRJState::Error) return RayError::RotaryJunctionError;
@@ -573,9 +577,17 @@ RayError COCTSystem::StartLiveView()
 */
 RayError COCTSystem::StopLiveView()
 {
+	PLOGI.printf("StopLiveView");
+
 	if (m_curState == RayScannerState::Default) {
 		if (m_pThreadRotaryJunction != nullptr) return RayError::DeviceBusy;
 		if (m_pRJController->GetState() == eRJState::Error) return RayError::RotaryJunctionError;
+
+		if (m_pImagingRealtime != m_pImagingLiveView) {
+			PLOGI.printf("m_pImagingRealtime != m_pImagingLiveView");
+			restartAcqDevice(m_pImagingLiveView);
+		}			
+
 		m_pImagingLiveView->Stop();
 		Sleep(500);
 
@@ -1411,6 +1423,42 @@ RayError COCTSystem::SetRefractiveIndex(double value)
 	return RayError::OK;
 }
 
+int COCTSystem::GetVelocityPullback()
+{
+	CConfiguration& config = CConfiguration::GetInstance();
+	
+	return config.bldcMotor.velocityPullback;
+}
+
+RayError COCTSystem::SetVelocityPullback(int value)
+{
+	PLOGI.printf("Set Velocity Pullback (%d)", value);
+
+	CConfiguration& config = CConfiguration::GetInstance();
+
+	if (config.WriteInt(_T("BLDCMotor"), _T("VelocityPullback"), value))
+		config.bldcMotor.velocityPullback = value;
+
+	if (m_pImagingPullback != nullptr) {
+		m_pImagingPullback->Stop();
+		delete m_pImagingPullback;
+		m_pImagingPullback = nullptr;
+	}
+
+	IImaging::Setting settingPullback = config.imaging;
+	settingPullback.Set(settingPullback.nAScan, floor((double)config.acquisition.nLaserSpeed / ((double)config.bldcMotor.velocityPullback / 60.f)));
+	PLOGI.printf("Pullback setting: LaserSpeed=%ld, Velocity=%ldrpm, NumOfAlines=%ld", config.acquisition.nLaserSpeed, config.bldcMotor.velocityPullback, settingPullback.nBScan);
+	m_pImagingPullback = CImagingSession::CreateColorImaging(this, settingPullback, nullptr, ImagingType::Default);
+	if (!m_pImagingPullback) {
+		PLOGI.printf("Failed to create imaging pullback");
+		return RayError::WrongSession;
+	}
+	m_pImagingPullback->SetSession(SESSION_REALTIME);
+	m_pImagingPullback->Start();
+
+	return RayError::OK;
+}
+
 /*
 * threadService
 */
@@ -1711,29 +1759,22 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_AUTO);
 		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO_1ST);
 
-		// 1. Start Finding Sheath
-		pSystem->m_pImagingLiveView->SetAutoCalibrationMathod(AutoCalibrationMathod::FindingMinMagnitude);
-		// 초기화
-		pSystem->m_cathState = CatheterState::FindingSheath;
+		// 1. First Scan to Find a Valid Range
+		pSystem->m_cathState = CatheterState::FindingSheath;													// OCTSyestm mode setting
+		pSystem->m_pImagingLiveView->SetAutoCalibrationMathod(AutoCalibrationMathod::FindingMinMagnitude);		// OCTImaging mode setting
 
-		pSystem->m_pImagingLiveView->SetDelayLineMovingDirection(1);
+		int startPosition = pLaserModule->GetPosition(eStepMotorIndex::DelayLine);
 		pSystem->m_vCalibrationInfo.clear();
 		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, 5000);
-		
 		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
-
 		std::vector<std::pair<int, int>> info = pSystem->m_vCalibrationInfo;
 
-		// 1-2. Find Z-Offset Position		
-		int startPosition = info.empty() ? 0 : info.at(0).second;
-		int nZOffset = 0;
-
-		//way 1
+		// 2. Find Target Position Laxly
 		std::vector<int> gradient(info.size() - 1);
-		int minVal = INT_MAX, minIndex = 0, Loc = startPosition, maxVal = 0;
-		int errorValThreshold = 10; // 1차 확인에서 값이 너무 작게 나오는 경우를 걸러내기 위한 임계값
+		int minVal = INT_MAX, minIndex = 0, Loc = startPosition;
+		int errorValThreshold = 10;		// 1차 확인에서 값이 너무 작게 나오는 경우를 걸러내기 위한 임계값
 
-		// gradient, minVal, maxVal 계산
+		// 2-1. Calculate gradient, Find minVal, maxVal
 		for (int i = 1; i < info.size(); i++)
 		{
 			gradient[i - 1] = info[i].first - info[i - 1].first;
@@ -1741,7 +1782,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 				if (i < 2)
 					gradient[i - 1] = -1;
 				else
-					gradient[i - 1] = info[i - 2].first - info[i].first;	
+					gradient[i - 1] = info[i].first - info[i - 2].first;
 			}else if(info[i].first < errorValThreshold) {
 				gradient[i - 1] = -1;
 			}
@@ -1751,12 +1792,9 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 				Loc = info[i].second;
 				minIndex = i;
 			}
-			if (info[i].first > maxVal)
-			{
-				maxVal = info[i].first;
-			}
 		}
 
+		// 2-2. Find a target position based on Gradient
 		if (config.laserModule.autoCalibrationForSeverance == 0) {
 			std::vector<std::pair<int, int>> minList; // pair<motor loc, index>
 			for (int i = 0; i < gradient.size() - 1; i++)
@@ -1765,7 +1803,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 				{
 					if (minVal * 1.3 < info[i + 1].first) // 최솟값의 130% 이상인 값은 제외
 						continue;
-					minList.push_back(std::make_pair(info[i + 1].second, i + 1));
+					minList.push_back({ info[i + 1].second, i + 1 });
 					//PLOGI.printf("local min found. Loc : %d, Value : %d", info[i + 1].second, info[i + 1].first);
 				}
 			}
@@ -1774,64 +1812,120 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 				});
 
 			std::vector<std::pair<int, int>> maxList; // pair<distLoc, index>
+			std::pair<int, int> contingencyMax = { INT_MIN, 0 }; // pair<gradient difference, index>
+			int minMaxDistRange = 1500; // local max가 local min과 너무 멀리 떨어져 있는 경우를 배제하기 위한 임계값
 			for (int i = 1; i < gradient.size() - 1; i++)
 			{
 				int distLoc = abs(info[i + 1].second - Loc); // minLoc과의 거리
 				if (gradient[i] >= 0 && gradient[i + 1] < 0 && gradient[i] != -1 && gradient[i + 1] != -1) // local max
 				{
-					maxList.push_back(std::make_pair(distLoc, i + 1));
+					maxList.push_back({ distLoc, i + 1 });
 					//PLOGI.printf("local max found. Loc : %d, Value : %d", info[i + 1].second, info[i + 1].first);
 				}
+				if (abs(info[i + 1].second - Loc) > minMaxDistRange ||
+					(gradient[i] > 20000000 && gradient[i + 1] > 20000000)) continue;
+				if (gradient[i] - gradient[i + 1] > contingencyMax.first && gradient[i] > 0) // local max 후보군 중 가장 급격한 변화가 있는 위치 저장
+					contingencyMax = { gradient[i] - gradient[i + 1], i + 1 };
+			}
+			if (contingencyMax.second > 0/*maxList.empty()*/) {
+				maxList.push_back({ abs(info[contingencyMax.second].second - Loc), contingencyMax.second });
+				//PLOGI.printf("local max contingency selected. Loc : %d, Value : %d", info[contingencyMax.second].second, info[contingencyMax.second].first);
 			}
 			std::sort(maxList.begin(), maxList.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
 				return a.first < b.first; // minLoc과의 거리 기준 오름차순 정렬
 				});
 
-			int minMaxDistRange = 800; // local max가 local min과 너무 멀리 떨어져 있는 경우를 배제하기 위한 임계값
 			if (minList.empty()) {
 				nTargetPos = startPosition;
 				//PLOGI.printf("Calibration is failed.");
 				autoCalibError = RayError::AutoCalibError;
 			}
 			else {
-				Loc = minList[0].first; // 가장 작은 local min 위치로 우선 설정
-				bool maxFound = false;
-				for (int i = 0; i < maxList.size(); i++)
+				for(int i = 0; i < minList.size(); i++)
 				{
-					if (abs(info[maxList[i].second].second - Loc) < minMaxDistRange)
+					if (abs(info[minList[i].second].second - Loc) < minMaxDistRange)
 					{
-						Loc = info[maxList[i].second].second;
-						maxFound = true;
+						Loc = info[minList[i].second].second;
+						//PLOGI.printf("Local min selected. Loc : %d, Value : %d", info[minList[i].second].second, info[minList[i].second].first);
 						break;
 					}
 				}
 
-				int valDist = 10000000; // 조건에 맞는 local max가 없는 경우, local min 좌우의 값 차이가 유효할 정도로 큰지 확인하기 위한 임계값
-				int adjustVal = 200; // 조건에 맞는 local max가 없는 경우, local min에서 local max로 이동하기 위한 보정값
+				bool maxFound = false;
+				int gradientThreshold = 100000000; // local max가 확실히 원하는 위치에 있는 경우를 위한 임계값
+				for(int i = 0; i < maxList.size(); i++)
+				{
+					if(gradient[ maxList[i].second - 1 ] - gradient[maxList[i].second] > gradientThreshold)
+					{
+						Loc = info[maxList[i].second].second;
+						maxFound = true;
+						//PLOGI.printf("Local max selected. Loc : %d, Value : %d __1", info[maxList[i].second].second, info[maxList[i].second].first);
+						break;
+					}
+				}
+
+				if (!maxFound) {
+					for (int i = 0; i < maxList.size(); i++)
+					{
+						if (info[maxList[i].second].second < Loc) continue;
+						if (abs(info[maxList[i].second].second - Loc) < minMaxDistRange)
+						{
+							Loc = info[maxList[i].second].second;
+							maxFound = true;
+							//PLOGI.printf("Local max selected. Loc : %d, Value : %d__2", info[maxList[i].second].second, info[maxList[i].second].first);
+							if (maxList.size() == 1)
+								Loc -= 200; // 약간 더 안쪽으로 보정
+							break;
+						}
+					}
+				}
+				if (!maxFound)
+				{
+					for (int i = 0; i < maxList.size(); i++)
+					{
+						if (abs(info[maxList[i].second].second - Loc) < minMaxDistRange)
+						{
+							Loc = info[maxList[i].second].second;
+							maxFound = true;
+							//PLOGI.printf("Local max selected. Loc : %d, Value : %d__3", info[maxList[i].second].second, info[maxList[i].second].first);
+							break;
+						}
+					}
+				}
+
+				int valDist = 10000000;	// 조건에 맞는 local max가 없는 경우, local min 좌우의 값 차이가 유효할 정도로 큰지 확인하기 위한 임계값
+				int adjustVal = 200;	// 조건에 맞는 local max가 없는 경우, local min에서 local max로 이동하기 위한 보정값
 				if (!maxFound) {
 					//PLOGI.printf("Cannot find Local max");
 					int nowIndex = minList[0].second;
 					if (abs(info[nowIndex - 2].first - info[nowIndex + 2].first) < valDist) {
 						if (nowIndex - 2 >= 0 && nowIndex + 1 < gradient.size() &&
-							abs(gradient[nowIndex - 2] - gradient[nowIndex - 1]) > abs(gradient[nowIndex] - gradient[nowIndex + 1]))
+							abs(gradient[nowIndex - 2] - gradient[nowIndex - 1]) < abs(gradient[nowIndex] - gradient[nowIndex + 1])) {
 							Loc += adjustVal;
-						else
+							//PLOGI.printf("2 steps away frames are inValid, so we are using gradients: plus");
+						}
+						else {
 							Loc -= adjustVal;
+							//PLOGI.printf("2 steps away frames are inValid, so we are using gradients: minus");
+						}
 					}
 					else {
 						if (info[nowIndex - 2].first > info[nowIndex + 2].first) {
 							Loc += adjustVal;
+							//PLOGI.printf("2 steps away frames are valid, so we are using values: plus");
 						}
-						else
+						else {
 							Loc -= adjustVal;
+							//PLOGI.printf("2 steps away frames are valid, so we are using values: minus");
+						}
 					}
-
 				}
 			}
 		}
 		else {
+			// for severance
 			int maxLaplacian = INT_MIN;
-			int maxIndex = 0; double avgGradient = 0.0;
+			int maxIndex = 1; double avgGradient = 0.0;
 			for (int i = 2; i < gradient.size(); i++) {
 				if (gradient[i] == -1 || gradient[i - 1] == -1)
 					continue;
@@ -1847,58 +1941,110 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			int maxGradientCheck = abs(gradient[maxIndex - 1]);
 			if (maxGradientCheck < abs(gradient[maxIndex]))
 				maxGradientCheck = abs(gradient[maxIndex]);
-			//if (abs(info[maxIndex].second - Loc) < 600 /* ±2 frame 정도의 step 차이 */
-			//	|| abs(info[maxIndex].second - Loc) < 1500 && abs(gradient[maxIndex - 1]) > avgGradient * 3)
-			//	Loc = info[maxIndex].second;
-			//else {
-			//	// min 위치와 max 위치가 너무 멀리 떨어져 있는 경우 올바르지 않은 위치로 간주
-			//	int valDist = 10000000; // min 좌우의 값 차이가 유효할 정도로 큰지 확인하기 위한 임계값
-			//	int adjustVal = 200; // min loc에서 올바른 위치 이동하기 위한 보정값
-
-			//	int nowIndex = minIndex;
-			//	if (abs(info[nowIndex - 2].first - info[nowIndex + 2].first) < valDist) {
-			//		if (nowIndex - 2 >= 0 && nowIndex + 1 < gradient.size() &&
-			//			abs(gradient[nowIndex - 2] - gradient[nowIndex - 1]) > abs(gradient[nowIndex] - gradient[nowIndex + 1]))
-			//			Loc += adjustVal;
-			//		else
-			//			Loc -= adjustVal;
-			//	}
-			//	else {
-			//		if (info[nowIndex - 2].first > info[nowIndex + 2].first) {
-			//			Loc += adjustVal;
-			//		}
-			//		else
-			//			Loc -= adjustVal;
-			//	}
-			//}
+			/* 세브란스 장비와 일반 장비 둘 다 동일하게 적용하기 위해 사용했던 로직. 현재는 분기 처리로 대체
+			if (abs(info[maxIndex].second - Loc) < 600 //±2 frame 정도의 step 차이
+				|| abs(info[maxIndex].second - Loc) < 1500 && abs(gradient[maxIndex - 1]) > avgGradient * 3)
+				Loc = info[maxIndex].second;
+			else {
+				// min 위치와 max 위치가 너무 멀리 떨어져 있는 경우 올바르지 않은 위치로 간주
+				int valDist = 10000000; // min 좌우의 값 차이가 유효할 정도로 큰지 확인하기 위한 임계값
+				int adjustVal = 200; // min loc에서 올바른 위치 이동하기 위한 보정값
+				int nowIndex = minIndex;
+				if (abs(info[nowIndex - 2].first - info[nowIndex + 2].first) < valDist) {
+					if (nowIndex - 2 >= 0 && nowIndex + 1 < gradient.size() &&
+						abs(gradient[nowIndex - 2] - gradient[nowIndex - 1]) > abs(gradient[nowIndex] - gradient[nowIndex + 1]))
+						Loc += adjustVal;
+					else
+						Loc -= adjustVal;
+				}
+				else {
+					if (info[nowIndex - 2].first > info[nowIndex + 2].first) {
+						Loc += adjustVal;
+					}
+					else
+						Loc -= adjustVal;
+				}
+			}
+			*/
 			Loc = info[maxIndex].second;
 		}
-		
-
 		PLOGI.printf("first calibration. checkPosition : %d, checkValue : %d", Loc, minVal);
 
+		// 3. Find a Perfect Sheath Position
 		if(autoCalibError != RayError::AutoCalibError){
-			// 2차 탐색
-			int nJumpStep = 3200;			//1차 탐색에서 확인한 지점으로부터, 2차 탐색을 위해 이동할 거리
-			int nSearchRange = 600;			//2차 탐색 범위 
-			nZOffset = Loc - nJumpStep;
+			// 3-1. Move to the target position found in 1st step
+			int nJumpStep = 3200;			// 1차 탐색에서 정한 위치로부터, 2차 탐색을 위해 이동할 거리(step)
+			int nSearchRange = 600;			// 2차 탐색 범위 
+			int Loc2nd = Loc - nJumpStep;
 			pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX);
-			pLaserModule->Move(eStepMotorIndex::DelayLine, nZOffset);
+			pLaserModule->Move(eStepMotorIndex::DelayLine, Loc2nd);
 			pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
+			// 3-2. Second Scan to Find Sheath Position
 			pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_AUTO_2ND);
 			pSystem->m_pImagingLiveView->SetAutoCalibrationMathod(AutoCalibrationMathod::FindingSheath);
 			pSystem->m_vCalibrationInfo.clear();
 
 			nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, nSearchRange);
 			pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
-
 			pSystem->m_pImagingLiveView->SetAutoCalibrationMathod(AutoCalibrationMathod::Disable);
-			const int nSheathPosition = CConfiguration::GetInstance().measurement.nSheathPosition;
 
+			// 3-3. Calculate Slope with Linear Regression
+			int sumIndex = 0, sumRow = 0, sumMult = 0; double sumIndexSq = 0.0;
+			int validCount = pSystem->m_vCalibrationInfo.size(), distanceThreshold = 60, rowThreshold = 398;
+			for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
+				if(i > 0 && pSystem->m_vCalibrationInfo.at(i).first - pSystem->m_vCalibrationInfo.at(i - 1).first > distanceThreshold
+					|| pSystem->m_vCalibrationInfo.at(i).first > rowThreshold) {
+					validCount--;
+					continue;
+				}
+				sumIndex += i;
+				sumRow += pSystem->m_vCalibrationInfo.at(i).first;
+				sumMult += i * pSystem->m_vCalibrationInfo.at(i).first;
+				sumIndexSq += (double)(i * i);
+			}
+			double numerator = (double)(validCount * sumMult) - (double)(sumIndex * sumRow);
+			double denominator = (double)(validCount * sumIndexSq) - (double)(sumIndex * sumIndex);
+			double slope = (denominator == 0.0) ? 0 : numerator / denominator;
+			slope = (slope > 10) ? 4 : slope;
+			//PLOGI.printf("sheath slope : %f", slope);
+
+			// 3-4. Adjust sheath position with slope information
+			int expectedRow = pSystem->m_vCalibrationInfo.at(0).first;
+			int errorThresholdPlus = 15, errorThresholdMinus = 5; // 2차 탐색의 step별 row 이동 범위 threshold
+			int minusMove = 35; // 외경을 내경으로 판단한 경우 보정값
+			
+			// plus direction check
+			for(auto& val : pSystem->m_vCalibrationInfo)
+			{
+				int rowMoving = val.first - expectedRow;
+				if (rowMoving > errorThresholdPlus) {
+					if(slope == 0)
+						val.first -= minusMove;
+					else
+						val.first = expectedRow + (int)slope;
+				}
+				expectedRow = val.first;
+				//PLOGI.printf("find sheath at the first row %d", expectedRow);
+			}
+			// minus direction check
+			for (int i = pSystem->m_vCalibrationInfo.size() - 1; i >= 0; i--) {
+				int rowMoving = pSystem->m_vCalibrationInfo.at(i).first - expectedRow;
+				if (rowMoving > errorThresholdMinus) {
+					if(slope == 0)
+						pSystem->m_vCalibrationInfo.at(i).first -= minusMove;
+					else
+						pSystem->m_vCalibrationInfo.at(i).first = expectedRow - (int)slope;
+				}
+				expectedRow = pSystem->m_vCalibrationInfo.at(i).first;
+				//PLOGI.printf("find sheath at the second row %d", expectedRow);
+			}
+			
+			// 3-5. Find the closest frame where the sheath position is near idealRow(180)
 			int minDiff = INT_MAX;
 			int closestIdx = pSystem->m_vCalibrationInfo.size() - 1;	// 내경이 row 180 위치에 가장 가까운 프레임 Index
-			int idealRow = 180;		// 내경이 위치해야 한다고 가정하는 이상적인 row 위치(reflection 배제를 위해 실제 위치해야 하는 row보다 100 아래에서 확인)
+			int idealRow = 180;		// 2차 진행 시에 내경이 위치해야 한다고 가정하는 이상적인 row 위치
+
 			for (int i = pSystem->m_vCalibrationInfo.size() - 1; i >= 0; i--)
 			{
 				int nowRow = pSystem->m_vCalibrationInfo.at(i).first;
@@ -1907,13 +2053,16 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 					closestIdx = i;
 					minDiff = abs(nowRow - idealRow);
 				}
+				if(nowRow < idealRow)	// 내경이 이상적인 위치보다 더 이상 깊은 위치에 있는 경우는 탐색 종료
+					break;
 			}
-			nZOffset = pSystem->m_vCalibrationInfo.at(closestIdx).second;
-			nZOffset += (idealRow - pSystem->m_vCalibrationInfo.at(closestIdx).first) * 3; // 보정값 적용
+			// 3-6. Adjust target position
+			Loc2nd = pSystem->m_vCalibrationInfo.at(closestIdx).second;
+			Loc2nd += (idealRow - pSystem->m_vCalibrationInfo.at(closestIdx).first) * 3; // 보정값 적용
+			PLOGI.printf("second calibration. ZOffset Position : %d, row : %d, diff : %d", Loc2nd, pSystem->m_vCalibrationInfo.at(closestIdx).first, minDiff);
 
-			// 1-3. Move to calibrated position
-			int adjustMotorStep = 450; // 내경에서 외경까지의 거리 150 step + reflection 배제를 위해 움직였던 거리 300 step
-			nTargetPos = nZOffset - adjustMotorStep - pSystem->autoCalibrationFranch;
+			int adjustMotorStep = 480; // 내경에서 외경까지의 거리 180 step + reflection 배제를 위해 움직였던 거리 300 step
+			nTargetPos = Loc2nd - adjustMotorStep;
 			//PLOGI.printf("Target Position : %d", nTargetPos);
 
 			if (minDiff > 50) // 내경 위치가 너무 이상적인 위치에서 멀리 떨어져 있는 경우 보정 실패로 간주
@@ -1923,10 +2072,12 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			nTargetPos = startPosition;
 		}
 
+		// 4. Move to calibrated position
 		pLaserModule->Set(eStepMotorIndex::DelayLine, CM_SM_SPEED_MAX);
 		pLaserModule->Move(eStepMotorIndex::DelayLine, nTargetPos);
 		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
+		// 5. Final Check for Sheath Position
 		pSystem->m_pImagingLiveView->SetAutoCalibrationMathod(AutoCalibrationMathod::CheckSheathPixelNum);
 		pSystem->m_cathState = CatheterState::CheckSheath;
 		pSystem->m_vCalibrationInfo.clear();
@@ -1934,16 +2085,38 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			Sleep(50);
 		}
 		auto const& sheathInfo = pSystem->m_vCalibrationInfo;
-		int validSheathCount = 0;
+		int validSheathCount = 0, needAdjustCount = 0, idealRow = 25;
+		float avgDiff = 0.0f;
 		for(auto const& val : sheathInfo)
 		{
-			if (val.first > 0) {
+			PLOGI.printf("sheath check - row : %d", val.first);
+			int diffIdeal = val.first - idealRow;
+			if (abs(diffIdeal) < 20) {
 				validSheathCount++;
+				if (diffIdeal > 5) {
+					needAdjustCount++;
+					avgDiff += diffIdeal;
+				}
+				else if (diffIdeal < -5) {
+					needAdjustCount--;
+					avgDiff += diffIdeal;
+				}
 				//PLOGI.printf("sheath check - true");
 			}
 		}
-		if(validSheathCount > sheathInfo.size()/2)
+		if (validSheathCount > sheathInfo.size() / 2) {
+			if (abs(needAdjustCount) > sheathInfo.size() / 2) {
+				avgDiff /= abs(needAdjustCount);
+				int adjustDir = (needAdjustCount > 0) ? -1 : 1;
+				int adjustStep = avgDiff * adjustDir * 3; 
+				PLOGI.printf("sheath adjustment - dir : %d, step : %d", needAdjustCount, adjustStep);
+				nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, adjustStep);
+				pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
+			}
+			nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, -(pSystem->autoCalibrationFranch * 1.5));
+			pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 			autoCalibError = RayError::OK;
+		}
 		else
 			autoCalibError = RayError::AutoCalibError;
 
@@ -1976,7 +2149,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		pLaserModule->Move(eStepMotorIndex::Polarization, nTargetPos);
 		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
 #endif
-		// 3. Default Speed
+		// 6. Default Speed
 		pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_DEFAULT);
 	}
 
@@ -2275,11 +2448,9 @@ void COCTSystem::autoCalibrationInit(LPVOID param) {
 		pSystem->m_cathState = CatheterState::FindingSheath;
 
 		// 1-1. Move Delay-line & Find Sheath
-		pSystem->m_pImagingLiveView->SetDelayLineMovingDirection(-1);
 		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, -1000);
 		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
-		pSystem->m_pImagingLiveView->SetDelayLineMovingDirection(1);
 		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, 2000);
 		pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
 
@@ -2328,6 +2499,25 @@ void COCTSystem::autoCalibrationInit(LPVOID param) {
 		nTargetPos = nMaxPeakPos;
 		pLaserModule->Move(eStepMotorIndex::Polarization, nTargetPos);
 		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
+	}
+}
+
+void COCTSystem::loadAutoCalibPatch() {
+	std::string patchPath = "res/matching/autoCalibPatch.tif";
+	cv::Mat patch = cv::imread(patchPath, cv::IMREAD_GRAYSCALE);
+	if(patch.empty()) {
+		PLOGI.printf("Failed to load auto calibration patch image.");
+		return;
+	}
+	else {
+		if (patch.type() == CV_8UC1)
+			patch.convertTo(m_autoCalibPatch, CV_32F, 1.0 / 255.0);
+		else if (patch.type() == CV_32F)
+			m_autoCalibPatch = patch;
+		else {
+			PLOGI.printf("Invalid auto calibration patch image format.");
+			return;
+		}
 	}
 }
 
@@ -2616,6 +2806,7 @@ int COCTSystem::restartAcqDevice(COCTImaging* pImaging) {
 	stopAcqDevice();
 
 	m_pImagingRealtime = pImaging;
+	m_pImagingRealtime->SetPatchImage(m_autoCalibPatch);
 
 	IImaging::Setting imaging = pImaging->GetSetting();
 	CATSDevice::Setting acquire = ((CATSDevice *)m_pAcqDevice)->GetSetting();
@@ -2803,7 +2994,8 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 			int nSheathPosition = m_pImagingRealtime->GetSheathPosition();
 			int nDelayLinePos = m_pLaserModule->GetPosition(eStepMotorIndex::DelayLine);
 			m_vCalibrationInfo.push_back(std::make_pair(nSheathPosition, nDelayLinePos));
-			//PLOGI.printf("FindingSheath - %d, %d", nSheathPosition, nDelayLinePos);
+			PLOGI.printf("FindingSheath - %d, %d", nSheathPosition, nDelayLinePos);
+			//PLOGI.printf("FindingSheath - %lf, %d", FFTscore, nDelayLinePos);
 		}
 			break;
 		case CatheterState::CheckSheath: 

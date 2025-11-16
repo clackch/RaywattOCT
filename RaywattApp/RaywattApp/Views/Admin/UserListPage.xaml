@@ -35,9 +35,25 @@
                         <component:IconButton Style="{DynamicResource IconButton}" Icon="edit" HorizontalAlignment="Right" Command="{Binding EditInstituteCommand}"/>
                     </StackPanel>
                     <StackPanel Height="8"/>
-                    <Label Style="{DynamicResource Pretendard-Bold-32}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding Institute.Name}"/>
+                    <Label Foreground="{DynamicResource GrayscaleWhiteBrush}"  
+                           Content="{Binding Institute.Name}" 
+                           Style="{DynamicResource Pretendard-Bold-32}">
+                        <Label.ContentTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}"/>
+                            </DataTemplate>
+                        </Label.ContentTemplate>
+                    </Label>
                     <StackPanel Height="19"/>
-                    <Label Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding Institute.Comment}"/>
+                    <Label Foreground="{DynamicResource GrayscaleGray3Brush}"  
+                           Content="{Binding Institute.Comment}" 
+                           Style="{DynamicResource Pretendard-Medium-20}">
+                        <Label.ContentTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}"/>
+                            </DataTemplate>
+                        </Label.ContentTemplate>
+                    </Label>
                 </StackPanel>
                 <StackPanel>
                     <Button Style="{StaticResource OutlinedBtnType1-Large}" Margin="0,30,0,0" Command="{Binding ChangeAdminPasswordCommand}" Content="{Binding [Password Change], Source={StaticResource L10N}}"/>

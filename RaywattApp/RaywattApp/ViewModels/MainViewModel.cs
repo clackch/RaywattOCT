@@ -14,7 +14,6 @@ using RaywattApp.Views.Dialog;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -74,6 +73,12 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private bool _isAutoPullbackTest = false;
 
+        [ObservableProperty]
+        private bool _isVelocityPullbackTest = false;
+
+        [ObservableProperty]
+        private int _velocityPullback;
+
         private ICommand _homeCommand;
         public ICommand HomeCommand
         {
@@ -132,6 +137,14 @@ namespace RaywattApp.ViewModels
             get { return this._autopullbackTest ?? (this._autopullbackTest = new RelayCommand(AutopullbackTest)); }
         }
 
+
+        //Test
+        private ICommand _velocityPullbackTest;
+        public ICommand VelocityPullbackTestCommand
+        {
+            get { return this._velocityPullbackTest ?? (this._velocityPullbackTest = new RelayCommand(VelocityPullbackTest)); }            
+        }
+
         //Test
         private ICommand _compensationTest;
         public ICommand CompensationTestCommand
@@ -167,6 +180,13 @@ namespace RaywattApp.ViewModels
         public ICommand AutopullbackOnCommmand
         {
             get { return this._autopullbackOn ?? (this._autopullbackOn = new RelayCommand(AutopullbackOn)); }
+        }
+
+        //Test
+        private ICommand _setVelocityPullback;
+        public ICommand SetVelocityPullbackCommmand
+        {
+            get { return this._setVelocityPullback ?? (this._setVelocityPullback = new RelayCommand(SetVelocityPullback)); }
         }
 
         // to avoid garbage collection
@@ -480,6 +500,18 @@ namespace RaywattApp.ViewModels
             IsAutoPullbackTest = !IsAutoPullbackTest;
         }
 
+        private void VelocityPullbackTest()
+        {
+            _log.Debug("VelocityPullbackTest");
+
+            IsVelocityPullbackTest = !IsVelocityPullbackTest;
+
+            if (IsVelocityPullbackTest)
+            {
+                VelocityPullback = (int)RayGetProperty(Property.VelocityPullback);
+            }
+        }
+
         private void CompensationTest()
         {
             _log.Debug("CompensationTest");
@@ -564,6 +596,34 @@ namespace RaywattApp.ViewModels
 
             CommonUtil.SetAutuPullback(_sqlManager);
             RayError result = (RayError)RaySetProperty(Property.AutoPullback, 1.0);
+            if (result != RayError.OK)
+            {
+                _log.Error("RaySetProperty Error");
+            }
+        }
+
+        private void SetVelocityPullback()
+        {
+            _log.Debug("SetVelocityPullback : " + VelocityPullback);
+
+            Dictionary<string, object> parameter = new Dictionary<string, object>();
+            if (VelocityPullback < 4800 || VelocityPullback > 24038)
+            {
+                parameter["title"] = _l10n["Information"];
+                if (VelocityPullback < 4800)
+                {
+                    parameter["message"] = _l10n["The value is out of range.\n(under 4800)"];
+                    VelocityPullback = 4800;
+                }
+                else
+                {
+                    parameter["message"] = _l10n["The value is out of range.\n(over 24038)"];
+                    VelocityPullback = 24038;
+                }
+                _dialogService.OpenDialog(new ConfirmDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+            }
+
+            RayError result = (RayError)RaySetProperty(Property.VelocityPullback, VelocityPullback);
             if (result != RayError.OK)
             {
                 _log.Error("RaySetProperty Error");

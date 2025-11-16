@@ -20,12 +20,12 @@ namespace RaywattApp.Models
         private byte[] _patientBirthDate = new byte[9];
 
         private static string GetString(byte[] bytes) =>
-            Encoding.ASCII.GetString(bytes).Split('\0')[0];
+            Encoding.UTF8.GetString(bytes).Split('\0')[0];
 
         private static void SetString(string value, byte[] target)
         {
             Array.Clear(target, 0, target.Length);
-            var bytes = Encoding.ASCII.GetBytes(value ?? string.Empty);
+            var bytes = Encoding.UTF8.GetBytes(value ?? string.Empty);
             Array.Copy(bytes, target, Math.Min(bytes.Length, target.Length - 1));
         }
 

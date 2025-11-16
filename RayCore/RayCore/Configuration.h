@@ -88,6 +88,9 @@ public:
 	void SaveStepMotorSettings();
 	void SaveBLDCMotorSettings();
 
+	int ReadInt(const tstring& section, const tstring& key, int def = 0) const;
+	bool WriteInt(const tstring& section, const tstring& key, int value) const;
+
 	//Property
 	double GetLoadCatheterTime();
 
