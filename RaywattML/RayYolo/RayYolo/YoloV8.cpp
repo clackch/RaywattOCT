@@ -18,6 +18,7 @@ YoloV8::YoloV8(const std::string& onnxModelPath, const YoloV8Config& config)
 
     options.precision = config.precision;
     options.calibrationDataDirectoryPath = config.calibrationDataDirectory;
+    CLASS_THRESHOLDS = config.classThresholds;
 
     if (options.precision == Precision::INT8) {
         if (options.calibrationDataDirectoryPath.empty()) {
@@ -191,31 +192,40 @@ std::vector<Object> YoloV8::postProcessSegment(std::vector<std::vector<float>>& 
     );
 
     // Obtain the segment masks
-    cv::Mat masks;
+    cv::Mat masks;                 // [cnt x SEG_CHANNELS], CV_32F
     std::vector<Object> objs;
     int cnt = 0;
     for (auto& i : indices) {
-        if (cnt >= TOP_K) {
-            break;
-        }
-        cv::Rect tmp = bboxes[i];
+        if (cnt >= TOP_K) break;
+
         Object obj;
         obj.label = labels[i];
-        obj.rect = tmp;
+        obj.rect = bboxes[i];
         obj.probability = scores[i];
-        masks.push_back(maskConfs[i]);
+
+        masks.push_back(maskConfs[i]); // 1 x SEG_CHANNELS, CV_32F
         objs.push_back(obj);
         cnt += 1;
     }
 
     // Convert segment mask to original frame
     if (!masks.empty()) {
-        cv::Mat matmulRes = (masks * protos).t();
-        cv::Mat maskMat = matmulRes.reshape(indices.size(), { SEG_W, SEG_H });
+        // masks:    [selected x SEG_CHANNELS]
+        // protos:   [SEG_CHANNELS x (SEG_H*SEG_W)]
+        // logits^T: [(SEG_H*SEG_W) x selected]
+        cv::Mat logitsT = (masks * protos).t();     // CV_32F
 
-        std::vector<cv::Mat> maskChannels;
+        const int selected = static_cast<int>(objs.size()); // == cnt
+        if (selected <= 0) return objs;
+
+        // 가장 안전한 reshape 오버로드: reshape(newChannels, newRows)
+        // total elems = SEG_H*SEG_W*selected 이므로
+        // newChannels=selected, newRows=SEG_H → newCols 자동으로 SEG_W 계산됨
+        cv::Mat maskMat = logitsT.reshape(/*newChannels=*/selected,
+            /*newRows=*/SEG_H); // [SEG_H x SEG_W], ch=selected
+
+        std::vector<cv::Mat> maskChannels;  // size == selected
         cv::split(maskMat, maskChannels);
-        const auto inputDims = m_trtEngine->getInputDims();
 
         cv::Rect roi;
         if (m_imgHeight > m_imgWidth) {
@@ -225,24 +235,20 @@ std::vector<Object> YoloV8::postProcessSegment(std::vector<std::vector<float>>& 
             roi = cv::Rect(0, 0, SEG_W, SEG_H * m_imgHeight / m_imgWidth);
         }
 
-
-        for (size_t i = 0; i < indices.size(); i++)
-        {
+        for (int i = 0; i < selected; ++i) {
             cv::Mat dest, mask;
             cv::exp(-maskChannels[i], dest);
             dest = 1.0 / (1.0 + dest);
             dest = dest(roi);
-            cv::resize(
-                dest,
-                mask,
+            cv::resize(dest, mask,
                 cv::Size(static_cast<int>(m_imgWidth), static_cast<int>(m_imgHeight)),
-                cv::INTER_LINEAR
-            );
+                cv::INTER_LINEAR);
             objs[i].boxMask = mask(objs[i].rect) > SEGMENT_THRESHOLD;
         }
     }
 
     return objs;
+
 }
 
 std::vector<Object> YoloV8::postprocessDetect(std::vector<float>& featureVector) {
@@ -295,20 +301,26 @@ std::vector<Object> YoloV8::postprocessDetect(std::vector<float>& featureVector)
     cv::dnn::NMSBoxesBatched(bboxes, scores, labels, PROBABILITY_THRESHOLD, NMS_THRESHOLD, indices);
 
     std::vector<Object> objects;
-
-    // Choose the top k detections
     int cnt = 0;
-    for (auto& chosenIdx : indices) {
-        if (cnt >= TOP_K) {
-            break;
-        }
+    for (auto& idx : indices) {
+        if (cnt >= TOP_K) break;
+
+        int lbl = labels[idx];
+        float sc = scores[idx];
+
+        float thr = PROBABILITY_THRESHOLD;
+        if (!CLASS_THRESHOLDS.empty() && lbl >= 0 && lbl < (int)CLASS_THRESHOLDS.size())
+            thr = CLASS_THRESHOLDS[lbl];
+
+        if (sc < thr) continue; // 클래스별로 컷
+
+        printf("Class = %d, Score = %.2f\n", lbl, sc);
 
         Object obj{};
-        obj.probability = scores[chosenIdx];
-        obj.label = labels[chosenIdx];
-        obj.rect = bboxes[chosenIdx];
+        obj.probability = sc;
+        obj.label = lbl;
+        obj.rect = bboxes[idx];
         objects.push_back(obj);
-
         cnt += 1;
     }
 
@@ -365,12 +377,13 @@ YoloV8* InitializeSegment()
 
 YoloV8* InitializeDetect()
 {
-    YoloV8Config segmentConfig;
-    segmentConfig.segH = 256;
-    segmentConfig.segW = 256;
-    segmentConfig.classNames = { "stent", "guide_wire" };
+    YoloV8Config detectConfig;
+    detectConfig.segH = 256;
+    detectConfig.segW = 256;
+    detectConfig.classThresholds = { 0.13f, 0.22f };
+    detectConfig.classNames = { "stent", "guide_wire" };
     std::string segmentModelPath = "C:\\Raywatt\\system\\3rdparty\\model\\yolo\\detect.onnx";
-    return new YoloV8(segmentModelPath, segmentConfig);
+    return new YoloV8(segmentModelPath, detectConfig);
 }
 
 YoloV8* InitializeCalciumSegment() 

@@ -176,7 +176,7 @@ namespace RaywattApp.Common.Annotation
                     DrawEllipse(this.angleSecondPoint, this.angleGeometries.Count, 2);
                     DrawEllipse(this.angleThirdPoint, this.angleGeometries.Count, 3);
                     DeleteLabel(constAngle, this.angleGeometries.Count);
-                    DrawLabel(this.angleSecondPoint, this.angleGeometries.Count, this.angle);
+                    DrawLabel(this.angleFirstPoint, this.angleSecondPoint, this.angleThirdPoint, this.angleGeometries.Count, this.angle);
 
                     DeleteLine(false, this.angleGeometries.Count);
                     DeleteLine(true, this.angleGeometries.Count);
@@ -251,8 +251,7 @@ namespace RaywattApp.Common.Annotation
                     DrawLine(this.angleSecondPoint, this.angleMovingPoint, false, this.angleGeometries.Count);
                     this.angle = getAngle(this.angleFirstPoint, this.angleSecondPoint, this.angleMovingPoint);
                     DeleteLabel(constAngle, this.angleGeometries.Count);
-                    DrawLabel(this.angleSecondPoint, this.angleGeometries.Count, this.angle);
-
+                    DrawLabel(this.angleFirstPoint, this.angleSecondPoint, this.angleThirdPoint, this.angleGeometries.Count, this.angle);
                 }
 
             }
@@ -335,6 +334,7 @@ namespace RaywattApp.Common.Annotation
                         point.Y = angleGeometry.AngleFirstPoint.Y;
 
                     angleGeometry.AngleFirstPoint = point;
+                    angleFirstPoint = point;
                 }
                 else if (index == 2)
                 {
@@ -345,6 +345,7 @@ namespace RaywattApp.Common.Annotation
                         point.Y = angleGeometry.AngleSecondPoint.Y;
 
                     angleGeometry.AngleSecondPoint = point;
+                    angleSecondPoint = point;
                 }
                 else if (index == 3)
                 {
@@ -355,6 +356,7 @@ namespace RaywattApp.Common.Annotation
                         point.Y = angleGeometry.AngleThirdPoint.Y;
 
                     angleGeometry.AngleThirdPoint = point;
+                    angleThirdPoint = point;
                 }
 
                 //to-do
@@ -363,7 +365,7 @@ namespace RaywattApp.Common.Annotation
 
                 double distance1 = CalculateDistance(angleGeometry.AngleFirstPoint, angleGeometry.AngleSecondPoint);
                 double distance2 = CalculateDistance(angleGeometry.AngleThirdPoint, angleGeometry.AngleSecondPoint);
-
+                
                 double distance = distance1 < distance2 ? distance1 : distance2;
 
                 if (distance < 10)
@@ -388,7 +390,7 @@ namespace RaywattApp.Common.Annotation
                 DrawLine(angleGeometry.AngleSecondPoint, angleGeometry.AngleThirdPoint, false, group);
                 DrawArc(angleGeometry.ArcPoint1, angleGeometry.ArcPoint2, angleGeometry.AngleSecondPoint, group,
                 angleGeometry.Angle);
-                DrawLabel(angleGeometry.AngleSecondPoint, group, angleGeometry.Angle);
+                DrawLabel(angleGeometry.AngleFirstPoint, angleGeometry.AngleSecondPoint, angleGeometry.AngleThirdPoint, group, angleGeometry.Angle);
             }
         }
 
@@ -725,7 +727,7 @@ namespace RaywattApp.Common.Annotation
 
 
                 DeleteLabel(constAngle, group);
-                DrawLabel(angleGeometry.AngleSecondPoint, group, angleGeometry.Angle);
+                DrawLabel(angleGeometry.AngleFirstPoint, angleGeometry.AngleSecondPoint, angleGeometry.AngleThirdPoint, group, angleGeometry.Angle);
 
                 DeleteEllipse(group, 1);
                 DrawEllipse(angleGeometry.AngleFirstPoint, group, 1);
@@ -793,9 +795,12 @@ namespace RaywattApp.Common.Annotation
                 angleGeometry.ArcPoint2 = getArcPoint(angleGeometry.AngleSecondPoint, angleGeometry.AngleThirdPoint, 10);
 
                 DrawLine(angleGeometry.AngleFirstPoint, angleGeometry.AngleSecondPoint, true, angleGeometry.AngleGroup);
-                DrawLine(angleGeometry.AngleSecondPoint, angleGeometry.AngleThirdPoint, false, angleGeometry.AngleGroup);          
+                DrawLine(angleGeometry.AngleSecondPoint, angleGeometry.AngleThirdPoint, false, angleGeometry.AngleGroup);
 
-                DrawLabel(angleGeometry.AngleSecondPoint, angleGeometry.AngleGroup, angleGeometry.Angle);
+                DeleteLabel(constAngle, angleGeometry.AngleGroup);
+                angleFirstPoint = angleGeometry.AngleFirstPoint;
+                angleThirdPoint = angleGeometry.AngleThirdPoint;
+                DrawLabel(angleGeometry.AngleFirstPoint, angleGeometry.AngleSecondPoint, angleGeometry.AngleThirdPoint, angleGeometry.AngleGroup, angleGeometry.Angle);
                 DrawEllipse(angleGeometry.AngleFirstPoint, angleGeometry.AngleGroup, 1);
                 DrawEllipse(angleGeometry.AngleSecondPoint, angleGeometry.AngleGroup, 2);
                 DrawEllipse(angleGeometry.AngleThirdPoint, angleGeometry.AngleGroup, 3);
@@ -906,19 +911,109 @@ namespace RaywattApp.Common.Annotation
                 }
             }
         }
-        private void DrawLabel(Point centerPoint, int group, double angle)
+        private void DrawLabel(Point angleFirstPoint, Point centerPoint, Point angleThirdPoint, int group, double angle)
         {
+            Point A = angleFirstPoint;
+            Point B = centerPoint;
+            Point C = angleThirdPoint;
+
             Label label = new Label();
             label.Style = (Style)this.Resources["StyleLabel"];
             label.Name = constAngle + "_" + group;
             label.Content = Math.Round(angle, 2).ToString() + "°";
 
-            int plusX = 5;
-            int plusY = 10;
-                        
-            Canvas.SetLeft(label, centerPoint.X + plusX);
-            Canvas.SetTop(label, centerPoint.Y - plusY);
+            // 기본 벡터
+            Vector BA = A - B; double n1 = BA.Length;
+            Vector BC = C - B; double n2 = BC.Length;
+            if (n1 < 1e-6 || n2 < 1e-6)
+            {
+                // 퇴화 케이스: 일단 B에 배치
+                Canvas.SetLeft(label, B.X);
+                Canvas.SetTop(label, B.Y);
+                this.canvas.Children.Add(label);
+                return;
+            }
+            Vector u1 = BA; u1.Normalize();    // B->A
+            Vector u2 = BC; u2.Normalize();    // B->C
+
+            // 각 크기(0~2π) 계산하여 reflex 여부 판단
+            double cross = u1.X * u2.Y - u1.Y * u2.X;   // 2D cross (z성분)
+            double dot = u1.X * u2.X + u1.Y * u2.Y;
+            double theta = Math.Atan2(cross, dot);      // [-pi, pi]
+            if (theta < 0) theta += 2 * Math.PI;        // [0, 2pi)
+            bool isReflex = theta > Math.PI;
+
+            // A–C 직선의 수직 방향(두 방향 중 하나)
+            Vector AC = C - A;
+            double acLen = AC.Length;
+
+            // offset = B에서의 유클리드 거리(px)
+            double offset = 40.0;
+
+            Vector n; // 최종 방향벡터(단위)
+            if (acLen < 1e-6)
+            {
+                // A와 C가 사실상 같은 점이면: 이등분선 사용 (reflex면 반대로)
+                n = u1 + u2;
+                if (n.Length < 1e-6) n = new Vector(-u1.Y, u1.X);  // 거의 일직선 예외
+                n.Normalize();
+                if (isReflex) n = -n;
+            }
+            else
+            {
+                // AC에 수직
+                n = new Vector(-AC.Y, AC.X);
+                double lenN = n.Length;
+                if (lenN < 1e-9)
+                {
+                    // 혹시라도 수치 불안정 시 이등분선 fallback
+                    n = u1 + u2;
+                    if (n.Length < 1e-6) n = new Vector(-u1.Y, u1.X);
+                    n.Normalize();
+                    if (isReflex) n = -n;
+                }
+                else
+                {
+                    n /= lenN;
+
+                    // 섹터(작은각/큰각) 내부를 향하도록 부호 결정
+                    bool ok;
+                    if (!isReflex)
+                    {
+                        // 작은 각: n·u1 >= 0 && n·u2 >= 0
+                        ok = (Vector.Multiply(n, u1) >= 0.0) && (Vector.Multiply(n, u2) >= 0.0);
+                        if (!ok) n = -n;
+                    }
+                    else
+                    {
+                        // 큰 각: n·u1 <= 0 && n·u2 <= 0
+                        ok = (Vector.Multiply(n, u1) <= 0.0) && (Vector.Multiply(n, u2) <= 0.0);
+                        if (!ok) n = -n;
+                    }
+
+                    // 경계/수치 불안 시 이등분선 fallback (reflex면 반대로)
+                    if (!(((Vector.Multiply(n, u1) >= 0.0) && (Vector.Multiply(n, u2) >= 0.0) && !isReflex) ||
+                          ((Vector.Multiply(n, u1) <= 0.0) && (Vector.Multiply(n, u2) <= 0.0) && isReflex)))
+                    {
+                        n = u1 + u2;
+                        if (n.Length < 1e-6) n = new Vector(-u1.Y, u1.X);
+                        n.Normalize();
+                        if (isReflex) n = -n;
+                    }
+                }
+            }
+
+            // 최종 위치(유클리드 offset)
+            Point pos = new Point(B.X + offset * n.X, B.Y + offset * n.Y);
+
+            // 라벨 중앙 정렬(Left/Top은 좌상단 기준이므로 보정)
+            label.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            Size size = label.DesiredSize;
+            Canvas.SetLeft(label, pos.X - size.Width / 2.0);
+            Canvas.SetTop(label, pos.Y - size.Height / 2.0);
+
             this.canvas.Children.Add(label);
+
         }
 
         private void DrawArc(Point startPoint, Point endPoint, Point centerPoint, int group, double angle)

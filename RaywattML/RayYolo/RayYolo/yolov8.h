@@ -28,7 +28,7 @@ struct YoloV8Config {
     // Calibration data directory. Must be specified when using INT8 precision.
     std::string calibrationDataDirectory;
     // Probability threshold used to filter detected objects
-    float probabilityThreshold = 0.1f;
+    float probabilityThreshold = 0.0f;
     // Non-maximum suppression threshold
     float nmsThreshold = 0.65f;
     // Max number of detected objects to return
@@ -41,6 +41,7 @@ struct YoloV8Config {
     // Class thresholds
     std::vector<std::string> classNames = {
     };
+    std::vector<float> classThresholds;
 };
 
 class YoloV8 {
@@ -98,6 +99,7 @@ private:
 
     // Object classes as strings
     const std::vector<std::string> CLASS_NAMES;
+    std::vector<float> CLASS_THRESHOLDS;
 };
 
 extern "C" __declspec(dllexport) YoloV8 * InitializeSegment();
