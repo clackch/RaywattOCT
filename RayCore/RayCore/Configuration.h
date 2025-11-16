@@ -42,7 +42,6 @@ public:
 	class CatheterSetting {
 	public:
 		int rotationTime;	// To-Do: remove
-		bool manualLoad;
 		int length;			// 2.6fr -> 1.6fr
 		bool catheterValidationOnOff;
 		bool catheterAutoCalibrationOnOff;

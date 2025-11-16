@@ -94,7 +94,6 @@ void CConfiguration::Initialize(tstring configFile)
 
 	// [Catheter]
 	this->catheter.rotationTime = ::GetPrivateProfileInt(_T("Catheter"), _T("RotationTime"), 10000, configFilePath.c_str());
-	this->catheter.manualLoad = ::GetPrivateProfileInt(_T("Catheter"), _T("ManualLoad"), 0, configFilePath.c_str());
 	this->catheter.length = ::GetPrivateProfileInt(_T("Catheter"), _T("Length1.7"), -45000, configFilePath.c_str());
 	this->catheter.catheterValidationOnOff = ::GetPrivateProfileInt(_T("Catheter"), _T("CatheterValidationOnOff"), 0, configFilePath.c_str());
 	this->catheter.catheterAutoCalibrationOnOff = ::GetPrivateProfileInt(_T("Catheter"), _T("CatheterAutoCalibrationOnOff"), 0, configFilePath.c_str());

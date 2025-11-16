@@ -1672,7 +1672,6 @@ UINT COCTSystem::threadInitializeRotaryJunction(LPVOID param) {
 	pRJController->SetModeOfOperation(MOTOR_DATA_MODE_VELOCITY);
 	pRJController->SwitchOff();
 	pRJController->SwitchOn();
-	pRJController->SetManualMode(config.catheter.manualLoad);
 	pRJController->Set(eStepMotorIndex::Both, STEP_MOTOR_SPEED_DEFAULT);
 
 	while (pSystem->m_pThreadRotaryJunction->isRun && !pRJController->InitialStatusReceived()) {
@@ -2223,7 +2222,6 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pRJController->StopMotor();
 
 	// 5. Homing
-
 	BYTE* uidRFID = new BYTE[CUSTOM_UID_LENGTH + HARDWARE_UID_LENGTH];
 	if(config.catheter.catheterRFID)
 		pRJController->IncreaseRFIDUsage(pRJController->GetRFIDUID(uidRFID), uidRFID);
@@ -2238,6 +2236,9 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pRJController->StopMotor();
 	pRJController->Current(eStepMotorIndex::Pullback, DISTANCE_BETWEEN_MOTORS);
 	pRJController->DisplayLCD(eLCDImage::LCD_IMAGE_STANDBY_OFF);
+
+	pRJController->SwitchOff();
+	pRJController->SwitchOn();
 	PLOGI.printf("Pullback done.");
 
 	if (auto* mgr = dynamic_cast<PullbackLengthManager*>(pDataWriter)) {
@@ -2566,14 +2567,8 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::ValidateCatheter);
 
 	if (verified) {
-		if (config.catheter.manualLoad) {
-			PLOGI.printf("m_pRJController->UpdateState - WaitManualLoad");
-			pRJController->UpdateState(eRJState::WaitManualLoad);
-		}
-		else {
-			PLOGI.printf("m_pRJController->UpdateState - Loaded");
-			pRJController->UpdateState(eRJState::Loaded);
-		}
+		PLOGI.printf("m_pRJController->UpdateState - Loaded");
+		pRJController->UpdateState(eRJState::Loaded);
 		PLOGI.printf("postMessage - CatheterState::Enable");
 
 		RFIDProtocol::SRFIDState rfidState;
@@ -2613,41 +2608,6 @@ UINT COCTSystem::threadValidateCatheter(LPVOID param) {
 	}
 	
 	PLOGI.printf("[DONE]threadValidateCatheter");
-
-	return NOERROR;
-}
-
-/*
-* threadValidateCatheter
-*/
-UINT COCTSystem::threadManualLoadCatheter(LPVOID param){
-	PLOGI.printf("threadManualLoadCatheter");
-
-	COCTSystem* pSystem = (COCTSystem*)param;
-	CConfiguration& config = CConfiguration::GetInstance();
-	CRJController* pRJController = pSystem->m_pRJController;
-
-	pSystem->postMessage(WM_NOTIFY_EVENT_OCCURED, (WPARAM)RayEvent::CatheterLoading);
-
-	if (pRJController->IsConnected()) {
-		pRJController->Current(eStepMotorIndex::Pullback, config.stepMotor.unLoadDistance);
-		pRJController->Set(eStepMotorIndex::Pullback, STEP_MOTOR_SPEED_DEFAULT);
-		pRJController->Move(eStepMotorIndex::Pullback, 0, false, 0x02 /* photo-sensor #2 */);
-		pSystem->waitForStepMotors(pSystem->m_pThreadRotaryJunction->isRun);
-	}
-	else if (pSystem->m_isTestMode)
-	{
-		Sleep(config.GetLoadCatheterTime());
-	}
-
-	pSystem->postMessage(WM_NOTIFY_DEVICE_WORK_DONE, (WPARAM)RayWorkItem::LoadCatheter);
-	pSystem->postMessage(WM_UPDATE_CATHETER_STATE, (WPARAM)CatheterState::Loading);
-
-	while (pSystem->m_pThreadRotaryJunction->isRun) {
-		Sleep(DELAY_FOR_STOP_THREAD);
-	}
-
-	PLOGI.printf("[DONE]threadManualLoadCatheter");
 
 	return NOERROR;
 }
@@ -3321,16 +3281,9 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 	{
 		CConfiguration& config = CConfiguration::GetInstance();
 		CUtility::StopThread(m_pThreadRotaryJunction);
-		if (config.catheter.manualLoad) {
-			CUtility::StartThread(threadManualLoadCatheter, m_pThreadRotaryJunction, this);
-		}
-		else {
-			CUtility::StartThread(threadLoadCatheter, m_pThreadRotaryJunction, this);
-		}
+		CUtility::StartThread(threadLoadCatheter, m_pThreadRotaryJunction, this);
 		break;
 	}
-	case eRJState::WaitManualLoad:
-		break;
 	case eRJState::Loaded:
 		break;
 	case eRJState::Unloading:
