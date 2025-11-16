@@ -3278,6 +3278,7 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 		else {
 			if (CUtility::StartThread(threadRFIDValidation, m_pThreadRotaryJunction, this)) {
 			}
+		}
 		break;
 	}
 	case eRJState::Loading:
@@ -3306,9 +3307,9 @@ LRESULT COCTSystem::OnMsgUpdateRJState(WPARAM wParam, LPARAM lParam) {
 		break;
 	case eRJState::RFIDError:
 		break;
-	}
 
-	return NOERROR;
+		return NOERROR;
+	}
 }
 
 /*
