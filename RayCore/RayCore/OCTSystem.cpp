@@ -2109,8 +2109,9 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			autoCalibError = RayError::AutoCalibError;
 
 		pSystem->m_pImagingLiveView->SetAutoCalibrationMathod(AutoCalibrationMathod::Disable);
+		bool isPolarActive = (config.laserModule.polarActive == 1) ? true : false;
 		
-#if 1
+#if isPolarActive
 		// 2. Start Finding Peak
 		pSystem->m_vCalibrationInfo.clear();
 		pSystem->m_cathState = CatheterState::FindingPeak;
@@ -2119,8 +2120,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		nTargetPos = pLaserModule->Move(eStepMotorIndex::Polarization, 0);
 		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
 
-		int polarizationRange = -1600;
-		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::Polarization, polarizationRange);
+		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::Polarization, POLARIZATION_RANGE);
 		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
 
 		// 2-2. Find Max Peak
@@ -2854,7 +2854,10 @@ int COCTSystem::connectRotaryJunction() {
 				Sleep(50);
 			}
 			m_pLaserModule->PrintPhotoSensor();
-
+			m_pLaserModule->Current(eStepMotorIndex::DelayLine, config.laserModule.delayPosition);
+#endif
+			bool polarHomingWorks = DELAY_LINE_HOMING_WORKS && config.laserModule.polarActive;
+#if polarHomingWorks
 			PLOGI.printf("Polarization Homing start =========================================");
 			m_pLaserModule->Move(eStepMotorIndex::Polarization, 0, false, static_cast<char>(0x01));
 
@@ -2879,7 +2882,6 @@ int COCTSystem::connectRotaryJunction() {
 			}
 			m_pLaserModule->PrintPhotoSensor();
 
-			m_pLaserModule->Current(eStepMotorIndex::DelayLine, config.laserModule.delayPosition);
 			m_pLaserModule->Current(eStepMotorIndex::Polarization, -config.laserModule.polarPosition);
 #endif
 		}
@@ -3025,7 +3027,8 @@ LRESULT COCTSystem::OnMsgProcessCrossSection(WPARAM wParam, LPARAM lParam) {
 
 			USHORT nPeakValue;
 			int nPeakIndex, nLineWidth;
-			measurement.CalculateAxialResolution(((CLabImaging *)m_pImagingRealtime)->GetScopeData(), config.imaging.nAScan, config.measurement, nPeakValue, nPeakIndex, nLineWidth);
+			measurement.CalculateAxialResolution(((CLabImaging *)m_pImagingRealtime)->GetScopeData(), config.imaging.nAScan, nPeakValue, nPeakIndex);
+			//measurement.CalculateAxialResolutionFFT(((CLabImaging*)m_pImagingRealtime)->GetScopeData(), config.imaging.nAScan, config.measurement, nPeakValue, nPeakIndex, nLineWidth);
 
 			int nPolarizationPos = m_pLaserModule->GetPosition(eStepMotorIndex::Polarization);
 			m_vCalibrationInfo.push_back(std::make_pair(nPeakValue, nPolarizationPos));

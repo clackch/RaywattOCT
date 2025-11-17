@@ -28,7 +28,8 @@ public:
 	COCTMeasurement();
 	virtual ~COCTMeasurement();
 
-	void CalculateAxialResolution(USHORT* fftData, UINT nLength, Setting setting, USHORT& nPeakValue, int& nPeakIndex, int& nLineWidth);
+	void CalculateAxialResolution(USHORT* fftData, UINT nLength, USHORT& nPeakValue, int& nPeakIndex);
+	void CalculateAxialResolutionFFT(USHORT* fftData, UINT nLength, Setting setting, USHORT& nPeakValue, int& nPeakIndex, int& nLineWidth);
 	void CalculateNoisePower(USHORT* fftData, UINT nLength, Setting setting, int nPeakIndex, USHORT& nNoisePower);	
 };
 

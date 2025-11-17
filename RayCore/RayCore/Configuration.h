@@ -17,6 +17,7 @@ public:
 		int delayPositionOnePointSeven;
 		int polarPosition;
 		int autoCalibrationForSeverance;
+		int polarActive;
 	};
 
 	class StepMotorSetting {
