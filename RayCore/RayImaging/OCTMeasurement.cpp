@@ -3,7 +3,19 @@
 COCTMeasurement::COCTMeasurement() {}
 COCTMeasurement::~COCTMeasurement() {}
 
-void COCTMeasurement::CalculateAxialResolution(USHORT* fftData, UINT nLength, Setting setting, USHORT& nPeakValue, int& nPeakIndex, int& nLineWidth) {
+void COCTMeasurement::CalculateAxialResolution(USHORT* fftData, UINT nLength, USHORT& nPeakValue, int& nPeakIndex) {
+	USHORT minValue = USHRT_MAX, maxValue = 0;
+	for(UINT i = 0; i < nLength; i++) {
+		if(fftData[i] < minValue) {
+			minValue = fftData[i];
+		}
+		if(fftData[i] > maxValue) {
+			maxValue = fftData[i];
+		}
+	}
+	nPeakValue = maxValue - minValue;
+}
+void COCTMeasurement::CalculateAxialResolutionFFT(USHORT* fftData, UINT nLength, Setting setting, USHORT& nPeakValue, int& nPeakIndex, int& nLineWidth) {
 	const int nFindRange = 40;
 
 	// get peak and index

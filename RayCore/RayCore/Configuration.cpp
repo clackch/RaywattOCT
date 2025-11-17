@@ -72,6 +72,7 @@ void CConfiguration::Initialize(tstring configFile)
 	this->laserModule.delayPositionOnePointSeven = ::GetPrivateProfileInt(_T("LaserModule"), _T("delayPositionOnePointSeven"), 0, configFilePath.c_str());
 	this->laserModule.polarPosition = ::GetPrivateProfileInt(_T("LaserModule"), _T("Polarization"), 0, configFilePath.c_str());
 	this->laserModule.autoCalibrationForSeverance = ::GetPrivateProfileInt(_T("LaserModule"), _T("AutoCalibrationForSeverance"), 0, configFilePath.c_str());
+	this->laserModule.polarActive = ::GetPrivateProfileInt(_T("LaserModule"), _T("PolarizationActive"), 1, configFilePath.c_str());
 
 	// [StepMotor]
 	::GetPrivateProfileString(_T("StepMotor"), _T("Port"), _T(""), this->stepMotor.port, sizeof(this->stepMotor.port), configFilePath.c_str());
