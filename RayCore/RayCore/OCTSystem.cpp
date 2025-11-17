@@ -2904,7 +2904,9 @@ int COCTSystem::disconnectRotaryJunction() {
 
 	if (m_pLaserModule->IsConnected()) {
 		CConfiguration& config = CConfiguration::GetInstance();
-		m_pLaserModule->Move(eStepMotorIndex::Polarization, 0);
+		if (config.laserModule.polarActive) {
+			m_pLaserModule->Move(eStepMotorIndex::Polarization, 0);
+		}
 		m_pLaserModule->SetVLD(0);
 		m_pLaserModule->SetVOA(0);
 
