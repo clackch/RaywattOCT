@@ -1771,7 +1771,8 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 					gradient[i - 1] = -1;
 				else
 					gradient[i - 1] = info[i].first - info[i - 2].first;
-			}else if(info[i].first < errorValThreshold) {
+			}
+			else if (info[i].first < errorValThreshold) {
 				gradient[i - 1] = -1;
 			}
 			else if (info[i].first < minVal)
@@ -1829,7 +1830,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 				autoCalibError = RayError::AutoCalibError;
 			}
 			else {
-				for(int i = 0; i < minList.size(); i++)
+				for (int i = 0; i < minList.size(); i++)
 				{
 					if (abs(info[minList[i].second].second - Loc) < minMaxDistRange)
 					{
@@ -1841,9 +1842,9 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 
 				bool maxFound = false;
 				int gradientThreshold = 100000000; // local max가 확실히 원하는 위치에 있는 경우를 위한 임계값
-				for(int i = 0; i < maxList.size(); i++)
+				for (int i = 0; i < maxList.size(); i++)
 				{
-					if(gradient[ maxList[i].second - 1 ] - gradient[maxList[i].second] > gradientThreshold)
+					if (gradient[maxList[i].second - 1] - gradient[maxList[i].second] > gradientThreshold)
 					{
 						Loc = info[maxList[i].second].second;
 						maxFound = true;
@@ -1959,7 +1960,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		PLOGI.printf("first calibration. checkPosition : %d, checkValue : %d", Loc, minVal);
 
 		// 3. Find a Perfect Sheath Position
-		if(autoCalibError != RayError::AutoCalibError){
+		if (autoCalibError != RayError::AutoCalibError) {
 			// 3-1. Move to the target position found in 1st step
 			int nJumpStep = 3200;			// 1차 탐색에서 정한 위치로부터, 2차 탐색을 위해 이동할 거리(step)
 			int nSearchRange = 600;			// 2차 탐색 범위 
@@ -1981,7 +1982,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			int sumIndex = 0, sumRow = 0, sumMult = 0; double sumIndexSq = 0.0;
 			int validCount = pSystem->m_vCalibrationInfo.size(), distanceThreshold = 60, rowThreshold = 398;
 			for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
-				if(i > 0 && pSystem->m_vCalibrationInfo.at(i).first - pSystem->m_vCalibrationInfo.at(i - 1).first > distanceThreshold
+				if (i > 0 && pSystem->m_vCalibrationInfo.at(i).first - pSystem->m_vCalibrationInfo.at(i - 1).first > distanceThreshold
 					|| pSystem->m_vCalibrationInfo.at(i).first > rowThreshold) {
 					validCount--;
 					continue;
@@ -2001,13 +2002,13 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			int expectedRow = pSystem->m_vCalibrationInfo.at(0).first;
 			int errorThresholdPlus = 15, errorThresholdMinus = 5; // 2차 탐색의 step별 row 이동 범위 threshold
 			int minusMove = 35; // 외경을 내경으로 판단한 경우 보정값
-			
+
 			// plus direction check
-			for(auto& val : pSystem->m_vCalibrationInfo)
+			for (auto& val : pSystem->m_vCalibrationInfo)
 			{
 				int rowMoving = val.first - expectedRow;
 				if (rowMoving > errorThresholdPlus) {
-					if(slope == 0)
+					if (slope == 0)
 						val.first -= minusMove;
 					else
 						val.first = expectedRow + (int)slope;
@@ -2019,7 +2020,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			for (int i = pSystem->m_vCalibrationInfo.size() - 1; i >= 0; i--) {
 				int rowMoving = pSystem->m_vCalibrationInfo.at(i).first - expectedRow;
 				if (rowMoving > errorThresholdMinus) {
-					if(slope == 0)
+					if (slope == 0)
 						pSystem->m_vCalibrationInfo.at(i).first -= minusMove;
 					else
 						pSystem->m_vCalibrationInfo.at(i).first = expectedRow - (int)slope;
@@ -2027,7 +2028,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 				expectedRow = pSystem->m_vCalibrationInfo.at(i).first;
 				//PLOGI.printf("find sheath at the second row %d", expectedRow);
 			}
-			
+
 			// 3-5. Find the closest frame where the sheath position is near idealRow(180)
 			int minDiff = INT_MAX;
 			int closestIdx = pSystem->m_vCalibrationInfo.size() - 1;	// 내경이 row 180 위치에 가장 가까운 프레임 Index
@@ -2041,7 +2042,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 					closestIdx = i;
 					minDiff = abs(nowRow - idealRow);
 				}
-				if(nowRow < idealRow)	// 내경이 이상적인 위치보다 더 이상 깊은 위치에 있는 경우는 탐색 종료
+				if (nowRow < idealRow)	// 내경이 이상적인 위치보다 더 이상 깊은 위치에 있는 경우는 탐색 종료
 					break;
 			}
 			// 3-6. Adjust target position
@@ -2075,7 +2076,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		auto const& sheathInfo = pSystem->m_vCalibrationInfo;
 		int validSheathCount = 0, needAdjustCount = 0, idealRow = 25;
 		float avgDiff = 0.0f;
-		for(auto const& val : sheathInfo)
+		for (auto const& val : sheathInfo)
 		{
 			PLOGI.printf("sheath check - row : %d", val.first);
 			int diffIdeal = val.first - idealRow;
@@ -2096,7 +2097,7 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 			if (abs(needAdjustCount) > sheathInfo.size() / 2) {
 				avgDiff /= abs(needAdjustCount);
 				int adjustDir = (needAdjustCount > 0) ? -1 : 1;
-				int adjustStep = avgDiff * adjustDir * 3; 
+				int adjustStep = avgDiff * adjustDir * 3;
 				PLOGI.printf("sheath adjustment - dir : %d, step : %d", needAdjustCount, adjustStep);
 				nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::DelayLine, adjustStep);
 				pSystem->waitForStepMotors(eStepMotorIndex::DelayLine, pSystem->m_pThreadRotaryJunction->isRun);
@@ -2107,38 +2108,36 @@ UINT COCTSystem::threadAutoCalibration(LPVOID param) {
 		}
 		else
 			autoCalibError = RayError::AutoCalibError;
-
 		pSystem->m_pImagingLiveView->SetAutoCalibrationMathod(AutoCalibrationMathod::Disable);
-		bool isPolarActive = (config.laserModule.polarActive == 1) ? true : false;
-		
-#if isPolarActive
-		// 2. Start Finding Peak
-		pSystem->m_vCalibrationInfo.clear();
-		pSystem->m_cathState = CatheterState::FindingPeak;
 
-		// 2-1. Move Polarization-control & Find Peak
-		nTargetPos = pLaserModule->Move(eStepMotorIndex::Polarization, 0);
-		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
+		if (config.laserModule.polarActive) {
+			// 2. Start Finding Peak
+			pSystem->m_vCalibrationInfo.clear();
+			pSystem->m_cathState = CatheterState::FindingPeak;
 
-		nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::Polarization, POLARIZATION_RANGE);
-		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
+			// 2-1. Move Polarization-control & Find Peak
+			nTargetPos = pLaserModule->Move(eStepMotorIndex::Polarization, 0);
+			pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
 
-		// 2-2. Find Max Peak
-		int nMaxPeak = INT_MIN;
-		int nMaxPeakPos = 0;
-		for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
-			if (nMaxPeak < pSystem->m_vCalibrationInfo.at(i).first) {
-				nMaxPeak = pSystem->m_vCalibrationInfo.at(i).first;
-				nMaxPeakPos = pSystem->m_vCalibrationInfo.at(i).second;
+			nTargetPos = pLaserModule->MoveRelative(eStepMotorIndex::Polarization, POLARIZATION_RANGE);
+			pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
+
+			// 2-2. Find Max Peak
+			int nMaxPeak = INT_MIN;
+			int nMaxPeakPos = 0;
+			for (int i = 0; i < pSystem->m_vCalibrationInfo.size(); i++) {
+				if (nMaxPeak < pSystem->m_vCalibrationInfo.at(i).first) {
+					nMaxPeak = pSystem->m_vCalibrationInfo.at(i).first;
+					nMaxPeakPos = pSystem->m_vCalibrationInfo.at(i).second;
+				}
 			}
-		}
 
-		// 2-3. Move to calibrated position
-		nTargetPos = nMaxPeakPos;
-		PLOGI.printf("Polarization Calibrated Position : %d, Peak Value : %d", nTargetPos, nMaxPeak);
-		pLaserModule->Move(eStepMotorIndex::Polarization, nTargetPos);
-		pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
-#endif
+			// 2-3. Move to calibrated position
+			nTargetPos = nMaxPeakPos;
+			PLOGI.printf("Polarization Calibrated Position : %d, Peak Value : %d", nTargetPos, nMaxPeak);
+			pLaserModule->Move(eStepMotorIndex::Polarization, nTargetPos);
+			pSystem->waitForStepMotors(eStepMotorIndex::Polarization, pSystem->m_pThreadRotaryJunction->isRun);
+		}
 		// 6. Default Speed
 		pLaserModule->Set(eStepMotorIndex::Both, CM_SM_SPEED_DEFAULT);
 	}
@@ -2856,34 +2855,34 @@ int COCTSystem::connectRotaryJunction() {
 			m_pLaserModule->PrintPhotoSensor();
 			m_pLaserModule->Current(eStepMotorIndex::DelayLine, config.laserModule.delayPosition);
 #endif
-			bool polarHomingWorks = DELAY_LINE_HOMING_WORKS && config.laserModule.polarActive;
-#if polarHomingWorks
-			PLOGI.printf("Polarization Homing start =========================================");
-			m_pLaserModule->Move(eStepMotorIndex::Polarization, 0, false, static_cast<char>(0x01));
+			if (config.laserModule.polarActive)
+			{
+				PLOGI.printf("Polarization Homing start =========================================");
+				m_pLaserModule->Move(eStepMotorIndex::Polarization, 0, false, static_cast<char>(0x01));
 
-			Sleep(500);
+				Sleep(500);
 
-			while (m_pLaserModule->IsMoving(eStepMotorIndex::Polarization)) {
-				Sleep(50);
+				while (m_pLaserModule->IsMoving(eStepMotorIndex::Polarization)) {
+					Sleep(50);
+				}
+				m_pLaserModule->PrintPhotoSensor();
+
+				m_pLaserModule->Current(eStepMotorIndex::Polarization, 0);
+
+				Sleep(500);
+
+				PLOGI.printf("Move to %d =========================================", config.laserModule.polarPosition);
+				m_pLaserModule->Move(eStepMotorIndex::Polarization, -config.laserModule.polarPosition);
+
+				Sleep(500);
+
+				while (m_pLaserModule->IsMoving(eStepMotorIndex::Polarization)) {
+					Sleep(50);
+				}
+				m_pLaserModule->PrintPhotoSensor();
+
+				m_pLaserModule->Current(eStepMotorIndex::Polarization, -config.laserModule.polarPosition);
 			}
-			m_pLaserModule->PrintPhotoSensor();
-
-			m_pLaserModule->Current(eStepMotorIndex::Polarization, 0);
-
-			Sleep(500);
-
-			PLOGI.printf("Move to %d =========================================", config.laserModule.polarPosition);
-			m_pLaserModule->Move(eStepMotorIndex::Polarization, -config.laserModule.polarPosition);
-
-			Sleep(500);
-
-			while (m_pLaserModule->IsMoving(eStepMotorIndex::Polarization)) {
-				Sleep(50);
-			}
-			m_pLaserModule->PrintPhotoSensor();
-
-			m_pLaserModule->Current(eStepMotorIndex::Polarization, -config.laserModule.polarPosition);
-#endif
 		}
 		else
 		{
