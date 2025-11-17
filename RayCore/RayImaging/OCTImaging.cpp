@@ -111,23 +111,12 @@ void COCTImaging::Process(char* fringes) {
 	computeLogarithm(fFFTResult, fFFTResult);
 	//findSheath(fFFTResult);
 	generateImage(fFFTResult, false);
-	adaptive_compensation();
+	//adaptive_compensation();
 }
 void COCTImaging::PostProcess(cv::Mat image) {
 	const bool bInvert = m_bInvert;
 	const bool bColor = m_bColor;
 
-	if (m_FindingSheathMathod == AutoCalibrationMathod::FindingMinMagnitude)
-	{
-		CalculateMagnitude(image);
-	}
-	else if (m_FindingSheathMathod == AutoCalibrationMathod::FindingSheath)
-	{
-		findSheath(image);
-	}else if(m_FindingSheathMathod == AutoCalibrationMathod::CheckSheathPixelNum)
-	{
-		CheckSheathPixels(image);
-	}
 	//cv::imwrite("sheath.tif", image);
 
 	cv::cvtColor(image, imageResultColor, cv::COLOR_GRAY2RGB);
@@ -158,6 +147,24 @@ void COCTImaging::ApplyZOffset(const cv::Mat& src, cv::Mat& dst, int zOffset) {
 
 	cv::Mat translation_matrix = (cv::Mat_<double>(2, 3) << 1, 0, zOffset * -1, 0, 1, 0);
 	cv::warpAffine(img, dst, translation_matrix, img.size());
+}
+void COCTImaging::processForAutoCalib() {
+	cv::Mat image = adaptive_compensation();
+	if (m_FindingSheathMathod == AutoCalibrationMathod::FindingMinMagnitude)
+	{
+		CalculateMagnitude(image);
+	}
+	else if (m_FindingSheathMathod == AutoCalibrationMathod::FindingSheath)
+	{
+		findSheath(image);
+	}
+	else if (m_FindingSheathMathod == AutoCalibrationMathod::CheckSheathPixelNum)
+	{
+		CheckSheathPixels(image);
+	}
+	if (m_setting.applyCompensation != 0 && bCompensated) {
+		imageResult = image;
+	}
 }
 int COCTImaging::Start() {
 	BOOL result = FALSE;
@@ -767,6 +774,7 @@ UINT COCTImaging::threadRender(LPVOID param) {
 
 		if (pImaging->m_pThread->isRun) {
 			pImaging->Process((char *)pImaging->m_pFringesBuffer);
+			pImaging->processForAutoCalib();
 			pImaging->PostProcess(pImaging->GetProcessedImage());
 			// To-Do
 			// double buffering 필요?
@@ -782,11 +790,8 @@ UINT COCTImaging::threadRender(LPVOID param) {
 	return NOERROR;
 }
 
-void COCTImaging::adaptive_compensation()
+cv::Mat COCTImaging::adaptive_compensation()
 {
-	if (!bCompensated || m_setting.applyCompensation == 0)
-		return;
-
 	// 0) 설정값 확정 (원 로직 유지)
 	EXPONENTIAL_FACTOR = (EXPONENTIAL_FACTOR <= -1.0f) ? m_setting.exponentialFactor : EXPONENTIAL_FACTOR;
 	BRIGHTNESS_CONTROL = (BRIGHTNESS_CONTROL <= -1.0f) ? m_setting.brightnessControl : BRIGHTNESS_CONTROL;
@@ -903,7 +908,9 @@ void COCTImaging::adaptive_compensation()
 	}
 
 	// Rotate back to original angle
-	cv::rotate(result_img, imageResult, cv::ROTATE_90_CLOCKWISE);
+	cv::Mat result;
+	cv::rotate(result_img, result, cv::ROTATE_90_CLOCKWISE);
+	return result;
 }
 
 void COCTImaging::min_max_normalization(const cv::Mat& img, cv::Mat& normalized_img, double& min_val, double& max_val)

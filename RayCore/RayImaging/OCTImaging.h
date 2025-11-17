@@ -93,7 +93,7 @@ public:
 	virtual void Process(char* fringes);
 	virtual void PostProcess(cv::Mat image);
 	void ApplyZOffset(const cv::Mat& src, cv::Mat& dst, int zOffset);
-
+	void processForAutoCalib();
 	int Start();
 	int Stop();
 	virtual void DoAsyncRender(char* fringes);
@@ -160,7 +160,7 @@ protected:
 	cv::Mat getFoVImage(cv::Mat image, double fov);
 	cv::Mat ReCircularize(const cv::Mat& img);
 
-	void adaptive_compensation();
+	cv::Mat adaptive_compensation();
 	void min_max_normalization(const cv::Mat& img, cv::Mat& normalized_img, double& min_val, double& max_val);
 	void logarithmic_contrast_stretching(cv::Mat& img, float lower_percentile = 1.0f, float upper_percentile = 99.0f);
 	double euclidean_distance(cv::Point2f pt1, cv::Point2f pt2);
