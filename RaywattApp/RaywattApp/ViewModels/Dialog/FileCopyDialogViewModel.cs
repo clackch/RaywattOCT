@@ -79,6 +79,11 @@ namespace RaywattApp.ViewModels.Dialog
 
         private bool usePeerVerification = true;
 
+        private readonly Dictionary<string, DateTime> dicomFileRecordingTimes = new Dictionary<string, DateTime>();
+        
+        private List<string> failedFiles = new List<string>();
+
+
         public FileCopyDialogViewModel(SqlManager sqlManager)
         {
             _sqlManager = sqlManager;
@@ -214,6 +219,9 @@ namespace RaywattApp.ViewModels.Dialog
 
         private async Task<bool> FileSaveDicom()
         {
+            dicomFileRecordingTimes.Clear();
+            failedFiles.Clear();
+
             //AE Title
             string aeTitle = "";
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
@@ -302,6 +310,9 @@ namespace RaywattApp.ViewModels.Dialog
                             //file path
                             string filePath = Constants.ExportDicomPrefix + string.Format("{0:0000}", index);
 
+                            // DICOM 파일명과 Recording 시간 매핑 저장
+                            dicomFileRecordingTimes[filePath] = patientCase.CreateDate;
+
                             //DICOM Save Check Start
                             var t = Task.Run(() => CommonUtil.CheckFileSaveDone(dicomDirFolder + "\\" + filePath, dicomApprSize, prog => Progress = prog, Progress, progressConvert, progText => ProgressText = progText));
 
@@ -355,8 +366,8 @@ namespace RaywattApp.ViewModels.Dialog
 
                         string fileName = System.IO.Path.GetFileName(file);
 
-                        _log.Debug($"File transfer started: {fileName} ({currentIndex}/{totalCount})");
-                        _log.Debug($"File path: {file}");
+                        string recordingTime = dicomFileRecordingTimes[fileName].ToString("yyyy-MM-dd HH:mm:ss");
+                        _log.Debug($"File transfer started: {fileName} ({currentIndex}), Recording: {recordingTime}");
 
                         while (retryCount < MAX_RETRY && !success)
                         {
@@ -369,8 +380,8 @@ namespace RaywattApp.ViewModels.Dialog
                             if (res == RayExportWrapper.DicomNetRWError.Normal)
                             {
                                 success = true;
-                                Progress = Progress + progressConvert / totalCount;
-                                _log.Debug($"Store succeeded: {fileName}");
+                                Progress = Progress + progressConvert;
+                                _log.Debug($"Store succeeded: {fileName} ({currentIndex}), Recording: {recordingTime}");
                                 _log.Debug(CommonUtil.GetDicomResultMessage(res));
                             }
                             else
@@ -390,8 +401,19 @@ namespace RaywattApp.ViewModels.Dialog
                         {
                             isDicomError = true;
                             ProgressText = CommonUtil.GetDicomResultMessage(res);
-                            break;
+                            failedFiles.Add($"{fileName} (Recording: {recordingTime})");
+                            _log.Error($"Store failed after {MAX_RETRY} attempts: {fileName}, Recording: {recordingTime}");
                         }
+                    }
+
+                    if (failedFiles.Count > 0)
+                    {
+                        _log.Error($"Transfer summary: {failedFiles.Count}/{totalCount} file(s) failed");
+                        _log.Error($"Failed files: {string.Join(", ", failedFiles.Select(f => $"{f} {dicomFileRecordingTimes[f].ToString("yyyy-MM-dd HH:mm:ss")}"))}");
+                    }
+                    else
+                    {
+                        _log.Debug($"Transfer completed: All {totalCount} file(s) succeeded");
                     }
                 }
                 else
