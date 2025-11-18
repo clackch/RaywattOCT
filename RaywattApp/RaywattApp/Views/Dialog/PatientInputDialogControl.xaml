@@ -37,7 +37,9 @@
             </StackPanel>
 
             <Label Grid.Row="1" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [ID], Source={StaticResource L10N}}" Padding="0" VerticalAlignment="Center"/>
-            <TextBox Grid.Row="2" Grid.Column="1" Style="{DynamicResource TextBoxValidator}" Text="{Binding Patient.Id, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter ID], Source={StaticResource L10N}}" ToolTip="{Binding Patient.ValidateId}" Width="Auto" Margin="0,0,0,8"/>
+            <Border Grid.Row="2" Grid.Column="1"  Margin="0 0 0 10" CornerRadius="10" BorderThickness="1" BorderBrush="{DynamicResource GrayscaleGray5Brush}" Height="54">
+                <TextBox Style="{DynamicResource TextBoxReadOnly}" Text="{Binding Patient.Id}" VerticalAlignment="Center" Margin="20,0,0,0"/>
+            </Border>
 
             <Label Grid.Row="3" Grid.Column="1" Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [First Name], Source={StaticResource L10N}}" Padding="0" VerticalAlignment="Center"/>
             <TextBox Grid.Row="4" Grid.Column="1" Style="{DynamicResource TextBoxBase}" Text="{Binding Patient.Firstname, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding [Enter First Name], Source={StaticResource L10N}}" Width="auto" Margin="0,0,0,8"/>
@@ -55,7 +57,7 @@
 
             <Grid Grid.Row="13" Grid.Column="1">
                 <Button Style="{StaticResource OutlinedBtnType3-Large}" Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Cancel], Source={StaticResource L10N}}" HorizontalAlignment="Left"/>
-                <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding YesCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}" HorizontalAlignment="Right"/>
+                <Button Style="{StaticResource ContainedBtnType1-Large-Wide}" Command="{Binding PatientSaveCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [OK], Source={StaticResource L10N}}" HorizontalAlignment="Right"/>
             </Grid>
         </Grid>
     </Border>

@@ -187,7 +187,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("CanSavePatient");
 
-            return ValidatePatient();
+            return CommonUtil.ValidatePatient(PatientEdit, true);
         }
 
         private void PatientEdit_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -195,25 +195,6 @@ namespace RaywattApp.ViewModels
             _log.Debug("PatientEdit_PropertyChanged");
 
             (PatientEditSaveCommand as RelayCommand).NotifyCanExecuteChanged();
-        }
-
-        private bool ValidatePatient()
-        {
-            _log.Debug("ValidatePatient");
-
-            if (string.IsNullOrEmpty(PatientEdit.Id.Trim()))
-                return false;
-
-            if (string.IsNullOrEmpty(PatientEdit.Lastname.Trim()))
-                return false;
-
-            if (string.IsNullOrEmpty(PatientEdit.Firstname.Trim()))
-                return false;
-
-            if (PatientEdit.PhysicianId == 0)
-                return false;
-
-            return true;
         }
 
         private static void CopyPatient(Patient src, Patient dest)

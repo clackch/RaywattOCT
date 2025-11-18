@@ -129,7 +129,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("NewRecording");
 
-            if (!ValidateSelectedPatient(SelectedPatient.HasFirstname))
+            if (!CommonUtil.ValidatePatient(SelectedPatient))
             {
                 Dictionary<string, object> confirmParam = new Dictionary<string, object>();
                 confirmParam["title"] = _l10n["Information"];
@@ -179,17 +179,6 @@ namespace RaywattApp.ViewModels
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.RecordingPresetPage) { Parameter = parameter });
             else
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientDetailPage) { Parameter = parameter });
-        }
-
-        private bool ValidateSelectedPatient(bool hasFirstname)
-        {
-            if (SelectedPatient.Id == null || SelectedPatient.Lastname == null)
-                return false;
-
-            if (hasFirstname && SelectedPatient.Firstname == string.Empty)
-                return false;
-
-            return true;
         }
 
         private bool Validate(out bool isExist)
@@ -356,7 +345,6 @@ namespace RaywattApp.ViewModels
                     CommonUtil.ParseDicomName(dicomPatient.PatientName, out lastname, out firstname);
                     patient.Lastname = lastname;
                     patient.Firstname = firstname;
-                    patient.HasFirstname = firstname != string.Empty ? true : false;
                     patient.Name = dicomPatient.PatientName;
                     patient.Gender = dicomPatient.PatientSex;
                     DateTime birthdate;

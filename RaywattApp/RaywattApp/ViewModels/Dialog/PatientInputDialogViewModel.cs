@@ -1,10 +1,13 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using log4net;
 using RaywattApp.Common.Bases;
 using RaywattApp.Common.Dialog;
+using RaywattApp.Common.Util;
 using RaywattApp.Models;
 using System;
 using System.Collections.Generic;
+using System.Windows.Input;
 
 namespace RaywattApp.ViewModels.Dialog
 {
@@ -20,6 +23,12 @@ namespace RaywattApp.ViewModels.Dialog
 
         [ObservableProperty]
         private string _selectedGender;
+
+        private ICommand _patiendSaveCommand;
+        public ICommand PatientSaveCommand
+        {
+            get { return this._patiendSaveCommand ?? (this._patiendSaveCommand = new RelayCommand<IDialogWindow>(AnswerYes, CanSavePatient)); }
+        }
 
         public PatientInputDialogViewModel()
         {
@@ -42,22 +51,20 @@ namespace RaywattApp.ViewModels.Dialog
                 Patient.Birthdate = existingPatient.Birthdate;
                 Patient.Gender = existingPatient.Gender;
                 SelectedGender = existingPatient.Gender;
+
+                Patient.PropertyChanged += Patient_PropertyChanged;
             }
+        }
+
+        private void Patient_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            _log.Debug("Patient_PropertyChanged");
+
+            (PatientSaveCommand as RelayCommand<IDialogWindow>).NotifyCanExecuteChanged();
         }
 
         protected override void AnswerYes(IDialogWindow dialog)
         {
-            if (string.IsNullOrEmpty(Patient.Id?.Trim()))
-            {
-                Patient.ValidateId = _l10n["Enter ID"].ToString();
-                return;
-            }
-
-            if (string.IsNullOrEmpty(Patient.Lastname?.Trim()))
-            {
-                return;
-            }
-
             Dictionary<string, object> parameter = new Dictionary<string, object>();
             parameter["id"] = Patient.Id.Trim();
             parameter["firstname"] = Patient.Firstname?.Trim() ?? "";
@@ -70,6 +77,13 @@ namespace RaywattApp.ViewModels.Dialog
             dialogResults.DialogReturn = parameter;
 
             CloseDialogWithResult(dialog, dialogResults);
+        }
+
+        private bool CanSavePatient(IDialogWindow dialog)
+        {
+            _log.Debug("CanSavePatient");
+
+            return CommonUtil.ValidatePatient(Patient);
         }
     }
 }

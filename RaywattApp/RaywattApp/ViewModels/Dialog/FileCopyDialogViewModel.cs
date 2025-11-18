@@ -83,6 +83,8 @@ namespace RaywattApp.ViewModels.Dialog
         
         private List<string> failedFiles = new List<string>();
 
+        [ObservableProperty]
+        private bool _isErrorDicomTransfer;
 
         public FileCopyDialogViewModel(SqlManager sqlManager)
         {
@@ -159,8 +161,16 @@ namespace RaywattApp.ViewModels.Dialog
                 await FileSaveStandard();
             }
 
-            if(!isError)
+            if (!isError)
+            {
                 ProgressText = Constants.ExportStatusCompleted;
+            }
+            else
+            {
+                ProgressText = string.Join("\n", failedFiles);
+                IsErrorDicomTransfer = true;
+            }
+
             EnableDone = true;
         }
 
@@ -394,14 +404,12 @@ namespace RaywattApp.ViewModels.Dialog
                                     await Task.Delay(RETRY_DELAY_MS);
                                 }
                             }
-
                         }
 
                         if (!success)
                         {
                             isDicomError = true;
-                            ProgressText = CommonUtil.GetDicomResultMessage(res);
-                            failedFiles.Add($"{fileName} (Recording: {recordingTime})");
+                            failedFiles.Add(recordingTime);
                             _log.Error($"Store failed after {MAX_RETRY} attempts: {fileName}, Recording: {recordingTime}");
                         }
                     }
@@ -409,7 +417,7 @@ namespace RaywattApp.ViewModels.Dialog
                     if (failedFiles.Count > 0)
                     {
                         _log.Error($"Transfer summary: {failedFiles.Count}/{totalCount} file(s) failed");
-                        _log.Error($"Failed files: {string.Join(", ", failedFiles.Select(f => $"{f} {dicomFileRecordingTimes[f].ToString("yyyy-MM-dd HH:mm:ss")}"))}");
+                        _log.Error($"Failed files: {string.Join(", ", failedFiles)}");
                     }
                     else
                     {
@@ -773,9 +781,9 @@ namespace RaywattApp.ViewModels.Dialog
             RayExportWrapper.DicomAddProperty(0x00080060, dicomProperty["00080060"], 0);
             //(0008, 0064)	Conversion Type	-	U	CS
             RayExportWrapper.DicomAddProperty(0x00080064, dicomProperty["00080064"], 0);
-            //(0008, 0070)	Manufacturer	-	M, C, U	LO (RV201)
-            RayExportWrapper.DicomAddProperty(0x00080070, dicomProperty["00080070"], 0);
-            //(0008, 0080)	Institution Name	-	M	LO (RV200)
+            //(0008, 0070)	Manufacturer	-	M, C, U	LO
+            RayExportWrapper.DicomAddProperty(0x00080070, ConfigurationManager.AppSettings.Get("Manufacturer"), 0);
+            //(0008, 0080)	Institution Name	-	M	LO
             RayExportWrapper.DicomAddProperty(0x00080080, dicomProperty["00080080"], 0);
             //(0008, 0090)	Referring Physician's Name	-	C	PN
             RayExportWrapper.DicomAddProperty(0x00080090, patientCase.PhysicianName, 0);

@@ -1229,4 +1229,7 @@ Overwrite existing data?</value>
   <data name="Recording starts automatically" xml:space="preserve">
     <value>Recording starts automatically</value>
   </data>
+  <data name="Transfer error. Failed files below. Try Again." xml:space="preserve">
+    <value>Transfer error. Failed files below. Try Again.</value>
+  </data>
 </root>

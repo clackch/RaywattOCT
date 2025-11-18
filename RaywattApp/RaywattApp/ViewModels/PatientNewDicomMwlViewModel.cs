@@ -153,9 +153,8 @@ namespace RaywattApp.ViewModels
             CommonUtil.ParseDicomName(SelectedWorklist.PatientName, out lastname, out firstname);
             SelectedPatient.Lastname = lastname;
             SelectedPatient.Firstname = firstname;
-            SelectedPatient.HasFirstname = (firstname != string.Empty);
 
-            if (!ValidateSelectedPatient(SelectedPatient.HasFirstname))
+            if (!CommonUtil.ValidatePatient(SelectedPatient))
             {
                 Dictionary<string, object> confirmParam = new Dictionary<string, object>();
                 confirmParam["title"] = _l10n["Information"];
@@ -209,17 +208,6 @@ namespace RaywattApp.ViewModels
             }
             else
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientDetailPage) { Parameter = parameter });
-        }
-
-        private bool ValidateSelectedPatient(bool hasFirstname)
-        {
-            if (SelectedPatient.Id == null || SelectedPatient.Lastname == null)
-                return false;
-
-            if (hasFirstname && SelectedPatient.Firstname == string.Empty)
-                return false;
-
-            return true;
         }
 
         private bool Validate(out bool isExist, out bool needPhysician)
