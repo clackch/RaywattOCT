@@ -131,11 +131,31 @@ namespace RaywattApp.ViewModels
 
             if (!ValidateSelectedPatient(SelectedPatient.HasFirstname))
             {
-                Dictionary<string, object> param = new Dictionary<string, object>();
-                param["title"] = _l10n["Information"];
-                param["message"] = _l10n["Invalid format for patient information."];
-                _dialogService.OpenDialog(new AlertDialogControl(), param, Constants.ApplicationWidth, Constants.ApplicationHeight);
-                return;
+                Dictionary<string, object> confirmParam = new Dictionary<string, object>();
+                confirmParam["title"] = _l10n["Information"];
+                confirmParam["message"] = _l10n["Invalid format for patient information. Enter manually?"];
+                var confirmResult = _dialogService.OpenDialog(new ConfirmDialogControl(), confirmParam, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                if (confirmResult == null || confirmResult.DialogAnswer != DialogResults.Answer.Yes)
+                {
+                    return;
+                }
+
+                Dictionary<string, object> inputParam = new Dictionary<string, object>();
+                inputParam["patient"] = SelectedPatient;
+                var inputResult = _dialogService.OpenDialog(new PatientInputDialogControl(), inputParam, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                if (inputResult == null || inputResult.DialogAnswer != DialogResults.Answer.Yes)
+                {
+                    return;
+                }
+
+                Dictionary<string, Object> data = (Dictionary<string, Object>)inputResult.DialogReturn;
+                SelectedPatient.Id = data["id"].ToString();
+                SelectedPatient.Firstname = data["firstname"].ToString();
+                SelectedPatient.Lastname = data["lastname"].ToString();
+                SelectedPatient.Birthdate = (DateTime?)data["birthdate"];
+                SelectedPatient.Gender = data["gender"].ToString();
             }
 
             bool isExist = false;
@@ -316,6 +336,19 @@ namespace RaywattApp.ViewModels
                 for (int i = 0; i < count; i++)
                 {
                     var dicomPatient = Marshal.PtrToStructure<DicomPatient>(current);
+
+                    _log.Debug($"[{i}] PatientID: [{dicomPatient.PatientId}]");
+                    _log.Debug($"[{i}] PatientName: [{dicomPatient.PatientName}]");
+                    _log.Debug($"[{i}] PatientSex: [{dicomPatient.PatientSex}]");
+                    _log.Debug($"[{i}] PatientBirthDate: [{dicomPatient.PatientBirthDate}]");
+                    _log.Debug($"[{i}] PatientBirthTime: [{dicomPatient.PatientBirthTime}]");
+                    _log.Debug($"[{i}] PatientAge: [{dicomPatient.PatientAge}]");
+                    _log.Debug($"[{i}] ReferencedSOPClassUID: [{dicomPatient.ReferencedSOPClassUID}]");
+                    _log.Debug($"[{i}] ReferencedSOPInstanceUID: [{dicomPatient.ReferencedSOPInstanceUID}]");
+                    _log.Debug($"[{i}] IssuerOfPatientID: [{dicomPatient.IssuerOfPatientID}]");
+                    _log.Debug($"[{i}] TypeOfPatientID: [{dicomPatient.TypeOfPatientID}]");
+                    _log.Debug($"[{i}] AccessionNumber: [{dicomPatient.AccessionNumber}]");
+                    _log.Debug($"[{i}] PatientComments: [{dicomPatient.PatientComments}]");
 
                     Patient patient = new Patient();
                     patient.Id = dicomPatient.PatientId;
