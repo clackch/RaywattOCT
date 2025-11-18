@@ -148,7 +148,7 @@ void COCTImaging::ApplyZOffset(const cv::Mat& src, cv::Mat& dst, int zOffset) {
 	cv::Mat translation_matrix = (cv::Mat_<double>(2, 3) << 1, 0, zOffset * -1, 0, 1, 0);
 	cv::warpAffine(img, dst, translation_matrix, img.size());
 }
-void COCTImaging::processForAutoCalib() {
+void COCTImaging::ProcessForAutoCalib() {
 	cv::Mat image = adaptive_compensation();
 	if (m_FindingSheathMathod == AutoCalibrationMathod::FindingMinMagnitude)
 	{
@@ -774,7 +774,7 @@ UINT COCTImaging::threadRender(LPVOID param) {
 
 		if (pImaging->m_pThread->isRun) {
 			pImaging->Process((char *)pImaging->m_pFringesBuffer);
-			pImaging->processForAutoCalib();
+			pImaging->ProcessForAutoCalib();
 			pImaging->PostProcess(pImaging->GetProcessedImage());
 			// To-Do
 			// double buffering 필요?
@@ -793,7 +793,7 @@ UINT COCTImaging::threadRender(LPVOID param) {
 cv::Mat COCTImaging::adaptive_compensation()
 {
 	if (!bCompensated || m_setting.applyCompensation == 0)
-		return;
+		return imageResult;
 
 	// 0) 설정값 확정 (원 로직 유지)
 	EXPONENTIAL_FACTOR = (EXPONENTIAL_FACTOR <= -1.0f) ? m_setting.exponentialFactor : EXPONENTIAL_FACTOR;

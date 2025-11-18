@@ -93,7 +93,7 @@ public:
 	virtual void Process(char* fringes);
 	virtual void PostProcess(cv::Mat image);
 	void ApplyZOffset(const cv::Mat& src, cv::Mat& dst, int zOffset);
-	void processForAutoCalib();
+	virtual void ProcessForAutoCalib();
 	int Start();
 	int Stop();
 	virtual void DoAsyncRender(char* fringes);

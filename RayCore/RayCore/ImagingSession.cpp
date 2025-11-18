@@ -245,6 +245,7 @@ void* CImagingSession::GetImageData(int nFrame) {
 	char* pBuffer = m_pDataManager->GetSample(nFrame);
 
 	m_pImaging->Process(pBuffer);
+	m_pImaging->ProcessForAutoCalib();
 	cv::Mat imgResult = m_pImaging->GetProcessedImage().clone();
 
 	std::map<int, cv::Mat>::iterator it = m_mapImage.find(nFrame);
