@@ -19,6 +19,7 @@ public:
 
 		int nSheathPosition;	// pixel
 		int nSheathThickness;	// pixel
+		int calPerFrame;
 
 		double GetAxialResolutionScale() { return fAxialResolutionScale / fRefractiveIndex; }
 		double GetSheathRadius() { return fSheathRadius / fRefractiveIndex;}

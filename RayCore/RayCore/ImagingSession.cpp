@@ -575,7 +575,7 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 		PLOGI.printf("mapImage inserted: frame %d", pSession->m_mapImage.size());
 		cv::Mat imgResultWithoutCompensation = pImaging->GetWithoutCompensationImage().clone();
 		pSession->m_mapImageWithoutCompensation.insert(std::make_pair(nFrame, imgResultWithoutCompensation));
-		PLOGI.printf("done")
+		PLOGI.printf("done");
 	}
 
 	if (pSession->m_vZOffset.size() == nNumOfSamples)
