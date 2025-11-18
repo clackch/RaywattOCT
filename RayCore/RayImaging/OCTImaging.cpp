@@ -792,6 +792,9 @@ UINT COCTImaging::threadRender(LPVOID param) {
 
 cv::Mat COCTImaging::adaptive_compensation()
 {
+	if (!bCompensated || m_setting.applyCompensation == 0)
+		return;
+
 	// 0) 설정값 확정 (원 로직 유지)
 	EXPONENTIAL_FACTOR = (EXPONENTIAL_FACTOR <= -1.0f) ? m_setting.exponentialFactor : EXPONENTIAL_FACTOR;
 	BRIGHTNESS_CONTROL = (BRIGHTNESS_CONTROL <= -1.0f) ? m_setting.brightnessControl : BRIGHTNESS_CONTROL;
