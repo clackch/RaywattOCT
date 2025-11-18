@@ -62,6 +62,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private string _spsMsg;
 
+        [ObservableProperty]
+        private bool _isOCT = true;
+
         private IntPtr dicomClient;
         private IntPtr dicomWorklists;
 
@@ -380,8 +383,9 @@ namespace RaywattApp.ViewModels
             string searchPatientName = SearchPatientId.Text.Trim();
             string searchSpsStartDateFrom = SpsStartDateFrom.HasValue ? SpsStartDateFrom.Value.ToString("yyyyMMdd") : "00010101";
             string searchSpsStartDateTo = SpsStartDateTo.HasValue ? SpsStartDateTo.Value.ToString("yyyyMMdd") : "99991231";
+            string searchModality = IsOCT ? "OCT" : "*";
 
-            dicomWorklists = await Task.Run(() => RayExportWrapper.FindWorklist(dicomClient, searchPatientName, "*" /* PatientName */, "*" /* AccessionNumber */, "OCT", "*" /* ScheduledStationAe */, searchSpsStartDateFrom, searchSpsStartDateTo, "*" /* ProcedureId */, out count));
+            dicomWorklists = await Task.Run(() => RayExportWrapper.FindWorklist(dicomClient, searchPatientName, "*" /* PatientName */, "*" /* AccessionNumber */, searchModality, "*" /* ScheduledStationAe */, searchSpsStartDateFrom, searchSpsStartDateTo, "*" /* ProcedureId */, out count));
             _log.Debug($"FindWorklist : PatientId = {searchPatientName}, SpsStartDate = {searchSpsStartDateFrom}-{searchSpsStartDateTo}, ResultCount = {count}");
             IsChecking = false;
 
