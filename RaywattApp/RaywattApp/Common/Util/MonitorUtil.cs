@@ -384,7 +384,7 @@ namespace RaywattApp.Common.Util
                     int deleted = 0;
                     foreach (var item in list)
                     {
-                        if (deleted >= list.Count - 1) break;
+                        if (deleted >= countToDelete) break;
 
                         try
                         {
