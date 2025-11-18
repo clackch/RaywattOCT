@@ -460,8 +460,14 @@ int COCTSystem::StartReview(char* strFilePath, double imageResolution, double zO
 			PLOGE.printf("InvalidArgument : %s", strFilePath);
 			return (int)RayError::InvalidArgument;
 		}
-		pSession->LoadZOffset(strFilePath);
-		pSession->SetZOffset((int)zOffset);
+		pSession->SetAutoCalibPatch(m_autoCalibPatch);
+
+		std::string strPath(strFilePath);
+		std::string strZOffsetFilePath = strPath.substr(0, strPath.size() - 3).append("zOffset");
+		if (pSession->LoadZOffset(strZOffsetFilePath)) {
+			//pSession->CalculateZOffset(pSession->GetDataManager()->GetNumOfSamples(), m_autoCalibPatch, strZOffsetFilePath);
+		}
+		//pSession->SetZOffset((int)zOffset);
 
 		postPriorMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
 		postPriorMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
@@ -483,8 +489,14 @@ RayError COCTSystem::StartCompare(char* strFilePath, double imageResolution, dou
 	if (pSession == nullptr) {
 		return RayError::InvalidArgument;
 	}
-	pSession->LoadZOffset(strFilePath);
-	pSession->SetZOffset((int)zOffset);
+	
+	std::string strPath(strFilePath);
+	std::string strZOffsetFilePath = strPath.substr(0, strPath.size() - 3).append("zOffset");
+	if (pSession->LoadZOffset(strZOffsetFilePath)) {
+		//pSession->CalculateZOffset(pSession->GetDataManager()->GetNumOfSamples(), m_autoCalibPatch, strZOffsetFilePath);
+	}
+
+	//pSession->SetZOffset((int)zOffset);
 
 	if (m_reviewSession[SESSION_COMPARE] != nullptr) {
 		m_reviewSession[SESSION_COMPARE]->Stop();
@@ -771,8 +783,12 @@ RayError COCTSystem::OpenImage(char* strFilePath, double imageResolution, double
 	if (pSession == nullptr) {
 		return RayError::InvalidArgument;
 	}
-	pSession->LoadZOffset(strFilePath);
-	pSession->SetZOffset((int)zOffset);
+	std::string strPath(strFilePath);
+	std::string strZOffsetFilePath = strPath.substr(0, strPath.size() - 3).append("zOffset");
+	if (pSession->LoadZOffset(strZOffsetFilePath)) {
+		//pSession->CalculateZOffset(pSession->GetDataManager()->GetNumOfSamples(), m_autoCalibPatch);
+	}
+	//pSession->SetZOffset((int)zOffset);
 
 	m_openedSession = pSession;
 	m_openedSession->InitCutView(cv::Scalar(0x00, 0x00, 0x00));
@@ -812,23 +828,24 @@ void* COCTSystem::GetImageData(int nFrame) {
 }
 
 /*
-* SetZOffsetPerFrame 
+* SaveZOffset
 */
-RayError COCTSystem::SetZOffsetPerFrame(int nFrame) {
+RayError COCTSystem::SaveZOffset(std::string strPath) {
+	PLOGI.printf("SaveZOffset : %s", strPath.c_str());
 	if (m_openedSession != nullptr) return RayError::WrongState;
 	else {
 		if (m_curSession == SESSION_UNKNOWN || m_reviewSession[m_curSession] == nullptr) {
 			PLOGI.printf("Session #%d is not started.", m_curSession);
 			return RayError::WrongState;
 		}
-		if (m_reviewSession[m_curSession]->IsProcessed(nFrame)) {
-			m_reviewSession[m_curSession]->CalculateZOffset(nFrame, m_autoCalibPatch);
+		std::string strZOffsetFilePath = strPath.substr(0, strPath.size() - 3).append("zOffset");
+		if (m_reviewSession[m_curSession]->SaveZOffset(strZOffsetFilePath))
 			return RayError::OK;
-		}
+		else
+			return RayError::WrongState;
 	}
-
-	return RayError::WrongState;
 }
+
 
 /*
 * GetLongitudeData

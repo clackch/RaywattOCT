@@ -269,14 +269,6 @@ namespace RaywattApp.Common.Bases
                 _log.Debug("OCTViewModelBase MoveToFrame : result != RayError.OK");
                 return false;
             }
-
-            RayError resZOffset = (RayError) RaySetZOffsetPerFrame(nFrame);
-            if (resZOffset != RayError.OK)
-            {
-                _log.Debug("OCTViewModelBase MoveToFrame : Can't Calculate ZOffset");
-                return false;
-            }
-
             IntPtr data = RayGetImageData(nFrame);
             if (data == IntPtr.Zero)
             {

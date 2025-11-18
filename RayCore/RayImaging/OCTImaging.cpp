@@ -154,6 +154,7 @@ void COCTImaging::PostProcess(cv::Mat image) {
 	CircularizeImage(imageResultColor, imageCircle);
 }
 void COCTImaging::ApplyZOffset(const cv::Mat& src, cv::Mat& dst, int zOffset) {
+	auto start_manual = std::chrono::high_resolution_clock::now();
 	cv::Mat img = src.clone();
 	dst.create(img.size(), img.type());
 	dst.setTo(cv::Scalar::all(0));
@@ -171,6 +172,8 @@ void COCTImaging::ApplyZOffset(const cv::Mat& src, cv::Mat& dst, int zOffset) {
 	else {
 		img.copyTo(dst);
 	}
+	auto end_manual = std::chrono::high_resolution_clock::now();
+	PLOGI.printf("Manual Time: %lld us", std::chrono::duration_cast<std::chrono::microseconds>(end_manual - start_manual).count());
 }
 int COCTImaging::Start() {
 	BOOL result = FALSE;

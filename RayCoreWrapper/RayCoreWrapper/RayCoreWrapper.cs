@@ -183,8 +183,6 @@ namespace RaywattOCT
         [DllImport("RayCore.dll")]
         public static extern int RaySetSession(RaySession session);
         [DllImport("RayCore.dll")]
-        public static extern int RaySetZOffsetPerFrame(int nFrame);
-        [DllImport("RayCore.dll")]
         public static extern int RayRegisterImageCallback(IntPtr cbCrossSection, IntPtr cbLongitude);
         [DllImport("RayCore.dll")]
         public static extern int RayUnregisterImageCallback();

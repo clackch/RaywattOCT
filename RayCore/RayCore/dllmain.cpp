@@ -250,9 +250,6 @@ _declspec(dllexport) RayError RayCloseImage() {
 _declspec(dllexport) void* RayGetImageData(int nFrame) {
     return octSystem.GetImageData(nFrame);
 }
-_declspec(dllexport) RayError RaySetZOffsetPerFrame(int nFrame) {
-    return octSystem.SetZOffsetPerFrame(nFrame);
-}
 _declspec(dllexport) void* RayGetLongitudeData(double fDegree) {
     return octSystem.GetLongitudeData(fDegree);
 }
