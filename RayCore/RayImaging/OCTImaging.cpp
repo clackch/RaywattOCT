@@ -173,7 +173,7 @@ void COCTImaging::ApplyZOffset(const cv::Mat& src, cv::Mat& dst, int zOffset) {
 		img.copyTo(dst);
 	}
 	auto end_manual = std::chrono::high_resolution_clock::now();
-	PLOGI.printf("Manual Time: %lld us", std::chrono::duration_cast<std::chrono::microseconds>(end_manual - start_manual).count());
+	//PLOGI.printf("Manual Time: %lld us", std::chrono::duration_cast<std::chrono::microseconds>(end_manual - start_manual).count());
 }
 int COCTImaging::Start() {
 	BOOL result = FALSE;
