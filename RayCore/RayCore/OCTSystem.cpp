@@ -467,7 +467,7 @@ int COCTSystem::StartReview(char* strFilePath, double imageResolution, double zO
 		if (!pSession->LoadZOffset(strZOffsetFilePath)) {
 			//pSession->CalculateZOffset(pSession->GetDataManager()->GetNumOfSamples(), m_autoCalibPatch, strZOffsetFilePath);
 		}
-		//pSession->SetZOffset((int)zOffset);
+		pSession->SetZOffset((int)zOffset);
 
 		postPriorMessage(WM_START_REVIEW_SESSION, SESSION_REVIEW, (LPARAM)pSession);
 		postPriorMessage(WM_UPDATE_SCANNER_STATE, (WPARAM)RayScannerState::Review);
@@ -496,7 +496,7 @@ RayError COCTSystem::StartCompare(char* strFilePath, double imageResolution, dou
 		//pSession->CalculateZOffset(pSession->GetDataManager()->GetNumOfSamples(), m_autoCalibPatch, strZOffsetFilePath);
 	}
 
-	//pSession->SetZOffset((int)zOffset);
+	pSession->SetZOffset((int)zOffset);
 
 	if (m_reviewSession[SESSION_COMPARE] != nullptr) {
 		m_reviewSession[SESSION_COMPARE]->Stop();
@@ -790,7 +790,7 @@ RayError COCTSystem::OpenImage(char* strFilePath, double imageResolution, double
 		// app의 fileCopyDialog에서만 OpenImage를 호출하는데, 이미 저장된 zOffset 파일이 있다고 가정 중.
 		//pSession->CalculateZOffset(pSession->GetDataManager()->GetNumOfSamples(), m_autoCalibPatch);
 	}
-	//pSession->SetZOffset((int)zOffset);
+	pSession->SetZOffset((int)zOffset);
 
 	m_openedSession = pSession;
 	m_openedSession->InitCutView(cv::Scalar(0x00, 0x00, 0x00));
