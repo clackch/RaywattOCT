@@ -265,6 +265,7 @@ void* CImagingSession::GetImageData(int nFrame) {
 	// ZOffset 파일에서 읽어오는 상태면, 계산 안해도 됨..
 	//int nowZOffset = CalculateZOffset(imgResult, m_autoCalibPatch);
 
+	//imgZOffset = imgResult.clone();
 	m_pImaging->ApplyZOffset(imgResult, imgZOffset, GetZOffset(nFrame));
 
 	std::map<int, cv::Mat>::iterator it = m_mapImage.find(nFrame);
@@ -455,7 +456,7 @@ int CImagingSession::CalculateZOffset(const cv::Mat image, const cv::Mat autoCal
 	else
 	{
 		/* section을 나눠 sheath 파악 안정성 추가*/
-		int validCount = 0, sectionDivision = 6, height = result.rows, width = result.cols / sectionDivision;
+		int validCount = 0, sectionDivision = 6, height = result.rows / 2, width = result.cols / sectionDivision;
 		for (int i = 0; i < sectionDivision; i++)
 		{
 			cv::Mat section = result(cv::Rect(i * width, 0, width, height));
