@@ -275,19 +275,13 @@ namespace RaywattApp.ViewModels
 
             Patients.Clear();
 
-            if (string.IsNullOrEmpty(SearchPatientId.Text))
-            {
-                SearchPatientId.Msg = _l10n["Enter ID"].ToString();
-                return;
-            }
-
             if (Regex.IsMatch(SearchPatientId.Text, @"[\*\?]"))
             {
                 SearchPatientId.Msg = _l10n["Patient ID cannot contain * or ?."].ToString();
                 return;
             }
 
-            string patientIdParam = SearchPatientId.Text.Trim();
+            string patientIdParam = "*" + SearchPatientId.Text.Trim() + "*";
 
             IsChecking = true;
             RayExportWrapper.DicomNetRWError res = await Task.Run(() => (RayExportWrapper.DicomNetRWError)RayExportWrapper.Echo(dicomClient));
