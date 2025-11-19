@@ -124,6 +124,7 @@ namespace RaywattApp.ViewModels
                 return;
             }
 
+            _log.Debug("before Z Offset : " + (PatientCase.ZOffset) + ", after Z Offset : " + (PatientCase.ZOffset + this.zOffset));
             RaySetProperty(Property.ZOffset, PatientCase.ZOffset + this.zOffset);
             MoveToFrame(RaySession.Review, DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current);
         }
