@@ -41,7 +41,7 @@ void CConfiguration::Initialize(tstring configFile)
 	if (measurement.GetAxialResolutionScale() > 0) {
 		this->measurement.nSheathPosition = measurement.GetSheathRadius() * 1000.f / measurement.GetAxialResolutionScale();
 	}
-	this->measurement.calPerFrame = ::GetPrivateProfileInt(_T("Measurement"), _T("CalibrationPerFrame"), 1, configFilePath.c_str());
+	this->measurement.calPerFrame = ::GetPrivateProfileInt(_T("Measurement"), _T("CalibrationPerFrame"), 0, configFilePath.c_str());
 	
 	// [Imaging]
 	int nAScan = ::GetPrivateProfileInt(_T("Imaging"), _T("AScan"), 1920, configFilePath.c_str());
