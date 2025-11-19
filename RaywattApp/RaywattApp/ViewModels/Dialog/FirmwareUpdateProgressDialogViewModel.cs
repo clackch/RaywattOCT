@@ -20,7 +20,6 @@ namespace RaywattApp.ViewModels.Dialog
         private FWProgressCallback _progressCallback;
         private FWStatusCallback _statusCallback;
 
-        private IDialogWindow _currentDialog;
         private bool _updateCompleted = false;
 
         [ObservableProperty]
@@ -122,14 +121,14 @@ namespace RaywattApp.ViewModels.Dialog
                         break;
 
                     case FirmwareUpdateState.Success:
-                        StatusMessage = "Firmware update completed successfully!\nPlease restart the device.";
+                        StatusMessage = "Firmware update completed successfully.";
                         CanCancel = false;
                         ShowCloseButton = true;
                         _updateCompleted = true;
                         break;
 
                     case FirmwareUpdateState.Failed:
-                        StatusMessage = "Firmware update failed.\nPlease try again or contact support.";
+                        StatusMessage = "Firmware update failed.";
                         CanCancel = false;
                         ShowCloseButton = true;
                         break;
@@ -201,7 +200,7 @@ namespace RaywattApp.ViewModels.Dialog
             }
         }
 
-        protected override void AnswerNo(IDialogWindow dialog)
+        protected override void AnswerYes(IDialogWindow dialog)
         {
             _log.Debug("Close button clicked");
 

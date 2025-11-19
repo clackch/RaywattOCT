@@ -11,69 +11,38 @@
     <Border CornerRadius="10"
             Background="{DynamicResource GrayscaleGray6Brush}"
             BorderBrush="{DynamicResource GrayscaleGray7Brush}"
-            Width="600"
-            Height="300">
+            Width="460"
+            Height="244">
 
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="21"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="34"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="70"/>
+                <RowDefinition Height="16"/>
+                <RowDefinition Height="24"/>
+                <RowDefinition Height="24"/>
+                <RowDefinition Height="66"/>
             </Grid.RowDefinitions>
 
             <!-- Title -->
-            <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,10,0,0">
-                <Label Style="{DynamicResource Pretendard-Medium-22}" 
-                       Content="{Binding Title}" 
-                       Foreground="{DynamicResource GrayscaleWhiteBrush}" 
-                       HorizontalAlignment="Center"/>
+            <StackPanel Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,10,0,0">
+                <Label Style="{DynamicResource Pretendard-Medium-12}" Content="{Binding Title}" Foreground="{DynamicResource GrayscaleGray3Brush}" HorizontalAlignment="Center"/>
             </StackPanel>
 
-            <!-- Content -->
-            <StackPanel Grid.Row="2" Margin="40,20" VerticalAlignment="Center">
-                <!-- Status Message -->
-                <Label Style="{DynamicResource Pretendard-Medium-16}" 
-                       Content="{Binding StatusMessage}" 
-                       Foreground="{DynamicResource GrayscaleWhiteBrush}" 
-                       HorizontalContentAlignment="Center"
-                       Margin="0,0,0,20"/>
+            <!-- Status Message -->
+            <StackPanel Grid.Row="1" VerticalAlignment="Bottom">
+                <Label Style="{DynamicResource Pretendard-Medium-22}" Content="{Binding StatusMessage}" Foreground="{DynamicResource GrayscaleWhiteBrush}" HorizontalContentAlignment="Center" Width="338" TextBlock.TextAlignment="Center"/>
+            </StackPanel>
 
-                <!-- Progress Bar -->
-                <ProgressBar Value="{Binding Progress}" 
-                            Minimum="0" 
-                            Maximum="100" 
-                            Height="30"
-                            Margin="0,0,0,10"/>
-
-                <!-- Progress Percentage -->
-                <Label Style="{DynamicResource Pretendard-Medium-14}" 
-                       Foreground="{DynamicResource GrayscaleGray3Brush}" 
-                       HorizontalContentAlignment="Center"
-                       Margin="0,0,0,0">
-                    <Label.Content>
-                        <TextBlock>
-                            <Run Text="{Binding Progress, Mode=OneWay}"/>
-                            <Run Text="%"/>
-                        </TextBlock>
-                    </Label.Content>
-                </Label>
+            <!-- Progress Bar -->
+            <StackPanel Grid.Row="3" VerticalAlignment="Center">
+                <ProgressBar Value="{Binding Progress}" Width="412" Height="24"/>
             </StackPanel>
 
             <!-- Buttons -->
-            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
-                <!-- Cancel Button (visible during download) -->
-                <Button Style="{StaticResource OutlinedBtnType3-Large}"
-                        Command="{Binding CancelCommand}"
-                        Content="{Binding [Cancel], Source={StaticResource L10N}}"
-                        Visibility="{Binding CanCancel, Converter={StaticResource BoolToVisibilityConverter}}"/>
-
-                <!-- Close Button (visible after completion) -->
-                <Button Style="{StaticResource ContainedBtnType1-Large-Wide}"
-                        Command="{Binding NoCommand}"
-                        CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"
-                        Content="{Binding [Close], Source={StaticResource L10N}}"
-                        Visibility="{Binding ShowCloseButton, Converter={StaticResource BoolToVisibilityConverter}}"/>
+            <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top">
+                <Button Style="{StaticResource ContainedBtnType1-Large-Short}" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}" Visibility="{Binding CanCancel, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                <Button Style="{StaticResource ContainedBtnType1-Large-Short}" Command="{Binding OKCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Done], Source={StaticResource L10N}}" Visibility="{Binding ShowCloseButton, Converter={StaticResource BoolToVisibilityConverter}}"/>
             </StackPanel>
         </Grid>
     </Border>
