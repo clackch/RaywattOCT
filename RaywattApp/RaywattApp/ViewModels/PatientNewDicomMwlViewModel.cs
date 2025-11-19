@@ -324,12 +324,6 @@ namespace RaywattApp.ViewModels
 
             Worklists.Clear();
 
-            if (string.IsNullOrEmpty(SearchPatientId.Text))
-            {
-                SearchPatientId.Msg = _l10n["Enter ID"].ToString();
-                return;
-            }
-
             if (Regex.IsMatch(SearchPatientId.Text, @"[\*\?]"))
             {
                 SearchPatientId.Msg = _l10n["Patient ID cannot contain * or ?."].ToString();
@@ -368,7 +362,7 @@ namespace RaywattApp.ViewModels
 
             int count = 0;
 
-            string searchPatientName = SearchPatientId.Text.Trim();
+            string searchPatientName = "*" + SearchPatientId.Text.Trim() + "*";
             string searchSpsStartDateFrom = SpsStartDateFrom.HasValue ? SpsStartDateFrom.Value.ToString("yyyyMMdd") : "00010101";
             string searchSpsStartDateTo = SpsStartDateTo.HasValue ? SpsStartDateTo.Value.ToString("yyyyMMdd") : "99991231";
             string searchModality = IsOCT ? "OCT" : "*";
