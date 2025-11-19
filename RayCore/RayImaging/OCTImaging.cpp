@@ -154,10 +154,26 @@ void COCTImaging::PostProcess(cv::Mat image) {
 	CircularizeImage(imageResultColor, imageCircle);
 }
 void COCTImaging::ApplyZOffset(const cv::Mat& src, cv::Mat& dst, int zOffset) {
+	auto start_manual = std::chrono::high_resolution_clock::now();
 	cv::Mat img = src.clone();
-
-	cv::Mat translation_matrix = (cv::Mat_<double>(2, 3) << 1, 0, zOffset * -1, 0, 1, 0);
-	cv::warpAffine(img, dst, translation_matrix, img.size());
+	dst.create(img.size(), img.type());
+	dst.setTo(cv::Scalar::all(0));
+	PLOGI.printf("ZOffset: %d", zOffset);
+	if (zOffset > 0) {
+		cv::Rect srcR(zOffset, 0, img.cols - zOffset, img.rows);
+		cv::Rect dstR(0, 0, img.cols - zOffset, img.rows);
+		img(srcR).copyTo(dst(dstR));
+	}
+	else if (zOffset < 0) {
+		cv::Rect srcR(0, 0, img.cols + zOffset, img.rows);
+		cv::Rect dstR(-zOffset, 0, img.cols + zOffset, img.rows);
+		img(srcR).copyTo(dst(dstR));
+	}
+	else {
+		img.copyTo(dst);
+	}
+	auto end_manual = std::chrono::high_resolution_clock::now();
+	PLOGI.printf("Manual Time: %lld us", std::chrono::duration_cast<std::chrono::microseconds>(end_manual - start_manual).count());
 }
 int COCTImaging::Start() {
 	BOOL result = FALSE;

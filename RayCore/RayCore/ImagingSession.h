@@ -57,6 +57,8 @@ private:
 	int m_zOffset;
 	std::vector<int> m_vZOffset;
 
+	std::string m_strDataFilePath;
+	cv::Mat m_autoCalibPatch;
 private:
 	CImagingSession(CMessageService* pMsg, int nSession, bool deleteData = true);
 public:
@@ -104,13 +106,17 @@ public:
 	int GetNumOfGuidewirePoints(int nFrame);
 	void* GetGuidewireRadius(int nFrame);
 
-	bool LoadZOffset(const char* strDataFilePath);
+	bool LoadZOffset(std::string strDataFilePath);
 	void SetZOffset(int zOffset) { m_zOffset = zOffset; }
 	int GetZOffset() { return m_zOffset; }
 	int GetZOffset(int nFrame);
+	int CalculateZOffset(const cv::Mat nowFrame, const cv::Mat autoCalibPatch);
+	bool SaveZOffset(std::string strDataFilePath);
 
 	static std::vector<cv::Point> GetValidLumenContour(const cv::Mat& imageResultWithoutCompensation, int imgSize, const cv::Mat& centerMask, const cv::Ptr<cv::CLAHE>& clahe, COCTImaging *pImaging);
 	static int IsLumenNormal(cv::Mat image, std::vector<cv::Point> contour, double lumenThresholdMin, double lumenThresholdMax, double lumenSnrThreshold, bool showLumenGuide);
+	cv::Mat GetAutoCalibPatch() { return m_autoCalibPatch; }
+	void SetAutoCalibPatch(cv::Mat patch) { m_autoCalibPatch = patch.clone(); }
 
 private:
 	static CImagingSession* createSession(CMessageService* pMsg, IImaging::Setting setting, int nSession, IDataManager* pData, bool deleteData, ImagingType type);
