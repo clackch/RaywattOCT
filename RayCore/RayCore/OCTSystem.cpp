@@ -831,26 +831,6 @@ void* COCTSystem::GetImageData(int nFrame) {
 }
 
 /*
-* SaveZOffset
-*/
-RayError COCTSystem::SaveZOffset(std::string strPath) {
-	PLOGI.printf("SaveZOffset : %s", strPath.c_str());
-	if (m_openedSession != nullptr) return RayError::WrongState;
-	else {
-		if (m_curSession == SESSION_UNKNOWN || m_reviewSession[m_curSession] == nullptr) {
-			PLOGI.printf("Session #%d is not started.", m_curSession);
-			return RayError::WrongState;
-		}
-		std::string strZOffsetFilePath = strPath.substr(0, strPath.size() - 3).append("zOffset");
-		if (m_reviewSession[m_curSession]->SaveZOffset(strZOffsetFilePath))
-			return RayError::OK;
-		else
-			return RayError::WrongState;
-	}
-}
-
-
-/*
 * GetLongitudeData
 */
 void* COCTSystem::GetLongitudeData(double fDegree) {
