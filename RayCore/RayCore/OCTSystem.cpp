@@ -816,16 +816,13 @@ RayError COCTSystem::CloseImage() {
 void* COCTSystem::GetImageData(int nFrame) {
 	// m_openedSession을 정해주는 게 OpenImage 함수 밖에 없는데, ZOffset 파일이 있다고 가정하고 진행 중.
 	if (m_openedSession != nullptr) {
-		PLOGI.printf("Get opened image data: Frame #%d", nFrame);
 		return m_openedSession->GetImageData(nFrame);
 	}
 	else {
 		if (m_curSession == SESSION_UNKNOWN || m_reviewSession[m_curSession] == nullptr) {
-			PLOGI.printf("Session #%d is not started.", m_curSession);
 			return nullptr;
 		}
 		if (m_reviewSession[m_curSession]->IsProcessed(nFrame)) {
-			PLOGI.printf("Get processed image data: Frame #%d", nFrame);
 			cv::Mat image = m_reviewSession[m_curSession]->PostProcess(nFrame);
 			return image.data;
 		}
