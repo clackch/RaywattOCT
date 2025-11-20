@@ -252,16 +252,11 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	const double secBadClkDuration = m_setting.usBadClockDuration * 1e-6;
 	const bool useDES = m_setting.bUseDES;
 
-	// TODO: Specify the sample rate (see sample rate id below)
-	double dSamplePerSec = nAScan * nLaserSpeed;
-	dSamplePerSec = ceil((dSamplePerSec / 1000000.f)) * 1000000.f;
-
 	if (useDES) {
 		retCode = AlazarSetParameterUL(boardHandle, CHANNEL_A, SET_ADC_MODE, ADC_MODE_DES);
 		PLOGI.printf("Use DES Mode - %s\n", AlazarErrorToText(retCode));
 	}
 
-	PLOGI.printf("sample per sec : %.2f\n", dSamplePerSec);
 	// TODO: Select clock parameters as required to generate this sample rate.
 	//
 	// For example: if samplesPerSec is 100.e6 (100 MS/s), then:
@@ -270,8 +265,8 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 	//   100 MHz signal to the EXT CLK BNC connector.
 
 	double dutyCycle = 0.5f;	// maximum 50%
-	U32 srcClock = (useKClock) ? FAST_EXTERNAL_CLOCK : INTERNAL_CLOCK_10MHz_REF;
-	U32 rate = (useKClock) ? SAMPLE_RATE_USER_DEF : dSamplePerSec / dutyCycle;
+	U32 srcClock = (useKClock) ? FAST_EXTERNAL_CLOCK : INTERNAL_CLOCK;
+	U32 rate = (useKClock) ? SAMPLE_RATE_USER_DEF : SAMPLE_RATE_1000MSPS;
 	retCode = AlazarSetCaptureClock(boardHandle,
 		srcClock,
 		rate,
