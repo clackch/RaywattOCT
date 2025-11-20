@@ -434,7 +434,7 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f) {
 				// 4. Zero Pad & Reorder (1 | 2 | 0 | 0)
 				ippsZero_32fc(ctx.fcBuffer_IFFT, nFFTLength);
 				ippsCopy_32fc(ctx.fcBuffer_FFT, ctx.fcBuffer_IFFT, nOutputLength);
-
+#if 0
 				// 5. Inverse FFT
 				ippsFFTInv_CToC_32fc_I(ctx.fcBuffer_IFFT, ifftSpec, ctx.fftWorkBufIFFT);
 
@@ -450,6 +450,10 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f) {
 
 				// 8. FFT Again
 				ippsFFTFwd_CToC_32fc_I(ctx.fcBuffer_FFT, fftSpecSecond, ctx.fftWorkBufSecond);
+#else
+				ippsCopy_32fc(ctx.fcBuffer_IFFT, ctx.fcBuffer_FFT, nOutputLength);
+
+#endif
 
 				// 9. Extract Magnitude
 				ippsPowerSpectr_32fc(ctx.fcBuffer_FFT, fFFTResult + i * nOutputLength, nOutputLength);
