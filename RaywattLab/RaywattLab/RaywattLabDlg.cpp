@@ -1135,7 +1135,7 @@ void CRaywattLabDlg::OnBnClickedButtonSaveData()
 			USHORT* pFFTData = m_pImagingRealtime->GetScopeFFTData();
 			USHORT nPeakValue;
 			int nPeakIndex, nLineWidth;
-			measurement.CalculateAxialResolution(pFFTData, config.imaging.nOutputLength, config.measurement, nPeakValue,  nPeakIndex, nLineWidth);
+			measurement.CalculateAxialResolutionFFT(pFFTData, config.imaging.nOutputLength, config.measurement, nPeakValue,  nPeakIndex, nLineWidth);
 			if (nPeakValue > nMaxPeak) {
 				nMaxPeak = nPeakValue;
 				nMaxIndex = nPeakIndex;
@@ -1509,7 +1509,7 @@ void CRaywattLabDlg::OnBnClickedButtonMeasure()
 	USHORT nPeakValue, nNoisePower;
 	int nPeakIndex, nLineWidth;
 
-	measurement.CalculateAxialResolution(pFFTData, config.imaging.nOutputLength, config.measurement, nPeakValue, nPeakIndex, nLineWidth);
+	measurement.CalculateAxialResolutionFFT(pFFTData, config.imaging.nOutputLength, config.measurement, nPeakValue, nPeakIndex, nLineWidth);
 	measurement.CalculateNoisePower(pFFTData, config.imaging.nOutputLength, config.measurement, nPeakIndex, nNoisePower);
 
 	updateMeasurement(nPeakValue, nPeakIndex, nLineWidth, nNoisePower);
