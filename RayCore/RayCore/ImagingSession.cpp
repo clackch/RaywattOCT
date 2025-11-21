@@ -224,12 +224,8 @@ bool CImagingSession::IsProcessed(int nFrame) {
 cv::Mat CImagingSession::PostProcess(int nFrame) {
 	CConfiguration& config = CConfiguration::GetInstance();
 	std::map<int, cv::Mat>::iterator it = m_mapImage.find(nFrame);
-	if (it != m_mapImage.end()) {
-		/* threadImaging에서 이미 ZOffset을 적용했으므로 주석처리
-		cv::Mat imgZOffset;
-		m_pImaging->ApplyZOffset(it->second, imgZOffset, GetZOffset(nFrame));
-		m_pImaging->PostProcess(imgZOffset);*/
-		
+
+	if (it != m_mapImage.end()) {		
 		cv::Mat imgZOffset;
 		m_pImaging->ApplyZOffset(it->second, imgZOffset, GetZOffset());
 		m_pImaging->PostProcess(imgZOffset);
@@ -262,17 +258,10 @@ void* CImagingSession::GetImageData(int nFrame) {
 	m_pImaging->Process(pBuffer);
 	cv::Mat imgResult = m_pImaging->GetProcessedImage().clone();
 
-	// buffer에서 다시 가져오는거라.. 원본에 ZOffset 적용 안된 상태
-
 	cv::Mat imgZOffset;
 	if (config.measurement.calPerFrame) {
 		m_pImaging->ApplyZOffset(imgResult, imgZOffset, GetZOffset(nFrame));
 	}
-
-	// ZOffset 파일에서 읽어오는 상태면, 계산 안해도 됨..
-	//int nowZOffset = CalculateZOffset(imgResult, m_autoCalibPatch);
-
-	//imgZOffset = imgResult.clone();
 
 	std::map<int, cv::Mat>::iterator it = m_mapImage.find(nFrame);
 	if (it != m_mapImage.end())
@@ -318,7 +307,6 @@ void CImagingSession::AddFramesIntoCutView() {
 		std::map<int, cv::Mat>::iterator it = m_mapImage.find(nFrame);
 		if (it != m_mapImage.end())
 		{
-			// threadImaging에서 이미 ZOffset을 적용했으므로 주석처리
 			cv::Mat imgZOffset;	
 			m_pImaging->ApplyZOffset(it->second, imgZOffset, GetZOffset());
 			m_pImaging->CircularizeImage(imgZOffset, imgCircle);
@@ -573,11 +561,9 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 		pImaging->ApplyZOffset(imgResult, imgResult, nowOffset);
 
 		pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult));
-		PLOGI.printf("mapImage inserted: frame %d", pSession->m_mapImage.size());
 		cv::Mat imgResultWithoutCompensation = pImaging->GetWithoutCompensationImage().clone();
 		pSession->m_mapImageWithoutCompensation.insert(std::make_pair(nFrame, imgResultWithoutCompensation));
-		PLOGI.printf("done");
-		// applyZOffset
+
 		pImaging->ApplyZOffset(imgResult, imgResult, pSession->GetZOffset());
 	}
 
@@ -618,7 +604,6 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 			continue;
 		}
 		
-		// threadImaging에서 이미 ZOffset을 적용했으므로 주석처리
 		cv::Mat imgZOffset;
 		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset());
 		pImaging->CircularizeImage(imgZOffset, imgCircle);
@@ -1311,7 +1296,6 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 			return ERROR;
 		}
 
-		// threadImaging에서 이미 ZOffset을 적용했으므로 주석처리
 		cv::Mat imgZOffset;
 		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset());
 		pImaging->CircularizeImage(imgZOffset, circleImage);
@@ -1474,7 +1458,6 @@ UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 			continue;
 		}
 		
-		// threadImaging에서 이미 ZOffset을 적용했으므로 주석처리
 		cv::Mat imgZOffset;
 		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset());
 		pImaging->CircularizeImage(imgZOffset, imgCircle);
