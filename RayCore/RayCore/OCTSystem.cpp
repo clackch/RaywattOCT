@@ -795,8 +795,6 @@ RayError COCTSystem::OpenImage(char* strFilePath, double imageResolution, double
 	std::string strZOffsetFilePath = strPath.substr(0, strPath.size() - 3).append("zOffset");
 	if (!pSession->LoadZOffset(strZOffsetFilePath)) {
 		PLOGI.printf("ZOffset file not found: %s", strZOffsetFilePath.c_str());
-		// app의 fileCopyDialog에서만 OpenImage를 호출하는데, 이미 저장된 zOffset 파일이 있다고 가정 중.
-		//pSession->CalculateZOffset(pSession->GetDataManager()->GetNumOfSamples(), m_autoCalibPatch);
 	}
 	pSession->SetZOffset((int)zOffset);
 
@@ -822,8 +820,9 @@ RayError COCTSystem::CloseImage() {
 * GetImageData
 */
 void* COCTSystem::GetImageData(int nFrame) {
-	// m_openedSession을 정해주는 게 OpenImage 함수 밖에 없는데, ZOffset 파일이 있다고 가정하고 진행 중.
-	if (m_openedSession != nullptr) return m_openedSession->GetImageData(nFrame);
+	if (m_openedSession != nullptr) {
+		return m_openedSession->GetImageData(nFrame);
+	}
 	else {
 		if (m_curSession == SESSION_UNKNOWN || m_reviewSession[m_curSession] == nullptr) {
 			PLOGI.printf("Session #%d is not started.", m_curSession);
