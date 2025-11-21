@@ -1019,6 +1019,9 @@ Overwrite existing data?</value>
   <data name="Rotary Junction" xml:space="preserve">
     <value>Rotary Junction</value>
   </data>
+  <data name="Multi Monitor" xml:space="preserve">
+    <value>Multi Monitor</value>
+  </data>
   <data name="Save" xml:space="preserve">
     <value>Save</value>
   </data>
@@ -1228,6 +1231,9 @@ Overwrite existing data?</value>
   </data>
   <data name="Recording starts automatically" xml:space="preserve">
     <value>Recording starts automatically</value>
+  </data>
+  <data name="Set" xml:space="preserve">
+    <value>Set</value>
   </data>
   <data name="Transfer error. Failed files below. Try Again." xml:space="preserve">
     <value>Transfer error. Failed files below. Try Again.</value>

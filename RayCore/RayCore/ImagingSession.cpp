@@ -222,14 +222,13 @@ bool CImagingSession::IsProcessed(int nFrame) {
 	return (it != m_mapImage.end());
 }
 cv::Mat CImagingSession::PostProcess(int nFrame) {
+	CConfiguration& config = CConfiguration::GetInstance();
 	std::map<int, cv::Mat>::iterator it = m_mapImage.find(nFrame);
-	if (it != m_mapImage.end()) {
-		/* threadImaging에서 이미 ZOffset을 적용했으므로 주석처리
+
+	if (it != m_mapImage.end()) {		
 		cv::Mat imgZOffset;
-		m_pImaging->ApplyZOffset(it->second, imgZOffset, GetZOffset(nFrame));
-		m_pImaging->PostProcess(imgZOffset);*/
-		
-		m_pImaging->PostProcess(it->second);
+		m_pImaging->ApplyZOffset(it->second, imgZOffset, GetZOffset());
+		m_pImaging->PostProcess(imgZOffset);
 	}
 	return m_pImaging->GetCircleImage();
 }
@@ -259,30 +258,21 @@ void* CImagingSession::GetImageData(int nFrame) {
 	m_pImaging->Process(pBuffer);
 	cv::Mat imgResult = m_pImaging->GetProcessedImage().clone();
 
-	// buffer에서 다시 가져오는거라.. 원본에 ZOffset 적용 안된 상태
-
 	cv::Mat imgZOffset;
-
-	// ZOffset 파일에서 읽어오는 상태면, 계산 안해도 됨..
-	//int nowZOffset = CalculateZOffset(imgResult, m_autoCalibPatch);
-
-	//imgZOffset = imgResult.clone();
 	if (config.measurement.calPerFrame) {
-		m_pImaging->ApplyZOffset(imgResult, imgZOffset, GetZOffset(nFrame) + GetZOffset());
-	}
-	else {
-		m_pImaging->ApplyZOffset(imgResult, imgZOffset, GetZOffset());
+		m_pImaging->ApplyZOffset(imgResult, imgZOffset, GetZOffset(nFrame));
 	}
 
 	std::map<int, cv::Mat>::iterator it = m_mapImage.find(nFrame);
 	if (it != m_mapImage.end())
 	{
-		it->second = imgZOffset;
+		it->second = imgResult;
 	}
 	else {
-		m_mapImage.insert(std::make_pair(nFrame, imgZOffset));
+		m_mapImage.insert(std::make_pair(nFrame, imgResult));
 	}
 	
+	m_pImaging->ApplyZOffset(imgResult, imgZOffset, GetZOffset());
 	m_pImaging->PostProcess(imgZOffset);
 
 	return m_pImaging->GetCircleImage().data;
@@ -311,15 +301,14 @@ UINT CImagingSession::GetCutViewChannels() {
 void CImagingSession::AddFramesIntoCutView() {
 	if (m_pCutView == nullptr) return;
 
-	cv::Mat /*imgZOffset, */imgCircle;
+	cv::Mat imgZOffset, imgCircle;
 	for (int nFrame = 0; nFrame < m_pCutView->GetNumOfSamples(); nFrame++)
 	{
 		std::map<int, cv::Mat>::iterator it = m_mapImage.find(nFrame);
 		if (it != m_mapImage.end())
 		{
-			// threadImaging에서 이미 ZOffset을 적용했으므로 주석처리
-			//m_pImaging->ApplyZOffset(it->second, imgZOffset, GetZOffset(nFrame));
-			m_pImaging->CircularizeImage(it->second, imgCircle);
+			m_pImaging->ApplyZOffset(it->second, imgZOffset, GetZOffset());
+			m_pImaging->CircularizeImage(imgZOffset, imgCircle);
 			m_pCutView->AddRecord(imgCircle, nFrame);
 		}
 	}
@@ -568,14 +557,13 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 			}
 			else nowOffset = pSession->GetZOffset(nFrame);
 		}
-		// applyZOffset
-		pImaging->ApplyZOffset(imgResult, imgResult, nowOffset + pSession->GetZOffset());
+		pImaging->ApplyZOffset(imgResult, imgResult, nowOffset);
 
-		pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult));
-		PLOGI.printf("mapImage inserted: frame %d", pSession->m_mapImage.size());
+		pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult.clone()));
 		cv::Mat imgResultWithoutCompensation = pImaging->GetWithoutCompensationImage().clone();
 		pSession->m_mapImageWithoutCompensation.insert(std::make_pair(nFrame, imgResultWithoutCompensation));
-		PLOGI.printf("done");
+
+		pImaging->ApplyZOffset(imgResult, imgResult, pSession->GetZOffset());
 	}
 
 	if (pSession->m_vZOffset.size() == nNumOfSamples)
@@ -615,9 +603,9 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 			continue;
 		}
 		
-		// threadImaging에서 이미 ZOffset을 적용했으므로 주석처리
-		//pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset(nFrame));
-		pImaging->CircularizeImage(it->second, imgCircle);
+		cv::Mat imgZOffset;
+		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset());
+		pImaging->CircularizeImage(imgZOffset, imgCircle);
 		pCutView->AddRecord(imgCircle, nFrame);
 
 		pSession->m_pMsg->postMessage(WM_PROCESS_CUTVIEW, nSession, nFrame);
@@ -1309,9 +1297,9 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 			return ERROR;
 		}
 
-		// threadImaging에서 이미 ZOffset을 적용했으므로 주석처리
-		//pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset(nFrame));
-		pImaging->CircularizeImage(it->second, circleImage);
+		cv::Mat imgZOffset;
+		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset());
+		pImaging->CircularizeImage(imgZOffset, circleImage);
 		cv::cvtColor(circleImage, circleImage, cv::COLOR_GRAY2BGR);
 
 		//lumen
@@ -1471,9 +1459,9 @@ UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 			continue;
 		}
 		
-		// threadImaging에서 이미 ZOffset을 적용했으므로 주석처리
-		//pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset(nFrame));
-		pImaging->CircularizeImage(it->second, imgCircle);
+		cv::Mat imgZOffset;
+		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset());
+		pImaging->CircularizeImage(imgZOffset, imgCircle);
 
 		// remove sheath
 		int nSheathPos = config.measurement.nSheathPosition + 15;

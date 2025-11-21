@@ -112,9 +112,6 @@ void CLabImaging::Process(char* fringes) {
 	generateImage(logData, false);
 
 	adaptive_compensation();
-
-	// LabImaging의 Process는 아무도 안부름.
-	//ApplyZOffset(imageResult, imageResult, m_nZOffset);
 }
 
 void CLabImaging::PostProcess(cv::Mat image) {

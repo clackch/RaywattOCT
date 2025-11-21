@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using log4net;
 using RaywattApp.Common.Bases;
+using RaywattApp.Common.Util;
 using System.Windows.Input;
 using static RaywattOCT.RayCoreWrapper;
 
@@ -13,8 +14,12 @@ namespace RaywattApp.ViewModels.Setting
 
         [ObservableProperty]
         private string _btnName;
-
         private bool isRJCleanModeOnOff;
+
+        [ObservableProperty]
+        private string _btnNameMonitorSet;
+        [ObservableProperty]
+        private bool _isMuliMonitorSetBntEnable;
 
         private ICommand _rJCleanModeOnOffCommand;
         public ICommand RJCleanModeOnOffCommand
@@ -22,11 +27,19 @@ namespace RaywattApp.ViewModels.Setting
             get { return this._rJCleanModeOnOffCommand ?? (this._rJCleanModeOnOffCommand = new RelayCommand(RJCleanModeOnOff)); }
         }
 
+        private ICommand _muliMonitorSetCommand;
+        public ICommand MuliMonitorSetCommand
+        {
+            get { return this._muliMonitorSetCommand ?? (this._muliMonitorSetCommand = new RelayCommand(MuliMonitorSet)); }
+        }
+
         public override void OnNavigated(object sender, object navigatedEventArgs)
         {
             _log.Debug("OnNavigated");
 
             BtnName = _l10n["Enable Cleaning"];
+            BtnNameMonitorSet = _l10n["Set"];
+            IsMuliMonitorSetBntEnable = true;
         }
 
         public override void OnNavigating(object sender, object navigationEventArgs)
@@ -67,6 +80,14 @@ namespace RaywattApp.ViewModels.Setting
                 isRJCleanModeOnOff = !isRJCleanModeOnOff;
                 DeviceStatus.IsCleaningDone = isRJCleanModeOnOff;
             }
+        }
+        private void MuliMonitorSet()
+        {
+            _log.Debug("MuliMonitorSetCommand");
+            IsMuliMonitorSetBntEnable = false;
+            if (MonitorUtil.GetMonitorCountPublic() > 1)
+                MonitorUtil.AdjustOnce();
+            IsMuliMonitorSetBntEnable = true;
         }
     }
 }
