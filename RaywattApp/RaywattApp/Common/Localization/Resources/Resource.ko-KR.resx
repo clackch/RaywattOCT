@@ -1217,9 +1217,10 @@ Overwrite existing data?</value>
   </data>
   <data name="Recording starts automatically" xml:space="preserve">
     <value>[K]Recording starts automatically</value>
-  </data>
+  </data>   
   <data name="Set" xml:space="preserve">
     <value>[k]Set</value>
+  </data>
   <data name="Transfer error. Failed files below. Try Again." xml:space="preserve">
     <value>[K]Transfer error. Failed files below. Try Again.</value>
   </data>
