@@ -444,6 +444,7 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 	{
 		char* pBuffer = pDataManager->GetSample(nFrame);
 		pImaging->Process(pBuffer);
+		pImaging->ProcessForAutoCalib();
 		cv::Mat imgResult = pImaging->GetProcessedImage().clone();
 		pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult));
 		cv::Mat imgResultWithoutCompensation = pImaging->GetWithoutCompensationImage().clone();
