@@ -301,13 +301,12 @@ UINT CImagingSession::GetCutViewChannels() {
 void CImagingSession::AddFramesIntoCutView() {
 	if (m_pCutView == nullptr) return;
 
-	cv::Mat /*imgZOffset, */imgCircle;
+	cv::Mat imgZOffset, imgCircle;
 	for (int nFrame = 0; nFrame < m_pCutView->GetNumOfSamples(); nFrame++)
 	{
 		std::map<int, cv::Mat>::iterator it = m_mapImage.find(nFrame);
 		if (it != m_mapImage.end())
 		{
-			cv::Mat imgZOffset;	
 			m_pImaging->ApplyZOffset(it->second, imgZOffset, GetZOffset());
 			m_pImaging->CircularizeImage(imgZOffset, imgCircle);
 			m_pCutView->AddRecord(imgCircle, nFrame);
@@ -560,7 +559,7 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 		}
 		pImaging->ApplyZOffset(imgResult, imgResult, nowOffset);
 
-		pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult));
+		pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult.clone()));
 		cv::Mat imgResultWithoutCompensation = pImaging->GetWithoutCompensationImage().clone();
 		pSession->m_mapImageWithoutCompensation.insert(std::make_pair(nFrame, imgResultWithoutCompensation));
 
