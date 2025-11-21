@@ -202,7 +202,7 @@ namespace RaywattApp.ViewModels.File
                 IList<Configuration> institute = _sqlManager.SelectConfiguration(instituteParams);
                 if (institute != null && institute.Count > 0)
                 {
-                    dicomProperty["00080070"] = institute[0].Value;
+                    dicomProperty["00080080"] = institute[0].Value;
                 }
             }
 

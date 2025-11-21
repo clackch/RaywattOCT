@@ -62,6 +62,9 @@ namespace RaywattApp.ViewModels
         [ObservableProperty]
         private string _spsMsg;
 
+        [ObservableProperty]
+        private bool _isOCT = true;
+
         private IntPtr dicomClient;
         private IntPtr dicomWorklists;
 
@@ -150,15 +153,34 @@ namespace RaywattApp.ViewModels
             CommonUtil.ParseDicomName(SelectedWorklist.PatientName, out lastname, out firstname);
             SelectedPatient.Lastname = lastname;
             SelectedPatient.Firstname = firstname;
-            SelectedPatient.HasFirstname = (firstname != string.Empty);
 
-            if (!ValidateSelectedPatient(SelectedPatient.HasFirstname))
+            if (!CommonUtil.ValidatePatient(SelectedPatient))
             {
-                Dictionary<string, object> param = new Dictionary<string, object>();
-                param["title"] = _l10n["Information"];
-                param["message"] = _l10n["Invalid format for patient information."];
-                _dialogService.OpenDialog(new ConfirmDialogControl(), param, Constants.ApplicationWidth, Constants.ApplicationHeight);
-                return;
+                Dictionary<string, object> confirmParam = new Dictionary<string, object>();
+                confirmParam["title"] = _l10n["Information"];
+                confirmParam["message"] = _l10n["Invalid format for patient information. Enter manually?"];
+                var confirmResult = _dialogService.OpenDialog(new ConfirmDialogControl(), confirmParam, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                if (confirmResult == null || confirmResult.DialogAnswer != DialogResults.Answer.Yes)
+                {
+                    return;
+                }
+
+                Dictionary<string, object> inputParam = new Dictionary<string, object>();
+                inputParam["patient"] = SelectedPatient;
+                var inputResult = _dialogService.OpenDialog(new PatientInputDialogControl(), inputParam, Constants.ApplicationWidth, Constants.ApplicationHeight);
+
+                if (inputResult == null || inputResult.DialogAnswer != DialogResults.Answer.Yes)
+                {
+                    return;
+                }
+
+                Dictionary<string, Object> data = (Dictionary<string, Object>)inputResult.DialogReturn;
+                SelectedPatient.Id = data["id"].ToString();
+                SelectedPatient.Firstname = data["firstname"].ToString();
+                SelectedPatient.Lastname = data["lastname"].ToString();
+                SelectedPatient.Birthdate = (DateTime?)data["birthdate"];
+                SelectedPatient.Gender = data["gender"].ToString();
             }
 
             bool isExist = false;
@@ -186,17 +208,6 @@ namespace RaywattApp.ViewModels
             }
             else
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(Constants.PatientDetailPage) { Parameter = parameter });
-        }
-
-        private bool ValidateSelectedPatient(bool hasFirstname)
-        {
-            if (SelectedPatient.Id == null || SelectedPatient.Birthdate == null || SelectedPatient.Gender == null || SelectedPatient.Lastname == null)
-                return false;
-
-            if (hasFirstname && SelectedPatient.Firstname == string.Empty)
-                return false;
-
-            return true;
         }
 
         private bool Validate(out bool isExist, out bool needPhysician)
@@ -313,12 +324,6 @@ namespace RaywattApp.ViewModels
 
             Worklists.Clear();
 
-            if (string.IsNullOrEmpty(SearchPatientId.Text))
-            {
-                SearchPatientId.Msg = _l10n["Enter ID"].ToString();
-                return;
-            }
-
             if (Regex.IsMatch(SearchPatientId.Text, @"[\*\?]"))
             {
                 SearchPatientId.Msg = _l10n["Patient ID cannot contain * or ?."].ToString();
@@ -357,11 +362,12 @@ namespace RaywattApp.ViewModels
 
             int count = 0;
 
-            string searchPatientName = SearchPatientId.Text.Trim();
+            string searchPatientName = "*" + SearchPatientId.Text.Trim() + "*";
             string searchSpsStartDateFrom = SpsStartDateFrom.HasValue ? SpsStartDateFrom.Value.ToString("yyyyMMdd") : "00010101";
             string searchSpsStartDateTo = SpsStartDateTo.HasValue ? SpsStartDateTo.Value.ToString("yyyyMMdd") : "99991231";
+            string searchModality = IsOCT ? "OCT" : "*";
 
-            dicomWorklists = await Task.Run(() => RayExportWrapper.FindWorklist(dicomClient, searchPatientName, "*" /* PatientName */, "*" /* AccessionNumber */, "OCT", "*" /* ScheduledStationAe */, searchSpsStartDateFrom, searchSpsStartDateTo, "*" /* ProcedureId */, out count));
+            dicomWorklists = await Task.Run(() => RayExportWrapper.FindWorklist(dicomClient, searchPatientName, "*" /* PatientName */, "*" /* AccessionNumber */, searchModality, "*" /* ScheduledStationAe */, searchSpsStartDateFrom, searchSpsStartDateTo, "*" /* ProcedureId */, out count));
             _log.Debug($"FindWorklist : PatientId = {searchPatientName}, SpsStartDate = {searchSpsStartDateFrom}-{searchSpsStartDateTo}, ResultCount = {count}");
             IsChecking = false;
 
@@ -372,6 +378,21 @@ namespace RaywattApp.ViewModels
                 for (int i = 0; i < count; i++)
                 {
                     var dicomWorklist = Marshal.PtrToStructure<DicomWorklist>(current);
+
+                    _log.Debug($"[{i}] PatientID: [{dicomWorklist.PatientId}]");
+                    _log.Debug($"[{i}] PatientName: [{dicomWorklist.PatientName}]");
+                    _log.Debug($"[{i}] PatientSex: [{dicomWorklist.PatientSex}]");
+                    _log.Debug($"[{i}] PatientBirthDate: [{dicomWorklist.PatientBirthDate}]");
+                    _log.Debug($"[{i}] PatientBirthTime: [{dicomWorklist.PatientBirthTime}]");
+                    _log.Debug($"[{i}] PatientAge: [{dicomWorklist.PatientAge}]");
+                    _log.Debug($"[{i}] AccessionNumber: [{dicomWorklist.AccessionNumber}]");
+                    _log.Debug($"[{i}] Modality: [{dicomWorklist.Modality}]");
+                    _log.Debug($"[{i}] ReferencedSOPClassUID: [{dicomWorklist.ReferencedSOPClassUID}]");
+                    _log.Debug($"[{i}] ReferencedSOPInstanceUID: [{dicomWorklist.ReferencedSOPInstanceUID}]");
+                    _log.Debug($"[{i}] IssuerOfPatientID: [{dicomWorklist.IssuerOfPatientID}]");
+                    _log.Debug($"[{i}] TypeOfPatientID: [{dicomWorklist.TypeOfPatientID}]");
+                    _log.Debug($"[{i}] PatientComments: [{dicomWorklist.PatientComments}]");
+
                     Worklists.Add(dicomWorklist);
 
                     current += Marshal.SizeOf<DicomWorklist>();

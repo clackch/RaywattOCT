@@ -28,8 +28,9 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="216"/>
-                    <ColumnDefinition Width="506"/>
+                    <ColumnDefinition Width="88"/>
+                    <ColumnDefinition Width="177"/>
+                    <ColumnDefinition Width="448"/>
                 </Grid.ColumnDefinitions>
                 
                 <StackPanel Grid.Column="0">
@@ -39,17 +40,22 @@
                         <Label Style="{DynamicResource Pretendard-Medium-18}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding SelectedDicomServer.AeTitle}" Margin="20,0,0,0"/>
                     </StackPanel>
                 </StackPanel>
-
+                
                 <StackPanel Grid.Column="1">
+                    <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Modality], Source={StaticResource L10N}}"/>
+                    <CheckBox Content="{Binding [OCT], Source={StaticResource L10N}}" IsChecked="{Binding IsOCT}" Margin="0,20,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
                     <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Patient ID], Source={StaticResource L10N}}"/>
-                    <TextBox Style="{DynamicResource TextBoxValidator}" Text="{Binding SearchPatientId.Text, UpdateSourceTrigger=PropertyChanged}" ToolTip="{Binding SearchPatientId.Msg}" Width="200" Height="72" HorizontalAlignment="Left" Margin="0,6,0,0">
+                    <TextBox Style="{DynamicResource TextBoxValidator}" Text="{Binding SearchPatientId.Text, UpdateSourceTrigger=PropertyChanged}" ToolTip="{Binding SearchPatientId.Msg}" Width="158" Height="72" HorizontalAlignment="Left" Margin="0,6,0,0">
                         <TextBox.InputBindings>
                             <KeyBinding Key="Enter" Command="{Binding SearchCommand}" />
                         </TextBox.InputBindings>
                     </TextBox>
                 </StackPanel>
 
-                <StackPanel Grid.Column="2">
+                <StackPanel Grid.Column="3">
                     <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Procedure Start Date], Source={StaticResource L10N}}"/>
                     <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
                         <Grid>
@@ -59,10 +65,10 @@
                             </Grid.RowDefinitions>
 
                             <StackPanel Grid.Row="0" Orientation="Horizontal">
-                                <DatePicker Style="{DynamicResource DatePickerValidator}" behaviors:DatePickerPopupOffsetBehavior.AutoVerticalOffset="True" behaviors:DatePickerPopupOffsetBehavior.AutoHorizontalOffset="True" Tag="{Binding [Enter Date], Source={StaticResource L10N}}" SelectedDate="{Binding SpsStartDateFrom, UpdateSourceTrigger=PropertyChanged}" ToolTip="{Binding SpsMsg}" Width="190" Height="54" HorizontalAlignment="Left"/>
+                                <DatePicker Style="{DynamicResource DatePickerValidator}" behaviors:DatePickerPopupOffsetBehavior.AutoVerticalOffset="True" behaviors:DatePickerPopupOffsetBehavior.AutoHorizontalOffset="True" Tag="{Binding [Enter Date], Source={StaticResource L10N}}" SelectedDate="{Binding SpsStartDateFrom, UpdateSourceTrigger=PropertyChanged}" ToolTip="{Binding SpsMsg}" Width="162" Height="54" HorizontalAlignment="Left"/>
                                 <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="~" Margin="6,19,6,0" VerticalAlignment="Top"/>
-                                <DatePicker Style="{DynamicResource DatePickerValidator}" behaviors:DatePickerPopupOffsetBehavior.AutoVerticalOffset="True" behaviors:DatePickerPopupOffsetBehavior.AutoHorizontalOffset="True" Tag="{Binding [Enter Date], Source={StaticResource L10N}}" SelectedDate="{Binding SpsStartDateTo, UpdateSourceTrigger=PropertyChanged}" ToolTip="{Binding SpsMsg}" Width="190" Height="54" VerticalAlignment="Top"/>
-                                <Button Style="{StaticResource OutlinedBtnType4-Large}" Command="{Binding SearchCommand}" Content="{Binding [Search], Source={StaticResource L10N}}" Width="92" Height="54" Margin="12,0,0,0" VerticalAlignment="Top"/>
+                                <DatePicker Style="{DynamicResource DatePickerValidator}" behaviors:DatePickerPopupOffsetBehavior.AutoVerticalOffset="True" behaviors:DatePickerPopupOffsetBehavior.AutoHorizontalOffset="True" Tag="{Binding [Enter Date], Source={StaticResource L10N}}" SelectedDate="{Binding SpsStartDateTo, UpdateSourceTrigger=PropertyChanged}" ToolTip="{Binding SpsMsg}" Width="162" Height="54" VerticalAlignment="Top"/>
+                                <Button Style="{StaticResource OutlinedBtnType4-Large}" Command="{Binding SearchCommand}" Content="{Binding [Search], Source={StaticResource L10N}}" Width="92" Height="54" Margin="10,0,0,0" VerticalAlignment="Top"/>
                             </StackPanel>
 
                             <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,4,0,0">
@@ -92,13 +98,14 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
                 <DataGrid.Columns>
-                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="1.8*" Binding="{Binding PatientName}" Header="{Binding [Patient Name], Source={StaticResource L10N}}"/>
-                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="1.2*" Binding="{Binding PatientId}" Header="{Binding [Patient ID], Source={StaticResource L10N}}" />
-                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="1.2*" Binding="{Binding PatientBirthDate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Birth Date], Source={StaticResource L10N}}" />
-                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding PatientSex, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}" Header="{Binding [Gender], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="1.4*" Binding="{Binding PatientName}" Header="{Binding [Patient Name], Source={StaticResource L10N}}"/>
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding PatientId}" Header="{Binding [Patient ID], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="*" Binding="{Binding PatientBirthDate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Birth Date], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="0.8*" Binding="{Binding PatientSex, Converter={StaticResource CodeConverter}, ConverterParameter='GEND'}" Header="{Binding [Gender], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="0.8*" Binding="{Binding Modality}" Header="{Binding [Modality], Source={StaticResource L10N}}" />
                     <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="1.4*" Binding="{Binding AccessionNumber}" Header="{Binding [Accession Number], Source={StaticResource L10N}}" />
-                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="1.8*" Binding="{Binding ScheduledStationAET}" Header="{Binding [Scheduled Station AE], Source={StaticResource L10N}}" />
-                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="1.8*" Binding="{Binding SPSStartDate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Procedure Start Date], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="1.6*" Binding="{Binding ScheduledStationAET}" Header="{Binding [Scheduled Station AE], Source={StaticResource L10N}}" />
+                    <DataGridTextColumn CellStyle="{StaticResource DataGridCellTooltip}" Width="1.7*" Binding="{Binding SPSStartDate, StringFormat=d, ConverterCulture={x:Static gl:CultureInfo.CurrentCulture}}" Header="{Binding [Procedure Start Date], Source={StaticResource L10N}}" />
                 </DataGrid.Columns>
             </DataGrid>
             <Grid Grid.Row="14" Grid.Column="1" Margin="0,28,0,0">

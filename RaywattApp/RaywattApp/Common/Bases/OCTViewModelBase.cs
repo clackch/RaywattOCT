@@ -269,7 +269,6 @@ namespace RaywattApp.Common.Bases
                 _log.Debug("OCTViewModelBase MoveToFrame : result != RayError.OK");
                 return false;
             }
-
             IntPtr data = RayGetImageData(nFrame);
             if (data == IntPtr.Zero)
             {

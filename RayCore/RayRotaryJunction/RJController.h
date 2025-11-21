@@ -31,7 +31,6 @@ enum class eRJState {
 	Connected,
 	Validating,
 	Loading,
-	WaitManualLoad,
 	Loaded,
 	Unloading,
 	Unloaded,
@@ -92,8 +91,6 @@ private:
 	BYTE m_byManufacturerId[MAX_PATH];
 	CThread* m_pThreadRFIDTag;
 
-	bool m_bManualMode;	// Manual Load Catheter
-
 	WriteTaskController* m_resendManager;
 
 	int catheterUsage;
@@ -143,8 +140,6 @@ public:
 	static DWORD WINAPI checkKeyFinding(LPVOID);
 
 	int ConvertMMtoStep(UINT mm);
-	void SetManualMode(bool on) { m_bManualMode = on; }
-
 	void changeSMProfileToPullback();
 	void changeSMProfileToLoadUnload();
 	void DisableStepMotors();
@@ -156,7 +151,6 @@ protected:
 	static UINT threadReadPacket(LPVOID param);
 	static UINT threadReadTag(LPVOID param);
 	void updateState();
-	void updateStateManualMode();
 	void updateState(eRJState state);
 	bool displayLCD(eLCDImage image);
 	void RxPacketRFIDGetState(BYTE* buff, RFID_ReadType type = DEFAULT);

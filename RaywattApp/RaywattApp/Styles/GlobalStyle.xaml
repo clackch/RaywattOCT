@@ -488,4 +488,12 @@
         <Setter Property="FontSize" Value="10"/>
     </Style>
 
+    <Style TargetType="TextBlock" x:Key="TextBlock_Pretendard-Medium-14">
+        <Setter Property="Padding" Value="0,0,0,0"/>
+        <Setter Property="FontFamily" Value="Pretendard"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="FontStyle" Value="Normal"/>
+        <Setter Property="FontSize" Value="14"/>
+    </Style>
+
 </ResourceDictionary>

@@ -34,7 +34,10 @@ void CConfiguration::Initialize(tstring configFile)
 	this->measurement.fSheathThicknessOnePointSeven = getPrivateProfileFloat(_T("Measurement"), _T("SheathThickness1.6"), 0.045, configFilePath.c_str());
 	this->measurement.fSheathThicknessTwoPointSix = getPrivateProfileFloat(_T("Measurement"), _T("SheathThickness2.6"), 0.1, configFilePath.c_str());
 	this->measurement.fSheathRadius = getPrivateProfileFloat(_T("Measurement"), _T("SheathRadius"), 0.43, configFilePath.c_str());
-	this->measurement.nSheathPosition = measurement.fSheathRadius * 1000.f / measurement.fAxialResolutionScale;
+	if (measurement.GetAxialResolutionScale() > 0) {
+		this->measurement.nSheathPosition = measurement.GetSheathRadius() * 1000.f / measurement.GetAxialResolutionScale();
+	}
+	this->measurement.calPerFrame = ::GetPrivateProfileInt(_T("Measurement"), _T("CalibrationPerFrame"), 0, configFilePath.c_str());
 
 	// [Imaging]
 	int nAScan = ::GetPrivateProfileInt(_T("Imaging"), _T("AScan"), 1920, configFilePath.c_str());
@@ -44,6 +47,7 @@ void CConfiguration::Initialize(tstring configFile)
 	this->imaging.highLevel = getPrivateProfileFloat(_T("Imaging"), _T("HighLevel"), 65.0f, configFilePath.c_str());
 	this->imaging.brightness = getPrivateProfileFloat(_T("Imaging"), _T("Brightness"), 0.f, configFilePath.c_str());
 	this->imaging.contrast = getPrivateProfileFloat(_T("Imaging"), _T("Contrast"), 0.875f, configFilePath.c_str());
+	this->imaging.distPerPixel = measurement.GetAxialResolutionScale();
 
 	// [Acquisition]
 	this->acquisition.nAScan = imaging.nAScan;

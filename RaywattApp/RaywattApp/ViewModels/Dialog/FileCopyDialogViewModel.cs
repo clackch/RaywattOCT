@@ -79,6 +79,13 @@ namespace RaywattApp.ViewModels.Dialog
 
         private bool usePeerVerification = true;
 
+        private readonly Dictionary<string, DateTime> dicomFileRecordingTimes = new Dictionary<string, DateTime>();
+        
+        private List<string> failedFiles = new List<string>();
+
+        [ObservableProperty]
+        private bool _isErrorDicomTransfer;
+
         public FileCopyDialogViewModel(SqlManager sqlManager)
         {
             _sqlManager = sqlManager;
@@ -154,8 +161,16 @@ namespace RaywattApp.ViewModels.Dialog
                 await FileSaveStandard();
             }
 
-            if(!isError)
+            if (!isError)
+            {
                 ProgressText = Constants.ExportStatusCompleted;
+            }
+            else
+            {
+                ProgressText = string.Join("\n", failedFiles);
+                IsErrorDicomTransfer = true;
+            }
+
             EnableDone = true;
         }
 
@@ -214,6 +229,9 @@ namespace RaywattApp.ViewModels.Dialog
 
         private async Task<bool> FileSaveDicom()
         {
+            dicomFileRecordingTimes.Clear();
+            failedFiles.Clear();
+
             //AE Title
             string aeTitle = "";
             Dictionary<string, object> sqlParameters = new Dictionary<string, object>();
@@ -302,6 +320,9 @@ namespace RaywattApp.ViewModels.Dialog
                             //file path
                             string filePath = Constants.ExportDicomPrefix + string.Format("{0:0000}", index);
 
+                            // DICOM 파일명과 Recording 시간 매핑 저장
+                            dicomFileRecordingTimes[filePath] = patientCase.CreateDate;
+
                             //DICOM Save Check Start
                             var t = Task.Run(() => CommonUtil.CheckFileSaveDone(dicomDirFolder + "\\" + filePath, dicomApprSize, prog => Progress = prog, Progress, progressConvert, progText => ProgressText = progText));
 
@@ -340,25 +361,67 @@ namespace RaywattApp.ViewModels.Dialog
                     var files = Directory.GetFiles(Constants.DicomTempFolderPath)
                         .Where(f => System.IO.Path.GetFileName(f).StartsWith(Constants.ExportDicomPrefix, StringComparison.OrdinalIgnoreCase)).ToList();
 
-                    int count = files.Count;
+                    int totalCount = files.Count;
+                    int currentIndex = 0;
+                    const int MAX_RETRY = 2;
+                    const int RETRY_DELAY_MS = 500;
+
+                    _log.Debug($"C-STORE transfer started: Total {totalCount} file(s)");
 
                     foreach (var file in files)
                     {
-                        _log.Debug(file);
+                        currentIndex++;
+                        int retryCount = 0;
+                        bool success = false;
 
-                        res = await Task.Run(() => (RayExportWrapper.DicomNetRWError)RayExportWrapper.StoreFile(dicomClient, file));
-                        _log.DebugFormat("StoreFile : {0}", res);
+                        string fileName = System.IO.Path.GetFileName(file);
 
-                        if (res == RayExportWrapper.DicomNetRWError.Normal)
+                        string recordingTime = dicomFileRecordingTimes[fileName].ToString("yyyy-MM-dd HH:mm:ss");
+                        _log.Debug($"File transfer started: {fileName} ({currentIndex}), Recording: {recordingTime}");
+
+                        while (retryCount < MAX_RETRY && !success)
                         {
-                            Progress = Progress + progressConvert / count;
+                            retryCount++;
+
+                            _log.Debug($"Transfer attempt: {retryCount}/{MAX_RETRY}");
+
+                            res = await Task.Run(() => (RayExportWrapper.DicomNetRWError)RayExportWrapper.StoreFile(dicomClient, file));
+
+                            if (res == RayExportWrapper.DicomNetRWError.Normal)
+                            {
+                                success = true;
+                                Progress = Progress + progressConvert;
+                                _log.Debug($"Store succeeded: {fileName} ({currentIndex}), Recording: {recordingTime}");
+                                _log.Debug(CommonUtil.GetDicomResultMessage(res));
+                            }
+                            else
+                            {
+                                _log.Debug(CommonUtil.GetDicomResultMessage(res));
+                                _log.Debug($"Attempt: {retryCount}/{MAX_RETRY}");
+
+                                if (retryCount < MAX_RETRY)
+                                {
+                                    await Task.Delay(RETRY_DELAY_MS);
+                                }
+                            }
                         }
-                        else
+
+                        if (!success)
                         {
                             isDicomError = true;
-                            ProgressText = CommonUtil.GetDicomResultMessage(res);
-                            break;
+                            failedFiles.Add(recordingTime);
+                            _log.Error($"Store failed after {MAX_RETRY} attempts: {fileName}, Recording: {recordingTime}");
                         }
+                    }
+
+                    if (failedFiles.Count > 0)
+                    {
+                        _log.Error($"Transfer summary: {failedFiles.Count}/{totalCount} file(s) failed");
+                        _log.Error($"Failed files: {string.Join(", ", failedFiles)}");
+                    }
+                    else
+                    {
+                        _log.Debug($"Transfer completed: All {totalCount} file(s) succeeded");
                     }
                 }
                 else
@@ -718,18 +781,10 @@ namespace RaywattApp.ViewModels.Dialog
             RayExportWrapper.DicomAddProperty(0x00080060, dicomProperty["00080060"], 0);
             //(0008, 0064)	Conversion Type	-	U	CS
             RayExportWrapper.DicomAddProperty(0x00080064, dicomProperty["00080064"], 0);
-
-            if (CommonUtil.IsRV200())
-            {
-                //(0008, 0080)	Institution Name	-	M	LO (RV200)
-                RayExportWrapper.DicomAddProperty(0x00080080, dicomProperty["00080080"], 0);
-            }
-            else
-            {
-                //(0008, 0070)	Manufacturer	-	M, C, U	LO (RV201)
-                RayExportWrapper.DicomAddProperty(0x00080070, dicomProperty["00080070"], 0);
-            }
-
+            //(0008, 0070)	Manufacturer	-	M, C, U	LO
+            RayExportWrapper.DicomAddProperty(0x00080070, ConfigurationManager.AppSettings.Get("Manufacturer"), 0);
+            //(0008, 0080)	Institution Name	-	M	LO
+            RayExportWrapper.DicomAddProperty(0x00080080, dicomProperty["00080080"], 0);
             //(0008, 0090)	Referring Physician's Name	-	C	PN
             RayExportWrapper.DicomAddProperty(0x00080090, patientCase.PhysicianName, 0);
             //(0008, 0201)	Timezone Offset From UTC	-	C	SH

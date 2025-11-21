@@ -2640,6 +2640,25 @@ namespace RaywattApp.Common.Util
             return true;
         }
 
+        public static bool ValidatePatient(Patient patient, bool checkPhysician = false)
+        {
+            _log.Debug("ValidatePatient");
+
+            if (string.IsNullOrWhiteSpace(patient.Id))
+                return false;
+
+            if (string.IsNullOrWhiteSpace(patient.Lastname))
+                return false;
+
+            if (string.IsNullOrWhiteSpace(patient.Firstname))
+                return false;
+
+            if (checkPhysician && patient.PhysicianId == 0)
+                return false;
+
+            return true;
+        }
+
         public static LocalHost GetNetworkInfo()
         {
             LocalHost localHost = new LocalHost();
@@ -2724,13 +2743,13 @@ namespace RaywattApp.Common.Util
                 case RayExportWrapper.DicomNetRWError.Normal:
                     return "Operation completed successfully.";
                 case RayExportWrapper.DicomNetRWError.InitializeFail:
-                    return "Initialization failed. Please check the configuration.";
+                    return "Initialization failed. Check the configuration.";
                 case RayExportWrapper.DicomNetRWError.NetworkInitFail:
-                    return "Failed to initialize network. Please check your network connection.";
+                    return "Failed to initialize network. Check your network connection.";
                 case RayExportWrapper.DicomNetRWError.AssociationFail:
                     return "Failed to establish DICOM association with the server.";
                 case RayExportWrapper.DicomNetRWError.EchoFail:
-                    return "DICOM Echo test failed. Please verify the server status.";
+                    return "DICOM Echo test failed. Verify the server status.";
                 case RayExportWrapper.DicomNetRWError.FindFail:
                     return "Failed to perform query (Find).";
                 case RayExportWrapper.DicomNetRWError.StoreFail:

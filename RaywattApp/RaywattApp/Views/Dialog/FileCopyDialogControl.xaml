@@ -23,7 +23,7 @@
                 <Label Style="{DynamicResource Pretendard-Medium-12}" Content="{Binding Title}" Foreground="{DynamicResource GrayscaleGray3Brush}"/>
             </StackPanel>
 
-            <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding IsErrorDicomTransfer, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                 <Label Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Margin="20,0,20,0">
                     <Label.Content>
                         <AccessText TextWrapping="Wrap" Text="{Binding ProgressText}"/>
@@ -31,7 +31,17 @@
                 </Label>
             </StackPanel>
 
-            <StackPanel Grid.Row="3" VerticalAlignment="Center">
+            <StackPanel Grid.Row="2" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding IsErrorDicomTransfer, Converter={StaticResource BoolToVisibilityConverter}}" Margin="15,0,15,0">
+                <Label Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding [Transfer error. Failed files below. Try Again.], Source={StaticResource L10N}}"/>
+                <StackPanel Height="3"/>
+                <Border BorderBrush="{StaticResource GrayscaleGray4Brush}" Background="{StaticResource GrayscaleGray7Brush}" BorderThickness="1" CornerRadius="3">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="52">
+                        <TextBlock Style="{DynamicResource TextBlock_Pretendard-Medium-14}" Foreground="{DynamicResource GrayscaleWhiteBrush}" TextWrapping="Wrap" Text="{Binding ProgressText}"/>
+                    </ScrollViewer>
+                </Border>                
+            </StackPanel>
+
+            <StackPanel Grid.Row="3" VerticalAlignment="Center" Visibility="{Binding IsErrorDicomTransfer, Converter={StaticResource BoolToVisibilityReverseConverter}}">
                 <ProgressBar Value="{Binding Progress}" Width="412" Height="24"/>
             </StackPanel>
 

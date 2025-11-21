@@ -117,7 +117,5 @@ namespace RaywattApp.Models
 
         [ObservableProperty]
         private bool? isChecked;
-
-        public bool HasFirstname { get; set; }
     }
 }

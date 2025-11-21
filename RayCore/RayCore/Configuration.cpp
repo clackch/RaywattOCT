@@ -41,6 +41,7 @@ void CConfiguration::Initialize(tstring configFile)
 	if (measurement.GetAxialResolutionScale() > 0) {
 		this->measurement.nSheathPosition = measurement.GetSheathRadius() * 1000.f / measurement.GetAxialResolutionScale();
 	}
+	this->measurement.calPerFrame = ::GetPrivateProfileInt(_T("Measurement"), _T("CalibrationPerFrame"), 0, configFilePath.c_str());
 	
 	// [Imaging]
 	int nAScan = ::GetPrivateProfileInt(_T("Imaging"), _T("AScan"), 1920, configFilePath.c_str());
@@ -72,6 +73,7 @@ void CConfiguration::Initialize(tstring configFile)
 	this->laserModule.delayPositionOnePointSeven = ::GetPrivateProfileInt(_T("LaserModule"), _T("delayPositionOnePointSeven"), 0, configFilePath.c_str());
 	this->laserModule.polarPosition = ::GetPrivateProfileInt(_T("LaserModule"), _T("Polarization"), 0, configFilePath.c_str());
 	this->laserModule.autoCalibrationForSeverance = ::GetPrivateProfileInt(_T("LaserModule"), _T("AutoCalibrationForSeverance"), 0, configFilePath.c_str());
+	this->laserModule.polarActive = ::GetPrivateProfileInt(_T("LaserModule"), _T("PolarizationActive"), 1, configFilePath.c_str());
 
 	// [StepMotor]
 	::GetPrivateProfileString(_T("StepMotor"), _T("Port"), _T(""), this->stepMotor.port, sizeof(this->stepMotor.port), configFilePath.c_str());
@@ -94,12 +96,10 @@ void CConfiguration::Initialize(tstring configFile)
 
 	// [Catheter]
 	this->catheter.rotationTime = ::GetPrivateProfileInt(_T("Catheter"), _T("RotationTime"), 10000, configFilePath.c_str());
-	this->catheter.manualLoad = ::GetPrivateProfileInt(_T("Catheter"), _T("ManualLoad"), 0, configFilePath.c_str());
 	this->catheter.length = ::GetPrivateProfileInt(_T("Catheter"), _T("Length1.7"), -45000, configFilePath.c_str());
 	this->catheter.catheterValidationOnOff = ::GetPrivateProfileInt(_T("Catheter"), _T("CatheterValidationOnOff"), 0, configFilePath.c_str());
 	this->catheter.catheterAutoCalibrationOnOff = ::GetPrivateProfileInt(_T("Catheter"), _T("CatheterAutoCalibrationOnOff"), 0, configFilePath.c_str());
 	this->catheter.catheterUsage = ::GetPrivateProfileInt(_T("Catheter"), _T("CatheterUsage"), 0, configFilePath.c_str());
-	this->catheter.catheterRFID = ::GetPrivateProfileInt(_T("Catheter"), _T("CatheterRFID"), 0, configFilePath.c_str());
 
 	// [Volume]
 	this->volume.size = ::GetPrivateProfileInt(_T("Volume"), _T("Size"), 500, configFilePath.c_str());

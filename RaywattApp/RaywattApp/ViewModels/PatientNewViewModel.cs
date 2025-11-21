@@ -105,7 +105,7 @@ namespace RaywattApp.ViewModels
         {
             _log.Debug("CanNewRecording");
 
-            return Validate();
+            return CommonUtil.ValidatePatient(Patient, true);
         }
 
         private void Patient_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -183,25 +183,6 @@ namespace RaywattApp.ViewModels
             PrevStatus.ListPageSize = 10;
             PrevStatus.ListPageGroup = 1;
             PrevStatus.ListPageNumber = 0;
-        }
-
-        private bool Validate()
-        {
-            _log.Debug("Validate");
-
-            if (string.IsNullOrEmpty(Patient.Id.Trim()))
-                return false;
-
-            if (string.IsNullOrEmpty(Patient.Lastname.Trim()))
-                return false;
-
-            if (string.IsNullOrEmpty(Patient.Firstname.Trim()))
-                return false;
-
-            if (Patient.PhysicianId == 0)
-                return false;
-
-            return true;
         }
 
         private void SelectPhysician()
