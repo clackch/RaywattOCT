@@ -1234,6 +1234,7 @@ Overwrite existing data?</value>
   </data>
   <data name="Set" xml:space="preserve">
     <value>Set</value>
+  </data>
   <data name="Transfer error. Failed files below. Try Again." xml:space="preserve">
     <value>Transfer error. Failed files below. Try Again.</value>
   </data>
