@@ -63,6 +63,7 @@ void CConfiguration::Initialize(tstring configFile)
 	this->acquisition.usGoodClockDuration = getPrivateProfileFloat(_T("Acquisition"), _T("GoodClockInMicroSecond"), 5.0, configFilePath.c_str());
 	this->acquisition.usBadClockDuration = getPrivateProfileFloat(_T("Acquisition"), _T("BadClockInMicroSecond"), 4.0, configFilePath.c_str());
 	this->acquisition.bUseDES = ::GetPrivateProfileInt(_T("Acquisition"), _T("UseDES"), 0, configFilePath.c_str());
+	this->acquisition.DAQSamplingRate = ::GetPrivateProfileInt(_T("Acquisition"), _T("DAQSamplingRate"), 1000, configFilePath.c_str());
 
 	// [LaserModule]
 	::GetPrivateProfileString(_T("LaserModule"), _T("Port"), _T(""), this->laserModule.port, sizeof(this->laserModule.port), configFilePath.c_str());

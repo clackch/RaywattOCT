@@ -1889,8 +1889,6 @@ void CRaywattLabDlg::OnBnClickedInitFringeData() {
 	}
 	else {
 		if (m_fpRaw) {
-			fflush(m_fpRaw);
-			_commit(_fileno(m_fpRaw)); // 선택
 			fclose(m_fpRaw);
 			m_fpRaw = nullptr;
 			PLOGI.printf("saving Done\n");
@@ -1903,9 +1901,9 @@ void CRaywattLabDlg::OnBnClickedInitFringeData() {
 
 void CRaywattLabDlg::OnBnClickedAddFringeData() {
 	if (!m_fpRaw) { PLOGI.printf("Skip: file not open\n"); return; }
-
-	const int nAScan = 1152;
-	const int nBScan = 2504; // 실제 ScopeData 라인 수와 일치해야 함!
+	CATSDevice::Setting acquire = ((CATSDevice*)m_pAcqDevice)->GetSetting();
+	const int nAScan = acquire.nAScan;
+	const int nBScan = acquire.nBScan;
 	const size_t bytesPerFrame = size_t(nAScan) * size_t(nBScan) * sizeof(uint16_t);
 
 	// 소스 포인터

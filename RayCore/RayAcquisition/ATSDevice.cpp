@@ -214,10 +214,10 @@ BOOL CATSDevice::calibrateBoard(HANDLE boardHandle)
 	PLOGI.printf("SET_ADC_MODE DEFAULT -- %s\n", AlazarErrorToText(retCode));
 	if (retCode != ApiSuccess) { cleanup(); return FALSE; }
 
-	// 4) 캡처 클록: 내부 200MSPS (테스트용)
+	// 4) 캡처 클록: 내부 1000MSPS (테스트용)
 	retCode = AlazarSetCaptureClock(boardHandle,
 		INTERNAL_CLOCK,
-		SAMPLE_RATE_1000MSPS,
+		SAMPLE_RATE_200MSPS,
 		CLOCK_EDGE_RISING,
 		0);
 	PLOGI.printf("SetCaptureClock INTERNAL 1000MSPS -- %s\n", AlazarErrorToText(retCode));
@@ -324,9 +324,20 @@ BOOL CATSDevice::configureBoard(HANDLE boardHandle)
 
 	// 샘플클록: 내부 + 프리셋 중 근접값 선택
 	U32 srcClock = INTERNAL_CLOCK;
-	U32 rateId = SAMPLE_RATE_1000MSPS;
+	U32 samplingRate = 0x0;;
+	if (m_setting.DAQSamplingRate == 250) {
+		samplingRate = SAMPLE_RATE_250MSPS;
+	}
+	else if (m_setting.DAQSamplingRate == 500) {
+		samplingRate = SAMPLE_RATE_500MSPS;
+	}
+	else {
+		samplingRate = SAMPLE_RATE_1000MSPS;
+	}
 
-	retCode = AlazarSetCaptureClock(boardHandle, srcClock, rateId,
+	PLOGI.printf("samplingRate: 0x%x", samplingRate);
+
+	retCode = AlazarSetCaptureClock(boardHandle, srcClock, samplingRate,
 		CLOCK_EDGE_RISING, 0);
 	if (retCode != ApiSuccess) {
 		PLOGI.printf("Error: AlazarSetCaptureClock failed -- %s\n", AlazarErrorToText(retCode));

@@ -21,6 +21,7 @@ public:
 		double usGoodClockDuration;
 		double usBadClockDuration;
 		bool bUseDES;
+		unsigned int DAQSamplingRate;
 	};
 
 protected:
