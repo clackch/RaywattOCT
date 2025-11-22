@@ -463,7 +463,7 @@ int COCTSystem::StartReview(char* strFilePath, double imageResolution, double zO
 		std::string strPath(strFilePath);
 		std::string strZOffsetFilePath = strPath.substr(0, strPath.size() - 3).append("zOffset");
 		if (!pSession->LoadZOffset(strZOffsetFilePath)) {
-			//pSession->CalculateZOffset(pSession->GetDataManager()->GetNumOfSamples(), m_autoCalibPatch, strZOffsetFilePath);
+			PLOGI.printf("load ZOffset file failed: %s", strZOffsetFilePath.c_str());
 		}
 		pSession->SetZOffset((int)zOffset);
 
@@ -491,7 +491,7 @@ RayError COCTSystem::StartCompare(char* strFilePath, double imageResolution, dou
 	std::string strPath(strFilePath);
 	std::string strZOffsetFilePath = strPath.substr(0, strPath.size() - 3).append("zOffset");
 	if (!pSession->LoadZOffset(strZOffsetFilePath)) {
-		//pSession->CalculateZOffset(pSession->GetDataManager()->GetNumOfSamples(), m_autoCalibPatch, strZOffsetFilePath);
+		PLOGI.printf("load ZOffset file failed: %s", strZOffsetFilePath.c_str());
 	}
 
 	pSession->SetZOffset((int)zOffset);
@@ -794,7 +794,7 @@ RayError COCTSystem::OpenImage(char* strFilePath, double imageResolution, double
 	std::string strPath(strFilePath);
 	std::string strZOffsetFilePath = strPath.substr(0, strPath.size() - 3).append("zOffset");
 	if (!pSession->LoadZOffset(strZOffsetFilePath)) {
-		PLOGI.printf("ZOffset file not found: %s", strZOffsetFilePath.c_str());
+		PLOGI.printf("load ZOffset file failed: %s", strZOffsetFilePath.c_str());
 	}
 	pSession->SetZOffset((int)zOffset);
 

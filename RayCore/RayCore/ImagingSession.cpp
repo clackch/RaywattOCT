@@ -391,14 +391,10 @@ bool CImagingSession::LoadZOffset(const std::string strDataFilePath) {
 			int offset = 0;
 			int ret = fscanf(fp, "%d,", &offset);
 
-			if (ret != 1) {
-				if (ret == EOF) {
-					PLOGI.printf("fscanf failed or reached EOF");
-					return false;
-				}
-			}
-			else {
-				PLOGI.printf("fscanf: expected 1 item, got %d\n", ret);
+			if (ret == EOF) {
+				fclose(fp);
+				PLOGI.printf("fscanf failed or reached EOF");
+				return false;
 			}
 
 			m_vZOffset.push_back(offset);
@@ -414,7 +410,6 @@ bool CImagingSession::LoadZOffset(const std::string strDataFilePath) {
 
 int CImagingSession::GetZOffset(int nFrame) {
 	if (m_pDataManager == nullptr || m_vZOffset.size() != m_pDataManager->GetNumOfSamples()) return 0;
-	//if (m_vZOffset.size() != m_pDataManager->GetNumOfSamples()) return GetZOffset();
 
 	return m_vZOffset.at(nFrame);
 
@@ -430,9 +425,7 @@ int CImagingSession::CalculateZOffset(const cv::Mat image, const cv::Mat autoCal
 	img = img(roi);
 	cv::Rect zeroRegion(0, 0, img.cols, 30);
 	img(zeroRegion).setTo(cv::Scalar::all(0));
-	//cv::imwrite("CalculateZOffset_origin.tif", img);
 
-	//cv::imwrite("CheckSheathPixels_origin" + std::to_string(i) + ".tif", img);
 	if (img.type() == CV_8U)
 		img.convertTo(img, CV_32F, 1.0 / 255.0);
 	else if (img.type() == CV_32F) {}
@@ -462,12 +455,12 @@ int CImagingSession::CalculateZOffset(const cv::Mat image, const cv::Mat autoCal
 			cv::Mat sectionMask = section != 1.0f;
 			cv::Point sectionMaxLoc;
 			cv::minMaxLoc(section, nullptr, &maxVal, nullptr, &sectionMaxLoc, sectionMask);
-			PLOGI.printf("CalculateZOffset: x %d, y %d, value %lf", sectionMaxLoc.x, sectionMaxLoc.y, maxVal);
+			//PLOGI.printf("CalculateZOffset: x %d, y %d, value %lf", sectionMaxLoc.x, sectionMaxLoc.y, maxVal);
 			if (std::abs(sectionMaxLoc.y - maxLoc.y) < 15 && maxVal > 0.6)
 			{
 				nowRow += sectionMaxLoc.y;
 				validCount++;
-				PLOGI.printf("Valid");
+				//PLOGI.printf("Valid");
 			}
 		}
 		if (validCount > 0)
@@ -476,18 +469,18 @@ int CImagingSession::CalculateZOffset(const cv::Mat image, const cv::Mat autoCal
 			return 0;
 	}
 	int nowZOffset = idealRow - nowRow;
-	PLOGI.printf("CalculateZOffset: nowRow %d, idealRow %d, zOffset %d", nowRow, idealRow, nowZOffset);
+	//PLOGI.printf("CalculateZOffset: nowRow %d, idealRow %d, zOffset %d", nowRow, idealRow, nowZOffset);
 	auto end = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double, std::milli> elapsed = end - start;
-	PLOGI.printf("CalculateZOffset: frame done in %f ms.", elapsed.count());
+	//PLOGI.printf("CalculateZOffset: frame done in %f ms.", elapsed.count());
 	return nowZOffset;
 }
 
 bool CImagingSession::SaveZOffset(const std::string strDataFilePath) {
-	PLOGI.printf("SaveZOffset: start saving to %s", strDataFilePath.c_str());
+	//PLOGI.printf("SaveZOffset: start saving to %s", strDataFilePath.c_str());
 	FILE* fp = fopen(strDataFilePath.c_str(), "w+");
 	if (fp) {
-		PLOGI.printf("ZOffset file opened: %s", strDataFilePath.c_str());
+		//PLOGI.printf("ZOffset file opened: %s", strDataFilePath.c_str());
 		for (size_t i = 0; i < m_vZOffset.size(); i++) {
 			if (fprintf(fp, "%d,", m_vZOffset[i]) < 0) {
 				PLOGE.printf("fprintf failed at index %zu", i);
@@ -496,7 +489,7 @@ bool CImagingSession::SaveZOffset(const std::string strDataFilePath) {
 			}
 		}
 		fclose(fp);
-		PLOGI.printf("ZOffset file saved: %s done.", strDataFilePath.c_str());
+		//PLOGI.printf("ZOffset file saved: %s done.", strDataFilePath.c_str());
 		return true;
 	}
 	return false;
@@ -558,16 +551,16 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 			else nowOffset = pSession->GetZOffset(nFrame);
 		}
 		pImaging->ApplyZOffset(imgResult, imgResult, nowOffset);
-
 		pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult.clone()));
-		cv::Mat imgResultWithoutCompensation = pImaging->GetWithoutCompensationImage().clone();
-		pSession->m_mapImageWithoutCompensation.insert(std::make_pair(nFrame, imgResultWithoutCompensation));
 
-		pImaging->ApplyZOffset(imgResult, imgResult, pSession->GetZOffset());
+		cv::Mat imgResultWithoutCompensation = pImaging->GetWithoutCompensationImage().clone();
+		pImaging->ApplyZOffset(imgResultWithoutCompensation, imgResultWithoutCompensation, nowOffset);
+		pSession->m_mapImageWithoutCompensation.insert(std::make_pair(nFrame, imgResultWithoutCompensation.clone()));
 	}
 
-	if (pSession->m_vZOffset.size() == nNumOfSamples)
+	if (pSession->m_vZOffset.size() == nNumOfSamples) {
 		pSession->SaveZOffset(pSession->m_strDataFilePath);
+	}
 	PLOGI.printf("Session #%d process oct imaging done.", pSession->m_nSession);
 	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::OCTImaging, pSession->m_nSession);
 	
@@ -588,7 +581,7 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 
 	CCutViewManager* pCutView = pSession->m_pCutView;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
-	cv::Mat imgCircle/*, imgZOffset*/;
+	cv::Mat imgCircle;
 
 	if (pImaging == nullptr) {
 		return ERROR;
@@ -1263,7 +1256,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	std::vector<cv::Mat>& vGuidewire = pSession->m_vGuidewire;
 	std::vector<std::vector<float>>& vGuidewireRadius = pSession->m_vGuidewireRadius;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
-	cv::Mat circleImage/*, imgZOffset*/, enhancedImage;
+	cv::Mat circleImage, enhancedImage;
 
 	int imgSize = 1024;
 	cv::Point center(imgSize / 2, imgSize / 2);
@@ -1303,7 +1296,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		cv::cvtColor(circleImage, circleImage, cv::COLOR_GRAY2BGR);
 
 		//lumen
-		std::vector<cv::Point> validContour = CImagingSession::GetValidLumenContour(it->second, imgSize, centerMask, clahe, pSession->m_pImaging);
+		std::vector<cv::Point> validContour = CImagingSession::GetValidLumenContour(imgZOffset, imgSize, centerMask, clahe, pSession->m_pImaging);
 
 		std::vector<std::vector<cv::Point>> vContours;
 		if (!validContour.empty()) {
@@ -1425,7 +1418,7 @@ UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 	const size_t nNumOfSamples = pDataManager->GetNumOfSamples();
 	const size_t nDiameter = config.volume.size;
 	const size_t nImageSize = nDiameter * nDiameter;
-	cv::Mat imgCircle, imgResize/*, imgZOffset*/;
+	cv::Mat imgCircle, imgResize;
 
 	if (pSession->m_pVolumeData != nullptr)
 	{
