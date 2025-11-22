@@ -558,12 +558,13 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 			else nowOffset = pSession->GetZOffset(nFrame);
 		}
 		pImaging->ApplyZOffset(imgResult, imgResult, nowOffset);
-
 		pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult.clone()));
-		cv::Mat imgResultWithoutCompensation = pImaging->GetWithoutCompensationImage().clone();
-		pSession->m_mapImageWithoutCompensation.insert(std::make_pair(nFrame, imgResultWithoutCompensation));
-
 		pImaging->ApplyZOffset(imgResult, imgResult, pSession->GetZOffset());
+
+		cv::Mat imgResultWithoutCompensation = pImaging->GetWithoutCompensationImage().clone();
+		pImaging->ApplyZOffset(imgResultWithoutCompensation, imgResultWithoutCompensation, nowOffset/* + pSession->GetZOffset()*/);
+		//PLOGI.printf("imgResultWithoutCompensation #%d processed frame %d / %d", pSession->m_nSession, nFrame + 1, nNumOfSamples);
+		pSession->m_mapImageWithoutCompensation.insert(std::make_pair(nFrame, imgResultWithoutCompensation.clone()));
 	}
 
 	if (pSession->m_vZOffset.size() == nNumOfSamples)
@@ -1303,7 +1304,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		cv::cvtColor(circleImage, circleImage, cv::COLOR_GRAY2BGR);
 
 		//lumen
-		std::vector<cv::Point> validContour = CImagingSession::GetValidLumenContour(it->second, imgSize, centerMask, clahe, pSession->m_pImaging);
+		std::vector<cv::Point> validContour = CImagingSession::GetValidLumenContour(imgZOffset, imgSize, centerMask, clahe, pSession->m_pImaging);
 
 		std::vector<std::vector<cv::Point>> vContours;
 		if (!validContour.empty()) {
