@@ -54,6 +54,7 @@ protected:
 	cv::Mat imageResultColor;
 	cv::Mat imageCircle;
 	cv::Mat imageResultWithoutCompensation;
+	cv::Mat imageAutoCalib;
 
 	// using in GenerateBackground
 	Ipp32f* fringes32f;
@@ -91,6 +92,7 @@ public:
 
 	virtual void Initialize(CCalibration* calibration);
 	virtual void Process(char* fringes);
+	void ProcessAutoCalib();
 	virtual void PostProcess(cv::Mat image);
 	void ApplyZOffset(const cv::Mat& src, cv::Mat& dst, int zOffset);
 
