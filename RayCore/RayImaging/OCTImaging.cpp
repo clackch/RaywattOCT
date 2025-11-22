@@ -159,7 +159,10 @@ void COCTImaging::ApplyZOffset(const cv::Mat& src, cv::Mat& dst, int zOffset) {
 	}
 }
 void COCTImaging::ProcessAutoCalib() {
-	if (imageAutoCalib.empty()) return;
+	if (imageAutoCalib.empty()) {
+		PLOGI.printf("Auto calibration image is empty");
+		return;
+	}
 
 	if (m_FindingSheathMathod == AutoCalibrationMathod::FindingMinMagnitude)
 	{
