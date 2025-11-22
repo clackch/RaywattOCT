@@ -430,9 +430,7 @@ int CImagingSession::CalculateZOffset(const cv::Mat image, const cv::Mat autoCal
 	img = img(roi);
 	cv::Rect zeroRegion(0, 0, img.cols, 30);
 	img(zeroRegion).setTo(cv::Scalar::all(0));
-	//cv::imwrite("CalculateZOffset_origin.tif", img);
 
-	//cv::imwrite("CheckSheathPixels_origin" + std::to_string(i) + ".tif", img);
 	if (img.type() == CV_8U)
 		img.convertTo(img, CV_32F, 1.0 / 255.0);
 	else if (img.type() == CV_32F) {}
@@ -462,12 +460,12 @@ int CImagingSession::CalculateZOffset(const cv::Mat image, const cv::Mat autoCal
 			cv::Mat sectionMask = section != 1.0f;
 			cv::Point sectionMaxLoc;
 			cv::minMaxLoc(section, nullptr, &maxVal, nullptr, &sectionMaxLoc, sectionMask);
-			PLOGI.printf("CalculateZOffset: x %d, y %d, value %lf", sectionMaxLoc.x, sectionMaxLoc.y, maxVal);
+			//PLOGI.printf("CalculateZOffset: x %d, y %d, value %lf", sectionMaxLoc.x, sectionMaxLoc.y, maxVal);
 			if (std::abs(sectionMaxLoc.y - maxLoc.y) < 15 && maxVal > 0.6)
 			{
 				nowRow += sectionMaxLoc.y;
 				validCount++;
-				PLOGI.printf("Valid");
+				//PLOGI.printf("Valid");
 			}
 		}
 		if (validCount > 0)
@@ -476,18 +474,18 @@ int CImagingSession::CalculateZOffset(const cv::Mat image, const cv::Mat autoCal
 			return 0;
 	}
 	int nowZOffset = idealRow - nowRow;
-	PLOGI.printf("CalculateZOffset: nowRow %d, idealRow %d, zOffset %d", nowRow, idealRow, nowZOffset);
+	//PLOGI.printf("CalculateZOffset: nowRow %d, idealRow %d, zOffset %d", nowRow, idealRow, nowZOffset);
 	auto end = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double, std::milli> elapsed = end - start;
-	PLOGI.printf("CalculateZOffset: frame done in %f ms.", elapsed.count());
+	//PLOGI.printf("CalculateZOffset: frame done in %f ms.", elapsed.count());
 	return nowZOffset;
 }
 
 bool CImagingSession::SaveZOffset(const std::string strDataFilePath) {
-	PLOGI.printf("SaveZOffset: start saving to %s", strDataFilePath.c_str());
+	//PLOGI.printf("SaveZOffset: start saving to %s", strDataFilePath.c_str());
 	FILE* fp = fopen(strDataFilePath.c_str(), "w+");
 	if (fp) {
-		PLOGI.printf("ZOffset file opened: %s", strDataFilePath.c_str());
+		//PLOGI.printf("ZOffset file opened: %s", strDataFilePath.c_str());
 		for (size_t i = 0; i < m_vZOffset.size(); i++) {
 			if (fprintf(fp, "%d,", m_vZOffset[i]) < 0) {
 				PLOGE.printf("fprintf failed at index %zu", i);
@@ -496,7 +494,7 @@ bool CImagingSession::SaveZOffset(const std::string strDataFilePath) {
 			}
 		}
 		fclose(fp);
-		PLOGI.printf("ZOffset file saved: %s done.", strDataFilePath.c_str());
+		//PLOGI.printf("ZOffset file saved: %s done.", strDataFilePath.c_str());
 		return true;
 	}
 	return false;
