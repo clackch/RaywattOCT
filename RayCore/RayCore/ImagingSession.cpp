@@ -391,14 +391,10 @@ bool CImagingSession::LoadZOffset(const std::string strDataFilePath) {
 			int offset = 0;
 			int ret = fscanf(fp, "%d,", &offset);
 
-			if (ret != 1) {
-				if (ret == EOF) {
-					PLOGI.printf("fscanf failed or reached EOF");
-					return false;
-				}
-			}
-			else {
-				PLOGI.printf("fscanf: expected 1 item, got %d\n", ret);
+			if (ret == EOF) {
+				fclose(fp);
+				PLOGI.printf("fscanf failed or reached EOF");
+				return false;
 			}
 
 			m_vZOffset.push_back(offset);
@@ -414,7 +410,6 @@ bool CImagingSession::LoadZOffset(const std::string strDataFilePath) {
 
 int CImagingSession::GetZOffset(int nFrame) {
 	if (m_pDataManager == nullptr || m_vZOffset.size() != m_pDataManager->GetNumOfSamples()) return 0;
-	//if (m_vZOffset.size() != m_pDataManager->GetNumOfSamples()) return GetZOffset();
 
 	return m_vZOffset.at(nFrame);
 
@@ -557,16 +552,15 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 		}
 		pImaging->ApplyZOffset(imgResult, imgResult, nowOffset);
 		pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult.clone()));
-		pImaging->ApplyZOffset(imgResult, imgResult, pSession->GetZOffset());
 
 		cv::Mat imgResultWithoutCompensation = pImaging->GetWithoutCompensationImage().clone();
-		pImaging->ApplyZOffset(imgResultWithoutCompensation, imgResultWithoutCompensation, nowOffset/* + pSession->GetZOffset()*/);
-		//PLOGI.printf("imgResultWithoutCompensation #%d processed frame %d / %d", pSession->m_nSession, nFrame + 1, nNumOfSamples);
+		pImaging->ApplyZOffset(imgResultWithoutCompensation, imgResultWithoutCompensation, nowOffset);
 		pSession->m_mapImageWithoutCompensation.insert(std::make_pair(nFrame, imgResultWithoutCompensation.clone()));
 	}
 
-	if (pSession->m_vZOffset.size() == nNumOfSamples)
+	if (pSession->m_vZOffset.size() == nNumOfSamples) {
 		pSession->SaveZOffset(pSession->m_strDataFilePath);
+	}
 	PLOGI.printf("Session #%d process oct imaging done.", pSession->m_nSession);
 	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::OCTImaging, pSession->m_nSession);
 	
@@ -587,7 +581,7 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 
 	CCutViewManager* pCutView = pSession->m_pCutView;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
-	cv::Mat imgCircle/*, imgZOffset*/;
+	cv::Mat imgCircle;
 
 	if (pImaging == nullptr) {
 		return ERROR;
@@ -1262,7 +1256,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 	std::vector<cv::Mat>& vGuidewire = pSession->m_vGuidewire;
 	std::vector<std::vector<float>>& vGuidewireRadius = pSession->m_vGuidewireRadius;
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
-	cv::Mat circleImage/*, imgZOffset*/, enhancedImage;
+	cv::Mat circleImage, enhancedImage;
 
 	int imgSize = 1024;
 	cv::Point center(imgSize / 2, imgSize / 2);
@@ -1424,7 +1418,7 @@ UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 	const size_t nNumOfSamples = pDataManager->GetNumOfSamples();
 	const size_t nDiameter = config.volume.size;
 	const size_t nImageSize = nDiameter * nDiameter;
-	cv::Mat imgCircle, imgResize/*, imgZOffset*/;
+	cv::Mat imgCircle, imgResize;
 
 	if (pSession->m_pVolumeData != nullptr)
 	{
