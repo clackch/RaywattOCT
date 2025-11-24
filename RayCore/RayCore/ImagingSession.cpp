@@ -219,7 +219,7 @@ cv::Mat CImagingSession::PostProcess(int nFrame) {
 
 	if (it != m_mapImage.end()) {		
 		cv::Mat imgZOffset;
-		m_pImaging->ApplyZOffset(it->second, imgZOffset, GetZOffset());
+		m_pImaging->ApplyZOffset(it->second, imgZOffset, GetSessionZOffset());
 		m_pImaging->PostProcess(imgZOffset);
 	}
 	return m_pImaging->GetCircleImage();
@@ -252,7 +252,7 @@ void* CImagingSession::GetImageData(int nFrame) {
 
 	cv::Mat imgZOffset;
 	if (config.measurement.calPerFrame) {
-		m_pImaging->ApplyZOffset(imgResult, imgZOffset, GetZOffset(nFrame));
+		m_pImaging->ApplyZOffset(imgResult, imgZOffset, GetFrameZOffset(nFrame));
 	}
 
 	std::map<int, cv::Mat>::iterator it = m_mapImage.find(nFrame);
@@ -264,7 +264,7 @@ void* CImagingSession::GetImageData(int nFrame) {
 		m_mapImage.insert(std::make_pair(nFrame, imgResult));
 	}
 	
-	m_pImaging->ApplyZOffset(imgResult, imgZOffset, GetZOffset());
+	m_pImaging->ApplyZOffset(imgResult, imgZOffset, GetSessionZOffset());
 	m_pImaging->PostProcess(imgZOffset);
 
 	return m_pImaging->GetCircleImage().data;
@@ -299,7 +299,7 @@ void CImagingSession::AddFramesIntoCutView() {
 		std::map<int, cv::Mat>::iterator it = m_mapImage.find(nFrame);
 		if (it != m_mapImage.end())
 		{
-			m_pImaging->ApplyZOffset(it->second, imgZOffset, GetZOffset());
+			m_pImaging->ApplyZOffset(it->second, imgZOffset, GetSessionZOffset());
 			m_pImaging->CircularizeImage(imgZOffset, imgCircle);
 			m_pCutView->AddRecord(imgCircle, nFrame);
 		}
@@ -398,7 +398,7 @@ bool CImagingSession::LoadZOffset(const std::string strZOffsetFilePath) {
 	return false;
 }
 
-int CImagingSession::GetZOffset(int nFrame) {
+int CImagingSession::GetFrameZOffset(int nFrame) {
 	if (m_pDataManager == nullptr || m_vZOffset.size() != m_pDataManager->GetNumOfSamples()) return 0;
 
 	return m_vZOffset.at(nFrame);
@@ -536,7 +536,7 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 				ZOffsetForCurrentFrame = pSession->CalculateZOffset(imgResult, pSession->GetAutoCalibPatch());
 				pSession->m_vZOffset.push_back(ZOffsetForCurrentFrame);
 			}
-			else ZOffsetForCurrentFrame = pSession->GetZOffset(nFrame);
+			else ZOffsetForCurrentFrame = pSession->GetFrameZOffset(nFrame);
 		}
 		pImaging->ApplyZOffset(imgResult, imgResult, ZOffsetForCurrentFrame);
 		pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult.clone()));
@@ -585,7 +585,7 @@ UINT CImagingSession::threadUpdateCutView(LPVOID param) {
 		}
 		
 		cv::Mat imgZOffset;
-		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset());
+		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetSessionZOffset());
 		pImaging->CircularizeImage(imgZOffset, imgCircle);
 		pCutView->AddRecord(imgCircle, nFrame);
 
@@ -1279,7 +1279,7 @@ UINT CImagingSession::threadDetectObject(LPVOID param) {
 		}
 
 		cv::Mat imgZOffset;
-		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset());
+		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetSessionZOffset());
 		pImaging->CircularizeImage(imgZOffset, circleImage);
 		cv::cvtColor(circleImage, circleImage, cv::COLOR_GRAY2BGR);
 
@@ -1441,7 +1441,7 @@ UINT CImagingSession::threadGenerateVolume(LPVOID param) {
 		}
 		
 		cv::Mat imgZOffset;
-		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetZOffset());
+		pImaging->ApplyZOffset(it->second, imgZOffset, pSession->GetSessionZOffset());
 		pImaging->CircularizeImage(imgZOffset, imgCircle);
 
 		// remove sheath

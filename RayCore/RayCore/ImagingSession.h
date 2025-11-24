@@ -108,8 +108,8 @@ public:
 
 	bool LoadZOffset(std::string strZOffsetFilePath);
 	void SetZOffset(int zOffset) { m_zOffset = zOffset; }
-	int GetZOffset() { return m_zOffset; }
-	int GetZOffset(int nFrame);
+	int GetSessionZOffset() { return m_zOffset; }
+	int GetFrameZOffset(int nFrame);
 	int CalculateZOffset(const cv::Mat currentFrame, const cv::Mat autoCalibPatch);
 	bool SaveZOffset(std::string strZOffsetFilePath);
 
