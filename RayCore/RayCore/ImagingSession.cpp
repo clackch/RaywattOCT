@@ -539,51 +539,57 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 				pSession->m_vZOffset.push_back(ZOffsetForCurrentFrame);
 			}
 			else ZOffsetForCurrentFrame = pSession->GetFrameZOffset(nFrame);
-		}
 
-		if (nFrame == 0) {
-			pImaging->ApplyZOffset(imgResult, imgResult, pSession->m_vZOffset[nFrame]);
-			pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult.clone()));
+			if (nFrame == 0) {
+				pImaging->ApplyZOffset(imgResult, imgResult, pSession->m_vZOffset[nFrame]);
+				pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult.clone()));
 
-			PLOGI.printf("now Frame : %d, nowZOffset : %d", nFrame, pSession->m_vZOffset[nFrame]);
+				PLOGI.printf("now Frame : %d, nowZOffset : %d", nFrame, pSession->m_vZOffset[nFrame]);
 
-			cv::Mat imgResultWithoutCompensation = pImaging->GetWithoutCompensationImage().clone();
-			pImaging->ApplyZOffset(imgResultWithoutCompensation, imgResultWithoutCompensation, pSession->m_vZOffset[nFrame]);
-			pSession->m_mapImageWithoutCompensation.insert(std::make_pair(nFrame, imgResultWithoutCompensation.clone()));
-		}
-		else if(nFrame > 1 && nFrame < nNumOfSamples)
-		{
-			int prev = pSession->m_vZOffset[nFrame - 2];
-			int curr = pSession->m_vZOffset[nFrame - 1];
-			int next = pSession->m_vZOffset[nFrame];
-			if (std::abs(curr - prev) >= 20 && std::abs(curr - next) >= 20)
-			{
-				pSession->m_vZOffset[nFrame - 1] = (prev + next) / 2;
+				cv::Mat imgResultWithoutCompensation = pImaging->GetWithoutCompensationImage().clone();
+				pImaging->ApplyZOffset(imgResultWithoutCompensation, imgResultWithoutCompensation, pSession->m_vZOffset[nFrame]);
+				pSession->m_mapImageWithoutCompensation.insert(std::make_pair(nFrame, imgResultWithoutCompensation.clone()));
 			}
+			else if (nFrame > 1)
+			{
+				int prev = pSession->m_vZOffset[nFrame - 2];
+				int curr = pSession->m_vZOffset[nFrame - 1];
+				int next = pSession->m_vZOffset[nFrame];
+				if (std::abs(curr - prev) >= 20 && std::abs(curr - next) >= 20)
+				{
+					pSession->m_vZOffset[nFrame - 1] = (prev + next) / 2;
+				}
 
-			pImaging->ApplyZOffset(prevImg, prevImg, pSession->m_vZOffset[nFrame - 1]);
-			pSession->m_mapImage.insert(std::make_pair(nFrame - 1, prevImg.clone()));
-			PLOGI.printf("now Frame : %d, nowZOffset : %d", nFrame - 1, pSession->m_vZOffset[nFrame - 1]);
-			cv::Mat imgResultWithoutCompensation = prevImgWithoutCompensation.clone();
-			pImaging->ApplyZOffset(imgResultWithoutCompensation, imgResultWithoutCompensation, pSession->m_vZOffset[nFrame - 1]);
-			pSession->m_mapImageWithoutCompensation.insert(std::make_pair(nFrame - 1, imgResultWithoutCompensation.clone()));
+				pImaging->ApplyZOffset(prevImg, prevImg, pSession->m_vZOffset[nFrame - 1]);
+				pSession->m_mapImage.insert(std::make_pair(nFrame - 1, prevImg.clone()));
+				PLOGI.printf("now Frame : %d, nowZOffset : %d", nFrame - 1, pSession->m_vZOffset[nFrame - 1]);
+				cv::Mat imgResultWithoutCompensation = prevImgWithoutCompensation.clone();
+				pImaging->ApplyZOffset(imgResultWithoutCompensation, imgResultWithoutCompensation, pSession->m_vZOffset[nFrame - 1]);
+				pSession->m_mapImageWithoutCompensation.insert(std::make_pair(nFrame - 1, imgResultWithoutCompensation.clone()));
+			}
+			if (nFrame == nNumOfSamples - 1)
+			{
+				pImaging->ApplyZOffset(imgResult, imgResult, ZOffsetForCurrentFrame);
+				pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult.clone()));
+				PLOGI.printf("now Frame : %d, nowZOffset : %d", nFrame, ZOffsetForCurrentFrame);
+				cv::Mat imgResultWithoutCompensation = pImaging->GetWithoutCompensationImage().clone();
+				pImaging->ApplyZOffset(imgResultWithoutCompensation, imgResultWithoutCompensation, ZOffsetForCurrentFrame);
+				pSession->m_mapImageWithoutCompensation.insert(std::make_pair(nFrame, imgResultWithoutCompensation.clone()));
+			}
+			prevImg = imgResult.clone();
+			prevImgWithoutCompensation = pImaging->GetWithoutCompensationImage().clone();
+
+			if (pSession->m_vZOffset.size() == nNumOfSamples) {
+				pSession->SaveZOffset(pSession->m_strZOffsetFilePath);
+			}
 		}
-		if(nFrame == nNumOfSamples - 1)
-		{
-			pImaging->ApplyZOffset(imgResult, imgResult, ZOffsetForCurrentFrame);
+		else {
 			pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult.clone()));
-			PLOGI.printf("now Frame : %d, nowZOffset : %d", nFrame, ZOffsetForCurrentFrame);
 			cv::Mat imgResultWithoutCompensation = pImaging->GetWithoutCompensationImage().clone();
-			pImaging->ApplyZOffset(imgResultWithoutCompensation, imgResultWithoutCompensation, ZOffsetForCurrentFrame);
 			pSession->m_mapImageWithoutCompensation.insert(std::make_pair(nFrame, imgResultWithoutCompensation.clone()));
 		}
-		prevImg = imgResult.clone();
-		prevImgWithoutCompensation = pImaging->GetWithoutCompensationImage().clone();
 	}
 
-	if (pSession->m_vZOffset.size() == nNumOfSamples) {
-		pSession->SaveZOffset(pSession->m_strZOffsetFilePath);
-	}
 	PLOGI.printf("Session #%d process oct imaging done.", pSession->m_nSession);
 	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::OCTImaging, pSession->m_nSession);
 	
