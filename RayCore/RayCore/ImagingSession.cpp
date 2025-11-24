@@ -445,12 +445,12 @@ int CImagingSession::CalculateZOffset(const cv::Mat image, const cv::Mat autoCal
 			cv::Mat sectionMask = section != 1.0f;
 			cv::Point sectionMaxLoc;
 			cv::minMaxLoc(section, nullptr, &maxVal, nullptr, &sectionMaxLoc, sectionMask);
-			//PLOGI.printf("CalculateZOffset: x %d, y %d, value %lf", sectionMaxLoc.x, sectionMaxLoc.y, maxVal);
+			PLOGI.printf("CalculateZOffset: x %d, y %d, value %lf", sectionMaxLoc.x, sectionMaxLoc.y, maxVal);
 			if (std::abs(sectionMaxLoc.y - maxLoc.y) < 15 && maxVal > 0.6)
 			{
 				nowRow += sectionMaxLoc.y;
 				validCount++;
-				//PLOGI.printf("Valid");
+				PLOGI.printf("Valid");
 			}
 		}
 		if (validCount > 0)
@@ -459,7 +459,7 @@ int CImagingSession::CalculateZOffset(const cv::Mat image, const cv::Mat autoCal
 			return 0;
 	}
 	int nowZOffset = idealRow - nowRow;
-	//PLOGI.printf("CalculateZOffset: nowRow %d, idealRow %d, zOffset %d", nowRow, idealRow, nowZOffset);
+	PLOGI.printf("CalculateZOffset: nowRow %d, idealRow %d, zOffset %d", nowRow, idealRow, nowZOffset);
 	auto end = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double, std::milli> elapsed = end - start;
 	//PLOGI.printf("CalculateZOffset: frame done in %f ms.", elapsed.count());
@@ -527,7 +527,7 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 	{
 		char* pBuffer = pDataManager->GetSample(nFrame);
 		pImaging->Process(pBuffer);
-		cv::Mat imgResult = pImaging->GetProcessedImage().clone();
+		cv::Mat imgResult = pImaging->GetProcessedImage();
 
 		int ZOffsetForCurrentFrame = 0;
 		// if file load failed, calculate zOffset
@@ -538,11 +538,32 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 			}
 			else ZOffsetForCurrentFrame = pSession->GetFrameZOffset(nFrame);
 		}
-		pImaging->ApplyZOffset(imgResult, imgResult, ZOffsetForCurrentFrame);
+	}
+
+	for (int nFrame = 1; nFrame < pSession->m_vZOffset.size() - 1; nFrame++)
+	{
+		int prev = pSession->m_vZOffset[nFrame - 1];
+		int curr = pSession->m_vZOffset[nFrame];
+		int next = pSession->m_vZOffset[nFrame + 1];
+		if (std::abs(curr - prev) >= 20 && std::abs(curr - next) >= 20)
+		{
+			pSession->m_vZOffset[nFrame] = (prev + next) / 2;
+		}
+	}
+
+	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadImaging->isRun; nFrame++)
+	{
+		char* pBuffer = pDataManager->GetSample(nFrame);
+		pImaging->Process(pBuffer);
+		cv::Mat imgResult = pImaging->GetProcessedImage();
+
+		pImaging->ApplyZOffset(imgResult, imgResult, pSession->m_vZOffset[nFrame]);
 		pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult.clone()));
 
+		PLOGI.printf("now Frame : %d, nowZOffset : %d", nFrame, pSession->m_vZOffset[nFrame]);
+
 		cv::Mat imgResultWithoutCompensation = pImaging->GetWithoutCompensationImage().clone();
-		pImaging->ApplyZOffset(imgResultWithoutCompensation, imgResultWithoutCompensation, ZOffsetForCurrentFrame);
+		pImaging->ApplyZOffset(imgResultWithoutCompensation, imgResultWithoutCompensation, pSession->m_vZOffset[nFrame]);
 		pSession->m_mapImageWithoutCompensation.insert(std::make_pair(nFrame, imgResultWithoutCompensation.clone()));
 	}
 
