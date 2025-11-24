@@ -100,14 +100,6 @@ CImagingSession* CImagingSession::CreateSession(CMessageService* pMsg, int nSess
 		return nullptr;
 	}
 
-	// 여기서 열려고 했는데, static이라서 안됨..
-
-	//std::string strPath(strFilePath);
-	//std::string strZOffsetFilePath = strPath.substr(0, strPath.size() - 3).append("zOffset");
-	//if (LoadZOffset(strZOffsetFilePath)) {
-	//	//pSession->CalculateZOffset(pSession->GetDataManager()->GetNumOfSamples(), m_autoCalibPatch, strZOffsetFilePath);
-	//}
-
 	return createSession(pMsg, setting, nSession, pReader, true, type);
 }
 
@@ -378,29 +370,27 @@ int CImagingSession::GetNumOfGuidewirePoints(int nFrame){
 	return mat.cols * mat.rows;
 }
 
-bool CImagingSession::LoadZOffset(const std::string strDataFilePath) {
-	PLOGI.printf("LoadZOffset: start loading from %s", strDataFilePath.c_str());
+bool CImagingSession::LoadZOffset(const std::string strZOffsetFilePath) {
+	PLOGI.printf("LoadZOffset: start loading from %s", strZOffsetFilePath.c_str());
 	int nNumOfSamples = (m_pDataManager == nullptr) ? 0 : m_pDataManager->GetNumOfSamples();
 	m_vZOffset.clear();
-	m_strDataFilePath = strDataFilePath;
+	m_strZOffsetFilePath = strZOffsetFilePath;
 
-	FILE* fp = fopen(strDataFilePath.c_str(), "r");
+	FILE* fp = fopen(strZOffsetFilePath.c_str(), "r");
 	if (fp) {
-		PLOGI.printf("ZOffset file loaded: %s", strDataFilePath.c_str());
 		for (int i = 0; i < nNumOfSamples; i++) {
 			int offset = 0;
 			int ret = fscanf(fp, "%d,", &offset);
 
 			if (ret == EOF) {
 				fclose(fp);
-				PLOGI.printf("fscanf failed or reached EOF");
+				PLOGI.printf("LoadZOffset: fscanf failed or reached EOF");
 				return false;
 			}
 
 			m_vZOffset.push_back(offset);
 		}
 		fclose(fp);
-		PLOGI.printf("ZOffset file loaded: %s done.", strDataFilePath.c_str());
 
 		return true;
 	}
@@ -476,20 +466,18 @@ int CImagingSession::CalculateZOffset(const cv::Mat image, const cv::Mat autoCal
 	return nowZOffset;
 }
 
-bool CImagingSession::SaveZOffset(const std::string strDataFilePath) {
-	//PLOGI.printf("SaveZOffset: start saving to %s", strDataFilePath.c_str());
-	FILE* fp = fopen(strDataFilePath.c_str(), "w+");
+bool CImagingSession::SaveZOffset(const std::string strZOffsetFilePath) {
+	PLOGI.printf("SaveZOffset: start saving to %s", strZOffsetFilePath.c_str());
+	FILE* fp = fopen(strZOffsetFilePath.c_str(), "w+");
 	if (fp) {
-		//PLOGI.printf("ZOffset file opened: %s", strDataFilePath.c_str());
 		for (size_t i = 0; i < m_vZOffset.size(); i++) {
 			if (fprintf(fp, "%d,", m_vZOffset[i]) < 0) {
-				PLOGE.printf("fprintf failed at index %zu", i);
+				PLOGE.printf("SaveZOffset: fprintf failed at index %zu", i);
 				fclose(fp);
 				return false;
 			}
 		}
 		fclose(fp);
-		//PLOGI.printf("ZOffset file saved: %s done.", strDataFilePath.c_str());
 		return true;
 	}
 	return false;
@@ -541,25 +529,25 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 		pImaging->Process(pBuffer);
 		cv::Mat imgResult = pImaging->GetProcessedImage().clone();
 
-		int nowOffset = 0;
+		int ZOffsetForCurrentFrame = 0;
 		// if file load failed, calculate zOffset
 		if (config.measurement.calPerFrame) {
 			if (pSession->m_vZOffset.size() != nNumOfSamples) {
-				nowOffset = pSession->CalculateZOffset(imgResult, pSession->GetAutoCalibPatch());
-				pSession->m_vZOffset.push_back(nowOffset);
+				ZOffsetForCurrentFrame = pSession->CalculateZOffset(imgResult, pSession->GetAutoCalibPatch());
+				pSession->m_vZOffset.push_back(ZOffsetForCurrentFrame);
 			}
-			else nowOffset = pSession->GetZOffset(nFrame);
+			else ZOffsetForCurrentFrame = pSession->GetZOffset(nFrame);
 		}
-		pImaging->ApplyZOffset(imgResult, imgResult, nowOffset);
+		pImaging->ApplyZOffset(imgResult, imgResult, ZOffsetForCurrentFrame);
 		pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult.clone()));
 
 		cv::Mat imgResultWithoutCompensation = pImaging->GetWithoutCompensationImage().clone();
-		pImaging->ApplyZOffset(imgResultWithoutCompensation, imgResultWithoutCompensation, nowOffset);
+		pImaging->ApplyZOffset(imgResultWithoutCompensation, imgResultWithoutCompensation, ZOffsetForCurrentFrame);
 		pSession->m_mapImageWithoutCompensation.insert(std::make_pair(nFrame, imgResultWithoutCompensation.clone()));
 	}
 
 	if (pSession->m_vZOffset.size() == nNumOfSamples) {
-		pSession->SaveZOffset(pSession->m_strDataFilePath);
+		pSession->SaveZOffset(pSession->m_strZOffsetFilePath);
 	}
 	PLOGI.printf("Session #%d process oct imaging done.", pSession->m_nSession);
 	pSession->m_pMsg->postMessage(WM_NOTIFY_PROCESS_DONE, (WPARAM)RayWorkItem::OCTImaging, pSession->m_nSession);
