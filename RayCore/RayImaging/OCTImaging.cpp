@@ -117,19 +117,6 @@ void COCTImaging::PostProcess(cv::Mat image) {
 	const bool bInvert = m_bInvert;
 	const bool bColor = m_bColor;
 
-	if (m_FindingSheathMathod == AutoCalibrationMathod::FindingMinMagnitude)
-	{
-		CalculateMagnitude(image);
-	}
-	else if (m_FindingSheathMathod == AutoCalibrationMathod::FindingSheath)
-	{
-		findSheath(image);
-	}else if(m_FindingSheathMathod == AutoCalibrationMathod::CheckSheathPixelNum)
-	{
-		CheckSheathPixels(image);
-	}
-	//cv::imwrite("sheath.tif", image);
-
 	cv::cvtColor(image, imageResultColor, cv::COLOR_GRAY2RGB);
 
 	if (bInvert) cv::bitwise_not(imageResultColor, imageResultColor);
@@ -154,11 +141,9 @@ void COCTImaging::PostProcess(cv::Mat image) {
 	CircularizeImage(imageResultColor, imageCircle);
 }
 void COCTImaging::ApplyZOffset(const cv::Mat& src, cv::Mat& dst, int zOffset) {
-	auto start_manual = std::chrono::high_resolution_clock::now();
 	cv::Mat img = src.clone();
 	dst.create(img.size(), img.type());
 	dst.setTo(cv::Scalar::all(0));
-	PLOGI.printf("ZOffset: %d", zOffset);
 	if (zOffset > 0) {
 		cv::Rect srcR(zOffset, 0, img.cols - zOffset, img.rows);
 		cv::Rect dstR(0, 0, img.cols - zOffset, img.rows);
@@ -172,8 +157,25 @@ void COCTImaging::ApplyZOffset(const cv::Mat& src, cv::Mat& dst, int zOffset) {
 	else {
 		img.copyTo(dst);
 	}
-	auto end_manual = std::chrono::high_resolution_clock::now();
-	PLOGI.printf("Manual Time: %lld us", std::chrono::duration_cast<std::chrono::microseconds>(end_manual - start_manual).count());
+}
+void COCTImaging::ProcessAutoCalib() {
+	if (imageAutoCalib.empty()) {
+		PLOGI.printf("Auto calibration image is empty");
+		return;
+	}
+
+	if (m_FindingSheathMathod == AutoCalibrationMathod::FindingMinMagnitude)
+	{
+		CalculateMagnitude(imageAutoCalib);
+	}
+	else if (m_FindingSheathMathod == AutoCalibrationMathod::FindingSheath)
+	{
+		findSheath(imageAutoCalib);
+	}
+	else if (m_FindingSheathMathod == AutoCalibrationMathod::CheckSheathPixelNum)
+	{
+		CheckSheathPixels(imageAutoCalib);
+	}
 }
 int COCTImaging::Start() {
 	BOOL result = FALSE;
@@ -783,6 +785,7 @@ UINT COCTImaging::threadRender(LPVOID param) {
 
 		if (pImaging->m_pThread->isRun) {
 			pImaging->Process((char *)pImaging->m_pFringesBuffer);
+			pImaging->ProcessAutoCalib();
 			pImaging->PostProcess(pImaging->GetProcessedImage());
 			// To-Do
 			// double buffering 필요?
@@ -800,9 +803,6 @@ UINT COCTImaging::threadRender(LPVOID param) {
 
 void COCTImaging::adaptive_compensation()
 {
-	if (!bCompensated || m_setting.applyCompensation == 0)
-		return;
-
 	// 0) 설정값 확정 (원 로직 유지)
 	EXPONENTIAL_FACTOR = (EXPONENTIAL_FACTOR <= -1.0f) ? m_setting.exponentialFactor : EXPONENTIAL_FACTOR;
 	BRIGHTNESS_CONTROL = (BRIGHTNESS_CONTROL <= -1.0f) ? m_setting.brightnessControl : BRIGHTNESS_CONTROL;
@@ -919,7 +919,12 @@ void COCTImaging::adaptive_compensation()
 	}
 
 	// Rotate back to original angle
-	cv::rotate(result_img, imageResult, cv::ROTATE_90_CLOCKWISE);
+	cv::Mat result;
+	cv::rotate(result_img, result, cv::ROTATE_90_CLOCKWISE);
+	imageAutoCalib = result.clone();
+	if (!bCompensated || m_setting.applyCompensation == 0)
+		return;
+	imageResult = result.clone();
 }
 
 void COCTImaging::min_max_normalization(const cv::Mat& img, cv::Mat& normalized_img, double& min_val, double& max_val)
