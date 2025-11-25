@@ -385,16 +385,17 @@ bool CImagingSession::LoadZOffset(const std::string strZOffsetFilePath) {
 			if (ret == EOF) {
 				fclose(fp);
 				PLOGI.printf("LoadZOffset: fscanf failed or reached EOF");
+				m_bZOffsetLoaded = false;
 				return false;
 			}
 
 			m_vZOffset.push_back(offset);
 		}
 		fclose(fp);
-
+		m_bZOffsetLoaded = true;
 		return true;
 	}
-
+	m_bZOffsetLoaded = false;
 	return false;
 }
 
@@ -478,6 +479,7 @@ bool CImagingSession::SaveZOffset(const std::string strZOffsetFilePath) {
 			}
 		}
 		fclose(fp);
+		m_bZOffsetLoaded = true;
 		return true;
 	}
 	return false;
@@ -518,10 +520,12 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 	pSession->m_mapImageWithoutCompensation.clear();
 	const int nNumOfSamples = pDataManager->GetNumOfSamples();
 	PLOGI.printf("Session #%d process oct imaging - %d frames", pSession->m_nSession, nNumOfSamples);
+
 	// zOffset file load
 	if( pSession->m_vZOffset.size() != nNumOfSamples) {
 		PLOGI.printf("ZOffset size (%d) is different from number of samples (%d). Resetting ZOffset.", pSession->m_vZOffset.size(), nNumOfSamples);
 		pSession->m_vZOffset.clear();
+		pSession->m_bZOffsetLoaded = false;
 	}
 
 	cv::Mat prevImg, prevImgWithoutCompensation, autoCalibPatch = pSession->GetAutoCalibPatch();
@@ -533,7 +537,7 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 
 		int ZOffsetForCurrentFrame = 0;
 		if (config.measurement.calPerFrame) {
-			if (pSession->m_vZOffset.size() != nNumOfSamples) {
+			if (!pSession->m_bZOffsetLoaded) {
 				ZOffsetForCurrentFrame = pSession->CalculateZOffset(imgResult, autoCalibPatch);
 				pSession->m_vZOffset.push_back(ZOffsetForCurrentFrame);
 			}
@@ -584,7 +588,7 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 		}
 	}
 
-	if( config.measurement.calPerFrame && pSession->m_vZOffset.size() == nNumOfSamples ) {
+	if( config.measurement.calPerFrame && pSession->m_vZOffset.size() == nNumOfSamples && !pSession->m_bZOffsetLoaded) {
 		PLOGI.printf("Save ZOffset to %s", pSession->m_strZOffsetFilePath.c_str());
 		pSession->SaveZOffset(pSession->m_strZOffsetFilePath);
 	}

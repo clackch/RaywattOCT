@@ -56,8 +56,9 @@ private:
 
 	int m_zOffset;
 	std::vector<int> m_vZOffset;
-
 	std::string m_strZOffsetFilePath;
+	bool m_bZOffsetLoaded;
+
 	cv::Mat m_autoCalibPatch;
 private:
 	CImagingSession(CMessageService* pMsg, int nSession, bool deleteData = true);
