@@ -37,9 +37,9 @@
 					          SelectedValuePath="Key" DisplayMemberPath="Value" IsEnabled="{Binding IsEnableExternalDrive}" Tag="{Binding [No Drive], Source={StaticResource L10N}}" HorizontalAlignment="Left"/>
                 </StackPanel>
 
-                <!-- Available Firmware Versions -->
+                <!-- Available Update Versions -->
                 <Grid Visibility="{Binding HasAvailableUpdates, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <DataGrid ItemsSource="{Binding FirmwareUpdateItems}" SelectedItem="{Binding SelectedFirmware}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}"
+                    <DataGrid ItemsSource="{Binding UpdateItems}" SelectedItem="{Binding SelectedUpdate}" Style="{StaticResource DataGridDialog}" RowStyle="{StaticResource DataGridRowDialog}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderDialog}"
                                 AutoGenerateColumns="False" SelectionMode="Single" CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" Height="335">
                         <DataGrid.Columns>
                             <DataGridTextColumn Width="*" Binding="{Binding Version}" Header="Version" CellStyle="{StaticResource DataGridCellTooltip}"/>
@@ -49,7 +49,7 @@
                 </Grid>
                 
                 <!-- No Updates Available Message -->
-                <StackPanel Visibility="{Binding HasAvailableUpdates, Converter={StaticResource BoolToVisibilityReverseConverter}}" HorizontalAlignment="Center" >
+                <StackPanel Visibility="{Binding HasAvailableUpdates, Converter={StaticResource BoolToVisibilityReverseConverter}}" HorizontalAlignment="Center" Width="600">
                     <Label Style="{DynamicResource Pretendard-Medium-16}" Content="{Binding StatusMessage}" Foreground="{DynamicResource GrayscaleGray3Brush}" HorizontalAlignment="Center" Margin="120"/>
                 </StackPanel>
             </StackPanel>

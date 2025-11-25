@@ -33,20 +33,20 @@
                     <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
                         <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [RJ Version], Source={StaticResource L10N}}"/>
                         <StackPanel Height="5"/>
-                        <Label Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding FirmwareVersion}"/>
+                        <Label Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding RjVersion}"/>
                     </StackPanel>
-                    <Button Style="{StaticResource OutlinedBtnType3-Medium}" Height="40" Command="{Binding SoftwareUpdateCommand}" Content="{Binding [RJ Update], Source={StaticResource L10N}}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    <Button Style="{StaticResource OutlinedBtnType3-Medium}" Height="40" Command="{Binding RJUpdateCommand}" Content="{Binding [RJ Update], Source={StaticResource L10N}}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                 </Grid>
-                
+
                 <StackPanel Height="25"/>
 
                 <Grid>
                     <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
                         <Label Style="{DynamicResource Pretendard-Medium-16}" Foreground="{DynamicResource GrayscaleGray3Brush}" Content="{Binding [CM Version], Source={StaticResource L10N}}"/>
                         <StackPanel Height="5"/>
-                        <Label Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding FirmwareVersion}"/>
+                        <Label Style="{DynamicResource Pretendard-Medium-20}" Foreground="{DynamicResource GrayscaleWhiteBrush}" Content="{Binding CmVersion}"/>
                     </StackPanel>
-                    <Button Style="{StaticResource OutlinedBtnType3-Medium}" Height="40" Command="{Binding SoftwareUpdateCommand}" Content="{Binding [CM Update], Source={StaticResource L10N}}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    <Button Style="{StaticResource OutlinedBtnType3-Medium}" Height="40" Command="{Binding CMUpdateCommand}" Content="{Binding [CM Update], Source={StaticResource L10N}}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                 </Grid>
             </StackPanel>
         </Border>

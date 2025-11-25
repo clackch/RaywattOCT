@@ -252,5 +252,20 @@ namespace RaywattOCT
 
         [DllImport("RayCore.dll")]
         public static extern bool RayRJCancelDownload();
+
+        [DllImport("RayCore.dll")]
+        public static extern void RayGetCMVersion(out int major, out int minor, out int patch, out bool isBootMode);
+
+        [DllImport("RayCore.dll")]
+        public static extern void RayCMSetProgressCallback(FWProgressCallback callback);
+
+        [DllImport("RayCore.dll")]
+        public static extern void RayCMSetStatusCallback(FWStatusCallback callback);
+
+        [DllImport("RayCore.dll")]
+        public static extern bool RayCMStartDownload(string filepath);
+
+        [DllImport("RayCore.dll")]
+        public static extern bool RayCMCancelDownload();
     }
 }

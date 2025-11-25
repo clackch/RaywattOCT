@@ -2,12 +2,11 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using log4net;
 using RaywattApp.Common.Dialog;
+using RaywattApp.Common.Enums;
 using RaywattApp.Models;
 using System;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Threading;
 using static RaywattOCT.RayCoreWrapper;
 
 namespace RaywattApp.ViewModels.Dialog
@@ -16,7 +15,6 @@ namespace RaywattApp.ViewModels.Dialog
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(FirmwareUpdateProgressDialogViewModel));
 
-        // Callback delegates - stored as member variables to prevent GC
         private FWProgressCallback _progressCallback;
         private FWStatusCallback _statusCallback;
 
@@ -37,6 +35,9 @@ namespace RaywattApp.ViewModels.Dialog
         [ObservableProperty]
         private FirmwareUpdateState _currentState = FirmwareUpdateState.Idle;
 
+        [ObservableProperty]
+        private UpdateType _updateType = UpdateType.RJ;
+
         private ICommand _cancelCommand;
         public ICommand CancelCommand
         {
@@ -50,10 +51,6 @@ namespace RaywattApp.ViewModels.Dialog
             // Initialize callbacks
             _progressCallback = OnProgressCallback;
             _statusCallback = OnStatusCallback;
-
-            // Register callbacks with DLL
-            RayRJSetProgressCallback(_progressCallback);
-            RayRJSetStatusCallback(_statusCallback);
         }
 
         public override void SetParameter(object parameter)
@@ -67,12 +64,19 @@ namespace RaywattApp.ViewModels.Dialog
                         Title = data["title"].ToString();
                     }
 
+                    if (data.ContainsKey("updateType"))
+                    {
+                        UpdateType = (UpdateType)data["updateType"];
+                        _log.Debug($"Update type set to: {UpdateType}");
+                    }
+
+                    RegisterCallbacks();
+
                     if (data.ContainsKey("firmwareFilePath"))
                     {
                         string firmwareFilePath = data["firmwareFilePath"].ToString();
-                        _log.Debug($"Firmware file path received: {firmwareFilePath}");
+                        _log.Debug($"{UpdateType} firmware file path received: {firmwareFilePath}");
 
-                        // Start firmware update immediately
                         StartFirmwareUpdate(firmwareFilePath);
                     }
                 }
@@ -84,6 +88,28 @@ namespace RaywattApp.ViewModels.Dialog
                     ShowCloseButton = true;
                     CurrentState = FirmwareUpdateState.Failed;
                 }
+            }
+        }
+
+        private void RegisterCallbacks()
+        {
+            switch (UpdateType)
+            {
+                case UpdateType.RJ:
+                    RayRJSetProgressCallback(_progressCallback);
+                    RayRJSetStatusCallback(_statusCallback);
+                    _log.Debug("RJ callbacks registered");
+                    break;
+
+                case UpdateType.CM:
+                    RayCMSetProgressCallback(_progressCallback);
+                    RayCMSetStatusCallback(_statusCallback);
+                    _log.Debug("CM callbacks registered");
+                    break;
+
+                default:
+                    _log.Warn($"No callbacks to register for UpdateType: {UpdateType}");
+                    break;
             }
         }
 
@@ -144,20 +170,35 @@ namespace RaywattApp.ViewModels.Dialog
 
         public void StartFirmwareUpdate(string firmwareFilePath)
         {
-            _log.Debug($"Starting firmware update: {firmwareFilePath}");
+            _log.Debug($"Starting {UpdateType} update: {firmwareFilePath}");
 
             try
             {
-                StatusMessage = "Starting firmware download...";
+                StatusMessage = $"Starting {UpdateType} download...";
                 Progress = 0;
                 CurrentState = FirmwareUpdateState.Idle;
 
-                bool success = RayRJStartDownload(firmwareFilePath);
+                bool success = false;
+
+                switch (UpdateType)
+                {
+                    case UpdateType.RJ:
+                        success = RayRJStartDownload(firmwareFilePath);
+                        break;
+
+                    case UpdateType.CM:
+                        success = RayCMStartDownload(firmwareFilePath);
+                        break;
+
+                    default:
+                        _log.Error($"Unsupported UpdateType for firmware download: {UpdateType}");
+                        break;
+                }
 
                 if (!success)
                 {
-                    _log.Error("Failed to start firmware download");
-                    StatusMessage = "Failed to start firmware update.\nPlease check device connection.";
+                    _log.Error($"Failed to start {UpdateType} download");
+                    StatusMessage = $"Failed to start {UpdateType} update.\nPlease check device connection.";
                     CanCancel = false;
                     ShowCloseButton = true;
                     CurrentState = FirmwareUpdateState.Failed;
@@ -165,7 +206,7 @@ namespace RaywattApp.ViewModels.Dialog
             }
             catch (Exception ex)
             {
-                _log.Error($"Exception during firmware update: {ex.Message}", ex);
+                _log.Error($"Exception during {UpdateType} update: {ex.Message}", ex);
                 StatusMessage = $"Error: {ex.Message}";
                 CanCancel = false;
                 ShowCloseButton = true;
@@ -175,27 +216,43 @@ namespace RaywattApp.ViewModels.Dialog
 
         private void CancelUpdate()
         {
-            _log.Debug("User requested firmware update cancellation");
+            _log.Debug($"User requested {UpdateType} update cancellation");
 
             if (CanCancel)
             {
                 try
                 {
-                    bool cancelled = RayRJCancelDownload();
+                    bool cancelled = false;
+
+                    switch (UpdateType)
+                    {
+                        case UpdateType.RJ:
+                            cancelled = RayRJCancelDownload();
+                            break;
+
+                        case UpdateType.CM:
+                            cancelled = RayCMCancelDownload();
+                            break;
+
+                        default:
+                            _log.Warn($"No cancel method for UpdateType: {UpdateType}");
+                            break;
+                    }
+
                     if (cancelled)
                     {
-                        _log.Debug("Firmware update cancelled successfully");
-                        StatusMessage = "Cancelling firmware update...";
+                        _log.Debug($"{UpdateType} update cancelled successfully");
+                        StatusMessage = $"Cancelling {UpdateType} update...";
                         CanCancel = false;
                     }
                     else
                     {
-                        _log.Warn("Failed to cancel firmware update");
+                        _log.Warn($"Failed to cancel {UpdateType} update");
                     }
                 }
                 catch (Exception ex)
                 {
-                    _log.Error($"Error cancelling firmware update: {ex.Message}", ex);
+                    _log.Error($"Error cancelling {UpdateType} update: {ex.Message}", ex);
                 }
             }
         }

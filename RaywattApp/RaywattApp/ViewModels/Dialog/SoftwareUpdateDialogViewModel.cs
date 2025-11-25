@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using log4net;
 using RaywattApp.Common.Dialog;
+using RaywattApp.Common.Enums;
 using RaywattApp.Models;
 using System;
 using System.Collections.Generic;
@@ -25,10 +26,13 @@ namespace RaywattApp.ViewModels.Dialog
         private string _statusMessage = "Checking USB device...";
 
         [ObservableProperty]
-        private ObservableCollection<UpdateItem> _firmwareUpdateItems = new ObservableCollection<UpdateItem>();
+        private ObservableCollection<UpdateItem> _updateItems = new ObservableCollection<UpdateItem>();
 
         [ObservableProperty]
-        private UpdateItem _selectedFirmware;
+        private UpdateItem _selectedUpdate;
+
+        [ObservableProperty]
+        private UpdateType _updateType = UpdateType.Software;
 
         [ObservableProperty]
         private string _usbDriveName = "";
@@ -85,7 +89,7 @@ namespace RaywattApp.ViewModels.Dialog
 
                     if (!string.IsNullOrEmpty(_selectedExternalDrive))
                     {
-                        LoadAndFilterFirmwareItems();
+                        LoadAndFilterUpdateItems();
                     }
                 }
             }
@@ -121,8 +125,13 @@ namespace RaywattApp.ViewModels.Dialog
                         CurrentVersion = data["currentVersion"].ToString();
                     }
 
+                    if (data.ContainsKey("updateType"))
+                    {
+                        UpdateType = (UpdateType)data["updateType"];
+                    }
+
                     GetDrive();
-                    LoadAndFilterFirmwareItems();
+                    LoadAndFilterUpdateItems();
                 }
                 catch (Exception ex)
                 {
@@ -206,7 +215,7 @@ namespace RaywattApp.ViewModels.Dialog
                 {
                     IsEnableExternalDrive = false;
                     SelectedExternalDrive = null;
-                    FirmwareUpdateItems.Clear();
+                    UpdateItems.Clear();
                     HasAvailableUpdates = false;
                     StatusMessage = "No USB drive detected";
                 }
@@ -221,7 +230,7 @@ namespace RaywattApp.ViewModels.Dialog
             }
         }
 
-        private void LoadAndFilterFirmwareItems()
+        private void LoadAndFilterUpdateItems()
         {
             try
             {
@@ -231,84 +240,93 @@ namespace RaywattApp.ViewModels.Dialog
                     StatusMessage = "Please select a USB drive";
                     HasAvailableUpdates = false;
                     CanUpdate = false;
-                    FirmwareUpdateItems.Clear();
+                    UpdateItems.Clear();
                     return;
                 }
 
-                // 선택된 드라이브에서 펌웨어 목록 가져오기
-                var allFirmwareItems = GetFirmwareItemsFromDrive(SelectedExternalDrive);
-                _log.Debug($"Found {allFirmwareItems.Count} firmware items on USB drive {SelectedExternalDrive}");
+                // 선택된 드라이브에서 업데이트 목록 가져오기
+                var allUpdateItems = GetUpdateItemsFromDrive(SelectedExternalDrive);
+                _log.Debug($"Found {allUpdateItems.Count} {UpdateType} update items on USB drive {SelectedExternalDrive}");
 
-                if (!allFirmwareItems.Any())
+                if (!allUpdateItems.Any())
                 {
-                    StatusMessage = "No firmware found on selected drive";
+                    StatusMessage = $"No {UpdateType} firmware found on selected drive";
                     HasAvailableUpdates = false;
                     CanUpdate = false;
-                    FirmwareUpdateItems.Clear();
+                    UpdateItems.Clear();
                     return;
                 }
 
                 // 현재 버전 객체 생성
-                var currentFirmware = new UpdateItem(CurrentVersion, "", DateTime.Now);
+                var currentVersion = new UpdateItem(CurrentVersion, "", DateTime.Now);
 
                 // 현재보다 새로운 버전만 필터링
-                var newerVersions = allFirmwareItems
-                    .Where(item => item.IsNewerThan(currentFirmware))
+                var newerVersions = allUpdateItems
+                    .Where(item => item.IsNewerThan(currentVersion))
                     .OrderByDescending(item => item.Version)
                     .ToList();
 
                 _log.Debug($"Available updates (newer than current): {newerVersions.Count}");
 
-                FirmwareUpdateItems.Clear();
+                UpdateItems.Clear();
 
                 if (newerVersions.Any())
                 {
                     foreach (var item in newerVersions)
                     {
-                        FirmwareUpdateItems.Add(item);
+                        UpdateItems.Add(item);
                     }
 
                     // 가장 최신 버전을 자동 선택
-                    SelectedFirmware = FirmwareUpdateItems.First();
+                    SelectedUpdate = UpdateItems.First();
                     HasAvailableUpdates = true;
                     CanUpdate = true;
                     StatusMessage = string.Empty;
 
-                    _log.Debug($"Loaded {newerVersions.Count} newer firmware versions");
+                    _log.Debug($"Loaded {newerVersions.Count} newer {UpdateType} firmware versions");
                 }
                 else
                 {
                     HasAvailableUpdates = false;
                     CanUpdate = false;
                     StatusMessage = "Latest Version";
-                    _log.Debug("No newer firmware versions available");
+                    _log.Debug($"No newer {UpdateType} firmware versions available");
                 }
             }
             catch (Exception ex)
             {
-                _log.Error($"Error loading firmware items: {ex.Message}", ex);
+                _log.Error($"Error loading {UpdateType} update items: {ex.Message}", ex);
                 StatusMessage = "An error occurred";
                 HasAvailableUpdates = false;
                 CanUpdate = false;
             }
         }
 
-        private List<UpdateItem> GetFirmwareItemsFromDrive(string driveName)
+        private List<UpdateItem> GetUpdateItemsFromDrive(string driveName)
         {
             try
             {
-                string firmwarePath = Path.Combine(driveName, "Firmware");
-
-                if (!Directory.Exists(firmwarePath))
+                // UpdateType에 따라 폴더 이름 결정
+                string folderName = UpdateType switch
                 {
-                    _log.Warn($"Firmware folder not found at: {firmwarePath}");
+                    UpdateType.Software => "Software",
+                    UpdateType.RJ => "Firmware\\RJ",
+                    UpdateType.CM => "Firmware\\CM",
+                    _ => "Firmware" // 기본값
+                };
+
+                string updatePath = Path.Combine(driveName, folderName);
+
+                if (!Directory.Exists(updatePath))
+                {
+                    _log.Warn($"{folderName} folder not found at: {updatePath}");
                     return new List<UpdateItem>();
                 }
 
-                _log.Debug($"Firmware folder found at: {firmwarePath}");
+                _log.Debug($"{folderName} folder found at: {updatePath}");
 
-                var firmwareItems = new List<UpdateItem>();
-                var directories = Directory.GetDirectories(firmwarePath);
+                var updateItems = new List<UpdateItem>();
+                var directories = Directory.GetDirectories(updatePath);
 
                 foreach (var dir in directories)
                 {
@@ -325,9 +343,9 @@ namespace RaywattApp.ViewModels.Dialog
 
                         // 첫 번째 .bin 파일의 전체 경로 사용
                         string binFilePath = binFiles[0];
-                        _log.Debug($"Found firmware binary: {binFilePath}");
+                        _log.Debug($"Found {UpdateType} firmware binary: {binFilePath}");
 
-                        firmwareItems.Add(new UpdateItem(
+                        updateItems.Add(new UpdateItem(
                             dirName,
                             binFilePath,
                             System.IO.File.GetLastWriteTime(binFilePath)
@@ -339,22 +357,22 @@ namespace RaywattApp.ViewModels.Dialog
                     }
                 }
 
-                _log.Debug($"Total firmware items found: {firmwareItems.Count}");
-                return firmwareItems;
+                _log.Debug($"Total {UpdateType} update items found: {updateItems.Count}");
+                return updateItems;
             }
             catch (Exception ex)
             {
-                _log.Error($"Error getting firmware items from drive: {ex.Message}", ex);
+                _log.Error($"Error getting {UpdateType} update items from drive: {ex.Message}", ex);
                 return new List<UpdateItem>();
             }
         }
 
-        partial void OnSelectedFirmwareChanged(UpdateItem value)
+        partial void OnSelectedUpdateChanged(UpdateItem value)
         {
             if (value != null)
             {
                 CanUpdate = true;
-                _log.Debug($"Selected firmware changed: v{value.Version}");
+                _log.Debug($"Selected {UpdateType} update changed: v{value.Version}");
             }
             else
             {
@@ -364,13 +382,13 @@ namespace RaywattApp.ViewModels.Dialog
 
         protected override void AnswerYes(IDialogWindow dialog)
         {
-            if (SelectedFirmware == null)
+            if (SelectedUpdate == null)
             {
-                _log.Warn("No firmware selected for update");
+                _log.Warn($"No {UpdateType} update selected");
                 return;
             }
 
-            _log.Debug($"User confirmed update to firmware version {SelectedFirmware.Version}");
+            _log.Debug($"User confirmed update to {UpdateType} version {SelectedUpdate.Version}");
 
             // 타이머 정지
             if (_timer != null && _timer.IsEnabled)
@@ -384,7 +402,8 @@ namespace RaywattApp.ViewModels.Dialog
                 DialogReturn = new Dictionary<string, object>
                 {
                     { "shouldUpdate", true },
-                    { "selectedFirmware", SelectedFirmware },
+                    { "selectedUpdate", SelectedUpdate },
+                    { "updateType", UpdateType },
                     { "usbDriveName", SelectedExternalDrive }
                 }
             };
@@ -394,7 +413,7 @@ namespace RaywattApp.ViewModels.Dialog
 
         protected override void AnswerNo(IDialogWindow dialog)
         {
-            _log.Debug("User canceled firmware update");
+            _log.Debug($"User canceled {UpdateType} update");
 
             // 타이머 정지
             if (_timer != null && _timer.IsEnabled)
