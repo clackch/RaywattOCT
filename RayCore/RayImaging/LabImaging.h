@@ -46,5 +46,6 @@ private:
 	void subtractBackground(T* fringes, T* background, T* dst, int size);
 	void generateScopeData(Ipp32f* output, Ipp16u* scope);
 	void cropSignalData(USHORT* fringes, int start, int end);
+	USHORT* LoadBackground2DFromFile(const char* strBackgroundFile, int bufferSize);
 };
 

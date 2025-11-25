@@ -16,12 +16,13 @@ class CThread;
 class CMessageService;
 
 struct FFTThreadContext {
-	Ipp32f* fBuffer_Window;   // nAScan
-	Ipp32fc* fcAnalytic;       // nAScan (analytic fringe)
-	Ipp32fc* fcK;              // nOut   (k-remapped)
-	IppsHilbertSpec* hilbertSpec; // per-thread spec
-	Ipp8u* hilbertWorkBuf;       // per-thread work buffer
-	Ipp8u* fftWorkBufSecond;     // for final FFT of length nOut
+	Ipp32f* fBuffer_Window = nullptr;
+	Ipp32fc* fcBuffer_FFT = nullptr;
+	Ipp32fc* fcBuffer_IFFT = nullptr;
+	Ipp8u* fftWorkBufFirst = nullptr;
+	Ipp8u* fftWorkBufIFFT = nullptr;
+	Ipp8u* fftWorkBufSecond = nullptr;
+	Ipp32fc* fcBuffer_ZFFT = nullptr;
 };
 
 enum class AutoCalibrationMathod {
@@ -58,13 +59,20 @@ protected:
 	// using in GenerateBackground
 	Ipp32f* fringes32f;
 	Ipp32f* fringes32fAverage;
+	Ipp32f* fFFTMean;
 
 	// using in Gen_8bit_Image
 
 	Ipp32f* fFFTResult;
-	IppsFFTSpec_C_32fc* fftSpec;	//second FFT
+	Ipp32f* fOutput;
+	IppsFFTSpec_R_32f* fftSpecFirst;	// first FFT
+	IppsFFTSpec_C_32fc* ifftSpec, * fftSpecSecond;	// Inverse, second FFT
+	IppsFFTSpec_C_64fc* fftSpecSecond64;
 
-	int fftWorkBufSize;
+	int fftFirstWorkBufSize;
+	int fftIFFTWorkBufSize;
+	int fftSecondWorkBufSize;
+	int fftSecondWorkBufSize64;
 
 	bool m_bInvert;
 	bool m_bColor;
@@ -77,8 +85,7 @@ protected:
 	int m_nSheathSearchRange;
 	int m_nZOffset;
 	int m_nPixelNum;
-	int fftOutLen_ = 0;
-
+	
 	cv::Ptr<cv::CLAHE> clahe;
 
 	AutoCalibrationMathod m_FindingSheathMathod;
@@ -145,10 +152,8 @@ protected:
 	void releaseInversedCircularizeMap();
 
 	void generateBackground(Ipp16u* fringes);
-	void fftProcessing(const Ipp32f* fringes32f);
+	void fftProcessing(const Ipp32f* fringes32f, bool isLoaded = false);
 	void computeLogarithm(Ipp32f* src, Ipp32f* dst);
-	double EstimateCarrierF0Norm(const Ipp32f* fringes32f, const Ipp32f* meanRow, const float* window, int nAScan, int nBScan);
-	void MakeDemodTone(std::vector<Ipp32fc>& tone, double f0norm, int nAScan);
 	void generateImage(Ipp32f* logaritihmData, bool bInvert);
 	void findSheath(Ipp32f* logaritihmData);
 	void CalculateMagnitude(cv::Mat img);
@@ -181,4 +186,35 @@ protected:
 
 	static UINT threadRender(LPVOID param);
 
+	std::pair<double, double> FitGlobalScalarF(const Ipp32fc* z,
+		const std::vector<float>& reRef,
+		const std::vector<float>& imRef,
+		int N);
+
+	void ApplyScalarF(const Ipp32fc* z,
+		double aRe, double aIm, int N,
+		std::vector<float>& outRe,
+		std::vector<float>& outIm);
+
+	double RelErrL2(const std::vector<float>& re,
+		const std::vector<float>& im,
+		const std::vector<float>& reRef,
+		const std::vector<float>& imRef);
+
+	void CircShiftComplex(const std::vector<float>& reIn,
+		const std::vector<float>& imIn,
+		int N, int shift,
+		std::vector<float>& reOut,
+		std::vector<float>& imOut);
+
+	std::tuple<int, double, double, double> BestShiftWithAlpha(const Ipp32fc* z,
+		const std::vector<float>& reRef,
+		const std::vector<float>& imRef,
+		int N, int maxShift);
+
+	double FitRealScale(const std::vector<float>& x, const std::vector<float>& y,
+		int dropHead = 0, int dropTail = 0);
+
+	double RelErrL2_Real(const std::vector<float>& x, const std::vector<float>& y,
+		int dropHead = 0, int dropTail = 0);
 };

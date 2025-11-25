@@ -51,6 +51,8 @@ void CLabImaging::Initialize(CCalibration* calibration, USHORT* backgroundData) 
 	this->logData = new float[allocSize];
 
 	generateBackground((Ipp16u*)backgroundData);
+	ippsConvert_16u32f((Ipp16u*)LoadBackground2DFromFile(R"(D:\RaywattOCT\RaywattLab\bin\BACKGROUND.bin)", nAScan * nBScan), fringes32fAverage, nAScan * nBScan);
+	
 	fftProcessing(fringes32f);
 
 	ippsCopy_32f(fFFTResult, backgroundFFT, nOutputLength * nBScan);
@@ -88,21 +90,23 @@ void CLabImaging::Process(char* fringes) {
 		hasNewCalibration = false;
 	}
 
+	Ipp16u* background = (Ipp16u*) LoadBackground2DFromFile(R"(D:\RaywattOCT\RaywattLab\bin\BACKGROUND.bin)", nAScan * nBScan);
+
 	// copy first line to display scope
 	ippsCopy_16s((Ipp16s*)fringes, (Ipp16s*)scopeData, nAScan);
 
 	generateBackground((Ipp16u*)fringes);
+	ippsConvert_16u32f(background, fringes32fAverage, nAScan * nBScan);
 
 	//cropSignalData(fringes, goodClockStart, goodClockEnd);
 
-	fftProcessing(fringes32f);
+	fftProcessing(fringes32f, calibration->isLoaded);
 	computeLogarithm(fFFTResult, logData);
 
 	if (subtract) {
 		subtractBackground<float>(fFFTResult, backgroundFFT, backgroundSubtracted, nOutputLength * nBScan);
 		computeLogarithm(backgroundSubtracted, logData);
 	}
-
 	generateScopeData(logData, scopeFFTData);
 
 	if (!subtract) {
@@ -137,6 +141,41 @@ void CLabImaging::subtractBackground(T* fringes, T* background, T* dst, int size
 	for (int i = 0; i < size; i++) {
 		dst[i] = fringes[i] - background[i];
 	}
+}
+
+USHORT* CLabImaging::LoadBackground2DFromFile(const char* strBackgroundFile, int bufferSize) {
+	if (strBackgroundFile == nullptr || strBackgroundFile[0] == '\0') return nullptr;
+
+	FILE* fp = fopen(strBackgroundFile, "rb");
+	if (fp == nullptr) {
+		return nullptr;
+	}
+
+	if (bufferSize > 1024 * 1024 * 100) {
+		PLOGI.printf("BufferSize is too big : %d", bufferSize);
+		fclose(fp);
+		return nullptr;
+	}
+
+	USHORT* pBackground = new USHORT[bufferSize];
+	size_t size = fread(pBackground, sizeof(USHORT), bufferSize, fp);
+
+	if (size != bufferSize) {
+		if (feof(fp)) {
+			PLOGI.printf("Warning: Reached end of file prematurely");
+		}
+		else if (ferror(fp)) {
+			PLOGI.printf("Error reading file");
+		}
+		else {
+			PLOGI.printf("Unknown fread issue");
+		}
+	}
+
+	fclose(fp);
+
+	PLOGI.printf("Read Background done");
+	return pBackground;
 }
 
 void CLabImaging::generateScopeData(Ipp32f* output, Ipp16u* scope) {

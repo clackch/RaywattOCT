@@ -170,6 +170,7 @@ xcopy "$(ProjectDir)*.h" "$(TargetDir)include\" /y /d</Command>
     <ClInclude Include="OCTImaging.h" />
     <ClInclude Include="OCTMeasurement.h" />
     <ClInclude Include="TIFFImaging.h" />
+    <ClInclude Include="TxtDumpCompare.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Utility\MessageService.cpp" />
@@ -181,6 +182,7 @@ xcopy "$(ProjectDir)*.h" "$(TargetDir)include\" /y /d</Command>
     <ClCompile Include="OCTImaging.cpp" />
     <ClCompile Include="OCTMeasurement.cpp" />
     <ClCompile Include="TIFFImaging.cpp" />
+    <ClCompile Include="TxtDumpCompare.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

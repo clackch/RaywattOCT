@@ -262,11 +262,12 @@ CString CRaywattLabDlg::getLoadedFilePath() {
 CString CRaywattLabDlg::splitFileName(CString strFilePath) {
 	return strFilePath.Right(strFilePath.GetLength() - strFilePath.ReverseFind('\\') - 1);
 }
-CLabImaging* CRaywattLabDlg::createImaging(IImaging::Setting imaging) {
+CLabImaging* CRaywattLabDlg::createImaging(IImaging::Setting imaging, bool isLoaded) {
 	CLabImaging* pImaging = new CLabImaging(imaging, this);
 
 	CCalibration* calibration = new CCalibration(imaging.nAScan, imaging.nFFTLength);
 	calibration->Initialize(m_strCurCalibration);
+	calibration->isLoaded = isLoaded;
 	USHORT* background = readBackground(BACKGROUND_FILEPATH, imaging);
 
 	pImaging->Initialize(calibration, background);
@@ -1108,7 +1109,7 @@ void CRaywattLabDlg::OnBnClickedButtonLoadSelectedData()
 			m_pImagingSimulate->Stop();
 			delete m_pImagingSimulate;
 		}
-		m_pImagingSimulate = createImaging(setting);
+		m_pImagingSimulate = createImaging(setting, true);
 		m_pImagingSimulate->Start();
 
 		if (m_pSimDevice == nullptr) {

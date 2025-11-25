@@ -139,7 +139,7 @@ private:
 	CString generateFileName(CString strPath, CString strExtension, CString strPrefix = _T(""));
 	CString getLoadedFilePath();
 	CString splitFileName(CString strFilePath);
-	CLabImaging* createImaging(IImaging::Setting imaging);
+	CLabImaging* createImaging(IImaging::Setting imaging, bool isLoaded = false);
 	USHORT* readBackground(const char* strBackgroundFile, IImaging::Setting setting);
 	IImaging::Setting initReader(tstring strFilePath, CDataReader* pReader);
 	void findFileByExtension(CString strFolder, CString strExt, std::vector<CString>& vList);
