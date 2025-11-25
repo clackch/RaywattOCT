@@ -27,6 +27,8 @@ namespace RaywattOCTFFR.ViewModels.File
 
         private IDialogService _dialogService;
 
+        private bool stopRequested;
+
         private CallbackFunctionForDetection cbMlData;
         public CallbackFunctionForDetection CbMlData => (this.cbMlData) ?? (this.cbMlData = new CallbackFunctionForDetection(OnRecvMlData));
 
@@ -78,9 +80,9 @@ namespace RaywattOCTFFR.ViewModels.File
 
                     StopPlayback();
 
-                    DrawSheathIndicator(PatientCase.SheathDiameter * CommonUtil.GetZOffsetScale(PatientCase.ZOffset));
+                    DrawSheathIndicator(PatientCase.SheathDiameter);
 
-                    CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault) * CommonUtil.GetZOffsetScale(PatientCase.ZOffset);
+                    CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault) * Constants.ZOffsetScale;
 
                     Section.Proximal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionProximal, PatientCase.NumOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveCenterWidth);
                     Section.Distal.X = CommonUtil.GetPositionFromFrame(PatientCase.SectionDistal, PatientCase.NumOfFrames, Constants.LongitudeWidth, Constants.SectionIndicatorMoveWidth - Constants.SectionIndicatorMoveCenterWidth);
@@ -122,6 +124,12 @@ namespace RaywattOCTFFR.ViewModels.File
                 if (this.isEndReview)
                     RayEndReview();
             }
+            else
+            {
+                this.stopRequested = true;
+            }
+
+            DeviceStatus.IsLumenLoaded = true;
         }
 
         protected override void Back()
@@ -187,7 +195,7 @@ namespace RaywattOCTFFR.ViewModels.File
             DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Current = 0;
             int total = DeviceStatus.ReviewImageInfos[(int)RaySession.Review].Total;
 
-            for (int idx = 0; idx < total; idx++)
+            for (int idx = 0; idx < total && !stopRequested; idx++)
             {
                 Mat gray = ConvertTo8BitGray(CrossSectionImages[idx]);
 
@@ -225,7 +233,9 @@ namespace RaywattOCTFFR.ViewModels.File
             }
 
             DeviceStatus.IsLumenLoaded = true;
-            Playback();
+
+            if(!this.stopRequested)
+                Playback();
         }
 
         private Mat ConvertTo8BitGray(Mat src)

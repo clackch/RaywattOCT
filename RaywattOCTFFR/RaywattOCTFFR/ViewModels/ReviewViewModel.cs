@@ -181,7 +181,7 @@ namespace RaywattOCTFFR.ViewModels
                 this.convertedFoV = Constants.DefaultFoV / value;
                 ReviewStatus.Zoom.SetFieldOfView(this.convertedFoV);
 
-                CrossSectionScaleIndicator = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault * this.convertedFoV);
+                CrossSectionScaleIndicator = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault * this.convertedFoV) * Constants.ZOffsetScale;
 
                 ReviewStatus.IsCalciumOn = true;
                 ReviewStatus.IsSheathOn = true;
@@ -341,7 +341,7 @@ namespace RaywattOCTFFR.ViewModels
                 Degree = PatientCase.IndicatorDegree;
                 Brightness = PatientCase.Brightness;
                 Contrast = PatientCase.Contrast;                
-                CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault);
+                CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault) * Constants.ZOffsetScale;
 
                 PatientCase.MeasureUIElements = new List<List<UIElement>>(ReviewStatus.NumberOfFrames);
                 for (int i = 0; i < ReviewStatus.NumberOfFrames; i++)

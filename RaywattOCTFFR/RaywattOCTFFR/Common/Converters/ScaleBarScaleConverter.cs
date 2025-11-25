@@ -14,8 +14,8 @@ namespace RaywattOCTFFR.Common.Converters
 
             double curScale = (double)value;
             double csSize = (double)parameter;
-            double scaleSize = (1 / Constants.ImageResolution) * (Constants.OCTImageSize / csSize);
-            double orgScaleSize = (1 / Constants.ImageResolution);
+            double scaleSize = (1 / Constants.ImageResolution) * (Constants.OCTImageSize / csSize) * Constants.ZOffsetScale;
+            double orgScaleSize = (1 / Constants.ImageResolution) * Constants.ZOffsetScale;
 
             double res = orgScaleSize - curScale * scaleSize;
 

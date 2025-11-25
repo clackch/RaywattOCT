@@ -187,7 +187,7 @@ namespace RaywattOCTFFR.ViewModels
                 if (CodeDefinition.Codes["VESS"].ContainsKey(PatientCase.Vessel))
                     CurrentVessel = VesselList.FirstOrDefault(x => x.Key == PatientCase.Vessel);
 
-                CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault);
+                CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault) * Constants.ZOffsetScale;
 
                 RayError result = (RayError)RaySetProperty(Property.LongitudeBackgroundColor, Constants.CardBackgroundColor);
                 if (result != RayError.OK)
@@ -371,7 +371,7 @@ namespace RaywattOCTFFR.ViewModels
         {
             _log.Debug("Confirm");            
 
-            double scaleArea = Constants.ImageResolution * Constants.ImageResolution;
+            double scaleArea = Constants.ImageResolution * Constants.ImageResolution / Constants.ZOffsetScale / Constants.ZOffsetScale;
 
             PatientCase.FfrFeature = FfrFeature;
             PatientCase.FfrFeature.VesselType = CurrentVessel.Key;

@@ -69,10 +69,11 @@ namespace RaywattOCTFFR.ViewModels.File
                     InitializeImportData(data);
 
                     this.zOffset = PatientCase.ZOffset;
+                    Constants.ZOffsetScale = CommonUtil.GetZOffsetScale(PatientCase.ZOffset);
 
-                    DrawSheathIndicator(PatientCase.SheathDiameter * CommonUtil.GetZOffsetScale(PatientCase.ZOffset));
+                    DrawSheathIndicator(PatientCase.SheathDiameter);
 
-                    CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault) * CommonUtil.GetZOffsetScale(PatientCase.ZOffset);
+                    CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault) * Constants.ZOffsetScale;
                 }
             }
         }
@@ -107,6 +108,7 @@ namespace RaywattOCTFFR.ViewModels.File
             this.isEndReview = false;
 
             PatientCase.ZOffset = this.zOffset;
+            Constants.ZOffsetScale = CommonUtil.GetZOffsetScale(PatientCase.ZOffset);
 
             MoveImportPage(Constants.FileImportStep5Page);
         }
@@ -123,7 +125,7 @@ namespace RaywattOCTFFR.ViewModels.File
 
             if(sheathDiameter > 0.5 && sheathDiameter < 3)
             {                
-                DrawSheathIndicator(sheathDiameter);
+                DrawSheathIndicator(sheathDiameter, false);
                 CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault) * CommonUtil.GetZOffsetScale(this.zOffset);
             }
             else
@@ -138,7 +140,8 @@ namespace RaywattOCTFFR.ViewModels.File
 
             this.zOffset = 0;
 
-            DrawSheathIndicator(PatientCase.SheathDiameter);
+            DrawSheathIndicator(PatientCase.SheathDiameter, false);
+            CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.ZoomScaleDefault);
         }
     }
 }

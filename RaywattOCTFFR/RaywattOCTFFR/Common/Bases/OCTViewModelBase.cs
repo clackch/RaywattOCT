@@ -185,9 +185,9 @@ namespace RaywattOCTFFR.Common.Bases
             return bitmap;
         }
 
-        protected void DrawSheathIndicator(double sheathDiameter)
+        protected void DrawSheathIndicator(double sheathDiameter, bool applyZOffset = true)
         {
-            SheathIndicator = CommonUtil.DrawSheathIndicator((int)Constants.CrossSectionSize, sheathDiameter);
+            SheathIndicator = CommonUtil.DrawSheathIndicator((int)Constants.CrossSectionSize, sheathDiameter, applyZOffset);
         }
 
         private static Mat GenerateMask(Mat image)

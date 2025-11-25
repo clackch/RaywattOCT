@@ -402,6 +402,14 @@ namespace RaywattOCTFFR.Common.Bases
         //Image Resolution
         public const double ImageResolution = DefaultFoV / 1024;
 
+        //Z-Offset
+        private static double _zOffsetScale;
+        public static double ZOffsetScale
+        {
+            get => _zOffsetScale;
+            set => _zOffsetScale = value;
+        }
+
         //Manual Calibration
         public const int ZOffsetLimit = 100;
 

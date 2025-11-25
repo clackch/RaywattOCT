@@ -188,7 +188,7 @@ namespace RaywattOCTFFR.Models
             if (mla == -1 || mld == -1)
                 return false;
 
-            double areaScaleMM2 = Constants.ImageResolution * Constants.ImageResolution;
+            double areaScaleMM2 = Constants.ImageResolution * Constants.ImageResolution / Constants.ZOffsetScale / Constants.ZOffsetScale;
 
             if(mlaIdx <= mldIdx)
             {
@@ -251,7 +251,7 @@ namespace RaywattOCTFFR.Models
             double minExp = msa;
             int minExpIdx = msaIdx;
 
-            double areaScaleMM2 = Constants.ImageResolution * Constants.ImageResolution;
+            double areaScaleMM2 = Constants.ImageResolution * Constants.ImageResolution / Constants.ZOffsetScale / Constants.ZOffsetScale;
 
             if(msaIdx <= minExpIdx)
             {

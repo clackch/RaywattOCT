@@ -1705,7 +1705,7 @@ namespace RaywattOCTFFR.Common.Util
                         double distanceStent = Math.Sqrt(Math.Pow(centerPoint.X - point.X, 2) + Math.Pow(centerPoint.Y - point.Y, 2));
                         double distanceLumen = Math.Sqrt(Math.Pow(centerPoint.X - intersection.X, 2) + Math.Pow(centerPoint.Y - intersection.Y, 2));
 
-                        return (distanceLumen - distanceStent) * Constants.ImageResolution;
+                        return (distanceLumen - distanceStent) * Constants.ImageResolution / Constants.ZOffsetScale;
                     }
                 }
             }
@@ -1851,9 +1851,9 @@ namespace RaywattOCTFFR.Common.Util
             return true;
         }
 
-        public static BitmapSource DrawSheathIndicator(int imageSize, double sheathDiameter)
+        public static BitmapSource DrawSheathIndicator(int imageSize, double sheathDiameter, bool applyZOffset)
         {
-            double pxDiameter = (sheathDiameter / Constants.ImageResolution) * imageSize / Constants.OCTImageSize;
+            double pxDiameter = (sheathDiameter / Constants.ImageResolution) * imageSize / Constants.OCTImageSize * (applyZOffset ? Constants.ZOffsetScale : 1);
             Mat imgSheath = new Mat(imageSize, imageSize, MatType.CV_8UC4);
             Point center = new Point(imgSheath.Width / 2, imgSheath.Height / 2);
             int thickness = 2;

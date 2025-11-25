@@ -150,7 +150,7 @@ namespace RaywattOCTFFR.ViewModels
                 Zoom.SetFieldOfView(Constants.DefaultFoV / PatientCase.FieldOfView);
 
                 LumenContours = PatientCase.LumenContours;
-                CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize);
+                CrossSectionScale = (1 / Constants.ImageResolution) * (Constants.CrossSectionSize / Constants.OCTImageSize) * Constants.ZOffsetScale;
 
                 SetCrossSectionBackground(RaySession.Review, Constants.CardBackgroundColor);
 

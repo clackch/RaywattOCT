@@ -18,11 +18,11 @@ namespace RaywattOCTFFR.Common.Converters
 
             if(scale.Contains("Length"))
             {
-                realValue = originValue * Constants.ImageResolution;
+                realValue = originValue * Constants.ImageResolution / Constants.ZOffsetScale;
             }
             else
             {
-                realValue = originValue * Constants.ImageResolution * Constants.ImageResolution;
+                realValue = originValue * Constants.ImageResolution * Constants.ImageResolution / Constants.ZOffsetScale / Constants.ZOffsetScale;
             }
 
             return Math.Round(realValue, 2);
