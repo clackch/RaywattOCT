@@ -17,6 +17,7 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="34"/>
+                <RowDefinition Height="28"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="16"/>
                 <RowDefinition Height="24"/>
@@ -30,17 +31,19 @@
             </StackPanel>
 
             <!-- Status Message -->
-            <StackPanel Grid.Row="1" VerticalAlignment="Bottom">
-                <Label Style="{DynamicResource Pretendard-Medium-22}" Content="{Binding StatusMessage}" Foreground="{DynamicResource GrayscaleWhiteBrush}" HorizontalContentAlignment="Center" Width="338" TextBlock.TextAlignment="Center"/>
+            <StackPanel Grid.Row="2" VerticalAlignment="Center">
+                <Label Style="{DynamicResource Pretendard-Medium-22}" Foreground="{DynamicResource GrayscaleWhiteBrush}" HorizontalContentAlignment="Center" Width="338">
+                    <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" TextAlignment="Center"/>
+                </Label>
             </StackPanel>
 
             <!-- Progress Bar -->
-            <StackPanel Grid.Row="3" VerticalAlignment="Center">
+            <StackPanel Grid.Row="4" VerticalAlignment="Center">
                 <ProgressBar Value="{Binding Progress}" Width="412" Height="24"/>
             </StackPanel>
 
             <!-- Buttons -->
-            <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top">
+            <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top">
                 <Button Style="{StaticResource ContainedBtnType1-Large-Short}" Command="{Binding CancelCommand}" Content="{Binding [Cancel], Source={StaticResource L10N}}" Visibility="{Binding CanCancel, Converter={StaticResource BoolToVisibilityConverter}}"/>
                 <Button Style="{StaticResource ContainedBtnType1-Large-Short}" Command="{Binding OKCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Content="{Binding [Done], Source={StaticResource L10N}}" Visibility="{Binding ShowCloseButton, Converter={StaticResource BoolToVisibilityConverter}}"/>
             </StackPanel>
