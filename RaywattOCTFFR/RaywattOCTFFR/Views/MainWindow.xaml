@@ -43,7 +43,7 @@
                     <ColumnDefinition Width="56"/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <component:MenuUnableComponent Grid.Column="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="{Binding DeviceStatus.IsLumenLoaded}" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="True" IsFfrCalculated="{Binding DeviceStatus.IsFfrCalculated}">
+                <component:MenuUnableComponent Grid.Column="0" Background="{StaticResource GrayscaleGray7Brush}" Opacity="0.7" IsSaveRawDataDone="{Binding DeviceStatus.IsSaveRawDataDone}" IsLumenLoaded="True" IsLumenSaved="{Binding DeviceStatus.IsLumenSaved}" IsOCTImagingDone="True" IsFfrCalculated="{Binding DeviceStatus.IsFfrCalculated}">
                     <component:MenuUnableComponent.Visibility>
                         <MultiBinding Converter="{StaticResource ComponentVisibilityConverter}">
                             <Binding RelativeSource="{RelativeSource Mode=Self}" Path="IsSaveRawDataDone"/>
