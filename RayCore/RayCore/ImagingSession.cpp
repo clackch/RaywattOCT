@@ -524,7 +524,7 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 		pSession->m_vZOffset.clear();
 	}
 
-	cv::Mat prevImg, prevImgWithoutCompensation;
+	cv::Mat prevImg, prevImgWithoutCompensation, autoCalibPatch = pSession->GetAutoCalibPatch();
 	for (int nFrame = 0; nFrame < nNumOfSamples && pSession->m_pThreadImaging->isRun; nFrame++)
 	{
 		char* pBuffer = pDataManager->GetSample(nFrame);
@@ -532,10 +532,9 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 		cv::Mat imgResult = pImaging->GetProcessedImage();
 
 		int ZOffsetForCurrentFrame = 0;
-		// if file load failed, calculate zOffset
 		if (config.measurement.calPerFrame) {
 			if (pSession->m_vZOffset.size() != nNumOfSamples) {
-				ZOffsetForCurrentFrame = pSession->CalculateZOffset(imgResult, pSession->GetAutoCalibPatch());
+				ZOffsetForCurrentFrame = pSession->CalculateZOffset(imgResult, autoCalibPatch);
 				pSession->m_vZOffset.push_back(ZOffsetForCurrentFrame);
 			}
 			else ZOffsetForCurrentFrame = pSession->GetFrameZOffset(nFrame);
@@ -578,16 +577,16 @@ UINT CImagingSession::threadImaging(LPVOID param) {
 			}
 			prevImg = imgResult.clone();
 			prevImgWithoutCompensation = pImaging->GetWithoutCompensationImage().clone();
-
-			if (pSession->m_vZOffset.size() == nNumOfSamples) {
-				pSession->SaveZOffset(pSession->m_strZOffsetFilePath);
-			}
 		}
 		else {
 			pSession->m_mapImage.insert(std::make_pair(nFrame, imgResult.clone()));
-			cv::Mat imgResultWithoutCompensation = pImaging->GetWithoutCompensationImage().clone();
-			pSession->m_mapImageWithoutCompensation.insert(std::make_pair(nFrame, imgResultWithoutCompensation.clone()));
+			pSession->m_mapImageWithoutCompensation.insert(std::make_pair(nFrame, pImaging->GetWithoutCompensationImage().clone()));
 		}
+	}
+
+	if( config.measurement.calPerFrame && pSession->m_vZOffset.size() == nNumOfSamples ) {
+		PLOGI.printf("Save ZOffset to %s", pSession->m_strZOffsetFilePath.c_str());
+		pSession->SaveZOffset(pSession->m_strZOffsetFilePath);
 	}
 
 	PLOGI.printf("Session #%d process oct imaging done.", pSession->m_nSession);
