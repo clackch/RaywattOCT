@@ -151,7 +151,7 @@ namespace RaywattApp
             services.AddTransient(typeof(DicomPacsDialogViewModel));
             services.AddTransient(typeof(PasswordChangeDialogViewModel));
             services.AddTransient(typeof(EditInstituteDialogViewModel));
-            services.AddTransient(typeof(SoftwareUpdateDialogViewModel));
+            services.AddTransient(typeof(UpdateSelectionDialogViewModel));
             services.AddTransient(typeof(FirmwareUpdateProgressDialogViewModel));
 
             //Admin

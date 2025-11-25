@@ -13,9 +13,9 @@ using System.Windows.Threading;
 
 namespace RaywattApp.ViewModels.Dialog
 {
-    public partial class SoftwareUpdateDialogViewModel : DialogViewModelBase
+    public partial class UpdateSelectionDialogViewModel : DialogViewModelBase
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(SoftwareUpdateDialogViewModel));
+        private static readonly ILog _log = LogManager.GetLogger(typeof(UpdateSelectionDialogViewModel));
 
         private DispatcherTimer _timer;
 
@@ -95,9 +95,9 @@ namespace RaywattApp.ViewModels.Dialog
             }
         }
 
-        public SoftwareUpdateDialogViewModel()
+        public UpdateSelectionDialogViewModel()
         {
-            _log.Debug("SoftwareUpdateDialogViewModel");
+            _log.Debug("UpdateSelectionDialogViewModel");
 
             ExternalDriveComboBox = new Dictionary<string, string>();
             ExternalDriveList = new Dictionary<string, object>();
@@ -131,7 +131,6 @@ namespace RaywattApp.ViewModels.Dialog
                     }
 
                     GetDrive();
-                    LoadAndFilterUpdateItems();
                 }
                 catch (Exception ex)
                 {

@@ -159,7 +159,7 @@ namespace RaywattApp.ViewModels.Setting
                 parameter["currentVersion"] = currentVersion;
                 parameter["updateType"] = updateType;
 
-                var result = _dialogService.OpenDialog(new SoftwareUpdateDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
+                var result = _dialogService.OpenDialog(new UpdateSelectionDialogControl(), parameter, Constants.ApplicationWidth, Constants.ApplicationHeight);
 
                 if (result != null && result.DialogAnswer == DialogResults.Answer.Yes)
                 {
