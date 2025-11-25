@@ -185,36 +185,4 @@ protected:
 	cv::Mat computeFFT(cv::Mat& img);
 
 	static UINT threadRender(LPVOID param);
-
-	std::pair<double, double> FitGlobalScalarF(const Ipp32fc* z,
-		const std::vector<float>& reRef,
-		const std::vector<float>& imRef,
-		int N);
-
-	void ApplyScalarF(const Ipp32fc* z,
-		double aRe, double aIm, int N,
-		std::vector<float>& outRe,
-		std::vector<float>& outIm);
-
-	double RelErrL2(const std::vector<float>& re,
-		const std::vector<float>& im,
-		const std::vector<float>& reRef,
-		const std::vector<float>& imRef);
-
-	void CircShiftComplex(const std::vector<float>& reIn,
-		const std::vector<float>& imIn,
-		int N, int shift,
-		std::vector<float>& reOut,
-		std::vector<float>& imOut);
-
-	std::tuple<int, double, double, double> BestShiftWithAlpha(const Ipp32fc* z,
-		const std::vector<float>& reRef,
-		const std::vector<float>& imRef,
-		int N, int maxShift);
-
-	double FitRealScale(const std::vector<float>& x, const std::vector<float>& y,
-		int dropHead = 0, int dropTail = 0);
-
-	double RelErrL2_Real(const std::vector<float>& x, const std::vector<float>& y,
-		int dropHead = 0, int dropTail = 0);
 };
