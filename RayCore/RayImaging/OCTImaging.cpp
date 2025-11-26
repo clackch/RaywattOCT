@@ -110,8 +110,9 @@ void COCTImaging::Process(char* fringes) {
 	fftProcessing(fringes32f);
 	computeLogarithm(fFFTResult, fFFTResult);
 	//findSheath(fFFTResult);
-	generateImage(fFFTResult, false);
-	adaptive_compensation();
+	generateImage(fFFTResult, false, false);
+	if (bCompensated && m_setting.applyCompensation != 0)
+		imageResult = adaptive_compensation(imageResult);
 }
 void COCTImaging::PostProcess(cv::Mat image) {
 	const bool bInvert = m_bInvert;
@@ -159,6 +160,9 @@ void COCTImaging::ApplyZOffset(const cv::Mat& src, cv::Mat& dst, int zOffset) {
 	}
 }
 void COCTImaging::ProcessAutoCalib() {
+	generateImage(fFFTResult, false, true);
+	imageAutoCalib = adaptive_compensation(imageAutoCalib);
+
 	if (imageAutoCalib.empty()) {
 		PLOGI.printf("Auto calibration image is empty");
 		return;
@@ -714,19 +718,30 @@ std::vector<double> COCTImaging::normalize(const std::vector<double>& values, do
 	return normalized;
 }
 
-void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert){
+void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert, bool isThisForAutoCalib){
 	const int nBScan = m_setting.nBScan;
 	const int nOutputLength = m_setting.nOutputLength;
 
-	cv::Mat imgLog(cv::Size(nOutputLength, nBScan), CV_32FC1, logaritihmData);
-	imgLog -= m_setting.lowLevel;
-	imgLog *= (LUT_SCALE / m_setting.highLevel);
-	cv::threshold(imgLog, imgLog, LUT_SCALE, LUT_SCALE, cv::THRESH_TRUNC);
-	imgLog.convertTo(imageResult, CV_8UC1);
-	cv::convertScaleAbs(imageResult, imageResult, 1.f / 80.f * LUT_SCALE, 0);
-	cv::flip(imageResult, imageResult, 1);
+	if(isThisForAutoCalib){
+		cv::Mat imgLog(cv::Size(nOutputLength, nBScan), CV_32FC1, logaritihmData);
+		imgLog -= m_setting.lowLevel;		// ini에서 새로 값
+		imgLog *= (LUT_SCALE / m_setting.highLevel);	// ini에서 새로 값
+		cv::threshold(imgLog, imgLog, LUT_SCALE, LUT_SCALE, cv::THRESH_TRUNC);
+		imgLog.convertTo(imageAutoCalib, CV_8UC1);
+		cv::convertScaleAbs(imageAutoCalib, imageAutoCalib, 1.f / 80.f * LUT_SCALE, 0);
+		cv::flip(imageAutoCalib, imageAutoCalib, 1);
+	}
+	else {
+		cv::Mat imgLog(cv::Size(nOutputLength, nBScan), CV_32FC1, logaritihmData);
+		imgLog -= m_setting.lowLevel;
+		imgLog *= (LUT_SCALE / m_setting.highLevel);
+		cv::threshold(imgLog, imgLog, LUT_SCALE, LUT_SCALE, cv::THRESH_TRUNC);
+		imgLog.convertTo(imageResult, CV_8UC1);
+		cv::convertScaleAbs(imageResult, imageResult, 1.f / 80.f * LUT_SCALE, 0);
+		cv::flip(imageResult, imageResult, 1);
 
-	imageResult.copyTo(imageResultWithoutCompensation);
+		imageResult.copyTo(imageResultWithoutCompensation);
+	}
 }
 
 void COCTImaging::drawGuideLine(cv::Mat& image, int nPosition, cv::Scalar color) {
@@ -801,7 +816,7 @@ UINT COCTImaging::threadRender(LPVOID param) {
 	return NOERROR;
 }
 
-void COCTImaging::adaptive_compensation()
+cv::Mat COCTImaging::adaptive_compensation(const cv::Mat& imgGenerated)
 {
 	// 0) 설정값 확정 (원 로직 유지)
 	EXPONENTIAL_FACTOR = (EXPONENTIAL_FACTOR <= -1.0f) ? m_setting.exponentialFactor : EXPONENTIAL_FACTOR;
@@ -811,7 +826,7 @@ void COCTImaging::adaptive_compensation()
 
 	// 1) 회전 + 32F 변환
 	cv::Mat rotated;
-	cv::rotate(imageResult, rotated, cv::ROTATE_90_COUNTERCLOCKWISE);
+	cv::rotate(imgGenerated, rotated, cv::ROTATE_90_COUNTERCLOCKWISE);
 	rotated.convertTo(rotated, CV_32F);
 
 	// 2) 하단 60행 0으로 (원 코드와 동일)
@@ -921,10 +936,8 @@ void COCTImaging::adaptive_compensation()
 	// Rotate back to original angle
 	cv::Mat result;
 	cv::rotate(result_img, result, cv::ROTATE_90_CLOCKWISE);
-	imageAutoCalib = result.clone();
-	if (!bCompensated || m_setting.applyCompensation == 0)
-		return;
-	imageResult = result.clone();
+
+	return result;
 }
 
 void COCTImaging::min_max_normalization(const cv::Mat& img, cv::Mat& normalized_img, double& min_val, double& max_val)

@@ -152,7 +152,7 @@ protected:
 	void generateBackground(Ipp16u* fringes);
 	void fftProcessing(const Ipp32f* fringes32f);
 	void computeLogarithm(Ipp32f* src, Ipp32f* dst);
-	void generateImage(Ipp32f* logaritihmData, bool bInvert);
+	void generateImage(Ipp32f* logaritihmData, bool bInvert, bool isThisForAutoCalib);
 	void findSheath(Ipp32f* logaritihmData);
 	void CalculateMagnitude(cv::Mat img);
 	void CheckSheathPixels(cv::Mat img);
@@ -162,7 +162,7 @@ protected:
 	cv::Mat getFoVImage(cv::Mat image, double fov);
 	cv::Mat ReCircularize(const cv::Mat& img);
 
-	void adaptive_compensation();
+	cv::Mat adaptive_compensation(const cv::Mat& img);
 	void min_max_normalization(const cv::Mat& img, cv::Mat& normalized_img, double& min_val, double& max_val);
 	void logarithmic_contrast_stretching(cv::Mat& img, float lower_percentile = 1.0f, float upper_percentile = 99.0f);
 	double euclidean_distance(cv::Point2f pt1, cv::Point2f pt2);

@@ -109,9 +109,9 @@ void CLabImaging::Process(char* fringes) {
 		generateScopeData(backgroundFFT, scopeFFTData + nOutputLength);
 	}
 	
-	generateImage(logData, false);
+	generateImage(logData, false, false);
 
-	adaptive_compensation();
+	imageResult = adaptive_compensation(imageResult);
 }
 
 void CLabImaging::PostProcess(cv::Mat image) {
