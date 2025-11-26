@@ -13,6 +13,7 @@ public:
 		int nFFTOrder;
 		int nFFTLength;
 		int nOutputLength;
+		int interpOversamp = 8;
 
 		float brightness;
 		float contrast;
@@ -44,6 +45,7 @@ public:
 			}
 			this->nOutputLength = this->nFFTLength / 2;
 			this->nCircleSize = this->nOutputLength;
+			this->interpOversamp = 8;
 		}
 	};
 

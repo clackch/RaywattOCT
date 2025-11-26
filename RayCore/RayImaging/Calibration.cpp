@@ -44,35 +44,43 @@ bool CCalibration::Initialize(char* data)
 	return loadCalibration();
 }
 
+// float* dispersionPhase;  // length = nAScan
+
 bool CCalibration::loadCalibration() {
-	if (nAScan > 1024 * 1024) {
+	if (nAScan > 1024 * 1024)
 		return false;
-	}
+
+	if (indexMap == nullptr)
+		indexMap = new int[nAScan / 2];
+
+	if (weightMap == nullptr)
+		weightMap = new float[nAScan / 2];
+
+	if (dispersion == nullptr)
+		dispersion = new float[nAScan];   // phase 배열
 
 	float* dispersionReal = new float[nAScan];
-	
-	if (indexMap == nullptr) {
-		indexMap = new int[(nAScan / 2)];
-	}
-
-	if (weightMap == nullptr) {
-		weightMap = new float[(nAScan / 2)];
-	}
 
 	int offset = 0;
-	memcpy(indexMap, data + offset, nAScan / 2 * sizeof(int));
-	offset += (nAScan / 2 * sizeof(int));
-	memcpy(weightMap, data + offset, nAScan / 2 * sizeof(float));
-	offset += (nAScan / 2 * sizeof(float));
+	memcpy(indexMap, data + offset, (nAScan / 2) * sizeof(int));
+	offset += (nAScan / 2) * sizeof(int);
+
+	memcpy(weightMap, data + offset, (nAScan / 2) * sizeof(float));
+	offset += (nAScan / 2) * sizeof(float);
+
 	memcpy(dispersionReal, data + offset, nAScan * sizeof(float));
 
-	// 실수 허수부를 복합하여 리턴
-	ippsRealToCplx_32f(dispersionReal, dispersionReal + nAScan / 2, (Ipp32fc*)dispersion, nAScan / 2);
+	// 그대로 phase로 복사
+	memcpy(dispersion, dispersionReal, nAScan * sizeof(float));
+
+	for (int i = 0; i < nAScan; i++) {
+		PLOGI.printf(" dispersion [%d] = %.9f", i, dispersion[i]);
+	}
 
 	delete[] dispersionReal;
-
 	return true;
 }
+
 bool CCalibration::readCalibration(LPCTSTR calibrationFileName){
 	const int calibrationSize = nAScan * sizeof(int) * 2;
 
@@ -148,7 +156,7 @@ void CCalibration::allocateMemory() {
 		data = new char[nAScan * sizeof(int) * 2];
 		indexMap = new int[nAScan / 2];
 		weightMap = new float[nAScan / 2];
-		dispersion = new complex_t[nAScan / 2];
+		dispersion = new float[nAScan];
 	}
 
 	if (nFFTLength < 1024 * 1024) {

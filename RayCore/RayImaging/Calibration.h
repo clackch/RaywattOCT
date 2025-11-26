@@ -4,11 +4,6 @@
 
 enum Windows { None, Hanning, Hamming, Gauss1 };
 
-typedef struct {
-	float  re;
-	float  im;
-}complex_t;
-
 class CCalibration
 {	
 private:
@@ -20,7 +15,7 @@ public:
 	char* data;
 	int *indexMap;
 	float *weightMap;
-	complex_t *dispersion;
+	float *dispersion;
 	bool isLoaded;
 	
 	float *window;

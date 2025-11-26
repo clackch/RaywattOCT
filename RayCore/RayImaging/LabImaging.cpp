@@ -36,7 +36,6 @@ void CLabImaging::Initialize(CCalibration* calibration, USHORT* backgroundData) 
 	const size_t nAScan = m_setting.nAScan;
 	const size_t nBScan = m_setting.nBScan;
 	const size_t nOutputLength = m_setting.nOutputLength;
-
 	size_t allocSize = static_cast<size_t>(nOutputLength);
 
 	if (nBScan > 1024 * 10 || nOutputLength > 1024 * 10) {

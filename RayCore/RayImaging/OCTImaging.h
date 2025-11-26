@@ -16,13 +16,17 @@ class CThread;
 class CMessageService;
 
 struct FFTThreadContext {
-	Ipp32f* fBuffer_Window = nullptr;
-	Ipp32fc* fcBuffer_FFT = nullptr;
-	Ipp32fc* fcBuffer_IFFT = nullptr;
-	Ipp8u* fftWorkBufFirst = nullptr;
-	Ipp8u* fftWorkBufIFFT = nullptr;
-	Ipp8u* fftWorkBufSecond = nullptr;
-	Ipp32fc* fcBuffer_ZFFT = nullptr;
+	Ipp32f* fBuffer_Window;     // N
+	Ipp32fc* fcBuffer_XN;        // N (complex spectrum)
+	Ipp32fc* fcBuffer_OS;        // signalInterpSize (xa_os)
+	Ipp32fc* fcBuffer_KZ;        // N2 (circshift 결과)
+	Ipp32fc* fcBuffer_Depth;
+	Ipp32fc* fcBuffer_ZFFT;
+
+	Ipp8u* fftWorkBufFirst;      // real FFT (안 써도 남겨둠)
+	Ipp8u* fftWorkBufFirstC;     // complex FFT (N)
+	Ipp8u* fftWorkBufIFFTOS;     // IFFT (signalInterpSize)
+	Ipp8u* fftWorkBufSecond;     // FFT (N2)
 };
 
 enum class AutoCalibrationMathod {
@@ -66,13 +70,14 @@ protected:
 	Ipp32f* fFFTResult;
 	Ipp32f* fOutput;
 	IppsFFTSpec_R_32f* fftSpecFirst;	// first FFT
-	IppsFFTSpec_C_32fc* ifftSpec, * fftSpecSecond;	// Inverse, second FFT
-	IppsFFTSpec_C_64fc* fftSpecSecond64;
+	IppsFFTSpec_C_32fc* fftSpecFirstC, * fftSpecSecond, *ifftSpecOS;	// Inverse, second FFT
+
 
 	int fftFirstWorkBufSize;
+	int fftFirstWorkBufSizeC;
+	int fftIFFTWorkBufSizeOS;
 	int fftIFFTWorkBufSize;
 	int fftSecondWorkBufSize;
-	int fftSecondWorkBufSize64;
 
 	bool m_bInvert;
 	bool m_bColor;

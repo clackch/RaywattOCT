@@ -68,7 +68,6 @@ COCTImaging::COCTImaging(Setting setting, CMessageService* pMsg) {
 
 	fftSpecFirst = nullptr;
 	fftSpecSecond = nullptr;
-	ifftSpec = nullptr;
 
 	m_bInvert = false;
 	m_bColor = false;
@@ -271,9 +270,16 @@ void COCTImaging::allocateMemory() {
 	const int nFFTLength = m_setting.nFFTLength;
 	const int nOutputLength = m_setting.nOutputLength;
 	const int nCircleSize = m_setting.nCircleSize;
+	const int Nout = nAScan / 2;
+
+	const int interp = std::max(2, m_setting.interpOversamp);
+	const int signalInterpSize = (interp * nAScan) / 2; // MATLAB: interpOversamp * N/2
 
 	fringes32f = ippsMalloc_32f(nAScan * nBScan);
 	fringes32fAverage = ippsMalloc_32f(nAScan * nBScan);
+	fFFTResult = ippsMalloc_32f(nOutputLength * nBScan);
+	fFFTMean = ippsMalloc_32f(nOutputLength); 
+	ippsZero_32f(fFFTMean, nOutputLength);
 
 	imageResult.create(nBScan, nOutputLength, CV_8UC1);
 	imageResultColor.create(nBScan, nOutputLength, CV_8UC3);
@@ -284,19 +290,26 @@ void COCTImaging::allocateMemory() {
 	fOutput = ippsMalloc_32f(nOutputLength * nBScan);
 
 	// Prepare FFT
-	CFFTSpecFactory& factory = CFFTSpecFactory::Instance();
-	fftSpecFirst = factory.GetSpecR(nFFTOrder, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
-	fftFirstWorkBufSize = factory.GetBufferR(fftSpecFirst);
+	CFFTSpecFactory& F = CFFTSpecFactory::Instance();
+	fftSpecFirst = F.GetSpecR(nFFTOrder, IPP_FFT_NODIV_BY_ANY, ippAlgHintAccurate);
+	fftFirstWorkBufSize = F.GetBufferR(fftSpecFirst);
 
-	ifftSpec = factory.GetSpecC(nFFTOrder, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
-	fftIFFTWorkBufSize = factory.GetBufferC(ifftSpec);
+	fftSpecFirstC = F.GetSpecC(nFFTOrder, IPP_FFT_NODIV_BY_ANY, ippAlgHintAccurate);
+	fftFirstWorkBufSizeC = F.GetBufferC(fftSpecFirstC);
 
-	fftSpecSecond = factory.GetSpecC(nFFTOrder - 1, IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
-	fftSecondWorkBufSize = factory.GetBufferC(fftSpecSecond);
+	int orderOS = 0; { int tmp = signalInterpSize; while ((1 << orderOS) < tmp) ++orderOS; }
+	if ((1 << orderOS) != signalInterpSize) {
+		PLOGI.printf("signalInterpSize(%d) is not power-of-two. Adjust interpOversamp.\n", signalInterpSize);
+	}
+	ifftSpecOS = F.GetSpecC(orderOS, IPP_FFT_NODIV_BY_ANY, ippAlgHintAccurate);
+	fftIFFTWorkBufSizeOS = F.GetBufferC(ifftSpecOS);
+
+	// 깊이 FFT(2nd) 스펙은 기존 그대로 (길이 = nFFTLength2)
+	fftSpecSecond = F.GetSpecC(nFFTOrder - 1, IPP_FFT_NODIV_BY_ANY, ippAlgHintAccurate);
+	fftSecondWorkBufSize = F.GetBufferC(fftSpecSecond);
 
 	fFFTMean = ippsMalloc_32f(nOutputLength);
 	ippsZero_32f(fFFTMean, nOutputLength);
-
 }
 void COCTImaging::releaseMemory() {
 	if (fringes32f) { ippsFree(fringes32f); fringes32f = nullptr; }
@@ -387,88 +400,118 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f, bool isLoaded)
 	// ----- 기본 파라미터 정리 -----
 	const int nAScan = m_setting.nAScan;
 	const int nBScan = m_setting.nBScan;
-	const int nFFTLength1 = m_setting.nFFTLength;    // 1st FFT length (2^order)
-	const int nFFTOrder = m_setting.nFFTOrder;
-	const int nFFTLength2 = 1 << (nFFTOrder - 1);    // 2nd FFT length (depth FFT)
-	const int nOutputLen = m_setting.nOutputLength; // 화면에 쓸 depth bins
-	const int Nout = nAScan / 2;              // k-linearized samples
+	const int nFFTLength1 = m_setting.nFFTLength;
+	const int nFFTLength2 = m_setting.nOutputLength;
+	const int Nout = nAScan / 2;
+	const int interp = std::max(2, m_setting.interpOversamp);
+	const int signalInterpSize = (interp * nAScan) / 2; // MATLAB과 동일
 
-	if (nOutputLen != nFFTLength2) {
-		PLOGI.printf("fftProcessing: nOutputLength (%d) != nFFTLength2 (%d). Check settings.",
-			nOutputLen, nFFTLength2);
-	}
-	if (Nout > nFFTLength2) {
-		PLOGI.printf("fftProcessing: Nout(%d) > depth FFT length(%d) – cropping.", Nout, nFFTLength2);
-	}
-
-	TxtMeta meta;
-	const char* dumpTxtDir = "DumpTxt";  // MATLAB에서 dump_steps_to_txt로 저장한 폴더
+	// ===== Dump 메타 =====
+	TxtMeta meta{};
+	const char* dumpTxtDir = "DumpTxt";
 	char pathBuf[512];
 	std::snprintf(pathBuf, sizeof(pathBuf), "%s/%s", dumpTxtDir, "meta.txt");
-	bool hasTxtMeta = LoadMetaTxt(pathBuf, meta);
-	if (!hasTxtMeta) {
-		PLOGI.printf("[CMP] meta not found at %s (skip compares)\n", pathBuf);
-	}
+	const bool hasTxtMeta = LoadMetaTxt(pathBuf, meta);
+	if (!hasTxtMeta) PLOGI.printf("[CMP] meta not found at %s (skip compares)\n", pathBuf);
 
-	if (m_setting.nOutputLength != meta.nFFTLength2) {
+	if (hasTxtMeta && m_setting.nOutputLength != meta.nFFTLength2) {
 		m_setting.nOutputLength = meta.nFFTLength2;
-		PLOGI.printf("m_setting.nOutputLength = %d,  meta.nFFTLength2 = %d;", m_setting.nOutputLength, meta.nFFTLength2);
+		PLOGI.printf("[CMP] force nOutputLength to meta: %d\n", m_setting.nOutputLength);
 	}
 
 	// ----- k-domain window (Hann) × dispersion -----
-	static std::vector<Ipp32fc> dispWin;   // 길이 Nout, (exp(-j*phi) * hann_k)
-	static std::vector<float>   phiNout;   // 길이 Nout
+	static std::vector<Ipp32fc> dispWin;    // exp(-j*phi) * Hann(k)
+	static std::vector<float>   phiNout;
 	static int cachedNout = -1;
 
-	// calibration->dispersionReal : length = nAScan (DAT에서 읽어온 "위상 φ")
-	const complex_t* complex = calibration->dispersion; // nAScan 길이의 real phase 배열
+	const float* phiFull = calibration->dispersion; // length = nAScan
 
 	if (cachedNout != Nout || dispWin.empty()) {
-		// 1) 위상을 Nout으로 보간
 		phiNout.assign(Nout, 0.0f);
-		const float scale = (Nout > 1) ? float(nAScan - 1) / float(Nout - 1) : 0.0f;
+
+		// Harvard matlab에서 했던 것처럼 nAScan → Nout re-sample
+		const float scale = (Nout > 1) ? float(nAScan - 1) / float(Nout - 1) : 0.f;
 		for (int k = 0; k < Nout; ++k) {
-			float pos = k * scale;
-			int   i0 = int(floorf(pos));
-			int   i1 = (i0 + 1 < nAScan) ? i0 + 1 : nAScan - 1;
+			float pos = k * scale;           // [0, nAScan-1]
+			int   i0 = (int)floorf(pos);
+			int   i1 = (i0 + 1 < nAScan) ? (i0 + 1) : (nAScan - 1);
 			float a = pos - i0;
-			phiNout[k] = (1.0f - a) * complex[i0].re + a * complex[i1].re;
+
+			phiNout[k] = (1.f - a) * phiFull[i0] + a * phiFull[i1];
 		}
 
-		// 2) exp(-j*phi) * periodic Hann(Nout)
-		dispWin.assign(Nout, { 0.0f, 0.0f });
+		dispWin.assign(Nout, { 0, 0 });
+
 		for (int k = 0; k < Nout; ++k) {
 			float phi = phiNout[k];
-			float c = cosf(-phi), s = sinf(-phi);         // exp(-j*phi)
-			float w = 0.5f * (1.0f - cosf(2.0f * float(M_PI) * k / float(Nout - 1)));; // k-domain window
+
+			// MATLAB: hanning(Nout, 'periodic') → 분모 Nout
+			float w = 0.5f * (1.f - cosf(2.f * (float)M_PI * k / (float)Nout));
+
+			float c = cosf(-phi);
+			float s = sinf(-phi);
+
 			dispWin[k].re = w * c;
 			dispWin[k].im = w * s;
 		}
 
 		cachedNout = Nout;
-		PLOGI.printf("fftProcessing: precomputed dispWin from phase (Nout=%d)", Nout);
+	}
+
+	// ===== 오버샘플 map → idx0_os, w_os =====
+	static std::vector<int>   idx0_os;
+	static std::vector<float> w_os;
+	static int   cachedInterp = -1, cachedN = -1, cachedSig = -1;
+
+	if (cachedInterp != interp || cachedN != nAScan || cachedSig != signalInterpSize
+		|| idx0_os.size() != (size_t)Nout) {
+
+		idx0_os.assign(Nout, 0);
+		w_os.assign(Nout, 0.f);
+
+		float mapMax = calibration->weightMap[0];
+		for (int k = 1; k < Nout; ++k)
+			mapMax = std::max(mapMax, calibration->weightMap[k]);
+
+		const float sigSz_f = (float)signalInterpSize;
+
+		for (int k = 0; k < Nout; ++k) {
+			float map1 = calibration->weightMap[k];   // 1..mapMax (≈ 1..sigSz_f)
+			// 필요하면 MATLAB처럼 리스케일 (mapMax != sigSz_f 대비)
+			float mappedPos = (map1 - 1.f) / (mapMax - 1.f) * (sigSz_f - 1.f) + 1.f;
+
+			int   k0_1b = (int)floorf(mappedPos);
+			float w = mappedPos - k0_1b;
+			int   idx0 = k0_1b - 1;                  // 0-based
+
+			if (idx0 < 0) idx0 = 0;
+			if (idx0 > signalInterpSize - 2) idx0 = signalInterpSize - 2;
+
+			idx0_os[k] = idx0;
+			w_os[k] = w;
+		}
+
+		cachedInterp = interp;
+		cachedN = nAScan;
+		cachedSig = signalInterpSize;
 	}
 
 
 	// ----- FFT thread context 준비 -----
 	const int numThreads = 8;
 	const int numDynamic = 1;
-
 	std::vector<FFTThreadContext> threadContexts(numThreads);
 	for (int t = 0; t < numThreads; ++t) {
 		auto& ctx = threadContexts[t];
-
 		ctx.fBuffer_Window = ippsMalloc_32f(nFFTLength1);
-		ippsZero_32f(ctx.fBuffer_Window, nFFTLength1);
-
-		ctx.fcBuffer_FFT = ippsMalloc_32fc(nFFTLength1); // freq/analytic/재사용
-		ippsZero_32fc(ctx.fcBuffer_FFT, nFFTLength1);
-
-		ctx.fcBuffer_IFFT = ippsMalloc_32fc(nFFTLength1); // k-linearized / depth FFT 버퍼
-		ippsZero_32fc(ctx.fcBuffer_IFFT, nFFTLength1);
+		ctx.fcBuffer_XN = ippsMalloc_32fc(nFFTLength1);
+		ctx.fcBuffer_OS = ippsMalloc_32fc(signalInterpSize);
+		ctx.fcBuffer_KZ = ippsMalloc_32fc(nFFTLength2);
+		ctx.fcBuffer_Depth = ippsMalloc_32fc(nFFTLength2);
 
 		ctx.fftWorkBufFirst = ippsMalloc_8u(fftFirstWorkBufSize);
-		ctx.fftWorkBufIFFT = ippsMalloc_8u(fftIFFTWorkBufSize);
+		ctx.fftWorkBufFirstC = ippsMalloc_8u(fftFirstWorkBufSizeC);
+		ctx.fftWorkBufIFFTOS = ippsMalloc_8u(fftIFFTWorkBufSizeOS);
 		ctx.fftWorkBufSecond = ippsMalloc_8u(fftSecondWorkBufSize);
 	}
 
@@ -483,9 +526,11 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f, bool isLoaded)
 		int tid = omp_get_thread_num();
 		auto& ctx = threadContexts[tid];
 
-		Ipp32f* lineReal = ctx.fBuffer_Window;   // [nFFTLength1] real
-		Ipp32fc* bufFreq = ctx.fcBuffer_FFT;     // [nFFTLength1] complex
-		Ipp32fc* bufK = ctx.fcBuffer_IFFT;    // [nFFTLength1] complex (k-domain & depth FFT)
+		Ipp32f* lineReal = ctx.fBuffer_Window;     // [N]
+		Ipp32fc* XN = ctx.fcBuffer_XN;        // [N]
+		Ipp32fc* OS = ctx.fcBuffer_OS;        // [signalInterpSize] (xa_os)
+		Ipp32fc* kz = ctx.fcBuffer_KZ;        // [N2]
+		Ipp32fc* Zbuf = ctx.fcBuffer_Depth;     // [N2] (depth FFT out)
 
 		ippsZero_32f(lineReal, nFFTLength1);
 
@@ -501,14 +546,11 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f, bool isLoaded)
 			ippsSubC_32f_I(mean, lineReal, nAScan);
 		}
 
-		if (nFFTLength1 > nAScan && i < 3 ) {
-			ippsZero_32f(lineReal + nAScan, nFFTLength1 - nAScan);
-		}
+		if (nFFTLength1 > nAScan) ippsZero_32f(lineReal + nAScan, nFFTLength1 - nAScan);
 
 		if (hasTxtMeta && isLoaded && i < 4) {
 			std::vector<float> rowRef;
 			std::snprintf(pathBuf, sizeof(pathBuf), "%s/%s", dumpTxtDir, "01_line_dc.txt");
-			// 파일이 nFFTLength1 길이로 저장되었다면 nFFTLength1로 비교
 			if (LoadRealRow(pathBuf, i, nFFTLength1, rowRef)) {
 				LogCompareReal("01 line_dc", lineReal, nFFTLength1, rowRef);
 			}
@@ -525,81 +567,48 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f, bool isLoaded)
 			}
 		}
 
-		// (3) Real → Complex FFT (analytic signal 생성용)
-		// RToPerm + ConjPerm + Hilbert kernel 적용 + IFFT
-		// real -> perm (permuted packed format)
-		ippsFFTFwd_RToPerm_32f_I(lineReal, fftSpecFirst, ctx.fftWorkBufFirst);
+		for (int n = 0; n < nAScan; ++n) { XN[n].re = lineReal[n]; XN[n].im = 0.f; }
+		ippsFFTFwd_CToC_32fc_I(XN, fftSpecFirstC, ctx.fftWorkBufFirstC);
+		ippsZero_32fc(XN, nAScan / 2); // conj 제거
 
-		// perm -> complex spectrum
-		ippsConjPerm_32fc(lineReal, bufFreq, nFFTLength1);
+		const int preZero = (interp - 2) * (nAScan / 2);
+		ippsZero_32fc(OS, preZero);
+		ippsCopy_32fc(XN, OS + preZero, nAScan); // [zeros; Xa]
 
-		// Hilbert kernel H[k] 적용: analytic spectrum 만들기
-		// even-length N 기준: H[0]=1, H[N/2]=1, H[1:N/2-1]=2, H[N/2+1:]=0
-		const int N = nFFTLength1;
-		if ((N & 1) == 0) {
-			// DC
-			// bufFreq[0] *= 1.0f;
-			// Nyquist
-			// bufFreq[N/2] *= 1.0f;
-			for (int k = 1; k < N / 2; ++k) {
-				bufFreq[k].re *= 2.0f;
-				bufFreq[k].im *= 2.0f;
-			}
-			for (int k = N / 2 + 1; k < N; ++k) {
-				bufFreq[k].re = 0.0f;
-				bufFreq[k].im = 0.0f;
-			}
-		}
-		else {
-			// 홀수 N인 경우 간단히 1..(N-1)/2 까지 2배, 나머지 0 처리
-			for (int k = 1; k <= (N - 1) / 2; ++k) {
-				bufFreq[k].re *= 2.0f;
-				bufFreq[k].im *= 2.0f;
-			}
-			for (int k = (N + 1) / 2; k < N; ++k) {
-				bufFreq[k].re = 0.0f;
-				bufFreq[k].im = 0.0f;
-			}
-		}
-
-		// IFFT -> analytic fringe (time domain)
-		ippsFFTInv_CToC_32fc_I(bufFreq, ifftSpec, ctx.fftWorkBufIFFT);
-
-		Ipp32fc scale;
-		scale.re = 1.0f / nFFTLength1;
-		scale.im = 0.0f;
-		ippsMulC_32fc_I(scale, bufFreq, nFFTLength1);
-
-		Ipp32fc* xa = bufFreq; // analytic
+		ippsFFTInv_CToC_32fc_I(OS, ifftSpecOS, ctx.fftWorkBufIFFTOS);
+		Ipp32fc scl; scl.re = 1.f / (float)signalInterpSize; scl.im = 0.f;
+		ippsMulC_32fc_I(scl, OS, signalInterpSize);
+		Ipp32fc* xa_os = OS;
 
 		if (hasTxtMeta && isLoaded && i < 4) {
 			std::vector<float> reRef, imRef;
 			std::string p03 = std::string(dumpTxtDir) + "/03_analytic";
-			if (LoadComplexRow(p03.c_str(), i, nFFTLength1, reRef, imRef)) {
-				std::vector<float> re(nFFTLength1), im(nFFTLength1);
-				for (int c = 0; c < nFFTLength1; ++c) { re[c] = xa[c].re; im[c] = xa[c].im; }
-				LogCompareComplex("03 analytic", re.data(), im.data(), nFFTLength1, reRef, imRef);
+			if (LoadComplexRow(p03.c_str(), i, signalInterpSize, reRef, imRef)) {
+				std::vector<float> re(signalInterpSize), im(signalInterpSize);
+				for (int c = 0; c < signalInterpSize; ++c) { re[c] = xa_os[c].re; im[c] = xa_os[c].im; }
+				LogCompareComplex("03 analytic", re.data(), im.data(), signalInterpSize, reRef, imRef);
 			}
 		}
 
-		// (4) k-선형화 (indexMap, weightMap)
-		ippsZero_32fc(bufK, nFFTLength2);     // depth FFT 길이만큼 clean
-		const int maxInterp = std::min(Nout, nFFTLength2);
+		// (4) k-linearization to kz (전단계)
+		ippsZero_32fc(kz, nFFTLength2);
+		for (int k = 0; k < Nout; ++k) {
+			int   idx0 = idx0_os[k];
+			float w = w_os[k];
 
-		for (int k = 0; k < maxInterp; ++k) {
-			int   idx = calibration->indexMap[k];   // 0-based
-			float w = calibration->weightMap[k];  // [0..1]
+			const Ipp32fc& s0 = xa_os[idx0];
+			const Ipp32fc& s1 = xa_os[idx0 + 1];
 
-			if (idx < 0) idx = 0;
-			if (idx >= nAScan - 1) idx = nAScan - 2;
+			float re = (1.f - w) * s0.re + w * s1.re;
+			float im = (1.f - w) * s0.im + w * s1.im;
+			kz[k].re = re;
+			kz[k].im = im;
+		}
 
-			const Ipp32fc& s0 = xa[idx];
-			const Ipp32fc& s1 = xa[idx + 1];
 
-			float re = (1.0f - w) * s0.re + w * s1.re;
-			float im = (1.0f - w) * s0.im + w * s1.im;
-			bufK[k].re = re;
-			bufK[k].im = im;
+		if (interp != 2) {
+			Ipp32fc gain; gain.re = (float)interp / 2.f; gain.im = 0.f;
+			ippsMulC_32fc_I(gain, kz, Nout);
 		}
 
 		if (hasTxtMeta && isLoaded && i < 4) {
@@ -607,19 +616,18 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f, bool isLoaded)
 			if (LoadComplexRow((std::string(dumpTxtDir) + "/04_kInterp").c_str(),
 				i, nFFTLength2, reRef, imRef)) {
 				std::vector<float> re(nFFTLength2), im(nFFTLength2);
-				for (int c = 0; c < nFFTLength2; ++c) { re[c] = bufK[c].re; im[c] = bufK[c].im; }
+				for (int c = 0; c < nFFTLength2; ++c) { re[c] = kz[c].re; im[c] = kz[c].im; }
 				LogCompareComplex("04 kInterp", re.data(), im.data(), nFFTLength2, reRef, imRef);
 			}
 		}
 
-		// (5) dispersion 보정 + k-window 적용
-		const int nDisp = std::min(maxInterp, (int)dispWin.size());
-		for (int k = 0; k < nDisp; ++k) {
-			const Ipp32fc& d = dispWin[k];   // dispersion × window
-			float re = bufK[k].re * d.re - bufK[k].im * d.im;
-			float im = bufK[k].re * d.im + bufK[k].im * d.re;
-			bufK[k].re = re;
-			bufK[k].im = im;
+		// (5) dispersion × k-Hann
+		for (int k = 0; k < Nout; ++k) {
+			const Ipp32fc& d = dispWin[k];
+			float re = kz[k].re * d.re - kz[k].im * d.im;
+			float im = kz[k].re * d.im + kz[k].im * d.re;
+			kz[k].re = re;
+			kz[k].im = im;   // k_dw (MATLAB의 k_dw와 대응)
 		}
 
 		if (hasTxtMeta && isLoaded && i < 4) {
@@ -627,52 +635,74 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f, bool isLoaded)
 			if (LoadComplexRow((std::string(dumpTxtDir) + "/05_kDispWin").c_str(),
 				i, nFFTLength2, reRef, imRef)) {
 				std::vector<float> re(nFFTLength2), im(nFFTLength2);
-				for (int c = 0; c < nFFTLength2; ++c) { re[c] = bufK[c].re; im[c] = bufK[c].im; }
+				for (int c = 0; c < nFFTLength2; ++c) { re[c] = kz[c].re; im[c] = kz[c].im; }
 				LogCompareComplex("05 kDispWin", re.data(), im.data(), nFFTLength2, reRef, imRef);
 			}
 		}
 
-		// 나머지 depthFFT 구간은 이미 zero-padding 상태 (ippsZero_32fc)
-		// (6) 깊이 방향 FFT (k → z)
-		// 여기서는 circshift 없이 바로 FFT (기존 viewer 기준)
-		ippsFFTFwd_CToC_32fc_I(bufK, fftSpecSecond, ctx.fftWorkBufSecond);
+		// circshift(-Nout/2)
+		const int shift = Nout / 2;
+		std::vector<Ipp32fc> tmp(Nout);
+		ippsCopy_32fc(kz, tmp.data(), Nout);
+
+		for (int n = 0; n < Nout; ++n) {
+			int src = n + shift;
+			if (src >= Nout) src -= Nout;
+			kz[n] = tmp[src];
+		}
+
+		if (Nout < nFFTLength2) {
+			ippsZero_32fc(kz + Nout, nFFTLength2 - Nout);
+		}
+		ippsCopy_32fc(kz, Zbuf, nFFTLength2);
+
+
+		// depth FFT (N2)
+		ippsFFTFwd_CToC_32fc_I(Zbuf, fftSpecSecond, ctx.fftWorkBufSecond);
+
+		// Zbuf에서 512 기준 대칭으로 뒤집기
+		const int N2 = nFFTLength2;
+		for (int k = 1; k < N2 / 2; ++k) {
+			int k2 = N2 - k;
+			std::swap(Zbuf[k], Zbuf[k2]);
+		}
 
 		if (hasTxtMeta && isLoaded && i < 4) {
 			std::vector<float> reRef, imRef;
 			if (LoadComplexRow((std::string(dumpTxtDir) + "/06_depthFFT").c_str(),
 				i, nFFTLength2, reRef, imRef)) {
 				std::vector<float> re(nFFTLength2), im(nFFTLength2);
-				for (int c = 0; c < nFFTLength2; ++c) { re[c] = bufK[c].re; im[c] = bufK[c].im; }
+				for (int c = 0; c < nFFTLength2; ++c) { re[c] = Zbuf[c].re; im[c] = Zbuf[c].im; }
 				LogCompareComplex("06 depthFFT", re.data(), im.data(), nFFTLength2, reRef, imRef);
 			}
 		}
 
-		// (7) Intensity (power) 저장
-		ippsPowerSpectr_32fc(bufK,
-			fFFTResult + i * nOutputLen,
-			nOutputLen);
+		// (7) power
+		ippsPowerSpectr_32fc(Zbuf, fFFTResult + i * nFFTLength2, nFFTLength2);
 
 		if (hasTxtMeta && isLoaded && i < 4) {
-			const int rowIndex = i; // 0-based, MATLAB 저장도 1번째 라인이 rowIndex=0
 			std::vector<float> rowRef;
-			std::vector<float> reRef, imRef;
 			std::snprintf(pathBuf, sizeof(pathBuf), "%s/%s", dumpTxtDir, "07_power.txt");
-			if (LoadRealRow(pathBuf, rowIndex, nOutputLen, rowRef)) {
-				LogCompareReal("07 power", fFFTResult + i * nOutputLen, nOutputLen, rowRef);
+			if (LoadRealRow(pathBuf, i, nFFTLength2, rowRef)) {
+				LogCompareReal("07 power", fFFTResult + i * nFFTLength2, nFFTLength2, rowRef);
 			}
 		}
 	} // for i (B-scan)
 
-	// ----- thread context 메모리 해제 -----
-	for (int t = 0; t < numThreads; ++t) {
-		auto& ctx = threadContexts[t];
-		if (ctx.fBuffer_Window) { ippsFree(ctx.fBuffer_Window); ctx.fBuffer_Window = nullptr; }
-		if (ctx.fcBuffer_FFT) { ippsFree(ctx.fcBuffer_FFT);   ctx.fcBuffer_FFT = nullptr; }
-		if (ctx.fcBuffer_IFFT) { ippsFree(ctx.fcBuffer_IFFT);  ctx.fcBuffer_IFFT = nullptr; }
-		if (ctx.fftWorkBufFirst) { ippsFree(ctx.fftWorkBufFirst); ctx.fftWorkBufFirst = nullptr; }
-		if (ctx.fftWorkBufIFFT) { ippsFree(ctx.fftWorkBufIFFT); ctx.fftWorkBufIFFT = nullptr; }
-		if (ctx.fftWorkBufSecond) { ippsFree(ctx.fftWorkBufSecond); ctx.fftWorkBufSecond = nullptr; }
-	}
+	// ===== 컨텍스트 해제 =====
+    for (int t = 0; t < numThreads; ++t) {
+        auto& ctx = threadContexts[t];
+        if (ctx.fBuffer_Window)    { ippsFree(ctx.fBuffer_Window);    ctx.fBuffer_Window = nullptr; }
+        if (ctx.fcBuffer_XN)       { ippsFree(ctx.fcBuffer_XN);       ctx.fcBuffer_XN = nullptr; }
+        if (ctx.fcBuffer_OS)       { ippsFree(ctx.fcBuffer_OS);       ctx.fcBuffer_OS = nullptr; }
+        if (ctx.fcBuffer_KZ)       { ippsFree(ctx.fcBuffer_KZ);       ctx.fcBuffer_KZ = nullptr; }
+        if (ctx.fcBuffer_Depth)    { ippsFree(ctx.fcBuffer_Depth);    ctx.fcBuffer_Depth = nullptr; }
+
+        if (ctx.fftWorkBufFirst)   { ippsFree(ctx.fftWorkBufFirst);   ctx.fftWorkBufFirst = nullptr; }
+        if (ctx.fftWorkBufFirstC)  { ippsFree(ctx.fftWorkBufFirstC);  ctx.fftWorkBufFirstC = nullptr; }
+        if (ctx.fftWorkBufIFFTOS)  { ippsFree(ctx.fftWorkBufIFFTOS);  ctx.fftWorkBufIFFTOS = nullptr; }
+        if (ctx.fftWorkBufSecond)  { ippsFree(ctx.fftWorkBufSecond);  ctx.fftWorkBufSecond = nullptr; }
+    }
 }
 
 void COCTImaging::computeLogarithm(Ipp32f* src, Ipp32f* dst) {
