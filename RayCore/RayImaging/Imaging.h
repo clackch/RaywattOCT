@@ -18,6 +18,8 @@ public:
 		float contrast;
 		float lowLevel;
 		float highLevel;
+		float lowLevelForAutoCalib;
+		float highLevelForAutoCalib;
 
 		double distPerPixel; // um per pixel (1024 x bscan)
     

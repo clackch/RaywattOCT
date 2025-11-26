@@ -724,8 +724,8 @@ void COCTImaging::generateImage(Ipp32f* logaritihmData, bool bInvert, bool isThi
 
 	if(isThisForAutoCalib){
 		cv::Mat imgLog(cv::Size(nOutputLength, nBScan), CV_32FC1, logaritihmData);
-		imgLog -= m_setting.lowLevel;		// ini에서 새로 값
-		imgLog *= (LUT_SCALE / m_setting.highLevel);	// ini에서 새로 값
+		imgLog -= m_setting.lowLevelForAutoCalib;
+		imgLog *= (LUT_SCALE / m_setting.highLevelForAutoCalib);
 		cv::threshold(imgLog, imgLog, LUT_SCALE, LUT_SCALE, cv::THRESH_TRUNC);
 		imgLog.convertTo(imageAutoCalib, CV_8UC1);
 		cv::convertScaleAbs(imageAutoCalib, imageAutoCalib, 1.f / 80.f * LUT_SCALE, 0);

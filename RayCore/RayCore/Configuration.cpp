@@ -49,6 +49,8 @@ void CConfiguration::Initialize(tstring configFile)
 	this->imaging.Set(nAScan, nBScan);
 	this->imaging.lowLevel = getPrivateProfileFloat(_T("Imaging"), _T("LowLevel"), 40.0f, configFilePath.c_str());
 	this->imaging.highLevel = getPrivateProfileFloat(_T("Imaging"), _T("HighLevel"), 65.0f, configFilePath.c_str());
+	this->imaging.lowLevelForAutoCalib = getPrivateProfileFloat(_T("Imaging"), _T("LowLevelForAutoCalibration"), 40.0f, configFilePath.c_str());
+	this->imaging.highLevelForAutoCalib = getPrivateProfileFloat(_T("Imaging"), _T("HighLevelForAutoCalibration"), 65.0f, configFilePath.c_str());
 	this->imaging.brightness = getPrivateProfileFloat(_T("Imaging"), _T("Brightness"), 0.f, configFilePath.c_str());
 	this->imaging.contrast = getPrivateProfileFloat(_T("Imaging"), _T("Contrast"), 0.875f, configFilePath.c_str());
 	this->imaging.distPerPixel = measurement.GetAxialResolutionScale();
