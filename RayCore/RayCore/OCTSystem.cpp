@@ -2245,7 +2245,7 @@ UINT COCTSystem::threadPullbackScan(LPVOID param) {
 	pRJController->IncreaseRFIDUsage(pRJController->GetRFIDUID(uidRFID), uidRFID);
 #endif
 
-	pRJController->changeSMProfileToLoadUnload();
+	pRJController->changeSMProfileToLoadUnload(config.stepMotor.SMPullbackProfile);
 	Sleep(2000);
 	int bldcHomingSpeed = config.bldcMotor.velocityLiveView / 2;
 	pRJController->PerformRun(bldcHomingSpeed);

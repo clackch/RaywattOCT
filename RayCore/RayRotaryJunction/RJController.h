@@ -140,8 +140,8 @@ public:
 	static DWORD WINAPI checkKeyFinding(LPVOID);
 
 	int ConvertMMtoStep(UINT mm);
-	void changeSMProfileToPullback();
-	void changeSMProfileToLoadUnload();
+	void changeSMProfileToPullback(int speed = 1);
+	void changeSMProfileToLoadUnload(int speed = 1);
 	void DisableStepMotors();
 	void moveDelaylineToRFIDPosition();
   

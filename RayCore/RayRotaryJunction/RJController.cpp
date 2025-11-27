@@ -969,16 +969,16 @@ bool CRJController::writeMotor(BYTE* packet, int size) {
 	return (written == packetLength);
 }
 
-void CRJController::changeSMProfileToPullback() {
+void CRJController::changeSMProfileToPullback(int speed) {
 	BYTE serialPacket[MAX_PATH];
 	int packetLength;
 	getSerialPacket(eFID::FID_SM_SET_CONFIG, (sizeof(int) * 7) * 2, serialPacket, packetLength);
 
 	const int minSpeed = 630;
 	const int maxSpeed = 314960;
-	const int accTime = 10;
+	const int accTime = speed;
 	const int accStep = 100;
-	const int decTime = 10;
+	const int decTime = speed;
 	const int decStep = 0;
 	const int minStep = 100;
 
@@ -1003,16 +1003,16 @@ void CRJController::changeSMProfileToPullback() {
 	}
 }
 
-void CRJController::changeSMProfileToLoadUnload() {
+void CRJController::changeSMProfileToLoadUnload(int speed) {
 	BYTE serialPacket[MAX_PATH];
 	int packetLength;
 	getSerialPacket(eFID::FID_SM_SET_CONFIG, (sizeof(int) * 7) * 2, serialPacket, packetLength);
 
 	const int minSpeed = 630;
 	const int maxSpeed = 314960;
-	const int accTime = 1;
+	const int accTime = speed;
 	const int accStep = 100;
-	const int decTime = 1;
+	const int decTime = speed;
 	const int decStep = 0;
 	const int minStep = 100;
 
