@@ -276,7 +276,7 @@ void COCTImaging::allocateMemory() {
 	const int signalInterpSize = (interp * nAScan) / 2; // MATLAB: interpOversamp * N/2
 
 	fringes32f = ippsMalloc_32f(nAScan * nBScan);
-	fringes32fAverage = ippsMalloc_32f(nAScan * nBScan);
+	fringes32fAverage = ippsMalloc_32f(nAScan);
 	fFFTResult = ippsMalloc_32f(nOutputLength * nBScan);
 	fFFTMean = ippsMalloc_32f(nOutputLength); 
 	ippsZero_32f(fFFTMean, nOutputLength);
@@ -385,7 +385,7 @@ void COCTImaging::generateBackground(Ipp16u* fringes) {
 	const int nWidth = m_setting.nAScan;
 	const int nHeight = m_setting.nBScan;
 
-	ippsZero_32f(fringes32fAverage, nWidth * nHeight);
+	ippsZero_32f(fringes32fAverage, nWidth);
 	
 	for (int y = 0; y < nHeight; y++)
 	{
@@ -538,7 +538,7 @@ void COCTImaging::fftProcessing(const Ipp32f* fringes32f, bool isLoaded)
 		ippsCopy_32f(fringes32f + i * nAScan, lineReal, nAScan);
 
 		if (fringes32fAverage && isLoaded) {
-			IppStatus status = ippsSub_32f_I(fringes32fAverage + i * nAScan, lineReal, nAScan);
+			IppStatus status = ippsSub_32f_I(fringes32fAverage, lineReal, nAScan);
 		}
 		else {
 			Ipp32f mean = 0.f;

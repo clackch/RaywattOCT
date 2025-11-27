@@ -50,7 +50,7 @@ void CLabImaging::Initialize(CCalibration* calibration, USHORT* backgroundData) 
 	this->logData = new float[allocSize];
 
 	generateBackground((Ipp16u*)backgroundData);
-	ippsConvert_16u32f((Ipp16u*)LoadBackground2DFromFile(R"(D:\RaywattOCT\RaywattLab\bin\BACKGROUND.bin)", nAScan * nBScan), fringes32fAverage, nAScan * nBScan);
+	ippsConvert_16u32f((Ipp16u*)LoadBackground2DFromFile(R"(D:\RaywattOCT\RaywattLab\bin\BACKGROUND.bin)", nAScan), fringes32fAverage, nAScan);
 	
 	fftProcessing(fringes32f);
 
@@ -95,7 +95,7 @@ void CLabImaging::Process(char* fringes) {
 	ippsCopy_16s((Ipp16s*)fringes, (Ipp16s*)scopeData, nAScan);
 
 	generateBackground((Ipp16u*)fringes);
-	ippsConvert_16u32f(background, fringes32fAverage, nAScan * nBScan);
+	ippsConvert_16u32f(background, fringes32fAverage, nAScan);
 
 	//cropSignalData(fringes, goodClockStart, goodClockEnd);
 
